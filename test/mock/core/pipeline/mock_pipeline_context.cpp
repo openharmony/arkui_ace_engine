@@ -29,6 +29,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+
 namespace OHOS::Ace {
 
 static bool g_setBoolStatus = false;
@@ -1270,6 +1272,11 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 }
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+
+RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
+{
+    return nullptr;
+}
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}

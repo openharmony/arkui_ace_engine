@@ -624,7 +624,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
     auto onChange = [func = FormatCharFunction(callback)](
-                        const std::u16string& val, PreviewText& previewText) { func(val); };
+                        const ChangeValueInfo& info) { func(info.value); };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
@@ -715,10 +715,10 @@ void FfiOHOSAceFrameworkTextFieldOnWillInsert(bool (*callback)(double insertOffs
 void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
     void (*callback)(const char* value, int32_t offset, const char* text))
 {
-    auto onChange = [func = CJLambda::Create(callback)](const std::u16string& val, PreviewText& previewText) {
-        const std::string valStr = UtfUtils::Str16ToStr8(val);
-        const std::string previewTextStr = UtfUtils::Str16ToStr8(previewText.value);
-        func(valStr.c_str(), previewText.offset, previewTextStr.c_str());
+    auto onChange = [func = CJLambda::Create(callback)](const ChangeValueInfo& info) {
+        const std::string valStr = UtfUtils::Str16ToStr8(info.value);
+        const std::string previewTextStr = UtfUtils::Str16ToStr8(info.previewText.value);
+        func(valStr.c_str(), info.previewText.offset, previewTextStr.c_str());
     };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }

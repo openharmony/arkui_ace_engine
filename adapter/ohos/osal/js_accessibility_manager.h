@@ -646,8 +646,11 @@ private:
 
     std::string pageMode_;
     std::vector<Accessibility::AccessibilityEventInfo> cacheEventVec_;
+    mutable std::mutex cacheEventVecMutex_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
+    mutable std::mutex defaultFocusListMutex_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
+    mutable std::mutex extensionComponentStatusVecMutex_;
     std::unordered_map<int32_t, std::optional<Accessibility::AccessibilityEventInfo>> pageIdEventMap_;
     AccessibilityParentRectInfo uecRectInfo_;
 };

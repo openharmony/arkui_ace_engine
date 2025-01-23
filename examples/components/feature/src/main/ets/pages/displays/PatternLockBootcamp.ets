@@ -2109,6 +2109,12 @@ export struct PatternLockBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .onPatternComplete((input: Array<number>) => {
+          this.compEventTriggeredLog('密码输入结束onPatternComplete触发')
+        })
+        .onDotConnect(() => {
+          this.compEventTriggeredLog('密码输入选中宫格圆点onDotConnect触发')
+        })
     }.justifyContent(FlexAlign.Center)
   }
 

@@ -2653,6 +2653,15 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     }
     SetAccessibilityAction();
     InitFocusEvent();
+    auto textAlign = static_cast<TextAlign>(selectTheme_->GetOptionContentNormalAlign());
+    if (textAlign != TextAlign::CENTER) {
+        return;
+    }
+    CHECK_NULL_VOID(text_);
+    auto textProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProperty);
+    textProperty->UpdateTextAlign(textAlign);
+    text_->MarkModifyDone();
 }
 
 void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha)

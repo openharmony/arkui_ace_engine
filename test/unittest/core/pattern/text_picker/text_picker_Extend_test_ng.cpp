@@ -410,6 +410,37 @@ HWTEST_F(TextPickerExTestNg, TextPickerRowAccessibilityPropertyGetText002, TestS
 }
 
 /**
+ * @tc.name: TextPickerRowAccessibilityPropertyGetText003
+ * @tc.desc: Test GetText of textPickerRowAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerExTestNg, TextPickerRowAccessibilityPropertyGetText003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_PICKER_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    ASSERT_NE(columnNode, nullptr);
+
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
+    stackNode->MountToParent(frameNode);
+
+    auto RowAccessibilityProperty = frameNode->GetAccessibilityProperty<TextPickerRowAccessibilityProperty>();
+    ASSERT_NE(RowAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(RowAccessibilityProperty->GetText(), "");
+}
+
+/**
  * @tc.name: TextPickerAccessibilityPropertyGetCurrentIndex001
  * @tc.desc: Test GetCurrentIndex of textPickerAccessibilityProperty.
  * @tc.type: FUNC

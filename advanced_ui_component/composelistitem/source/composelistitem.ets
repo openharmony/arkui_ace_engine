@@ -1139,11 +1139,12 @@ export struct ComposeListItem {
           (LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value);
       }
     } else if (this.contentItem.description === undefined) {
+      let iconStyle = this.contentItem.iconStyle as number;
       if (this.contentItem.icon === undefined ||
-        (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
+        (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT;
       } else {
-        this.itemHeight = APPICON_ITEMLENGTH;
+        this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
       }
     } else {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT;
@@ -1345,13 +1346,13 @@ export struct ComposeListItem {
   }
 
   getPadding(): Padding | undefined {
-    if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isWrapText) {
+    if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
       let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
       let compareSize = paddingNum > LISTITEM_PADDING;
       let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
       return {
-        top: paddingNum,
-        bottom: paddingNum,
+        top: this.isWrapText ? paddingNum : 0,
+        bottom: this.isWrapText ? paddingNum : 0,
         left: horizontalPadding,
         right: horizontalPadding
       };

@@ -172,6 +172,7 @@ constexpr int32_t TRANSLATE_ANIMATION_BASE = 3;
 constexpr int32_t DEFAULT_DURATION = 1000;
 constexpr int32_t TWO = 2;
 constexpr float ZERO_F = 0.0f;
+constexpr float ONE_F = 1.0f;
 constexpr float HUNDRED = 100.0f;
 constexpr float SLIDER_STEP_MIN_F = 0.01f;
 constexpr float HALF = 0.5f;
@@ -992,6 +993,45 @@ const ArkUI_AttributeItem* GetBackgroundImage(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundImage(node->uiNodeHandle, &options);
     g_numberValues[NUM_0].i32 = options.repeat;
     g_attributeItem.string = options.src;
+    return &g_attributeItem;
+}
+
+int32_t SetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUIStringAndFloat options[NUM_12] = {};
+    for (int32_t i = 0; i < actualSize; ++i) {
+        // hasValue
+        options[i * NUM_3] = { ONE_F, nullptr };
+        // value
+        options[i * NUM_3 + NUM_1] = { item->value[i].f32, nullptr };
+        // unit
+        options[i * NUM_3 + NUM_2] = { UNIT_VP, nullptr };
+    }
+
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageResizable(
+        node->uiNodeHandle, options);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetBackgroundImageResizable(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    auto slice = fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundImageResizable(node->uiNodeHandle);
+    g_numberValues[NUM_0].f32 = slice.left;
+    g_numberValues[NUM_1].f32 = slice.top;
+    g_numberValues[NUM_2].f32 = slice.right;
+    g_numberValues[NUM_3].f32 = slice.bottom;
     return &g_attributeItem;
 }
 
@@ -5082,6 +5122,8 @@ int32_t SetTextInputKeyboardAppearance(ArkUI_NodeHandle node, const ArkUI_Attrib
 {
     auto* fullImpl = GetFullImpl();
     if (item->size != 1 || !CheckAttributeIsKeyboardAppearance(item->value[0].i32)) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputKeyboardAppearance(
+            node->uiNodeHandle, ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
         return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputKeyboardAppearance(
@@ -11462,6 +11504,61 @@ const ArkUI_AttributeItem* GetCalendarPickerTextStyle(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetCalendarPickerMarkToday(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setCalendarPickerMarkToday(
+            node->uiNodeHandle, item->value[0].i32);
+    } else {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCalendarPickerMarkToday(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        auto isMarkToday =
+            fullImpl->getNodeModifiers()->getCalendarPickerModifier()->getCalendarPickerMarkToday(node->uiNodeHandle);
+        g_numberValues[0].i32 = isMarkToday;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetCalendarPickerDisabledDateRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || !item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setCalendarPickerDisabledDateRange(
+            node->uiNodeHandle, item->string);
+    } else {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCalendarPickerDisabledDateRange(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        auto disabledDateRange =
+            fullImpl->getNodeModifiers()->getCalendarPickerModifier()->getCalendarPickerDisabledDateRange(
+                node->uiNodeHandle);
+        g_attributeItem.string = disabledDateRange;
+    }
+    return &g_attributeItem;
+}
+
 void ResetHintRadius(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
@@ -11488,6 +11585,23 @@ void ResetCalendarPickerEndDate(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
         fullImpl->getNodeModifiers()->getCalendarPickerModifier()->resetEndDate(node->uiNodeHandle);
+    }
+}
+
+void ResetCalendarPickerMarkToday(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerMarkToday(node->uiNodeHandle);
+    }
+}
+
+void ResetCalendarPickerDisabledDateRange(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerDisabledDateRange(
+            node->uiNodeHandle);
     }
 }
 
@@ -14244,6 +14358,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetClickDistance,
         SetTabStop,
         SetBackdropBlur,
+        SetBackgroundImageResizableWithSlice,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14355,6 +14470,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         nullptr,
         GetTabStop,
         GetBackdropBlur,
+        GetBackgroundImageResizableWithSlice,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14470,6 +14586,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetClickDistance,
         ResetTabStop,
         ResetBackdropBlur,
+        ResetBackgroundImageResizableWithSlice,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -15049,7 +15166,8 @@ void ResetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetHintRadius, SetSelectedDate, SetEdgeAlignment, SetCalendarPickerTextStyle,
-        SetCalendarPickerStartDate, SetCalendarPickerEndDate };
+        SetCalendarPickerStartDate, SetCalendarPickerEndDate, SetCalendarPickerDisabledDateRange,
+        SetCalendarPickerMarkToday };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "calendar picker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15060,7 +15178,8 @@ int32_t SetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, con
 void ResetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetHintRadius, ResetSelectedDate, ResetEdgeAlignment,
-        ResetCalendarPickerTextStyle, ResetCalendarPickerStartDate, ResetCalendarPickerEndDate };
+        ResetCalendarPickerTextStyle, ResetCalendarPickerStartDate, ResetCalendarPickerEndDate,
+        ResetCalendarPickerDisabledDateRange, ResetCalendarPickerMarkToday };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "calendar picker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -15071,7 +15190,8 @@ void ResetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 const ArkUI_AttributeItem* GetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetHintRadius, GetSelectedDate, GetEdgeAlignment, GetCalendarPickerTextStyle,
-        GetCalendarPickerStartDate, GetCalendarPickerEndDate };
+        GetCalendarPickerStartDate, GetCalendarPickerEndDate, GetCalendarPickerDisabledDateRange,
+        GetCalendarPickerMarkToday };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "calendar picker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

@@ -19,7 +19,6 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
-#include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -77,7 +76,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSObject> ownerObj = JSRef<JSObject>::Cast(info[1]);
 
         // check if owner object is set
-        auto* ownerView = JSViewPartialUpdate::GetNativeViewPartialUpdate(ownerObj);
+        JSView* ownerView = ownerObj->Unwrap<JSView>();
         auto instance = AceType::MakeRefPtr<JSCustomDialogController>(ownerView);
         if (ownerView == nullptr) {
             instance->IncRefCount();

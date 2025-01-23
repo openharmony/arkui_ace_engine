@@ -2088,7 +2088,8 @@ ScrollState ScrollablePattern::GetScrollState() const
 ScrollState ScrollablePattern::GetScrollState(int32_t scrollSource)
 {
     // with event
-    if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS || scrollSource == SCROLL_FROM_BAR) {
+    if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS || scrollSource == SCROLL_FROM_BAR ||
+        scrollSource == SCROLL_FROM_CROWN) {
         return ScrollState::SCROLL;
     }
     // without event
@@ -2114,6 +2115,7 @@ ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
         { SCROLL_FROM_AXIS, ScrollSource::OTHER_USER_INPUT },
         { SCROLL_FROM_ANIMATION_CONTROLLER, ScrollSource::SCROLLER_ANIMATION },
         { SCROLL_FROM_BAR_FLING, ScrollSource::SCROLL_BAR_FLING },
+        { SCROLL_FROM_CROWN, ScrollSource::OTHER_USER_INPUT },
     };
     ScrollSource sourceType = ScrollSource::OTHER_USER_INPUT;
     int64_t idx = BinarySearchFindIndex(scrollSourceMap, ArraySize(scrollSourceMap), source);

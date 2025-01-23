@@ -174,6 +174,31 @@ void TimePickerDialogViewTestNg::CreateTimePickerColumnNode()
     EXPECT_NE(host, nullptr);
 }
 
+static RefPtr<FrameNode> CreateDialogNode()
+{
+    DialogProperties dialogProperties;
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, PickerTime> timePickerProperty;
+    uint32_t hour = 3;
+    uint32_t minute = 4;
+    uint32_t second = 1;
+    timePickerProperty["selected"] = PickerTime(hour, minute, second);
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    return dialogNode;
+}
+
 /**
  * @tc.name: TimePickerDialogViewTest001
  * @tc.desc: Test TimePickerDialogView::ConvertFontScaleValue.
@@ -322,4 +347,158 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest003, TestSize.Level
     EXPECT_EQ(ret, FONT_VALUE_NOMARL * scale);
 }
 
+/**
+ * @tc.name: TimePickerDialogViewTest004
+ * @tc.desc: Test TimePickerDialogViewShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest004, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    uint32_t hour = 3;
+    uint32_t minute = 4;
+    uint32_t second = 1;
+    timePickerProperty["selected"] = PickerTime(hour, minute, second);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    /**
+     * @tc.steps2: call TimePickerDialogViewShow.
+     * @tc.expected: set NeedAdaptForAging is true.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    EXPECT_TRUE(pickerTheme);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(10.0f);
+    pipeline->SetFontScale(0);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5;
+    pipeline->SetFontScale(10);
+    pipeline->rootHeight_ = 1000;
+    auto ret = TimePickerDialogView::ConvertTitleFontScaleValue(FONT_SIZE_VP);
+    EXPECT_EQ(ret, FONT_SIZE_VP * pickerTheme->GetTitleFontScaleLimit());
+    EXPECT_TRUE(TimePickerDialogView::NeedAdaptForAging());
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewTest005
+ * @tc.desc: Test TimePickerDialogView::CreateNextPrevButtonNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    EXPECT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    auto dialogNode = CreateDialogNode();
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    EXPECT_NE(timePickerNode, nullptr);
+    /**
+     * @tc.steps2: call CreateNextPrevButtonNode.
+     * @tc.expected: set switch event and api version is 16.
+     */
+    std::vector<ButtonInfo> buttonInfos;
+    std::function<void()> switchEvent = [weak = WeakPtr<FrameNode>(dialogNode), timePickerRowPattern]() {
+        auto dialogNode = weak.Upgrade();
+        auto pipeline = dialogNode->GetContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+        timePickerRowPattern->SetIsShowInDialog(false);
+    };
+    auto setApiVersion = 16;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    TimePickerDialogView::CreateNextPrevButtonNode(switchEvent, timePickerNode, buttonInfos);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+    /**
+     * @tc.steps3: call CreateNextPrevButtonNode.
+     * @tc.expected: set api version is 13.
+     */
+    setApiVersion = 13;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    TimePickerDialogView::CreateNextPrevButtonNode(switchEvent, timePickerNode, buttonInfos);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewTest006
+ * @tc.desc: Test TimePickerDialogView::UpdateTimePickerSwitchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    EXPECT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    auto dialogNode = CreateDialogNode();
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    EXPECT_NE(timePickerNode, nullptr);
+    std::function<void()> switchEvent = [weak = WeakPtr<FrameNode>(dialogNode), timePickerRowPattern]() {
+        auto dialogNode = weak.Upgrade();
+        auto pipeline = dialogNode->GetContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+        timePickerRowPattern->SetIsShowInDialog(false);
+    };
+    /**
+     * @tc.steps3: call UpdateTimePickerSwitchEvent.
+     * @tc.expected: set switch event.
+     */
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    EXPECT_TRUE(minuteColumn);
+    auto child = minuteColumn->GetChildren();
+    auto iter = child.begin();
+    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
+    EXPECT_TRUE(textNode);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    TimePickerDialogView::UpdateTimePickerSwitchEvent(timePickerNode, textNode, dialogTheme, buttonNode, switchEvent);
+    EXPECT_NE(buttonNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

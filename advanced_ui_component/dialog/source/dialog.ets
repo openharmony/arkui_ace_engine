@@ -706,8 +706,8 @@ export struct ConfirmDialog {
   content?: ResourceStr = ''
   checkTips?: ResourceStr = ''
   @State isChecked?: boolean = false
-  primaryButton?: ButtonOptions = { value: "" }
-  secondaryButton?: ButtonOptions = { value: "" }
+  primaryButton?: ButtonOptions | null = null;
+  secondaryButton?: ButtonOptions | null = null;
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;

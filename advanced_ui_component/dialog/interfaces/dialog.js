@@ -1563,8 +1563,8 @@ export class ConfirmDialog extends ViewPU {
         this.content = '';
         this.checkTips = '';
         this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
-        this.primaryButton = { value: "" };
-        this.secondaryButton = { value: "" };
+        this.primaryButton = null;
+        this.secondaryButton = null;
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,

@@ -1566,6 +1566,7 @@ private:
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
     uint32_t autoFillSessionId, bool isNative)
 {
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UpdatePopupUIExtension called");
     CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
@@ -2448,7 +2449,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         CHECK_NULL_VOID(ngPipeline);
         auto uiExtManager = ngPipeline->GetUIExtensionManager();
         CHECK_NULL_VOID(uiExtManager);
-        uiExtManager->SendPageModeToUEA(ngPipeline);
+        uiExtManager->SendPageModeRequestToHost(ngPipeline);
     }
 }
 

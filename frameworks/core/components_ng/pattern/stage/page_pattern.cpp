@@ -248,7 +248,7 @@ void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, Win
     renderContext->RemoveClipWithRRect();
 }
 
-void PagePattern::OnShow()
+void PagePattern::OnShow(bool isFromWindow)
 {
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID(isRenderDone_);
@@ -263,9 +263,7 @@ void PagePattern::OnShow()
     NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), container->GetBundleName());
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
-        auto navigationManager = context->GetNavigationManager();
-        CHECK_NULL_VOID(navigationManager);
-        navigationManager->FireNavigationLifecycle(GetHost(), static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE));
+        NotifyNavigationLifecycle(true, isFromWindow);
     }
     UpdatePageParam();
     isOnShow_ = true;
@@ -292,18 +290,34 @@ void PagePattern::OnShow()
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(true);
     }
-    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+    RecordPageEvent(true);
+}
+
+void PagePattern::RecordPageEvent(bool isShow)
+{
+    if (!Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+        return;
+    }
+    auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
+    if (isShow) {
         std::string param;
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
             param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
-        Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);
+        Recorder::EventRecorder::Get().OnPageShow(
+            pageInfo_->GetPageUrl(), param, pageInfo_->GetRouteName().value_or(""));
+    } else {
+        int64_t duration = 0;
+        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
+            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
+        }
+        Recorder::EventRecorder::Get().OnPageHide(
+            pageInfo_->GetPageUrl(), duration, pageInfo_->GetRouteName().value_or(""));
     }
 }
 
-void PagePattern::OnHide()
+void PagePattern::OnHide(bool isFromWindow)
 {
     CHECK_NULL_VOID(isOnShow_);
     JankFrameReport::GetInstance().FlushRecord();
@@ -312,9 +326,7 @@ void PagePattern::OnHide()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (pageInfo_) {
-        auto navigationManager = context->GetNavigationManager();
-        CHECK_NULL_VOID(navigationManager);
-        navigationManager->FireNavigationLifecycle(host, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE));
+        NotifyNavigationLifecycle(false, isFromWindow);
         context->FirePageChanged(pageInfo_->GetPageId(), false);
     }
     host->SetJSViewActive(false);
@@ -346,14 +358,7 @@ void PagePattern::OnHide()
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(false);
     }
-    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
-        int64_t duration = 0;
-        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
-            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
-        }
-        Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
-    }
+    RecordPageEvent(false);
 }
 
 bool PagePattern::OnBackPressed()
@@ -964,5 +969,21 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
         option.SetDuration(delayedDuration);
     }
 #endif
+}
+
+void PagePattern::NotifyNavigationLifecycle(bool isShow, bool isFromWindow)
+{
+    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    NavDestinationActiveReason activeReason = isFromWindow ? NavDestinationActiveReason::APP_STATE_CHANGE
+        : NavDestinationActiveReason::TRANSITION;
+    NavDestinationLifecycle lifecycle = isShow ? NavDestinationLifecycle::ON_ACTIVE
+        : NavDestinationLifecycle::ON_INACTIVE;
+    navigationManager->FireNavigationLifecycle(hostNode, static_cast<int32_t>(lifecycle),
+        static_cast<int32_t>(activeReason));
 }
 } // namespace OHOS::Ace::NG

@@ -689,6 +689,19 @@ class SearchInitializeModifier extends ModifierWithKey<SearchParam> {
   }
 }
 
+class SearchOnWillChangeModifier extends ModifierWithKey<Callback<ChangeValueInfo, boolean>> {
+  constructor(value: Callback<ChangeValueInfo, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillChange(node);
+    } else {
+      getUINativeModule().search.setOnWillChange(node, this.value);
+    }
+  }
+}
 
 class SearchOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
   constructor(value: Callback<InsertValue, boolean>) {
@@ -1004,6 +1017,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchInputFilter.value = value;
     searchInputFilter.error = error;
     modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
+    return this;
+  }
+  onWillChange(callback: Callback<ChangeValueInfo, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillChangeModifier.identity, SearchOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback: Callback<InsertValue, boolean>): this {

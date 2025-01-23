@@ -229,13 +229,13 @@ void AddSetAppColorModeToResConfig(
 
 std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    std::string res = "[";
-    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&res](const auto& avoidArea) {
-        res =
-            res + "(" + std::to_string(static_cast<int32_t>(avoidArea.first)) + "," + avoidArea.second.ToString() + ")";
+    std::stringstream ss;
+    ss << "[";
+    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&ss](const auto& avoidArea) {
+        ss << "(" << static_cast<int32_t>(avoidArea.first) << "," << avoidArea.second.ToString() << ")";
     });
-    res = res + "]";
-    return res;
+    ss << "]";
+    return ss.str();
 }
 } // namespace
 
@@ -779,6 +779,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     if (CJUtils::IsCJFrontendContext(context)) {
         LOGD("UIContentImpl cj");
         context_ = context->weak_from_this();
+        SetConfiguration(context->GetConfiguration());
     } else {
         auto hapModuleInfo = context->GetHapModuleInfo();
         CHECK_NULL_VOID(hapModuleInfo);
@@ -2275,6 +2276,7 @@ void UIContentImpl::Foreground()
         instanceId_);
     if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+        PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsBegin();
     }
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
@@ -2294,6 +2296,7 @@ void UIContentImpl::Background()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
+    PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
@@ -2771,17 +2774,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
-         "rsTransaction nullptr %{public}d",
+    std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
+    TAG_LOGI(ACE_LAYOUT,
+        "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
+        "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
-        rsTransaction == nullptr);
+        rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
     if (lastReason_ == OHOS::Rosen::WindowSizeChangeReason::UNDEFINED) {
         lastReason_ = reason;
     }
     bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
     lastReason_ = reason;
-    std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
-    TAG_LOGI(ACE_LAYOUT, "updateAvoidAreas size %{public}zu, %{public}s", avoidAreas.size(), stringifiedMap.c_str());
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(

@@ -441,6 +441,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     UpdateCalendarMonthData(calendarDialogNode, calendarNode, currentMonth);
     calendarPattern->SetStartDate(settingData.startDate);
     calendarPattern->SetEndDate(settingData.endDate);
+    calendarPattern->SetMarkToday(settingData.markToday);
+    calendarPattern->SetDisabledDateRange(settingData.disabledDateRange);
 
     CalendarDay calendarDay;
     PickerDate today = PickerDate::Current();
@@ -1185,7 +1187,6 @@ void CalendarDialogView::UpdateTextLayoutProperty(const RefPtr<TextLayoutPropert
     textLayoutProperty->UpdateMargin(textMargin);
     textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
-    textLayoutProperty->UpdateTextColorFlagByUser(true);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateLayoutWeight(1);

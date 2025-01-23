@@ -1335,6 +1335,20 @@ class TextInputControllerModifier extends ModifierWithKey<TextInputController> {
 
 }
 
+class TextInputOnWillChangeModifier extends ModifierWithKey<Callback<ChangeValueInfo, boolean>> {
+  constructor(value: Callback<ChangeValueInfo, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnWillChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillChange(node);
+    } else {
+      getUINativeModule().textInput.setOnWillChange(node, this.value);
+    }
+  }
+}
+
 class TextInputOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
   constructor(value: Callback<InsertValue, boolean>) {
     super(value);
@@ -1958,6 +1972,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     } else {
       modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillChange(callback: Callback<ChangeValueInfo, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillChangeModifier.identity, TextInputOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback: Callback<InsertValue, boolean>): this {

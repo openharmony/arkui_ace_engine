@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,13 +146,6 @@ void SwiperTestNg::CreateItemWithSize(float width, float height)
     ViewStackProcessor::GetInstance()->Pop();
 }
 
-void SwiperTestNg::CreateDefaultSwiper()
-{
-    CreateSwiper();
-    CreateSwiperItems();
-    CreateSwiperDone();
-}
-
 void SwiperTestNg::CreateWithArrow()
 {
     SwiperModelNG model = CreateSwiper();
@@ -175,9 +168,15 @@ void SwiperTestNg::ShowPrevious()
     FlushUITasks();
 }
 
-void SwiperTestNg::ChangeIndex(int32_t index)
+void SwiperTestNg::ChangeIndex(int32_t index, bool useAnimation)
 {
-    controller_->ChangeIndex(index, false);
+    controller_->ChangeIndex(index, useAnimation);
+    FlushUITasks();
+}
+
+void SwiperTestNg::ChangeIndex(int32_t index, SwiperAnimationMode mode)
+{
+    controller_->ChangeIndex(index, mode);
     FlushUITasks();
 }
 
@@ -220,6 +219,28 @@ AssertionResult SwiperTestNg::DigitText(std::u16string expectDigit)
                               << " Expected: " << UtfUtils::Str16ToStr8(expectDigit);
 }
 
+AssertionResult SwiperTestNg::CurrentIndex(int32_t expectIndex)
+{
+    if (pattern_->GetCurrentIndex() != expectIndex) {
+        return IsEqual(pattern_->GetCurrentIndex(), expectIndex);
+    }
+    if (!GetChildFrameNode(frameNode_, expectIndex)) {
+        return AssertionFailure() << "There is no item at expectIndex: " << expectIndex;
+    }
+    if (!GetChildFrameNode(frameNode_, expectIndex)->IsActive()) {
+        return AssertionFailure() << "The expectIndex item is not active";
+    }
+    if (GetChildFrameNode(frameNode_, expectIndex)->GetLayoutProperty()->GetVisibility() != VisibleType::GONE) {
+        if (NearZero(GetChildWidth(frameNode_, expectIndex))) {
+            return AssertionFailure() << "The expectIndex item width is 0";
+        }
+        if (NearZero(GetChildHeight(frameNode_, expectIndex))) {
+            return AssertionFailure() << "The expectIndex item height is 0";
+        }
+    }
+    return AssertionSuccess();
+}
+
 /**
  * @tc.name: SwiperPatternComputeNextIndexByVelocity001
  * @tc.desc: ComputeNextIndexByVelocity
@@ -245,8 +266,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Leve
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 0);
     velocity = -781.0f;
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
-    pattern_->SwipeToWithoutAnimation(0);
-    FlushUITasks();
+    ChangeIndex(0, false);
     pattern_->UpdateCurrentOffset(-241.0f);
     FlushUITasks();
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 1);
@@ -261,7 +281,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Leve
  */
 HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->leftButtonId_.reset();
     pattern_->rightButtonId_ = 1;
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
@@ -332,7 +354,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
  */
 HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
     pattern_->CalculateGestureState(1.0f, 0.0f, 1);
@@ -371,7 +395,9 @@ HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, CalculateGestureState002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->CalculateGestureState(1.0f, 0.0f, 1);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
@@ -517,7 +543,9 @@ HWTEST_F(SwiperTestNg, CalculateGestureState004, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, CalculateGestureStateOnRTL001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
 
     pattern_->CalculateGestureStateOnRTL(1.0f, 0.0f, 1);
@@ -647,7 +675,9 @@ HWTEST_F(SwiperTestNg, CalculateGestureStateOnRTL003, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, HandleTouchBottomLoop001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
 
     pattern_->currentFirstIndex_ = 0;
@@ -690,7 +720,9 @@ HWTEST_F(SwiperTestNg, HandleTouchBottomLoop001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, HandleTouchBottomLoop002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
 
     pattern_->currentFirstIndex_ = -1;
@@ -727,7 +759,9 @@ HWTEST_F(SwiperTestNg, HandleTouchBottomLoop002, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
 
     pattern_->currentFirstIndex_ = 0;
@@ -770,7 +804,9 @@ HWTEST_F(SwiperTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, HandleTouchBottomLoopOnRTL002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
 
     pattern_->currentFirstIndex_ = -1;
@@ -807,7 +843,9 @@ HWTEST_F(SwiperTestNg, HandleTouchBottomLoopOnRTL002, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, CalcCurrentPageStatus001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
 
     auto turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
@@ -935,7 +973,9 @@ HWTEST_F(SwiperTestNg, CalcCurrentPageStatus002, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 
@@ -982,7 +1022,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.L
  */
 HWTEST_F(SwiperTestNg, ChangeItemsCount001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER);
 
     /**
@@ -990,24 +1032,24 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount001, TestSize.Level1)
      * @tc.expected: The currentIndex would changed to be >= 0
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+    EXPECT_TRUE(CurrentIndex(3));
 
     AddSwiperItem(pattern_->TotalCount() - 1);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER + 1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(CurrentIndex(3));
 
     /**
      * @tc.steps: step2. Change index and remove child
      * @tc.expected: The currentIndex would changed to be 0
      */
     ShowNext();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
+    EXPECT_TRUE(CurrentIndex(4));
     ShowNext();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 5);
+    EXPECT_TRUE(CurrentIndex(0));
 
     RemoveSwiperItem(0);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -1029,11 +1071,11 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount002, TestSize.Level1)
      * @tc.steps: step1. Change index and remove child
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+    EXPECT_TRUE(CurrentIndex(5));
     EXPECT_TRUE(DigitText(u"6/6"));
 
     RemoveSwiperItem(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_TRUE(DigitText(u"1/5"));
 
     /**
@@ -1041,7 +1083,7 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount002, TestSize.Level1)
      * @tc.expected: The currentIndex changed to be 0 because page not existed
      */
     RemoveSwiperItem(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_TRUE(DigitText(u"1/4"));
 
     /**
@@ -1049,11 +1091,11 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount002, TestSize.Level1)
      * @tc.expected: The currentIndex would changed to be >= 0
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+    EXPECT_TRUE(CurrentIndex(3));
     EXPECT_TRUE(DigitText(u"4/4"));
 
     AddSwiperItem(pattern_->TotalCount() - 1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(CurrentIndex(3));
     EXPECT_TRUE(DigitText(u"4/5"));
 
     /**
@@ -1061,7 +1103,7 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount002, TestSize.Level1)
      * @tc.expected: The currentIndex would not changed
      */
     AddSwiperItem(pattern_->TotalCount() - 1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(CurrentIndex(3));
     EXPECT_TRUE(DigitText(u"4/6"));
 }
 
@@ -1086,11 +1128,11 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount003, TestSize.Level1)
      * @tc.expected: The currentIndex would not changed because page existed
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(CurrentIndex(4));
     EXPECT_TRUE(DigitText(u"5/6"));
 
     RemoveSwiperItem(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(CurrentIndex(4));
     EXPECT_TRUE(DigitText(u"5/5"));
 
     /**
@@ -1098,7 +1140,7 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount003, TestSize.Level1)
      * @tc.expected: The currentIndex changed to be 0 because page not existed
      */
     RemoveSwiperItem(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_TRUE(DigitText(u"1/4"));
 
     /**
@@ -1106,11 +1148,11 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount003, TestSize.Level1)
      * @tc.expected: The currentIndex would changed to be >= 0
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(CurrentIndex(2));
     EXPECT_TRUE(DigitText(u"3/4"));
 
     AddSwiperItem(pattern_->TotalCount() - 1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
     EXPECT_TRUE(DigitText(u"3/5"));
 
     /**
@@ -1118,7 +1160,7 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount003, TestSize.Level1)
      * @tc.expected: The currentIndex would not changed
      */
     AddSwiperItem(pattern_->TotalCount() - 1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
     EXPECT_TRUE(DigitText(u"3/6"));
 }
 
@@ -1129,7 +1171,9 @@ HWTEST_F(SwiperTestNg, ChangeItemsCount003, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 
@@ -1204,7 +1248,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level
 
 void SwiperTestNg::InitCaptureTest()
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::STRETCH);
     layoutProperty_->UpdateLoop(true);
     layoutProperty_->UpdateDisplayCount(3);
@@ -1388,191 +1434,15 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: FadeOverScroll001
- * @tc.desc: Test SwiperPattern FadeOverScroll
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, FadeOverScroll001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = SizeF(720.f, 1136.f);
-    layoutConstraint.percentReference = SizeF(720.f, 1136.f);
-    layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
-    layoutConstraint.selfIdealSize = OptionalSize(SizeF(720.f, 1200.f));
-    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
-    layoutProperty_->UpdateContentConstraint();
-    /**
-     * @tc.steps: step1. set data.
-     */
-    struct SwiperItemInfo swiperItemInfo1;
-    struct SwiperItemInfo swiperItemInfo2;
-    struct SwiperItemInfo swiperItemInfo3;
-    struct SwiperItemInfo swiperItemInfo4;
-    pattern_->itemPosition_.clear();
-    swiperItemInfo1.startPos = 0.0f;
-    swiperItemInfo1.endPos = 180.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
-    swiperItemInfo2.startPos = 180.0f;
-    swiperItemInfo2.endPos = 360.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo2));
-    swiperItemInfo3.startPos = 360.0f;
-    swiperItemInfo3.endPos = 540.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(2, swiperItemInfo3));
-    swiperItemInfo4.startPos = 540.0f;
-    swiperItemInfo4.endPos = 720.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(3, swiperItemInfo4));
-    layoutProperty_->UpdateDisplayCount(4);
-    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, 4);
-    EXPECT_FALSE(pattern_->IsLoop());
-    EXPECT_FALSE(pattern_->itemPosition_.empty());
-    /**
-     * @tc.steps: step2. call no mirror func.
-     */
-    EXPECT_FALSE(pattern_->IsOutOfBoundary(0.0f));
-    layoutProperty_->UpdateLoop(false);
-    EXPECT_TRUE(pattern_->IsOutOfBoundary(10.0f));
-
-    float offset = 0.0f;
-    EXPECT_FALSE(pattern_->FadeOverScroll(offset));
-    offset = 10.0f;
-    EXPECT_FALSE(pattern_->IsVisibleChildrenSizeLessThanSwiper());
-    EXPECT_TRUE(pattern_->FadeOverScroll(offset));
-    /**
-     * @tc.steps: step3. call mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
-    pattern_->fadeOffset_ = 0.0f;
-    offset = 0.0f;
-    EXPECT_FALSE(pattern_->FadeOverScroll(offset));
-    EXPECT_FALSE(pattern_->IsVisibleChildrenSizeLessThanSwiper());
-    offset = 10.0f;
-    EXPECT_TRUE(pattern_->FadeOverScroll(offset));
-}
-
-/**
- * @tc.name: IsOutOfStart001
- * @tc.desc: Test SwiperPattern IsOutOfStart
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, IsOutOfStart001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    float offset = 10.0f;
-    layoutProperty_->UpdateLoop(false);
-    layoutProperty_->UpdateDisplayCount(4);
-    auto totalCount = pattern_->TotalCount();
-    pattern_->currentIndex_ = 0;
-    EXPECT_EQ(totalCount, 4);
-    EXPECT_FALSE(pattern_->itemPosition_.empty());
-    /**
-     * @tc.steps: step1. call no mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    offset = 10.0f;
-    EXPECT_TRUE(pattern_->IsOutOfStart(offset));
-    /**
-     * @tc.steps: step2. call mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    offset = 10.0f;
-    EXPECT_TRUE(pattern_->IsOutOfStart(offset));
-}
-
-/**
- * @tc.name: GetCustomPropertyTargetOffset001
- * @tc.desc: Test SwiperPattern GetCustomPropertyTargetOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, GetCustomPropertyTargetOffset001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto paddingAndBorder = layoutProperty_->CreatePaddingAndBorder();
-    auto paddingAndBorderValue = paddingAndBorder.top.value_or(0.0) + pattern_->tabsPaddingAndBorder_.top.value_or(0.0);
-    layoutProperty_->UpdatePrevMargin(Dimension(10));
-    float offset = Dimension(paddingAndBorderValue - 10.0f, DimensionUnit::PX).ConvertToVp();
-    /**
-     * @tc.steps: step1. call no mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    offset = Dimension(paddingAndBorderValue + 10.0f, DimensionUnit::PX).ConvertToVp();
-    EXPECT_EQ(pattern_->GetCustomPropertyTargetOffset(), offset);
-    /**
-     * @tc.steps: step2. call mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    offset = Dimension(paddingAndBorderValue - 10.0f, DimensionUnit::PX).ConvertToVp();
-    EXPECT_EQ(pattern_->GetCustomPropertyTargetOffset(), offset);
-}
-
-/**
- * @tc.name: IsOutOfBoundary001
- * @tc.desc: Test SwiperPattern IsOutOfBoundary
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, IsOutOfBoundary001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    layoutProperty_->UpdateLoop(false);
-    EXPECT_FALSE(pattern_->itemPosition_.empty());
-    /**
-     * @tc.steps: step1. call no mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    EXPECT_TRUE(pattern_->IsOutOfBoundary(10.0f));
-    /**
-     * @tc.steps: step2. call mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_TRUE(pattern_->IsOutOfBoundary(10.0f));
-}
-
-/**
- * @tc.name: CheckTargetIndex001
- * @tc.desc: Test SwiperPattern CheckTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, CheckTargetIndexheckTargetIndex001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto dimension = Dimension(1);
-    layoutProperty_->UpdateMinSize(dimension);
-    layoutProperty_->UpdateDisplayCount(4);
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    EXPECT_TRUE(pattern_->IsAutoLinear());
-    pattern_->currentIndex_ = 1;
-    int32_t targetIndex = 0;
-    EXPECT_TRUE(pattern_->GetLoopIndex(targetIndex) != pattern_->GetLoopIndex(pattern_->currentIndex_));
-    auto currentFrameNode = pattern_->GetCurrentFrameNode(pattern_->GetLoopIndex(targetIndex));
-    EXPECT_NE(currentFrameNode, nullptr);
-    auto swiperLayoutProperty = currentFrameNode->GetLayoutProperty<LayoutProperty>();
-    EXPECT_NE(swiperLayoutProperty, nullptr);
-    swiperLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    /**
-     * @tc.steps: step1. call no mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, true), targetIndex + 1);
-    EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, false), targetIndex - 1);
-    /**
-     * @tc.steps: step2. call mirror func.
-     */
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, true), targetIndex - 1);
-    EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, false), targetIndex + 1);
-}
-
-/**
  * @tc.name: SwiperSetFrameRateTest001
  * @tc.desc: Test SetFrameRate
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     int32_t expectedRate = 60;
     auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, expectedRate);
     pattern_->SetFrameRateRange(frameRateRange, SwiperDynamicSyncSceneType::GESTURE);
@@ -1593,7 +1463,9 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, ToJsonValue001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     InspectorFilter filter;
     auto json = JsonUtil::Create(true);

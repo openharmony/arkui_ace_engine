@@ -1793,22 +1793,25 @@ void GetPositionToWindowWithTransform(NG::OffsetF& offset, NG::OffsetF& offsetBo
     context->GetPointTransformRotate(rightBottomPointNode);
     auto parent = node->GetAncestorNodeOfFrame(true);
     while (parent) {
-        auto parentRenderContext = parent->GetRenderContext();
-        auto parentOffset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
-        NG::PointF leftTopPointAfterAddOffset(parentOffset.GetX() + leftTopPointNode.GetX(),
-                                          parentOffset.GetY() + leftTopPointNode.GetY());
-        NG::PointF rightBottomPointAfterAddOffset(parentOffset.GetX() + rightBottomPointNode.GetX(),
-                                              parentOffset.GetY() + rightBottomPointNode.GetY());
+        // if get the window boundary (window scene), not calculate transform
+        if (!parent->IsWindowBoundary()) {
+            auto parentRenderContext = parent->GetRenderContext();
+            auto parentOffset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
+            NG::PointF leftTopPointAfterAddOffset(parentOffset.GetX() + leftTopPointNode.GetX(),
+                                            parentOffset.GetY() + leftTopPointNode.GetY());
+            NG::PointF rightBottomPointAfterAddOffset(parentOffset.GetX() + rightBottomPointNode.GetX(),
+                                                parentOffset.GetY() + rightBottomPointNode.GetY());
 
-        auto parentTransformMat = parentRenderContext->GetMatrixWithTransformRotate();
-        Point leftTop(leftTopPointAfterAddOffset.GetX(), leftTopPointAfterAddOffset.GetY());
-        Point rightBottom(rightBottomPointAfterAddOffset.GetX(), rightBottomPointAfterAddOffset.GetY());
-        auto leftTopPoint = parentTransformMat * leftTop;
-        auto rightBottomPoint = parentTransformMat * rightBottom;
-        leftTopPointNode.SetX(leftTopPoint.GetX());
-        leftTopPointNode.SetY(leftTopPoint.GetY());
-        rightBottomPointNode.SetX(rightBottomPoint.GetX());
-        rightBottomPointNode.SetY(rightBottomPoint.GetY());
+            auto parentTransformMat = parentRenderContext->GetMatrixWithTransformRotate();
+            Point leftTop(leftTopPointAfterAddOffset.GetX(), leftTopPointAfterAddOffset.GetY());
+            Point rightBottom(rightBottomPointAfterAddOffset.GetX(), rightBottomPointAfterAddOffset.GetY());
+            auto leftTopPoint = parentTransformMat * leftTop;
+            auto rightBottomPoint = parentTransformMat * rightBottom;
+            leftTopPointNode.SetX(leftTopPoint.GetX());
+            leftTopPointNode.SetY(leftTopPoint.GetY());
+            rightBottomPointNode.SetX(rightBottomPoint.GetX());
+            rightBottomPointNode.SetY(rightBottomPoint.GetY());
+        }
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     offset.SetX(leftTopPointNode.GetX());
@@ -1819,6 +1822,14 @@ void GetPositionToWindowWithTransform(NG::OffsetF& offset, NG::OffsetF& offsetBo
 
 NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node)
 {
+    if ((node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) && node->IsWindowBoundary()) {
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, NG::RectF());
+        auto rect = renderContext->GetPaintRectWithoutTransform();
+        // commonproperty will contain the offset and scale of the window scene
+        return {0, 0, rect.Width(), rect.Height()};
+    }
+
     NG::OffsetF offset;
     NG::OffsetF offsetBottom;
     GetPositionToWindowWithTransform(offset, offsetBottom, node);
@@ -2881,7 +2892,8 @@ namespace {
     {
         return eventType && (eventType == Accessibility::EventType::TYPE_PAGE_STATE_UPDATE
             || eventType == Accessibility::EventType::TYPE_PAGE_CONTENT_UPDATE
-            || eventType == Accessibility::EventType::TYPE_PAGE_OPEN);
+            || eventType == Accessibility::EventType::TYPE_PAGE_OPEN
+            || eventType == Accessibility::EventType::TYPE_PAGE_CLOSE);
     }
 
     bool IsRootOrPageComponent(const std::string& componentType)
@@ -2922,8 +2934,10 @@ namespace {
         return !accessibilityProperty->HasAccessibilitySamePage();
     }
 
-    void UpdateExtensionComponentStatusVec(std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>>& nodeVec)
+    void UpdateExtensionComponentStatusVec(
+        std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>>& nodeVec, std::mutex& mutex)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto it = nodeVec.begin(); it != nodeVec.end();) {
             if (IsDelNode(it->first)) {
                 it = nodeVec.erase(it);
@@ -2947,8 +2961,9 @@ namespace {
         pageId = node->GetPageId();
     }
 
-    void ClearDefaultFocusList(std::list<WeakPtr<NG::FrameNode>>& nodeList)
+    void ClearDefaultFocusList(std::list<WeakPtr<NG::FrameNode>>& nodeList, std::mutex& mutex)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto it = nodeList.begin(); it != nodeList.end();) {
             auto node = it->Upgrade();
             if (!node) {
@@ -2981,6 +2996,7 @@ bool JsAccessibilityManager::HandleAccessibilityEvent(
 bool JsAccessibilityManager::HandleAccessibilityEventForUEA(
     std::shared_ptr<AccessibilitySystemAbilityClient>& client, const Accessibility::AccessibilityEventInfo& eventInfo)
 {
+    std::lock_guard<std::mutex> lock(cacheEventVecMutex_);
     if (pageMode_.empty()) {
         if (treeId_ == -1) {
             cacheEventVec_.push_back(eventInfo);
@@ -3001,13 +3017,14 @@ bool JsAccessibilityManager::HandleAccessibilityEventForUEA(
 bool JsAccessibilityManager::HandleAccessibilityEventForHost(std::shared_ptr<AccessibilitySystemAbilityClient>& client,
     const Accessibility::AccessibilityEventInfo& eventInfo, const int32_t pageId)
 {
-    UpdateExtensionComponentStatusVec(extensionComponentStatusVec_);
-    ClearDefaultFocusList(defaultFocusList_);
+    UpdateExtensionComponentStatusVec(extensionComponentStatusVec_, extensionComponentStatusVecMutex_);
+    ClearDefaultFocusList(defaultFocusList_, defaultFocusListMutex_);
 
     if (extensionComponentStatusVec_.empty() || defaultFocusList_.empty()) {
         return SendEvent(client, eventInfo);
     }
 
+    std::lock_guard<std::mutex> lock(extensionComponentStatusVecMutex_);
     for (const auto& [node, status] : extensionComponentStatusVec_) {
         auto frameNode = node.Upgrade();
         CHECK_NULL_CONTINUE(frameNode);
@@ -3041,6 +3058,7 @@ void JsAccessibilityManager::SendCacheAccessibilityEvent(int32_t instanceId)
     client->IsEnabled(isEnabled);
     CHECK_NULL_VOID(isEnabled);
 
+    std::lock_guard<std::mutex> lock(cacheEventVecMutex_);
     if (!cacheEventVec_.empty()) {
         for (const auto& event : cacheEventVec_) {
             SendEvent(client, event);
@@ -3070,6 +3088,7 @@ void JsAccessibilityManager::SendCacheAccessibilityEventForHost(const int32_t pa
 bool JsAccessibilityManager::SendEvent(std::shared_ptr<AccessibilitySystemAbilityClient>& client,
     const Accessibility::AccessibilityEventInfo& eventInfo)
 {
+    CHECK_NULL_RETURN(client, false);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
         "send accessibility componentType:%{public}s event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfo.GetComponentType().c_str(), eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
@@ -3079,14 +3098,17 @@ bool JsAccessibilityManager::SendEvent(std::shared_ptr<AccessibilitySystemAbilit
 void JsAccessibilityManager::SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent)
 {
     if (isExtensionComponent) {
+        std::lock_guard<std::mutex> lock(extensionComponentStatusVecMutex_);
         extensionComponentStatusVec_.emplace_back(WeakPtr(node), false);
         return;
     }
+    std::lock_guard<std::mutex> lock(defaultFocusListMutex_);
     defaultFocusList_.push_back(WeakPtr(node));
 }
 
 void JsAccessibilityManager::UpdateFrameNodeState(int32_t nodeId)
 {
+    std::lock_guard<std::mutex> lock(extensionComponentStatusVecMutex_);
     for (auto& [node, status] : extensionComponentStatusVec_) {
         auto frameNode = node.Upgrade();
         if (frameNode && (frameNode->GetId() == nodeId)) {
@@ -4849,18 +4871,14 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowId(const int32_t windowId
         }
     }
 
-    auto weak = WeakClaim(this);
-    auto jsAccessibilityManager = weak.Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
-    auto defaultFocusNodeList = jsAccessibilityManager->GetDefaultFocusList();
-
+    auto defaultFocusNodeList = GetDefaultFocusList();
     for (const auto& defaultFocusNode : defaultFocusNodeList) {
         auto frameNode = defaultFocusNode.Upgrade();
         if (frameNode && (frameNode->GetPageId() == pageId || pageId == -1)) {
-            auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(frameNode->GetId());
+            auto node = GetAccessibilityNodeFromPage(frameNode->GetAccessibilityId());
             CHECK_NULL_CONTINUE(node);
             AccessibilityElementInfo nodeInfo;
-            UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_);
+            UpdateAccessibilityNodeInfo(node, nodeInfo, Claim(this), windowId_);
             infos.emplace_back(nodeInfo);
         }
     }
@@ -4878,12 +4896,12 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowIdNG(const int32_t pageId
     for (const auto& defaultFocusNode : defaultFocusList_) {
         auto node = defaultFocusNode.Upgrade();
         if (node && (node->GetPageId() == pageId || pageId == -1)) {
-        AccessibilityElementInfo nodeInfo;
+            AccessibilityElementInfo nodeInfo;
 
-        CommonProperty commonProperty;
-        GenerateCommonProperty(ngPipeline, commonProperty, mainContext, node);
-        UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
-        infos.emplace_back(nodeInfo);
+            CommonProperty commonProperty;
+            GenerateCommonProperty(ngPipeline, commonProperty, mainContext, node);
+            UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
+            infos.emplace_back(nodeInfo);
         }
     }
 }
@@ -6765,17 +6783,17 @@ bool JsAccessibilityManager::IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>
 {
     CHECK_NULL_RETURN(node, false);
     // update windowScene node commonProperty left, top position and get scale data
-    auto parent = node->GetAncestorNodeOfFrame(true);
+    auto parent = node->GetAncestorNodeOfFrame(false);
     if (node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
         parent = node;
     }
+
     while (parent) {
-        if (parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
-            parent = parent->GetAncestorNodeOfFrame(true);
+        // window scene with windowboundary property, is the same as window
+        if ((parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) || (!parent->IsWindowBoundary())) {
+            parent = parent->GetAncestorNodeOfFrame(false);
             continue;
         }
-        auto type = parent->GetWindowPatternType();
-        auto windowSceneRect = GetFinalRealRect(parent);
         auto accessibilityProperty = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty) {
             accessibilityProperty->GetWindowScenePosition(windowSceneInfo);
@@ -6783,13 +6801,10 @@ bool JsAccessibilityManager::IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "windowScene nodeId: %{public}" PRId64
             ", left: %{public}d, top: %{public}d, windowSceneScale: [%{public}f, %{public}f], "
-            "innerWindowId:%{public}d, node rect: %{public}s, type: %{public}d",
+            "innerWindowId:%{public}d, type: %{public}d",
             parent->GetAccessibilityId(), windowSceneInfo.left, windowSceneInfo.top,
             windowSceneInfo.scaleX, windowSceneInfo.scaleY, windowSceneInfo.innerWindowId,
-            windowSceneRect.ToString().c_str(), type);
-        if (windowSceneRect.Left() != 0 || windowSceneRect.Top() != 0) {
-            return false;
-        }
+            parent->GetWindowPatternType());
         return true;
     }
     return false;

@@ -71,7 +71,6 @@ public:
     void SetBackBorder() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override {};
     void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange) override {};
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnScroll(std::function<void(float, float)>&& func) override {};

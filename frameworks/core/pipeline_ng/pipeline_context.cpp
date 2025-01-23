@@ -64,6 +64,7 @@
 #ifdef COMPONENT_TEST_ENABLED
 #include "component_test/pipeline_status.h"
 #endif // COMPONENT_TEST_ENABLED
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -375,7 +376,8 @@ void PipelineContext::FlushDirtyNodeUpdate()
     // use maxFlushTimes to avoid dead cycle.
     int maxFlushTimes = 3;
     while (!dirtyNodes_.empty() && maxFlushTimes > 0) {
-        ArkUIPerfMonitor::GetInstance().RecordStateMgmtNode(dirtyNodes_.size());
+        auto id = GetInstanceId();
+        ArkUIPerfMonitor::GetPerfMonitor(id)->RecordStateMgmtNode(dirtyNodes_.size());
         decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
         for (const auto& node : dirtyNodes) {
             if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
@@ -759,7 +761,8 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     int32_t displaySyncRate = displaySyncManager->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
     auto monitorVsyncRate = displaySyncManager->GetMonitorVsyncRate();
-    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(monitorVsyncRate);
+    auto id = GetInstanceId();
+    ArkUIPerfMonitor::GetPerfMonitor(id)->RecordDisplaySyncRate(monitorVsyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -3665,10 +3668,17 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 
     DispatchAxisEventToDragDropManager(event, node, etsSerializedGesture);
-
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, node);
-        eventManager_->DispatchAxisEventNG(scaleEvent);
+    // when api >= 15, do not block end and cancel action.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.action != AxisAction::NONE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
+    } else {
+        if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
     }
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
@@ -4107,6 +4117,7 @@ void PipelineContext::Destroy()
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif
+    uiContextImpl_.Reset();
     PipelineBase::Destroy();
 }
 
@@ -5513,5 +5524,14 @@ void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
     auto renderContext = rootNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->RequestNextFrame();
+}
+
+RefPtr<Kit::UIContext> PipelineContext::GetUIContext()
+{
+    if (uiContextImpl_) {
+        return uiContextImpl_;
+    }
+    uiContextImpl_ = AceType::MakeRefPtr<Kit::UIContextImpl>(this);
+    return uiContextImpl_;
 }
 } // namespace OHOS::Ace::NG

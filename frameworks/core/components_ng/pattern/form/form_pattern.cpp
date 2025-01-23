@@ -72,7 +72,7 @@ constexpr uint32_t TOP_BG_COLOR_LIGHT = 0xFFDEDEEB;
 constexpr uint32_t BOTTOM_BG_COLOR_LIGHT = 0xFFA1A3B3;
 constexpr uint32_t FONT_COLOR_DARK = 0x99FFFFFF;
 constexpr uint32_t FONT_COLOR_LIGHT = 0x99000000;
-constexpr double TRANSITION_PERCENT = 0.1;
+constexpr int32_t END_POSITION = 100;
 constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
@@ -914,7 +914,7 @@ void FormPattern::UpdateSpecialStyleCfg()
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(GetFormStyleBackGroundColor());
+    UpdateForbiddenRootNodeStyle(renderContext);
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
     if (attribution == FormStyleAttribution::PARENT_CONTROL) {
         UpdateTimeLimitFontCfg();
@@ -992,7 +992,7 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(GetFormStyleBackGroundColor());
+    UpdateForbiddenRootNodeStyle(renderContext);
 
     auto node = CreateActionNode();
     CHECK_NULL_VOID(node);
@@ -2482,10 +2482,20 @@ void FormPattern::HandleFormStyleOperation(const FormSpecialStyle& newFormSpecia
   HandleFormStyleOperation(newFormSpecialStyle, cardInfo_);
 }
 
-Color FormPattern::GetFormStyleBackGroundColor()
+void FormPattern::UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext)
 {
-  return SystemProperties::GetColorMode() == ColorMode::DARK ?
-      Color::LineColorTransition(Color(TOP_BG_COLOR_DARK), Color(BOTTOM_BG_COLOR_DARK), TRANSITION_PERCENT)
-      : Color::LineColorTransition(Color(TOP_BG_COLOR_LIGHT), Color(BOTTOM_BG_COLOR_LIGHT), TRANSITION_PERCENT);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    bool isDarkMode = SystemProperties::GetColorMode() == ColorMode::DARK;
+    GradientColor beginGredientColor =
+        GradientColor(isDarkMode ? Color(TOP_BG_COLOR_DARK) : Color(TOP_BG_COLOR_LIGHT));
+    beginGredientColor.SetDimension(CalcDimension(0, DimensionUnit::PERCENT));
+    GradientColor endGredientColor =
+        GradientColor(isDarkMode ? Color(BOTTOM_BG_COLOR_DARK) : Color(BOTTOM_BG_COLOR_LIGHT));
+    endGredientColor.SetDimension(CalcDimension(END_POSITION, DimensionUnit::PERCENT));
+    gradient.AddColor(beginGredientColor);
+    gradient.AddColor(endGredientColor);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateLinearGradient(gradient);
 }
 } // namespace OHOS::Ace::NG

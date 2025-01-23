@@ -518,9 +518,9 @@ void UIExtensionPattern::UpdateFrameNodeState()
 {
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(ngPipeline);
-    auto frontend = ngPipeline->GetFrontend();
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
@@ -534,6 +534,7 @@ void UIExtensionPattern::OnUeaAccessibilityEventAsync()
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     UpdateFrameNodeState();
+    TransferAccessibilityRectInfo(); // first connect need info UEC rect info
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());

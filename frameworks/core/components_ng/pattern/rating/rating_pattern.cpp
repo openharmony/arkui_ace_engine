@@ -65,7 +65,11 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
     auto currentSourceInfo = ImageSourceInfo("");
     switch (imageFlag) {
         case 0b001:
-            currentSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
+            if (isForegroundImageInfoFromTheme_) {
+                currentSourceInfo = foregroundImageSourceInfo_.value_or(ImageSourceInfo(""));
+            } else {
+                currentSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
+            }
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
                 TAG_LOGW(AceLogTag::ACE_SELECT_COMPONENT,
@@ -73,7 +77,11 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             }
             break;
         case 0b010:
-            currentSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
+            if (isSecondaryImageInfoFromTheme_) {
+                currentSourceInfo = secondaryImageSourceInfo_.value_or(ImageSourceInfo(""));
+            } else {
+                currentSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
+            }
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
                 TAG_LOGW(AceLogTag::ACE_SELECT_COMPONENT,
@@ -81,7 +89,11 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             }
             break;
         case 0b100:
-            currentSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
+            if (isBackgroundImageInfoFromTheme_) {
+                currentSourceInfo = backgroundImageSourceInfo_.value_or(ImageSourceInfo(""));
+            } else {
+                currentSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
+            }
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
                 TAG_LOGW(AceLogTag::ACE_SELECT_COMPONENT,
@@ -577,8 +589,10 @@ float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& prop
     CHECK_NULL_RETURN(ratingTheme, 0.0);
     focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
     float radius = 0.0f;
-    if (!ratingTheme->GetIsCircleRadius()) {
-        radius = ratingTheme->GetFocusBorderRadius().ConvertToPx();
+    auto isImageInfoFromTheme = isForegroundImageInfoFromTheme_ &&
+        isSecondaryImageInfoFromTheme_ && isBackgroundImageInfoFromTheme_;
+    if (!ratingTheme->GetIsCircleRadius() || !isImageInfoFromTheme) {
+        radius = ratingTheme->GetFocusBorderRadius().ConvertToPx() + ratingTheme->GetFocusSpace().ConvertToPx();
     } else {
         double starNum = property->GetStarsValue(themeStarNum_);
         if (!NearEqual(starNum, 0.0)) {
@@ -822,7 +836,7 @@ void RatingPattern::LoadForeground(const RefPtr<RatingLayoutProperty>& layoutPro
     if (!layoutProperty->HasForegroundImageSourceInfo()) {
         isForegroundImageInfoFromTheme_ = true;
         sourceInfo.SetResourceId(ratingTheme->GetForegroundResourceId());
-        layoutProperty->UpdateForegroundImageSourceInfo(sourceInfo);
+        foregroundImageSourceInfo_ = sourceInfo;
     } else {
         sourceInfo = layoutProperty->GetForegroundImageSourceInfo().value();
     }
@@ -852,7 +866,7 @@ void RatingPattern::LoadSecondary(const RefPtr<RatingLayoutProperty>& layoutProp
     if (!layoutProperty->HasSecondaryImageSourceInfo()) {
         isSecondaryImageInfoFromTheme_ = true;
         sourceInfo.SetResourceId(ratingTheme->GetSecondaryResourceId());
-        layoutProperty->UpdateSecondaryImageSourceInfo(sourceInfo);
+        secondaryImageSourceInfo_ = sourceInfo;
     } else {
         sourceInfo = layoutProperty->GetSecondaryImageSourceInfo().value();
     }
@@ -880,7 +894,7 @@ void RatingPattern::LoadBackground(const RefPtr<RatingLayoutProperty>& layoutPro
     if (!layoutProperty->HasBackgroundImageSourceInfo()) {
         isBackgroundImageInfoFromTheme_ = true;
         sourceInfo.SetResourceId(ratingTheme->GetBackgroundResourceId());
-        layoutProperty->UpdateBackgroundImageSourceInfo(sourceInfo);
+        backgroundImageSourceInfo_ = sourceInfo;
     } else {
         sourceInfo = layoutProperty->GetBackgroundImageSourceInfo().value();
     }
@@ -908,7 +922,7 @@ void RatingPattern::LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layo
     if (!layoutProperty->HasBackgroundImageSourceInfo()) {
         isBackgroundImageInfoFromTheme_ = true;
         sourceInfo.SetResourceId(ratingTheme->GetBackgroundResourceId());
-        layoutProperty->UpdateBackgroundImageSourceInfo(sourceInfo);
+        focusBackgroundImageSourceInfo_ = sourceInfo;
     } else {
         sourceInfo = layoutProperty->GetBackgroundImageSourceInfo().value();
     }

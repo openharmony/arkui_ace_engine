@@ -11,18 +11,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
-*/
-
-/**
- * 
- * This file includes only framework internal classes and functions 
- * non are part of SDK. Do not access from app.
- * 
- * ViewBuildNodeBase is the common base class of PUV2ViewBase and BaseNode
- * 
  */
 
-class ViewBuildNodeBase {
-  
+#include "ui/base/utils/measure_utils.h"
+
+#include "frameworks/base/utils/measure_util.h"
+
+namespace OHOS::Ace::Kit {
+NG::SizeF MeasureUtils::GetMeasureTextSize(const MeasureContext& context)
+{
+    Ace::MeasureContext aceContext;
+    aceContext.textContent = context.data;
+    aceContext.fontSize = context.fontSize;
+    auto measuredSize = OHOS::Ace::MeasureUtil::MeasureTextSize(aceContext);
+    return NG::SizeF(measuredSize.Width(), measuredSize.Height());
 }
+} // OHOS::Ace::Kit
