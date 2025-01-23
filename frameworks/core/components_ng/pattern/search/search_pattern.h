@@ -210,6 +210,8 @@ public:
     void UpdateEnable(bool needToenable);
     float GetMaxFontScale();
     float GetMinFontScale();
+    bool IsShowCancelButton();
+    bool IsShowSearchButton();
 
 private:
     void OnModifyDone() override;
