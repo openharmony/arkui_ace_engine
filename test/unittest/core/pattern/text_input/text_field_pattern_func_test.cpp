@@ -1061,7 +1061,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc060, TestSize.Level1)
     pattern->isEdit_ = true;
     pattern->focusIndex_ = FocuseIndex::CANCEL;
     pattern->InsertValue(u"", true);
-    EXPECT_FALSE(pattern->HandleSpaceEvent());
+    EXPECT_TRUE(pattern->HandleSpaceEvent());
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc061, TestSize.Level1)

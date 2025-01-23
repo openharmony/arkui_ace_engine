@@ -3069,7 +3069,7 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
-    if (isTransparent_ || !HasFocus()) {
+    if (isTransparent_ || !HasFocus() || focusIndex_ == FocuseIndex::CANCEL || focusIndex_ == FocuseIndex::UNIT) {
         return;
     }
     // Ignore the result because all ops are called on this same thread (ACE UI).
@@ -4886,6 +4886,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     selectController_->MoveCaretToContentRect(newCaretIndex);
     UpdateObscure(insertValue, hasInsertValue);
     UpdateEditingValueToRecord();
+    focusIndex_ = FocuseIndex::TEXT;
     TwinklingByFocus();
     CloseSelectOverlay(true);
     ScrollToSafeArea();
@@ -4954,10 +4955,9 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
 
 void TextFieldPattern::TwinklingByFocus()
 {
-    if (HasFocus()) {
+    if (HasFocus() && focusIndex_ == FocuseIndex::TEXT) {
         cursorVisible_ = true;
         StartTwinkling();
-        focusIndex_ = FocuseIndex::TEXT;
     } else {
         cursorVisible_ = false;
         StopTwinkling();
@@ -6090,6 +6090,7 @@ void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     CHECK_NULL_VOID(!IsDragging());
+    CHECK_NULL_VOID(focusIndex_ == FocuseIndex::TEXT);
     ResetObscureTickCountDown();
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
@@ -6163,6 +6164,7 @@ void TextFieldPattern::DeleteForwardOperation(int32_t length)
 void TextFieldPattern::DeleteForward(int32_t length)
 {
     CHECK_NULL_VOID(!IsDragging());
+    CHECK_NULL_VOID(focusIndex_ == FocuseIndex::TEXT);
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
         auto end = selectController_->GetEndIndex();
@@ -8658,6 +8660,13 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
+    if (cleanNodeStyle == CleanNodeStyle::INPUT) {
+        focusIndex_ = FocuseIndex::TEXT;
+    }
 }
 
 void TextFieldPattern::RegisterWindowSizeCallback()
@@ -10316,11 +10325,12 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
             isEdit_, IsDragging());
         return;
     }
-    if (focusIndex_ != FocuseIndex::TEXT && insertValue == u" ") {
-        HandleSpaceEvent();
+    if (focusIndex_ != FocuseIndex::TEXT) {
+        if (insertValue == u" ") {
+            HandleSpaceEvent();
+        }
         return;
     }
-    focusIndex_ = FocuseIndex::TEXT;
     if (FinishTextPreviewByPreview(insertValue)) {
         return;
     }
