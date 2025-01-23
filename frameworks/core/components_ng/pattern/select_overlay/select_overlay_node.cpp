@@ -748,6 +748,15 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     return content;
 }
 
+void CloseOverlayIfNecessary(const RefPtr<SelectOverlayManager>& overlayManager)
+{
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DestroySelectOverlay(true);
+    auto contentOverlayManager = overlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->CloseCurrent(true, CloseReason::CLOSE_REASON_TOOL_BAR);
+}
+
 std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOptionsParam>& menuOptionItems,
     const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex)
 {
@@ -788,7 +797,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 systemEvent();
             }
             if (!systemEvent && !result) {
-                overlayManager->DestroySelectOverlay(true);
+                CloseOverlayIfNecessary(overlayManager);
             }
         };
         params.emplace_back(

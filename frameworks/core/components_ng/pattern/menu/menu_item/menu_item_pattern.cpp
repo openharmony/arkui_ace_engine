@@ -1123,9 +1123,7 @@ bool MenuItemPattern::OnClick()
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
     auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
-    if (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu) {
-        return true;
-    }
+    CHECK_EQUAL_RETURN(expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu, true, true);
     if (expandingMode_ == SubMenuExpandingMode::STACK && IsStackSubmenuHeader()) {
         menuWrapperPattern->HideSubMenu();
         return true;
@@ -1159,8 +1157,10 @@ bool MenuItemPattern::OnClick()
         ShowSubMenu(ShowSubMenuType::CLICK);
         return true;
     }
-    // hide menu when menu item is clicked
-    CloseMenu();
+    // hide menu when menu item is clicked, unless the click is intercepted
+    if (!blockClick_) {
+        CloseMenu();
+    }
     return true;
 }
 
