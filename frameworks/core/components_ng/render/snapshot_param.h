@@ -42,7 +42,7 @@ struct SnapshotOptions {
     LocalizedSnapshotRegion snapshotRegion;
     SnapshotRegionMode regionMode;
     explicit SnapshotOptions(float scale = DEFAULT_SNAPSHOT_SCALE, bool waitUntilRenderFinished = false,
-        SnapshotRegionMode regionMode = SnapshotRegionMode::COMMON)
+        SnapshotRegionMode regionMode = SnapshotRegionMode::NO_REGION)
         : scale(scale), waitUntilRenderFinished(waitUntilRenderFinished), regionMode(regionMode) {}
     std::string ToString() const
     {
