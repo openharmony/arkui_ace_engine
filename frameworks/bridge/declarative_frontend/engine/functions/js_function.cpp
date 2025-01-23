@@ -116,7 +116,11 @@ void JsFunctionBase::ExecuteNew(const std::vector<std::string>& keys, const std:
 
 JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 {
-    JS_CALLBACK_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    JS_CALLBACK_DURATION(id);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
     JSRef<JSVal> jsObject = jsThis_.Lock();
@@ -131,7 +135,11 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 {
-    JS_CALLBACK_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    JS_CALLBACK_DURATION(id);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
 

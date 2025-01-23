@@ -376,7 +376,8 @@ void PipelineContext::FlushDirtyNodeUpdate()
     // use maxFlushTimes to avoid dead cycle.
     int maxFlushTimes = 3;
     while (!dirtyNodes_.empty() && maxFlushTimes > 0) {
-        ArkUIPerfMonitor::GetInstance().RecordStateMgmtNode(dirtyNodes_.size());
+        auto id = GetInstanceId();
+        ArkUIPerfMonitor::GetPerfMonitor(id)->RecordStateMgmtNode(dirtyNodes_.size());
         decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
         for (const auto& node : dirtyNodes) {
             if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
@@ -760,7 +761,8 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     int32_t displaySyncRate = displaySyncManager->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
     auto monitorVsyncRate = displaySyncManager->GetMonitorVsyncRate();
-    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(monitorVsyncRate);
+    auto id = GetInstanceId();
+    ArkUIPerfMonitor::GetPerfMonitor(id)->RecordDisplaySyncRate(monitorVsyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
