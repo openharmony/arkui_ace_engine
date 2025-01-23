@@ -1238,6 +1238,177 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedPlayTransition004
+ * @tc.desc: Branch: if (!inputStyle.detentSelection.has_value() || inputStyle.detents.size() == 0).
+ *           Condition: !inputStyle.detentSelection.has_value().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition004, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    style.detents.emplace_back(detent);
+    SheetHeight detent1;
+    detent1.height->unit_ = DimensionUnit::VP;
+    detent1.height->value_ = 100;
+    style.detents.emplace_back(detent1);
+    layoutProperty->UpdateSheetStyle(style);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition005
+ * @tc.desc: Branch: if (!inputStyle.detentSelection.has_value() || inputStyle.detents.size() == 0).
+ *           Condition: inputStyle.detents.size() == 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition005, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateSheetStyle(style);
+    SheetHeight sheetHeight;
+    sheetHeight.sheetMode = SheetMode::MEDIUM;
+    style.detentSelection = sheetHeight;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition006
+ * @tc.desc: Branch: if ((selection.sheetMode.has_value() && selection.sheetMode.value() == NG::SheetMode::AUTO)).
+ *           Condition: (selection.sheetMode.has_value() && selection.sheetMode.value() == NG::SheetMode::AUTO).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition006, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight sheetHeight;
+    sheetHeight.sheetMode = SheetMode::AUTO;
+    style.detents.emplace_back(sheetHeight);
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = sheetHeight;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition007
+ * @tc.desc: Branch: if (inputStyle.detents[index] == inputStyle.detentSelection.value()).
+ *           Condition 1: inputStyle.detents[index] == inputStyle.detentSelection.value().
+ *                     2: inputStyle.detents[index] != inputStyle.detentSelection.value().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition007, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    style.detents.emplace_back(detent);
+    SheetHeight detent1;
+    detent1.height->unit_ = DimensionUnit::VP;
+    detent1.height->value_ = 100;
+    style.detents.emplace_back(detent1);
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = detent1;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+
+    layoutProperty->UpdateSheetStyle(style);
+    SheetHeight selection1;
+    selection1.sheetMode = SheetMode::LARGE;
+    style.detentSelection = selection1;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition008
+ * @tc.desc: Branch: if (!isFirstTransition && preStyle.detentSelection == inputStyle.detentSelection).
+ *           Condition: preStyle.detentSelection == inputStyle.detentSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition008, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight height1;
+    height1.sheetMode = SheetMode::AUTO;
+    SheetHeight height2;
+    height2.height->unit_ = DimensionUnit::VP;
+    height2.height->value_ = 100;
+    style.detents.emplace_back(height1);
+    style.detents.emplace_back(height2);
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = height2;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = height2;
+    style.showDragBar = true;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+}
+
+/**
  * @tc.name: FireOnHeightDidChange001
  * @tc.desc: Test FireOnHeightDidChange function.
  * @tc.type: FUNC
