@@ -343,7 +343,21 @@ void IndicatorPattern::ShowPrevious()
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ShowPrevious();
     }
-    singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+
+    singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+        if (IsLoop() && GetCurrentIndex() == 0) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        }
+    } else {
+        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+        if (IsLoop() && GetCurrentIndex() == 0) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        }
+    }
+
+    lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() - 1);
 }
 
@@ -352,7 +366,20 @@ void IndicatorPattern::ShowNext()
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ShowNext();
     }
-    singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+        if (IsLoop() && GetCurrentIndex() == (RealTotalCount() - 1)) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        }
+    } else {
+        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+        if (IsLoop() && GetCurrentIndex() == (RealTotalCount() - 1)) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        }
+    }
+
+    lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() + 1);
 }
 
