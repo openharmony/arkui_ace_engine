@@ -979,6 +979,7 @@ public:
     bool AccessBackward();
 
     void ScaleGestureChange(double scale, double centerX, double centerY);
+    void ScaleGestureChangeV2(int type, double scale, double originScale, double centerX, double centerY);
     std::string GetSelectInfo() const;
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);

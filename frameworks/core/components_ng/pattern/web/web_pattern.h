@@ -861,6 +861,8 @@ private:
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
+    void HandleScaleGestureStart(const GestureEvent& event);
+    void HandleScaleGestureEnd(const GestureEvent& event);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -987,6 +989,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     void UpdateSlideOffset();
     double GetNewScale(double& scale) const;
+    double GetNewOriginScale(double originScale) const;
     void SetRotation(uint32_t rotation);
     Color GetSystemColor() const;
     void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)

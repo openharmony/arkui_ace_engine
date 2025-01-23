@@ -278,6 +278,10 @@ constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 
+constexpr int32_t PINCH_START_TYPE = 1;
+constexpr int32_t PINCH_UPDATE_TYPE = 3;
+constexpr int32_t PINCH_END_TYPE = 2;
+
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
 constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
@@ -903,17 +907,21 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->startPinchScale_ = event.GetScale();
-        pattern->preScale_ = event.GetScale();
-        pattern->pinchIndex_ = 0;
-        pattern->zoomOutSwitch_ = false;
-        pattern->zoomStatus_ = 0;
-        pattern->zoomErrorCount_ = 0;
-        TAG_LOGI(AceLogTag::ACE_WEB, "InitPinchEvent StartScale: %{public}f", pattern->startPinchScale_);
+        if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->startPinchScale_ = event.GetScale();
+            pattern->preScale_ = event.GetScale();
+            pattern->pinchIndex_ = 0;
+            pattern->zoomOutSwitch_ = false;
+            pattern->zoomStatus_ = 0;
+            pattern->zoomErrorCount_ = 0;
+            TAG_LOGI(AceLogTag::ACE_WEB, "InitPinchEvent StartScale: %{public}f", pattern->startPinchScale_);
 
-        return;
+            pattern->HandleScaleGestureStart(event);
+
+            return;
+        }
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
@@ -925,7 +933,11 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
                 event.GetScale());
         }
     };
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleScaleGestureEnd(event);
+    };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
 
     pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
@@ -1042,6 +1054,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
         return;
     }
     double newScale = GetNewScale(scale);
+    double newOriginScale = GetNewOriginScale(event.GetScale());
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
@@ -1049,10 +1062,14 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     CHECK_NULL_VOID(frameNode);
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f centerX: "
-        "%{public}f centerY: %{public}f offset X: %{public}f offset Y: %{public}f",
-        curScale, scale, newScale, centerX, centerY, offset.GetX(), offset.GetY());
-    delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
+        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
+        " newOriginScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
+         " offset Y: %{public}f",
+        curScale, scale, newScale, event.GetScale(), centerX, centerY, offset.GetX(), offset.GetY());
+
+    // Plan two
+    delegate_->ScaleGestureChangeV2(
+        PINCH_UPDATE_TYPE, newScale, newOriginScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     pageScale_ = scale;
@@ -1079,6 +1096,50 @@ double WebPattern::GetNewScale(double& scale) const
     }
 
     return newScale;
+}
+
+double WebPattern::GetNewOriginScale(double originScale) const
+{
+    double newScale = 0.0;
+    if (zoomStatus_ == STATUS_ZOOMOUT) {
+        newScale = DEFAULT_PINCH_SCALE_MAX;
+    } else if (zoomStatus_ == STATUS_ZOOMIN) {
+        newScale = DEFAULT_PINCH_SCALE_MIN;
+    }
+
+    return newScale;
+}
+
+void WebPattern::HandleScaleGestureStart(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale = event.GetScale();
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
+
+    delegate_->ScaleGestureChangeV2(
+        PINCH_START_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
+}
+
+void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale = event.GetScale();
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
+
+    delegate_->ScaleGestureChangeV2(
+        PINCH_END_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
