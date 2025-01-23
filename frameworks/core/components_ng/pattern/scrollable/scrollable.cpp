@@ -567,9 +567,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     const double dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, id:%{public}d, tag:%{public}s", nodeId_, nodeTag_.c_str());
-
     skipRestartSpring_ = false; // reset flags. Extract method if more flags need to be reset
-
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
@@ -583,12 +581,15 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 #endif
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
     auto isAxisEvent = IsMouseWheelScroll(info);
-    ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, id:%d, tag:%s",
-        info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, nodeId_, nodeTag_.c_str());
+    ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, "
+                     "IsAxisAnimationRunning:%u, IsSnapAnimationRunning:%u, id:%d, tag:%s",
+        info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
+        nodeId_, nodeTag_.c_str());
     if (isAxisEvent) {
         InitAxisAnimator();
         if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
+            snapDirection_ = SnapDirection::NONE;
         }
         return;
     } else if (IsAxisAnimationRunning()) {
