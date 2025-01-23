@@ -237,16 +237,16 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
         };
     };
     
-    Callback_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = callback
-    };
-    // auto arkCalback = Converter::ArkValue<Callback_Void>(callback, frameNode->GetId());
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(callBackValue);
+    // Callback_Void callBackValue = {
+    //     .resource = Ark_CallbackResource {
+    //         .resourceId = frameNode->GetId(),
+    //         .hold = nullptr,
+    //         .release = nullptr,
+    //     },
+    //     .call = callback
+    // };
+    auto arkCalback = Converter::ArkValue<Callback_Void>(callback, frameNode->GetId());
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCalback);
    
     // parameters
     auto value = Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("A");
@@ -273,7 +273,7 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
             std::printf("keyboard: holder  shorcut: %s count %d run \n", shortcut.value.c_str(), count);
             action();
         }
-        std::printf("keyboard: holder checkEvent: %d frameNode: %d\n", checkEvent? checkEvent.value().nodeId:-1, frameNode->GetId());
+        std::printf("keyboard: holder checkEvent: %d == %d\n", checkEvent? checkEvent.value().nodeId:-1, frameNode->GetId());
         count++;
         checkEvent.reset();
 
