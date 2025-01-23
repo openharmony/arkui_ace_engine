@@ -1580,7 +1580,9 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
         auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
         auto symbolSize = textOverlayTheme->GetSymbolSize();
         symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
-            auto symbolNode = weak.Upgrade().GetRawPtr();
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto symbolNode = node.GetRawPtr();
             SymbolModelNG::InitialSymbol(symbolNode, symbolId);
             SymbolModelNG::SetFontSize(symbolNode, symbolSize);
         };
