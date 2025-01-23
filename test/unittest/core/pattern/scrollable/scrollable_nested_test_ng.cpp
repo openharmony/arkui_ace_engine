@@ -847,7 +847,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
     DragUpdate(scrollable, -100);
     FlushLayoutTask(sheetNode, true);
     EXPECT_FLOAT_EQ(scrollPattern->GetTotalOffset(), 100);
-    
+
     /**
      * @tc.steps: step3. Scroll -200
      * @tc.expected: Scroll offset is 0, Sheet offset is 100
@@ -868,5 +868,236 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+}
+
+/**
+ * @tc.name: BackToTopNestedScrollTest001
+ * @tc.desc: Set pipeline onShow_ is false for scroll nested List, NOT scroll back to top.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE,
+        NestedScrollOptions {
+            .forward = NestedScrollMode::PARALLEL,
+            .backward = NestedScrollMode::PARALLEL,
+        });
+    FlushLayoutTask(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    auto listScrollable = GetScrollable(listNode);
+    /**
+     * @tc.steps: step2. Scroll backward and call OnStatusBarClick when pipeline onShow_ is false.
+     * @tc.expected: Neither the list nor the scroll is scrolling.
+     */
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, -200);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    scrollPattern->OnStatusBarClick();
+    listPattern->OnStatusBarClick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
+
+    /**
+     * @tc.steps: step3. Set backToTop to true and call OnStatusBarClick when pipeline onShow_ is false.
+     * @tc.expected: Neither the list nor the scroll is scrolling.
+     */
+    listPattern->SetBackToTop(true);
+    scrollPattern->SetBackToTop(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    scrollPattern->OnStatusBarClick();
+    listPattern->OnStatusBarClick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
+}
+
+/**
+ * @tc.name: BackToTopNestedScrollTest002
+ * @tc.desc: Set backToTop for scroll nested List, Scroll spring animate back to top.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE,
+        NestedScrollOptions {
+            .forward = NestedScrollMode::PARALLEL,
+            .backward = NestedScrollMode::PARALLEL,
+        });
+    FlushLayoutTask(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    auto listScrollable = GetScrollable(listNode);
+    /**
+     * @tc.steps: step2. Scroll backward and call OnStatusBarClick when pipeline onShow_ is true.
+     * @tc.expected: Neither the list nor the scroll is scrolling.
+     */
+    MockPipelineContext::GetCurrent()->onShow_ = true;
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, -200);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    scrollPattern->OnStatusBarClick();
+    listPattern->OnStatusBarClick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
+
+    /**
+     * @tc.steps: step3. Set listPattern backToTop is true.
+     * @tc.expected: Only list scroll to top.
+     */
+    listPattern->SetBackToTop(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    listPattern->OnStatusBarClick();
+    scrollPattern->OnStatusBarClick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
+
+    /**
+     * @tc.steps: step4. Set scrollPattern backToTop is true.
+     * @tc.expected: Scroll component scroll back to top.
+     */
+    scrollPattern->SetBackToTop(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    scrollPattern->OnStatusBarClick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+}
+
+/**
+ * @tc.name: BackToTopNestedScrollTest003
+ * @tc.desc: Set both backToTop of nested scroll components and scroll to the top.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE,
+        NestedScrollOptions {
+            .forward = NestedScrollMode::PARALLEL,
+            .backward = NestedScrollMode::PARALLEL,
+        });
+    FlushLayoutTask(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    auto listScrollable = GetScrollable(listNode);
+
+    /**
+     * @tc.steps: step2. Scroll backward, set both listPattern and scrollPattern backToTop to true.
+     * @tc.expected: Both list and scroll component scroll to top.
+     */
+    MockPipelineContext::GetCurrent()->onShow_ = true;
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, -200);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    listPattern->SetBackToTop(true);
+    scrollPattern->SetBackToTop(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    scrollPattern->OnStatusBarClick();
+    listPattern->OnStatusBarClick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
+}
+
+/**
+ * @tc.name: BackToTopNestedScrollTest004
+ * @tc.desc: Set backToTop for scroll nested List,  touch stop animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE,
+        NestedScrollOptions {
+            .forward = NestedScrollMode::PARALLEL,
+            .backward = NestedScrollMode::PARALLEL,
+        });
+    FlushLayoutTask(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    auto listScrollable = GetScrollable(listNode);
+
+    bool listOnScrollStop = false;
+    bool scrollOnScrollStop = false;
+    ListModelNG::SetOnScrollStop(AceType::RawPtr(listNode), [&listOnScrollStop]() { listOnScrollStop = true; });
+    ScrollModelNG::SetOnScrollStop(AceType::RawPtr(rootNode), [&scrollOnScrollStop]() { scrollOnScrollStop = true; });
+    /**
+     * @tc.steps: step2. When scroll back to top, touch scroll and list trigger animate stop.
+     * @tc.expected: Scroll and list stop animation.
+     */
+    MockPipelineContext::GetCurrent()->onShow_ = true;
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, -200);
+    DragEnd(listScrollable, 0);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    listPattern->SetBackToTop(true);
+    scrollPattern->SetBackToTop(true);
+    scrollPattern->OnStatusBarClick();
+    listPattern->OnStatusBarClick();
+
+    TouchEventInfo touchEvent = TouchEventInfo("unknown");
+    listPattern->OnTouchDown(touchEvent);
+    scrollPattern->OnTouchDown(touchEvent);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_TRUE(listOnScrollStop);
+    EXPECT_TRUE(scrollOnScrollStop);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 }
 } // namespace OHOS::Ace::NG
