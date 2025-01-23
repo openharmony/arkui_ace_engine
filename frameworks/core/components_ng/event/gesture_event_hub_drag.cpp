@@ -1541,7 +1541,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, textNode, data.badgeNumber, data.previewScale,
         data.dragPreviewOffsetToScreen - subWindowOffset);
     DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
-
+    HideMenu();
     auto subwindowContext = data.imageNode->GetContext();
     if (subwindowContext) {
         subwindowContext->FlushSyncGeometryNodeTasks();
@@ -1549,7 +1549,6 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     }
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
-    HideMenu();
     DragAnimationHelper::ShowBadgeAnimation(textNode);
     DragAnimationHelper::HideDragNodeCopy(overlayManager);
     auto dragDropManager = pipeline->GetDragDropManager();
