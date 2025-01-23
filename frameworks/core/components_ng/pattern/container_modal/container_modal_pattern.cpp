@@ -38,7 +38,7 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 bool ContainerModalPattern::GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline)
 {
-    if (pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL){
+    if (pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
         return false;
     }
     auto rootNode = pipeline->GetRootElement();
