@@ -46,14 +46,14 @@ class FrameNodeAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIFrameNodeAccessor,
         &GENERATED_ArkUIAccessors::getFrameNodeAccessor, FrameNodePeer> {
 public:
-    void SetUp(void) override
-    {
-        AccessorTestCtorBase::SetUp();
-        ASSERT_NE(peer_, nullptr);
-    }
     void* CreatePeerInstance() override
     {
         return accessor_->ctor(nullptr);
+    }
+    void DestroyPeer(FrameNodePeer* peer)
+    {
+        finalyzer_(peer);
+        peer = nullptr;
     }
 };
 
@@ -126,6 +126,7 @@ HWTEST_F(FrameNodeAccessorTest, AppendChildTest, TestSize.Level1)
     auto childUINodeRef = AceType::DynamicCast<UINode>(childPeer->node);
     EXPECT_EQ(childPeer->node->GetParentFrameNode(), peer_->node);
     EXPECT_EQ(childList.back(), childUINodeRef);
+    DestroyPeer(childPeer);
 }
 
 /**
@@ -166,6 +167,9 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest1, TestSize.Level1)
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef3), POS_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_2);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
 }
 
 /**
@@ -206,6 +210,9 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest2, TestSize.Level1)
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef3), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_INVALID);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
 }
 
 /**
@@ -241,6 +248,9 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest3, TestSize.Level1)
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef3), POS_INVALID);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
 }
 
 /**
@@ -283,6 +293,9 @@ HWTEST_F(FrameNodeAccessorTest, RemoveChildTest1, TestSize.Level1)
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef3), POS_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_INVALID);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
 }
 
 /**
@@ -324,6 +337,9 @@ HWTEST_F(FrameNodeAccessorTest, RemoveChildTest2, TestSize.Level1)
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_INVALID);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef3), POS_1);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
 }
 
 /**
@@ -361,6 +377,9 @@ HWTEST_F(FrameNodeAccessorTest, ClearChildrenTest, TestSize.Level1)
     accessor_->clearChildren(peer_);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_0);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
 }
 
 /**
@@ -397,6 +416,8 @@ HWTEST_F(FrameNodeAccessorTest, GetChildTest, TestSize.Level1)
     EXPECT_EQ(accessor_->getChild(peer_, &pos0), arkChild1.ptr);
     EXPECT_EQ(accessor_->getChild(peer_, &pos1), arkChild2.ptr);
     EXPECT_EQ(accessor_->getChild(peer_, &pos2), nullptr);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
 }
 
 /**
@@ -427,6 +448,8 @@ HWTEST_F(FrameNodeAccessorTest, GetFirstChildTest, TestSize.Level1)
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_1);
     EXPECT_EQ(accessor_->getFirstChild(peer_), arkChild1.ptr);
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
 }
 
 /**
@@ -463,6 +486,9 @@ HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest1, TestSize.Level1)
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getNextSibling(peer_), arkNext.ptr);
+    DestroyPeer(nextPeer);
+    DestroyPeer(prevPeer);
+    DestroyPeer(rootPeer);
 }
 
 /**
@@ -499,6 +525,9 @@ HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest2, TestSize.Level1)
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getNextSibling(peer_), nullptr);
+    DestroyPeer(nextPeer);
+    DestroyPeer(prevPeer);
+    DestroyPeer(rootPeer);
 }
 
 /**
@@ -535,6 +564,9 @@ HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest1, TestSize.Level1)
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getPreviousSibling(peer_), arkPrev.ptr);
+    DestroyPeer(nextPeer);
+    DestroyPeer(prevPeer);
+    DestroyPeer(rootPeer);
 }
 
 /**
@@ -571,6 +603,9 @@ HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest2, TestSize.Level1)
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getPreviousSibling(peer_), nullptr);
+    DestroyPeer(nextPeer);
+    DestroyPeer(prevPeer);
+    DestroyPeer(rootPeer);
 }
 
 /**
@@ -606,6 +641,9 @@ HWTEST_F(FrameNodeAccessorTest, GetChildrenCountTest, TestSize.Level1)
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getChildrenCount(peer_), childList.size());
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
 }
 
 /**
@@ -640,6 +678,8 @@ HWTEST_F(FrameNodeAccessorTest, GetParentTest, TestSize.Level1)
     accessor_->appendChild(rootPeer, &arkCurrent);
     accessor_->appendChild(rootPeer, &arkOther);
     EXPECT_EQ(accessor_->getParent(peer_), arkRoot.ptr);
+    DestroyPeer(otherPeer);
+    DestroyPeer(rootPeer);
 }
 
 /**
@@ -678,6 +718,8 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     EXPECT_EQ(rootUINodeRef->GetChildIndex(currentUINodeRef), POS_INVALID);
     EXPECT_EQ(rootUINodeRef->GetChildIndex(otherUINodeRef), POS_0);
+    DestroyPeer(otherPeer);
+    DestroyPeer(rootPeer);
 }
 
 } // namespace OHOS::Ace::NG
