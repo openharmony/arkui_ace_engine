@@ -44,6 +44,11 @@ constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
 float ContainerModalView::baseScale = 1.0f;
+std::function<RefPtr<NG::FrameNode>()> ContainerModalView::customTitileBuilder_ = nullptr;
+std::function<RefPtr<NG::FrameNode>(
+    const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, const RefPtr<NG::FrameNode>& containerTitleRow)>
+    ContainerModalView::customControlButtonBuilder_ = nullptr;
+
 /**
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
@@ -99,16 +104,28 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     auto containerTitleRow = BuildTitleRow(isFloatingTitle);
     CHECK_NULL_RETURN(containerTitleRow, nullptr);
 
-    auto isSucc = ExecuteCustomTitleAbc();
-    if (!isSucc) {
-        return nullptr;
+    RefPtr<UINode> customTitleBarNode;
+    if (customTitileBuilder_) {
+        customTitleBarNode = customTitileBuilder_();
+    } else {
+        auto isSucc = ExecuteCustomTitleAbc();
+        if (!isSucc) {
+            return nullptr;
+        }
+        customTitleBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomTitleNode();
     }
 
-    // get custom node
-    auto customTitleBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomTitleNode();
     CHECK_NULL_RETURN(customTitleBarNode, nullptr);
     containerTitleRow->AddChild(customTitleBarNode);
     return containerTitleRow;
+}
+
+void ContainerModalView::RegistCustomBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
+    std::function<RefPtr<NG::FrameNode>(const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
+        const RefPtr<NG::FrameNode>& containerTitleRow)>& button)
+{
+    customTitileBuilder_ = title;
+    customControlButtonBuilder_ = button;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
@@ -243,7 +260,6 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     buttonEventHub->AddGesture(clickGesture);
     buttonNode->SetDraggable(canDrag);
 
-    
     DimensionOffset offsetDimen(TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_X, TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_Y);
     DimensionRect dimenRect(TITLE_BUTTON_RESPONSE_REGIOIN_WIDTH, TITLE_BUTTON_RESPONSE_REGIOIN_HEIGHT, offsetDimen);
     std::vector<DimensionRect> result;

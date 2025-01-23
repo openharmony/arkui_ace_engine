@@ -21,6 +21,7 @@
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "securec.h"
+#include "core/components_ng/base/view_advanced_register.h"
 
 using namespace OHOS::Ace::NG;
 
