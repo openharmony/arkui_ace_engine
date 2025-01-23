@@ -174,6 +174,7 @@ public:
     void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
+    bool CheckTransitionPop(const int32_t animationId);
     bool SystemTransitionPopCallback(const int32_t animationId);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;

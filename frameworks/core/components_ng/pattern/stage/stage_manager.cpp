@@ -62,6 +62,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(pagePattern);
                 pagePattern->FinishOutPage(animationId, transitionType);
             }, transitionType);
+        pagePattern->RemoveJsChildImmediately(page, transitionType);
         return;
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");

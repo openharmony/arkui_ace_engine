@@ -1299,6 +1299,14 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
+void ImagePattern::OnDetachFromMainTree()
+{
+    if (isNeedReset_) {
+        ResetImageAndAlt();
+        isNeedReset_ = false;
+    }
+}
+
 void ImagePattern::EnableDrag()
 {
     auto host = GetHost();
@@ -2398,6 +2406,12 @@ void ImagePattern::ResetAltImage()
 
 void ImagePattern::ResetImageAndAlt()
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsInDestroying() && frameNode->IsOnMainTree()) {
+        isNeedReset_ = true;
+        return;
+    }
     image_ = nullptr;
     loadingCtx_ = nullptr;
     srcRect_.Reset();
@@ -2406,8 +2420,6 @@ void ImagePattern::ResetImageAndAlt()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);

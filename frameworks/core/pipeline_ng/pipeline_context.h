@@ -1081,6 +1081,8 @@ public:
     void SetHostParentOffsetToWindow(const Offset& offset);
 
     RefPtr<Kit::UIContext> GetUIContext();
+    void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
+    void FlushPendingDeleteCustomNode();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1213,6 +1215,7 @@ private:
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
     std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
+    std::stack<RefPtr<CustomNode>> pendingDeleteCustomNode_;
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;

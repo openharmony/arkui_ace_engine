@@ -31,6 +31,7 @@ std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 constexpr float REMOVE_CLIP_SIZE = 10000.0f;
 constexpr double HALF = 0.5;
 constexpr double PARENT_PAGE_OFFSET = 0.2;
+constexpr int32_t RELEASE_JSCHILD_DELAY_TIME = 50;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
@@ -818,6 +819,35 @@ void PagePattern::ResetPageTransitionEffect()
     MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }
 
+void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+
+    if (transactionType != PageTransitionType::EXIT_POP) {
+        return;
+    }
+
+    auto effect = FindPageTransitionEffect(transactionType);
+    if (effect && effect->GetUserCallback()) {
+        return;
+    }
+
+    if (page->HasSkipNode()) {
+        return;
+    }
+
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakPtr<FrameNode>(page)]() {
+            auto page = weak.Upgrade();
+            CHECK_NULL_VOID(page);
+            page->SetDestroying();
+        }, TaskExecutor::TaskType::UI, RELEASE_JSCHILD_DELAY_TIME, "ArkUIRemoveJsChild");
+}
+
 void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType type)
 {
     if (animationId_ != animationId) {
@@ -834,6 +864,10 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewHide();
+    }
+
+    if (outPage->IsInDestroying()) {
+        outPage->SetDestroying(false, false);
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);

@@ -399,6 +399,22 @@ void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
     }
 }
 
+bool NavDestinationGroupNode::CheckTransitionPop(const int32_t animationId)
+{
+    if (IsCacheNode()) {
+        return false;
+    }
+    if (animationId_ != animationId) {
+        return false;
+    }
+    if (GetTransitionType() != PageTransitionType::EXIT_POP) {
+        return false;
+    }
+    auto preNavDesPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(preNavDesPattern, false);
+    return true;
+}
+
 bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId)
 {
     if (animationId_ != animationId) {
