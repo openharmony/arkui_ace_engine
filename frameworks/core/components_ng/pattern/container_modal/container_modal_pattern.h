@@ -33,9 +33,7 @@ public:
     ContainerModalPattern() = default;
     ~ContainerModalPattern() override = default;
 
-
-
-    void OnColorConfigurationUpdate() override;
+     void OnColorConfigurationUpdate() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
