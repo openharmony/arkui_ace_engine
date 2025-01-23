@@ -50,12 +50,14 @@ public:
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
-    int32_t GetMarkIndex() override {
+    int32_t GetMarkIndex() override
+    {
         return range_.startIdx;
     }
 
-    std::pair<int32_t, int32_t> GetRange() const override {
-        return {range_.startIdx, range_.endIdx};
+    std::pair<int32_t, int32_t> GetRange() const override
+    {
+        return { range_.startIdx, range_.endIdx };
     }
 
 private:
@@ -79,10 +81,8 @@ private:
 
         std::string ToString() const
         {
-            return "LayoutRange { startLine: " + std::to_string(startLine) +
-                   ", offset: " + std::to_string(offset) +
-                   ", endLine: " + std::to_string(endLine) +
-                   ", startIdx: " + std::to_string(startIdx) +
+            return "LayoutRange { startLine: " + std::to_string(startLine) + ", offset: " + std::to_string(offset) +
+                   ", endLine: " + std::to_string(endLine) + ", startIdx: " + std::to_string(startIdx) +
                    ", endIdx: " + std::to_string(endIdx) + " }";
         }
 

@@ -111,7 +111,7 @@ void ScrollWindowAdapter::UpdateSlidingOffset(float delta)
         bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);
         if (res && updater_) {
             auto range = fillAlgorithm_->GetRange();
-            updater_(range.first, (void*)range.second);
+            updater_(range.first, nullptr); // placeholder
         }
         return;
     }
