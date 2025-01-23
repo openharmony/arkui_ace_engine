@@ -272,6 +272,7 @@ struct DialogProperties {
     // These attributes is used for CustomDialog.
     RefPtr<AceType> customComponent;         // Used for CustomDialog in declarative.
     std::function<void(bool)> onStatusChanged; // Called when dialog appear or disappear.
+    bool isUserCreatedDialog = false; // used for user create dialog for navdestination lifecycle
 
     // These attributes is used for ActionSheet.
     std::vector<ActionSheetInfo> sheetsInfo;
@@ -304,6 +305,7 @@ struct PromptDialogAttr {
     bool showInSubWindow = false;
     bool isModal = false;
     bool enableHoverMode = false;
+    bool isUserCreatedDialog = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::function<void(const int32_t& info, const int32_t& instanceId)> customOnWillDismiss;
