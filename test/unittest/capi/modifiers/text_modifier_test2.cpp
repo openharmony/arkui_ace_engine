@@ -21,6 +21,8 @@
 #include "generated/type_helpers.h"
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "generated/type_helpers.h"
@@ -94,7 +96,8 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestDefaultValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE) << "Default value for attribute 'BindSelectionMenu'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE) <<
+        "Default value for attribute 'BindSelectionMenu'";
 }
 
 /*
@@ -102,6 +105,19 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
+using OneTestStep = std::tuple<Ark_TextSpanType, CustomNodeBuilder, Ark_TextResponseType>;
+static const std::vector<OneTestStep> testPlan = {
+    {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
+    {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
+    {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
+    {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+    {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+    {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+    {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+    {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+    {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+};
+
 HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
@@ -111,20 +127,6 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
     int callsCount(0);
     CustomNodeBuilderTestHelper<TextModifierTest2> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-
-    using OneTestStep = std::tuple<Ark_TextSpanType, CustomNodeBuilder, Ark_TextResponseType>;
-
-    static const std::vector<OneTestStep> testPlan = {
-        {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
-        {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
-        {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
-        {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
-        {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
-        {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
-        {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
-        {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
-        {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
-    };
 
     std::unique_ptr<JsonValue> fullJson;
     std::string resultValue;
@@ -136,10 +138,20 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
         .menuType = Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU};
     auto options2 = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions2);
 
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SelectOverlayInfo selectInfo;
+
     for (auto [spanType, content, responseType]: testPlan) {
         modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options1);
+        pattern->CopySelectionMenuParams(selectInfo);
+        ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
+        selectInfo.menuInfo.menuBuilder();
         EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
         modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options2);
+        pattern->CopySelectionMenuParams(selectInfo);
+        ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
+        selectInfo.menuInfo.menuBuilder();
         EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
         fullJson = GetJsonValue(node_);
         resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);

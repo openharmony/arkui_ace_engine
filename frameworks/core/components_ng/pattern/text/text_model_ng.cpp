@@ -1390,6 +1390,8 @@ void TextModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType
     auto pattern = frameNode->GetPattern<TextPattern>();
     if (pattern) {
         pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
+        pattern->SetSelectedType(spanType);
+        pattern->SetTextResponseType(responseType);
     }
 }
 } // namespace OHOS::Ace::NG
