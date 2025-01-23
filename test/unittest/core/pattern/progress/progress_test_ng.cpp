@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@ namespace {
 DirtySwapConfig config;
 ProgressModelNG progressModel;
 RefPtr<ProgressTheme> progressTheme;
+RefPtr<ProgressTheme> progressThemeWrapper;
 RefPtr<MockThemeManager> themeManager;
 
 void InitCanvas(Testing::MockCanvas& canvas)
@@ -56,6 +57,14 @@ void ProgressTestNg::SetUpTestSuite()
     progressTheme->trackSelectedColor_ = FRONT_COLOR;
     progressTheme->scaleNumber_ = SCALE_COUNT;
     progressTheme->scaleWidth_ = TEST_PROGRESS_SCALE_WIDTH;
+    progressThemeWrapper = ProgressThemeWrapper::WrapperBuilder().Build(themeConstants);
+    progressThemeWrapper->trackThickness_ = TEST_PROGRESS_THICKNESS;
+    progressThemeWrapper->scaleLength_ = TEST_PROGRESS_STROKE_WIDTH;
+    progressThemeWrapper->ringDiameter_ = TEST_PROGRESS_DEFAULT_DIAMETER;
+    progressThemeWrapper->trackBgColor_ = BG_COLOR;
+    progressThemeWrapper->trackSelectedColor_ = FRONT_COLOR;
+    progressThemeWrapper->scaleNumber_ = SCALE_COUNT;
+    progressThemeWrapper->scaleWidth_ = TEST_PROGRESS_SCALE_WIDTH;
 }
 
 void ProgressTestNg::TearDownTestSuite()
@@ -69,6 +78,7 @@ void ProgressTestNg::SetUp()
 {
     MockContainer::SetUp();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(progressThemeWrapper));
 }
 
 void ProgressTestNg::TearDown()
@@ -118,7 +128,7 @@ RefPtr<ProgressModifier> ProgressTestNg::CreateProgressModifier()
     CHECK_NULL_RETURN(progressPattern, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, nullptr);
-    progressPattern->progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
+    progressPattern->progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     return progressPattern->progressModifier_;
 }
 
@@ -186,6 +196,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
      * @tc.expected: step5. layout result equals expected result.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(nullptr));
     auto progressPattern = frameNode_->GetPattern();
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
@@ -980,6 +991,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm003, TestSize.Level1)
      * @tc.expected: step3. Check the result of MeasureContent.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(nullptr));
     auto layoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->GetType(), PROGRESS_TYPE_MOON);
@@ -1008,6 +1020,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm004, TestSize.Level1)
      * @tc.expected: step2. Check the progressLayoutAlgorithm created successfully.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(nullptr));
     LayoutWrapperNode layoutWrapper(frameNode_, nullptr, layoutProperty_);
     auto layoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
 
@@ -1160,7 +1173,7 @@ HWTEST_F(ProgressTestNg, ProgressIsRightToLeftTest001, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
     EXPECT_FALSE(frameNode == nullptr);
-    pattern->progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
+    pattern->progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     auto modifier = pattern->progressModifier_;
     EXPECT_FALSE(modifier == nullptr);
     /**

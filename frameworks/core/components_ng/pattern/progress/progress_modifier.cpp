@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,8 @@ constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr float RING_SHADOW_OPACITY = 0.4f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 } // namespace
-ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAnimatableProperty_)
+ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
+    const ProgressAnimatableProperty& progressAnimatableProperty_)
     : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.strokeWidth)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.color))),
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
@@ -74,7 +75,8 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       isRightToLeft_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressUpdate_(AceType::MakeRefPtr<PropertyBool>(false)),
-      capsuleBorderRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0f))
+      capsuleBorderRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0f)),
+      host_(host)
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -105,7 +107,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
 
     pressBlendColor_ = theme->GetClickEffect();
@@ -968,7 +970,7 @@ std::vector<GradientColor> ProgressModifier::GetRingProgressGradientColors() con
     if (gradientColors.empty()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, gradientColors);
-        auto theme = pipeline->GetTheme<ProgressTheme>();
+        auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
         CHECK_NULL_RETURN(theme, gradientColors);
         GradientColor endColor;
         GradientColor beginColor;
@@ -2005,5 +2007,11 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
     }
     canvas.DrawPath(path);
     canvas.DetachBrush();
+}
+
+uint32_t ProgressModifier::GetThemeScopeId() const
+{
+    auto host = host_.Upgrade();
+    return host ? host->GetThemeScopeId() : 0;
 }
 } // namespace OHOS::Ace::NG
