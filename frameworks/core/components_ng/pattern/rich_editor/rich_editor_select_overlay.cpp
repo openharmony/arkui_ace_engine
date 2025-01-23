@@ -344,6 +344,19 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         };
     }
 }
+
+void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectInfo)
+{
+    BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(selectInfo);
+    selectInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_RETURN(overlay, true);
+        auto pattern = overlay->GetPattern<RichEditorPattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        return !pattern->IsSelectedTypeChange();
+    };
+}
+
 void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
     TextSpanType selectType, TextResponseType responseType)
 {
@@ -380,7 +393,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             HandleOnTranslate();
             return;
         case OptionMenuActionId::SHARE:
-            HandleOnShare();
+            pattern->HandleOnShare();
             break;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
@@ -692,13 +705,6 @@ void RichEditorSelectOverlay::OnHandleMarkInfoChange(
     CHECK_NULL_VOID(pattern);
     info->handlerColor = pattern->caretColor_;
     manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
-    if ((flag & DIRTY_DOUBLE_HANDLE) != 0) {
-        if (info->menuInfo.showShare != (IsSupportMenuShare() && AllowShare() && IsNeedMenuShare())) {
-            info->menuInfo.showShare = !info->menuInfo.showShare;
-            manager->NotifyUpdateToolBar(true);
-        }
-    }
 }
 
 void RichEditorSelectOverlay::UpdateHandleColor()

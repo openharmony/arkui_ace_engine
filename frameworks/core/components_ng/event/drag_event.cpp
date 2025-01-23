@@ -85,6 +85,10 @@ DragEventActuator::DragEventActuator(
 
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+    preDragStatusPressRecognizer_ =
+        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_STATUS, fingers_, false, true);
+    preDragStatusPressRecognizer_->SetGestureInfo(
+        MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, true);
     longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     previewLongPressRecognizer_ =
@@ -453,9 +457,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->RemoveDeadlineTimer();
-        RefPtr<TaskExecutor> taskExecutor = pipelineContext->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIPreDragLongPressTimer");
         auto actuator = weak.Upgrade();
         if (!actuator) {
             DragEventActuator::ResetDragStatus();
@@ -616,7 +617,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->SetDragDampStartPointInfo(info.GetGlobalPoint(), info.GetPointerId());
         }
     };
-    auto preDragStatusTask = [weak = WeakClaim(this)]() {
+    auto preDragStatusCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 350ms.");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -628,6 +629,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
         }
     };
+    preDragStatusPressRecognizer_->SetOnAction(preDragStatusCallback);
     longPressRecognizer_->SetOnAction(longPressUpdateValue);
     auto longPressUpdate = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                 GestureEvent& info) {
@@ -780,17 +782,16 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     previewLongPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    preDragStatusPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    preDragStatusPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    preDragStatusPressRecognizer_->SetGestureHub(gestureEventHub_);
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetOnActionCancel(actionCancel);
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     SequencedRecognizer_->SetIsEventHandoverNeeded(true);
     result.emplace_back(SequencedRecognizer_);
     result.emplace_back(previewLongPressRecognizer_);
-    RefPtr<TaskExecutor> taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIPreDragLongPressTimer");
-    taskExecutor->PostDelayedTask(preDragStatusTask, TaskExecutor::TaskType::UI,
-        PREVIEW_LONG_PRESS_STATUS, "ArkUIPreDragLongPressTimer");
+    result.emplace_back(preDragStatusPressRecognizer_);
 }
 
 void DragEventActuator::ResetDragStatus()
@@ -1645,6 +1646,10 @@ void DragEventActuator::CopyDragEvent(const RefPtr<DragEventActuator>& dragEvent
     panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
     longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+    preDragStatusPressRecognizer_ =
+        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_STATUS, fingers_, false, true);
+    preDragStatusPressRecognizer_->SetGestureInfo(
+        MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     previewLongPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
     previewLongPressRecognizer_->SetGestureInfo(

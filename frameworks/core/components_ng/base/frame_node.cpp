@@ -509,11 +509,13 @@ FrameNode::~FrameNode()
 
 void FrameNode::CreateEventHubInner()
 {
-    if (eventHub_) {
+    if (eventHub_ || !pattern_) {
         return;
     }
     eventHub_ = pattern_->CreateEventHub();
-    eventHub_->AttachHost(WeakClaim(this));
+    if (eventHub_) {
+        eventHub_->AttachHost(WeakClaim(this));
+    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -1232,6 +1234,13 @@ void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConf
             json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
         }
     }
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty) {
+        auto accessibilityText = accessibilityProperty->GetAccessibilityText();
+        if (!accessibilityText.empty()) {
+            json->Put("accessilityContent", accessibilityText.c_str());
+        }
+    }
 }
 
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -1602,6 +1611,7 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
     InitLastArea();
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
@@ -1682,6 +1692,7 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
@@ -1691,6 +1702,7 @@ void FrameNode::AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& cal
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->AddInnerOnSizeChanged(id, std::move(callback));
 }
 
@@ -1700,6 +1712,7 @@ void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
 }
 
@@ -2117,12 +2130,14 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
-        ArkUIPerfMonitor::GetInstance().RecordRenderNode();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto id = pipeline->GetInstanceId();
+        ArkUIPerfMonitor::GetPerfMonitor(id)->RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
         auto eventHub = self->GetEventHubOnly<NG::EventHub>();
         if (self->GetInspectorId() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
-            auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
         }
@@ -4232,7 +4247,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()
                                                        : "NA");
     }
-    ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto id = pipeline->GetInstanceId();
+    ArkUIPerfMonitor::GetPerfMonitor(id)->RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();

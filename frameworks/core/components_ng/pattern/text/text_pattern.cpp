@@ -3148,8 +3148,8 @@ std::string TextPattern::GetFontInJson() const
 void TextPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
 {
     Pattern::ToTreeJson(json, config);
-    if (!json->Contains(TreeKey::CONTENT) && !textForDisplay_.empty()) {
-        json->Put(TreeKey::CONTENT, textForDisplay_.c_str());
+    if (!textForDisplay_.empty()) {
+        json->Put(TreeKey::CONTENT, UtfUtils::Str16DebugToStr8(textForDisplay_).c_str());
     }
 }
 
@@ -4562,13 +4562,15 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
     return resultObject;
 }
 
-void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
+void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
 {
     AllocStyledString();
     isSpanStringMode_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CloseSelectOverlay();
+    if (closeSelectOverlay) {
+        CloseSelectOverlay();
+    }
     auto length = styledString_->GetLength();
     styledString_->RemoveCustomSpan();
     styledString_->ReplaceSpanString(0, length, value);

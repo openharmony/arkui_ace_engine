@@ -31,6 +31,7 @@ struct LayoutConstraintT;
 namespace OHOS::Ace::Kit {
 
 class Pattern;
+class UIContext;
 class FrameNode : public AceType {
     DECLARE_ACE_TYPE(FrameNode, AceType);
 
@@ -47,6 +48,8 @@ public:
     virtual RefPtr<Pattern> GetPattern() = 0;
     virtual void MeasureChildren() = 0;
     virtual void LayoutChildren() = 0;
+
+    virtual RefPtr<UIContext> GetUIContext() const = 0;
 };
 } // namespace OHOS::Ace::Kit
 

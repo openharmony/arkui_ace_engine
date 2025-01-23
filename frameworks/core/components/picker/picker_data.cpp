@@ -18,6 +18,10 @@
 #include "base/i18n/localization.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr uint32_t MAX_YEAR = 5000;
+constexpr uint32_t MAX_MONTH = 12;
+}
 
 PickerDate PickerDate::Current()
 {
@@ -151,6 +155,95 @@ void PickerDate::FromDays(uint32_t days)
     }
 
     day_ = days + 1; // days is index start form 0 and day start form 1.
+}
+
+bool comparePickerDateRange(
+    const std::pair<PickerDate, PickerDate>& pair, const std::pair<PickerDate, PickerDate>& other)
+{
+    if (pair.first == other.first) {
+        return pair.second < other.second;
+    }
+    return pair.first < other.first;
+}
+
+void PickerDate::SortAndMergeDisabledDateRange(std::vector<std::pair<PickerDate, PickerDate>>& disableDateRange)
+{
+    if (disableDateRange.empty()) {
+        return;
+    }
+    std::sort(disableDateRange.begin(), disableDateRange.end(), comparePickerDateRange);
+    std::vector<std::pair<PickerDate, PickerDate>> mergedRange;
+    for (const auto& range : disableDateRange) {
+        if (!mergedRange.empty() && (range.first.ToDays() - 1) <= mergedRange.back().second.ToDays()) {
+            mergedRange.back().second =
+                mergedRange.back().second < range.second ? range.second : mergedRange.back().second;
+        } else {
+            mergedRange.push_back(range);
+        }
+    }
+    disableDateRange.clear();
+    disableDateRange = mergedRange;
+}
+
+PickerDate PickerDate::GetAvailableNextDay(const PickerDate& date, const PickerDate& start, const PickerDate& end,
+    std::vector<std::pair<PickerDate, PickerDate>>& disableDateRange, bool isAdd)
+{
+    PickerDate retDate = PickerDate(0, 0, 0);
+    if ((end.GetYear() != 0 && end < date) || (start.GetYear() != 0 && date < start)) {
+        return retDate;
+    }
+    if (isAdd) {
+        for (const auto& range : disableDateRange) {
+            if (range.first <= date && date <= range.second) {
+                return end.GetYear() != 0 && end < range.second ? retDate : NextDay(range.second);
+            }
+        }
+        return date;
+    } else {
+        for (const auto& range : disableDateRange) {
+            if (range.first <= date && date <= range.second) {
+                return start.GetYear() != 0 && range.first < start ? retDate : PrevDay(range.first);
+            }
+        }
+        return date;
+    }
+}
+
+PickerDate PickerDate::PrevDay(const PickerDate& dateObj)
+{
+    PickerDate date = dateObj;
+    if (date.GetDay() > 1) {
+        date.SetDay(date.GetDay() - 1);
+        return date;
+    }
+    if (date.GetMonth() == 1) {
+        date.SetMonth(MAX_MONTH);
+        auto getYear = date.GetYear();
+        date.SetYear(date.GetYear() == 1 ? MAX_YEAR : (getYear > 0 ? getYear - 1 : 0));
+    } else {
+        auto getMonth = date.GetMonth();
+        date.SetMonth(getMonth > 0 ? getMonth - 1 : 0);
+    }
+    date.SetDay(PickerDate::GetMaxDay(date.GetYear(), date.GetMonth()));
+    return date;
+}
+
+PickerDate PickerDate::NextDay(const PickerDate& dateObj)
+{
+    PickerDate date = dateObj;
+    auto maxDay = PickerDate::GetMaxDay(date.GetYear(), date.GetMonth());
+    if (maxDay > date.GetDay()) {
+        date.SetDay(date.GetDay() + 1);
+        return date;
+    }
+    date.SetDay(1);
+    if (date.GetMonth() < MAX_MONTH) {
+        date.SetMonth(date.GetMonth() + 1);
+        return date;
+    }
+    date.SetMonth(1);
+    date.SetYear(date.GetYear() == MAX_YEAR ? 1 : date.GetYear() + 1);
+    return date;
 }
 
 PickerTime PickerTime::Current()

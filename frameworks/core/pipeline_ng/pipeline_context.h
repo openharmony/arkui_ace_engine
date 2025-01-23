@@ -61,6 +61,11 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
 
+namespace OHOS::Ace::Kit {
+class UIContext;
+class UIContextImpl;
+}
+
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
@@ -1075,6 +1080,8 @@ public:
 
     void SetHostParentOffsetToWindow(const Offset& offset);
 
+    RefPtr<Kit::UIContext> GetUIContext();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1357,6 +1364,8 @@ private:
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
+
+    RefPtr<Kit::UIContextImpl> uiContextImpl_;
 
     friend class ScopedLayout;
     friend class FormGestureManager;

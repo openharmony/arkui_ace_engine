@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent001, TestSize.Level1)
      * @tc.cases: Call HandleTouchEvent with empty TouchLocationInfo
      * @tc.expected: isTouchDown_ is still false when touch
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
 
     pattern_->HandleTouchEvent(TouchEventInfo("touch"));
@@ -88,7 +90,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent002, TestSize.Level1)
      * @tc.cases: Call HandleTouchEvent with invalid TouchType::UNKNOWN
      * @tc.expected: isTouchDown_ is still false when touch
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
 
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::UNKNOWN, Offset()));
@@ -106,7 +110,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
      * @tc.steps: step1. Swipe to item(index:1), set animation to true
      * @tc.expected: When touch up, will trigger UpdateAnimationProperty and stop animation
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     ShowNext();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
@@ -141,7 +147,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->fadeAnimationIsRunning_ = true;
 
     /**
@@ -168,7 +176,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->springAnimationIsRunning_ = true;
 
     /**
@@ -330,7 +340,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
      * @tc.cases: LoopIndex is middle item(index:1)
      */
     ChangeIndex(1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_));
 
@@ -344,7 +354,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
      * @tc.cases: LoopIndex is last item(index:3)
      */
     ChangeIndex(3);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(CurrentIndex(3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr));
 
@@ -409,7 +419,9 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep005, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -484,7 +496,9 @@ HWTEST_F(SwiperCommonTestNg, Distributed001, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
 
     /**
@@ -645,7 +659,9 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
     /**
      * @tc.steps: step1. set axis default
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
@@ -717,7 +733,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      * @tc.expected: Verify ignoreBlank on the homepage is effective
      */
     ChangeIndex(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
     EXPECT_EQ(GetChildX(frameNode_, 1), itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), itemWidth * 2);
@@ -728,7 +744,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      * @tc.expected: Verify ignoreBlank is not effective
      */
     ChangeIndex(1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN);
     EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth);
@@ -740,7 +756,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      * @tc.expected: Verify ignoreBlank on the endPage is effective
      */
     ChangeIndex(2);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + NEXT_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + NEXT_MARGIN);
     EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + NEXT_MARGIN + itemWidth);
@@ -771,7 +787,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest002, TestSize.Level1)
      * @tc.expected: loop is true, ignoreBlank on the endPage is not effective
      */
     ChangeIndex(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN);
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + itemWidth * 1);
@@ -802,7 +818,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
      * @tc.steps: step2. check first item position
      * @tc.expected: current index is 0, prevMargin and itemspace is both 0.
      */
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);
 }
 
@@ -1852,7 +1868,9 @@ HWTEST_F(SwiperCommonTestNg, SwiperIndicatorAccessibilityProperty001, TestSize.L
      * @tc.steps: step1. indicator type is DOT, indicator use mode is INNER
      * @tc.expected: check function.
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     ASSERT_NE(accessibilityProperty_, nullptr);
     auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);

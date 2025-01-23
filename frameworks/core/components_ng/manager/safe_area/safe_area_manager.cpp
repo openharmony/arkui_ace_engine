@@ -94,8 +94,7 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
 {
     uint32_t bottom;
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    if (systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+    if (container && systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
         bottom = systemSafeArea_.bottom_.start;
         ACE_SCOPED_TRACE("calc keyboardRect use systemSafeArea_.bottom_");
     } else {

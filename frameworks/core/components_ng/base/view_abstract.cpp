@@ -5289,6 +5289,16 @@ void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const 
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
 }
+
+ImageResizableSlice ViewAbstract::GetBackgroundImageResizableSlice(FrameNode* frameNode)
+{
+    ImageResizableSlice slice;
+    CHECK_NULL_RETURN(frameNode, slice);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, slice);
+    return target->GetBackgroundImageResizableSliceValue(slice);
+}
+
 void ViewAbstract::SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc&& touchInterceptFunc)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

@@ -1584,17 +1584,17 @@ bool TextFieldPattern::HandleOnEscape()
         if (!IsSelected() && HasFocus()) {
             StartTwinkling();
         }
-        return true;
+        return false;
     }
     if (GetIsPreviewText()) {
         ResetPreviewTextState();
-        return true;
+        return false;
     }
     if (HasFocus()) {
         StopTwinkling();
         TextFieldLostFocusToViewRoot();
     }
-    return true;
+    return false;
 }
 
 bool TextFieldPattern::HandleOnTab(bool backward)
@@ -1739,7 +1739,7 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         clipboard_->SetData(UtfUtils::Str16DebugToStr8(value), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     }
 
-    if (isUsingExternalKeyboard || IsUsingMouse()) {
+    if (isUsingExternalKeyboard || selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay(true);
     } else {
         selectOverlay_->HideMenu();
@@ -4596,7 +4596,6 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
         .isTextPreviewSupported = hasSupportedPreviewText_,
         .immersiveMode = static_cast<int32_t>(keyboardAppearance_)};
-    TAG_LOGI(ACE_TEXT_FIELD, "GetMiscTextConfig, immersiveMode:%{public}i", keyboardAppearance_);
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -5055,7 +5054,7 @@ void TextFieldPattern::AdjustFloatingCaretInfo(const Offset& localOffset,
     bool FloatCursorOnOriginLeft = floatingCaretInfo.rect.GetX() < caretInfo.rect.GetX();
     bool FloatCursorNotInText = ((pos == TouchPosition::LEFT && FloatCursorOnOriginLeft) ||
         (pos == TouchPosition::RIGHT && !FloatCursorOnOriginLeft));
-    SetShowOriginCursor(reachBoundary || (distanceMoreThenTenVp && FloatCursorNotInText));
+    SetShowOriginCursor((reachBoundary || distanceMoreThenTenVp) && FloatCursorNotInText);
     SetFloatingCursorVisible(true);
 }
 
@@ -10339,16 +10338,6 @@ void TextFieldPattern::AddInputCommand(const InputCommandInfo& inputCommandInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!isEdit_ && (inputCommandInfo.reason != InputReason::CANCEL_BUTTON)) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't input", host->GetId());
-        return;
-    }
-    if (inputCommandInfo.reason == InputReason::IME && IsDragging()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "textfield %{public}d NOT allow input when dragging", host->GetId());
-        return;
-    }
-
     inputOperations_.emplace(InputOperation::INPUT);
     inputCommands_.emplace(inputCommandInfo);
     CloseSelectOverlay(true);

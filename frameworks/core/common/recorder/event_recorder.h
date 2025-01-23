@@ -130,8 +130,8 @@ public:
     void HandleJavascriptItems(std::optional<WebJsItem>& scriptItems);
     bool IsMessageValid(const std::string& webCategory, const std::string& identifier);
 
-    void OnPageShow(const std::string& pageUrl, const std::string& param);
-    void OnPageHide(const std::string& pageUrl, const int64_t duration);
+    void OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name = "");
+    void OnPageHide(const std::string& pageUrl, const int64_t duration, const std::string& name = "");
     void OnClick(EventParamsBuilder&& builder);
     void OnChange(EventParamsBuilder&& builder);
     void OnEvent(EventParamsBuilder&& builder);

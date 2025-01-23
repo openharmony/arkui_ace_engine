@@ -218,8 +218,14 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithString(ArkUIRuntimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
     std::string content;
-    if (ArkTSUtils::ParseJsString(vm, valueArg, content)) {
-        value = content.c_str();
+    if (!valueArg->IsNull() && valueArg->IsString(vm)) {
+        if (ArkTSUtils::ParseJsString(vm, valueArg, content)) {
+            value = content.c_str();
+        }
+    } else if (!valueArg->IsNull() && valueArg->IsObject(vm)) {
+        std::string valueResult;
+        ArkTSUtils::ParseJsString(vm, valueArg, valueResult);
+        value = valueResult.c_str();
     }
 
     auto nodeModifiers = GetArkUINodeModifiers();

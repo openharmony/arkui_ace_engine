@@ -477,6 +477,32 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
     }
 }
 
+void registerGestureEventExt(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
+    GestrueFunction* gestrueFunction, void* gestureData)
+{
+    CHECK_NULL_VOID(gestrueFunction);
+    Gesture* gestureRef = reinterpret_cast<Gesture*>(gesture);
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_ACCEPT) {
+        auto onActionAccept = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->acceptFunction(gestureData);
+        };
+        gestureRef->SetOnActionId(onActionAccept);
+        gestureRef->SetOnActionStartId(onActionAccept);
+    }
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_UPDATE) {
+        auto onActionUpdate = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->updateFunction(gestureData);
+        };
+        gestureRef->SetOnActionUpdateId(onActionUpdate);
+    }
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_END) {
+        auto onActionEnd = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->endFunction(gestureData);
+        };
+        gestureRef->SetOnActionEndId(onActionEnd);
+    }
+}
+
 void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -834,6 +860,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         .setArkUIGestureRecognizerDisposeNotify = setArkUIGestureRecognizerDisposeNotify,
         .addGestureToGestureGroupWithRefCountDecrease = addGestureToGestureGroupWithRefCountDecrease,
         .addGestureToNodeWithRefCountDecrease = addGestureToNodeWithRefCountDecrease,
+        .registerGestureEventExt = registerGestureEventExt,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

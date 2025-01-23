@@ -439,6 +439,4 @@ HWTEST_F(NavigationManagerTestNg, ButtonsRectChangeListener001, TestSize.Level1)
     navigationManager->RemoveButtonsRectChangeListener(LISTENER_ID1);
     ASSERT_TRUE(navigationManager->buttonsRectChangeListeners_.empty());
 }
-
-
 } // namespace OHOS::Ace::NG
