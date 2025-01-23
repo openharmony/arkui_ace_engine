@@ -110,8 +110,9 @@ Scrollable::~Scrollable()
 {
     // If animation still runs, force stop it.
     if (!IsStopped()) {
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        AceAsyncTraceEnd(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+        PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+        AceAsyncTraceEndCommercial(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") +
+            nodeTag_).c_str());
     }
     StopFrictionAnimation();
     StopSpringAnimation();
@@ -1138,7 +1139,7 @@ void Scrollable::ProcessListSnapMotion(double position)
     }
     if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
         // trace stop at OnScrollStop
-        AceAsyncTraceBegin(
+        AceAsyncTraceBeginCommercial(
             nodeId_, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
     }
     currentPos_ = position;
@@ -1347,7 +1348,7 @@ void Scrollable::ProcessSpringMotion(double position)
     if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
         // trace stop at OnScrollStop
         if (!isFadingAway_) {
-            AceAsyncTraceBegin(
+            AceAsyncTraceBeginCommercial(
                 nodeId_, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
         } else {
             ACE_SCOPED_TRACE("Spring to same position");
@@ -1394,7 +1395,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
         position, currentVelocity_, needScrollSnapChange_);
     if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
         // trace stop at OnScrollStop
-        AceAsyncTraceBegin(
+        AceAsyncTraceBeginCommercial(
             nodeId_, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
     }
     // UpdateScrollPosition return false, means reach to scroll limit.

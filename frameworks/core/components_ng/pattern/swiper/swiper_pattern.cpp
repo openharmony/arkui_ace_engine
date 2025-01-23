@@ -3088,7 +3088,8 @@ void SwiperPattern::HandleTouchUp()
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     if (!hasTabsAncestor_) {
-        PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_SCROLL, PerfActionType::FIRST_MOVE, "");
+        PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_SWIPER_SCROLL,
+            PerfActionType::FIRST_MOVE, "");
     } else {
         AceAsyncTraceBeginCommercial(0, APP_TABS_SCROLL);
     }
@@ -3178,7 +3179,7 @@ void SwiperPattern::TriggerAddTabBarEvent() const
 void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 {
     if (!hasTabsAncestor_) {
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
+        PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_SCROLL, false);
     } else {
         AceAsyncTraceEndCommercial(0, APP_TABS_SCROLL);
     }
@@ -3575,7 +3576,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         }
 #endif
         if (!swiper->hasTabsAncestor_) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
+            PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_FLING, true);
         } else {
             AceAsyncTraceEndCommercial(0, APP_TABS_FLING);
         }
@@ -3602,7 +3603,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         }
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
-            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+            PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_SWIPER_FLING,
+                PerfActionType::LAST_UP, "");
         } else {
             AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
         }
@@ -3971,7 +3973,7 @@ void SwiperPattern::OnSpringAnimationFinish()
     if (!springAnimationIsRunning_) {
         return;
     }
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     AceAsyncTraceEndCommercial(0, TRAILING_ANIMATION);
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f, id: %{public}d",
         currentIndexOffset_, swiperId_);
@@ -4163,7 +4165,8 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), delta]() {
-            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+            PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING,
+                PerfActionType::FIRST_MOVE, "");
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f, id:%{public}d",

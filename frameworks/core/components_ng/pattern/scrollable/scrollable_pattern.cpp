@@ -75,7 +75,7 @@ ScrollablePattern::~ScrollablePattern()
             auto nodeTag = scrollable->GetNodeTag();
             AceAsyncTraceEnd(nodeId,
                 (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
-            AceAsyncTraceEnd(
+            AceAsyncTraceEndCommercial(
                 nodeId, (TRAILING_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
         }
     }
@@ -1399,7 +1399,7 @@ void ScrollablePattern::AnimateTo(
     if (!GetIsDragging()) {
         FireOnScrollStart();
     }
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -1417,7 +1417,7 @@ void ScrollablePattern::OnAnimateFinish()
     }
     if (animateToTraceFlag_) {
         animateToTraceFlag_ = false;
-        AceAsyncTraceEnd(host->GetAccessibilityId(),
+        AceAsyncTraceEndCommercial(host->GetAccessibilityId(),
             (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
                 .c_str());
     }
@@ -1509,7 +1509,8 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
     if (NearEqual(offset, lastPosition_, 1.0) && !animateToTraceFlag_) {
         animateToTraceFlag_ = true;
         auto id = host->GetAccessibilityId();
-        AceAsyncTraceBegin(id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") + host->GetTag()).c_str());
+        AceAsyncTraceBeginCommercial(id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") +
+            host->GetTag()).c_str());
     }
     auto delta = useTotalOffset_ ? GetTotalOffset() - offset : lastPosition_ - offset;
     lastVsyncTime_ = currentVsync;
@@ -2697,7 +2698,7 @@ void ScrollablePattern::FireOnScrollStart()
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStart, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -2898,8 +2899,8 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
     if (pipeline) {
         pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
     }
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-    AceAsyncTraceEnd(host->GetAccessibilityId(),
+    PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+    AceAsyncTraceEndCommercial(host->GetAccessibilityId(),
         (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
     SetScrollAbort(false);
