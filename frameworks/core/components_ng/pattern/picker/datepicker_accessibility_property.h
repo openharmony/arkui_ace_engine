@@ -31,6 +31,10 @@ public:
     std::string GetText() const override;
 
 private:
+    std::string GetShowTimePickerText() const;
+    std::string GetColumnsText(const RefPtr<FrameNode>& frameNode, bool isMonthDaysDateNode) const;
+    void GetMinuteText(const RefPtr<FrameNode>& frameNode, std::string& result) const;
+    void GetSecondText(const RefPtr<FrameNode>& frameNode, std::string& result) const;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

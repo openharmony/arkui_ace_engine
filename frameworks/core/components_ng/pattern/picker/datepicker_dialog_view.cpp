@@ -949,7 +949,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     datePickerPattern->SetShowCount(showCount);
-
+    datePickerPattern->SetIsShowInDialog(true);
     if (showTime) {
         CreateSingleDateNode(dateNode, showCount);
     } else {
