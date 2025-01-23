@@ -59,7 +59,7 @@ RefPtr<AceType> NativeView::CreateUI()
             ContainerScope scope(self->instanceId_);
             self->cjView_->OnAppear();
         },
-        .renderFunc = [weakThis]() -> RefPtr<AceType> {
+        .renderFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
             auto self = weakThis.promote();
             CHECK_NULL_RETURN(self, nullptr);
             ContainerScope scope(self->instanceId_);
@@ -96,7 +96,7 @@ RefPtr<AceType> NativeView::CreateUI()
             ContainerScope scope(self->instanceId_);
             self->cjView_->Reload(deep);
         },
-        .completeReloadFunc = [weakThis]() -> RefPtr<AceType> {
+        .completeReloadFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
             auto view = weakThis.promote();
             CHECK_NULL_RETURN(view, nullptr);
             ContainerScope scope(view->instanceId_);

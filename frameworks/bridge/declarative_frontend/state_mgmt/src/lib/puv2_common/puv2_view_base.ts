@@ -27,6 +27,12 @@
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
+enum PrebuildPhase {
+  None = 0,
+  BuildPrebuildCmd = 1,
+  ExecutePrebuildCmd = 2,
+  PrebuildDone = 3,
+}
 
 // NativeView
 // implemented in C++  for release
@@ -82,6 +88,10 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // the key is the elementId of the Component/Element that's the result of this function
   protected updateFuncByElmtId = new UpdateFuncsByElmtId();
 
+  protected static prebuildFuncQueues: Map<number, Array<PrebuildFunc>> = new Map();
+
+  protected static propertyChangedFuncQueues: Map<number, Array<PrebuildFunc>> = new Map();
+
   protected extraInfo_: ExtraInfo = undefined;
 
   // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
@@ -89,6 +99,10 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
+
+  protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
+  protected isPrebuilding_: boolean = false;
+  protected static prebuildingElmtId_: number = -1;
 
   protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
 
@@ -838,5 +852,63 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
         recyleOrReuse ? child.aboutToRecycleInternal() : child.aboutToReuseInternal();
       } // if child
     });
+  }
+
+  public processPropertyChangedFuncQueue(): void {
+    if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+      return;
+    }
+    let propertyChangedFuncQueue = PUV2ViewBase.propertyChangedFuncQueues.get(this.id__());
+    if (!propertyChangedFuncQueue) {
+      PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
+      return;
+    }
+    for (const propertyChangedFunc of propertyChangedFuncQueue) {
+      if (propertyChangedFunc && typeof propertyChangedFunc === 'function') {
+        propertyChangedFunc();
+      }
+    }
+    PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
+  }
+
+  public setPrebuildPhase(prebuildPhase: PrebuildPhase): void {
+    PUV2ViewBase.prebuildPhase_ = prebuildPhase;
+    if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd) {
+      this.isPrebuilding_ = true;
+      PUV2ViewBase.prebuildingElmtId_ = this.id__();
+    } else if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.ExecutePrebuildCmd) {
+      this.isPrebuilding_ = true;
+      PUV2ViewBase.prebuildingElmtId_ = this.id__();
+    } else if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.PrebuildDone) {
+      PUV2ViewBase.prebuildingElmtId_ = -1;
+      PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
+      this.isPrebuilding_ = false;
+      this.processPropertyChangedFuncQueue();
+    }
+  }
+
+  protected isNeedBuildPrebuildCmd(): boolean {
+    const needBuild: boolean = PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd &&
+      ViewStackProcessor.CheckIsPrebuildTimeout();
+    if (needBuild && !PUV2ViewBase.prebuildFuncQueues.has(this.id__())) {
+      PUV2ViewBase.prebuildFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+    }
+    return needBuild;
+  }
+
+  private prebuildComponent(): void {
+    let prebuildFuncQueue = PUV2ViewBase.prebuildFuncQueues.get(this.id__());
+    if (!prebuildFuncQueue) {
+      stateMgmtConsole.error(`prebuildComponent: prebuildFuncQueue ${this.id__()} not in prebuildFuncQueues`);
+      return;
+    }
+    const prebuildFunc = prebuildFuncQueue.shift();
+    if (prebuildFunc && typeof prebuildFunc === 'function') {
+      prebuildFunc();
+    }
+  }
+
+  protected isEnablePrebuildInMultiFrame(): boolean {
+    return !this.isViewV2;
   }
 } // class PUV2ViewBase

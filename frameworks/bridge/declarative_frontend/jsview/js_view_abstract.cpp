@@ -5485,6 +5485,9 @@ void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
 
 void JSViewAbstract::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSViewAbstract][pop]", &JSViewAbstract::Pop);
+    }
     ViewStackModel::GetInstance()->Pop();
 }
 
