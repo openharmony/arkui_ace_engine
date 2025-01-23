@@ -353,7 +353,6 @@ void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainD
     info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
     isDragging_ = true;
     isCrownEventDragging_ = true;
-    crownTask_.Cancel();
     HandleDragStart(info);
 }
 
@@ -558,6 +557,10 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         HandleTouchDown();
     }
 #ifdef SUPPORT_DIGITAL_CROWN
+    crownTask_.Cancel();
+    if (info.GetSourceDevice() != SourceType::CROWN) {
+        isCrownEventDragging_ = false;
+    }
     if (isCrownEventDragging_) {
         HandleTouchDown();
     }
