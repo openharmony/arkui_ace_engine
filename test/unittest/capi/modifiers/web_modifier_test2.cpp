@@ -573,7 +573,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedLifecycleChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnNativeEmbedLifecycleChangeEvent(std::make_shared<NativeEmbedDataInfo>(
         status, surfaceId, embedId, embedInfo));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->embedId, embedId);
 }
@@ -613,7 +613,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
     EXPECT_EQ(checkEvent.has_value(), false);
     auto info = std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param);
     webEventHub->FireOnNativeEmbedGestureEvent(info);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->embedId, embedId);
 }
