@@ -498,7 +498,6 @@ namespace Converter {
     template<> CalcDimension Convert(const Ark_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
     template<> Dimension Convert(const Ark_Number& src);
-    template<> int Convert(const Ark_IlluminatedType& src);
     template<> StringArray Convert(const Ark_CustomObject& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_String& src);
@@ -536,6 +535,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
 
     // SORTED_SECTION: Enums specializations. No multiline declarations, please!
+    template<> void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedType& src);
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src);

@@ -634,12 +634,6 @@ Dimension Convert(const Ark_Number& src)
 }
 
 template<>
-int Convert(const Ark_IlluminatedType& src)
-{
-    return static_cast<int>(src);
-}
-
-template<>
 StringArray Convert(const Ark_CustomObject& src)
 {
     LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
@@ -1819,7 +1813,9 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.lightSource = Converter::OptConvert<LightSource>(src.lightSource);
     // this converter should be changed to support IlluminatedType
     auto arkIlluminatedType = Converter::OptConvert<Ark_IlluminatedType>(src.illuminated);
+    std::cout << arkIlluminatedType.has_value() << std::endl;
     pointLightStyle.illuminationType = EnumToInt(arkIlluminatedType);
+    std::cout << pointLightStyle.illuminationType.value_or(100000) << std::endl;
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;

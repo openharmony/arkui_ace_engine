@@ -431,7 +431,26 @@ void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         return;
     }
     auto jsonLightIntensity = JsonUtil::Create(true);
+    auto lightSourceJSON = JsonUtil::Create(true);
+    std::vector<std::string> strings = {
+        "IlluminatedType.NONE",
+        "IlluminatedType.BORDER",
+        "IlluminatedType.CONTENT",
+        "IlluminatedType.BORDER_CONTENT",
+        "IlluminatedType.BLOOM_BORDER",
+        "IlluminatedType.BLOOM_BORDER_CONTENT"
+    };
     jsonLightIntensity->Put("lightIntensity", propLightIntensity.has_value() ? propLightIntensity.value() : 0.0);
+    if (propLightPosition && propLightIntensity && propLightColor) {
+        lightSourceJSON->Put("color", propLightColor.value_or(Color::WHITE).ColorToString().c_str());
+        jsonLightIntensity->Put("lightSource", lightSourceJSON);
+    } else {
+        jsonLightIntensity->Put("lightSource", "No light source");
+    }
+    std::cout << propLightIlluminated.value_or(1000) << std::endl;
+    auto iiluminatedString = strings.at(propLightIlluminated.value_or(0)).c_str();
+    jsonLightIntensity->Put("illuminated", iiluminatedString);
+    jsonLightIntensity->Put("bloom", std::to_string(propBloom.value_or(0.0f)).c_str());
     json->PutExtAttr("pointLight", jsonLightIntensity, filter);
 
     if (propLightPosition.has_value()) {

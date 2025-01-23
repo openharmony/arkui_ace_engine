@@ -1470,6 +1470,7 @@ void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorRespon
 template<>
 void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedType& src)
 {
+    std::cout << "enter " << std::endl;
     switch (src) {
         case ARK_ILLUMINATED_TYPE_NONE: dst = ARK_ILLUMINATED_TYPE_NONE; break;
         case ARK_ILLUMINATED_TYPE_BORDER: dst = ARK_ILLUMINATED_TYPE_BORDER; break;
