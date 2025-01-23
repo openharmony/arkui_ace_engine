@@ -38,7 +38,7 @@ int32_t Section::EndIdx() const
     return maxIdx;
 }
 
-inline float Section::StartPos() const
+float Section::StartPos() const
 {
     if (lanes.empty()) {
         LOGW("section not ready");
@@ -49,7 +49,7 @@ inline float Section::StartPos() const
     })->startPos;
 }
 
-inline float Section::EndPos() const
+float Section::EndPos() const
 {
     if (lanes.empty()) {
         LOGW("section not ready");
