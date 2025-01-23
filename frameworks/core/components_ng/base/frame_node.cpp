@@ -5353,6 +5353,9 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
     changedInfo.SetTouchType(touchEvent.type);
     changedInfo.SetForce(touchEvent.force);
+    changedInfo.SetPressedTime(touchEvent.pressedTime);
+    changedInfo.SetWidth(touchEvent.width);
+    changedInfo.SetHeight(touchEvent.height);
     if (touchEvent.tiltX.has_value()) {
         changedInfo.SetTiltX(touchEvent.tiltX.value());
     }
@@ -5398,6 +5401,9 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         info.SetScreenLocation(Offset(screenX, screenY));
         info.SetTouchType(touchEvent.type);
         info.SetForce(item.force);
+        info.SetPressedTime(item.downTime);
+        info.SetWidth(item.width);
+        info.SetHeight(item.height);
         if (item.tiltX.has_value()) {
             info.SetTiltX(item.tiltX.value());
         }

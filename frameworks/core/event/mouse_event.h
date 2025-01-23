@@ -176,6 +176,9 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.isInjected = isInjected;
         mouseEvent.isPrivacyMode = isPrivacyMode;
         mouseEvent.mockFlushEvent = mockFlushEvent;
+        mouseEvent.rawDeltaX = rawDeltaX;
+        mouseEvent.rawDeltaY = rawDeltaY;
+        mouseEvent.pressedButtonsArray = pressedButtonsArray;
         return mouseEvent;
     }
 

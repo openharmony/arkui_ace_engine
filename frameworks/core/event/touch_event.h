@@ -97,6 +97,9 @@ struct TouchEvent final : public PointerEvent {
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
     bool isPassThroughMode = false;
+    TimeStamp pressedTime;
+    int32_t width;
+    int32_t height;
 
     TouchEvent()
     {
@@ -130,6 +133,9 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
     TouchEvent& SetIsPassThroughMode(bool isPassThroughMode);
     TouchEvent& SetOperatingHand(int32_t operatingHand);
+    TouchEvent& SetPressedTime(TimeStamp pressedTime);
+    TouchEvent& SetWidth(int32_t width);
+    TouchEvent& SetHeight(int32_t height);
     TouchEvent CloneWith(float scale) const;
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
