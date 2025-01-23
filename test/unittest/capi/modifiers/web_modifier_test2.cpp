@@ -50,7 +50,7 @@ using namespace testing::ext;
 using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
-    
+
 class MockGestureEventResult : public GestureEventResult {
     DECLARE_ACE_TYPE(MockGestureEventResult, GestureEventResult);
 
@@ -609,7 +609,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
     modifier_->setOnNativeEmbedGestureEvent(node_, &arkCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
-    auto info = std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param); 
+    auto info = std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param);
     webEventHub->FireOnNativeEmbedGestureEvent(info);
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->resourceId, contextId);
