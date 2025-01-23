@@ -601,11 +601,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(outterMenuLayoutProps);
     param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
     auto focusMenuRenderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(focusMenuRenderContext);
-    if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
-        auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
-        CHECK_NULL_VOID(focusMenuBlurStyle);
-        param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
+    if (!ParseMenuBlurStyleEffect(param, focusMenuRenderContext)) {
+        return;
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
@@ -632,6 +629,23 @@ void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu,
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show sub menu, open type %{public}d", type);
+}
+
+bool MenuItemPattern::ParseMenuBlurStyleEffect(MenuParam& param, const RefPtr<RenderContext>& focusMenuRenderContext)
+{
+    CHECK_NULL_RETURN(focusMenuRenderContext, false);
+    if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
+        auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
+        CHECK_NULL_RETURN(focusMenuBlurStyle, false);
+        param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
+        param.blurStyleOption = focusMenuBlurStyle;
+    }
+    if (focusMenuRenderContext->GetBackgroundEffect().has_value()) {
+        auto focusMenuEffect = focusMenuRenderContext->GetBackgroundEffect();
+        CHECK_NULL_RETURN(focusMenuEffect, false);
+        param.effectOption = focusMenuEffect;
+    }
+    return true;
 }
 
 RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()

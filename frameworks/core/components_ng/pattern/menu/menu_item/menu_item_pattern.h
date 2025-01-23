@@ -443,6 +443,7 @@ private:
     void SetAccessibilityAction();
     bool IsSelectOverlayMenu();
     void RecordChangeEvent() const;
+    bool ParseMenuBlurStyleEffect(MenuParam& param, const RefPtr<RenderContext>& parseMenuBlurStyleEffect);
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 
