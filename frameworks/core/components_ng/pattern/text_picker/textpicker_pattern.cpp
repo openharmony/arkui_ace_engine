@@ -1322,6 +1322,9 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         }
     }
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
+    if (!columnWidths_.empty()) {
+        json->PutExtAttr("columnWidths", GetColumnWidthsStr().c_str(), filter);
+    }
 }
 
 std::string TextPickerPattern::GetRangeStr() const
@@ -1395,6 +1398,17 @@ std::string TextPickerPattern::GetOptionsMultiStr() const
     if (!cascadeOptions_.empty()) {
         result = GetOptionsMultiStrInternal();
     }
+    return result;
+}
+
+std::string TextPickerPattern::GetColumnWidthsStr() const
+{
+    std::string result = "";
+    for (const auto& item : columnWidths_) {
+        result += item.ToString();
+        result += ",";
+    }
+    result.pop_back();
     return result;
 }
 
