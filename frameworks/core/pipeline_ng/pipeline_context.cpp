@@ -2688,9 +2688,7 @@ void PipelineContext::OnTouchEvent(
         auto lastDispatchTime = eventManager_->GetLastDispatchTime();
         lastDispatchTime.erase(scalePoint.id);
         eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
-        auto idToTouchPoint = eventManager_->GetIdToTouchPoint();
-        idToTouchPoint.erase(scalePoint.id);
-        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoint));
+        eventManager_->EraseFingerId(scalePoint.id);
     }
 
     hasIdleTasks_ = true;
@@ -3168,9 +3166,7 @@ void PipelineContext::FlushTouchEvents()
             }
             eventManager_->DispatchTouchEvent(*iter);
         }
-        auto idToTouchPoint = eventManager_->GetIdToTouchPoint();
-        idToTouchPoint = std::move(idToTouchPoints);
-        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoint));
+        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoints));
     }
 }
 
