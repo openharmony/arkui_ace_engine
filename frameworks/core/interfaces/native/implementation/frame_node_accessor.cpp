@@ -46,9 +46,7 @@ Ark_Boolean IsModifiableImpl(FrameNodePeer* peer)
 {
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->node, false);
-    auto currentUINodeRef = AceType::DynamicCast<UINode>(peer->node);
-    CHECK_NULL_RETURN(currentUINodeRef, false);
-    auto isModifiable = currentUINodeRef->GetTag() == "CustomFrameNode";
+    auto isModifiable = peer->node->GetTag() == "CustomFrameNode";
     return Converter::ArkValue<Ark_Boolean>(isModifiable);
 }
 void AppendChildImpl(FrameNodePeer* peer,
@@ -63,7 +61,7 @@ void AppendChildImpl(FrameNodePeer* peer,
     CHECK_NULL_VOID(node->ptr);
     auto childNode = reinterpret_cast<UINode*>(node->ptr);
     CHECK_NULL_VOID(childNode);
-    if (childNode->GetParent() != nullptr && childNode->GetParent() != currentUINodeRef) {
+    if (childNode->GetParent() != nullptr) {
         return;
     }
     currentUINodeRef->AddChild(Referenced::Claim<UINode>(childNode));
@@ -82,10 +80,9 @@ void InsertChildAfterImpl(FrameNodePeer* peer,
     CHECK_NULL_VOID(child->ptr);
     auto childNode = reinterpret_cast<UINode*>(child->ptr);
     CHECK_NULL_VOID(childNode);
-    if (childNode->GetParent() != nullptr && childNode->GetParent() != currentUINodeRef) {
+    if (childNode->GetParent() != nullptr) {
         return;
     }
-
     CHECK_NULL_VOID(sibling);
     CHECK_NULL_VOID(sibling->ptr);
     auto siblingNode = reinterpret_cast<UINode*>(sibling->ptr);
@@ -125,7 +122,7 @@ Ark_NativePointer GetChildImpl(FrameNodePeer* peer,
     CHECK_NULL_RETURN(peer->node, nullptr);
     CHECK_NULL_RETURN(index, nullptr);
     auto indexInt = Converter::Convert<int32_t>(*index);
-    CHECK_NULL_RETURN(indexInt > 0, nullptr);
+    CHECK_NULL_RETURN(indexInt > -1, nullptr);
     LOGW("FrameNodeAccessor::GetChildImpl work only for case: IsExpanded is false");
     return peer->node->GetFrameNodeChildByIndex(indexInt, false, false);
 }
@@ -190,12 +187,12 @@ void DisposeImpl(FrameNodePeer* peer)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->node);
+    auto currentUINodeRef = AceType::DynamicCast<UINode>(peer->node);
+    CHECK_NULL_VOID(currentUINodeRef);
     LOGW("FrameNodeAccessor::DisposeImpl - behavior can be wrong. No specification to this API.");
-    if (peer->node->IsOnMainTree()) {
-        peer->node->DetachFromMainTree();
-    } else {
-        peer->node->DetachContext();
-    }
+    auto parent = GetParentNode(peer->node);
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(currentUINodeRef);
 }
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
