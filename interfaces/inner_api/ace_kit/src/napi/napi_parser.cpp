@@ -26,7 +26,6 @@ namespace OHOS::Ace::Kit {
 
 namespace {
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
-// constexpr int32_t NAPI_BUF_LENGTH = 256;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr char BUNDLE_NAME[] = "bundleName";
 std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
@@ -90,7 +89,7 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
             firstMatch = false;
             shortHolderType = pos.length() == 0;
         } else {
-            if (static_cast<uint32_t>(shortHolderType) ^ ((uint32_t)(pos.length() == 0))) {
+            if (static_cast<uint32_t>(shortHolderType) ^ static_cast<uint32_t>(pos.length() == 0)) {
                 LOGE("wrong place holder,stop parse string");
                 return;
             }

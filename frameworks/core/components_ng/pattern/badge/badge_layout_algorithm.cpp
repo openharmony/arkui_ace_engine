@@ -308,7 +308,8 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
         }
         auto textFrameSize = textGeometryNode->GetFrameSize();
-        if (GreatNotEqual(circleSize->ConvertToPx(), 0) && Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (GreatNotEqual(circleSize->ConvertToPx(), 0) &&
+            Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
         }
         textGeometryNode->SetFrameSize(textFrameSize);

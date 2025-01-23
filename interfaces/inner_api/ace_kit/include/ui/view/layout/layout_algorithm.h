@@ -54,7 +54,7 @@ public:
 
     virtual Kit::LayoutConstraintInfo GetLayoutConstraint()
     {
-       return layoutConstraintInfo_;
+        return layoutConstraintInfo_;
     }
 
 protected:

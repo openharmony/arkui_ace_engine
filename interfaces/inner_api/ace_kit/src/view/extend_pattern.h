@@ -33,8 +33,8 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<NG::LayoutWrapper>& dirty, const NG::DirtySwapConfig& changeConfig) override;
-    
-    void OnModifyDone() override; 
+
+    void OnModifyDone() override;
 
 private:
     RefPtr<Kit::Pattern> kitPattern_;
