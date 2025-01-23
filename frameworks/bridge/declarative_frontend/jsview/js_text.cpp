@@ -788,6 +788,13 @@ void JSText::Create(const JSCallbackInfo& info)
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
     if (jsController) {
         jsController->SetController(controller);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            auto styledString = jsController->GetStyledString();
+            if (styledString) {
+                controller->SetStyledString(styledString, false);
+                jsController->ClearStyledString();
+            }
+        }
     }
 }
 
@@ -1176,11 +1183,14 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
-    auto controller = controllerWeak_.Upgrade();
-    CHECK_NULL_VOID(controller);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
-    controller->SetStyledString(spanStringController);
+    auto controller = controllerWeak_.Upgrade();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) && !controller) {
+        styledString_ = spanStringController;
+    }
+    CHECK_NULL_VOID(controller);
+    controller->SetStyledString(spanStringController, true);
     auto thisObj = info.This();
     thisObj->SetPropertyObject("STYLED_STRING_IN_CONTROLLER", info[0]);
 }
