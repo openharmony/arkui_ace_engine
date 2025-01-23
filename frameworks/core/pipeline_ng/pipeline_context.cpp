@@ -64,6 +64,7 @@
 #ifdef COMPONENT_TEST_ENABLED
 #include "component_test/pipeline_status.h"
 #endif // COMPONENT_TEST_ENABLED
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -4114,6 +4115,7 @@ void PipelineContext::Destroy()
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif
+    uiContextImpl_.Reset();
     PipelineBase::Destroy();
 }
 
@@ -5520,5 +5522,14 @@ void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
     auto renderContext = rootNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->RequestNextFrame();
+}
+
+RefPtr<Kit::UIContext> PipelineContext::GetUIContext()
+{
+    if (uiContextImpl_) {
+        return uiContextImpl_;
+    }
+    uiContextImpl_ = AceType::MakeRefPtr<Kit::UIContextImpl>(this);
+    return uiContextImpl_;
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CUBIC_CURVE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CUBIC_CURVE_H
+#include "ui/base/utils/measure_utils.h"
 
-#include "ui/animation/cubic_curve.h"
-#include "base/log/log.h"
+#include "frameworks/base/utils/measure_util.h"
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CUBIC_CURVE_H
+namespace OHOS::Ace::Kit {
+NG::SizeF MeasureUtils::GetMeasureTextSize(const MeasureContext& context)
+{
+    Ace::MeasureContext aceContext;
+    aceContext.textContent = context.data;
+    aceContext.fontSize = context.fontSize;
+    auto measuredSize = OHOS::Ace::MeasureUtil::MeasureTextSize(aceContext);
+    return NG::SizeF(measuredSize.Width(), measuredSize.Height());
+}
+} // OHOS::Ace::Kit

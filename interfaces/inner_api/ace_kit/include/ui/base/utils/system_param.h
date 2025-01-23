@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CUBIC_CURVE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CUBIC_CURVE_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_UTILS_SYSTEM_PARAM_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_UTILS_SYSTEM_PARAM_H
 
-#include "ui/animation/cubic_curve.h"
-#include "base/log/log.h"
+#include <string>
+#include <vector>
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CUBIC_CURVE_H
+namespace OHOS::Ace::Kit {
+
+enum class ColorMode : int32_t {
+    LIGHT = 0,
+    DARK,
+    COLOR_MODE_UNDEFINED,
+};
+
+} // namespace OHOS::Ace::Kit
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_UTILS_SYSTEM_PARAM_H

@@ -408,6 +408,12 @@
       OHOS::Ace::Kit::ResourceParser::*;
       OHOS::Ace::Kit::ThemeFactory::*;
       OHOS::Ace::Kit::ThemeStyle::*;
+      OHOS::Ace::Kit::AgingAdapationDialogUtil::*;
+      OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::MeasureUtils::*;
+      OHOS::Ace::Kit::MenuView::*;
+      OHOS::Ace::Kit::OverlayManager::*;
+      OHOS::Ace::Kit::UIContext::*;
       OHOS::Ace::Theme::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;

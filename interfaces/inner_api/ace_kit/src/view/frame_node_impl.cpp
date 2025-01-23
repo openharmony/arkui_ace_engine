@@ -19,14 +19,21 @@
 #include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
 #include "interfaces/inner_api/ace_kit/include/ui/base/utils/utils.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/pattern.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/ui_context.h"
 
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {
 
 FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>& pattern)
     : nodeRef_(node), pattern_(pattern)
+{
+    frameNode_ = AceType::RawPtr(node);
+}
+
+FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node) : nodeRef_(node)
 {
     frameNode_ = AceType::RawPtr(node);
 }
@@ -54,6 +61,11 @@ RefPtr<AceNode> FrameNodeImpl::PopAceNode()
     RefPtr<AceNode> node;
     node.Swap(nodeRef_);
     return node;
+}
+
+RefPtr<AceNode> FrameNodeImpl::GetAceNode() const
+{
+    return nodeRef_;
 }
 
 void FrameNodeImpl::Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint)
@@ -100,5 +112,13 @@ void FrameNodeImpl::LayoutChildren()
     for (auto& child : frameNode_->GetAllChildrenWithBuild()) {
         child->Layout();
     }
+}
+
+RefPtr<UIContext> FrameNodeImpl::GetUIContext() const
+{
+    CHECK_NULL_RETURN(frameNode_, nullptr);
+    auto* pipeline = frameNode_->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetUIContext();
 }
 } // namespace OHOS::Ace::Kit
