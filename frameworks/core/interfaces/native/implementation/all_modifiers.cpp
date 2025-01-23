@@ -211,6 +211,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
@@ -451,6 +452,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDrawingCanvasAccessor,
         GetFrameNodeAccessor,
         GetPixelMapAccessor,
+        GetNavExtenderAccessor,
         GetEventEmulatorAccessor,
         GetActionSheetAccessor,
         GetAlertDialogAccessor,

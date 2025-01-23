@@ -19,13 +19,15 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = NavDestinationModelNG::CreateFrameNode(id);
+    // We must create NavDestination as [Stack] (NavDestinationModelNG::CreateFrameNode(id))
+    auto frameNode = StackModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
