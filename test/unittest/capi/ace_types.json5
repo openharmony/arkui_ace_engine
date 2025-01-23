@@ -799,6 +799,28 @@
             ],
         },
         {
+            "name": "DimensionsResNonPct",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123._vp", "123.00vp"],
+                ["0._vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123._fp", "123.00fp"],
+                ["0._fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123._px", "123.00px"],
+                ["0._px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["-123._vp", "-123.00vp"],
+                ["-123._fp", "-123.00fp"],
+                ["-123._px", "-123.00px"],
+            ],
+            "invalidValues": [
+                "0.2_pct", "-0.2_pct",
+            ],
+        },
+        {
             "name": "MaxFontScaleNum",
             "type": "Ark_Number",
             "validValues": [
@@ -1772,6 +1794,37 @@
             "themes": ["TextFieldTheme"],
             "attributes": [
                 {
+                    "name": "lineHeight",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
+                },
+                {
+                    "name": "letterSpacing",
+                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc", "DimensionsResNonPct"]
+                },
+                {
+                    "name": "decoration",
+                    "type": "DecorationStyleInterface",
+                    "attributes": [
+                        {
+                            "name": "type",
+                            "default": "TextDecorationType.None",
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                        },
+                        {
+                            "name": "style",
+                            "default": "TextDecorationStyle.SOLID",
+                        },
+                    ],
+                },
+                {
+                    "name": "fontFeature",
+                    "default": "",
+                    "fixtures": ["FontFeature"]
+                },
+                {
                     "name": "minFontSize",
                     "default": "0.00px",
                     "type": "DimensionNonNegNonPct",
@@ -2091,23 +2144,14 @@
                 "setCopyOptionTestCopyOptionValidValues",
                 "setCopyOptionTestCopyOptionInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
-                "setDecorationTestDefaultValues",
-                "setDecorationTestDecorationTypeValidValues",
-                "setDecorationTestDecorationTypeInvalidValues",
-                "setDecorationTestDecorationColorValidValues",
-                "setDecorationTestDecorationColorInvalidValues",
-                "setDecorationTestDecorationStyleValidValues",
-                "setDecorationTestDecorationStyleInvalidValues",
-                "setLetterSpacingTestDefaultValues",
-                "setLetterSpacingTestLetterSpacingValidValues",
-                "setLetterSpacingTestLetterSpacingInvalidValues",
-                "setLineHeightTestDefaultValues",
-                "setLineHeightTestLineHeightValidValues",
-                "setLineHeightTestLineHeightInvalidValues",
-                "setFontFeatureTestDefaultValues",
-                "setFontFeatureTestFontFeatureValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
                 "setMaxLinesTestDefaultValues",
+
+                // Default value is not clear
+                "setLetterSpacingTestDefaultValues",
+                "setLetterSpacingTestLetterSpacingInvalidValues",
+                "setLineHeightTestDefaultValues",
+                "setLineHeightTestLineHeightInvalidValues",
 
                 // New API 111
                 "setMinFontScaleTestDefaultValues",

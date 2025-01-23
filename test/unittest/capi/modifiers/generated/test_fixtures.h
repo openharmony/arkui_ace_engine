@@ -81,6 +81,20 @@ enum ResID {
     DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID,
+    DIMENSIONS_RES_NON_PCT_0_ID,
+    DIMENSIONS_RES_NON_PCT_1_ID,
+    DIMENSIONS_RES_NON_PCT_2_ID,
+    DIMENSIONS_RES_NON_PCT_3_ID,
+    DIMENSIONS_RES_NON_PCT_4_ID,
+    DIMENSIONS_RES_NON_PCT_5_ID,
+    DIMENSIONS_RES_NON_PCT_6_ID,
+    DIMENSIONS_RES_NON_PCT_7_ID,
+    DIMENSIONS_RES_NON_PCT_8_ID,
+    DIMENSIONS_RES_NON_PCT_9_ID,
+    DIMENSIONS_RES_NON_PCT_10_ID,
+    DIMENSIONS_RES_NON_PCT_11_ID,
+    DIMENSIONS_RES_NON_PCT_12_ID,
+    DIMENSIONS_RES_NON_PCT_13_ID,
     MAX_FONT_SCALE_RES_0_ID,
     MAX_FONT_SCALE_RES_1_ID,
     MAX_FONT_SCALE_RES_2_ID,
@@ -178,6 +192,20 @@ inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR = "DIMENSIONS_RES_NO
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_0_STR = "DIMENSIONS_RES_NON_PCT_0_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_1_STR = "DIMENSIONS_RES_NON_PCT_1_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_2_STR = "DIMENSIONS_RES_NON_PCT_2_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_3_STR = "DIMENSIONS_RES_NON_PCT_3_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_4_STR = "DIMENSIONS_RES_NON_PCT_4_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_5_STR = "DIMENSIONS_RES_NON_PCT_5_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_6_STR = "DIMENSIONS_RES_NON_PCT_6_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_7_STR = "DIMENSIONS_RES_NON_PCT_7_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_8_STR = "DIMENSIONS_RES_NON_PCT_8_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_9_STR = "DIMENSIONS_RES_NON_PCT_9_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_10_STR = "DIMENSIONS_RES_NON_PCT_10_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_11_STR = "DIMENSIONS_RES_NON_PCT_11_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_12_STR = "DIMENSIONS_RES_NON_PCT_12_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_13_STR = "DIMENSIONS_RES_NON_PCT_13_STR";
 inline constexpr auto MAX_FONT_SCALE_RES_0_STR = "MAX_FONT_SCALE_RES_0_STR";
 inline constexpr auto MAX_FONT_SCALE_RES_1_STR = "MAX_FONT_SCALE_RES_1_STR";
 inline constexpr auto MAX_FONT_SCALE_RES_2_STR = "MAX_FONT_SCALE_RES_2_STR";
@@ -414,6 +442,10 @@ extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsR
 // Fixture 'DimensionsResNonNegNonPct' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNegNonPctInvalidValues;
+
+// Fixture 'DimensionsResNonPct' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonPctInvalidValues;
 
 // Fixture 'MaxFontScaleNum' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues;

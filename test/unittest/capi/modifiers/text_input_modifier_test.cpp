@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/implementation/text_input_controller_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
 using namespace testing;
@@ -26,6 +27,10 @@ namespace OHOS::Ace::NG {
 using namespace Converter;
 using namespace TypeHelper;
 using namespace TestConst::TextInput;
+
+namespace GeneratedModifier {
+const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor();
+}
 
 class TextInputModifierTestNonGenerated : public ModifierTestBase<GENERATED_ArkUITextInputModifier,
                                   &GENERATED_ArkUINodeModifiers::getTextInputModifier, GENERATED_ARKUI_TEXT_INPUT> {
@@ -225,5 +230,67 @@ HWTEST_F(TextInputModifierTest, setOnWillDeleteTest, TestSize.Level1)
         auto checkVal = eventHub->FireOnWillDeleteEvent(checkValue);
         EXPECT_FALSE(checkVal);
     }
+}
+
+/*
+ * @tc.name: setTextInputOptionsTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setTextInputOptionsTest, TestSize.Level1)
+{
+    const std::string placeholderTestValue = "Placeholder 511";
+    const std::string textTestValue = "Text 512";
+
+    Ark_TextInputOptions options;
+    std::string resultStr;
+
+    auto placeholder = ArkUnion<Ark_ResourceStr, Ark_String>(placeholderTestValue);
+    auto text = ArkUnion<Ark_ResourceStr, Ark_String>(textTestValue);
+
+    options.placeholder = ArkValue<Opt_ResourceStr>(placeholder);
+    options.text = ArkValue<Opt_ResourceStr>(text);
+    options.controller = ArkValue<Opt_TextInputController>();
+
+    auto optOptions = ArkValue<Opt_TextInputOptions>(options);
+    modifier_->setTextInputOptions(node_, &optOptions);
+
+    auto jsonValue = GetJsonValue(node_);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_I_PLACEHOLDER_NAME);
+    EXPECT_EQ(resultStr, placeholderTestValue);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_I_TEXT_NAME);
+    EXPECT_EQ(resultStr, textTestValue);
+}
+
+/*
+ * @tc.name: setTextInputOptionsTestController
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setTextInputOptionsTestController, TestSize.Level1)
+{
+    Ark_TextInputOptions options;
+    std::string resultStr;
+
+    auto controllerAccessor = GeneratedModifier::GetTextInputControllerAccessor();
+    ASSERT_NE(controllerAccessor, nullptr);
+
+    Ark_TextInputController controller;
+    controller.ptr = controllerAccessor->ctor();
+    ASSERT_NE(controller.ptr, nullptr);
+    auto peer = reinterpret_cast<TextInputControllerPeer*>(controller.ptr);
+    EXPECT_EQ(peer->GetController(), nullptr);
+
+    options.placeholder = ArkValue<Opt_ResourceStr>();
+    options.text = ArkValue<Opt_ResourceStr>();
+    options.controller = ArkValue<Opt_TextInputController>(controller);
+
+    auto optOptions = ArkValue<Opt_TextInputOptions>(options);
+    modifier_->setTextInputOptions(node_, &optOptions);
+    EXPECT_NE(peer->GetController(), nullptr);
+
+    controllerAccessor->destroyPeer(peer);
 }
 } // namespace OHOS::Ace::NG
