@@ -3928,8 +3928,18 @@ void DragPreviewImpl(Ark_NativePointer node,
             convValue->customNode = CallbackHelper(val, frameNode).BuildSync(node);
         },
         [frameNode, &convValue](const Ark_DragItemInfo& value) {
+            // The inspectorId acts as a preview surrogate identifier which is used
+            // to retrieve a preview image for the item being dragged.
+            convValue->inspectorId = "123";
+            convValue->pixelMap = Converter::Convert<RefPtr<PixelMap>>(value.pixelMap);
+            /*
+            typedef struct Ark_DragItemInfo {
+                Opt_PixelMap pixelMap;
+                Opt_CustomNodeBuilder builder;
+                Opt_String extraInfo;
+            } Ark_DragItemInfo;
+            */
             LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
-            convValue = std::nullopt;
         },
         []() {
             LOGE("DragPreviewImpl(): Invalid union argument");
