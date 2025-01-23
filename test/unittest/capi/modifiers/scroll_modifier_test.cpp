@@ -1390,18 +1390,17 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
     static std::optional<resultData> result;
 
     auto callback = [](
-        const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState, 
-        Ark_ScrollSource scrollSource, const Callback_OffsetResult_Void continuation) {
+        const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState) {
             result = {resourceId, xOffset, yOffset, scrollState};
     };
 
     auto id = Converter::ArkValue<Ark_Int32>(123);
 
-    auto apiCall = Converter::ArkValue<Opt_ScrollOnWillScrollCallback>(
-        Converter::ArkValue<ScrollOnWillScrollCallback>(callback, id));
+    auto apiCall = Converter::ArkValue<Opt_ScrollOnScrollCallback>(
+        Converter::ArkValue<ScrollOnScrollCallback>(callback, id));
     ASSERT_FALSE(eventHub->GetOnDidScrollEvent());
 
-    ASSERT_NE(modifier_->setOnScrollEdge, nullptr);
+    ASSERT_NE(modifier_->setOnDidScroll, nullptr);
     modifier_->setOnDidScroll(node_, &apiCall);
 
     ASSERT_TRUE(eventHub->GetOnDidScrollEvent());

@@ -186,7 +186,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto callValue = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
+    auto callValue = Converter::OptConvert<ScrollOnScrollCallback>(*value);
     if (!callValue.has_value()) {
         return;
     }
@@ -195,8 +195,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
             auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
             auto x = Converter::ArkValue<Ark_Number>(xIn);
             auto y = Converter::ArkValue<Ark_Number>(yIn);
-            Callback_OffsetResult_Void cont;
-            arkCallback.Invoke(x, y, state, Ark_ScrollSource::ARK_SCROLL_SOURCE_DRAG, cont);
+            arkCallback.Invoke(x, y, state);
     };
     ScrollModelNG::SetOnDidScroll(frameNode, call);
 }
