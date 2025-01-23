@@ -69,7 +69,7 @@ private:
             value = 0;
         }
         result = static_cast<size_t>(value);
-        return false;
+        return true;
     }
 
     void OnDataReloaded(const JSCallbackInfo& args)
@@ -99,8 +99,7 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        int32_t length = 2;
-        if (args.Length() < length || !ConvertFromJSCallbackInfo(args, 0, index) ||
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
             !ConvertFromJSCallbackInfo(args, 1, count)) {
             return;
         }
@@ -125,8 +124,7 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        int32_t length = 2;
-        if (args.Length() < length || !ConvertFromJSCallbackInfo(args, 0, index) ||
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
             !ConvertFromJSCallbackInfo(args, 1, count)) {
             return;
         }
@@ -151,8 +149,7 @@ private:
         ContainerScope scope(instanceId_);
         size_t from = 0;
         size_t to = 0;
-        int32_t length = 2;
-        if (args.Length() < length || !ConvertFromJSCallbackInfo(args, 0, from) ||
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, from) ||
             !ConvertFromJSCallbackInfo(args, 1, to)) {
             return;
         }
