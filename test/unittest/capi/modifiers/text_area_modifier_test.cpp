@@ -36,6 +36,7 @@ const auto ATTRIBUTE_TEXT_NAME = "text";
 const auto ATTRIBUTE_PLACEHOLDER_VALUE = "xxx";
 const auto ATTRIBUTE_TEXT_VALUE = "yyy";
 const auto ATTRIBUTE_INPUT_FILTER_NAME("inputFilter");
+const auto ATTRIBUTE_TEXT_OVERFLOW_NAME = "textOverflow";
 const std::u16string ERROR_TEXT = u"error_text";
 const std::u16string ERROR_TEXT2 = u"error_text2";
 const std::string STR_TEST_TEXT("test_text");
@@ -255,6 +256,14 @@ std::vector<DecorationStyleTestStep> TEXT_DECORATION_STYLE_TEST_PLAN = {
     { static_cast<Ark_TextDecorationStyle>(-100), "TextDecorationStyle.SOLID" },
     { static_cast<Ark_TextDecorationStyle>(3), "TextDecorationStyle.DASHED" },
     { static_cast<Ark_TextDecorationStyle>(100), "TextDecorationStyle.SOLID" },
+};
+
+typedef std::tuple<std::string, Ark_TextOverflow, std::string> TextOverflowTestStep;
+std::vector<TextOverflowTestStep> TEXT_OVERFLOW_VALID_TEST_PLAN = {
+    { "ARK_TEXT_OVERFLOW_NONE", ARK_TEXT_OVERFLOW_NONE, "TextOverflow.None" },
+    { "ARK_TEXT_OVERFLOW_CLIP", ARK_TEXT_OVERFLOW_CLIP, "TextOverflow.Clip" },
+    { "ARK_TEXT_OVERFLOW_ELLIPSIS", ARK_TEXT_OVERFLOW_ELLIPSIS, "TextOverflow.Ellipsis" },
+    { "ARK_TEXT_OVERFLOW_MARQUEE", ARK_TEXT_OVERFLOW_MARQUEE, "TextOverflow.Marquee" },
 };
 
 // events
@@ -1775,5 +1784,34 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTest, TestSize.Level1)
     EXPECT_FALSE(event.IsPreventDefault());
     EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
     EXPECT_EQ(checkEvent->content, testString);
+}
+
+/*
+ * @tc.name: setTextOverflowTestTextOverflowValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setTextOverflowTestTextOverflowValidValues, TestSize.Level1)
+{
+    Ark_TextOverflow initValueTextOverflow;
+
+    // Initial setup
+    initValueTextOverflow = std::get<1>(TEXT_OVERFLOW_VALID_TEST_PLAN[0]);
+
+    auto checkValue = [this, &initValueTextOverflow](
+                          const std::string& input, const std::string& expectedStr, const Ark_TextOverflow& value) {
+        Ark_TextOverflow inputValueTextOverflow = initValueTextOverflow;
+
+        inputValueTextOverflow = value;
+        modifier_->setTextOverflow(node_, inputValueTextOverflow);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_OVERFLOW_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextOverflow, attribute: textOverflow";
+    };
+
+    for (auto& [input, value, expected] : TEXT_OVERFLOW_VALID_TEST_PLAN) {
+        checkValue(input, expected, value);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1744,7 +1744,7 @@
                 "setLineSpacingTestValidValues",
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
-                "setTextOverflowTestTextOverflowValidValues",
+                "setTextOverflowTestTextOverflowValidValues", // due to issue #IB57XU can not be fixed
 
                 // New API 111
                 "setMinFontScaleTestDefaultValues",
