@@ -3943,6 +3943,21 @@ bool TextFieldPattern::InitValueText(std::u16string content)
     if (HasInputOperation() && content != u"") {
         return false;
     }
+    ChangeValueInfo changeValueInfo;
+    changeValueInfo.oldContent = GetBodyTextValue();
+    changeValueInfo.value = content;
+    changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
+    changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
+    changeValueInfo.previewText = changeValueInfo.oldPreviewText;
+    changeValueInfo.rangeBefore = TextRange { 0, changeValueInfo.oldContent.length() };
+    changeValueInfo.rangeAfter = TextRange { 0, content.length() };
+    bool isWillChange = FireOnWillChange(changeValueInfo);
+    if (!isWillChange) {
+        return false;
+    }
+    if (changeValueInfo.oldContent == content) {
+        return false;
+    }
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetTextUtf16Value().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -4871,11 +4886,25 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     CHECK_NULL_RETURN(host, offset);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, offset);
+    ChangeValueInfo changeValueInfo;
+    changeValueInfo.oldContent = GetBodyTextValue();
+    changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
+    changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
+    changeValueInfo.rangeBefore = TextRange { offset, offset };
     NotifyImfFinishTextPreview();
     int32_t originLength =
         static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     bool hasInsertValue =
         contentController_->InsertValue(offset, insertValue);
+    changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
+    changeValueInfo.previewText.value = GetPreviewTextValue();
+    changeValueInfo.value = contentController_->GetTextUtf16Value();
+    changeValueInfo.rangeAfter = TextRange { offset, offset + contentController_->GetInsertValue().length() };
+    bool isWillChange = FireOnWillChange(changeValueInfo);
+    if (!isWillChange) {
+        contentController_->SetTextValue(changeValueInfo.oldContent);
+        return false;
+    }
     int32_t caretMoveLength =
         abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - originLength);
     if (layoutProperty->HasMaxLength()) {
@@ -9043,7 +9072,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     CHECK_NULL_VOID(host);
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && IsSelected()) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSelected()) {
             uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
             uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
             if (startIndex < fullStr.length() && endIndex < fullStr.length()) {
@@ -9126,7 +9155,7 @@ void TextFieldPattern::FinishTextPreviewOperation()
     }
 
     ChangeValueInfo changeValueInfo;
-    changeValueInfo.oldPreviewText.offset = GetPreviewTextStart();
+    changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
     changeValueInfo.oldContent = GetBodyTextValue();
     changeValueInfo.rangeBefore = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
@@ -9142,7 +9171,7 @@ void TextFieldPattern::FinishTextPreviewOperation()
     UpdateEditingValueToRecord();
     changeValueInfo.rangeAfter = TextRange { selectController_->GetCaretIndex(), selectController_->GetCaretIndex() };
     changeValueInfo.value = GetBodyTextValue();
-    changeValueInfo.previewText.offset = GetPreviewTextStart();
+    changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
     FireOnWillChange(changeValueInfo);
     if (HasFocus()) {
@@ -10215,6 +10244,10 @@ bool TextFieldPattern::FireOnWillChange(const ChangeValueInfo& changeValueInfo)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     CHECK_NULL_RETURN(eventHub->HaveOnWillChangeEvent(), true);
+    callbackRangeBefore_ = changeValueInfo.rangeBefore;
+    callbackRangeAfter_ = changeValueInfo.rangeAfter;
+    callbackOldContent_ = changeValueInfo.oldContent;
+    callbackOldPreviewText_ = changeValueInfo.oldPreviewText;
     return eventHub->FireOnWillChangeEvent(changeValueInfo);
 }
 
@@ -10286,9 +10319,9 @@ bool TextFieldPattern::OnWillChangePreSetValue(const std::u16string& newValue)
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldContent = contentController_->GetTextUtf16Value();
     changeValueInfo.value = newValue;
-    changeValueInfo.previewText.offset = GetPreviewTextStart();
+    changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
-    changeValueInfo.oldPreviewText.offset = GetPreviewTextStart();
+    changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
     changeValueInfo.rangeBefore = TextRange { 0, contentController_->GetTextUtf16Value().length() };
     changeValueInfo.rangeAfter = TextRange { 0, newValue.length() };
@@ -10339,16 +10372,6 @@ void TextFieldPattern::AddInputCommand(const InputCommandInfo& inputCommandInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!isEdit_ && (inputCommandInfo.reason != InputReason::CANCEL_BUTTON)) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't input", host->GetId());
-        return;
-    }
-    if (inputCommandInfo.reason == InputReason::IME && IsDragging()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "textfield %{public}d NOT allow input when dragging", host->GetId());
-        return;
-    }
-
     inputOperations_.emplace(InputOperation::INPUT);
     inputCommands_.emplace(inputCommandInfo);
     CloseSelectOverlay(true);
@@ -10364,7 +10387,6 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     auto end = info.deleteRange.end;
     auto insertValue = info.insertValue;
     auto caretIndex = info.insertOffset;
-    GetEmojiSubStringRange(start, end);
 
     if ((info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE) && !insertValue.empty()) {
         auto isInsert = BeforeIMEInsertValue(insertValue, caretIndex - (end - start));
@@ -10373,7 +10395,7 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
 
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldContent = contentController_->GetTextUtf16Value();
-    changeValueInfo.oldPreviewText.offset = GetPreviewTextStart();
+    changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
     changeValueInfo.rangeBefore = TextRange { start, end };
 
@@ -10384,8 +10406,8 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
             isDelete = BeforeIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD, end);
         }
         contentController_->erase(start, end - start);
+        selectController_->UpdateCaretIndex(start);
         if ((info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE) && isDelete) {
-            selectController_->UpdateCaretIndex(start);
             AfterIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD);
         }
     }
@@ -10412,7 +10434,7 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     }
 
     changeValueInfo.value = contentController_->GetTextUtf16Value();
-    changeValueInfo.previewText.offset = GetPreviewTextStart();
+    changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
     changeValueInfo.rangeAfter = TextRange { caretIndex - insertLength, caretIndex };
 
