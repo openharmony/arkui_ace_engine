@@ -6864,7 +6864,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "repeat", "offsetX", "offsetY", "scale", "angle", "speed", "timestamp", "pinchCenterX",
         "pinchCenterY", "source", "pressure", "sourceTool", "velocityX", "velocityY", "velocity",
-        "getModifierKeyState", "deviceId" };
+        "deviceId", "getModifierKeyState" };
     Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, info.GetRepeat()),
         panda::NumberRef::New(vm, info.GetOffsetX() / density), panda::NumberRef::New(vm, info.GetOffsetY() / density),
         panda::NumberRef::New(vm, info.GetScale()), panda::NumberRef::New(vm, info.GetAngle()),
@@ -7588,6 +7588,14 @@ ArkUINativeModuleValue CommonBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCal
             panda::NumberRef::New(vm, hoverInfo.GetDeviceId()),
             panda::NumberRef::New(vm, hoverInfo.GetTargetDisplayId()) };
         auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltX().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltY().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(
+            vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
