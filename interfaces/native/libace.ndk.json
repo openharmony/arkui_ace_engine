@@ -485,7 +485,7 @@
     },
     {
         "first_introduced": "16",
-        "name": "OH_ArkUI_PointerEvent_GetInteractionHandByIdx"
+        "name": "OH_ArkUI_PointerEvent_GetInteractionHandByIndex"
     },
     {
         "first_introduced": "12",
