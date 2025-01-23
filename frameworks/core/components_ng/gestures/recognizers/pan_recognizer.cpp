@@ -515,7 +515,6 @@ bool PanRecognizer::HandlePanAccept()
         return true;
     }
     if (CheckLimitFinger()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return false;
     }
     if (IsBridgeMode()) {
