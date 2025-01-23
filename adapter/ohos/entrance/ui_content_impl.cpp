@@ -2822,7 +2822,6 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         }
     };
     auto updateDisplayIdAndAreaTask = [container, context, rsWindow = window_]() {
-        CHECK_NULL_VOID(rsWindow);
         if (!rsWindow) {
             TAG_LOGE(AceLogTag::ACE_WINDOW, "Current container has invalid window data.");
             return;

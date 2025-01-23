@@ -59,8 +59,7 @@ const std::vector<DialogButtonDirection> DIALOG_BUTTONS_DIRECTION = { DialogButt
     DialogButtonDirection::HORIZONTAL, DialogButtonDirection::VERTICAL };
 constexpr int32_t ALERT_DIALOG_VALID_PRIMARY_BUTTON_NUM = 1;
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
-const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = {
-    ImmersiveMode::DEFAULT, ImmersiveMode::PAGE, ImmersiveMode::FULL};
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
 } // namespace
 
 void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)

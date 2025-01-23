@@ -112,8 +112,7 @@ enum class LevelMode {
 
 enum class ImmersiveMode {
     DEFAULT = 0,
-    PAGE,
-    FULL,
+    EXTEND,
 };
 
 class DialogAlignmentUtils {

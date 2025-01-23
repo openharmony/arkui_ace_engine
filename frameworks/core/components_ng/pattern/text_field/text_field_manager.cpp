@@ -342,6 +342,9 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
             CHECK_NULL_RETURN(sheetNode, nullptr);
             return AceType::DynamicCast<FrameNode>(sheetNode);
         }
+        if (parent->GetHostTag() == V2::DIALOG_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(parent);
+        }
         if (parent->GetHostTag() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
             parent->GetHostTag() == V2::NAVBAR_ETS_TAG) {
                 ret = parent;

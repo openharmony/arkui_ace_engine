@@ -297,6 +297,8 @@ public:
         isNeedRemove_ = isNeedRemove;
     }
 
+    bool IsNeedCallbackBackPressed();
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;

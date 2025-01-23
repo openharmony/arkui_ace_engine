@@ -33,8 +33,6 @@ constexpr double HALF = 0.5;
 constexpr double PARENT_PAGE_OFFSET = 0.2;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
-const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
-    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
 {
@@ -518,9 +516,7 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    auto lastNode = overlayManager_->GetLastChildNotRemoving(GetHost());
-    if (!overlayManager_->IsModalEmpty() ||
-        (lastNode && EMBEDDED_DIALOG_NODE_TAG.find(lastNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end())) {
+    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto taskExecutor = pipeline->GetTaskExecutor();
@@ -528,6 +524,12 @@ bool PagePattern::RemoveOverlay()
         return overlayManager_->RemoveOverlay(true);
     }
     return false;
+}
+
+bool PagePattern::IsNeedCallbackBackPressed()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    return overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), true);
 }
 
 void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
