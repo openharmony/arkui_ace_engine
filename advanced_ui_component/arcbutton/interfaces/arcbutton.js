@@ -19,7 +19,7 @@ let __decorate =
         let c = arguments.length;
         let r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc;
         let d;
-        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") {
+        if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function') {
             r = Reflect.decorate(decorators, target, key, desc);
         } else {
             for (let i = decorators.length - 1; i >= 0; i--) {
@@ -243,6 +243,7 @@ export class ArcButton extends ViewV2 {
         this.fontColor = ColorMetrics.resourceColor(Color.White);
         this.isExceed = false;
         this.pathString = '';
+        this.fontSize = '';
         this.btnNormalColor = ColorMetrics.resourceColor(Color.Black);
         this.btnPressColor = ColorMetrics.resourceColor(Color.Black);
         this.btnDisableColor = ColorMetrics.resourceColor(Color.Black);
@@ -257,6 +258,7 @@ export class ArcButton extends ViewV2 {
     }
 
     optionsChange() {
+        this.fontSize = this.cover(this.options.fontSize);
         this.judgeTextWidth();
         this.changeStatus();
     }
@@ -377,13 +379,21 @@ export class ArcButton extends ViewV2 {
     judgeTextWidth() {
         const measureTextWidth = measure.measureText({
             textContent: this.options.label,
-            fontSize: this.cover(this.options.fontSize),
+            fontStyle: this.options.fontStyle,
+            fontFamily: this.options.fontFamily,
+            fontWeight: FontWeight.Medium,
+            maxLines: 1,
+            fontSize: `${Constants.MIN_FONT_SIZE}fp`,
         });
         this.isExceed =
             measureTextWidth > this.getUIContext().vp2px(this.textWidth);
     }
 
     aboutToAppear() {
+        if (arcButtonTheme.BUTTON_HEIGHT === 0) {
+            console.error("arcbutton can't obtain sys float value.");
+            return;
+        }
         this.initValues();
         this.dataProcessUtil.initData();
         const pathData = this.dataProcessUtil.calculate();
@@ -452,13 +462,13 @@ export class ArcButton extends ViewV2 {
         this.pathString = pathStr;
     }
 
-    TextBuilder(parent = null) {
+    TextBuilderIsExceed(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.options.label);
             Text.width(this.textWidth);
             Text.height(this.textHeight);
             Text.fontColor(this.fontColor.color);
-            Text.fontSize(this.cover(this.options.fontSize));
+            Text.fontSize(this.fontSize);
             Text.maxLines(1);
             Text.textAlign(TextAlign.Center);
             Text.fontWeight(FontWeight.Medium);
@@ -466,6 +476,31 @@ export class ArcButton extends ViewV2 {
             Text.fontFamily(this.options.fontFamily);
             Text.backgroundColor(Color.Transparent);
             Text.textOverflow({ overflow: TextOverflow.MARQUEE });
+            Text.margin({
+                start: this.options.fontMargin.start,
+                top: this.isUp
+                    ? this.options.fontMargin.bottom
+                    : this.options.fontMargin.top,
+                end: this.options.fontMargin.end,
+                bottom: this.options.fontMargin.bottom,
+            });
+        }, Text);
+        Text.pop();
+    }
+
+    TextBuilderNormal(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.options.label);
+            Text.width(this.textWidth);
+            Text.height(this.textHeight);
+            Text.textAlign(TextAlign.Center);
+            Text.fontColor(this.fontColor.color);
+            Text.maxFontSize(`${Constants.MAX_FONT_SIZE}fp`);
+            Text.minFontSize(`${Constants.MIN_FONT_SIZE}fp`);
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontStyle(this.options.fontStyle);
+            Text.fontFamily(this.options.fontFamily);
+            Text.maxLines(1);
             Text.margin({
                 start: this.options.fontMargin.start,
                 top: this.isUp
@@ -543,7 +578,19 @@ export class ArcButton extends ViewV2 {
             Button.shadow(this.getShadow());
         }, Button);
         Button.pop();
-        this.TextBuilder.bind(this)(this);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.isExceed) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.TextBuilderIsExceed.bind(this)(this);
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.TextBuilderNormal.bind(this)(this);
+                });
+            }
+        }, If);
+        If.pop();
         Stack.pop();
     }
 
@@ -595,6 +642,7 @@ __decorate([Local], ArcButton.prototype, 'textHeight', void 0);
 __decorate([Local], ArcButton.prototype, 'fontColor', void 0);
 __decorate([Local], ArcButton.prototype, 'isExceed', void 0);
 __decorate([Local], ArcButton.prototype, 'pathString', void 0);
+__decorate([Local], ArcButton.prototype, 'fontSize', void 0);
 __decorate(
     [
         Monitor(
