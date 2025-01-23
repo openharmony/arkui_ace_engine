@@ -4562,13 +4562,15 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
     return resultObject;
 }
 
-void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
+void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
 {
     AllocStyledString();
     isSpanStringMode_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CloseSelectOverlay();
+    if (closeSelectOverlay) {
+        CloseSelectOverlay();
+    }
     auto length = styledString_->GetLength();
     styledString_->RemoveCustomSpan();
     styledString_->ReplaceSpanString(0, length, value);
