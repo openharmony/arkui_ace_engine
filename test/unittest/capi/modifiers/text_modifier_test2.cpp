@@ -105,17 +105,17 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-using OneTestStep = std::tuple<Ark_TextSpanType, CustomNodeBuilder, Ark_TextResponseType>;
+using OneTestStep = std::tuple<Ark_TextSpanType, Ark_TextResponseType>;
 static const std::vector<OneTestStep> testPlan = {
-    {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
-    {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
-    {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
-    {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
-    {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
-    {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
-    {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
-    {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
-    {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+    {ARK_TEXT_SPAN_TYPE_TEXT, ARK_TEXT_RESPONSE_TYPE_SELECT},
+    {ARK_TEXT_SPAN_TYPE_MIXED, ARK_TEXT_RESPONSE_TYPE_SELECT},
+    {ARK_TEXT_SPAN_TYPE_IMAGE, ARK_TEXT_RESPONSE_TYPE_SELECT},
+    {ARK_TEXT_SPAN_TYPE_TEXT, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+    {ARK_TEXT_SPAN_TYPE_MIXED, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+    {ARK_TEXT_SPAN_TYPE_IMAGE, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+    {ARK_TEXT_SPAN_TYPE_TEXT, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+    {ARK_TEXT_SPAN_TYPE_MIXED, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+    {ARK_TEXT_SPAN_TYPE_IMAGE, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
 };
 
 HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
@@ -142,13 +142,13 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     SelectOverlayInfo selectInfo;
 
-    for (auto [spanType, content, responseType]: testPlan) {
-        modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options1);
+    for (auto [spanType, responseType]: testPlan) {
+        modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options1);
         pattern->CopySelectionMenuParams(selectInfo);
         ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
         selectInfo.menuInfo.menuBuilder();
         EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
-        modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options2);
+        modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options2);
         pattern->CopySelectionMenuParams(selectInfo);
         ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
         selectInfo.menuInfo.menuBuilder();
