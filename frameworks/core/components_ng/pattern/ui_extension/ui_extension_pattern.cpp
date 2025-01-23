@@ -1887,7 +1887,10 @@ bool UIExtensionPattern::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag f
 
 void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
+    if (IsAncestorNodeGeometryChange(flag)) {
+        DispatchDisplayArea();
+    }
+    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeGeometryChange(flag))) {
         return;
     }
     if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
