@@ -39,14 +39,10 @@ constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and m
 PixelMapPeer* CreatePixelMap()
 {
     static PixelMapPeer pixelMapPeer;
-    if (pixelMapPeer.pixelMap && pixelMapPeer.pixelMap->RefCount() > 0) {
-        pixelMapPeer.pixelMap->DecRefCount();
-    }
     static std::string src = "test";
     auto voidChar = src.data();
     void* voidPtr = static_cast<void*>(voidChar);
     pixelMapPeer.pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    pixelMapPeer.pixelMap->IncRefCount();
     return &pixelMapPeer;
 }
 const Ark_PixelMap TEST_PIXELMAP {
@@ -749,8 +745,10 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAtta
     const std::optional<ImageSpanAttribute>& imageAttribute = imageSpan->GetImageAttribute();
     ASSERT_TRUE(imageAttribute.has_value());
     ASSERT_TRUE(imageAttribute.value().size.has_value());
-    EXPECT_EQ(imageAttribute.value().size.value().width, CalcDimension(TEST_SIZEOPTIONS));
-    EXPECT_EQ(imageAttribute.value().size.value().height, CalcDimension(TEST_SIZEOPTIONS));
+    ASSERT_TRUE(imageAttribute->size->width.has_value());
+    ASSERT_TRUE(imageAttribute->size->height.has_value());
+    EXPECT_EQ(imageAttribute->size->width->ToString(), CalcDimension(TEST_SIZEOPTIONS).ToString());
+    EXPECT_EQ(imageAttribute->size->height->ToString(), CalcDimension(TEST_SIZEOPTIONS).ToString());
     ASSERT_TRUE(imageAttribute.value().verticalAlign.has_value());
     EXPECT_EQ(imageAttribute.value().verticalAlign.value(), std::get<0>(TEST_VERTICALALIGN));
     ASSERT_TRUE(imageAttribute.value().objectFit.has_value());
