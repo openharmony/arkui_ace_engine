@@ -40,8 +40,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
     CHECK_NULL_RETURN(toastContext, nullptr);
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
-    toastAccessibilityProperty->SetUserTextValue(toastInfo.message);
-    toastAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
+    toastAccessibilityProperty->SetText(toastInfo.message);
     // create text in toast
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
