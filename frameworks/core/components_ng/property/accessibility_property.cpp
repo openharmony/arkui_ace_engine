@@ -384,7 +384,8 @@ bool AccessibilityProperty::HoverTestRecursive(
     }
 
     if (shouldSearchChildren) {
-        PointF noOffsetPoint = selfPoint - rect.GetOffset();
+        auto orginRect = renderContext->GetPaintRectWithoutTransform();
+        PointF noOffsetPoint = selfPoint - orginRect.GetOffset();
         RecursiveParam recursiveParam;
         recursiveParam.hitTarget = hitTarget;
         recursiveParam.ancestorGroupFlag = currentGroupFlag;
