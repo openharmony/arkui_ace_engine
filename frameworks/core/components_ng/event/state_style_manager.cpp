@@ -129,11 +129,24 @@ void StateStyleManager::HandleTouchUp()
     }
 }
 
-void StateStyleManager::FireStateFunc(bool isReset)
+static bool isCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
 {
-    auto node = GetFrameNode();
-    CHECK_NULL_VOID(node);
-    auto nodeId = node->GetId();
+    return ((subscribers & handlingState) == handlingState || currentState == UI_STATE_NORMAL);
+}
+
+void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset)
+{
+    std::function<void(UIState)> onStateStyleChange;
+    if (isCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
+        onStateStyleChange = innerStateStyleSubscribers_.second;
+        if (onStateStyleChange) {
+            onStateStyleChange(currentState);
+        }
+    }
+    if (isCanUpdate(frontendSubscribers_, handlingState, currentState)) {
+        auto node = GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto nodeId = node->GetId();
 #ifdef IS_RELEASE_VERSION
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE,"Start execution, node is %{public}s, "
         "reset is %{public}d", node->GetTag().c_str(), isReset);
@@ -141,16 +154,29 @@ void StateStyleManager::FireStateFunc(bool isReset)
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, node is %{public}s/%{public}d, "
         "reset is %{public}d", node->GetTag().c_str(), nodeId, isReset);
 #endif
-    auto uiNode = DynamicCast<UINode>(node);
-    CHECK_NULL_VOID(uiNode);
-    RefPtr<CustomNodeBase> customNode;
-    GetCustomNode(customNode, uiNode);
-    if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
-        TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
+        auto uiNode = DynamicCast<UINode>(node);
+        CHECK_NULL_VOID(uiNode);
+        RefPtr<CustomNodeBase> customNode;
+        GetCustomNode(customNode, uiNode);
+        if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
+            TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
+            return;
+        }
+        ScopedViewStackProcessor processor;
+        customNode->FireNodeUpdateFunc(nodeId);
         return;
     }
-    ScopedViewStackProcessor processor;
-    customNode->FireNodeUpdateFunc(nodeId);
+    if (isCanUpdate(userStateStyleSubscribers_.first, handlingState, currentState)) {
+        onStateStyleChange = userStateStyleSubscribers_.second;
+        if (onStateStyleChange) {
+            onStateStyleChange(currentState);
+        }
+    }
+}
+
+void StateStyleManager::FireStateFunc(UIState handlingState, UIState currentState, bool isReset)
+{
+    HandleStateChangeInternal(handlingState, currentState, isReset);
 }
 
 void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node)
