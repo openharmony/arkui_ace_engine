@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,8 +110,7 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_CalendarDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_CalendarDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_CalendarDialogOptions arkOptions = *arkOptionsOpt;
@@ -160,7 +159,4 @@ const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccess
     return &CalendarPickerDialogAccessorImpl;
 }
 
-struct CalendarPickerDialogPeer {
-    virtual ~CalendarPickerDialogPeer() = default;
-};
 }

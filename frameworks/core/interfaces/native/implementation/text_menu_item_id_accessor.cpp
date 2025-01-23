@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(TextMenuItemIdPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->id = std::nullopt;
     delete peer;
 }
 Ark_NativePointer CtorImpl()
@@ -63,7 +61,4 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
     return &TextMenuItemIdAccessorImpl;
 }
 
-struct TextMenuItemIdPeer {
-    virtual ~TextMenuItemIdPeer() = default;
-};
 }

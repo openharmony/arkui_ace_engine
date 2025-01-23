@@ -36,7 +36,7 @@ const auto OPT_VALID_NUM = ArkValue<Opt_Number>(VALID_NUMBER);
 const auto OPT_INVALID_NUM = ArkValue<Opt_Number>(INVALID_NUMBER);
 const auto OPT_UNDEF_NUM = ArkValue<Opt_Number>();
 const auto ARK_EMPTY_STR = ArkValue<Ark_String>("");
-const Ark_Length RES_ARK_LENGTH = { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID };
+const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
 
 struct EventsTracker {
     static inline GENERATED_ArkUICommonMethodEventsReceiver commonMethodsEventsReceiver {};
@@ -106,9 +106,6 @@ const auto ATTRIBUTE_ID_DEFAULT_VALUE = "";
 
 typedef std::pair<Ark_Length, std::string> MarginPaddingOneTestStep;
 static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Length>(1), "1.00px" },
-    { Converter::ArkValue<Ark_Length>(-1), "-1.00px" },
-    { Converter::ArkValue<Ark_Length>(0), "0.00px" },
     { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
     { Converter::ArkValue<Ark_Length>(-2.45f), "-2.45vp" },
     { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
@@ -212,8 +209,6 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
-        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
         { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
         { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
         { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
@@ -241,7 +236,6 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest, setWidthTestInvalidValues, TestSize.Level1)
 {
     static const std::vector<Ark_Length> testPlan = {
-        Converter::ArkValue<Ark_Length>(-1),
         Converter::ArkValue<Ark_Length>(-2.45f),
         Converter::ArkValue<Ark_Length>(-5.0_px),
         Converter::ArkValue<Ark_Length>(-22.35_px),
@@ -283,8 +277,6 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
-        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
         { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
         { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
         { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
@@ -312,7 +304,6 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest, setHeightTestInvalidValues, TestSize.Level1)
 {
     static const std::vector<Ark_Length> testPlan = {
-        Converter::ArkValue<Ark_Length>(-1),
         Converter::ArkValue<Ark_Length>(-2.45f),
         Converter::ArkValue<Ark_Length>(-5.0_px),
         Converter::ArkValue<Ark_Length>(-22.35_px),
@@ -343,8 +334,6 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestValidHeightValues, TestSize.Level1
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
-        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
         { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
         { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
         { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
@@ -377,8 +366,6 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
-        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
         { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
         { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
         { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
@@ -412,7 +399,6 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestInvalidValues, TestSize.Level1)
     Ark_SizeOptions inputValue;
 
     static const std::vector<Ark_Length> testPlan = {
-        Converter::ArkValue<Ark_Length>(-1),
         Converter::ArkValue<Ark_Length>(-2.45f),
         Converter::ArkValue<Ark_Length>(-5.0_px),
         Converter::ArkValue<Ark_Length>(-22.35_px),
@@ -492,7 +478,7 @@ HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestId, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsCurveType, TestSize.Level1)
 {
     const auto nameDefaultCurve = Framework::CreateCurve(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR)->ToString();
-    Opt_sharedTransitionOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    auto realInputValue = Converter::ArkValue<Opt_sharedTransitionOptions>(Ark_sharedTransitionOptions{});
     auto& inputOptionCurveValue = realInputValue.value.curve;
 
     ASSERT_NE(modifier_->setSharedTransition, nullptr);
@@ -527,7 +513,7 @@ HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsCurveType, Test
 HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsCurveCustom, TestSize.Level1)
 {
     const auto nameDefaultCurve = Framework::CreateCurve(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR)->ToString();
-    Opt_sharedTransitionOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    auto realInputValue = Converter::ArkValue<Opt_sharedTransitionOptions>(Ark_sharedTransitionOptions{});
     auto& inputOptionCurveValue = realInputValue.value.curve;
 
     ASSERT_NE(modifier_->setSharedTransition, nullptr);
@@ -563,7 +549,7 @@ HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsCurveCustom, Te
 HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsCurveUndef, TestSize.Level1)
 {
     const auto nameDefaultCurve = Framework::CreateCurve(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR)->ToString();
-    Opt_sharedTransitionOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    auto realInputValue = Converter::ArkValue<Opt_sharedTransitionOptions>(Ark_sharedTransitionOptions{});
     auto& inputOptionCurveValue = realInputValue.value.curve;
 
     ASSERT_NE(modifier_->setSharedTransition, nullptr);
@@ -600,8 +586,8 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveI
  */
 HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsPath, TestSize.Level1)
 {
-    Opt_sharedTransitionOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    realInputValue.value.motionPath = {.tag = ARK_TAG_OBJECT, .value = {}};
+    auto realInputValue = Converter::ArkValue<Opt_sharedTransitionOptions>(Ark_sharedTransitionOptions{});
+    realInputValue.value.motionPath = Converter::ArkValue<Opt_MotionPathOptions>(Ark_MotionPathOptions{});
     auto& inputMotionPathValue = realInputValue.value.motionPath.value;
 
     ASSERT_NE(modifier_->setSharedTransition, nullptr);
@@ -648,7 +634,7 @@ HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsPath, TestSize.
  */
 HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsOtherArgs, TestSize.Level1)
 {
-    Opt_sharedTransitionOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    auto realInputValue = Converter::ArkValue<Opt_sharedTransitionOptions>(Ark_sharedTransitionOptions{});
     Ark_sharedTransitionOptions& inputValueOptions = realInputValue.value;
 
     ASSERT_NE(modifier_->setSharedTransition, nullptr);
@@ -722,13 +708,13 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundColorTest, TestSize.Level1)
         { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
     };
 
-    ASSERT_NE(modifier_->setBackgroundColor, nullptr);
+    ASSERT_NE(modifier_->setBackgroundColor0, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, Color::TRANSPARENT.ToString());
 
     for (const auto &[arkResColor, expected]: testPlan) {
-        modifier_->setBackgroundColor(node_, &arkResColor);
+        modifier_->setBackgroundColor0(node_, &arkResColor);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }
@@ -1318,7 +1304,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientTestDefaultValues, TestSize.
 HWTEST_F(CommonMethodModifierTest, setRadialGradientTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Type_CommonMethod_radialGradient_value inputValue;
+    Ark_RadialGradientOptions inputValue;
 
     // center
     inputValue.center.value0 = Converter::ArkValue<Ark_Length>(2.0_vp);
@@ -1337,7 +1323,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientTestValidValues, TestSize.Le
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value
-    modifier_->setRadialGradient(node_, &inputValue);
+    modifier_->setRadialGradient0(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
     auto centerResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_CENTER_NAME);
     EXPECT_EQ(centerResult, "[\"2.00vp\",\"3.00vp\"]");
@@ -1357,7 +1343,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientTestValidValues, TestSize.Le
 HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Type_CommonMethod_radialGradient_value inputValue;
+    Ark_RadialGradientOptions inputValue;
 
     typedef std::pair<Ark_Union_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -1390,7 +1376,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestS
     // check value
     for (const auto &[arkRadius, expected]: testPlan) {
         inputValue.radius = arkRadius;
-        modifier_->setRadialGradient(node_, &inputValue);
+        modifier_->setRadialGradient0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
         auto radiusResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_RADIUS_NAME);
         EXPECT_EQ(radiusResult, expected);
@@ -1405,7 +1391,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestS
 HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Type_CommonMethod_radialGradient_value inputValue;
+    Ark_RadialGradientOptions inputValue;
 
     typedef std::pair<Ark_Union_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -1437,7 +1423,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, Tes
     // check value
     for (const auto &[arkRadius, expected]: testPlan) {
         inputValue.radius = arkRadius;
-        modifier_->setRadialGradient(node_, &inputValue);
+        modifier_->setRadialGradient0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
         auto radiusResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_RADIUS_NAME);
         EXPECT_EQ(radiusResult, expected);
@@ -1452,28 +1438,26 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, Tes
 HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Type_CommonMethod_radialGradient_value inputValue;
+    Ark_RadialGradientOptions inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "[\"1.00px\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-1), "[\"-1.00px\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(2.45f), "[\"2.45vp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-2.45f), "[\"-2.45vp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(5.0_px), "[\"5.00px\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-5.0_px), "[\"-5.00px\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(22.35_px), "[\"22.35px\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-22.35_px), "[\"-22.35px\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), "[\"7.00vp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-7.0_vp), "[\"-7.00vp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(1.65_vp), "[\"1.65vp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-1.65_vp), "[\"-1.65vp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), "[\"65.00fp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"-65.00fp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"4.30fp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"-4.30fp\",\"0.00px\"]" },
-        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"1000.00%\",\"0.00px\"]" },
-        { RES_ARK_LENGTH, "[\"10.00px\",\"0.00px\"]" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "[\"2.45vp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-2.45f), "[\"-2.45vp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "[\"5.00px\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-5.0_px), "[\"-5.00px\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "[\"22.35px\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-22.35_px), "[\"-22.35px\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "[\"7.00vp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-7.0_vp), "[\"-7.00vp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "[\"1.65vp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-1.65_vp), "[\"-1.65vp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "[\"65.00fp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"-65.00fp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"4.30fp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"-4.30fp\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"1000.00%\",\"0.00vp\"]" },
+        { RES_ARK_LENGTH, "[\"10.00px\",\"0.00vp\"]" },
     };
 
     // radius
@@ -1494,8 +1478,8 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
     for (const auto &[arkCenter, expected]: testPlan) {
         // center
         inputValue.center.value0 = arkCenter;
-        inputValue.center.value1 = Converter::ArkValue<Ark_Length>(0);
-        modifier_->setRadialGradient(node_, &inputValue);
+        inputValue.center.value1 = Converter::ArkValue<Ark_Length>(0.);
+        modifier_->setRadialGradient0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
         auto centerResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_CENTER_NAME);
         EXPECT_EQ(centerResult, expected);
@@ -1510,28 +1494,26 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
 HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Type_CommonMethod_radialGradient_value inputValue;
+    Ark_RadialGradientOptions inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "[\"0.00px\",\"1.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-1), "[\"0.00px\",\"-1.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(2.45f), "[\"0.00px\",\"2.45vp\"]" },
-        { Converter::ArkValue<Ark_Length>(-2.45f), "[\"0.00px\",\"-2.45vp\"]" },
-        { Converter::ArkValue<Ark_Length>(5.0_px), "[\"0.00px\",\"5.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-5.0_px), "[\"0.00px\",\"-5.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(22.35_px), "[\"0.00px\",\"22.35px\"]" },
-        { Converter::ArkValue<Ark_Length>(-22.35_px), "[\"0.00px\",\"-22.35px\"]" },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), "[\"0.00px\",\"7.00vp\"]" },
-        { Converter::ArkValue<Ark_Length>(-7.0_vp), "[\"0.00px\",\"-7.00vp\"]" },
-        { Converter::ArkValue<Ark_Length>(1.65_vp), "[\"0.00px\",\"1.65vp\"]" },
-        { Converter::ArkValue<Ark_Length>(-1.65_vp), "[\"0.00px\",\"-1.65vp\"]" },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), "[\"0.00px\",\"65.00fp\"]" },
-        { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"0.00px\",\"-65.00fp\"]" },
-        { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"0.00px\",\"4.30fp\"]" },
-        { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"0.00px\",\"-4.30fp\"]" },
-        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"0.00px\",\"1000.00%\"]" },
-        { RES_ARK_LENGTH, "[\"0.00px\",\"10.00px\"]" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "[\"0.00vp\",\"2.45vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-2.45f), "[\"0.00vp\",\"-2.45vp\"]" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "[\"0.00vp\",\"5.00px\"]" },
+        { Converter::ArkValue<Ark_Length>(-5.0_px), "[\"0.00vp\",\"-5.00px\"]" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "[\"0.00vp\",\"22.35px\"]" },
+        { Converter::ArkValue<Ark_Length>(-22.35_px), "[\"0.00vp\",\"-22.35px\"]" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "[\"0.00vp\",\"7.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-7.0_vp), "[\"0.00vp\",\"-7.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "[\"0.00vp\",\"1.65vp\"]" },
+        { Converter::ArkValue<Ark_Length>(-1.65_vp), "[\"0.00vp\",\"-1.65vp\"]" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "[\"0.00vp\",\"65.00fp\"]" },
+        { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"0.00vp\",\"-65.00fp\"]" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"0.00vp\",\"4.30fp\"]" },
+        { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"0.00vp\",\"-4.30fp\"]" },
+        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"0.00vp\",\"1000.00%\"]" },
+        { RES_ARK_LENGTH, "[\"0.00vp\",\"10.00px\"]" },
     };
 
     // radius
@@ -1551,9 +1533,9 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
     // check value
     for (const auto &[arkCenter, expected]: testPlan) {
         // center
-        inputValue.center.value0 = Converter::ArkValue<Ark_Length>(0);
+        inputValue.center.value0 = Converter::ArkValue<Ark_Length>(0.);
         inputValue.center.value1 = arkCenter;
-        modifier_->setRadialGradient(node_, &inputValue);
+        modifier_->setRadialGradient0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
         auto centerResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_CENTER_NAME);
         EXPECT_EQ(centerResult, expected);
@@ -1568,7 +1550,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
 HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Type_CommonMethod_radialGradient_value inputValue;
+    Ark_RadialGradientOptions inputValue;
 
     // center
     inputValue.center.value0 = Converter::ArkValue<Ark_Length>(2.0_vp);
@@ -1587,21 +1569,21 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, Te
 
     // check undefined repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    modifier_->setRadialGradient(node_, &inputValue);
+    modifier_->setRadialGradient0(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
     auto repeatingResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_REPEATING_NAME);
     EXPECT_EQ(repeatingResult, "false");
 
     // check true repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(true);
-    modifier_->setRadialGradient(node_, &inputValue);
+    modifier_->setRadialGradient0(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
     repeatingResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_REPEATING_NAME);
     EXPECT_EQ(repeatingResult, "true");
 
     // check false repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(false);
-    modifier_->setRadialGradient(node_, &inputValue);
+    modifier_->setRadialGradient0(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
     repeatingResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_REPEATING_NAME);
     EXPECT_EQ(repeatingResult, "false");
@@ -1615,7 +1597,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, Te
 HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Type_CommonMethod_radialGradient_value inputValue;
+    Ark_RadialGradientOptions inputValue;
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
     const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
@@ -1637,7 +1619,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value
-    modifier_->setRadialGradient(node_, &inputValue);
+    modifier_->setRadialGradient0(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_RADIAL_GRADIENT_NAME);
     auto colResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_COLORS_NAME);
     EXPECT_EQ(colResult, "[[\"#FFFF0000\",\"0.500000\"],[\"#FFFF0000\",\"0.900000\"]]");
@@ -1743,8 +1725,6 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeValidValues, TestSize.L
 
     typedef std::pair<Ark_Length, std::string> OneTestStep2;
     static const std::vector<OneTestStep2> testPlan2 = {
-        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
-        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
         { Converter::ArkValue<Ark_Length>(2.45f), "2.45px" },
         { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
         { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
@@ -1833,7 +1813,6 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeInvalidValues, TestSize
     }
 
     static const std::vector<Ark_Length> testPlan2 = {
-        Converter::ArkValue<Ark_Length>(-1),
         Converter::ArkValue<Ark_Length>(-2.45f),
         Converter::ArkValue<Ark_Length>(-5.0_px),
         Converter::ArkValue<Ark_Length>(-22.35_px),
@@ -1897,8 +1876,6 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionValidValues, TestSi
 
     typedef std::pair<Ark_Length, double> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), 1.0 },
-        { Converter::ArkValue<Ark_Length>(0), 0.0 },
         { Converter::ArkValue<Ark_Length>(-2.5f), -2.5 },
         { Converter::ArkValue<Ark_Length>(5.0_px), 5.0 },
         { Converter::ArkValue<Ark_Length>(22.5_px), 22.5 },
@@ -1987,12 +1964,12 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
     EXPECT_EQ(strResult, "false");
 
     Ark_Type_CommonMethod_clip_value arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(true));
-    modifier_->setClip1(node_, &arg);
+    modifier_->setClip2(node_, &arg);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, "true");
 
     arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(false));
-    modifier_->setClip1(node_, &arg);
+    modifier_->setClip2(node_, &arg);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
 }
 
@@ -2041,7 +2018,7 @@ HWTEST_F(CommonMethodModifierTest, setScaleValidXValues, TestSize.Level1)
 
     for (const auto &[arkNumber, expected]: testPlan) {
         inputValue.x = arkNumber;
-        modifier_->setScale(node_, &inputValue);
+        modifier_->setScale0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_SCALE_NAME);
         auto x = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_X_NAME);
         EXPECT_EQ(x, expected);
@@ -2078,7 +2055,7 @@ HWTEST_F(CommonMethodModifierTest, setScaleValidYValues, TestSize.Level1)
 
     for (const auto &[arkNumber, expected]: testPlan) {
         inputValue.y = arkNumber;
-        modifier_->setScale(node_, &inputValue);
+        modifier_->setScale0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_SCALE_NAME);
         auto x = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_X_NAME);
         EXPECT_EQ(x, "1.000000");
@@ -2108,7 +2085,7 @@ HWTEST_F(CommonMethodModifierTest, setScaleValidCenterXValues, TestSize.Level1)
 
     for (const auto &[arkCenter, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.centerX = arkCenter;
-        modifier_->setScale(node_, &inputValue);
+        modifier_->setScale0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_SCALE_NAME);
         auto x = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_X_NAME);
         EXPECT_EQ(x, "1.000000");
@@ -2138,7 +2115,7 @@ HWTEST_F(CommonMethodModifierTest, setScaleValidCenterYValues, TestSize.Level1)
 
     for (const auto &[arkCenter, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.centerY= arkCenter;
-        modifier_->setScale(node_, &inputValue);
+        modifier_->setScale0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_SCALE_NAME);
         auto x = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_X_NAME);
         EXPECT_EQ(x, "1.000000");
@@ -2178,7 +2155,7 @@ HWTEST_F(CommonMethodModifierTest, setTranslateValidXValues, TestSize.Level1)
 
     for (const auto &[arkTranslate, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.x = arkTranslate;
-        modifier_->setTranslate(node_, &inputValue);
+        modifier_->setTranslate0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_TRANSLATE_NAME);
         auto x = GetAttrValue<std::string>(strResult, ATTRIBUTE_TRANSLATE_X_NAME);
         EXPECT_EQ(x, expected);
@@ -2205,7 +2182,7 @@ HWTEST_F(CommonMethodModifierTest, setTranslateValidYValues, TestSize.Level1)
 
     for (const auto &[arkTranslate, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.y = arkTranslate;
-        modifier_->setTranslate(node_, &inputValue);
+        modifier_->setTranslate0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_TRANSLATE_NAME);
         auto x = GetAttrValue<std::string>(strResult, ATTRIBUTE_TRANSLATE_X_NAME);
         EXPECT_EQ(x, "0.00px");
@@ -2232,7 +2209,7 @@ HWTEST_F(CommonMethodModifierTest, setTranslateValidZValues, TestSize.Level1)
 
     for (const auto &[arkTranslate, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.z = arkTranslate;
-        modifier_->setTranslate(node_, &inputValue);
+        modifier_->setTranslate0(node_, &inputValue);
         strResult = GetStringAttribute(node_, ATTRIBUTE_TRANSLATE_NAME);
         auto x = GetAttrValue<std::string>(strResult, ATTRIBUTE_TRANSLATE_X_NAME);
         EXPECT_EQ(x, "0.00px");

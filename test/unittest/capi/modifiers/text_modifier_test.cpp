@@ -438,11 +438,10 @@ HWTEST_F(TextModifierTest, setMaxLines, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setDecoration, TestSize.Level1)
 {
-    Ark_ResourceColor color1 = { .selector = 0, .value0 = ARK_COLOR_GREEN };
     Ark_DecorationStyleInterface v1 = {
         .type = ARK_TEXT_DECORATION_TYPE_UNDERLINE,
-        .style = { .tag = ARK_TAG_OBJECT, .value = ARK_TEXT_DECORATION_STYLE_DASHED },
-        .color = { .tag = ARK_TAG_OBJECT, .value = color1 }
+        .style = Converter::ArkValue<Opt_TextDecorationStyle>(ARK_TEXT_DECORATION_STYLE_DASHED),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN),
     };
 
     modifier_->setDecoration(node_, &v1);
@@ -530,13 +529,11 @@ HWTEST_F(TextModifierTest, setCopyOption, TestSize.Level1)
 HWTEST_F(TextModifierTest, setTextShadow, TestSize.Level1)
 {
     Ark_ShadowOptions shadow = {
-        .radius = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(1.5f) },
-        .type = { .tag = ARK_TAG_OBJECT, .value = ARK_SHADOW_TYPE_COLOR },
-        .color = { .tag = ARK_TAG_OBJECT, .value = { .selector = 0, .value0 = ARK_COLOR_GREEN }},
-        .offsetX = { .tag = ARK_TAG_OBJECT,
-                     .value = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(2.5f) }},
-        .offsetY = { .tag = ARK_TAG_OBJECT,
-                     .value = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(3.5f) }}
+        .radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1.5f),
+        .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
+        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_GREEN),
+        .offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(2.5f),
+        .offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(3.5f),
     };
 
     Ark_Union_ShadowOptions_Array_ShadowOptions v1 = {
@@ -568,12 +565,7 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicy, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setTextIndent, TestSize.Level1)
 {
-    Ark_Length v1 = {
-        .type = ARK_TAG_LENGTH,
-        .unit = static_cast<int>(DimensionUnit::PX),
-        .value = 11.25f
-    };
-
+    Ark_Length v1 = Converter::ArkValue<Ark_Length>("11.25px");
     modifier_->setTextIndent(node_, &v1);
     auto checkVal1 = GetStringAttribute(node_, TEXT_INDENT_ATTR);
     EXPECT_EQ(checkVal1, "11.25px");
@@ -1023,17 +1015,17 @@ HWTEST_F(TextModifierTest, setTextShadowTestArrayValues, TestSize.Level1)
     std::string resultStr;
     Ark_ShadowOptions shadow1 = {
         .color = ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FFAABB01"),
-        .offsetX = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(50.f) },
-        .offsetY = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(55.f) },
+        .offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(50.f),
+        .offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(55.f),
         .radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(12),
-        .type = { .tag = ARK_TAG_OBJECT, .value = ARK_SHADOW_TYPE_COLOR }
+        .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
     };
     Ark_ShadowOptions shadow2 = {
         .color = ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FFAABB22"),
-        .offsetX = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(70.f) },
-        .offsetY = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(75.f) },
+        .offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(70.f),
+        .offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(75.f),
         .radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(20),
-        .type = { .tag = ARK_TAG_OBJECT, .value = ARK_SHADOW_TYPE_BLUR }
+        .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_BLUR),
     };
     std::vector<Ark_ShadowOptions> vec = { shadow1, shadow2 };
     Array_ShadowOptions array = { .array = vec.data(), .length = vec.size() };

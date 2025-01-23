@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,12 +49,12 @@ Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
     return nullptr;
 }
 void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Callback_UIExtensionProxy_Void* callback)
+                                 const Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback);
-    auto func = [arkCallback = CallbackHelper(*callback)](const RefPtr<UIExtensionProxy>& proxy) {
+    CHECK_NULL_VOID(callback_);
+    auto func = [arkCallback = CallbackHelper(*callback_)](const RefPtr<UIExtensionProxy>& proxy) {
         auto accessor = GetUIExtensionProxyAccessor();
         CHECK_NULL_VOID(accessor);
         auto peer = accessor->ctor();
@@ -65,7 +65,7 @@ void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
     };
 
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
-    peer->AddAsyncCallbackToList(callback->resource.resourceId, std::move(func));
+    peer->AddAsyncCallbackToList(callback_->resource.resourceId, std::move(func));
     auto pattern = peer->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto funcList = peer->GetOnAsyncCallbackList();
@@ -73,12 +73,12 @@ void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                const Callback_UIExtensionProxy_Void* callback)
+                                const Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback);
-    auto func = [arkCallback = CallbackHelper(*callback)](const RefPtr<UIExtensionProxy>& proxy) {
+    CHECK_NULL_VOID(callback_);
+    auto func = [arkCallback = CallbackHelper(*callback_)](const RefPtr<UIExtensionProxy>& proxy) {
         auto accessor = GetUIExtensionProxyAccessor();
         CHECK_NULL_VOID(accessor);
         auto peer = accessor->ctor();
@@ -89,7 +89,7 @@ void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
     };
 
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
-    peer->AddSyncCallbackToList(callback->resource.resourceId, std::move(func));
+    peer->AddSyncCallbackToList(callback_->resource.resourceId, std::move(func));
     auto pattern = peer->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto funcList = peer->GetOnSyncCallbackList();
@@ -97,12 +97,12 @@ void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                  const Opt_Callback_UIExtensionProxy_Void* callback)
+                                  const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback);
-    auto cb = Converter::OptConvert<Callback_UIExtensionProxy_Void>(*callback);
+    CHECK_NULL_VOID(callback_);
+    auto cb = Converter::OptConvert<Callback_UIExtensionProxy_Void>(*callback_);
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
     if (cb) {
         peer->DeleteAsyncCallbackFromList(cb.value().resource.resourceId);
@@ -116,12 +116,12 @@ void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Opt_Callback_UIExtensionProxy_Void* callback)
+                                 const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback);
-    auto cb = Converter::OptConvert<Callback_UIExtensionProxy_Void>(*callback);
+    CHECK_NULL_VOID(callback_);
+    auto cb = Converter::OptConvert<Callback_UIExtensionProxy_Void>(*callback_);
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
     if (cb) {
         peer->DeleteSyncCallbackFromList(cb.value().resource.resourceId);
@@ -151,7 +151,4 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
     return &UIExtensionProxyAccessorImpl;
 }
 
-struct UIExtensionProxyPeer {
-    virtual ~UIExtensionProxyPeer() = default;
-};
 }

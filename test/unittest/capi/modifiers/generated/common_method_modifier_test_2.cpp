@@ -1285,11 +1285,11 @@ HWTEST_P(
 }
 
 /*
- * @tc.name: setRenderFitTestDefaultValues
+ * @tc.name: setRenderFit0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRenderFitTestDefaultValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRenderFit0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1299,11 +1299,11 @@ HWTEST_P(CommonMethodModifierTest, setRenderFitTestDefaultValues, TestSize.Level
 }
 
 /*
- * @tc.name: setRenderFitTestRenderFitValidValues
+ * @tc.name: setRenderFit0TestRenderFitValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRenderFit0TestRenderFitValidValues, TestSize.Level1)
 {
     Ark_RenderFit initValueRenderFit;
 
@@ -1315,11 +1315,11 @@ HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitValidValues, TestSiz
         Ark_RenderFit inputValueRenderFit = initValueRenderFit;
 
         inputValueRenderFit = value;
-        modifier_->setRenderFit(node_, inputValueRenderFit);
+        modifier_->setRenderFit0(node_, inputValueRenderFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRenderFit, attribute: renderFit";
+            "Input value is: " << input << ", method: setRenderFit0, attribute: renderFit";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumRenderFitValidValues) {
@@ -1328,11 +1328,11 @@ HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitValidValues, TestSiz
 }
 
 /*
- * @tc.name: setRenderFitTestRenderFitInvalidValues
+ * @tc.name: setRenderFit0TestRenderFitInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitInvalidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRenderFit0TestRenderFitInvalidValues, TestSize.Level1)
 {
     Ark_RenderFit initValueRenderFit;
 
@@ -1342,13 +1342,13 @@ HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitInvalidValues, TestS
     auto checkValue = [this, &initValueRenderFit](const std::string& input, const Ark_RenderFit& value) {
         Ark_RenderFit inputValueRenderFit = initValueRenderFit;
 
-        modifier_->setRenderFit(node_, inputValueRenderFit);
+        modifier_->setRenderFit0(node_, inputValueRenderFit);
         inputValueRenderFit = value;
-        modifier_->setRenderFit(node_, inputValueRenderFit);
+        modifier_->setRenderFit0(node_, inputValueRenderFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setRenderFit, attribute: renderFit";
+            "Input value is: " << input << ", method: setRenderFit0, attribute: renderFit";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumRenderFitInvalidValues) {

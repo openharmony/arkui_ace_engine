@@ -180,30 +180,30 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
 
     // set valid values, color as Ark_Color aka int
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    EXPECT_EQ(strokeWidthCheckValue, "11.00vp");
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
     EXPECT_EQ(startMarginCheckValue, "55.50vp");
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "77.00px");
+    EXPECT_EQ(endMarginCheckValue, "77.00vp");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
 
     // set color as Ark_Number
     dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456),
     };
     divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -222,17 +222,17 @@ HWTEST_F(ListItemGroupModifierTest, setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
         .startMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .color = {.tag = ARK_TAG_UNDEFINED}
+        .color = Converter::ArkValue<Opt_ResourceColor>(),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    EXPECT_EQ(strokeWidthCheckValue, "11.00vp");
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
     EXPECT_EQ(startMarginCheckValue, "0.00vp");
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
@@ -250,10 +250,10 @@ HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
 {
     // set color as Ark_String
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);

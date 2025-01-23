@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,18 +82,12 @@ RectRadius Convert(const Ark_String& src)
 }
 
 template<>
-RectRadius Convert(const Array_CustomObject& src)
+RectRadius Convert(const Array_Union_Number_String& src)
 {
     RectRadius radiusStruct;
     radiusStruct.radiusWidth = std::make_optional<Dimension>(Dimension(0));
     radiusStruct.radiusHeight = std::make_optional<Dimension>(Dimension(0));
     return radiusStruct;
-}
-
-template<>
-Dimension Convert(const Array_CustomObject& src)
-{
-    return Dimension(0);
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -156,15 +150,17 @@ void RadiusHeightImpl(Ark_NativePointer node,
     RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value());
 }
 void RadiusImpl(Ark_NativePointer node,
-                const Ark_Union_Number_String_Array_Any* value)
+                const Ark_Union_Number_String_Array_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto radius = Converter::OptConvert<Dimension>(*value);
+    auto radius = Converter::OptConvert<RectRadius>(*value);
     CHECK_NULL_VOID(radius);
-    RectModelNG::SetRadiusWidth(frameNode, radius.value());
-    RectModelNG::SetRadiusHeight(frameNode, radius.value());
+    CHECK_NULL_VOID(radius->radiusHeight);
+    CHECK_NULL_VOID(radius->radiusWidth);
+    RectModelNG::SetRadiusWidth(frameNode, radius->radiusWidth.value());
+    RectModelNG::SetRadiusHeight(frameNode, radius->radiusHeight.value());
 }
 } // RectAttributeModifier
 const GENERATED_ArkUIRectModifier* GetRectModifier()

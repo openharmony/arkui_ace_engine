@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,7 +89,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
                    const Opt_String* type,
-                   const Opt_CustomObject* quality)
+                   const Opt_Number* quality)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
@@ -120,38 +120,38 @@ void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
     peerImpl->TriggerStopImageAnalyzer();
 }
 void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
-                    const Callback_Void* callback)
+                    const Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(callback);
-    auto arkCallback = CallbackHelper(*callback);
+    CHECK_NULL_VOID(callback_);
+    auto arkCallback = CallbackHelper(*callback_);
     peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
 void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
-                     const Opt_Callback_Void* callback)
+                     const Opt_Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
+    auto optCallback = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
 void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
-                    const Callback_Void* callback)
+                    const Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(callback);
-    auto arkCallback = CallbackHelper(*callback);
+    CHECK_NULL_VOID(callback_);
+    auto arkCallback = CallbackHelper(*callback_);
     peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
 void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
-                     const Opt_Callback_Void* callback)
+                     const Opt_Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
+    auto optCallback = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
@@ -187,7 +187,4 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
     return &CanvasRenderingContext2DAccessorImpl;
 }
 
-struct CanvasRenderingContext2DPeer {
-    virtual ~CanvasRenderingContext2DPeer() = default;
-};
 }

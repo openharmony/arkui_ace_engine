@@ -75,7 +75,7 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLinearGradientBlur, nullptr);
+    ASSERT_NE(modifier_->setLinearGradientBlur0, nullptr);
     using OneTestStep = std::tuple<Ark_Number, Ark_LinearGradientBlurOptions, std::string>;
     std::vector<FractionStop> val1 = {{1.1f, 2.2f}, {3.3f, 4.4f}, {5.5f, 6.6f}};
     Converter::ArkArrayHolder<Array_FractionStop> frac(val1);
@@ -91,7 +91,7 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSi
         },
     };
     for (auto [inputValueNum, inputValueGradient, expectedValue]: testPlan) {
-        modifier_->setLinearGradientBlur(node_, &inputValueNum, &inputValueGradient);
+        modifier_->setLinearGradientBlur0(node_, &inputValueNum, &inputValueGradient);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -105,8 +105,8 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLinearGradientBlur, nullptr);
-    modifier_->setLinearGradientBlur(node_, nullptr, nullptr);
+    ASSERT_NE(modifier_->setLinearGradientBlur0, nullptr);
+    modifier_->setLinearGradientBlur0(node_, nullptr, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME);
     EXPECT_EQ(resultValue, ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE)
@@ -162,7 +162,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setBlendMode, nullptr);
+    ASSERT_NE(modifier_->setBlendMode0, nullptr);
     using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
     auto blendType = Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST);
     static const std::vector<OneTestStep> testPlan = {
@@ -195,7 +195,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level
         {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
     };
     for (auto [inputValueMode, inputValueType, expectedValue]: testPlan) {
-        modifier_->setBlendMode(node_, inputValueMode, &inputValueType);
+        modifier_->setBlendMode0(node_, inputValueMode, &inputValueType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -209,7 +209,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level
  */
 HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues2, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setBlendMode, nullptr);
+    ASSERT_NE(modifier_->setBlendMode0, nullptr);
     using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
     auto blendType = Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_OFFSCREEN);
     static const std::vector<OneTestStep> testPlan = {
@@ -242,7 +242,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues2, TestSize.Level
         {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
     };
     for (auto [inputValueMode, inputValueType, expectedValue]: testPlan) {
-        modifier_->setBlendMode(node_, inputValueMode, &inputValueType);
+        modifier_->setBlendMode0(node_, inputValueMode, &inputValueType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -251,14 +251,14 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues2, TestSize.Level
 
 HWTEST_F(CommonMethodModifierTest5, setBlendModeTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setBlendMode, nullptr);
+    ASSERT_NE(modifier_->setBlendMode0, nullptr);
     using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {static_cast<Ark_BlendMode>(-1), Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
         {static_cast<Ark_BlendMode>(999), Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
     };
     for (const auto& [blendMode, applyType, expectedValue] : testPlan) {
-        modifier_->setBlendMode(node_, blendMode, &applyType);
+        modifier_->setBlendMode0(node_, blendMode, &applyType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Invalid value should not change the blend mode";

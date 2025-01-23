@@ -54,7 +54,7 @@ const std::tuple<std::string, Ark_Color> TEST_TEXT_SHADOW_COLOR = {
     "#FFFF0000", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED) };
 const std::tuple<std::string, Ark_Color> TEST_BGCL_COLOR = {
     "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
-const std::tuple<std::string, int> TEST_BGCL_RADIUS = { "10.00px", 10 };
+const std::tuple<std::string, float> TEST_BGCL_RADIUS = { "10.00vp", 10.f };
 const std::string TEST_URL = "https://www.test.test";
 const std::tuple<Ace::TextAlign, Ark_TextAlign> TEST_PSST_TEXT_ALIGN = {
     Ace::TextAlign::CENTER, ARK_TEXT_ALIGN_CENTER};

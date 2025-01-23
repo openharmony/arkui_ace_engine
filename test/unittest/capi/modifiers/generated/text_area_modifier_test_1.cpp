@@ -2039,149 +2039,157 @@ HWTEST_F(TextAreaModifierTest, setMaxFontSizeTestMaxFontSizeInvalidValues, TestS
 }
 
 /*
- * @tc.name: setHeightAdaptivePolicyTestDefaultValues
+ * @tc.name: setMinFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setMinFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
-        "Default value for attribute 'heightAdaptivePolicy'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
 }
 
 /*
- * @tc.name: setHeightAdaptivePolicyTestHeightAdaptivePolicyValidValues
+ * @tc.name: setMinFontScaleTestMinFontScaleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setMinFontScaleTestMinFontScaleValidValues, TestSize.Level1)
 {
-    Ark_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
+    Opt_Union_Number_Resource initValueMinFontScale;
 
     // Initial setup
-    initValueHeightAdaptivePolicy = std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]);
+    initValueMinFontScale =
+        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueHeightAdaptivePolicy](const std::string& input, const std::string& expectedStr,
-                          const Ark_TextHeightAdaptivePolicy& value) {
-        Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
 
-        inputValueHeightAdaptivePolicy = value;
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues) {
-        checkValue(input, expected, value);
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
- * @tc.name: setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues
+ * @tc.name: setMinFontScaleTestMinFontScaleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setMinFontScaleTestMinFontScaleInvalidValues, TestSize.Level1)
 {
-    Ark_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
+    Opt_Union_Number_Resource initValueMinFontScale;
 
     // Initial setup
-    initValueHeightAdaptivePolicy = std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]);
+    initValueMinFontScale =
+        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueHeightAdaptivePolicy](
-                          const std::string& input, const Ark_TextHeightAdaptivePolicy& value) {
-        Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
 
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
-        inputValueHeightAdaptivePolicy = value;
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyInvalidValues) {
-        checkValue(input, value);
-    }
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_Resource>());
 }
 
 /*
- * @tc.name: setMaxLinesTestDefaultValues
+ * @tc.name: setMaxFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setMaxFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) << "Default value for attribute 'maxLines'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
 }
 
 /*
- * @tc.name: setMaxLinesTestMaxLinesValidValues
+ * @tc.name: setMaxFontScaleTestMaxFontScaleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleValidValues, TestSize.Level1)
 {
-    Ark_Number initValueMaxLines;
+    Opt_Union_Number_Resource initValueMaxFontScale;
 
     // Initial setup
-    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
+    initValueMaxFontScale =
+        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueMaxLines](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Number inputValueMaxLines = initValueMaxLines;
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
 
-        inputValueMaxLines = value;
-        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberPosIntFloorValidValues) {
-        checkValue(input, expected, value);
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
- * @tc.name: setMaxLinesTestMaxLinesInvalidValues
+ * @tc.name: setMaxFontScaleTestMaxFontScaleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleInvalidValues, TestSize.Level1)
 {
-    Ark_Number initValueMaxLines;
+    Opt_Union_Number_Resource initValueMaxFontScale;
 
     // Initial setup
-    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
+    initValueMaxFontScale =
+        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Number& value) {
-        Ark_Number inputValueMaxLines = initValueMaxLines;
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
 
-        modifier_->setMaxLines(node_, &inputValueMaxLines);
-        inputValueMaxLines = value;
-        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureNumberPosIntFloorInvalidValues) {
-        checkValue(input, value);
-    }
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_Resource>());
 }
 
 } // namespace OHOS::Ace::NG

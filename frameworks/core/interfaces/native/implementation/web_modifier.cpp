@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,6 +133,7 @@ void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src)
 
 void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)
 {
+#ifdef WRONG_TYPE
     TouchEvent touchEvent = src.ConvertToTouchEvent();
     dst.tiltX = Converter::ArkValue<Ark_Number>(src.GetTiltX().value_or(0.0f));
     dst.tiltY = Converter::ArkValue<Ark_Number>(src.GetTiltY().value_or(0.0f));
@@ -147,6 +148,7 @@ void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)
                 src.GetTimeStamp().time_since_epoch()).count());
     dst.pressure = Converter::ArkValue<Ark_Number>(touchEvent.force);
     dst.type = Converter::ArkValue<Ark_TouchType>(touchEvent.type);
+#endif
 }
 
 void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src)
@@ -401,6 +403,15 @@ void OverScrollModeImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<OverScrollMode>(value);
     WebModelNG::SetOverScrollMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
+}
+void BlurOnKeyboardHideModeImpl(Ark_NativePointer node,
+                                Ark_BlurOnKeyboardHideMode value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //WebModelNG::SetBlurOnKeyboardHideMode(frameNode, convValue);
 }
 void TextZoomAtioImpl(Ark_NativePointer node,
                       const Ark_Number* value)
@@ -761,7 +772,7 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
-                            const Callback_Literal_Function_callback_Object_fileSelector_Void* value)
+                            const Type_WebAttribute_onFileSelectorShow_callback* value)
 {
     // deprecated
 }
@@ -1735,6 +1746,22 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     WebModelNG::SetEnabledHapticFeedback(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
+void EnableFollowSystemFontWeightImpl(Ark_NativePointer node,
+                                      Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //WebModelNG::SetEnableFollowSystemFontWeight(frameNode, convValue);
+}
+void EnableWebAVSessionImpl(Ark_NativePointer node,
+                            Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //WebModelNG::SetEnableWebAVSession(frameNode, convValue);
+}
 void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                  const Ark_String* tag,
                                  const Ark_String* type)
@@ -1840,6 +1867,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::WideViewModeAccessImpl,
         WebAttributeModifier::OverviewModeAccessImpl,
         WebAttributeModifier::OverScrollModeImpl,
+        WebAttributeModifier::BlurOnKeyboardHideModeImpl,
         WebAttributeModifier::TextZoomAtioImpl,
         WebAttributeModifier::TextZoomRatioImpl,
         WebAttributeModifier::DatabaseAccessImpl,
@@ -1941,6 +1969,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::KeyboardAvoidModeImpl,
         WebAttributeModifier::EditMenuOptionsImpl,
         WebAttributeModifier::EnableHapticFeedbackImpl,
+        WebAttributeModifier::EnableFollowSystemFontWeightImpl,
+        WebAttributeModifier::EnableWebAVSessionImpl,
         WebAttributeModifier::RegisterNativeEmbedRuleImpl,
         WebAttributeModifier::BindSelectionMenuImpl,
     };

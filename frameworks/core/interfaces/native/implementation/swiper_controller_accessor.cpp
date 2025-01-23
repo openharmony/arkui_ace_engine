@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,11 +69,11 @@ void ChangeIndexImpl(SwiperControllerPeer* peer,
     peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
 }
 void FinishAnimationImpl(SwiperControllerPeer* peer,
-                         const Opt_VoidCallback* callback)
+                         const Opt_VoidCallback* callback_)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto arkCallbackOpt = callback ? Converter::OptConvert<VoidCallback>(*callback) : std::nullopt;
+    auto arkCallbackOpt = callback_ ? Converter::OptConvert<VoidCallback>(*callback_) : std::nullopt;
     if (arkCallbackOpt) {
         auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
             arkCallback.Invoke();
@@ -81,6 +81,11 @@ void FinishAnimationImpl(SwiperControllerPeer* peer,
         peerImpl->SetFinishCallback(onFinish);
     }
     peerImpl->TriggerFinishAnimation();
+}
+void PreloadItemsImpl(SwiperControllerPeer* peer,
+                      const Opt_Array_Number* indices,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
 }
 } // SwiperControllerAccessor
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
@@ -93,11 +98,9 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
         SwiperControllerAccessor::ShowPreviousImpl,
         SwiperControllerAccessor::ChangeIndexImpl,
         SwiperControllerAccessor::FinishAnimationImpl,
+        SwiperControllerAccessor::PreloadItemsImpl,
     };
     return &SwiperControllerAccessorImpl;
 }
 
-struct SwiperControllerPeer {
-    virtual ~SwiperControllerPeer() = default;
-};
 }

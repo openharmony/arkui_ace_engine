@@ -27,15 +27,13 @@ using namespace testing;
 using namespace testing::ext;
 
 static bool g_isCheckedTest = false;
-static constexpr int SIZE1 = 111;
-static constexpr int SIZE2 = 222;
 
 static void onChangeCallback(Ark_Int32 nodeId, const Ark_CheckboxGroupResult event)
 {
     g_isCheckedTest = !g_isCheckedTest;
 };
 static GENERATED_ArkUICheckboxGroupEventsReceiver recv {
-    .onChange = onChangeCallback
+    .onChange0 = onChangeCallback
 };
 static const GENERATED_ArkUICheckboxGroupEventsReceiver* getEventsReceiverTest()
 {
@@ -71,7 +69,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level
     auto checkVal1 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal1, "#FF007DFF");
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
-    modifier_->setSelectedColor(node_, &color);
+    modifier_->setSelectedColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
 }
@@ -86,7 +84,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level
     auto checkVal1 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal1, "#FF000000");
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
-    modifier_->setUnselectedColor(node_, &color);
+    modifier_->setUnselectedColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
 }
@@ -100,7 +98,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal1, "false");
-    modifier_->setSelectAll(node_, true);
+    modifier_->setSelectAll0(node_, true);
     auto checkVal2 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal2, "true");
 }
@@ -114,14 +112,10 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level
 {
     Ark_MarkStyle style;
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
-    Ark_Length len1 = { .value = SIZE1 };
-    Ark_Length len2 = { .value = SIZE2 };
-    Opt_Length opt1 = { .tag = ARK_TAG_INT32, .value = len1 };
-    Opt_Length opt2 = { .tag = ARK_TAG_INT32, .value = len2 };
     style.strokeColor.value = color;
-    style.size = opt1;
-    style.strokeWidth = opt2;
-    modifier_->setMark(node_, &style);
+    style.size = Converter::ArkValue<Opt_Length>("111.00px");
+    style.strokeWidth = Converter::ArkValue<Opt_Length>("222.00px");
+    modifier_->setMark0(node_, &style);
 
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     const InspectorFilter inspector;
@@ -152,11 +146,11 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestS
     auto checkVal1 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal1, "CIRCLE");
 
-    modifier_->setCheckboxShape(node_, ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
+    modifier_->setCheckboxShape0(node_, ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
     auto checkVal2 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal2, "ROUNDED_SQUARE");
 
-    modifier_->setCheckboxShape(node_, ARK_CHECK_BOX_SHAPE_CIRCLE);
+    modifier_->setCheckboxShape0(node_, ARK_CHECK_BOX_SHAPE_CIRCLE);
     auto checkVal3 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal3, "CIRCLE");
 }
@@ -170,7 +164,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest006, TestSize.Level
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     OnCheckboxGroupChangeCallback func{};
-    modifier_->setOnChange(node_, &func);
+    modifier_->setOnChange0(node_, &func);
     EXPECT_EQ(g_isCheckedTest, false);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
 

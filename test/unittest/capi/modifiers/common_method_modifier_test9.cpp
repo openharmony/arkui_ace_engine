@@ -381,7 +381,9 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
         checkEvent = {
             .nodeId = resourceId,
             .isHover = isHover,
+#ifdef WRONG_TYPE
             .pressure = Converter::Convert<int32_t>(event.pressure)
+#endif
         };
     };
 
@@ -441,7 +443,9 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         checkEvent = {
             .nodeId = resourceId,
             .isHover = isHover,
+#ifdef WRONG_TYPE
             .pressure = Converter::Convert<int32_t>(event.pressure)
+#endif
         };
     };
 

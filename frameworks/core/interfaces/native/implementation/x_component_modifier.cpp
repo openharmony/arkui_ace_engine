@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,6 +178,23 @@ void EnableSecureImpl(Ark_NativePointer node,
     XComponentModelNG::EnableSecure(frameNode, convValue);
 #endif // XCOMPONENT_SUPPORTED
 }
+void HdrBrightnessImpl(Ark_NativePointer node,
+                       const Ark_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //XComponentModelNG::SetHdrBrightness(frameNode, convValue);
+}
+void EnableTransparentLayerImpl(Ark_NativePointer node,
+                                Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //XComponentModelNG::SetEnableTransparentLayer(frameNode, convValue);
+}
 } // XComponentAttributeModifier
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
 {
@@ -190,6 +207,8 @@ const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
         XComponentAttributeModifier::OnDestroyImpl,
         XComponentAttributeModifier::EnableAnalyzerImpl,
         XComponentAttributeModifier::EnableSecureImpl,
+        XComponentAttributeModifier::HdrBrightnessImpl,
+        XComponentAttributeModifier::EnableTransparentLayerImpl,
     };
     return &ArkUIXComponentModifierImpl;
 }

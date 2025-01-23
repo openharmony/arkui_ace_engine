@@ -178,7 +178,7 @@ HWTEST_F(CommonMethodModifierTest4, setColorBlendTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(CommonMethodModifierTest4, setColorBlendTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setColorBlend, nullptr);
+    ASSERT_NE(modifier_->setColorBlend0, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Color_String_Resource, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_WHITE), "#FFFFFFFF"},
@@ -196,7 +196,7 @@ HWTEST_F(CommonMethodModifierTest4, setColorBlendTestValidValues, TestSize.Level
             "#00000000"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setColorBlend(node_, &inputValue);
+        modifier_->setColorBlend0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_COLOR_BLEND_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -210,14 +210,14 @@ HWTEST_F(CommonMethodModifierTest4, setColorBlendTestValidValues, TestSize.Level
  */
 HWTEST_F(CommonMethodModifierTest4, setColorBlendTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setColorBlend, nullptr);
+    ASSERT_NE(modifier_->setColorBlend0, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Color_String_Resource, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_String>(""), ""},
         {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_String>("failValue"), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setColorBlend(node_, &inputValue);
+        modifier_->setColorBlend0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_COLOR_BLEND_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -242,7 +242,7 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, setInvertTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setInvert, nullptr);
+    ASSERT_NE(modifier_->setInvert0, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_InvertOptions, std::string>;
     InvertOption val1 = {1.0f, 2.0f, 3.0f, 4.0f};
     static const std::vector<OneTestStep> testPlan = {
@@ -257,7 +257,7 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestValidValues, TestSize.Level1)
             "{\"low\":1,\"high\":2,\"threshold\":3,\"thresholdRange\":4}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setInvert(node_, &inputValue);
+        modifier_->setInvert0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_INVERT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -271,7 +271,7 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestValidValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, setInvertTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setInvert, nullptr);
+    ASSERT_NE(modifier_->setInvert0, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_InvertOptions, std::string>;
     InvertOption val1 = {-1.0, 2.0, 3.0, 4.0};
     static const std::vector<OneTestStep> testPlan = {
@@ -281,7 +281,7 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestInvalidValues, TestSize.Level1)
             Converter::ArkValue<Ark_InvertOptions>(val1)), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setInvert(node_, &inputValue);
+        modifier_->setInvert0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_INVERT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -307,7 +307,7 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setHueRotate, nullptr);
+    ASSERT_NE(modifier_->setHueRotate0, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_String, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0)), 0.0},
@@ -317,7 +317,7 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
         {Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-90.0")), -90.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setHueRotate(node_, &inputValue);
+        modifier_->setHueRotate0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -331,14 +331,14 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, setHueRotateInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setHueRotate, nullptr);
+    ASSERT_NE(modifier_->setHueRotate0, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_String, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), 0.0},
         {Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("badValue")), 0.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setHueRotate(node_, &inputValue);
+        modifier_->setHueRotate0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -397,14 +397,14 @@ HWTEST_F(CommonMethodModifierTest4, setRenderGroupDefaultValues, TestSize.Level1
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setRenderGroupValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setRenderGroup, nullptr);
+    ASSERT_NE(modifier_->setRenderGroup0, nullptr);
     using OneTestStep = std::tuple<Ark_Boolean, bool>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Boolean>(true), true},
         {Converter::ArkValue<Ark_Boolean>(false), false},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setRenderGroup(node_, inputValue);
+        modifier_->setRenderGroup0(node_, inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetBool(ATTRIBUTE_RENDER_GROUP_NAME, ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");
@@ -430,14 +430,14 @@ HWTEST_F(CommonMethodModifierTest4, setFreezeDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setFreezeValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setFreeze, nullptr);
+    ASSERT_NE(modifier_->setFreeze0, nullptr);
     using OneTestStep = std::tuple<Ark_Boolean, bool>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Boolean>(true), true},
         {Converter::ArkValue<Ark_Boolean>(false), false},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setFreeze(node_, inputValue);
+        modifier_->setFreeze0(node_, inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetBool(ATTRIBUTE_FREEZE_NAME, ATTRIBUTE_FREEZE_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");
@@ -573,7 +573,7 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectDefaultValues, TestSize.Le
  */
 HWTEST_F(CommonMethodModifierTest4, setSphericalEffectValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSphericalEffect, nullptr);
+    ASSERT_NE(modifier_->setSphericalEffect0, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Number>(0.0), 0.0},
@@ -583,7 +583,7 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectValidValues, TestSize.Leve
         {Converter::ArkValue<Ark_Number>(1.0), 1.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setSphericalEffect(node_, &inputValue);
+        modifier_->setSphericalEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME,
             ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
@@ -598,7 +598,7 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectValidValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSphericalEffect, nullptr);
+    ASSERT_NE(modifier_->setSphericalEffect0, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Number>(-1.0), 0.0},
@@ -607,7 +607,7 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Le
         {Converter::ArkValue<Ark_Number>(2.0), 0.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setSphericalEffect(node_, &inputValue);
+        modifier_->setSphericalEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME,
             ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
@@ -634,7 +634,7 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest4, setLightUpEffectValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLightUpEffect, nullptr);
+    ASSERT_NE(modifier_->setLightUpEffect0, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Number>(0.0), 0.0},
@@ -644,7 +644,7 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectValidValues, TestSize.Level1
         {Converter::ArkValue<Ark_Number>(1.0), 1.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setLightUpEffect(node_, &inputValue);
+        modifier_->setLightUpEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_LIGHT_UP_EFFECT_NAME, ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -658,7 +658,7 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectValidValues, TestSize.Level1
  */
 HWTEST_F(CommonMethodModifierTest4, setLightUpEffectInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLightUpEffect, nullptr);
+    ASSERT_NE(modifier_->setLightUpEffect0, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Number>(-1.0), 0.0},
@@ -667,7 +667,7 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectInvalidValues, TestSize.Leve
         {Converter::ArkValue<Ark_Number>(2.0), 0.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setLightUpEffect(node_, &inputValue);
+        modifier_->setLightUpEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_LIGHT_UP_EFFECT_NAME, ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -693,7 +693,7 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectDefaultValues, TestSize
  */
 HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
+    ASSERT_NE(modifier_->setPixelStretchEffect0, nullptr);
     using OneTestStep = std::tuple<Ark_PixelStretchEffectOptions, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_PixelStretchEffectOptions>(
@@ -707,7 +707,7 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectValidValues, TestSize.L
             "{\"left\":\"1.00px\",\"right\":\"3.00px\",\"top\":\"2.00px\",\"bottom\":\"4.00px\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setPixelStretchEffect(node_, &inputValue);
+        modifier_->setPixelStretchEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -721,14 +721,14 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectValidValues, TestSize.L
  */
 HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
+    ASSERT_NE(modifier_->setPixelStretchEffect0, nullptr);
     using OneTestStep = std::tuple<Ark_PixelStretchEffectOptions, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {{.top = {}, .bottom = {}, .left = {}, .right = {}},
             "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setPixelStretchEffect(node_, &inputValue);
+        modifier_->setPixelStretchEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;

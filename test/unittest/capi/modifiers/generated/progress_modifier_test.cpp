@@ -73,6 +73,8 @@ const auto ATTRIBUTE_STYLE_I_FONT_COLOR_NAME = "fontColor";
 const auto ATTRIBUTE_STYLE_I_FONT_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_NAME = "showDefaultPercentage";
 const auto ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_STYLE_I_BORDER_RADIUS_NAME = "borderRadius";
+const auto ATTRIBUTE_STYLE_I_BORDER_RADIUS_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_STYLE_I_SCALE_COUNT_NAME = "scaleCount";
 const auto ATTRIBUTE_STYLE_I_SCALE_COUNT_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_STYLE_I_SCALE_WIDTH_NAME = "scaleWidth";
@@ -805,6 +807,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -863,6 +867,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_ResourceColor& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -919,6 +925,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -968,6 +976,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1019,6 +1029,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsCont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_String& value) {
@@ -1068,6 +1080,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsCont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_String& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1116,6 +1130,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1166,6 +1182,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1218,6 +1236,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_FontWeight_Number_String& value) {
@@ -1274,6 +1294,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const Opt_Union_FontWeight_Number_String& value) {
@@ -1329,6 +1351,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_String_Resource& value) {
@@ -1380,6 +1404,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_Resource& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1432,6 +1458,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
@@ -1482,6 +1510,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_FontStyle& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1532,6 +1562,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1590,6 +1622,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_ResourceColor& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1647,6 +1681,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
@@ -1698,6 +1734,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Boolean& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1716,6 +1754,110 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
 
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setStyleTestStyleCapsuleStyleOptionsBorderRadiusValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBorderRadiusValidValues, TestSize.Level1)
+{
+    Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions initValueStyle;
+
+    // Initial setup
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderColor =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderWidth =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).content =
+        ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).size =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).weight =
+        ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+            std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).family =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).fontColor =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
+
+    auto checkValue = [this, &initValueStyle](
+                          const std::string& input, const std::string& expectedStr, const Opt_LengthMetrics& value) {
+        Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
+            initValueStyle;
+
+        WriteToUnion<Ark_CapsuleStyleOptions>(inputValueStyle).borderRadius = value;
+        modifier_->setStyle(node_, &inputValueStyle);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_RADIUS_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderRadius";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthMetricsNonNegValidValues) {
+        checkValue(input, expected, ArkValue<Opt_LengthMetrics>(value));
+    }
+}
+
+/*
+ * @tc.name: setStyleTestStyleCapsuleStyleOptionsBorderRadiusInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBorderRadiusInvalidValues, TestSize.Level1)
+{
+    Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions initValueStyle;
+
+    // Initial setup
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderColor =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderWidth =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).content =
+        ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).size =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).weight =
+        ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+            std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).family =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).font).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).fontColor =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).borderRadius =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
+
+    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_LengthMetrics& value) {
+        Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
+            initValueStyle;
+
+        modifier_->setStyle(node_, &inputValueStyle);
+        WriteToUnion<Ark_CapsuleStyleOptions>(inputValueStyle).borderRadius = value;
+        modifier_->setStyle(node_, &inputValueStyle);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_RADIUS_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_BORDER_RADIUS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderRadius";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthMetricsNonNegInvalidValues) {
+        checkValue(input, ArkValue<Opt_LengthMetrics>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_LengthMetrics>());
 }
 
 /*

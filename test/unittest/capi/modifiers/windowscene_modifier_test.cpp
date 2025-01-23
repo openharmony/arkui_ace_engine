@@ -27,8 +27,8 @@ using namespace testing;
 using namespace testing::ext;
 
 static constexpr int32_t PERSISTENT_ID = 10;
-static constexpr int32_t DESTINATION_X = 5;
-static constexpr int32_t DESTINATION_Y = 6;
+static constexpr auto DESTINATION_X = 5._px;
+static constexpr auto DESTINATION_Y = 6._px;
 static constexpr float FRACTION = 100.1f;
 
 class WindowSceneModifierTest : public ModifierTestBase<GENERATED_ArkUIWindowSceneModifier,

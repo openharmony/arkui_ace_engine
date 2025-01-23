@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceResponseAccessor {
 void DestroyPeerImpl(WebResourceResponsePeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()
@@ -200,7 +198,4 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
     return &WebResourceResponseAccessorImpl;
 }
 
-struct WebResourceResponsePeer {
-    virtual ~WebResourceResponsePeer() = default;
-};
 }

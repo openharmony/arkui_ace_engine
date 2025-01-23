@@ -80,33 +80,25 @@ const std::vector<BoolTestStep> BOOL_TEST_PLAN = {
 const Ark_Int32 AINT32_POS(70);
 const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Int32 FAKE_RES_ID(1234);
-const Ark_Int32 INVALID_UNIT(10000);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
-const Ark_Float32 AFLT32_PERCENT_POS(70.0f);
-const Ark_Float32 AFLT32_PERCENT_NEG(-70.0f);
 
 typedef std::tuple<Ark_Length, std::string> ArkLengthTestStep;
 const std::vector<ArkLengthTestStep> ARK_LENGTH_TEST_PLAN = {
-    { { .type = ARK_TAG_INT32, .value = AINT32_POS, .unit = static_cast<int32_t>(DimensionUnit::PX) }, "70.00px" },
-    { { .type = ARK_TAG_INT32, .value = AINT32_NEG, .unit = static_cast<int32_t>(DimensionUnit::PX) },
-        "-2147483648.00px" },
-    { { .type = ARK_TAG_INT32, .value = AFLT32_POS, .unit = static_cast<int32_t>(DimensionUnit::PX) }, "1.23px" },
-    { { .type = ARK_TAG_INT32, .value = AFLT32_NEG, .unit = static_cast<int32_t>(DimensionUnit::PX) }, "-5.68px" },
-    { { .type = ARK_TAG_FLOAT32, .value = AINT32_POS, .unit = static_cast<int32_t>(DimensionUnit::VP) }, "70.00vp" },
-    { { .type = ARK_TAG_FLOAT32, .value = AINT32_NEG, .unit = static_cast<int32_t>(DimensionUnit::VP) },
-        "-2147483648.00vp" },
-    { { .type = ARK_TAG_FLOAT32, .value = AFLT32_POS, .unit = static_cast<int32_t>(DimensionUnit::VP) }, "1.23vp" },
-    { { .type = ARK_TAG_FLOAT32, .value = AFLT32_NEG, .unit = static_cast<int32_t>(DimensionUnit::VP) }, "-5.68vp" },
-    { { .type = ARK_TAG_FLOAT32, .value = AFLT32_POS, .unit = INVALID_UNIT }, "1.23px" },
-    { { .type = ARK_TAG_FLOAT32, .value = AFLT32_PERCENT_POS, .unit = static_cast<int32_t>(DimensionUnit::PERCENT) },
-        "70.00%" }, // Dimension::ToString do multiply value on 100
-    { { .type = ARK_TAG_FLOAT32, .value = AFLT32_PERCENT_NEG, .unit = static_cast<int32_t>(DimensionUnit::PERCENT) },
-        "-70.00%" } // Dimension::ToString do multiply value on 100
+    { Converter::ArkValue<Ark_Length>("70.00px"), "70.00px" },
+    { Converter::ArkValue<Ark_Length>("-2147483648.00px"), "-2147483648.00px" },
+    { Converter::ArkValue<Ark_Length>("1.23px"), "1.23px" },
+    { Converter::ArkValue<Ark_Length>("-5.68px"), "-5.68px" },
+    { Converter::ArkValue<Ark_Length>("70.00vp"), "70.00vp" },
+    { Converter::ArkValue<Ark_Length>("-2147483648.00vp"), "-2147483648.00vp" },
+    { Converter::ArkValue<Ark_Length>("1.23vp"), "1.23vp" },
+    { Converter::ArkValue<Ark_Length>("-5.68vp"), "-5.68vp" },
+    { Converter::ArkValue<Ark_Length>("1.23px"), "1.23px" },
+    { Converter::ArkValue<Ark_Length>("70.00%"), "70.00%" },
+    { Converter::ArkValue<Ark_Length>("-70.00%"), "-70.00%" },
 };
 const std::vector<ArkLengthTestStep> ARK_LENGTH_TEST_PLAN_RES = {
-    { { .type = ARK_TAG_RESOURCE, .value = AINT32_POS, .unit = static_cast<int32_t>(DimensionUnit::PX),
-        .resource = FAKE_RES_ID },
+    { Converter::ArkValue<Ark_Length>(FAKE_RES_ID),
         "0.00px" } // Work with resource dos not have final solution. Test step can be changed.
 };
 
@@ -149,9 +141,9 @@ const std::vector<TextDeleteDirection> DELETE_DIRECTION_TEST_PLAN = {
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
 const std::vector<ArkFontStyleTestStep> FONT_STYLE_TEST_PLAN = {
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_NORMAL }, "FontStyle.Normal" },
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_ITALIC }, "FontStyle.Italic" },
-    { { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_FontStyle>(2) }, "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL), "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC), "FontStyle.Italic" },
+    { Converter::ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(-1)), "FontStyle.Normal" },
 };
 
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
@@ -237,8 +229,6 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> OPT_LENGTH_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(AINT32_POS), "70.00px" },
-    { Converter::ArkValue<Opt_Length>(AINT32_NEG), "0.00px" },
     { Converter::ArkValue<Opt_Length>(AFLT32_NEG), "0.00px" },
     { Converter::ArkValue<Opt_Length>(AFLT32_POS), "1.23vp" } };
 
@@ -582,14 +572,14 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
     std::vector<TestCaretStyle> testPlanCaretStyle;
     for (auto testLength : ARK_LENGTH_TEST_PLAN) {
         for (auto testColor : COLOR_TEST_PLAN) {
-            Ark_CaretStyle arkCaretStyle = { .color = { .tag = ARK_TAG_OBJECT, .value = std::get<0>(testColor) },
-                .width = { .tag = ARK_TAG_OBJECT, .value = std::get<0>(testLength) } };
+            Ark_CaretStyle arkCaretStyle = {
+                .color = Converter::ArkValue<Opt_ResourceColor>(std::get<0>(testColor)),
+                .width = Converter::ArkValue<Opt_Length>(std::get<0>(testLength)),
+            };
             CheckCaretValue caretValue = { std::get<1>(testColor), std::get<1>(testLength) };
-            auto type = std::get<0>(testLength).type;
             auto length = std::get<0>(testLength).value;
             auto unit = std::get<0>(testLength).unit;
-            if (type != ARK_TAG_RESOURCE &&
-                (LessNotEqual(length, 0.0f) || (unit == static_cast<int32_t>(DimensionUnit::PERCENT)))) {
+            if ((LessNotEqual(length, 0.0f) || (unit == static_cast<int32_t>(DimensionUnit::PERCENT)))) {
                 caretValue = { std::get<1>(testColor), DEFAULT_CARET_WIDTH };
             }
             TestCaretStyle testCaretStyle = { arkCaretStyle, caretValue };
@@ -1325,7 +1315,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestValidValues, TestSize.Level1)
     EXPECT_EQ(checkEvent->error, ERROR_TEXT);
     auto attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
     EXPECT_EQ(attrValue, STR_TEST_TEXT);
-    
+
     checkEvent.reset();
     modifier_->setInputFilter(node_, &sendResource2, &optCallbackValue);
     EXPECT_FALSE(checkEvent.has_value());
@@ -1529,9 +1519,11 @@ HWTEST_F(TextAreaModifierTest, setDecorationTest, TestSize.Level1)
     for (const auto& [decorationType, expectDecorationType] : TEXT_DECORATION_TYPE_TEST_PLAN) {
         for (const auto& [decorationStyle, expectDecorationStyle] : TEXT_DECORATION_STYLE_TEST_PLAN) {
             for (const auto& [decorationColor, expectColor] : COLOR_TEST_PLAN) {
-                Ark_TextDecorationOptions options = { .color = { .tag = ARK_TAG_OBJECT, .value = decorationColor },
+                Ark_TextDecorationOptions options = {
+                    .color = Converter::ArkValue<Opt_ResourceColor>(decorationColor),
                     .type = decorationType,
-                    .style = Converter::ArkValue<Opt_TextDecorationStyle>(decorationStyle) };
+                    .style = Converter::ArkValue<Opt_TextDecorationStyle>(decorationStyle),
+                };
                 modifier_->setDecoration(node_, &options);
                 auto decorationJSON = GetStringAttribute(node_, decorationsAttrs);
                 auto decoration = JsonUtil::ParseJsonString(decorationJSON);

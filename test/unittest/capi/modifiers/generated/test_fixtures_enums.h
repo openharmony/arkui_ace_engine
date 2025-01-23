@@ -23,6 +23,10 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Fixtures {
+extern std::vector<std::tuple<std::string, Ark_AccessibilityRoleType, std::string>>
+    testFixtureEnumAccessibilityRoleTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_AccessibilityRoleType>>
+    testFixtureEnumAccessibilityRoleTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_AdaptiveColor, std::string>> testFixtureEnumAdaptiveColorValidValues;
 extern std::vector<std::tuple<std::string, Ark_AdaptiveColor>> testFixtureEnumAdaptiveColorInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_Alignment, std::string>> testFixtureEnumAlignmentValidValues;
@@ -40,6 +44,10 @@ extern std::vector<std::tuple<std::string, Ark_BlendApplyType, std::string>> tes
 extern std::vector<std::tuple<std::string, Ark_BlendApplyType>> testFixtureEnumBlendApplyTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BlendMode, std::string>> testFixtureEnumBlendModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_BlendMode>> testFixtureEnumBlendModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_BlurOnKeyboardHideMode, std::string>>
+    testFixtureEnumBlurOnKeyboardHideModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_BlurOnKeyboardHideMode>>
+    testFixtureEnumBlurOnKeyboardHideModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BlurStyle, std::string>> testFixtureEnumBlurStyleValidValues;
 extern std::vector<std::tuple<std::string, Ark_BlurStyle>> testFixtureEnumBlurStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BlurStyleActivePolicy, std::string>>
@@ -75,6 +83,9 @@ extern std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFi
 extern std::vector<std::tuple<std::string, Ark_ControlSize>> testFixtureEnumControlSizeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_CopyOptions, std::string>> testFixtureEnumCopyOptionsValidValues;
 extern std::vector<std::tuple<std::string, Ark_CopyOptions>> testFixtureEnumCopyOptionsInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_CrownSensitivity, std::string>>
+    testFixtureEnumCrownSensitivityValidValues;
+extern std::vector<std::tuple<std::string, Ark_CrownSensitivity>> testFixtureEnumCrownSensitivityInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_Direction, std::string>> testFixtureEnumDirectionValidValues;
 extern std::vector<std::tuple<std::string, Ark_Direction>> testFixtureEnumDirectionInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_DragPreviewMode, std::string>> testFixtureEnumDragPreviewModeValidValues;
@@ -142,6 +153,9 @@ extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixt
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnumItemAlignValidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_MarqueeStartPolicy, std::string>>
+    testFixtureEnumMarqueeStartPolicyValidValues;
+extern std::vector<std::tuple<std::string, Ark_MarqueeStartPolicy>> testFixtureEnumMarqueeStartPolicyInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ModelType, std::string>> testFixtureEnumModelTypeValidValues;

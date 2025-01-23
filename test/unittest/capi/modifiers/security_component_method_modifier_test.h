@@ -123,12 +123,12 @@ const auto THEME_TEXT_ICON_SPACE = Dimension(4., DimensionUnit::VP);
 
 const auto DEFAULT_JSON_INT = -1;
 
-const uint32_t FLOAT_RES_0_ID = 100;
+const int32_t FLOAT_RES_0_ID = 100;
 const float FLOAT_RES_0_VALUE = 70.5f;
 const auto FLOAT_RES_0_STORED_VALUE = Dimension(FLOAT_RES_0_VALUE, DimensionUnit::PX);
 const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, Converter::ResourceType::FLOAT);
 
-const uint32_t FLOAT_RES_1_ID = 101;
+const int32_t FLOAT_RES_1_ID = 101;
 const float FLOAT_RES_1_VALUE = 19.5f;
 const auto FLOAT_RES_1_STORED_VALUE = Dimension(FLOAT_RES_1_VALUE, DimensionUnit::FP);
 const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, Converter::ResourceType::FLOAT);

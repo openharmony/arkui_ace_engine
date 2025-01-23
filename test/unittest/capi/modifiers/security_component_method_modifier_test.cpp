@@ -33,41 +33,38 @@ std::vector<std::tuple<std::string, Opt_Length>> positionYInvalidValues = {
 
 // Valid values for attribute 'x' of position
 std::vector<std::tuple<std::string, Opt_Length, std::string>> positionXValidValues = {
-    { "23", ArkValue<Opt_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     { "-40.5f", ArkValue<Opt_Length>(-40.5f), "-40.50vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
 // Valid values for attribute 'y' of position
 std::vector<std::tuple<std::string, Opt_Length, std::string>> positionYValidValues = {
-    { "23", ArkValue<Opt_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     { "-40.5f", ArkValue<Opt_Length>(-40.5f), "-40.50vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
 // Valid values for attribute 'width'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> widthValidValues = {
-    { "23", ArkValue<Ark_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID },
+        Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
 static std::vector<std::tuple<std::string, Ark_Length>> widthInvalidValues = {
-    {"-10", Converter::ArkValue<Ark_Length>(-10)},
+    {"-10", Converter::ArkValue<Ark_Length>(-10.)},
 };
 
 /*
@@ -86,9 +83,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconSizeTestDefaultValues, Test
 
 // Valid values for attribute 'iconSize' of method 'iconSize'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> iconSizeIconSizeValidValues = {
-    { "123", ArkValue<Ark_Length>(123), "123.00px" },
     { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
-    { "ResId:FLOAT_RES_0_ID", { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }, "70.50px" }
+    { "ResId:FLOAT_RES_0_ID", Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID), "70.50px" }
 };
 
 /*
@@ -123,7 +119,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconSizeTestValidValues, TestSi
 
 // Invalid values for attribute 'iconSize'
 static std::vector<std::tuple<std::string, Ark_Length>> iconSizeInvalidValues = {
-    { "-15", ArkValue<Ark_Length>(-15) },
+    { "-15", ArkValue<Ark_Length>(-15.) },
 };
 
 /*
@@ -496,9 +492,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestDefaultValues, Test
 
 // Valid values for attribute 'fontSize' of method 'fontSize'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> fontSizeFontSizeValidValues = {
-    { "12", ArkValue<Ark_Length>(12), "12.00px" },
     { "22.25fp", ArkValue<Ark_Length>(22.25f), "22.25vp" },
-    { "ResId:FLOAT_RES_1_ID", { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_1_ID }, "19.50fp" }
+    { "ResId:FLOAT_RES_1_ID", Converter::ArkValue<Ark_Length>(FLOAT_RES_1_ID), "19.50fp" }
 };
 
 /*
@@ -533,7 +528,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestValidValues, TestSi
 
 // Invalid values for attribute 'fontSize'
 static std::vector<std::tuple<std::string, Ark_Length>> fontSizeInvalidValues = {
-    { "-15", ArkValue<Ark_Length>(-15) },
+    { "-15", ArkValue<Ark_Length>(-15.) },
 };
 
 /*
@@ -1345,7 +1340,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestValidValues, Te
     inputValueBorderRadius = initValueBorderRadius;
     for (auto&& value: widthValidValues) {
         inputValueBorderRadius = std::get<1>(value);
-        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        modifier_->setBorderRadius0(node_, &inputValueBorderRadius);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
@@ -1374,10 +1369,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestInvalidValues, 
     inputValueBorderRadius = initValueBorderRadius;
     for (auto&& value: widthInvalidValues) {
         inputValueBorderRadius = initValueBorderRadius;
-        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        modifier_->setBorderRadius0(node_, &inputValueBorderRadius);
         OnModifyDone();
         inputValueBorderRadius = std::get<1>(value);
-        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        modifier_->setBorderRadius0(node_, &inputValueBorderRadius);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
@@ -1401,9 +1396,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestDefau
 
 // Valid values for attribute 'textIconSpace' of method 'textIconSpace'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> textIconSpaceTextIconSpaceValidValues = {
-    { "23", ArkValue<Ark_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
-    { "ResId:FLOAT_RES_0_ID", { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }, "70.50px" }
+    { "ResId:FLOAT_RES_0_ID", Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID), "70.50px" }
 };
 
 /*
@@ -1437,7 +1431,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setTextIconSpaceTestValidValues, T
 
 // Invalid values for attribute 'textIconSpace'
 static std::vector<std::tuple<std::string, Ark_Length>> textIconSpaceInvalidValues = {
-    { "-15", ArkValue<Ark_Length>(-15) },
+    { "-15", ArkValue<Ark_Length>(-15.) },
 };
 
 /*
@@ -1608,11 +1602,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setHeightTestDefaultValues, TestSi
 
 // Valid values for attribute 'height' of method 'height'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> heightHeightValidValues = {
-    { "23", ArkValue<Ark_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID },
+        Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
@@ -1646,7 +1639,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setHeightTestValidValues, TestSize
 }
 
 static std::vector<std::tuple<std::string, Ark_Length>> heightHeightInvalidValues = {
-    {"-10", Converter::ArkValue<Ark_Length>(-10)},
+    {"-10", Converter::ArkValue<Ark_Length>(-10.)},
 };
 
 /*
@@ -1696,22 +1689,20 @@ HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestDefaultValues, TestSize
 
 // Valid values for attribute 'width' of method 'size'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> sizeWidthValidValues = {
-    { "23", ArkValue<Opt_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
 // Valid values for attribute 'height' of method 'size'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> sizeHeightValidValues = {
-    { "23", ArkValue<Opt_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
@@ -1817,12 +1808,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestInvalidValues, TestSize
 
 // Invalid values for attribute 'width' of method 'size'
 static std::vector<std::tuple<std::string, Opt_Length>> sizeWidthInvalidValuesReset = {
-    {"-10", Converter::ArkValue<Opt_Length>(-10)},
+    {"-10", Converter::ArkValue<Opt_Length>(-10.)},
 };
 
 // Invalid values for attribute 'height' of method 'size'
 static std::vector<std::tuple<std::string, Opt_Length>> sizeHeightInvalidValuesReset = {
-    {"-10", Converter::ArkValue<Opt_Length>(-10)},
+    {"-10", Converter::ArkValue<Opt_Length>(-10.)},
 };
 
 /*
@@ -1898,46 +1889,42 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestDefaultValues
 
 // Valid values for attribute 'minWidth' of method 'constraintSize'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> constraintSizeMinWidthValidValues = {
-    { "23", ArkValue<Opt_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     { "0.f", ArkValue<Opt_Length>(0.f), "0.00vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
 // Valid values for attribute 'maxWidth' of method 'constraintSize'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> constraintSizeMaxWidthValidValues = {
-    { "230", ArkValue<Opt_Length>(230), "230.00px" },
     { "600.25f", ArkValue<Opt_Length>(600.25f), "600.25vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
 // Valid values for attribute 'minHeight' of method 'constraintSize'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> constraintSizeMinHeightValidValues = {
-    { "23", ArkValue<Opt_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     { "0.f", ArkValue<Opt_Length>(0.f), "0.00vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
 // Valid values for attribute 'maxHeight' of method 'constraintSize'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> constraintSizeMaxHeightValidValues = {
-    { "230", ArkValue<Opt_Length>(230), "230.00px" },
     { "600.25f", ArkValue<Opt_Length>(600.25f), "600.25vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
@@ -2178,12 +2165,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestDefaultValu
 }
 
 std::vector<std::tuple<std::string, Ark_Length, std::string>> paddingValidValues = {
-    { "23", ArkValue<Ark_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
     { "-40.5f", ArkValue<Ark_Length>(-40.5f), "-40.50vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID },
+        Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
@@ -2224,12 +2210,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestValidValues, TestSiz
 }
 
 std::vector<std::tuple<std::string, Opt_Length, std::string>> optPaddingValidValues = {
-    { "23", ArkValue<Opt_Length>(23), "23.00px" },
     { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     { "-40.5f", ArkValue<Opt_Length>(-40.5f), "-40.50vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        { .tag = ARK_TAG_RESOURCE, .value = { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }},
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };

@@ -24,7 +24,6 @@ namespace OHOS::Ace::NG::Converter {
 
 inline void AssignArkValue(Ark_CustomObject& dst, const Ark_String& src)
 {
-    dst.id = ARK_TAG_STRING;
     dst.string = src;
 }
 

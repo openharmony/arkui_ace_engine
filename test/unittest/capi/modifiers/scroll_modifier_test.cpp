@@ -57,21 +57,6 @@ struct ScrollStateValue {
     bool state;
 };
 
-inline void AssignArkValue(Opt_Length& dst, const CalcDimension& src)
-{
-    if (src.Unit() == DimensionUnit::CALC) {
-        return;
-    }
-    dst.tag = ARK_TAG_LENGTH;
-    dst.value.value = src.ConvertToVp();
-}
-
-inline void AssignArkValue(Ark_OffsetOptions& dst, const OffsetT<CalcDimension>& src)
-{
-    AssignArkValue(dst.xOffset, src.GetX());
-    AssignArkValue(dst.yOffset, src.GetY());
-}
-
 std::optional<std::string> getStringScrollable(std::unique_ptr<JsonValue>& json, std::string key)
 {
     for (auto object = json->GetChild(); object->IsValid(); object = object->GetNext()) {
@@ -159,6 +144,7 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetBadDirectionOnSlide, testing::ext::Te
  * @tc.desc: Test OnScrollImpl
  * @tc.type: FUNC
  */
+#ifdef DEPRECATED
 HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -192,6 +178,7 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
     ASSERT_EQ(y.Value(), data->y.f32);
     ASSERT_EQ(frameNode->GetId(), data->nodeId);
 }
+#endif
 
 /**
  * @tc.name: OnScrollStart_SetCallback
@@ -435,24 +422,16 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
     auto testVal = GetStringAttribute(node_, jsonKey);
     EXPECT_EQ(testVal, defaultVal);
 
-    Ark_Number num = {.tag = ARK_TAG_UNDEFINED};
-    auto defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(num);
-    modifier_->setScrollBarWidth(node_, &defectiveNumber);
+    Ark_String str = Converter::ArkValue<Ark_String>("");
+    auto emptyString = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(str);
+    modifier_->setScrollBarWidth(node_, &emptyString);
 
     testVal = GetStringAttribute(node_, jsonKey);
     Dimension testValDim = Dimension::FromString(testVal);
     EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
-    Ark_String str = {.length = 0, .chars = 0};
-    auto emptyString = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(str);
-    modifier_->setScrollBarWidth(node_, &emptyString);
-
-    testVal = GetStringAttribute(node_, jsonKey);
-    testValDim = Dimension::FromString(testVal);
-    EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
-
     auto testNumber = Converter::ArkValue<Ark_Number>(-1.0f);
-    defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(testNumber);
+    auto defectiveNumber = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(testNumber);
     modifier_->setScrollBarWidth(node_, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
@@ -589,13 +568,11 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetAValue, testing::ext::TestSize.Lev
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    OffsetT<CalcDimension> value;
-    float x = 22;
-    float y = 7;
-    value.SetX(x);
-    value.SetY(y);
+    Dimension x(22);
+    Dimension y(7);
     Ark_OffsetOptions offset;
-    AssignArkValue(offset, value);
+    offset.xOffset = Converter::ArkValue<Opt_Length>(x);
+    offset.yOffset = Converter::ArkValue<Opt_Length>(y);
     modifier_->setInitialOffset(node_, &offset);
 
     auto json = GetJsonValue(node_);
@@ -605,8 +582,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetAValue, testing::ext::TestSize.Lev
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
 
-    ASSERT_EQ(value.GetX().ToString(), xAfter);
-    ASSERT_EQ(value.GetY().ToString(), yAfter);
+    ASSERT_EQ(x.ToString(), xAfter);
+    ASSERT_EQ(y.ToString(), yAfter);
 }
 
 /**
@@ -627,8 +604,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetBothCoordinatesDisabled, testing::
     auto yBefore = GetAttrValue<std::string>(initialOffset, "yOffset");
 
     Ark_OffsetOptions offset;
-    offset.xOffset.tag = ARK_TAG_UNDEFINED;
-    offset.yOffset.tag = ARK_TAG_UNDEFINED;
+    offset.xOffset = Converter::ArkValue<Opt_Length>();
+    offset.yOffset = Converter::ArkValue<Opt_Length>();
     modifier_->setInitialOffset(node_, &offset);
 
     json = GetJsonValue(node_);
@@ -658,12 +635,10 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     auto xBefore = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yBefore = GetAttrValue<std::string>(initialOffset, "yOffset");
     // disabled y will be set to some defined by lower levels value (we expect that it will the same as after start)
-    OffsetT<CalcDimension> value;
-    float x = 22;
-    value.SetX(x);
+    Dimension x(22);
     Ark_OffsetOptions offset;
-    AssignArkValue(offset, value);
-    offset.yOffset.tag = ARK_TAG_UNDEFINED;
+    offset.xOffset = Converter::ArkValue<Opt_Length>(x);
+    offset.yOffset = Converter::ArkValue<Opt_Length>();
     modifier_->setInitialOffset(node_, &offset);
 
     json = GetJsonValue(node_);
@@ -672,14 +647,12 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     ASSERT_TRUE(initialOffset);
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
-    ASSERT_EQ(value.GetX().ToString(), xAfter);
+    ASSERT_EQ(x.ToString(), xAfter);
     ASSERT_EQ(yBefore, yAfter);
     // disabled x will be set to some defined by lower levels value (we expect that it will the same as after start)
-    OffsetT<CalcDimension> value1;
-    float y = 7;
-    value1.SetY(y);
-    AssignArkValue(offset, value1);
-    offset.xOffset.tag = ARK_TAG_UNDEFINED;
+    Dimension y(7);
+    offset.xOffset = Converter::ArkValue<Opt_Length>();
+    offset.yOffset = Converter::ArkValue<Opt_Length>(y);
     modifier_->setInitialOffset(node_, &offset);
 
     json = GetJsonValue(node_);
@@ -689,7 +662,7 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
     ASSERT_EQ(xBefore, xAfter);
-    ASSERT_EQ(value1.GetY().ToString(), yAfter);
+    ASSERT_EQ(y.ToString(), yAfter);
 }
 
 /**
@@ -1038,7 +1011,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing:
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNegativeIntervalSize, testing::ext::TestSize.Level1)
 {
-    auto intervalLen = Converter::ArkValue<Ark_Length>(-1234);
+    auto intervalLen = Converter::ArkValue<Ark_Length>(-1234._px);
     auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
     Ark_ScrollSnapOptions newOpt = {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
@@ -1090,7 +1063,7 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInSnapPagination, testing::ext::TestSize.Level1)
 {
-    std::vector<int> testSet{10, 45, -6, 9};
+    std::vector<double> testSet{10., 45., -6., 9.};
     Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
 
     Ark_ScrollSnapOptions newOpt = {

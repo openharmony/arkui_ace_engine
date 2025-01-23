@@ -289,7 +289,7 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestDefaultValues, TestSize.Level1
 
 // Valid values for attribute 'strokeWidth' of method 'strokeWidth'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidthStrokeWidthValidValues = {
-    {"1.00px", Converter::ArkValue<Ark_Length>(1), "1.00px"},
+    {"1.00px", Converter::ArkValue<Ark_Length>("1.00px"), "1.00px"},
 };
 
 /*
@@ -320,7 +320,7 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
     }
 }
 
-static Ark_Length RESOURCE_STROKE = {.type = Ark_Tag::ARK_TAG_RESOURCE, .resource = 123};
+static Ark_Length RESOURCE_STROKE = Converter::ArkValue<Ark_Length>(123);
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidthStrokeWidthResourceValues = {
     {"10.00px", RESOURCE_STROKE, "10.00px"},
 }; // 10.00px is in mock theme constants
@@ -353,7 +353,7 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestResourceValues, TestSize.Level
 }
 
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidthStrokeWidthInvalidValues = {
-    {"24.00vp", Converter::ArkValue<Ark_Length>(-1), "24.00vp"},
+    {"-1", Converter::ArkValue<Ark_Length>(-1.), "24.00vp"},
 };
 
 /*

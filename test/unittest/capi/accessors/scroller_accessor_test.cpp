@@ -126,7 +126,7 @@ public:
 };
 
 const Ark_Int32 FAKE_RES_ID(1234);
-const Ark_Length RES_ARK_LENGTH = { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID };
+const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
 } // namespace
 
 class ScrollerAccessorTest : public AccessorTestBase<GENERATED_ArkUIScrollerAccessor,
@@ -339,9 +339,6 @@ HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
 
     typedef std::pair<Ark_Length, double> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), 1 },
-        { Converter::ArkValue<Ark_Length>(0), 0 },
-        { Converter::ArkValue<Ark_Length>(-1), -1 },
         { Converter::ArkValue<Ark_Length>(2.5f), 2.5 },
         { Converter::ArkValue<Ark_Length>(-2.5f), -2.5 },
         { Converter::ArkValue<Ark_Length>(5.0_px), 5 },
@@ -380,9 +377,6 @@ HWTEST_F(ScrollerAccessorTest, scrollByYTest, TestSize.Level1)
 
     typedef std::pair<Ark_Length, double> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), 1 },
-        { Converter::ArkValue<Ark_Length>(0), 0 },
-        { Converter::ArkValue<Ark_Length>(-1), -1 },
         { Converter::ArkValue<Ark_Length>(2.5f), 2.5 },
         { Converter::ArkValue<Ark_Length>(-2.5f), -2.5 },
         { Converter::ArkValue<Ark_Length>(5.0_px), 5 },

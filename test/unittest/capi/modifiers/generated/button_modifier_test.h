@@ -75,6 +75,10 @@ const auto ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE = "Harmony"
                                                                  "OS Sans";
 const auto ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_NAME = "style";
 const auto ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE = "FontStyle.Normal";
+const auto ATTRIBUTE_MIN_FONT_SCALE_NAME = "minFontScale";
+const auto ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_MAX_FONT_SCALE_NAME = "maxFontScale";
+const auto ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE = "!NOT-DEFINED!";
 } // namespace TestConst::Button
 
 class ButtonModifierTest : public ModifierTestBase<GENERATED_ArkUIButtonModifier,

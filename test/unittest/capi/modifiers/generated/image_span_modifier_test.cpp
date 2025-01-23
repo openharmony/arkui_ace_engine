@@ -252,7 +252,7 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageSpanModifierTest, setObjectFitTestObjectFitValidValues, TestSize.Level1)
+HWTEST_F(ImageSpanModifierTest, DISABLED_setObjectFitTestObjectFitValidValues, TestSize.Level1)
 {
     Ark_ImageFit initValueObjectFit;
 

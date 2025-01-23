@@ -23,9 +23,6 @@ using namespace TestConst::SecurityComponentMethod;
 
 typedef std::pair<Ark_Length, std::string> MarginPaddingOneTestStep;
 static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Length>(1), "1.00px" },
-    { Converter::ArkValue<Ark_Length>(-1), "-1.00px" },
-    { Converter::ArkValue<Ark_Length>(0), "0.00px" },
     { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
     { Converter::ArkValue<Ark_Length>(-2.45f), "-2.45vp" },
     { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
@@ -41,7 +38,7 @@ static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
     { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
     { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
-    { { .type = ARK_TAG_RESOURCE, .resource = FLOAT_RES_0_ID }, "70.50px" },
+    { Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID), "70.50px" },
 };
 
 using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;

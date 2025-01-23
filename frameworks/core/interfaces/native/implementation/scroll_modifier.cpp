@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,8 +150,6 @@ void OnScrollImpl(Ark_NativePointer node,
         auto _xOffset = Converter::ArkValue<Ark_Number>(xOffset);
         auto _yOffset = Converter::ArkValue<Ark_Number>(yOffset);
         CHECK_NULL_VOID(GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->onScroll);
-        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
-            onScroll(frameNode->GetId(), _xOffset, _yOffset);
     };
     ScrollModelNG::SetOnScroll(frameNode, onEvent);
 }
@@ -183,7 +181,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
     }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_ScrollOnWillScrollCallback* value)
+                     const Opt_ScrollOnScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

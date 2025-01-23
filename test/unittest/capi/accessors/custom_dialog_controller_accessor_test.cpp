@@ -61,27 +61,9 @@ Ark_CustomDialogControllerOptions GetEmptyOptions()
     return options;
 }
 
-class CustomDialogControllerAccessorTest : public testing::Test {
+class CustomDialogControllerAccessorTest : public AccessorTestBaseParent<GENERATED_ArkUICustomDialogControllerAccessor,
+    &GENERATED_ArkUIAccessors::getCustomDialogControllerAccessor, CustomDialogControllerPeer> {
 public:
-    static void SetUpTestCase()
-    {
-        ASSERT_NE(accessor_, nullptr);
-        ASSERT_NE(accessor_->ctor, nullptr);
-        ASSERT_NE(accessor_->getFinalizer, nullptr);
-        finalyzer_ = reinterpret_cast<void (*)(CustomDialogControllerPeer *)>(accessor_->getFinalizer());
-        ASSERT_NE(finalyzer_, nullptr);
-    }
-
-    virtual void SetUp(void)
-    {
-        ASSERT_NE(finalyzer_, nullptr);
-    }
-
-    virtual void TearDown(void)
-    {
-        FinalizePeer();
-    }
-
     void FinalizePeer()
     {
         if (peer_) {
@@ -90,17 +72,6 @@ public:
             peer_ = nullptr;
         }
     }
-
-private:
-    inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
-        = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL, GENERATED_ARKUI_FULL_API_VERSION)
-        );
-public:
-    inline static const GENERATED_ArkUICustomDialogControllerAccessor *accessor_ =
-        fullAPI_->getAccessors()->getCustomDialogControllerAccessor();
-    inline static void (*finalyzer_)(CustomDialogControllerPeer *) = nullptr;
-    CustomDialogControllerPeer *peer_ = nullptr;
 };
 
 /**
@@ -232,9 +203,6 @@ HWTEST_F(CustomDialogControllerAccessorTest, alignmentTest, TestSize.Level1)
 }
 
 static const std::vector<std::pair<Ark_Length, Dimension>> OFFSET_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Length>(1), Dimension(1, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(0), Dimension(0, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(-1), Dimension(-1, DimensionUnit::PX) },
     { Converter::ArkValue<Ark_Length>(2.5f), Dimension(2.5, DimensionUnit::VP) },
     { Converter::ArkValue<Ark_Length>(-2.5f), Dimension(-2.5, DimensionUnit::VP) },
     { Converter::ArkValue<Ark_Length>(5.0_px), Dimension(5, DimensionUnit::PX) },
@@ -469,8 +437,6 @@ HWTEST_F(CustomDialogControllerAccessorTest, isModalTest, TestSize.Level1)
 }
 
 static const std::vector<std::pair<Ark_Length, Dimension>> SIZE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Length>(1), Dimension(1, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(0), Dimension(0, DimensionUnit::PX) },
     { Converter::ArkValue<Ark_Length>(2.5f), Dimension(2.5, DimensionUnit::VP) },
     { Converter::ArkValue<Ark_Length>(5.0_px), Dimension(5, DimensionUnit::PX) },
     { Converter::ArkValue<Ark_Length>(22.5_px), Dimension(22.5, DimensionUnit::PX) },
@@ -481,7 +447,6 @@ static const std::vector<std::pair<Ark_Length, Dimension>> SIZE_TEST_PLAN = {
 };
 
 static const std::vector<Ark_Length> SIZE_INVALID_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Length>(-1) },
     { Converter::ArkValue<Ark_Length>(-2.5f) },
     { Converter::ArkValue<Ark_Length>(-5.0_px) },
     { Converter::ArkValue<Ark_Length>(-22.5_px) },

@@ -126,13 +126,13 @@ static const std::vector<ResourceColorTestPlan> COLOR_RESOURCE_TEST_PLAN = {
 
 using OneTestStep = std::pair<Ark_Length, std::string>;
 const std::vector<OneTestStep> ARK_LENGTH_TEST_PLAN = {
-    { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00vp" },
-    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "0.00px" }
+    { Converter::ArkValue<Ark_Length>(RES_DIMENSION_ID), "5.00vp" },
+    { Converter::ArkValue<Ark_Length>(-1), "0.00px" }
 };
 
 const std::vector<OneTestStep> ARK_SIZE_TEST_PLAN = {
-    { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00px" },
-    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "0.00px" }
+    { Converter::ArkValue<Ark_Length>(RES_DIMENSION_ID), "5.00px" },
+    { Converter::ArkValue<Ark_Length>(-1), "0.00px" }
 };
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {

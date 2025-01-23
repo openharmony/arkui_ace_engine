@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ ActionSheetInfo Convert(const Ark_SheetInfo& src)
     if (title) { info.title = *title; }
     auto icon = Converter::OptConvert<std::string>(src.icon);
     if (icon) { info.icon = *icon; }
-    
+
     auto action = Converter::OptConvert<VoidCallback>(src.action);
     auto onClick = [callback = CallbackHelper(*action)](GestureEvent& info) {
         callback.Invoke();
@@ -166,7 +166,4 @@ const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
     return &ActionSheetAccessorImpl;
 }
 
-struct ActionSheetPeer {
-    virtual ~ActionSheetPeer() = default;
-};
 }

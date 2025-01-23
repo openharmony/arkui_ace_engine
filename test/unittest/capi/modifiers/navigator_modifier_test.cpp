@@ -101,7 +101,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.
     // Initial setup
     Ark_Literal_String_target_NavigationType_type inputValueOptions = {
         .target = { .chars = nullptr },
-        .type = { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_NavigationType>(INT_MIN) }
+        .type = Converter::ArkValue<Opt_NavigationType>(static_cast<Ark_NavigationType>(INT_MIN)),
     };
     auto realInputValue = Converter::ArkValue<Opt_Literal_String_target_NavigationType_type>(inputValueOptions);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -280,8 +280,7 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_TextPickerDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_TextPickerDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TextPickerDialogOptions arkOptions = arkOptionsOpt.value();
@@ -325,7 +324,4 @@ const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
     return &TextPickerDialogAccessorImpl;
 }
 
-struct TextPickerDialogPeer {
-    virtual ~TextPickerDialogPeer() = default;
-};
 }

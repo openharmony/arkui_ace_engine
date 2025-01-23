@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,6 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextControllerAccessor {
 void DestroyPeerImpl(TextControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()
@@ -74,7 +72,4 @@ const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
     return &TextControllerAccessorImpl;
 }
 
-struct TextControllerPeer {
-    virtual ~TextControllerPeer() = default;
-};
 }
