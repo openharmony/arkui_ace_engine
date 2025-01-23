@@ -2045,9 +2045,6 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
     spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
     TextStyle textStyle;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
     /**
      * @tc.steps: step2. call StartDrag
      * @tc.expected: IsDragging() return ture
@@ -2082,6 +2079,96 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 20, 20);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
     MockParagraph::TearDown();
+}
+
+/**
+ * @tc.name: UpdateTextStyle002
+ * @tc.desc: test span_node.cpp UpdateTextStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize spanNode and paragraph.
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetTextDetectEnable(true);
+    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
+    spanNode->SetParent(node);
+    spanNode->MountToParagraph();
+    ASSERT_NE(spanNode->GetParent(), nullptr);
+    spanNode->spanItem_->fontStyle = nullptr;
+    spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    /**
+     * @tc.steps: step2. call UpdateTextStyle
+     * @tc.expected: update text style for three parts.
+     */
+    std::u16string spanContent = u"0123456789";
+    spanNode->spanItem_->selectedStart = 3;
+    spanNode->spanItem_->selectedEnd = 6;
+    std::u16string part1 = u"012";
+    std::u16string part2 = u"345";
+    std::u16string part3 = u"6789";
+    EXPECT_CALL(*paragraph, AddText(part1)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part3)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(3);
+    EXPECT_CALL(*paragraph, PopStyle).Times(3);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 3, 6);
+    /**
+     * @tc.steps: step3. call UpdateTextStyle
+     * @tc.expected: update text style when selStart equals 0.
+     */
+    spanNode->spanItem_->selectedStart = 0;
+    spanNode->spanItem_->selectedEnd = 6;
+    part1 = u"012345";
+    part2 = u"6789";
+    EXPECT_CALL(*paragraph, AddText(part1)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(2);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 0, 6);
+    /**
+     * @tc.steps: step4. call UpdateTextStyle
+     * @tc.expected: update text style when selEnd reaches before the end of string.
+     */
+    spanNode->spanItem_->selectedStart = 3;
+    spanNode->spanItem_->selectedEnd = 9;
+    part1 = u"012";
+    part2 = u"345678";
+    part3 = u"9";
+    EXPECT_CALL(*paragraph, AddText(part1)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part3)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(3);
+    EXPECT_CALL(*paragraph, PopStyle).Times(3);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 3, 9);
+    /**
+     * @tc.steps: step5. call UpdateTextStyle
+     * @tc.expected: update text style when selEnd reaches end of string.
+     */
+    spanNode->spanItem_->selectedStart = 3;
+    spanNode->spanItem_->selectedEnd = 10;
+    part2 = u"012";
+    part3 = u"3456789";
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part3)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(2);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 3, 10);
+    /**
+     * @tc.steps: step6. call UpdateTextStyle
+     * @tc.expected: update text style when selStart and selEnd is invalid.
+     */
+    EXPECT_CALL(*paragraph, AddText).Times(0);
+    EXPECT_CALL(*paragraph, PushStyle).Times(0);
+    EXPECT_CALL(*paragraph, PopStyle).Times(0);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
 }
 
 /**

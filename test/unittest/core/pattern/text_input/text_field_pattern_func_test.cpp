@@ -1987,4 +1987,34 @@ HWTEST_F(TextFieldPatternFuncTest, GetCaretPosition002, TestSize.Level1)
     auto result = textFieldController.GetCaretPosition();
     EXPECT_EQ(result.GetX(), -1);
 }
+
+/**
+ * @tc.name: GetKeyboardAppearance001
+ * @tc.desc: test SetKeyboardAppearance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetKeyboardAppearance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. check KeyboardAppearance's size and default value.
+     */
+    EXPECT_TRUE(pattern->GetKeyboardAppearance() == KeyboardAppearance::NONE_IMMERSIVE);
+    /**
+     * @tc.steps: step3. call SetKeyboardAppearance and use GetKeyboardAppearance to check
+     */
+    pattern->SetKeyboardAppearance(KeyboardAppearance::DARK_IMMERSIVE);
+    EXPECT_TRUE(pattern->GetKeyboardAppearance() == KeyboardAppearance::DARK_IMMERSIVE);
+    pattern->SetKeyboardAppearance(KeyboardAppearance::NONE_IMMERSIVE);
+    EXPECT_TRUE(pattern->GetKeyboardAppearance() == KeyboardAppearance::NONE_IMMERSIVE);
+}
 } // namespace OHOS::Ace

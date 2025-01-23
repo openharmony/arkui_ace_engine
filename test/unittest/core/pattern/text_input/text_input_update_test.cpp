@@ -434,6 +434,34 @@ HWTEST_F(TextInputUpdateTestNg, AddCounterNode001, TestSize.Level1)
     pattern_->AddCounterNode();
     EXPECT_TRUE(pattern_->counterDecorator_);
     pattern_->CleanCounterNode();
+    EXPECT_FALSE(pattern_->counterDecorator_);
+}
+
+/**
+ * @tc.name: MeasureDecorator
+ * @tc.desc: test MeasureDecorator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, MeasureDecorator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected: counterTextNode_ is created
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. call AddCounterNode and MeasureDecorator
+     * @tc.expected: counterTextNode_ is created and align properties is correct
+     */
+    pattern_->AddCounterNode();
+    auto counter = pattern_->GetCounterDecorator();
+    counter->MeasureDecorator(Infinity<float>(), u"9/10", false);
+    EXPECT_TRUE(counter);
+    auto property = frameNode_->GetLayoutProperty();
+    EXPECT_TRUE(property);
+    auto layoutDirection = property->GetLayoutDirection();
+    EXPECT_TRUE(layoutDirection == TextDirection::AUTO);
 }
 
 /**
