@@ -569,7 +569,7 @@ public:
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
-    void SetStyledString(const RefPtr<SpanString>& value);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
