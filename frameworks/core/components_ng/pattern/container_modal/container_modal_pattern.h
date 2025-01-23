@@ -33,7 +33,7 @@ public:
     ContainerModalPattern() = default;
     ~ContainerModalPattern() override = default;
 
-    static bool GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline);
+
 
     void OnColorConfigurationUpdate() override;
 

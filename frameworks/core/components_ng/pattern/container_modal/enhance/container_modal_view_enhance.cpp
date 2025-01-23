@@ -279,4 +279,18 @@ void ContainerModalViewEnhance::RemoveButtonsRectChangeListener(PipelineContext*
     CHECK_NULL_VOID(pattern);
     pattern->RemoveButtonsRectChangeListener(id);
 }
+
+bool ContainerModalPattern::GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline)
+{
+    if (pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
+        return false;
+    }
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetFirstChild());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerModalPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerModalPattern, false);
+    return containerModalPattern->GetContainerModalTitleVisible();
+}
 } // namespace OHOS::Ace::NG
