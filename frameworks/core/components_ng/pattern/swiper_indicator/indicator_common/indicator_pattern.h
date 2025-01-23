@@ -200,6 +200,8 @@ public:
     void GetTextContentSub(std::string& firstContent, std::string& lastContent) const override;
     void SwipeTo(std::optional<int32_t> mouseClickIndex) override;
     void OnModifyDone() override;
+    int32_t GetTouchCurrentIndex() const override;
+    std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex) override;
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -207,7 +209,8 @@ public:
     int32_t hasSetInitialIndex_ = false;
 
 protected:
-    void FireChangeEvent(int32_t index) const override;
+    void FireChangeEvent() const override;
+    void FireIndicatorIndexChangeEvent(int32_t index) const override;
     SwiperIndicatorType GetIndicatorTypeFromProperty() const;
     Axis GetDirectionFromProperty() const;
     int32_t GetInitialIndexFromProperty() const;

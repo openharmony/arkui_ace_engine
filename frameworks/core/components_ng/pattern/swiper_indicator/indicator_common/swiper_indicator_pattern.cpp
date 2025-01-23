@@ -141,16 +141,11 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
     CHECK_NULL_VOID(swiperEventHub);
 
     swiperEventHub->SetIndicatorOnChange(
-        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)](int32_t index) {
+        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
             auto indicator = weak.Upgrade();
             CHECK_NULL_VOID(indicator);
             auto pipeline = indicator->GetContext();
             CHECK_NULL_VOID(pipeline);
-            auto pattern = context.Upgrade();
-            if (pattern->lastNotifyIndex_ != index && index != pattern->GetCurrentIndex()) {
-                pattern->FireChangeEvent(index);
-                pattern->lastNotifyIndex_ = index;
-            }
             pipeline->AddAfterLayoutTask([weak, context]() {
                 auto indicator = weak.Upgrade();
                 CHECK_NULL_VOID(indicator);
@@ -168,6 +163,16 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
             });
             pipeline->RequestFrame();
         });
+    swiperEventHub->SetIndicatorIndexChangeEvent(
+        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)](int32_t index) {
+        auto indicator = weak.Upgrade();
+        CHECK_NULL_VOID(indicator);
+        auto pipeline = indicator->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto pattern = context.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireIndicatorIndexChangeEvent(index);
+    });
 }
 
 void SwiperIndicatorPattern::UpdateFocusable() const
@@ -383,7 +388,7 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     }
 
     auto isRtl = IsHorizontalAndRightToLeft();
-    auto currentIndex = GetCurrentIndex();
+    auto currentIndex = GetTouchCurrentIndex();
     auto margin = HandleTouchClickMargin();
     auto lengthBeforeCurrentIndex = margin + theme->GetIndicatorPaddingDot().ConvertToPx() +
                                     (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
@@ -1016,10 +1021,8 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
         itemWidth = theme->GetSize().ConvertToPx();
         selectedItemWidth = theme->GetSize().ConvertToPx();
     }
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_RETURN(swiperNode, 0.0f);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    int32_t itemCount = swiperPattern->DisplayIndicatorTotalCount();
+
+    int32_t itemCount = DisplayIndicatorTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
     auto indicatorPadding = static_cast<float>(theme->GetIndicatorPaddingDot().ConvertToPx());
@@ -1299,6 +1302,11 @@ void SwiperIndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
     auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
     swiperPattern->ChangeIndex(index, useAnimation);
+}
+
+int32_t SwiperIndicatorPattern::GetTouchCurrentIndex() const
+{
+    return GetCurrentIndex();
 }
 
 int32_t SwiperIndicatorPattern::GetCurrentIndex() const
