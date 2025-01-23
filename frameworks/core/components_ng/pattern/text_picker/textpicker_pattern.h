@@ -344,6 +344,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void OnDirectionConfigurationUpdate() override;
 
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)

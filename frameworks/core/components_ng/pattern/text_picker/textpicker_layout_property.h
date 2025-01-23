@@ -87,6 +87,19 @@ public:
         json->PutExtAttr("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str(), filter);
         json->PutExtAttr("selected", std::to_string(GetSelectedValue(0)).c_str(), filter);
         json->PutExtAttr("value", GetValueValue("").c_str(), filter);
+        Color defaultDisappearColor = Color::BLACK;
+        Color defaultNormalColor = Color::BLACK;
+        Color defaultSelectColor = Color::BLACK;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = GetHost();
+        if (pipeline && frameNode) {
+            auto pickerTheme = pipeline->GetTheme<PickerTheme>(frameNode->GetThemeScopeId());
+            if (pickerTheme) {
+                defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();
+                defaultNormalColor = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+                defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+            }
+        }
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
             divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
@@ -128,7 +141,7 @@ public:
         disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
         auto disappearTextStyle = JsonUtil::Create(true);
-        disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
+        disappearTextStyle->Put("color", GetDisappearColor().value_or(defaultDisappearColor).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
         json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
@@ -136,7 +149,7 @@ public:
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
         normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
         auto normalTextStyle = JsonUtil::Create(true);
-        normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
+        normalTextStyle->Put("color", GetColor().value_or(defaultNormalColor).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
         json->PutExtAttr("textStyle", normalTextStyle, filter);
 
@@ -145,7 +158,7 @@ public:
         selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
         auto selectedTextStyle = JsonUtil::Create(true);
-        selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
+        selectedTextStyle->Put("color", GetSelectedColor().value_or(defaultSelectColor).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
         auto canLoop = GetCanLoopValue();
