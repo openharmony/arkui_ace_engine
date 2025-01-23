@@ -52,6 +52,7 @@ constexpr double MASS = 1.0f;
 constexpr double STIFFNESS = 328.0f;
 constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
+constexpr double MENU_FOCUS_TYPE = 1.0;
 constexpr float OPACITY_EFFECT = 0.99;
 const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
 // id of system resource start from 0x07000000
@@ -177,6 +178,9 @@ void MenuItemPattern::InitFocusPadding()
     auto selectTheme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     focusPadding_ = selectTheme->GetOptionFocusedBoxPadding();
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    menuFocusType_ = menuTheme->GetFocusStyleType();
 }
 
 void MenuItemPattern::OnModifyDone()
@@ -954,11 +958,12 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     option.SetCurve(rotateOption);
     RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
     expandableAreaContext->UpdateChainedTransition(opacity);
+    MenuRemoveChild(expandableNode, menuFocusType_ == MENU_FOCUS_TYPE);
 
     AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
-        host->RemoveChild(expandableNode, true);
-        host->MarkModifyDone();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->MenuRemoveChild(expandableNode, menuItemPattern->menuFocusType_ != MENU_FOCUS_TYPE);
         auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_VOID(rightRow);
         auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
@@ -978,10 +983,21 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
 
-        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(menuItemPattern);
         menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
     });
+}
+
+void MenuItemPattern::MenuRemoveChild(const RefPtr<FrameNode>& expandableNode, bool isOutFocus)
+{
+    if (!isOutFocus) {
+        return;
+    }
+    CHECK_NULL_VOID(expandableNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(expandableNode, true);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void MenuItemPattern::CloseMenu()
@@ -2306,6 +2322,11 @@ void MenuItemPattern::SetItalicFontStyle(const Ace::FontStyle& value)
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateItalicFontStyle(value);
+}
+
+void MenuItemPattern::SetSelected(int32_t selected)
+{
+    rowSelected_ = selected;
 }
 
 void MenuItemPattern::SetBorderColor(const Color& color)
