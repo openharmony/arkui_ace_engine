@@ -300,7 +300,6 @@ private:
     void UpdateFocusable() const;
     void CheckDragAndUpdate(
         const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
-    std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
 
     double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
@@ -334,7 +333,8 @@ private:
 protected:
     OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
     OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
-    virtual void FireChangeEvent(int32_t index) const {}
+    virtual void FireChangeEvent() const {}
+    virtual void FireIndicatorIndexChangeEvent(int32_t index) const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
     virtual void ShowPrevious();
     virtual void ShowNext();
@@ -345,6 +345,8 @@ protected:
     virtual int32_t GetCurrentShownIndex() const;
     virtual int32_t DisplayIndicatorTotalCount() const;
     virtual bool IsLoop() const;
+    virtual int32_t GetTouchCurrentIndex() const;
+    virtual std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
 
     RefPtr<SwiperPattern> GetSwiperPattern() const
@@ -431,8 +433,6 @@ protected:
     RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
-
-    int32_t lastNotifyIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

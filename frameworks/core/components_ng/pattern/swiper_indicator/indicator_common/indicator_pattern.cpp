@@ -90,11 +90,18 @@ bool IndicatorPattern::IsLoopFromProperty() const
     return swiperIndicatorLayoutProperty->GetLoop().value_or(true);
 }
 
-void IndicatorPattern::FireChangeEvent(int32_t index) const
+void IndicatorPattern::FireChangeEvent() const
 {
     auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
     CHECK_NULL_VOID(indicatorEventHub);
-    indicatorEventHub->FireChangeEvent(index);
+    indicatorEventHub->FireChangeEvent(GetLoopIndex(GetCurrentIndex()));
+}
+
+void IndicatorPattern::FireIndicatorIndexChangeEvent(int32_t index) const
+{
+    auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
+    CHECK_NULL_VOID(indicatorEventHub);
+    indicatorEventHub->FireChangeEvent(GetLoopIndex(index));
 }
 
 std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
@@ -334,7 +341,7 @@ void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
         }
     }
     SetCurrentIndexInSingleMode(GetLoopIndex(index));
-    FireChangeEvent(GetLoopIndex(index));
+    FireChangeEvent();
     SwiperIndicatorPattern::IndicatorOnChange();
 }
 
@@ -522,5 +529,37 @@ void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         }
         SetDragStartPoint(dragPoint);
     }
+}
+
+int32_t IndicatorPattern::GetTouchCurrentIndex() const
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::GetTouchCurrentIndex();
+    }
+
+    auto currentIndex = GetCurrentIndex();
+    auto isRtl = IsHorizontalAndRightToLeft();
+    if (isRtl) {
+        currentIndex = RealTotalCount() - 1 - currentIndex;
+    }
+
+    return currentIndex;
+}
+
+std::pair<int32_t, int32_t> IndicatorPattern::CalMouseClickIndexStartAndEnd(
+    int32_t itemCount, int32_t currentIndex)
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::CalMouseClickIndexStartAndEnd(itemCount, currentIndex);
+    }
+
+    int32_t loopCount = SwiperIndicatorUtils::CalcLoopCount(currentIndex, itemCount);
+    int32_t start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
+    int32_t end = currentIndex >= 0 ? (loopCount + 1) * itemCount : -loopCount * itemCount;
+    if (IsHorizontalAndRightToLeft()) {
+        end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
+        start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
+    }
+    return { start, end };
 }
 } // namespace OHOS::Ace::NG
