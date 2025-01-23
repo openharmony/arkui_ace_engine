@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,13 @@
 
 #include "gtest/gtest.h"
 #include "base/i18n/time_format.h"
+#include "core/components/theme/theme_attributes.h"
+#include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -200,6 +204,14 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     ASSERT_NE(textNode, nullptr);
+
+    MockPipelineContext::SetUp();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_TEXT);
+    auto theme = TextThemeWrapper::WrapperBuilder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. get pattern and create layout property.
@@ -477,15 +489,15 @@ HWTEST_F(TextClockTestNG, TextClockTest007, TestSize.Level1)
     ASSERT_NE(textClockProperty, nullptr);
     auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-
-    pattern->UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
+    TextStyle textStyleTheme;
+    pattern->UpdateTextLayoutProperty(textClockProperty, textLayoutProperty, textStyleTheme);
 
     /**
      * @tc.steps: step3. get the properties of all settings.
      * @tc.expected: step3. check whether the properties is correct.
      */
     EXPECT_FALSE(textLayoutProperty->HasFontSize());
-    EXPECT_FALSE(textLayoutProperty->HasTextColor());
+    EXPECT_TRUE(textLayoutProperty->HasTextColor());
     EXPECT_FALSE(textLayoutProperty->HasItalicFontStyle());
     EXPECT_FALSE(textLayoutProperty->HasFontWeight());
     EXPECT_FALSE(textLayoutProperty->HasFontFamily());
@@ -542,8 +554,8 @@ HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
     ASSERT_NE(textClockProperty, nullptr);
     auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-
-    pattern->UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
+    TextStyle textStyleTheme;
+    pattern->UpdateTextLayoutProperty(textClockProperty, textLayoutProperty, textStyleTheme);
 
     /**
      * @tc.steps: step3. get the properties of all settings.
