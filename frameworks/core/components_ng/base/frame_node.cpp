@@ -1234,6 +1234,13 @@ void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConf
             json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
         }
     }
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty) {
+        auto accessibilityText = accessibilityProperty->GetAccessibilityText();
+        if (!accessibilityText.empty()) {
+            json->Put("accessilityContent", accessibilityText.c_str());
+        }
+    }
 }
 
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)

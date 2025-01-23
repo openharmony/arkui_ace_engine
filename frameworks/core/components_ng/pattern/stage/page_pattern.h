@@ -343,6 +343,8 @@ protected:
 
     void NotifyNavigationLifecycle(bool isShow, bool isFromWindow);
 
+    void RecordPageEvent(bool isShow);
+
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
 

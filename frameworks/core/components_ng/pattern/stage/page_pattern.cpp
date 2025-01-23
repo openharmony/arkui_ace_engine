@@ -290,14 +290,30 @@ void PagePattern::OnShow(bool isFromWindow)
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(true);
     }
-    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+    RecordPageEvent(true);
+}
+
+void PagePattern::RecordPageEvent(bool isShow)
+{
+    if (!Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+        return;
+    }
+    auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
+    if (isShow) {
         std::string param;
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
             param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
-        Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);
+        Recorder::EventRecorder::Get().OnPageShow(
+            pageInfo_->GetPageUrl(), param, pageInfo_->GetRouteName().value_or(""));
+    } else {
+        int64_t duration = 0;
+        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
+            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
+        }
+        Recorder::EventRecorder::Get().OnPageHide(
+            pageInfo_->GetPageUrl(), duration, pageInfo_->GetRouteName().value_or(""));
     }
 }
 
@@ -342,14 +358,7 @@ void PagePattern::OnHide(bool isFromWindow)
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(false);
     }
-    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
-        int64_t duration = 0;
-        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
-            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
-        }
-        Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
-    }
+    RecordPageEvent(false);
 }
 
 bool PagePattern::OnBackPressed()
