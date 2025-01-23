@@ -47,6 +47,7 @@ enum class UIContentType {
     FORM,                      // form
     UI_EXTENSION,              // ui extension
     SECURITY_UI_EXTENSION,     // security ui extension
+    MODAL_UI_EXTENSION = 10,    // modal ui extension
 };
 } // namespace OHOS::Ace
 
