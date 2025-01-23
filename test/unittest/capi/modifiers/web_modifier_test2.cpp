@@ -546,6 +546,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedLifecycleChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
     std::string embedId = "embed_id";
     std::string surfaceId = "surface_id";
     NativeEmbedStatus status = NativeEmbedStatus::CREATE;
@@ -586,6 +587,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
     std::string embedId = "embed_id";
     TouchEventInfo touchEventInfo("touchEvent");
     auto param = AceType::MakeRefPtr<MockGestureEventResult>();
@@ -613,6 +615,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
     webEventHub->FireOnNativeEmbedGestureEvent(info);
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->resourceId, contextId);
-    EXPECT_EQ(checkEvent->embedId, embedId);}
+    EXPECT_EQ(checkEvent->embedId, embedId);
+}
 
 } // namespace OHOS::Ace::NG
