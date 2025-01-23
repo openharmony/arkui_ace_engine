@@ -328,6 +328,7 @@ private:
     void RegisterHoverModeChangeCallback();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    RectF GetContentRect(const RefPtr<FrameNode>& contentNode);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
