@@ -17,13 +17,13 @@
 
 #include <cstdint>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
+void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool notify)
 {
     if (index == -1) {
         index = fillAlgorithm_->GetMarkIndex();
@@ -32,18 +32,15 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
         return;
     }
     markIndex_ = index;
-    itemRectMap_.clear();
-    if (updater_) {
-        // nullptr to mark the first item
-        updater_(index, nullptr);
-    }
+    RequestRecompose();
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 {
-    // TODO: LazyForEach has initial offset index.
     auto* item = GetChildPtrByIndex(markIndex_);
     if (!item) {
+        nodeToIndex_.clear();
+        indexToNode_.clear();
         item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
     }
     if (!item) {
@@ -51,22 +48,16 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
             container_->TotalChildCount());
         return nullptr;
     }
-    RectF rect;
-    auto iter = itemRectMap_.find(item);
-    if (iter == itemRectMap_.end()) {
-        // 1: remeasure the mark item and get the new size.
-        rect = fillAlgorithm_->CalcMarkItemRect(size_, axis_, item, markIndex_, markItemOffset_);
-        markItemOffset_.reset();
-        indexToNode_.clear();
-        nodeToIndex_.clear();
-        itemRectMap_.try_emplace(item, rect);
-    } else {
-        rect = iter->second;
+    // 1: remeasure the mark item.
+    if (!filled_.count(markIndex_)) {
+        fillAlgorithm_->FillMarkItem(size_, axis_, item, markIndex_);
+        filled_.insert(markIndex_);
+
+        indexToNode_[markIndex_] = WeakClaim(item);
+        nodeToIndex_[item] = markIndex_;
     }
-    indexToNode_[markIndex_] = WeakClaim(item);
-    nodeToIndex_[item] = markIndex_;
     // 2: check if more space for new item.
-    if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, rect, direction)) {
+    if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, direction)) {
         LOGI("no more space left");
         return nullptr;
     }
@@ -84,9 +75,9 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
         return nullptr;
     }
     if (markItem == nullptr) {
-        fillAlgorithm_->PreFill(size_, axis_, totalCount_);
         return InitPivotItem(direction);
     }
+
     auto* pendingNode = static_cast<FrameNode*>(
         direction == FillDirection::START ? container_->GetChildBefore(markItem) : container_->GetChildAfter(markItem));
     if (!pendingNode) {
@@ -103,55 +94,60 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     if (index >= totalCount_ - 1 && direction == FillDirection::END) {
         return nullptr;
     }
-    // 2: remeasure the mark item and get the new size.
-    RectF rect;
-    auto iter = itemRectMap_.find(pendingNode);
-    if (iter == itemRectMap_.end()) {
-        // 1: remeasure the mark item and get the new size.
-        rect =
-            direction == FillDirection::START
-                ? fillAlgorithm_->CalcItemRectBeforeMarkItem(size_, axis_, pendingNode, index, itemRectMap_[markItem])
-                : fillAlgorithm_->CalcItemRectAfterMarkItem(size_, axis_, pendingNode, index, itemRectMap_[markItem]);
-        itemRectMap_.try_emplace(pendingNode, rect);
-    } else {
-        rect = iter->second;
-    }
-    if (direction == FillDirection::START) {
-        startRect_ = rect;
-    } else {
-        endRect_ = rect;
+    if (!filled_.count(index)) {
+        // 2: measure the pendingNode
+        direction == FillDirection::START ? fillAlgorithm_->FillPrev(size_, axis_, pendingNode, index)
+                                          : fillAlgorithm_->FillNext(size_, axis_, pendingNode, index);
+        filled_.insert(index);
     }
     // 3: check if more space for new item.
-    if (!fillAlgorithm_->CanFillMore(axis_, size_, index, rect, direction)) {
+    if (!fillAlgorithm_->CanFillMore(axis_, size_, index, direction)) {
         LOGE("no more space left");
         return nullptr;
     }
     return pendingNode;
 }
 
-void ScrollWindowAdapter::UpdateSlidingOffset(float x, float y)
+void ScrollWindowAdapter::UpdateSlidingOffset(float delta)
 {
-    markItemOffset_ = OffsetF(x, y);
-    fillAlgorithm_->OnSlidingOffsetUpdate(x, y);
-    for (auto& [node, rect] : itemRectMap_) {
-        rect.SetOffset(rect.GetOffset() + *markItemOffset_);
+    if (NearZero(delta)) {
+        return;
     }
-    if (Negative(x) || Negative(y)) {
-        endRect_.SetOffset(endRect_.GetOffset() + *markItemOffset_);
-        if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, endRect_, FillDirection::END)) {
+    fillAlgorithm_->OnSlidingOffsetUpdate(delta);
+    if (rangeMode_) {
+        bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);
+        if (res && updater_) {
+            auto range = fillAlgorithm_->GetRange();
+            updater_(range.first, nullptr); // placeholder
+        }
+        return;
+    }
+
+    if (Negative(delta)) {
+        if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
             return;
         }
     } else {
-        startRect_.SetOffset(startRect_.GetOffset() + *markItemOffset_);
-        if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, startRect_, FillDirection::START)) {
+        if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::START)) {
             return;
         }
     }
     LOGD("need to load");
+    markIndex_ = fillAlgorithm_->GetMarkIndex();
+
+    RequestRecompose();
+}
+
+void ScrollWindowAdapter::RequestRecompose()
+{
     if (updater_) {
-        // 01: mark the first loop item.
+        // nullptr to mark the first item
         updater_(markIndex_, nullptr);
     }
-    itemRectMap_.clear();
+}
+void ScrollWindowAdapter::Prepare()
+{
+    filled_.clear();
+    fillAlgorithm_->PreFill(size_, axis_, totalCount_);
 }
 } // namespace OHOS::Ace::NG

@@ -52,9 +52,9 @@ struct Section {
      */
     int32_t EndIdx() const;
 
-    inline float StartPos() const;
+    float StartPos() const;
 
-    inline float EndPos() const;
+    float EndPos() const;
 
     /**
      * @brief prepare next section's position and clear junk lanes.

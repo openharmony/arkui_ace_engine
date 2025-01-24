@@ -36,23 +36,22 @@ class StaggeredFillAlgorithm : public FillAlgorithm {
 public:
     explicit StaggeredFillAlgorithm(const RefPtr<LayoutProperty>& props) : props_(props) {}
 
-    RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index,
-        const std::optional<OffsetF>& slidingOffset) override;
+    void FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    RectF CalcItemRectAfterMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
+    void FillNext(
+        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    RectF CalcItemRectBeforeMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
+    void FillPrev(
+        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    void OnSlidingOffsetUpdate(float x, float y) override;
+    void OnSlidingOffsetUpdate(float delta) override;
 
     bool IsReady() const override
     {
         return true;
     }
 
-    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect,
+    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx,
         FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_content_modifier.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -50,7 +52,7 @@ struct GridItemAdapter {
     std::function<RefPtr<FrameNode>(int32_t index)> getItemFunc;
 };
 
-class ACE_EXPORT GridPattern : public ScrollablePattern {
+class ACE_EXPORT GridPattern : public ScrollablePattern, public LazyContainer {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
 public:
@@ -283,29 +285,6 @@ public:
         return adapter_;
     }
 
-    int32_t GetTotalChildCount() override
-    {
-        return adapter_ ? adapter_->totalCount : -1;
-    }
-
-    RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override
-    {
-        if (scrollWindowAdapter_) {
-            return scrollWindowAdapter_->GetChildByIndex(index);
-        }
-        return nullptr;
-    }
-
-    ScrollWindowAdapter* GetScrollWindowAdapter() override
-    {
-        if (scrollWindowAdapter_) {
-            return scrollWindowAdapter_.GetRawPtr();
-        }
-        return nullptr;
-    }
-
-    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter() override;
-
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -367,7 +346,16 @@ private:
 
     std::string GetIrregularIndexesString() const;
 
-    void CheckGridItemRange(const std::pair<int32_t, int32_t> &range);
+    void CheckGridItemRange(const std::pair<int32_t, int32_t>& range);
+
+    RefPtr<FillAlgorithm> CreateFillAlgorithm() override
+    {
+        auto props = GetLayoutProperty<GridLayoutProperty>();
+        if (!props->IsConfiguredScrollable()) {
+            return nullptr;
+        }
+        return MakeRefPtr<GridFillAlgorithm>(*props, info_);
+    }
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
@@ -394,9 +382,7 @@ private:
     std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
     GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
-    std::shared_ptr<GridItemAdapter> adapter_; // need to delete?
-    RefPtr<ScrollWindowAdapter> scrollWindowAdapter_;
-    RefPtr<GridFillAlgorithm> fillAlgo_;
+    std::shared_ptr<GridItemAdapter> adapter_;   // need to delete?
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 
