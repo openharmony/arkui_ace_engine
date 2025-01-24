@@ -216,9 +216,6 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
-    if (lineStyle->HasHalfLeading()) {
-        pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
-    }
     if (layoutWrapper) {
         pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
     } else {
@@ -413,8 +410,7 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .indent = textStyle.GetTextIndent(),
-        .halfLeading = textStyle.GetHalfLeading()
+        .indent = textStyle.GetTextIndent()
         };
 }
 
