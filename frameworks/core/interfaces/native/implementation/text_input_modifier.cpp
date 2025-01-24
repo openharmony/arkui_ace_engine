@@ -637,7 +637,6 @@ void LetterSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto spacing = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(spacing);
     Validator::ValidateNonPercent(spacing);
     TextFieldModelNG::SetLetterSpacing(frameNode, spacing);
 }
@@ -649,7 +648,6 @@ void LineHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(optValue);
-    Validator::ValidateNonPercent(optValue);
     TextFieldModelNG::SetLineHeight(frameNode, optValue);
 }
 void PasswordRulesImpl(Ark_NativePointer node,

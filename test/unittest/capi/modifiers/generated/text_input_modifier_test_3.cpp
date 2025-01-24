@@ -18,11 +18,40 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
+ * @tc.name: setPasswordRulesTestPasswordRulesValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setPasswordRulesTestPasswordRulesValidValues, TestSize.Level1)
+{
+    Ark_String initValuePasswordRules;
+
+    // Initial setup
+    initValuePasswordRules = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+
+    auto checkValue = [this, &initValuePasswordRules](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_String inputValuePasswordRules = initValuePasswordRules;
+
+        inputValuePasswordRules = value;
+        modifier_->setPasswordRules(node_, &inputValuePasswordRules);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPasswordRules, attribute: passwordRules";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
  * @tc.name: setFontFeatureTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontFeatureTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -36,12 +65,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestDefaultValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestFontFeatureValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontFeatureTestFontFeatureValidValues, TestSize.Level1)
 {
     Ark_String initValueFontFeature;
 
     // Initial setup
-    initValueFontFeature = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    initValueFontFeature = std::get<1>(Fixtures::testFixtureFontFeatureValidValues[0]);
 
     auto checkValue = [this, &initValueFontFeature](
                           const std::string& input, const std::string& expectedStr, const Ark_String& value) {
@@ -55,8 +84,37 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestFontFeatureValidValue
             "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontFeatureValidValues) {
         checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setFontFeatureTestFontFeatureInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setFontFeatureTestFontFeatureInvalidValues, TestSize.Level1)
+{
+    Ark_String initValueFontFeature;
+
+    // Initial setup
+    initValueFontFeature = std::get<1>(Fixtures::testFixtureFontFeatureValidValues[0]);
+
+    auto checkValue = [this, &initValueFontFeature](const std::string& input, const Ark_String& value) {
+        Ark_String inputValueFontFeature = initValueFontFeature;
+
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        inputValueFontFeature = value;
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureFontFeatureInvalidValues) {
+        checkValue(input, value);
     }
 }
 
