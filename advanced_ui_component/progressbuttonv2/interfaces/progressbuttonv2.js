@@ -153,8 +153,11 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.borderRadius(this.buttonBorderRadius);
       Progress.width('100%');
       Progress.hoverEffect(HoverEffect.None);
-      Progress.style(this.progressButtonRadius ?
-        { borderRadius: this.getProgressButtonRadius() } : {});
+      Progress.style({
+        borderColor: this.colorOptions?.borderColor?.color ?
+          this.colorOptions?.borderColor?.color : this.containerBorderColor,
+        borderRadius: this.getProgressButtonRadius()
+      });
       Progress.clip(false);
       Progress.enabled(this.isEnabled);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
