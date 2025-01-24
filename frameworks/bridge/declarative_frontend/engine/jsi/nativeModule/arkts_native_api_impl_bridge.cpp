@@ -4123,14 +4123,12 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(
             const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting));
 
-#ifndef ARKUI_WEARABLE
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNodeContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateNodeContent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "addFrameNodeToNodeContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AddFrameNodeToNodeContent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeFrameNodeFromNodeContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveFrameNodeFromNodeContent));
-#endif
 
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFirstUINode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetFirstUINode));
