@@ -3563,6 +3563,15 @@ void UIContentImpl::SetFormRenderingMode(int8_t renderMode)
     pipelineContext->SetFormRenderingMode(renderMode);
 }
 
+void UIContentImpl::SetFormEnableBlurBackground(bool enableBlurBackground)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFormEnableBlurBackground(enableBlurBackground);
+}
+
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
     std::vector<std::string>& assetBasePaths, std::string& resFolderName)
 {
