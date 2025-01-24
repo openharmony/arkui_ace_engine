@@ -320,7 +320,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto targetSize = geometryNode->GetFrameSize();
-        auto targetOffset = targetNode->GetPaintRectOffset(false, true);
+        auto targetOffset = targetNode->GetPaintRectOffset();
         auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
         float maxWidth = constrainWidth - targetSecurity_ * DOUBLE;
@@ -759,7 +759,7 @@ void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
     }
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    auto targetOffset = targetNode->GetPaintRectOffset(false, true);
+    auto targetOffset = targetNode->GetPaintRectOffset();
     float getY = 0;
     getY = targetOffset.GetY();
     auto bubbleNode = layoutWrapper->GetHostNode();
@@ -1483,7 +1483,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         targetSize_ = geometryNode->GetFrameSize();
-        targetOffset_ = targetNode->GetPaintRectOffset(false, true);
+        targetOffset_ = targetNode->GetPaintRectOffset();
     }
     auto pipelineContext = GetMainPipelineContext(layoutWrapper);
     CHECK_NULL_VOID(pipelineContext);
