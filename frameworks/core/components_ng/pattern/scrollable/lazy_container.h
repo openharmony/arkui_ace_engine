@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
  *
  */
 class LazyContainer : virtual public Pattern {
+    DECLARE_ACE_TYPE(LazyContainer, Pattern);
 public:
     int32_t GetTotalChildCount() override
     {

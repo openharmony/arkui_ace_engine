@@ -49,9 +49,13 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
         return nullptr;
     }
     // 1: remeasure the mark item.
-    fillAlgorithm_->FillMarkItem(size_, axis_, item, markIndex_);
-    indexToNode_[markIndex_] = WeakClaim(item);
-    nodeToIndex_[item] = markIndex_;
+    if (!filled_.count(markIndex_)) {
+        fillAlgorithm_->FillMarkItem(size_, axis_, item, markIndex_);
+        filled_.insert(markIndex_);
+
+        indexToNode_[markIndex_] = WeakClaim(item);
+        nodeToIndex_[item] = markIndex_;
+    }
     // 2: check if more space for new item.
     if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, direction)) {
         LOGI("no more space left");
@@ -74,7 +78,7 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
         return InitPivotItem(direction);
     }
 
-    FrameNode* pendingNode = static_cast<FrameNode*>(
+    auto* pendingNode = static_cast<FrameNode*>(
         direction == FillDirection::START ? container_->GetChildBefore(markItem) : container_->GetChildAfter(markItem));
     if (!pendingNode) {
         LOGE("fail to find pendingNode");
@@ -90,9 +94,12 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     if (index >= totalCount_ - 1 && direction == FillDirection::END) {
         return nullptr;
     }
-    // 2: measure the pendingNode
-    direction == FillDirection::START ? fillAlgorithm_->FillPrev(size_, axis_, pendingNode, index)
-                                      : fillAlgorithm_->FillNext(size_, axis_, pendingNode, index);
+    if (!filled_.count(index)) {
+        // 2: measure the pendingNode
+        direction == FillDirection::START ? fillAlgorithm_->FillPrev(size_, axis_, pendingNode, index)
+                                          : fillAlgorithm_->FillNext(size_, axis_, pendingNode, index);
+        filled_.insert(index);
+    }
     // 3: check if more space for new item.
     if (!fillAlgorithm_->CanFillMore(axis_, size_, index, direction)) {
         LOGE("no more space left");
@@ -140,6 +147,7 @@ void ScrollWindowAdapter::RequestRecompose()
 }
 void ScrollWindowAdapter::Prepare()
 {
+    filled_.clear();
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
 }
 } // namespace OHOS::Ace::NG

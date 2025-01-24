@@ -19,6 +19,7 @@
 #include <functional>
 #include <optional>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "fill_algorithm.h"
 
@@ -122,6 +123,7 @@ private:
     std::function<void(int32_t, void*)> updater_;
     std::unordered_map<int32_t, WeakPtr<FrameNode>> indexToNode_;
     std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
+    std::unordered_set<int32_t> filled_; // to record measured items during Fill
 
     Axis axis_ = Axis::VERTICAL;
     bool rangeMode_ = false; // true  if providing item range to frontend directly
