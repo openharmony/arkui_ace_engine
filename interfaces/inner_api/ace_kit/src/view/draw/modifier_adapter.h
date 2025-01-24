@@ -18,6 +18,10 @@
 
 #include <memory>
 
+#ifdef _USE_MATH_DEFINES
+#undef _USE_MATH_DEFINES
+#endif
+
 #include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "ui/view/draw/content_modifier.h"
 

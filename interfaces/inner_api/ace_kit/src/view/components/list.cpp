@@ -15,12 +15,11 @@
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/components/list.h"
 
-
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/referenced.h"
 #include "ui/view_stack/view_stack_processor.h"
+
 #include "core/components_ng/pattern/list/list_model_ng.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 
 namespace OHOS::Ace::Kit {
 

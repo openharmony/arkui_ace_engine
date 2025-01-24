@@ -20,8 +20,6 @@
 #include "ui/view/draw/content_modifier.h"
 #include "ui/view/draw/modifier.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace::Kit {
 
 ContentModifierAdapter::ContentModifierAdapter(const RefPtr<ContentModifier>& modifier) : modifier_(modifier) {}
