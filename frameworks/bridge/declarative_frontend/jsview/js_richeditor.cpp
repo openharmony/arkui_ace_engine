@@ -1365,7 +1365,7 @@ void JSRichEditor::SetMaxLength(const JSCallbackInfo& info)
 
 void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
 {
-    auto normalMaxLines = -1;
+    auto normalMaxLines = Infinity<uint32_t>();
     auto isValid = info.Length() >= 1 && info[0]->IsNumber() && info[0]->ToNumber<int32_t>() > 0;
     if (isValid) {
         normalMaxLines = info[0]->ToNumber<uint32_t>();

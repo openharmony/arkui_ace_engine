@@ -147,12 +147,12 @@ LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
         newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
         return newContentConstraint;
     }
-    if (pattern->GetMaxLines() == -1 || pManager_->GetHeight() <= 0.0f) {
+    if (pattern->GetMaxLines() == INT32_MAX || pManager_->GetHeight() <= 0.0f) {
         return newContentConstraint;
     }
     pattern->SetMaxLinesHeight(pManager_->GetHeight());
     newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
-    layoutProperty->UpdateMaxLines(-1);
+    layoutProperty->UpdateMaxLines(INT32_MAX);
     TextStyle textStyle;
     ConstructTextStyles(newContentConstraint, layoutWrapper, textStyle);
     layoutProperty->UpdateMaxLines(pattern->GetMaxLines());
