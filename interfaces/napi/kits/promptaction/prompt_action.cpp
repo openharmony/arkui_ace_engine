@@ -2294,6 +2294,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
 void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext,
     PromptDialogAttr& promptDialogAttr, std::function<void(int32_t)>& openCallback)
 {
+    promptDialogAttr.isUserCreatedDialog = true;
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {

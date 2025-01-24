@@ -475,4 +475,13 @@ void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int3
     CHECK_NULL_VOID(lastPage);
     NavigationPattern::FireNavigationLifecycle(lastPage, lowerLifecycle, activeReason);
 }
+
+void NavigationManager::FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetMainPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->FireLowerLayerLifecycle(node, lifecycle, reason);
+}
 } // namespace OHOS::Ace::NG

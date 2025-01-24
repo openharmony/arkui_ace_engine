@@ -7348,22 +7348,29 @@ SafeAreaInsets OverlayManager::GetSafeAreaInsets(const RefPtr<FrameNode>& frameN
 void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle,
     bool isLowerOnly, int32_t reason)
 {
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
     auto pipelineContext = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto navigationManager = pipelineContext->GetNavigationManager();
     CHECK_NULL_VOID(navigationManager);
-    if (node->GetTag() == V2::DIALOG_ETS_TAG) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(node);
-        CHECK_NULL_VOID(frameNode);
-        auto layoutProperty = frameNode->GetLayoutProperty<DialogLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto isShowInSubWindow = layoutProperty->GetShowInSubWindow().value_or(false);
-        if (isShowInSubWindow) {
+    auto pattern = frameNode->GetPattern();
+    if (InstanceOf<DialogPattern>(pattern)) {
+        auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_VOID(dialogPattern);
+        auto dialogProperties = dialogPattern->GetDialogProperties();
+        if (!dialogProperties.isUserCreatedDialog || dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
             return;
         }
-        auto dialogPattern = frameNode->GetPattern<DialogPattern>();
-        CHECK_NULL_VOID(dialogPattern);
-        if (dialogPattern->GetIsPickerDialog()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire dialog change to cause navdestination lifecycle: %{public}d",
+            static_cast<int32_t>(lifecycle));
+        if (dialogProperties.isShowInSubWindow) {
+            navigationManager->FireSubWindowLifecycle(node, lifecycle, reason);
+            return;
+        }
+    } else if (node->GetTag() == V2::SHEET_PAGE_TAG) {
+        auto layoutProperty = frameNode->GetLayoutProperty<SheetPresentationProperty>();
+        if (layoutProperty && layoutProperty->GetSheetStyleValue().showInPage.value_or(false)) {
             return;
         }
     }

@@ -171,6 +171,8 @@ public:
 
     void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
 
+    void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
+
 private:
     struct DumpMapKey {
         int32_t nodeId;
