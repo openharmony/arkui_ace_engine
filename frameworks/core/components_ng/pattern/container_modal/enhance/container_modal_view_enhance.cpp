@@ -280,7 +280,7 @@ void ContainerModalViewEnhance::RemoveButtonsRectChangeListener(PipelineContext*
     pattern->RemoveButtonsRectChangeListener(id);
 }
 
-bool ContainerModalPattern::GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline)
+bool ContainerModalViewEnhance::GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline)
 {
     if (pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
         return false;
