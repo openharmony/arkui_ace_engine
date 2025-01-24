@@ -68,7 +68,7 @@ void ArcIndexerPattern::InitArrayValue(bool& autoCollapseModeChanged)
             }
         }
         fullArrayValue_ = newArray;
-        fullCount_ = fullArrayValue_.size();
+        fullCount_ = static_cast<int32_t>(fullArrayValue_.size());
     }
     auto propSelect = layoutProperty->GetSelected().value();
     if (propSelect < 0) {
