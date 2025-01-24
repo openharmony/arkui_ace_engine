@@ -1777,6 +1777,7 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     if (focusHub->IsCurrentFocus()) {
+        isCursorAlwaysDisplayed_ = false;
         StartTwinkling();
     }
     CloseSelectOverlay();
