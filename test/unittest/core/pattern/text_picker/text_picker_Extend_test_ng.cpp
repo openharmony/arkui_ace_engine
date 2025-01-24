@@ -1941,4 +1941,34 @@ HWTEST_F(TextPickerExTestNg, TextPickerModelNGSetGradientHeight001, TestSize.Lev
     ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
     EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
 }
+
+/**
+ * @tc.name: TextPickerPaintTest005
+ * @tc.desc: Test GetForegroundDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerExTestNg, TextPickerPaintTest005, TestSize.Level1)
+{
+#ifdef ARKUI_WEARABLE
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    auto renderContext = frameNode->GetRenderContext();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto canvasDrawFunction = textPickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    canvasDrawFunction(rsCanvas);
+#endif
+}
 } // namespace OHOS::Ace::NG
