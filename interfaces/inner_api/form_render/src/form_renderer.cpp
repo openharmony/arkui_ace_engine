@@ -283,7 +283,7 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         uiContent_->SetFormHeight(resizedHeight);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-        SurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
+        rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
         if (!eventHandler) {
             HILOG_ERROR("eventHandler is null");
             return;
