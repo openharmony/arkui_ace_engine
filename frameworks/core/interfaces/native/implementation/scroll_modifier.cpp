@@ -209,7 +209,7 @@ void OnScrollEdgeImpl(Ark_NativePointer node,
         auto edge = Converter::ArkValue<Ark_Edge>(edgeIn);
         arkCallback.Invoke(edge);
     };
-    ScrollModelNG::SetOnScrollEdge(frameNode, call);
+    ScrollModelNG::SetOnScrollEdge(frameNode, std::move(call));
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        const VoidCallback* value)
