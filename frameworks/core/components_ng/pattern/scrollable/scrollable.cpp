@@ -38,7 +38,8 @@ constexpr double CAP_COEFFICIENT = 0.45;
 constexpr int32_t FIRST_THRESHOLD = 4;
 constexpr int32_t SECOND_THRESHOLD = 10;
 constexpr double CAP_FIXED_VALUE = 16.0;
-constexpr uint32_t DRAG_INTERVAL_TIME = 900;
+constexpr uint32_t DRAG_INTERVAL_TIME = 400;
+constexpr uint32_t MULTI_FLING_DISTANCE = 125;
 
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
@@ -467,6 +468,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
                      "canOverScroll_:%u, id:%d, tag:%s",
         mainPosition, gestureVelocity, currentVelocity_, moved_, canOverScroll_, nodeId_, nodeTag_.c_str());
     if (!moved_ || IsMouseWheelScroll(info)) {
+        ResetContinueDragCount();
         if (calePredictSnapOffsetCallback_) {
             std::optional<float> predictSnapOffset = calePredictSnapOffsetCallback_(0.0f, 0.0f, 0.0f);
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -609,6 +611,11 @@ double Scrollable::GetGain(double delta)
 {
     auto cap = 1.0;
     auto gain = 1.0;
+    if (std::abs(delta) < MULTI_FLING_DISTANCE) {
+        ResetContinueDragCount();
+        preGain_ = gain;
+        return gain;
+    }
     if (!continuousSlidingCallback_) {
         preGain_ = gain;
         return gain;
@@ -1032,6 +1039,7 @@ void Scrollable::ProcessScrollMotion(double position)
     auto mainDelta = position - currentPos_;
     HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
     if (!moved_) {
+        ResetContinueDragCount();
         StopFrictionAnimation();
     } else if (!touchUp_) {
         if (scrollTouchUpCallback_) {
@@ -1048,6 +1056,7 @@ void Scrollable::ProcessScrollMotion(double position)
             "nodeId:%d, tag:%s", canOverScroll_, needScrollSnapChange_, nodeId_, nodeTag_.c_str());
         scrollPause_ = true;
         skipRestartSpring_ = true;
+        ResetContinueDragCount();
         MarkNeedFlushAnimationStartTime();
         StopFrictionAnimation();
     }
