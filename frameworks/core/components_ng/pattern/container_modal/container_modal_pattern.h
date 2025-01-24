@@ -163,6 +163,7 @@ public:
     void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height);
     void UpdateGestureRowVisible();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
+    bool GetContainerModalTitleVisible();
     virtual void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
     virtual bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);

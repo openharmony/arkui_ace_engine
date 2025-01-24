@@ -586,6 +586,8 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     TrimFloatingWindowLayout();
 }
 
+bool ContainerModalPattern::GetContainerModalTitleVisible() { return customTitleSettedShow_; }
+
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModal SetContainerModalTitleHeight height=%{public}d", height);
