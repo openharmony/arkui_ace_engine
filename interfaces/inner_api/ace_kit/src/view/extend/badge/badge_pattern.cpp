@@ -22,11 +22,6 @@ RefPtr<BadgeExtension> BadgePattern::CreateExtension()
     return nullptr;
 }
 
-bool BadgePattern::IsAtomicNode() const
-{
-    return false;
-}
-
 void BadgePattern::OnModifyDone() {}
 
 } // namespace OHOS::Ace::Kit

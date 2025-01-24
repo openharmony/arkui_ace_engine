@@ -18,9 +18,7 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 
-#include "base/json/json_util.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "compatible/components/component_loader.h"
@@ -30,7 +28,6 @@ namespace OHOS::Ace {
 using ComponentLoaderFunc = ComponentLoader* (*)(const char* name);
 using CanvasLoaderFunc = void* (*)(bool offscreen);
 using CanvasBridgeFunc = void* (*)(CanvasBridgeParams& params);
-using CreatorFunc = void* (*)();
 
 class ACE_EXPORT DynamicModuleHelper final {
 public:
@@ -38,9 +35,6 @@ public:
     std::unique_ptr<ComponentLoader> GetLoaderByName(const char* name);
     void* CreateCanvasRenderingContextModel(bool isOffscreen);
     void* CreateCanvasBridge(CanvasBridgeParams& params);
-    void LoadVendorConfig();
-    std::unique_ptr<JsonValue> GetVendorFeatures();
-    CreatorFunc GetCreatorByFeatureName(const std::string& feature);
 
 private:
     DynamicModuleHelper();
@@ -55,9 +49,6 @@ private:
     ComponentLoaderFunc componentLoaderFunc_ = nullptr;
     CanvasLoaderFunc canvasRenderingContextLoaderFunc_ = nullptr;
     CanvasBridgeFunc canvasBridgeLoaderFunc_ = nullptr;
-    std::unique_ptr<JsonValue> vendorConfig_;
-    std::unordered_map<std::string, void*> vendorHandleMap_;
-    std::unordered_map<std::string, CreatorFunc> vendorSymbolMap_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DYNAMIC_MODULE_HELPER_H
