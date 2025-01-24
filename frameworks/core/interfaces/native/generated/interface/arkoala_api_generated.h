@@ -152,7 +152,7 @@ typedef struct InteropBuffer {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 112
+#define GENERATED_ARKUI_FULL_API_VERSION 114
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -626,6 +626,20 @@ typedef struct Ark_MotionPathOptions Ark_MotionPathOptions;
 typedef struct Opt_MotionPathOptions Opt_MotionPathOptions;
 typedef struct Array_FractionStop Array_FractionStop;
 typedef struct Opt_Array_FractionStop Opt_Array_FractionStop;
+typedef struct Ark_GestureGroupInterface Ark_GestureGroupInterface;
+typedef struct Opt_GestureGroupInterface Opt_GestureGroupInterface;
+typedef struct Ark_RotationGestureInterface Ark_RotationGestureInterface;
+typedef struct Opt_RotationGestureInterface Opt_RotationGestureInterface;
+typedef struct Ark_SwipeGestureInterface Ark_SwipeGestureInterface;
+typedef struct Opt_SwipeGestureInterface Opt_SwipeGestureInterface;
+typedef struct Ark_PinchGestureInterface Ark_PinchGestureInterface;
+typedef struct Opt_PinchGestureInterface Opt_PinchGestureInterface;
+typedef struct Ark_PanGestureInterface Ark_PanGestureInterface;
+typedef struct Opt_PanGestureInterface Opt_PanGestureInterface;
+typedef struct Ark_LongPressGestureInterface Ark_LongPressGestureInterface;
+typedef struct Opt_LongPressGestureInterface Opt_LongPressGestureInterface;
+typedef struct Ark_TapGestureInterface Ark_TapGestureInterface;
+typedef struct Opt_TapGestureInterface Opt_TapGestureInterface;
 typedef struct Ark_Literal_Number_offset_span Ark_Literal_Number_offset_span;
 typedef struct Opt_Literal_Number_offset_span Opt_Literal_Number_offset_span;
 typedef struct Ark_RotateOptions Ark_RotateOptions;
@@ -1074,6 +1088,8 @@ typedef struct Ark_sharedTransitionOptions Ark_sharedTransitionOptions;
 typedef struct Opt_sharedTransitionOptions Opt_sharedTransitionOptions;
 typedef struct Ark_LinearGradientBlurOptions Ark_LinearGradientBlurOptions;
 typedef struct Opt_LinearGradientBlurOptions Opt_LinearGradientBlurOptions;
+typedef struct Ark_GestureType Ark_GestureType;
+typedef struct Opt_GestureType Opt_GestureType;
 typedef struct TransitionFinishCallback TransitionFinishCallback;
 typedef struct Opt_TransitionFinishCallback Opt_TransitionFinishCallback;
 typedef struct Ark_ForegroundBlurStyleOptions Ark_ForegroundBlurStyleOptions;
@@ -1192,6 +1208,8 @@ typedef Ark_Materialized Ark_ClickEvent;
 typedef struct Opt_ClickEvent Opt_ClickEvent;
 typedef struct Callback_RangeUpdate Callback_RangeUpdate;
 typedef struct Opt_Callback_RangeUpdate Opt_Callback_RangeUpdate;
+typedef struct Ark_DoubleAnimationParam Ark_DoubleAnimationParam;
+typedef struct Opt_DoubleAnimationParam Opt_DoubleAnimationParam;
 typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
 typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct WithThemeInterface WithThemeInterface;
@@ -3918,20 +3936,6 @@ typedef struct Opt_GestureMask {
     Ark_Tag tag;
     Ark_GestureMask value;
 } Opt_GestureMask;
-typedef enum Ark_GestureControl_GestureType {
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE = 0,
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE = 1,
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE = 2,
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE = 3,
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE = 4,
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE = 5,
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG = 6,
-    ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK = 7,
-} Ark_GestureControl_GestureType;
-typedef struct Opt_GestureControl_GestureType {
-    Ark_Tag tag;
-    Ark_GestureControl_GestureType value;
-} Opt_GestureControl_GestureType;
 typedef enum Ark_FocusPriority {
     ARK_FOCUS_PRIORITY_AUTO = 0,
     ARK_FOCUS_PRIORITY_PRIOR = 2000,
@@ -3951,6 +3955,20 @@ typedef struct Opt_ImageRepeat {
     Ark_Tag tag;
     Ark_ImageRepeat value;
 } Opt_ImageRepeat;
+typedef enum Ark_GestureControl_GestureType {
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE = 0,
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE = 1,
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE = 2,
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE = 3,
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE = 4,
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE = 5,
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG = 6,
+    ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK = 7,
+} Ark_GestureControl_GestureType;
+typedef struct Opt_GestureControl_GestureType {
+    Ark_Tag tag;
+    Ark_GestureControl_GestureType value;
+} Opt_GestureControl_GestureType;
 typedef enum Ark_DragBehavior {
     ARK_DRAG_BEHAVIOR_COPY = 0,
     ARK_DRAG_BEHAVIOR_MOVE = 1,
@@ -6992,6 +7010,55 @@ typedef struct Opt_Array_FractionStop {
     Ark_Tag tag;
     Array_FractionStop value;
 } Opt_Array_FractionStop;
+typedef struct Ark_GestureGroupInterface {
+    void *handle;
+} Ark_GestureGroupInterface;
+typedef struct Opt_GestureGroupInterface {
+    Ark_Tag tag;
+    Ark_GestureGroupInterface value;
+} Opt_GestureGroupInterface;
+typedef struct Ark_RotationGestureInterface {
+    void *handle;
+} Ark_RotationGestureInterface;
+typedef struct Opt_RotationGestureInterface {
+    Ark_Tag tag;
+    Ark_RotationGestureInterface value;
+} Opt_RotationGestureInterface;
+typedef struct Ark_SwipeGestureInterface {
+    void *handle;
+} Ark_SwipeGestureInterface;
+typedef struct Opt_SwipeGestureInterface {
+    Ark_Tag tag;
+    Ark_SwipeGestureInterface value;
+} Opt_SwipeGestureInterface;
+typedef struct Ark_PinchGestureInterface {
+    void *handle;
+} Ark_PinchGestureInterface;
+typedef struct Opt_PinchGestureInterface {
+    Ark_Tag tag;
+    Ark_PinchGestureInterface value;
+} Opt_PinchGestureInterface;
+typedef struct Ark_PanGestureInterface {
+    void *handle;
+} Ark_PanGestureInterface;
+typedef struct Opt_PanGestureInterface {
+    Ark_Tag tag;
+    Ark_PanGestureInterface value;
+} Opt_PanGestureInterface;
+typedef struct Ark_LongPressGestureInterface {
+    void *handle;
+} Ark_LongPressGestureInterface;
+typedef struct Opt_LongPressGestureInterface {
+    Ark_Tag tag;
+    Ark_LongPressGestureInterface value;
+} Opt_LongPressGestureInterface;
+typedef struct Ark_TapGestureInterface {
+    void *handle;
+} Ark_TapGestureInterface;
+typedef struct Opt_TapGestureInterface {
+    Ark_Tag tag;
+    Ark_TapGestureInterface value;
+} Opt_TapGestureInterface;
 typedef struct Ark_Literal_Number_offset_span {
     Ark_Number span;
     Ark_Number offset;
@@ -9056,6 +9123,22 @@ typedef struct Opt_LinearGradientBlurOptions {
     Ark_Tag tag;
     Ark_LinearGradientBlurOptions value;
 } Opt_LinearGradientBlurOptions;
+typedef struct Ark_GestureType {
+    Ark_Int32 selector;
+    union {
+        Ark_TapGestureInterface value0;
+        Ark_LongPressGestureInterface value1;
+        Ark_PanGestureInterface value2;
+        Ark_PinchGestureInterface value3;
+        Ark_SwipeGestureInterface value4;
+        Ark_RotationGestureInterface value5;
+        Ark_GestureGroupInterface value6;
+    };
+} Ark_GestureType;
+typedef struct Opt_GestureType {
+    Ark_Tag tag;
+    Ark_GestureType value;
+} Opt_GestureType;
 typedef struct TransitionFinishCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Boolean transitionIn);
@@ -9663,6 +9746,20 @@ typedef struct Opt_Callback_RangeUpdate {
     Ark_Tag tag;
     Callback_RangeUpdate value;
 } Opt_Callback_RangeUpdate;
+typedef struct Ark_DoubleAnimationParam {
+    Ark_String propertyName;
+    Ark_Number startValue;
+    Ark_Number endValue;
+    Ark_Number duration;
+    Ark_Number delay;
+    Ark_Union_Curve_String_ICurve curve;
+    Opt_Callback_Number_Void onProgress;
+    Opt_Callback_Void onFinish;
+} Ark_DoubleAnimationParam;
+typedef struct Opt_DoubleAnimationParam {
+    Ark_Tag tag;
+    Ark_DoubleAnimationParam value;
+} Opt_DoubleAnimationParam;
 typedef struct Ark_WithThemeOptions {
     Opt_CustomTheme theme;
     Opt_ThemeColorMode colorMode;
@@ -15406,13 +15503,13 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                   const Ark_String* scopeId,
                                   const Opt_FocusPriority* priority);
     void (*setGesture)(Ark_NativePointer node,
-                       Ark_GestureControl_GestureType gesture,
+                       const Ark_GestureType* gesture,
                        const Opt_GestureMask* mask);
     void (*setPriorityGesture)(Ark_NativePointer node,
-                               Ark_GestureControl_GestureType gesture,
+                               const Ark_GestureType* gesture,
                                const Opt_GestureMask* mask);
     void (*setParallelGesture)(Ark_NativePointer node,
-                               Ark_GestureControl_GestureType gesture,
+                               const Ark_GestureType* gesture,
                                const Opt_GestureMask* mask);
     void (*setBlur)(Ark_NativePointer node,
                     const Ark_Number* value,
@@ -18211,6 +18308,23 @@ typedef struct GENERATED_ArkUILinearIndicatorModifier {
 } GENERATED_ArkUILinearIndicatorModifier;
 
 // Accessors
+
+typedef struct AnimationExtenderPeer AnimationExtenderPeer;
+typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
+    void (*destroyPeer)(AnimationExtenderPeer* peer);
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*SetClipRect)(Ark_NativePointer peer,
+                        const Ark_Number* left,
+                        const Ark_Number* top,
+                        const Ark_Number* right,
+                        const Ark_Number* bottom);
+    void (*OpenImplicitAnimation)(Ark_NativePointer peer,
+                                  const Ark_AnimateParam* param);
+    void (*CloseImplicitAnimation)(Ark_NativePointer node);
+    void (*StartDoubleAnimation)(Ark_NativePointer peer,
+                                 const Ark_DoubleAnimationParam* param);
+} GENERATED_ArkUIAnimationExtenderAccessor;
 
 typedef struct UnifiedDataPeer UnifiedDataPeer;
 typedef struct GENERATED_ArkUIUnifiedDataAccessor {
@@ -21308,6 +21422,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
 } GENERATED_ArkUINodeModifiers;
 
 typedef struct GENERATED_ArkUIAccessors {
+    const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();

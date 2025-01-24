@@ -206,6 +206,7 @@ const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier();
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
+const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
@@ -447,6 +448,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
+        GetAnimationExtenderAccessor,
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetDrawingCanvasAccessor,
