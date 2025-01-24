@@ -111,6 +111,8 @@ public:
      */
     SafeAreaInsets GetCutoutSafeArea() const;
 
+    SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
+
     bool UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea);
 
     bool UpdateScbCutoutSafeArea(
@@ -302,6 +304,15 @@ public:
     {
         keyboardChangeCbsConsideringUIExt_.erase(nodeId);
     }
+    void SetUseCutout(bool useCutout)
+    {
+        useCutout_ = useCutout;
+    }
+
+    bool GetUseCutout()
+    {
+        return useCutout_;
+    }
 
 private:
     bool isAtomicService_ = false;
@@ -327,6 +338,8 @@ private:
      * [keyboardAvoidMode_] is NONE.
      */
     bool keyboardSafeAreaEnabled_ = false;
+
+    bool useCutout_ = false;
 
     KeyBoardAvoidMode keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
 

@@ -189,7 +189,7 @@ public:
                     pipeline->UpdateSystemSafeArea(safeArea);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
-                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
                 }
                 // for ui extension component
@@ -371,9 +371,7 @@ void AceAbility::InitEnv()
     }
     container->InitializeAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
     pipelineContext->UpdateSystemSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, window));
-    if (pipelineContext->GetUseCutout()) {
-        pipelineContext->UpdateCutoutSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, window));
-    }
+    pipelineContext->UpdateCutoutSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, window));
     pipelineContext->UpdateNavSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, window));
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);

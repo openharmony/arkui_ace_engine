@@ -726,7 +726,7 @@ void FrameNode::DumpSafeAreaInfo()
                                        .append(std::string(", isKeyboardAvoidMode").c_str())
                                        .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
                                        .append(std::string(", isUseCutout").c_str())
-                                       .append(std::to_string(pipeline->GetUseCutout())));
+                                       .append(std::to_string(manager->GetUseCutout())));
 }
 
 void FrameNode::DumpAlignRulesInfo()
@@ -1006,7 +1006,7 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
     json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
     json->Put("IsFullScreen", manager->IsFullScreen());
     json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
-    json->Put("IsUseCutout", pipeline->GetUseCutout());
+    json->Put("IsUseCutout", manager->GetUseCutout());
 }
 
 void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
@@ -6130,7 +6130,7 @@ void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
     json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
     json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
     json->Put("isKeyboardAvoidMode", std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())).c_str());
-    json->Put("isUseCutout", std::to_string(pipeline->GetUseCutout()).c_str());
+    json->Put("isUseCutout", std::to_string(manager->GetUseCutout()).c_str());
 }
 
 void FrameNode::DumpExtensionHandlerInfo(std::unique_ptr<JsonValue>& json)
