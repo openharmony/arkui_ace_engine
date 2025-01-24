@@ -2058,6 +2058,99 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0126, TestSize.Level1)
     EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: FocusHubTestNg0999
+ * @tc.desc: Test the function OnFocusEventNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0999, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 120, AceType::MakeRefPtr<ButtonPattern>());
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+
+    /**
+     * @tc.steps2: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
+    NonPointerEvent nonPointerEvent;
+    nonPointerEvent.sourceType = SourceType::CROWN;
+    FocusEvent focusEvent(nonPointerEvent);
+    EXPECT_FALSE(focusHub->OnFocusEventNode(focusEvent));
+
+    focusHub->currentFocus_ = true;
+    auto focus = focusHub->IsCurrentFocus();
+    EXPECT_EQ(focus, true);
+}
+
+/**
+ * @tc.name: FocusHubTestNg01000
+ * @tc.desc: Test the function HandleCrownEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg01000, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 120, AceType::MakeRefPtr<ButtonPattern>());
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+
+    /**
+     * @tc.steps2: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
+
+    CrownEvent event;
+    EXPECT_FALSE(focusHub->HandleCrownEvent(event));
+
+    focusHub->currentFocus_ = true;
+    auto focus = focusHub->IsCurrentFocus();
+    EXPECT_EQ(focus, true);
+}
+
+/**
+ * @tc.name: FocusHubTestNg01001
+ * @tc.desc: Test the function ProcessOnCrownEventInternal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg01001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 120, AceType::MakeRefPtr<ButtonPattern>());
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+
+    /**
+     * @tc.steps2: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
+
+    CrownEvent event;
+    EXPECT_FALSE(focusHub->ProcessOnCrownEventInternal(event));
+
+    focusHub->currentFocus_ = true;
+    auto focus = focusHub->IsCurrentFocus();
+    EXPECT_EQ(focus, true);
+}
+#endif
+
 /**
  * @tc.name: GetRootFocusHub001
  * @tc.desc: Test the function GetRootFocusHub.

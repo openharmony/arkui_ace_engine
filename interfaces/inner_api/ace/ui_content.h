@@ -313,6 +313,8 @@ public:
 
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
 
+    virtual bool GetContainerModalTitleVisible() { return false; }
+
     virtual void SetContainerModalTitleHeight(int height) {}
 
     virtual int32_t GetContainerModalTitleHeight()

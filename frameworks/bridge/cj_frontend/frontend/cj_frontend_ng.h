@@ -19,6 +19,7 @@
 #include "bridge/cj_frontend/frontend/cj_page_router_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_page_router_ng.h"
+#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 
 namespace OHOS::Ace::Framework {
 

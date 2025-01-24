@@ -763,6 +763,11 @@ public:
     }
     virtual void MarkUiFirstNode(bool isUiFirstNode) {}
 
+    virtual OffsetF GetRectOffsetWithPositionEdges(
+        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference)
+    {
+        return OffsetF();
+    }
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

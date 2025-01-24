@@ -72,7 +72,7 @@ constexpr uint32_t TOP_BG_COLOR_LIGHT = 0xFFDEDEEB;
 constexpr uint32_t BOTTOM_BG_COLOR_LIGHT = 0xFFA1A3B3;
 constexpr uint32_t FONT_COLOR_DARK = 0x99FFFFFF;
 constexpr uint32_t FONT_COLOR_LIGHT = 0x99000000;
-constexpr double TRANSITION_PERCENT = 0.1;
+constexpr int32_t END_POSITION = 100;
 constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
@@ -200,6 +200,7 @@ void FormPattern::InitClickEvent()
 
 void FormPattern::HandleTouchDownEvent(const TouchEventInfo& event)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "handle touch down.");
     touchDownTime_ = event.GetTimeStamp();
     shouldResponseClick_ = true;
     if (!event.GetTouches().empty()) {
@@ -220,6 +221,7 @@ void FormPattern::HandleTouchUpEvent(const TouchEventInfo& event)
     }
     auto distance = event.GetTouches().front().GetScreenLocation() - lastTouchLocation_;
     if (distance.GetDistance() > FORM_CLICK_OPEN_LIMIT_DISTANCE) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "reject click. distance exceeded the limit.");
         shouldResponseClick_ = false;
     }
 }
@@ -299,7 +301,16 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 {
-    if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
+    if (formLinkInfos_.empty()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formLinkInfos_ empty.");
+        return;
+    }
+    if (isDynamic_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dynamic form.");
+        return;
+    }
+    if (!shouldResponseClick_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "shouldResponseClick_ is false.");
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
@@ -333,6 +344,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
     
     if (isDynamic_) {
         formLinkInfos_.clear();
+        TAG_LOGI(AceLogTag::ACE_FORM, "formLinkInfos_ clear.");
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "Static-form take snapshot.");
     auto host = GetHost();
@@ -914,7 +926,7 @@ void FormPattern::UpdateSpecialStyleCfg()
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(GetFormStyleBackGroundColor());
+    UpdateForbiddenRootNodeStyle(renderContext);
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
     if (attribution == FormStyleAttribution::PARENT_CONTROL) {
         UpdateTimeLimitFontCfg();
@@ -992,7 +1004,7 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(GetFormStyleBackGroundColor());
+    UpdateForbiddenRootNodeStyle(renderContext);
 
     auto node = CreateActionNode();
     CHECK_NULL_VOID(node);
@@ -2151,7 +2163,8 @@ void FormPattern::UpdateFormBaseConfig(bool isDynamic)
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d", static_cast<int32_t>(visible));
+    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d, isDynamic: %{public}d",
+        static_cast<int32_t>(visible), isDynamic);
     layoutProperty->UpdateVisibility(visible);
     isLoaded_ = true;
     isUnTrust_ = false;
@@ -2482,10 +2495,20 @@ void FormPattern::HandleFormStyleOperation(const FormSpecialStyle& newFormSpecia
   HandleFormStyleOperation(newFormSpecialStyle, cardInfo_);
 }
 
-Color FormPattern::GetFormStyleBackGroundColor()
+void FormPattern::UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext)
 {
-  return SystemProperties::GetColorMode() == ColorMode::DARK ?
-      Color::LineColorTransition(Color(TOP_BG_COLOR_DARK), Color(BOTTOM_BG_COLOR_DARK), TRANSITION_PERCENT)
-      : Color::LineColorTransition(Color(TOP_BG_COLOR_LIGHT), Color(BOTTOM_BG_COLOR_LIGHT), TRANSITION_PERCENT);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    bool isDarkMode = SystemProperties::GetColorMode() == ColorMode::DARK;
+    GradientColor beginGredientColor =
+        GradientColor(isDarkMode ? Color(TOP_BG_COLOR_DARK) : Color(TOP_BG_COLOR_LIGHT));
+    beginGredientColor.SetDimension(CalcDimension(0, DimensionUnit::PERCENT));
+    GradientColor endGredientColor =
+        GradientColor(isDarkMode ? Color(BOTTOM_BG_COLOR_DARK) : Color(BOTTOM_BG_COLOR_LIGHT));
+    endGredientColor.SetDimension(CalcDimension(END_POSITION, DimensionUnit::PERCENT));
+    gradient.AddColor(beginGredientColor);
+    gradient.AddColor(endGredientColor);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateLinearGradient(gradient);
 }
 } // namespace OHOS::Ace::NG

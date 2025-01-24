@@ -233,6 +233,7 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
+        points[i].operatingHand = fingureIterator->operatingHand_;
         i++;
         fingureIterator++;
     }
@@ -257,6 +258,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
         touchEvent.actionTouchPoint.screenX = touchEvent.touchPointes[0].screenX;
         touchEvent.actionTouchPoint.screenY = touchEvent.touchPointes[0].screenY;
         touchEvent.actionTouchPoint.toolType = touchEvent.touchPointes[0].toolType;
+        touchEvent.actionTouchPoint.operatingHand = touchEvent.touchPointes[0].operatingHand;
     }
     touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
     tempTouchEvent.pointers.size() : MAX_POINTS;
@@ -277,6 +279,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.pinchCenterY = info.GetPinchCenter().GetY();
     ret.speed = info.GetSpeed();
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
+    ret.targetDisplayId = info.GetTargetDisplayId();
     switch (info.GetInputEventType()) {
         case InputEventType::TOUCH_SCREEN :
             ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);
@@ -472,6 +475,32 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
             SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_CANCEL), extraParam);
         };
         gestureRef->SetOnActionCancelId(onActionCancel);
+    }
+}
+
+void registerGestureEventExt(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
+    GestrueFunction* gestrueFunction, void* gestureData)
+{
+    CHECK_NULL_VOID(gestrueFunction);
+    Gesture* gestureRef = reinterpret_cast<Gesture*>(gesture);
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_ACCEPT) {
+        auto onActionAccept = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->acceptFunction(gestureData);
+        };
+        gestureRef->SetOnActionId(onActionAccept);
+        gestureRef->SetOnActionStartId(onActionAccept);
+    }
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_UPDATE) {
+        auto onActionUpdate = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->updateFunction(gestureData);
+        };
+        gestureRef->SetOnActionUpdateId(onActionUpdate);
+    }
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_END) {
+        auto onActionEnd = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->endFunction(gestureData);
+        };
+        gestureRef->SetOnActionEndId(onActionEnd);
     }
 }
 
@@ -832,6 +861,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         .setArkUIGestureRecognizerDisposeNotify = setArkUIGestureRecognizerDisposeNotify,
         .addGestureToGestureGroupWithRefCountDecrease = addGestureToGestureGroupWithRefCountDecrease,
         .addGestureToNodeWithRefCountDecrease = addGestureToNodeWithRefCountDecrease,
+        .registerGestureEventExt = registerGestureEventExt,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

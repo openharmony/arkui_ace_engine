@@ -2295,12 +2295,13 @@ export class ComposeListItem extends ViewPU {
             }
         }
         else if (this.contentItem.description === undefined) {
+            let iconStyle = this.contentItem.iconStyle;
             if (this.contentItem.icon === undefined ||
-                (this.contentItem.icon !== undefined && this.contentItem.iconStyle <= IconType.SYSTEM_ICON)) {
+                (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
                 this.itemHeight = ItemHeight.THIRD_HEIGHT;
             }
             else {
-                this.itemHeight = APPICON_ITEMLENGTH;
+                this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
             }
         }
         else {
@@ -2482,13 +2483,13 @@ export class ComposeListItem extends ViewPU {
         return Math.min(this.maxFontScale, this.getUIContext().getHostContext()?.config.fontSizeScale ?? 1);
     }
     getPadding() {
-        if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isWrapText) {
+        if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
             let z = LengthMetrics.resource(ITEM_PADDING).value;
             let a1 = z > LISTITEM_PADDING;
             let b1 = a1 ? z - LISTITEM_PADDING : 0;
             return {
-                top: z,
-                bottom: z,
+                top: this.isWrapText ? z : 0,
+                bottom: this.isWrapText ? z : 0,
                 left: b1,
                 right: b1
             };

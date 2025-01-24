@@ -70,7 +70,6 @@ struct Index {
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .textAlign(TextAlign.Start)
-        .layoutWeight(1.0)
         .opacity(this.iconOpacity)
     }
     .width('100%')

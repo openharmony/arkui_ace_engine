@@ -296,6 +296,18 @@ public:
         }
     }
 
+    void UpdateOnUnselectedEvent(ChangeEvent&& event)
+    {
+        if (!unselectedEvent_) {
+            unselectedEvent_ = std::make_shared<ChangeEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddOnUnselectedEvent(unselectedEvent_);
+        } else {
+            (*unselectedEvent_).swap(event);
+        }
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -717,6 +729,7 @@ public:
 
     float CalcCurrentTurnPageRate() const;
     int32_t GetFirstIndexInVisibleArea() const;
+    float CalculateGroupTurnPageRate(float additionalOffset);
 
     bool IsBindIndicator() const
     {
@@ -885,6 +898,7 @@ private:
     void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout = false) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
     void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
@@ -904,7 +918,6 @@ private:
     {
         return Positive(GetNextMargin()) ? GetNextMargin() + GetItemSpace() : 0.0f;
     }
-    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -1156,12 +1169,20 @@ private:
     bool CheckContentWillScroll(float checkValue, float mainDelta);
     float CalcWillScrollOffset(int32_t comingIndex);
     std::optional<bool> OnContentWillScroll(int32_t currentIndex, int32_t comingIndex, float offset) const;
+    std::pair<int32_t, SwiperItemInfo> CalcFirstItemWithoutItemSpace() const;
     int32_t CalcComingIndex(float mainDelta) const;
     void TriggerAddTabBarEvent() const;
 
     bool ComputeTargetIndex(int32_t index, int32_t& targetIndex) const;
     void FastAnimation(int32_t targetIndex);
     void MarkDirtyBindIndicatorNode() const;
+
+    RefPtr<FrameNode> GetCommonIndicatorNode();
+    bool IsIndicator(const std::string& tag) const
+    {
+        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
+    }
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1213,6 +1234,7 @@ private:
     int32_t nextValidIndex_ = 0;
     int32_t currentFocusIndex_ = 0;
     int32_t selectedIndex_ = -1;
+    int32_t unselectedIndex_ = -1;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -1237,6 +1259,7 @@ private:
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     ChangeEventPtr selectedEvent_;
+    ChangeEventPtr unselectedEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
@@ -1335,11 +1358,6 @@ private:
     bool stopWhenTouched_ = true;
     WeakPtr<NG::UINode> indicatorNode_;
     bool isBindIndicator_ = false;
-    RefPtr<FrameNode> GetCommonIndicatorNode();
-    bool IsIndicator(const std::string& tag) const
-    {
-        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
-    }
 };
 } // namespace OHOS::Ace::NG
 

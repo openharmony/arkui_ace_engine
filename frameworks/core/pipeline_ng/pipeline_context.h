@@ -61,6 +61,11 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
 
+namespace OHOS::Ace::Kit {
+class UIContext;
+class UIContextImpl;
+}
+
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
@@ -1075,6 +1080,10 @@ public:
 
     void SetHostParentOffsetToWindow(const Offset& offset);
 
+    RefPtr<Kit::UIContext> GetUIContext();
+    void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
+    void FlushPendingDeleteCustomNode();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1206,6 +1215,7 @@ private:
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
     std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
+    std::stack<RefPtr<CustomNode>> pendingDeleteCustomNode_;
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
@@ -1357,6 +1367,8 @@ private:
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
+
+    RefPtr<Kit::UIContextImpl> uiContextImpl_;
 
     friend class ScopedLayout;
     friend class FormGestureManager;

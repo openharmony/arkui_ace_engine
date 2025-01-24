@@ -530,7 +530,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
@@ -555,6 +555,25 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);
     OnModifyDone();
+}
+
+bool DatePickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    host->SetNeedCallChildrenUpdate(false);
+    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_RETURN(pickerProperty, result);
+    // The following three attributes will be affected by withTheme.
+    // If they are setted by user, then use the value by user set; Otherwise use the value from withTheme
+    // When the "result" is true, mean to notify the framework to Re-render
+    if ((!pickerProperty->HasColor()) || (!pickerProperty->HasDisappearColor()) ||
+        (!pickerProperty->HasSelectedColor())) {
+        result = true;
+    }
+    OnModifyDone();
+    return result;
 }
 
 void DatePickerPattern::UpdateTitleTextColor(
@@ -892,6 +911,12 @@ void DatePickerPattern::FlushColumn()
     yearColumnPattern->FlushCurrentOptions();
     monthColumnPattern->FlushCurrentOptions();
     dayColumnPattern->FlushCurrentOptions();
+    yearNode->MarkModifyDone();
+    monthNode->MarkModifyDone();
+    dayNode->MarkModifyDone();
+    yearNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    monthNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    dayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     ShowColumnByDatePickMode();
 }
@@ -982,6 +1007,10 @@ void DatePickerPattern::FlushMonthDaysColumn()
     yearColumnPattern->SetShowCount(GetShowCount());
     monthDaysColumnPattern->FlushCurrentOptions();
     yearColumnPattern->FlushCurrentOptions();
+    monthDaysNode->MarkModifyDone();
+    yearDaysNode->MarkModifyDone();
+    monthDaysNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    yearDaysNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,

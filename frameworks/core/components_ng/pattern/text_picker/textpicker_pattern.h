@@ -344,6 +344,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void OnDirectionConfigurationUpdate() override;
 
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
@@ -551,6 +553,7 @@ private:
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
+    std::string GetColumnWidthsStr() const;
     std::string GetOptionsCascadeStr(
         const std::vector<NG::TextCascadePickerOptions>& options) const;
     bool ChangeCurrentOptionValue(NG::TextCascadePickerOptions& option,

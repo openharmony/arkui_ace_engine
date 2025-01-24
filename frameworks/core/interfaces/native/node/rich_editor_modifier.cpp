@@ -606,6 +606,10 @@ void SetRichEditorKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboard
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    if (value < KeyboardAppearance::NONE_IMMERSIVE || value > KeyboardAppearance::DARK_IMMERSIVE) {
+        RichEditorModelNG::SetKeyboardAppearance(frameNode, KeyboardAppearance::NONE_IMMERSIVE);
+        return;
+    }
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 

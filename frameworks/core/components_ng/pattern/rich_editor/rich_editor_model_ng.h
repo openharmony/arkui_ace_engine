@@ -48,6 +48,7 @@ public:
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func) override;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;

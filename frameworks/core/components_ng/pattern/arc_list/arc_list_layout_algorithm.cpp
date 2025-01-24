@@ -500,6 +500,13 @@ void ArcListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layout
         auto snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
         contentEndOffset_ = std::max((contentMainSize_ - snapSize) / FLOAT_TWO, 0.0f);
     }
+
+    if (childrenSize_ && totalItemCount_ - 1 > 0) {
+        auto startItemHeight = posMap_->GetPositionInfo(0).mainSize;
+        auto endItemHeight = posMap_->GetPositionInfo(totalItemCount_ - 1).mainSize;
+        contentStartOffset_ = std::max((contentMainSize_ - startItemHeight) / FLOAT_TWO, 0.0f);
+        contentEndOffset_ = std::max((contentMainSize_ - endItemHeight) / FLOAT_TWO, 0.0f);
+    }
 }
 
 float ArcListLayoutAlgorithm::GetLayoutFixOffset()

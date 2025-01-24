@@ -507,5 +507,5 @@ std::vector<CJPageRouterAbstract::RouterState> CJPageRouter::GetStateByUrl(const
 void CJPageRouter::StartPushPageWithCallback(const RouterPageInfo& target, const std::string& params) {}
 void CJPageRouter::StartReplacePageWithCallback(const RouterPageInfo& target, const std::string& params) {}
 void CJPageRouter::BackCheckAlertIndex(int32_t index, const std::string& params) {}
-void DisableAlertBeforeBackPage() {}
+void CJPageRouter::DisableAlertBeforeBackPage() {}
 } // namespace OHOS::Ace::Framework

@@ -405,7 +405,8 @@ int32_t GetPageCountProp()
 bool IsTaskPriorityAdjustmentEnable()
 {
     int32_t appVsyncPriority = system::GetIntParameter("const.graphic.app_vsync_priority", -1);
-    return appVsyncPriority != -1;
+    bool isArkUIEnable = system::GetBoolParameter("persist.sys.arkui.task_priority.enabled", false);
+    return appVsyncPriority != -1 && isArkUIEnable;
 }
 
 int32_t ReadDragDropFrameworkStatus()

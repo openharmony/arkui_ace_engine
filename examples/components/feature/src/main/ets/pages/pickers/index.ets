@@ -56,12 +56,12 @@ export function PickersDestination(name: string, route: Route) {
     RatingBootcamp({ title: route.label })
   } else if (name === 'pickers/toggle') {
     ToggleBootcamp({ title: route.label })
+  } else if (name === 'pickers/Radio') {
+    RadioBootcamp({ title: route.label })
   } else if (name === 'pickers/Slider') {
     SliderBootcamp({ title: route.label })
-  } else if (name === 'pickers/text-picker') {
-    TextPickerBootcamp({ title: route.label })
-  } else if (name === 'pickers/radio') {
-    RadioBootcamp({ title: route.label })
+  } else if (name==='pickers/text-picker'){
+    TextPickerBootcamp({title: route.label})
   } else if (name === 'pickers/Timepicker') {
     TimePickerBootcamp({ title: route.label })
   }

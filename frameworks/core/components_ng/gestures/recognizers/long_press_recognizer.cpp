@@ -174,6 +174,9 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
+        if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+            SendCallbackMsg(onAction_, false, true);
+        }
         SendCallbackMsg(onActionUpdate_, false);
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             SendCallbackMsg(onActionEnd_, false);
@@ -211,6 +214,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    touchPoints_[event.id].operatingHand = event.operatingHand;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     time_ = event.time;

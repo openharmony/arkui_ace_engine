@@ -78,7 +78,7 @@ class ACE_EXPORT TextControllerBase : public AceType {
 
 public:
     virtual void CloseSelectionMenu() = 0;
-    virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
+    virtual void SetStyledString(const RefPtr<SpanStringBase>& value, bool closeSelectOverlay) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
 };
 

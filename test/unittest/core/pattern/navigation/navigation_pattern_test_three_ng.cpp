@@ -756,6 +756,7 @@ HWTEST_F(NavigationPatternTestThreeNg, GenerateUINodeByIndex003, TestSize.Level1
     navigationPattern->SetNavigationStack(navigationStack);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->GetEventHub<EventHub>();
     RefPtr<UINode> node = navDestinationNode;
     auto navDestinationPattern = navDestinationNode->pattern_;
     navDestinationNode->pattern_ = nullptr;
@@ -856,6 +857,7 @@ HWTEST_F(NavigationPatternTestThreeNg, GetNavdestinationJsonArray003, TestSize.L
     navigationPattern->SetNavigationStack(navigationStack);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->GetEventHub<EventHub>();
     navigationStack->navPathList_.emplace_back(std::make_pair("Page01", navDestinationNode));
     auto navDestinationPattern = navDestinationNode->pattern_;
     navDestinationNode->pattern_ = nullptr;

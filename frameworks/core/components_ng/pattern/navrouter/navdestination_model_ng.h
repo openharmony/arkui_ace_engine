@@ -81,6 +81,17 @@ public:
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) override;
     void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) override;
+    static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
+    static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
+    static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid);
+    static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
+    static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
+    static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
+    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
+    static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
+    static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
+    static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
+    void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

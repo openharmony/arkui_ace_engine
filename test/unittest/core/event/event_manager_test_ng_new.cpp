@@ -1807,6 +1807,50 @@ HWTEST_F(EventManagerTestNg, EventManagerTest088, TestSize.Level1)
     EXPECT_EQ(touchPoint.isFalsified, false);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: EventManagerTest089
+ * @tc.desc: Test OnCrownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest089, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Call OnCrownEvent.
+    * @tc.expected: ret is false.
+    */
+    CrownEvent event;
+    bool ret = eventManager->OnCrownEvent(event);
+    EXPECT_FALSE(ret);
+
+    /**
+    * @tc.steps: step3. Call OnCrownEvent.
+    * @tc.expected: ret is true.
+    */
+    MockPipelineContext::SetUp();
+    ASSERT_NE(MockPipelineContext::GetCurrentContext(), nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    ret = eventManager->OnCrownEvent(event);
+    EXPECT_TRUE(ret);
+
+    /**
+    * @tc.steps: step4. Call OnCrownEvent. pipelineContext is nullptr
+    * @tc.expected: ret is false.
+    */
+    MockContainer::Current()->pipelineContext_ = nullptr;
+    ret = eventManager->OnCrownEvent(event);
+    EXPECT_FALSE(ret);
+    MockPipelineContext::TearDown();
+}
+#endif
+
 /**
  * @tc.name: CleanRecognizersForDragBeginTest001
  * @tc.desc: Test CleanRecognizersForDragBegin

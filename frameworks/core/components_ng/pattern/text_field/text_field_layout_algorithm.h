@@ -187,7 +187,7 @@ private:
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);
     void UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
-        bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
+        bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty, bool isTextFadeout);
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);

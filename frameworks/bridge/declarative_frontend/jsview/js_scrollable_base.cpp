@@ -111,9 +111,8 @@ void JSScrollableBase::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
         NG::ScrollableModelNG::SetDigitalCrownSensitivity(
             static_cast<CrownSensitivity>(static_cast<int32_t>(CrownSensitivity::MEDIUM)));
         return;
-    } else {
-        NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
     }
+    NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
 #endif
 }
 

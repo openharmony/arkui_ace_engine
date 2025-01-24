@@ -357,16 +357,6 @@ public:
 
     void SetDelayDragCallBack(const std::function<void()>& cb) noexcept;
 
-    DragStartRequestStatus IsDragStartNeedToBePended() const
-    {
-        return dragStartRequestStatus_;
-    }
-
-    bool HasDelayDragCallBack() const
-    {
-        return asyncDragCallback_ != nullptr;
-    }
-
     bool IsStartAnimationFInished() const
     {
         return isStartAnimationFinished_;
@@ -637,9 +627,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
 
-    Point dragMoveLastPoint_;
-    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
-    std::function<void()> asyncDragCallback_;
+    Point dragMoveLastPoint_{};
     bool isStartAnimationFinished_{};
 };
 } // namespace OHOS::Ace::NG

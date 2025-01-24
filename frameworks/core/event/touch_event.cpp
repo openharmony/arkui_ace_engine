@@ -184,6 +184,30 @@ TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
+{
+    this->operatingHand = operatingHand;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetPressedTime(TimeStamp pressedTime)
+{
+    this->pressedTime = pressedTime;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetWidth(int32_t width)
+{
+    this->width = width;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetHeight(int32_t height)
+{
+    this->height = height;
+    return *this;
+}
+
 TouchEvent TouchEvent::CloneWith(float scale) const
 {
     return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -220,6 +244,10 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
     event.isPassThroughMode = isPassThroughMode;
+    event.operatingHand = operatingHand;
+    event.width = width;
+    event.height = height;
+    event.pressedTime = pressedTime;
     return event;
 }
 
@@ -340,7 +368,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .downTime = time,
         .size = size,
         .force = force,
-        .isPressed = (type == TouchType::DOWN) };
+        .isPressed = (type == TouchType::DOWN),
+        .operatingHand = operatingHand };
     TouchEvent event;
     event.SetId(id)
         .SetX(x)
@@ -357,7 +386,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetIsInterpolated(isInterpolated)
         .SetPointerEvent(pointerEvent)
         .SetOriginalId(originalId)
-        .SetIsPassThroughMode(isPassThroughMode);
+        .SetIsPassThroughMode(isPassThroughMode)
+        .SetOperatingHand(operatingHand);
     event.pointers.emplace_back(std::move(point));
     return event;
 }
@@ -790,6 +820,9 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
         touchEvent.type = changedTouches_.front().GetTouchType();
         touchEvent.tiltX = changedTouches_.front().GetTiltX();
         touchEvent.tiltY = changedTouches_.front().GetTiltY();
+        touchEvent.width = changedTouches_.front().GetWidth();
+        touchEvent.height = changedTouches_.front().GetHeight();
+        touchEvent.pressedTime = changedTouches_.front().GetPressedTime();
     }
     touchEvent.time = timeStamp_;
     return touchEvent;

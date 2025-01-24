@@ -557,6 +557,11 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     if (info.GetSourceTool() == SourceTool::TOUCHPAD) {
         HandleTouchDown();
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (isCrownEventDragging_) {
+        HandleTouchDown();
+    }
+#endif
     currentVelocity_ = info.GetMainVelocity();
     ReportToDragFRCScene(currentVelocity_, NG::SceneStatus::START);
     if (continuousDragStatus_) {
@@ -567,9 +572,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     const double dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, id:%{public}d, tag:%{public}s", nodeId_, nodeTag_.c_str());
-
     skipRestartSpring_ = false; // reset flags. Extract method if more flags need to be reset
-
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
@@ -583,12 +586,15 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 #endif
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
     auto isAxisEvent = IsMouseWheelScroll(info);
-    ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, id:%d, tag:%s",
-        info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, nodeId_, nodeTag_.c_str());
+    ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, "
+                     "IsAxisAnimationRunning:%u, IsSnapAnimationRunning:%u, id:%d, tag:%s",
+        info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
+        nodeId_, nodeTag_.c_str());
     if (isAxisEvent) {
         InitAxisAnimator();
         if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
+            snapDirection_ = SnapDirection::NONE;
         }
         return;
     } else if (IsAxisAnimationRunning()) {
@@ -651,6 +657,11 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     if (isAxisEvent) {
         source = SCROLL_FROM_AXIS;
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (isCrownEventDragging_) {
+        source = SCROLL_FROM_CROWN;
+    }
+#endif
     ACE_SCOPED_TRACE(
         "HandleDragUpdate, mainDelta:%f, source:%d, id:%d, tag:%s", mainDelta, source, nodeId_, nodeTag_.c_str());
     if (isAxisEvent) {
@@ -1559,8 +1570,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
                 scroll->currentPos_ = currPos;
             }
         }
-        scroll->ProcessSpringMotion(scroll->finalPosition_);
-        scroll->StopSpringAnimation();
+        scroll->StopSpringAnimation(true);
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     AttachAnimatableProperty(springOffsetProperty_);

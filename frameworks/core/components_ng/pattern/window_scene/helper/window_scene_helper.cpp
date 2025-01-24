@@ -333,4 +333,17 @@ bool WindowSceneHelper::IsScreenScene(uint32_t type)
 {
     return type == static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
 }
+
+bool WindowSceneHelper::IsNodeInKeyGuardWindow(const RefPtr<FrameNode>& node)
+{
+    auto window2patternSession = GetCurSession(node);
+    if (window2patternSession == nullptr) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "The session between window and pattern is nullptr.");
+        return false;
+    }
+    
+    auto sessionWindowType = window2patternSession->GetWindowType();
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "The windowtype of window scene session is %{public}d", sessionWindowType);
+    return sessionWindowType == Rosen::WindowType::WINDOW_TYPE_KEYGUARD;
+}
 } // namespace OHOS::Ace::NG

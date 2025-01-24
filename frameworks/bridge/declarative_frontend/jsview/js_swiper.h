@@ -52,6 +52,7 @@ protected:
     static void SetDisableSwipe(bool disableSwipe);
     static void SetCurve(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnUnselected(const JSCallbackInfo& info);
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnGestureSwipe(const JSCallbackInfo& info);

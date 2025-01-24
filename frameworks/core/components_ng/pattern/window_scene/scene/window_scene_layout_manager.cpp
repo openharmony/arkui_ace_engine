@@ -572,11 +572,22 @@ void WindowSceneLayoutManager::UnregisterScreenNode(uint64_t screenId)
 void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
     int32_t parentId, std::ostringstream& oss)
 {
-    CHECK_NULL_VOID(node);
+    if (node == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "node null. parentId:%{public}d", parentId);
+        return;
+    }
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
-    CHECK_NULL_VOID(context);
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "context null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
+        return;
+    }
     auto rsNode = context->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
+    if (rsNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "rsNode null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
+        return;
+    }
     oss << " name: " << GetWindowName(node);
     oss << " isVisible: " << node->IsVisible();
     oss << " opacity: " << context->GetOpacityValue(1.0f);
@@ -593,6 +604,8 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " globalPos: [" << rsNode->GetGlobalPositionX() << ", " << rsNode->GetGlobalPositionY() << "],";
         oss << " pivot: [" << globalGeometry->GetPivotX() << ", " << globalGeometry->GetPivotY() << "],";
     } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "globalGeometry null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
         oss << " globalGeometry: [null],";
     }
     if (localGeometry) {
@@ -607,6 +620,8 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " localPos: [" << localGeometry->GetX() << ", "
             << localGeometry->GetY() << "],";
     } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "localGeometry null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
         oss << " localGeometry: [null],";
     }
     oss << " requestZIndex: " << context->GetZIndexValue(ZINDEX_DEFAULT_VALUE);

@@ -687,6 +687,15 @@ public:
 
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
 
+    void DestroySelectOverlaySubwindow(int32_t instanceId);
+
+    static bool IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node);
+
+    virtual bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+    {
+        return false;
+    }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

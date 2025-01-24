@@ -639,7 +639,7 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
-class LayoutPolicyPolicy {
+class LayoutPolicy {
   id_ = '';
 
   constructor(id) {
@@ -647,7 +647,7 @@ class LayoutPolicyPolicy {
   }
 
   static get matchParent() {
-    return new LayoutPolicyPolicy('matchParent');
+    return new LayoutPolicy('matchParent');
   }
 }
 
@@ -1105,6 +1105,10 @@ let NavigationSystemTransitionType;
   NavigationSystemTransitionType[NavigationSystemTransitionType.NONE = 1] = 'NONE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.TITLE = 2] = 'TITLE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.CONTENT = 3] = 'CONTENT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.FADE = 4] = 'FADE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.EXPLODE = 5] = 'EXPLODE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_RIGHT = 6] = 'SLIDE_RIGHT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
@@ -1821,19 +1825,6 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.DEFAULT = 0] = 'DEFAULT';
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
-
-let LevelMode;
-(function (LevelMode) {
-    LevelMode[LevelMode.OVERLAY = 0] = 'OVERLAY';
-    LevelMode[LevelMode.EMBEDDED = 1] = 'EMBEDDED';
-})(LevelMode || (LevelMode = {}));
-
-let ImmersiveMode;
-(function (ImmersiveMode) {
-    ImmersiveMode[ImmersiveMode.DEFAULT = 0] = 'DEFAULT';
-    ImmersiveMode[ImmersiveMode.PAGE = 1] = 'PAGE';
-    ImmersiveMode[ImmersiveMode.FULL = 2] = 'FULL';
-})(ImmersiveMode || (ImmersiveMode = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -2588,7 +2579,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-    this.nativeStack.onPopCallback(typeof result === 'boolean' ? undefined : result);
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return pathInfo;
   }
@@ -2617,7 +2608,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-    this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+    this.nativeStack?.onPopCallback(typeof result == 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return index;
   }
@@ -2643,7 +2634,7 @@ class NavPathStack {
       this.animated = animated;
     }
     if (needFireOnResult) {
-      this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+      this.nativeStack?.onPopCallback(typeof result == 'boolean' ? undefined : result);
     }
     this.nativeStack?.onStateChanged();
   }
@@ -3826,3 +3817,9 @@ let AccessibilitySamePageMode;
   AccessibilitySamePageMode[AccessibilitySamePageMode.SEMI_SILENT = 0] = 'SEMI_SILENT';
   AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
 })(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));
+
+let TextMenuShowMode;
+(function (TextMenuShowMode) {
+  TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
+  TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
+})(TextMenuShowMode || (TextMenuShowMode = {}));

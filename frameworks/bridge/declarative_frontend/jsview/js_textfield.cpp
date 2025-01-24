@@ -1716,16 +1716,16 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
 
 void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
-    auto jsValue = info[0];
-    if (!jsValue->IsNumber()) {
-        return;
-    }
-    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
+    auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
     if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
         keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        TextFieldModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
     TextFieldModel::GetInstance()->

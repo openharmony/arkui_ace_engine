@@ -22,6 +22,8 @@
 
 #include <dirent.h>
 
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+
 namespace OHOS::Ace {
 
 int32_t Container::CurrentId()
@@ -245,6 +247,15 @@ void Container::DestroyToastSubwindow(int32_t instanceId)
     }
 }
 
+void Container::DestroySelectOverlaySubwindow(int32_t instanceId)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSelectOverlaySubwindow(instanceId);
+    if (subwindow && subwindow->IsToastSubWindow()) {
+        subwindow->DestroyWindow();
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Destroy selectOverlay subwindow, instanceId is %{public}d", instanceId);
+    }
+}
+
 bool Container::IsFontFileExistInPath(const std::string& path)
 {
     DIR* dir;
@@ -318,4 +329,12 @@ int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
 #endif
 }
 
+bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    return NG::WindowSceneHelper::IsNodeInKeyGuardWindow(node);
+#else
+    return false;
+#endif
+}
 } // namespace OHOS::Ace

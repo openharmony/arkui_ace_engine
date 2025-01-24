@@ -68,6 +68,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -1714,8 +1715,16 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.steps: step2. keyboard up, and sheet will goes to correct position.
      * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
      */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
+
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1000));
+    pattern->selectController_->caretInfo_.rect.SetTop(1000.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->height_ = 1800;
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
@@ -1730,7 +1739,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.cases: case3. sheet offset = 1800, sheet goes up with h and not goes up to LARGE.
      */
     sheetPattern->keyboardHeight_ = 0;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
+    pattern->selectController_->caretInfo_.rect.SetTop(1900.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 56);
     EXPECT_FALSE(sheetPattern->isScrolling_);
@@ -1739,7 +1749,6 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      */
     sheetPattern->keyboardHeight_ = 0;
     sheetPattern->height_ = 1950;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 8);
     EXPECT_EQ(sheetPattern->scrollHeight_, 102.0f);
@@ -2090,6 +2099,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_RESIZE.
@@ -2136,11 +2151,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
      *              and isScrolling state is false.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1500));
+    pattern->selectController_->caretInfo_.rect.SetTop(1500.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -2171,7 +2187,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
      *              and isScrolling state is true.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
+    pattern->selectController_->caretInfo_.rect.SetTop(1900.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -
@@ -2266,6 +2283,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_RESIZE.
@@ -2312,11 +2335,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
      *              and isScrolling state is false.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1400));
+    pattern->selectController_->caretInfo_.rect.SetTop(1400.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -2347,7 +2371,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
      *              and isScrolling state is true.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1800));
+    pattern->selectController_->caretInfo_.rect.SetTop(1800.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -
@@ -2765,6 +2790,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_SCROLL.
@@ -2812,11 +2843,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
      *              and isScrolling state is false, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1500));
+    pattern->selectController_->caretInfo_.rect.SetTop(1500.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -2847,7 +2879,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
      *              and isScrolling state is true, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
+    pattern->selectController_->caretInfo_.rect.SetTop(1900.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -
@@ -2937,6 +2970,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_SCROLL.
@@ -2984,11 +3023,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
      *              and isScrolling state is false, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1400));
+    pattern->selectController_->caretInfo_.rect.SetTop(1400.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -3019,7 +3059,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
      *              and isScrolling state is true, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1800));
+    pattern->selectController_->caretInfo_.rect.SetTop(1800.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -

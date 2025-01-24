@@ -950,6 +950,12 @@ void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetMenuWrapperNode(menuWrapperNode);
+
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragMainDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragMainDropManager);
+    dragMainDropManager->SetMenuWrapperNode(menuWrapperNode);
 }
 
 RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByInspectorId(const std::string& inspectorId)

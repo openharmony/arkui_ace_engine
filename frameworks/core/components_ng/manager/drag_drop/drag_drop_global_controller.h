@@ -50,6 +50,13 @@ public:
     void UpdateDragFilterShowingStatus(bool isShowing);
     bool IsDragFilterShowing() const;
 
+    void SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus);
+
+    DragStartRequestStatus GetDragStartRequestStatus();
+
+    void SetAsyncDragCallback(std::function<void()> asyncDragCallbac);
+
+    std::function<void()> GetAsyncDragCallback();
 private:
     DragDropGlobalController() = default;
 
@@ -64,6 +71,9 @@ private:
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
 
     bool isDragFilterShowing_ = false;
+
+    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
+    std::function<void()> asyncDragCallback_;
 };
 
 } // namespace OHOS::Ace::NG

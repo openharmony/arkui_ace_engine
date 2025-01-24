@@ -225,7 +225,11 @@ void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)
     if (status != 0) {
         args.SetReturnValue(JSVal::Undefined());
         NapiThrow(engine, ERROR_CODE_PARAM_INVALID, "Invalid input parameter.");
+        return;
     }
+    auto jsUdKey = JSVal(ToJSValue(udKey));
+    auto jsUdKeyRef = JSRef<JSVal>::Make(jsUdKey);
+    args.SetReturnValue(jsUdKeyRef);
 }
 
 void JsDragEvent::GetData(const JSCallbackInfo& args)

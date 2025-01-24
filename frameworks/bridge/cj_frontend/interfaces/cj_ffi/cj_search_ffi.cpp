@@ -289,8 +289,8 @@ void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
 {
     auto onChange = [lambda = CJLambda::Create(callback)]
-        (const std::u16string& value, PreviewText& previewText) -> void {
-        const std::string valueStr = UtfUtils::Str16DebugToStr8(value);
+        (const ChangeValueInfo& info) -> void {
+        const std::string valueStr = UtfUtils::Str16DebugToStr8(info.value);
         lambda(valueStr.c_str());
     };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));

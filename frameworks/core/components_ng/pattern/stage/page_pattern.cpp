@@ -31,10 +31,9 @@ std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 constexpr float REMOVE_CLIP_SIZE = 10000.0f;
 constexpr double HALF = 0.5;
 constexpr double PARENT_PAGE_OFFSET = 0.2;
+constexpr int32_t RELEASE_JSCHILD_DELAY_TIME = 50;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
-const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
-    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
 {
@@ -248,7 +247,7 @@ void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, Win
     renderContext->RemoveClipWithRRect();
 }
 
-void PagePattern::OnShow()
+void PagePattern::OnShow(bool isFromWindow)
 {
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID(isRenderDone_);
@@ -263,9 +262,7 @@ void PagePattern::OnShow()
     NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), container->GetBundleName());
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
-        auto navigationManager = context->GetNavigationManager();
-        CHECK_NULL_VOID(navigationManager);
-        navigationManager->FireNavigationLifecycle(GetHost(), static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE));
+        NotifyNavigationLifecycle(true, isFromWindow);
     }
     UpdatePageParam();
     isOnShow_ = true;
@@ -292,18 +289,34 @@ void PagePattern::OnShow()
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(true);
     }
-    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+    RecordPageEvent(true);
+}
+
+void PagePattern::RecordPageEvent(bool isShow)
+{
+    if (!Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+        return;
+    }
+    auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
+    if (isShow) {
         std::string param;
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
             param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
-        Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);
+        Recorder::EventRecorder::Get().OnPageShow(
+            pageInfo_->GetPageUrl(), param, pageInfo_->GetRouteName().value_or(""));
+    } else {
+        int64_t duration = 0;
+        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
+            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
+        }
+        Recorder::EventRecorder::Get().OnPageHide(
+            pageInfo_->GetPageUrl(), duration, pageInfo_->GetRouteName().value_or(""));
     }
 }
 
-void PagePattern::OnHide()
+void PagePattern::OnHide(bool isFromWindow)
 {
     CHECK_NULL_VOID(isOnShow_);
     JankFrameReport::GetInstance().FlushRecord();
@@ -312,9 +325,7 @@ void PagePattern::OnHide()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (pageInfo_) {
-        auto navigationManager = context->GetNavigationManager();
-        CHECK_NULL_VOID(navigationManager);
-        navigationManager->FireNavigationLifecycle(host, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE));
+        NotifyNavigationLifecycle(false, isFromWindow);
         context->FirePageChanged(pageInfo_->GetPageId(), false);
     }
     host->SetJSViewActive(false);
@@ -346,14 +357,7 @@ void PagePattern::OnHide()
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(false);
     }
-    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
-        int64_t duration = 0;
-        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
-            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
-        }
-        Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
-    }
+    RecordPageEvent(false);
 }
 
 bool PagePattern::OnBackPressed()
@@ -513,9 +517,7 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    auto lastNode = overlayManager_->GetLastChildNotRemoving(GetHost());
-    if (!overlayManager_->IsModalEmpty() ||
-        (lastNode && EMBEDDED_DIALOG_NODE_TAG.find(lastNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end())) {
+    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto taskExecutor = pipeline->GetTaskExecutor();
@@ -523,6 +525,12 @@ bool PagePattern::RemoveOverlay()
         return overlayManager_->RemoveOverlay(true);
     }
     return false;
+}
+
+bool PagePattern::IsNeedCallbackBackPressed()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    return overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), true);
 }
 
 void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
@@ -813,6 +821,35 @@ void PagePattern::ResetPageTransitionEffect()
     MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }
 
+void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+
+    if (transactionType != PageTransitionType::EXIT_POP) {
+        return;
+    }
+
+    auto effect = FindPageTransitionEffect(transactionType);
+    if (effect && effect->GetUserCallback()) {
+        return;
+    }
+
+    if (page->HasSkipNode()) {
+        return;
+    }
+
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakPtr<FrameNode>(page)]() {
+            auto page = weak.Upgrade();
+            CHECK_NULL_VOID(page);
+            page->SetDestroying();
+        }, TaskExecutor::TaskType::UI, RELEASE_JSCHILD_DELAY_TIME, "ArkUIRemoveJsChild");
+}
+
 void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType type)
 {
     if (animationId_ != animationId) {
@@ -829,6 +866,10 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewHide();
+    }
+
+    if (outPage->IsInDestroying()) {
+        outPage->SetDestroying(false, false);
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -964,5 +1005,21 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
         option.SetDuration(delayedDuration);
     }
 #endif
+}
+
+void PagePattern::NotifyNavigationLifecycle(bool isShow, bool isFromWindow)
+{
+    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    NavDestinationActiveReason activeReason = isFromWindow ? NavDestinationActiveReason::APP_STATE_CHANGE
+        : NavDestinationActiveReason::TRANSITION;
+    NavDestinationLifecycle lifecycle = isShow ? NavDestinationLifecycle::ON_ACTIVE
+        : NavDestinationLifecycle::ON_INACTIVE;
+    navigationManager->FireNavigationLifecycle(hostNode, static_cast<int32_t>(lifecycle),
+        static_cast<int32_t>(activeReason));
 }
 } // namespace OHOS::Ace::NG

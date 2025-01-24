@@ -920,6 +920,28 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
     return true;
 }
 
+NG::RectF SecurityComponentHandler::UpdateClipRect(NG::RectF& clipRect, NG::RectF& paintRect)
+{
+    if (clipRect.IsIntersectWith(paintRect)) {
+        return clipRect.IntersectRectT(paintRect);
+    }
+
+    return NG::RectF(0.0, 0.0, 0.0, 0.0);
+}
+
+NG::RectF SecurityComponentHandler::UpdatePaintRect(NG::RectF& paintRect, NG::RectF& clipRect)
+{
+    if (NearEqual(clipRect.Width(), -1.0) && NearEqual(clipRect.Height(), -1.0)) {
+        return paintRect;
+    }
+
+    if (paintRect.IsIntersectWith(clipRect)) {
+        return paintRect.IntersectRectT(clipRect);
+    }
+
+    return NG::RectF(0.0, 0.0, 0.0, 0.0);
+}
+
 int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
 {
     SecurityComponentHandler::probe.InitProbeTask();
@@ -999,9 +1021,8 @@ bool SecurityComponentHandler::IsInModalPage(const RefPtr<UINode>& node)
     return false;
 }
 
-bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>& root,
-    std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect, int32_t secNodeId,
-    std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message)
+bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>& root, NodeMaps& maps,
+    int32_t secNodeId, std::string& message, NG::RectF& clipRect)
 {
     bool res = false;
     RectF paintRect;
@@ -1013,7 +1034,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
             if (IsInModalPage(root)) {
                 return false;
             }
-            return CheckRectIntersect(paintRect, secNodeId, nodeId2Rect, nodeId2Zindex, message);
+            return CheckRectIntersect(paintRect, secNodeId, maps.nodeId2Rect, maps.nodeId2Zindex, message);
         }
     }
     auto& children = root->GetChildren();
@@ -1022,11 +1043,20 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
         if (node && (IsContextTransparent(node) || !node->IsActive())) {
             continue;
         }
-        res |= CheckSecurityComponentStatus(*child, nodeId2Rect, secNodeId, nodeId2Zindex, message);
+        if (frameNode && frameNode->GetRenderContext() &&
+            frameNode->GetRenderContext()->GetClipEdge().has_value() && frameNode->GetRenderContext()->GetClipEdge()) {
+            if (NearEqual(clipRect.Width(), -1.0) && NearEqual(clipRect.Height(), -1.0)) {
+                clipRect = paintRect;
+            } else {
+                clipRect = UpdateClipRect(clipRect, paintRect);
+            }
+        }
+        res |= CheckSecurityComponentStatus(*child, maps, secNodeId, message, clipRect);
     }
 
     if (frameNode && frameNode->GetTag() != V2::SHEET_WRAPPER_TAG && !CheckContainerTags(frameNode)) {
-        nodeId2Rect[frameNode->GetId()] = std::make_pair(frameNode->GetTag(), paintRect);
+        paintRect = UpdatePaintRect(paintRect, clipRect);
+        maps.nodeId2Rect[frameNode->GetId()] = std::make_pair(frameNode->GetTag(), paintRect);
     }
     return res;
 }
@@ -1103,10 +1133,10 @@ bool SecurityComponentHandler::CheckComponentCoveredStatus(int32_t secNodeId, st
     CHECK_NULL_RETURN(pipeline, false);
     RefPtr<UINode> root = pipeline->GetRootElement();
     CHECK_NULL_RETURN(root, false);
-    std::unordered_map<int32_t, std::pair<std::string, NG::RectF>> nodeId2Rect;
-    std::unordered_map<int32_t, int32_t> nodeId2Zindex;
-    UpdateAllZindex(root, nodeId2Zindex);
-    if (CheckSecurityComponentStatus(root, nodeId2Rect, secNodeId, nodeId2Zindex, message)) {
+    NodeMaps maps;
+    UpdateAllZindex(root, maps.nodeId2Zindex);
+    NG::RectF clipRect = NG::RectF(-1.0, -1.0, -1.0, -1.0);
+    if (CheckSecurityComponentStatus(root, maps, secNodeId, message, clipRect)) {
         return true;
     }
     return false;
