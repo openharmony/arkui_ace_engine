@@ -784,7 +784,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager019, TestSize.Level1)
     jsAccessibilityManager->DeregisterAccessibilitySAObserverCallback(elementId0);
     EXPECT_EQ(0, jsAccessibilityManager->componentSACallbackMap_.size());
 }
-
 /**
  * @tc.name: UpdateWindowInfo001
  * @tc.desc: UpdateWindowInfo
@@ -813,7 +812,7 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateWindowInfo001, TestSize.Level1)
     /**
      * @tc.steps: step3. call and test UpdateWindowInfo method
      */
-    jsAccessibilityManager->UpdateWindowInfo(windowInfo);
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
     EXPECT_EQ(windowInfo.left, 10);
     EXPECT_EQ(windowInfo.top, 10);
     EXPECT_EQ(windowInfo.scaleX, 1.0f);
@@ -823,7 +822,7 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateWindowInfo001, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.6f));
 
-    jsAccessibilityManager->UpdateWindowInfo(windowInfo);
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
     EXPECT_EQ(windowInfo.left, 107.0f);
     EXPECT_EQ(windowInfo.top, 206.0f);
     EXPECT_EQ(windowInfo.scaleX, 0.7f);
@@ -856,6 +855,14 @@ HWTEST_F(JsAccessibilityManagerTest, GenerateWindowInfo001, TestSize.Level1)
         AceType::MakeRefPtr<Pattern>(), false);
     windowInfo = jsAccessibilityManager->GenerateWindowInfo(frameNode, nullptr);
     
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    jsAccessibilityManager->context_ = pipelineContext;
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    auto singleHandTransform = container->GetSingleHandTransform();
+    container->SetSingleHandTransform(Platform::SingleHandTransform(0.0f, 0.0f, 1.0f, 1.0f));
+
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     jsAccessibilityManager->getParentRectHandler_ = nullptr;
@@ -870,15 +877,9 @@ HWTEST_F(JsAccessibilityManagerTest, GenerateWindowInfo001, TestSize.Level1)
     /**
      * @tc.steps: step4. mock SingleHandTransform, and then test GenerateWindowInfo method again
      */
-    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    jsAccessibilityManager->context_ = pipelineContext;
-    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
-    ASSERT_NE(container, nullptr);
-    auto singleHandTransform = container->GetSingleHandTransform();
     container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.7f));
 
-    jsAccessibilityManager->UpdateWindowInfo(windowInfo);
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
     EXPECT_EQ(windowInfo.left, 100.0f);
     EXPECT_EQ(windowInfo.top, 200.0f);
     EXPECT_EQ(windowInfo.scaleX, 0.7f);
@@ -910,5 +911,4 @@ HWTEST_F(JsAccessibilityManagerTest, SingleHandTransformTest001, TestSize.Level1
     EXPECT_EQ(singleHandTransform.scaleX_, 0.7f);
     EXPECT_EQ(singleHandTransform.scaleY_, 0.6f);
 }
-
 } // namespace OHOS::Ace::NG

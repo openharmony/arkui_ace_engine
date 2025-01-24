@@ -6821,11 +6821,9 @@ void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
     }
 }
 
-void JsAccessibilityManager::UpdateWindowInfo(AccessibilityWindowInfo& windowInfo)
+void JsAccessibilityManager::UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context)
 {
-    auto pipelineContext = GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(pipelineContext);
-    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
     CHECK_NULL_VOID(container);
     auto singleHandTransform = container->GetSingleHandTransform();
     windowInfo.top = windowInfo.top * singleHandTransform.scaleY_ + singleHandTransform.y_;
@@ -6873,7 +6871,7 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
             windowInfo.scaleX = windowScale;
             windowInfo.scaleY = windowScale;
         }
-        UpdateWindowInfo(windowInfo);
+        UpdateWindowInfo(windowInfo, context);
     }
     return windowInfo;
 }
