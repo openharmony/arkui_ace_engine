@@ -430,6 +430,16 @@ void SwiperPattern::OnModifyDone()
     if (IsSwipeByGroup()) {
         needAdjustIndex_ = true;
     }
+
+    if (isBindIndicator_) {
+        auto refUINode = indicatorNode_.Upgrade();
+        CHECK_NULL_VOID(refUINode);
+        auto frameNode = DynamicCast<NG::FrameNode>(refUINode);
+        CHECK_NULL_VOID(frameNode);
+        auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+        CHECK_NULL_VOID(indicatorPattern);
+        indicatorPattern->InitIndicatorEvent();
+    }
 }
 
 void SwiperPattern::OnAfterModifyDone()
@@ -6978,13 +6988,6 @@ void SwiperPattern::SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
-        auto refUINode = indicatorNode_.Upgrade();
-        CHECK_NULL_VOID(refUINode);
-        auto frameNode = DynamicCast<NG::FrameNode>(refUINode);
-        CHECK_NULL_VOID(frameNode);
-        auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
-        CHECK_NULL_VOID(indicatorPattern);
-        indicatorPattern->InitIndicatorEvent();
         auto frameIndicatorNode = GetIndicatorNode();
         CHECK_NULL_VOID(frameIndicatorNode);
         frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
