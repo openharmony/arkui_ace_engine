@@ -887,8 +887,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h @arkui_image
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h @arkuilayout
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.cpp @arkuiabilitygroup
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.cpp @arkuilayout
