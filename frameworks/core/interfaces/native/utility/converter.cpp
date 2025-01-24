@@ -1813,9 +1813,7 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.lightSource = Converter::OptConvert<LightSource>(src.lightSource);
     // this converter should be changed to support IlluminatedType
     auto arkIlluminatedType = Converter::OptConvert<Ark_IlluminatedType>(src.illuminated);
-    std::cout << arkIlluminatedType.has_value() << std::endl;
     pointLightStyle.illuminationType = EnumToInt(arkIlluminatedType);
-    std::cout << pointLightStyle.illuminationType.value_or(100000) << std::endl;
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;

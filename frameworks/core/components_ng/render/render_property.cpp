@@ -447,7 +447,6 @@ void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     } else {
         jsonLightIntensity->Put("lightSource", "No light source");
     }
-    std::cout << propLightIlluminated.value_or(1000) << std::endl;
     auto iiluminatedString = strings.at(propLightIlluminated.value_or(0)).c_str();
     jsonLightIntensity->Put("illuminated", iiluminatedString);
     jsonLightIntensity->Put("bloom", std::to_string(propBloom.value_or(0.0f)).c_str());
