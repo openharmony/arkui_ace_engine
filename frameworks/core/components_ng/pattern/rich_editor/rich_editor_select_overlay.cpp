@@ -200,7 +200,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
             auto textOffset = localOffset - pattern->richTextRect_.GetOffset();
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
             textSelector.Update(currentHandleIndex);
-            pattern->SetCaretTouchMoveOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+            IF_TRUE(isHandleMoving_, pattern->SetCaretTouchMoveOffset(Offset(localOffset.GetX(), localOffset.GetY())));
         } else {
             pattern->HandleSelectionChange(initSelector_.first, currentHandleIndex);
         }
