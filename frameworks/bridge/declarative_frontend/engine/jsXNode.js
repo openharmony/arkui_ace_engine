@@ -701,7 +701,7 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
     let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
     if (nodeController) {
         nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-        nodeController._value = -1;
+        nodeController._nodeContainerId._value = -1;
         NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
     }
 };
