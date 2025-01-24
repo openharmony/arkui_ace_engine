@@ -3602,7 +3602,6 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(
             DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
-        rsNode_->AddModifier(accessibilityFocusStateModifier_);
         RequestNextFrame();
         return;
     }
@@ -3629,6 +3628,7 @@ void RosenRenderContext::InitAccessibilityFocusModidifer(
     if (!accessibilityFocusStateModifier_) {
         accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
     }
+    rsNode_->AddModifier(accessibilityFocusStateModifier_);
     accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
     accessibilityFocusStateModifier_->SetPaintColor(paintColor);
     accessibilityFocusStateModifier_->SetFrameNode(frameNode);
