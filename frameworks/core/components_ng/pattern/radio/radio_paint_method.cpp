@@ -356,9 +356,11 @@ void RadioModifier::PaintIndicator(
     if (isFocused_->Get()) {
         brush.SetColor(ToRSColor(focusedBgUnchecked_.BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
         if (isUserSetUncheckedBorderColor_->Get()) {
-            pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
+            pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale)
+                .BlendOpacity(alphaCalculate)));
         } else {
-            pen.SetColor(ToRSColor(focusedRingUnchecked_.BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
+            pen.SetColor(ToRSColor(focusedRingUnchecked_.BlendOpacity(borderOpacityScale)
+                .BlendOpacity(alphaCalculate)));
         }
     } else {
         pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
