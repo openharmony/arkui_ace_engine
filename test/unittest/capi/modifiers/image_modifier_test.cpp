@@ -64,7 +64,7 @@ namespace  {
     const auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
     const auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
-    const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "true";
+    const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
     const auto ATTRIBUTE_SOURCE_SIZE_DEFAULT_VALUE = "[0.00 x 0.00]";
 
@@ -464,7 +464,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions_NullOptions, testing::ext::TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setDraggableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
