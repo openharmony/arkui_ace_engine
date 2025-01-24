@@ -110,9 +110,6 @@ template("ace_base_source_set") {
       external_deps += [ "cJSON:cjson" ]
     }
 
-    if (current_os == "ohos") {
-      defines += [ "ENABLE_VSYNC_MODE_NOTIFY" ]
-    }
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }
