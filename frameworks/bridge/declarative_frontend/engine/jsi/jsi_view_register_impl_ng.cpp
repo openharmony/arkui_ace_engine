@@ -466,6 +466,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSToggle::JSBind(globalObj);
     JSCounter::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
+    JSCalendarPickerDialog::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
