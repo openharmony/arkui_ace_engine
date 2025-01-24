@@ -2021,10 +2021,8 @@ void SubwindowOhos::InitializeSafeArea()
     auto navSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, windowRect);
     pipeline->UpdateSystemSafeArea(systemSafeArea);
     pipeline->UpdateNavSafeArea(navSafeArea);
-    if (pipeline->GetUseCutout()) {
-        auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
-        pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
-    }
+    auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
+    pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
 
     auto safeAreaInsets = pipeline->GetScbSafeArea();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "initializeSafeArea by windowRect: %{public}s, safeAreaInsets: %{public}s",

@@ -1267,16 +1267,6 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    void SetUseCutout(bool useCutout)
-    {
-        useCutout_ = useCutout;
-    }
-
-    bool GetUseCutout() const
-    {
-        return useCutout_;
-    }
-
     bool GetOnFoucs() const
     {
         return onFocus_;
@@ -1646,7 +1636,6 @@ private:
     bool halfLeading_ = false;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
-    bool useCutout_ = false;
     // whether visible area need to be calculate at each vsync after approximate timeout.
     bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;

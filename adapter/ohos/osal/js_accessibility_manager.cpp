@@ -4042,7 +4042,7 @@ void JsAccessibilityManager::DumpTreeNodeSafeAreaInfoNg(const RefPtr<NG::FrameNo
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     if (!manager->IsIgnoreSafeArea() && !manager->IsNeedAvoidWindow() && !manager->IsFullScreen() &&
-        !manager->KeyboardSafeAreaEnabled() && !pipeline->GetUseCutout()) {
+        !manager->KeyboardSafeAreaEnabled() && !manager->GetUseCutout()) {
         DumpLog::GetInstance().AddDesc(
             std::string("ignoreSafeArea: ")
                 .append(std::to_string(manager->IsIgnoreSafeArea()))
@@ -4053,7 +4053,7 @@ void JsAccessibilityManager::DumpTreeNodeSafeAreaInfoNg(const RefPtr<NG::FrameNo
                 .append(std::string(", isKeyboardAvoidMode: ").c_str())
                 .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
                 .append(std::string(", isUseCutout: ").c_str())
-                .append(std::to_string(pipeline->GetUseCutout())));
+                .append(std::to_string(manager->GetUseCutout())));
     }
 }
 

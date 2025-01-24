@@ -110,9 +110,7 @@ void SafeAreaManagerTest::TearDownTestCase()
 void SafeAreaManagerTest::SetUp()
 {
     safeAreaManager_ = Referenced::MakeRefPtr<SafeAreaManager>();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetUseCutout(true);
+    safeAreaManager_->SetUseCutout(true);
 }
 
 void SafeAreaManagerTest::TearDown()
