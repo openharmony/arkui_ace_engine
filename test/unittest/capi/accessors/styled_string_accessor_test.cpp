@@ -609,7 +609,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixe
 {
     ASSERT_NE(peer_->spanString, nullptr);
     auto spans = peer_->spanString->GetSpans(TEST_START_PSPM, TEST_LENGTH);
-    EXPECT_EQ(spans.size(), 1);
+    ASSERT_EQ(spans.size(), 1);
     auto paragraphSpan = AceType::DynamicCast<ParagraphStyleSpan>(spans[0]);
     ASSERT_NE(paragraphSpan, nullptr);
     SpanParagraphStyle style = paragraphSpan->GetParagraphStyle();
@@ -735,7 +735,7 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAtta
 {
     ASSERT_NE(peer_->spanString, nullptr);
     auto spans = peer_->spanString->GetSpans(0, 1);
-    EXPECT_EQ(spans.size(), 1);
+    ASSERT_EQ(spans.size(), 1);
     auto imageSpan = AceType::DynamicCast<ImageSpan>(spans[0]);
     ASSERT_NE(imageSpan, nullptr);
     const ImageSpanOptions& options = imageSpan->GetImageSpanOptions();
@@ -756,6 +756,7 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAtta
     ASSERT_TRUE(imageAttribute.value().marginProp.has_value());
     auto marginStr = imageAttribute.value().marginProp.value().ToString();
     EXPECT_EQ(marginStr, TEST_LENGTHMETRICS_STR);
+    ASSERT_TRUE(imageAttribute.value().borderRadius.has_value());
     auto borderRadiusStr = imageAttribute.value().borderRadius.value().ToString();
     EXPECT_EQ(borderRadiusStr, TEST_LENGTHMETRICS_BR_STR);
     ASSERT_TRUE(imageAttribute.value().paddingProp.has_value());
