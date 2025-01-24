@@ -444,12 +444,12 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool canOverScrollStart, bool can
     startIndex_ = FastSolveStartIndex();
 }
 
-bool WaterFlowLayoutInfo::OverScrollTop()
+bool WaterFlowLayoutInfo::IsAtTopWithDelta()
 {
     return GreatOrEqual(currentOffset_, 0.0f);
 }
 
-bool WaterFlowLayoutInfo::OverScrollBottom()
+bool WaterFlowLayoutInfo::IsAtBottomWithDelta()
 {
     return itemEnd_ && GreatOrEqual(lastMainSize_ - currentOffset_, maxHeight_);
 }

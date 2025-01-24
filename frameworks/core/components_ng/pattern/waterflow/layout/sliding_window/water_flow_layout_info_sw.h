@@ -228,8 +228,8 @@ public:
      */
     void PrepareSectionPos(int32_t idx, bool fillBack);
 
-    bool OverScrollTop() override;
-    bool OverScrollBottom() override;
+    bool IsAtTopWithDelta() override;
+    bool IsAtBottomWithDelta() override;
 
     void NotifyDataChange(int32_t index, int32_t count) override;
     void UpdateLanesIndex(int32_t updateIdx);
@@ -244,6 +244,11 @@ public:
     Lane* GetMutableLane(int32_t itemIdx);
 
     bool LaneOutOfRange(size_t laneIdx, int32_t section) const;
+
+    bool AtStartPos(int32_t startIdx) const
+    {
+        return startIdx == 0 || startIdx == Infinity<int32_t>();
+    }
 
     /**
      * @brief lanes in multiple sections.

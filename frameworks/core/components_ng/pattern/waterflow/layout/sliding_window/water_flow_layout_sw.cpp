@@ -237,7 +237,7 @@ bool WaterFlowLayoutSW::CheckData() const
 void WaterFlowLayoutSW::MeasureOnOffset(float delta)
 {
     // handle initial layout
-    if (NearZero(delta) && itemCnt_ != 0 && info_->startIndex_ > info_->endIndex_) {
+    if (NearZero(delta) && info_->startIndex_ > info_->endIndex_ && itemCnt_ != 0) {
         info_->ResetWithLaneOffset(info_->TopMargin());
     }
 
@@ -655,7 +655,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
     minStart -= info_->TopMargin();
 
     int32_t startIdx = info_->StartIndex();
-    if (startIdx == 0 && Positive(minStart)) {
+    if (info_->AtStartPos(startIdx) && Positive(minStart)) {
         if (canOverScrollStart_) {
             return;
         }
@@ -665,7 +665,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
             return;
         }
         float delta = mainLen_ - maxEnd;
-        if (startIdx == 0 || startIdx == Infinity<int32_t>()) {
+        if (info_->AtStartPos(startIdx)) {
             delta = std::min(-minStart, delta);
         }
         ApplyDelta(delta);
