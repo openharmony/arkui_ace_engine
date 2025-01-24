@@ -62,9 +62,19 @@ ohos_source_set("ace_kit") {
     "$ace_root/interfaces/inner_api/ace_kit/src",
   ]
 
-  external_deps = [
-    "graphic_2d:librender_service_client",
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
+  deps = []
+  external_deps = [ "hilog:libhilog" ]
+
+  if (is_arkui_x) {
+    include_dirs += [
+      "//foundation/arkui/napi",
+      "//third_party/node/src",
+    ]
+    deps += [ "${ace_graphic}/rosen/modules/render_service_client:librender_service_client_static" ]
+  } else {
+    external_deps += [
+      "graphic_2d:librender_service_client",
+      "napi:ace_napi",
+    ]
+  }
 }
