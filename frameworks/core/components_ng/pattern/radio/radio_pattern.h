@@ -70,7 +70,7 @@ public:
         paintMethod->SetIsFirstCreated(isFirstCreated_);
         paintMethod->SetShowHoverEffect(showHoverEffect_);
         isFirstCreated_ = false;
-        paintMethod->SetIsUserSetUncheckBorderColor(isUserSetUncheckedBorderColor_);
+        paintMethod->SetIsUserSetUncheckBorderColor(isUserSetUncheckBorderColor_);
         return paintMethod;
     }
 
@@ -175,7 +175,7 @@ public:
 
     void SetIsUserSetUncheckBorderColor(bool isUserSet)
     {
-        isUserSetUncheckedBorderColor_ = isUserSet;
+        isUserSetUncheckBorderColor_ = isUserSet;
     }
 
 private:
