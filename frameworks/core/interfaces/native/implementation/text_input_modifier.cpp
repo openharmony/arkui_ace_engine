@@ -811,11 +811,6 @@ void InputFilterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto valueString = Converter::OptConvert<std::string>(*value);
-    // auto errorEvent = [frameNode](const std::u16string& val) {
-    //     Converter::ConvContext ctx;
-    //     auto errorArkString = Converter::ArkValue<Ark_String>(val, &ctx);
-    // };
-    // TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
     std::function<void(const std::u16string&)> onErrorEvent = nullptr;
     if (error) {
         auto arkOnError = Converter::OptConvert<Callback_String_Void>(*error);

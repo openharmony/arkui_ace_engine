@@ -450,10 +450,10 @@ HWTEST_F(TextInputModifierTest, setOnContentScrollTest, TestSize.Level1)
         .call = onContentScroll
     };
     for (const auto& [value, expectVal] : FLOAT_NUMBER_TEST_PLAN) {
-         modifier_->setOnContentScroll(node_, &func);
-         eventHub->FireOnScrollChangeEvent(value, value);
-         EXPECT_EQ(expectedX, expectVal);
-         EXPECT_EQ(expectedY, expectVal);
+        modifier_->setOnContentScroll(node_, &func);
+        eventHub->FireOnScrollChangeEvent(value, value);
+        EXPECT_EQ(expectedX, expectVal);
+        EXPECT_EQ(expectedY, expectVal);
     }
 }
 
@@ -484,10 +484,10 @@ HWTEST_F(TextInputModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
         .call = onTextSelection
     };
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-          modifier_->setOnTextSelectionChange(node_, &func);
-          eventHub->FireOnSelectionChange(value, value);
-          EXPECT_EQ(expectedStart, expectVal);
-          EXPECT_EQ(expectedEnd, expectVal);
+        modifier_->setOnTextSelectionChange(node_, &func);
+        eventHub->FireOnSelectionChange(value, value);
+        EXPECT_EQ(expectedStart, expectVal);
+        EXPECT_EQ(expectedEnd, expectVal);
     }
 }
 
@@ -588,10 +588,10 @@ HWTEST_F(TextInputModifierTest, setOnDidInsertTest, TestSize.Level1)
     EXPECT_EQ(expectedOffset, OFFSET);
 
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-         InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
-         eventHub->FireOnDidInsertValueEvent(checkValue);
-         EXPECT_EQ(expectedText, CHECK_TEXT);
-         EXPECT_EQ(expectedOffset, expectVal);
+        InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
+        eventHub->FireOnDidInsertValueEvent(checkValue);
+        EXPECT_EQ(expectedText, CHECK_TEXT);
+        EXPECT_EQ(expectedOffset, expectVal);
     }
 }
 
@@ -658,8 +658,8 @@ HWTEST_F(TextInputModifierTest, setInputFilterTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     struct CheckEvent {
-         int32_t nodeId;
-         std::u16string error;
+        int32_t nodeId;
+        std::u16string error;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onErrorChange = [](Ark_Int32 nodeId, const Ark_String error) {
