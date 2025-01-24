@@ -1794,14 +1794,6 @@
             "themes": ["TextFieldTheme"],
             "attributes": [
                 {
-                    "name": "lineHeight",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
-                },
-                {
-                    "name": "letterSpacing",
-                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc", "DimensionsResNonPct"]
-                },
-                {
                     "name": "decoration",
                     "type": "DecorationStyleInterface",
                     "attributes": [
@@ -1907,7 +1899,7 @@
                 },
                 {
                     "name": "letterSpacing",
-                    "default": "0.00px"
+                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc", "DimensionsResNonPct"]
                 },
                 {
                     "name": "lineSpacing",
@@ -1915,7 +1907,7 @@
                 },
                 {
                     "name": "lineHeight",
-                    "default": "0.00vp"
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
                 },
                 {
                     "name": "maxLines",
