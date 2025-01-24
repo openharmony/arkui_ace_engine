@@ -561,6 +561,28 @@ std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableFontWeig
         Converter::ArkValue<Ark_FontWeight>(static_cast<Ark_FontWeight>(INT_MAX)) },
 };
 
+// Fixture 'ImageRotateOrientation' for type 'Ark_ImageRotateOrientation'
+std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::string>>
+    testFixtureImageRotateOrientationValidValues = {
+        { "ARK_IMAGE_ROTATE_ORIENTATION_AUTO",
+            Converter::ArkValue<Ark_ImageRotateOrientation>(ARK_IMAGE_ROTATE_ORIENTATION_AUTO), "0" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_UP",
+            Converter::ArkValue<Ark_ImageRotateOrientation>(ARK_IMAGE_ROTATE_ORIENTATION_UP), "1" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_RIGHT",
+            Converter::ArkValue<Ark_ImageRotateOrientation>(ARK_IMAGE_ROTATE_ORIENTATION_RIGHT), "2" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_DOWN",
+            Converter::ArkValue<Ark_ImageRotateOrientation>(ARK_IMAGE_ROTATE_ORIENTATION_DOWN), "3" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_LEFT",
+            Converter::ArkValue<Ark_ImageRotateOrientation>(ARK_IMAGE_ROTATE_ORIENTATION_LEFT), "4" },
+    };
+
+std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>> testFixtureImageRotateOrientationInvalidValues = {
+    { "static_cast<Ark_ImageRotateOrientation>(-1)",
+        Converter::ArkValue<Ark_ImageRotateOrientation>(static_cast<Ark_ImageRotateOrientation>(-1)) },
+    { "static_cast<Ark_ImageRotateOrientation>(INT_MAX)",
+        Converter::ArkValue<Ark_ImageRotateOrientation>(static_cast<Ark_ImageRotateOrientation>(INT_MAX)) },
+};
+
 // Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
 std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues = {
     { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },

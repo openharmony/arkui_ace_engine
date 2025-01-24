@@ -90,7 +90,7 @@ public:
     static void ResetAutoResize(FrameNode *frameNode);
     static void SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat);
     static void SetImageRenderMode(FrameNode *frameNode, const std::optional<ImageRenderMode>& imageRenderMode);
-    static void SetOrientation(FrameNode *frameNode, ImageRotateOrientation orientation);
+    static void SetOrientation(FrameNode *frameNode, const std::optional<ImageRotateOrientation>& orientation);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageMatrix(FrameNode *frameNode, const Matrix4 &value);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
