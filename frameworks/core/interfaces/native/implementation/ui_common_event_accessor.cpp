@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/ui_common_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UICommonEventAccessor {
 void DestroyPeerImpl(UICommonEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new UICommonEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -96,5 +97,4 @@ const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor()
     };
     return &UICommonEventAccessorImpl;
 }
-
 }

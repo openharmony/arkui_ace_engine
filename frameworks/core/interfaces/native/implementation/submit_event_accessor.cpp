@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubmitEventAccessor {
 void DestroyPeerImpl(SubmitEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new SubmitEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -53,5 +54,4 @@ const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()
     };
     return &SubmitEventAccessorImpl;
 }
-
 }

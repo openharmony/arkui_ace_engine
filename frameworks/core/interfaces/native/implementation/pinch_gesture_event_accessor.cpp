@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchGestureEventAccessor {
 void DestroyPeerImpl(PinchGestureEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new PinchGestureEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -70,5 +71,4 @@ const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()
     };
     return &PinchGestureEventAccessorImpl;
 }
-
 }

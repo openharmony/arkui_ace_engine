@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
 void DestroyPeerImpl(DragEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new DragEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -141,5 +142,4 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
     };
     return &DragEventAccessorImpl;
 }
-
 }
