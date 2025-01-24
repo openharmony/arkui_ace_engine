@@ -2870,6 +2870,7 @@ void RichEditorPattern::CreateAndShowSingleHandle()
     selectOverlay_->SetIsSingleHandle(true);
     textSelector_.Update(caretPosition_);
     CalculateHandleOffsetAndShowOverlay();
+    UpdateSelectionType(GetSpansInfo(caretPosition_, caretPosition_, GetSpansMethod::ONSELECT));
     selectOverlay_->ProcessOverlay({ .animation = true });
 }
 
@@ -8530,6 +8531,9 @@ void RichEditorPattern::UpdateSelectMenuInfo(SelectMenuInfo& menuInfo)
         inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
 #endif
     menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !customKeyboardBuilder_;
+    if (textResponseType_.has_value()) {
+        menuInfo.responseType = static_cast<int32_t>(textResponseType_.value());
+    }
 }
 
 RectF RichEditorPattern::GetCaretRect() const
