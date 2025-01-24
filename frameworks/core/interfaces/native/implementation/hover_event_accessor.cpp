@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/hover_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
 void DestroyPeerImpl(HoverEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new HoverEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -45,8 +46,4 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
     };
     return &HoverEventAccessorImpl;
 }
-
-struct HoverEventPeer {
-    virtual ~HoverEventPeer() = default;
-};
 }

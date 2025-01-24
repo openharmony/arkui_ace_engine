@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace KeyEventAccessor {
 void DestroyPeerImpl(KeyEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new KeyEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -135,8 +136,4 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
     };
     return &KeyEventAccessorImpl;
 }
-
-struct KeyEventPeer {
-    virtual ~KeyEventPeer() = default;
-};
 }

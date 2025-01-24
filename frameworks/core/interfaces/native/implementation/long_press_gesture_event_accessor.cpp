@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressGestureEventAccessor {
 void DestroyPeerImpl(LongPressGestureEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new LongPressGestureEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -50,8 +51,4 @@ const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAcce
     };
     return &LongPressGestureEventAccessorImpl;
 }
-
-struct LongPressGestureEventPeer {
-    virtual ~LongPressGestureEventPeer() = default;
-};
 }
