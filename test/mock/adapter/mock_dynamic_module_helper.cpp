@@ -24,11 +24,6 @@ DynamicModuleHelper& DynamicModuleHelper::GetInstance()
     return instance;
 }
 
-CreatorFunc DynamicModuleHelper::GetCreatorByFeatureName(const std::string& feature)
-{
-    return nullptr;
-}
-
 DynamicModuleHelper::DynamicModuleHelper() {}
 
 DynamicModuleHelper::~DynamicModuleHelper() {}
@@ -44,13 +39,6 @@ void* DynamicModuleHelper::CreateCanvasRenderingContextModel(bool isOffscreen)
 }
 
 void* DynamicModuleHelper::CreateCanvasBridge(CanvasBridgeParams& params)
-{
-    return nullptr;
-}
-
-void DynamicModuleHelper::LoadVendorConfig() {}
-
-std::unique_ptr<JsonValue> DynamicModuleHelper::GetVendorFeatures()
 {
     return nullptr;
 }

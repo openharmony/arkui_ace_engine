@@ -74,16 +74,4 @@ void* DynamicModuleHelper::LoadSymbol(const char* symName)
     return nullptr;
 }
 
-void DynamicModuleHelper::LoadVendorConfig() {}
-
-std::unique_ptr<JsonValue> DynamicModuleHelper::GetVendorFeatures()
-{
-    return nullptr;
-}
-
-CreatorFunc DynamicModuleHelper::GetCreatorByFeatureName(const std::string& feature)
-{
-    return nullptr;
-}
-
 } // namespace OHOS::Ace

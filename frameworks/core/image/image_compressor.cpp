@@ -25,7 +25,6 @@
 
 #include "base/log/log.h"
 #include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_compressor.h"

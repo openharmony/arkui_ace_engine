@@ -579,7 +579,6 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
     "$ace_root/frameworks/core/text/text_emoji_processor.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/properties/property.cpp",
-    "$ace_root/interfaces/inner_api/ace_kit/src/view/extend/badge/badge_extend_pattern.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/frame_node_impl.cpp",
     "$ace_root/test/mock/core/common/mock_icon_theme.cpp",
   ]
