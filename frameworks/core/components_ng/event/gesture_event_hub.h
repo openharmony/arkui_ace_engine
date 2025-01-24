@@ -91,6 +91,15 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> imageNode;
 };
 
+struct PreparedAsyncCtxForAnimate {
+    int32_t containerId = -1;
+    bool hasTouchPoint = false;
+    DragPointerEvent dragPointerEvent;
+    DragPreviewOption dragPreviewOption;
+    DimensionOffset touchPoint = DimensionOffset(0.0_vp, 0.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+};
+
 struct DragframeNodeInfo {
     WeakPtr<FrameNode> frameNode;
     std::vector<RefPtr<FrameNode>> gatherFrameNode;
