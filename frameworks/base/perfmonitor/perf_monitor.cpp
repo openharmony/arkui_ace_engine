@@ -351,6 +351,29 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     }
 }
 
+void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
+{
+    std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
+    int64_t inputTime = GetInputTime(sceneId, type, note);
+    SceneRecord* record = GetRecord(sceneId);
+    if (IsSceneIdInSceneWhiteList(sceneId)) {
+        isExceptAnimator = true;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("Animation start and current sceneId=%s", sceneId.c_str());
+    if (record == nullptr) {
+        currentSceneId = sceneId;
+        record = new SceneRecord();
+        record->InitRecord(sceneId, type, mSourceType, note, inputTime);
+        mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
+        RecordBaseInfo(record);
+        AceAsyncTraceBeginCommercial(0, sceneId.c_str());
+    }
+}
+
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
@@ -371,6 +394,27 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
         ReportAnimateEnd(sceneId, record);
         RemoveRecord(sceneId);
         AceAsyncTraceEnd(0, sceneId.c_str());
+    }
+}
+
+void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)
+{
+    std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
+    SceneRecord* record = GetRecord(sceneId);
+    ACE_SCOPED_TRACE_COMMERCIAL("Animation end and current sceneId=%s", sceneId.c_str());
+    if (record != nullptr) {
+        if (IsSceneIdInSceneWhiteList(sceneId)) {
+            isExceptAnimator = false;
+        }
+        RecordBaseInfo(record);
+        record->Report(sceneId, mVsyncTime, isRsRender);
+        ReportAnimateEnd(sceneId, record);
+        RemoveRecord(sceneId);
+        AceAsyncTraceEndCommercial(0, sceneId.c_str());
     }
 }
 

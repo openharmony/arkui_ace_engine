@@ -533,8 +533,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         return;
     }
     SetVsyncTime(nanoTimestamp);
-    ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]", nanoTimestamp,
-        static_cast<uint64_t>(frameCount), instanceId_);
+    ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]",
+        nanoTimestamp, static_cast<uint64_t>(frameCount), instanceId_);
     window_->Lock();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
@@ -803,7 +803,7 @@ void PipelineContext::FlushModifier()
 
 void PipelineContext::FlushMessages()
 {
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     if (IsFreezeFlushMessage()) {
         SetIsFreezeFlushMessage(false);
         LOGI("Flush message is freezed.");
@@ -4532,7 +4532,7 @@ void PipelineContext::OnIdle(int64_t deadline)
         }
     }
     CHECK_RUN_ON(UI);
-    ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
+    ACE_SCOPED_TRACE_COMMERCIAL("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
     if (currentTime < deadline) {
