@@ -470,6 +470,8 @@ public:
     {
         return nullptr;
     }
+
+    virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 };
 
 } // namespace OHOS::Ace

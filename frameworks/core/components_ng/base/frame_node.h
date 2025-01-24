@@ -1150,6 +1150,16 @@ public:
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
     void FireFrameNodeDestructorCallback();
 
+    bool CheckTopWindowBoundary() const
+    {
+        return topWindowBoundary_;
+    }
+
+    void SetTopWindowBoundary(bool topWindowBoundary)
+    {
+        topWindowBoundary_ = topWindowBoundary;
+    }
+
 protected:
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
@@ -1405,6 +1415,8 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+
+    bool topWindowBoundary_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;
