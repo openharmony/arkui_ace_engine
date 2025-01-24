@@ -48,7 +48,7 @@ PixelMapPeer* CreatePixelMap()
 const Ark_PixelMap TEST_PIXELMAP {
     .ptr = static_cast<void*>(CreatePixelMap()),
 };
-const int TEST_SIZEOPTIONS = 1;
+const std::string TEST_SIZEOPTIONS = "1.00px";
 const Ark_SizeOptions TEST_ARK_SIZEOPTIONS {
     .width = Converter::ArkValue<Opt_Length>(TEST_SIZEOPTIONS),
     .height = Converter::ArkValue<Opt_Length>(TEST_SIZEOPTIONS)
@@ -747,8 +747,8 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAtta
     ASSERT_TRUE(imageAttribute.value().size.has_value());
     ASSERT_TRUE(imageAttribute->size->width.has_value());
     ASSERT_TRUE(imageAttribute->size->height.has_value());
-    EXPECT_EQ(imageAttribute->size->width->ToString(), CalcDimension(TEST_SIZEOPTIONS).ToString());
-    EXPECT_EQ(imageAttribute->size->height->ToString(), CalcDimension(TEST_SIZEOPTIONS).ToString());
+    EXPECT_EQ(imageAttribute->size->width->ToString(), TEST_SIZEOPTIONS);
+    EXPECT_EQ(imageAttribute->size->height->ToString(), TEST_SIZEOPTIONS);
     ASSERT_TRUE(imageAttribute.value().verticalAlign.has_value());
     EXPECT_EQ(imageAttribute.value().verticalAlign.value(), std::get<0>(TEST_VERTICALALIGN));
     ASSERT_TRUE(imageAttribute.value().objectFit.has_value());
