@@ -32,6 +32,35 @@ namespace GeneratedModifier {
 const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor();
 }
 
+namespace {
+const auto ATTRIBUTE_INPUT_FILTER_NAME("inputFilter");
+const std::string STR_TEST_TEXT("test_text");
+const std::string STR_TEST_TEXT2("test_text2");
+const std::u16string ERROR_TEXT = u"error_text";
+const std::u16string ERROR_TEXT2 = u"error_text2";
+const Ark_Int32 AINT32_POS(1234);
+const Ark_Int32 AINT32_NEG(INT_MIN);
+const Ark_Float32 AFLT32_POS(1.234f);
+const Ark_Float32 AFLT32_NEG(-5.6789f);
+
+using ArkNumberIntTest = std::pair<Ark_Int32, Ark_Int32>;
+using ArkNumberFloatTest = std::pair<float, float>;
+
+const std::vector<ArkNumberIntTest> INT_NUMBER_TEST_PLAN = {
+    { AINT32_POS, AINT32_POS },
+    { AINT32_NEG, AINT32_NEG },
+};
+const std::vector<ArkNumberFloatTest> FLOAT_NUMBER_TEST_PLAN = {
+    { AFLT32_POS, AFLT32_POS },
+    { AFLT32_NEG, AFLT32_NEG },
+};
+
+const std::vector<TextDeleteDirection> DELETE_DIRECTION_TEST_PLAN = {
+    TextDeleteDirection::FORWARD,
+    TextDeleteDirection::BACKWARD,
+};
+} // namespace
+
 class TextInputModifierTestNonGenerated : public ModifierTestBase<GENERATED_ArkUITextInputModifier,
                                   &GENERATED_ArkUINodeModifiers::getTextInputModifier, GENERATED_ARKUI_TEXT_INPUT> {
 public:
@@ -147,6 +176,7 @@ HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
     EXPECT_EQ(reinterpret_cast<FrameNode*>(checkEvent->parentNode), frameNode);
     EXPECT_EQ(pattern->GetUnitNode(), node);
 }
+
 /**
  * @tc.name: setOnWillInsertTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextInputModifier.setOnWillInsert.
@@ -293,4 +323,382 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTestController, TestSize.Leve
 
     controllerAccessor->destroyPeer(peer);
 }
+
+/**
+ * @tc.name: setOnEditChangedTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextInputModifier.setOnEditChangedTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnEditChangedTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnEditChanged, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<bool> expected = std::nullopt;
+    auto onEditChanged = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
+        expected = Converter::Convert<bool>(parameter);
+    };
+    Callback_Boolean_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onEditChanged
+    };
+    modifier_->setOnEditChanged(node_, &func);
+    eventHub->FireOnEditChanged(true);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, true);
+    eventHub->FireOnEditChanged(false);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, false);
+}
+
+/**
+ * @tc.name: setOnEditChangeTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextInputModifier.setOnEditChangeTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnEditChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnEditChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<bool> expected = std::nullopt;
+    auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
+        expected = Converter::Convert<bool>(parameter);
+    };
+    Callback_Boolean_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onEditChange
+    };
+    modifier_->setOnEditChange(node_, &func);
+    eventHub->FireOnEditChanged(true);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, true);
+    eventHub->FireOnEditChanged(false);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, false);
+}
+
+/**
+ * @tc.name: setOnSecurityStateChangeTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextInputModifier.setOnSecurityStateChangeTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnSecurityStateChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnEditChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<bool> expected = std::nullopt;
+    auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
+        expected = Converter::Convert<bool>(parameter);
+    };
+    Callback_Boolean_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onEditChange
+    };
+    modifier_->setOnSecurityStateChange(node_, &func);
+    eventHub->FireOnSecurityStateChanged(true);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, true);
+    eventHub->FireOnSecurityStateChanged(false);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, false);
+}
+
+/**
+ * @tc.name: setOnContentScrollTest
+ * @tc.desc: Check the functionality of setOnContentScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnContentScrollTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnContentScroll, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<float> expectedX = std::nullopt;
+    static std::optional<float> expectedY = std::nullopt;
+    auto onContentScroll = [](const Ark_Int32 resourceId, Ark_Number totalOffsetX, Ark_Number totalOffsetY) {
+        expectedX = Convert<float>(totalOffsetX);
+        expectedY = Convert<float>(totalOffsetY);
+    };
+    OnContentScrollCallback func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onContentScroll
+    };
+    for (const auto& [value, expectVal] : FLOAT_NUMBER_TEST_PLAN) {
+         modifier_->setOnContentScroll(node_, &func);
+         eventHub->FireOnScrollChangeEvent(value, value);
+         EXPECT_EQ(expectedX, expectVal);
+         EXPECT_EQ(expectedY, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setOnTextSelectionChangeTest
+ * @tc.desc: Check the functionality of setOnTextSelectionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnTextSelectionChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<int32_t> expectedStart = std::nullopt;
+    static std::optional<int32_t> expectedEnd = std::nullopt;
+    auto onTextSelection = [](const Ark_Int32 resourceId, Ark_Number start, Ark_Number end) {
+        expectedStart = Convert<int32_t>(start);
+        expectedEnd = Convert<int32_t>(end);
+    };
+    OnTextSelectionChangeCallback func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onTextSelection
+    };
+    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
+          modifier_->setOnTextSelectionChange(node_, &func);
+          eventHub->FireOnSelectionChange(value, value);
+          EXPECT_EQ(expectedStart, expectVal);
+          EXPECT_EQ(expectedEnd, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setOnCopyTest
+ * @tc.desc: Check the functionality of setOnCopy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnCopyTest, TestSize.Level1)
+{
+    constexpr auto CHECK_TEXT(u"test_text");
+    ASSERT_NE(modifier_->setOnCopy, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<std::u16string> expected = std::nullopt;
+    auto onCopy = [](const Ark_Int32 resourceId, Ark_String parameter) {
+        expected = Converter::Convert<std::u16string>(parameter);
+    };
+    Callback_String_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onCopy
+    };
+    modifier_->setOnCopy(node_, &func);
+    eventHub->FireOnCopy(CHECK_TEXT);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, CHECK_TEXT);
+}
+
+/**
+ * @tc.name: setOnCutTest
+ * @tc.desc: Check the functionality of setOnCut.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnCutTest, TestSize.Level1)
+{
+    constexpr auto CHECK_TEXT(u"test_text");
+    ASSERT_NE(modifier_->setOnCut, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<std::u16string> expected = std::nullopt;
+    auto onCut = [](const Ark_Int32 resourceId, Ark_String parameter) {
+        expected = Converter::Convert<std::u16string>(parameter);
+    };
+    Callback_String_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onCut
+    };
+    modifier_->setOnCut(node_, &func);
+    eventHub->FireOnCut(CHECK_TEXT);
+    EXPECT_TRUE(expected.has_value());
+    EXPECT_EQ(expected, CHECK_TEXT);
+}
+
+/**
+ * @tc.name: setOnDidInsertTest
+ * @tc.desc: Check the functionality of setOnDidInsert
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnDidInsertTest, TestSize.Level1)
+{
+    constexpr auto CHECK_TEXT(u"test_text");
+    constexpr int32_t OFFSET(0);
+    ASSERT_NE(modifier_->setOnDidInsert, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<std::u16string> expectedText = std::nullopt;
+    static std::optional<int32_t> expectedOffset = std::nullopt;
+    auto onDidInsert = [](Ark_Int32 nodeId, const Ark_InsertValue data) {
+        expectedText = Convert<std::u16string>(data.insertValue);
+        expectedOffset = Convert<int32_t>(data.insertOffset);
+    };
+    Callback_InsertValue_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDidInsert
+    };
+    InsertValueInfo checkValue = { .insertOffset = OFFSET, .insertValue = CHECK_TEXT };
+    modifier_->setOnDidInsert(node_, &func);
+    eventHub->FireOnDidInsertValueEvent(checkValue);
+    EXPECT_EQ(expectedText, CHECK_TEXT);
+    EXPECT_EQ(expectedOffset, OFFSET);
+
+    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
+         InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
+         eventHub->FireOnDidInsertValueEvent(checkValue);
+         EXPECT_EQ(expectedText, CHECK_TEXT);
+         EXPECT_EQ(expectedOffset, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setOnDidDeleteTest
+ * @tc.desc: Check the functionality of setOnDidDelete
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnDidDeleteTest, TestSize.Level1)
+{
+    constexpr auto CHECK_TEXT(u"test_text");
+    constexpr int32_t OFFSET(0);
+    constexpr TextDeleteDirection DIRECTION(TextDeleteDirection::FORWARD);
+    ASSERT_NE(modifier_->setOnDidDelete, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<std::u16string> expectedText = std::nullopt;
+    static std::optional<int32_t> expectedOffset = std::nullopt;
+    static std::optional<TextDeleteDirection> expectedDirection = std::nullopt;
+    auto onDidDelete = [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
+        expectedText = Convert<std::u16string>(data.deleteValue);
+        expectedOffset = Convert<int32_t>(data.deleteOffset);
+        expectedDirection = OptConvert<TextDeleteDirection>(data.direction);
+    };
+    Callback_DeleteValue_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDidDelete
+    };
+    DeleteValueInfo checkValue = { .deleteOffset = OFFSET, .direction = DIRECTION, .deleteValue = CHECK_TEXT };
+    modifier_->setOnDidDelete(node_, &func);
+    eventHub->FireOnDidDeleteValueEvent(checkValue);
+    EXPECT_EQ(expectedText, CHECK_TEXT);
+    EXPECT_EQ(expectedDirection, DIRECTION);
+    EXPECT_EQ(expectedOffset, OFFSET);
+    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
+        for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
+            DeleteValueInfo checkValue = {
+                .deleteOffset = value, .direction = deleteDirection, .deleteValue = CHECK_TEXT
+            };
+            eventHub->FireOnDidDeleteValueEvent(checkValue);
+            EXPECT_EQ(expectedText, CHECK_TEXT);
+            EXPECT_EQ(expectedOffset, expectVal);
+            EXPECT_EQ(expectedDirection, deleteDirection);
+        }
+    }
+}
+
+/**
+ * @tc.name: setInputFilterTest
+ * @tc.desc: Check the functionality of setOnCut.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setInputFilterTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setInputFilter, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    struct CheckEvent {
+         int32_t nodeId;
+         std::u16string error;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onErrorChange = [](Ark_Int32 nodeId, const Ark_String error) {
+        checkEvent = {
+            .nodeId = nodeId,
+            .error = Converter::Convert<std::u16string>(error)
+        };
+    };
+    Callback_String_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onErrorChange
+    };
+    auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>(callBackValue);
+    Converter::ConvContext ctx;
+    auto sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT, &ctx);
+    auto sendResource = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
+    sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT2, &ctx);
+    auto sendResource2 = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
+    modifier_->setInputFilter(node_, &sendResource, &optCallbackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+    eventHub->FireOnInputFilterError(ERROR_TEXT);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->error, ERROR_TEXT);
+    auto attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_EQ(attrValue, STR_TEST_TEXT);
+    checkEvent.reset();
+    modifier_->setInputFilter(node_, &sendResource2, &optCallbackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+    eventHub->FireOnInputFilterError(ERROR_TEXT2);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->error, ERROR_TEXT2);
+    attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_EQ(attrValue, STR_TEST_TEXT2);
+}
+
 } // namespace OHOS::Ace::NG
