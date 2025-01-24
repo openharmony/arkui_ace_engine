@@ -20,19 +20,42 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ui/properties/font_style.h"
-
 #include "base/geometry/dimension.h"
 #include "base/utils/linear_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 namespace OHOS::Ace {
+// The normal weight is W400, the larger the number after W, the thicker the font will be.
+// BOLD is equal to W700 and NORMAL is equal to W400, lighter is W100, BOLDER is W900.
+enum class FontWeight {
+    W100 = 0,
+    W200,
+    W300,
+    W400,
+    W500,
+    W600,
+    W700,
+    W800,
+    W900,
+    BOLD,
+    NORMAL,
+    BOLDER,
+    LIGHTER,
+    MEDIUM,
+    REGULAR,
+};
+
+enum class FontStyle {
+    NORMAL,
+    ITALIC,
+    NONE
+};
 
 namespace StringUtils {
 inline std::string ToString(const FontStyle& fontStyle)
@@ -637,42 +660,42 @@ public:
     {
         return ellipsisMode_;
     }
-
+    
     void SetHeightScale(double heightScale)
     {
         heightScale_ = heightScale;
     }
-
+ 
     double GetHeightScale() const
     {
         return heightScale_;
     }
-
+ 
     void SetHeightOnly(bool heightOnly)
     {
         heightOnly_ = heightOnly;
     }
-
+ 
     bool GetHeightOnly() const
     {
         return heightOnly_;
     }
-
+ 
     void SetEllipsis(std::u16string ellipsis)
     {
         ellipsis_ = ellipsis;
     }
-
+ 
     std::u16string GetEllipsis() const
     {
         return ellipsis_;
     }
-
+ 
     void SetLocale(std::string locale)
     {
         locale_ = locale;
     }
-
+ 
     std::string GetLocale() const
     {
         return locale_;
@@ -692,7 +715,7 @@ public:
 
     void SetRenderColors(std::vector<Color>& renderColors)
     {
-        renderColors_ = renderColors;
+        renderColors_ = renderColors ;
     }
 
     void SetRenderStrategy(int32_t renderStrategy)
@@ -810,8 +833,8 @@ private:
 
 namespace StringUtils {
 
-inline std::pair<bool, FontWeight> ParseFontWeight(
-    const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
+inline std::pair<bool, FontWeight> ParseFontWeight(const std::string& weight,
+    FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     static const LinearMapNode<FontWeight> fontWeightTable[] = {
         { "100", FontWeight::W100 },
@@ -855,21 +878,11 @@ inline WordBreak StringToWordBreak(const std::string& wordBreak)
 inline std::string FontWeightToString(const FontWeight& fontWeight)
 {
     static const std::unordered_map<FontWeight, std::string> fontWeightTable = {
-        { FontWeight::W100, "100" },
-        { FontWeight::W200, "200" },
-        { FontWeight::W300, "300" },
-        { FontWeight::W400, "400" },
-        { FontWeight::W500, "500" },
-        { FontWeight::W600, "600" },
-        { FontWeight::W700, "700" },
-        { FontWeight::W800, "800" },
-        { FontWeight::W900, "900" },
-        { FontWeight::BOLD, "bold" },
-        { FontWeight::BOLDER, "bolder" },
-        { FontWeight::LIGHTER, "lighter" },
-        { FontWeight::MEDIUM, "medium" },
-        { FontWeight::NORMAL, "normal" },
-        { FontWeight::REGULAR, "regular" },
+        { FontWeight::W100, "100" }, { FontWeight::W200, "200" }, { FontWeight::W300, "300" },
+        { FontWeight::W400, "400" }, { FontWeight::W500, "500" }, { FontWeight::W600, "600" },
+        { FontWeight::W700, "700" }, { FontWeight::W800, "800" }, { FontWeight::W900, "900" },
+        { FontWeight::BOLD, "bold" }, { FontWeight::BOLDER, "bolder" }, { FontWeight::LIGHTER, "lighter" },
+        { FontWeight::MEDIUM, "medium" }, { FontWeight::NORMAL, "normal" }, { FontWeight::REGULAR, "regular" },
     };
     auto weightIter = fontWeightTable.find(fontWeight);
     return weightIter != fontWeightTable.end() ? weightIter->second : "";

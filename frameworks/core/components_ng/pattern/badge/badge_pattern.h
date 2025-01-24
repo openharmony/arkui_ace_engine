@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BADGE_BADGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BADGE_BADGE_PATTERN_H
 
-#include "ui/view/extend/badge/badge_extension.h"
-
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/badge/badge_accessibility_property.h"
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
@@ -43,18 +41,18 @@ public:
         return MakeRefPtr<BadgeLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<BadgeLayoutAlgorithm>();
+    }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<BadgeAccessibilityProperty>();
     }
 
-protected:
-    void OnModifyDone() override;
-    RefPtr<Kit::BadgeExtension> badgeExtension_;
-
 private:
+    void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;

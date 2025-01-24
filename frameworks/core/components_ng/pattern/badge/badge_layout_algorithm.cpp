@@ -293,30 +293,24 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
-    bool skipLayoutBadgeText = badgeExtension_ && badgeExtension_->SkipLayoutBadgeText();
-    if (!skipLayoutBadgeText) {
-        OffsetF textOffset;
-        if (layoutProperty->GetIsPositionXy().has_value() && !layoutProperty->GetIsPositionXy().value()) {
-            textOffset = GetTextDataOffset(layoutProperty, badgeCircleDiameter, badgeCircleRadius,
-                geometryNode, textData == u" ");
-        } else {
-            textOffset = GetTextOffsetByPosition(layoutProperty, geometryNode);
-        }
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
-        } else {
-            textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
-        }
-        auto textFrameSize = textGeometryNode->GetFrameSize();
-        if (GreatNotEqual(circleSize->ConvertToPx(), 0) &&
-            Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
-        }
-        textGeometryNode->SetFrameSize(textFrameSize);
-        textWrapper->Layout();
+    OffsetF textOffset;
+    if (layoutProperty->GetIsPositionXy().has_value() && !layoutProperty->GetIsPositionXy().value()) {
+        textOffset = GetTextDataOffset(layoutProperty, badgeCircleDiameter, badgeCircleRadius,
+            geometryNode, textData == u" ");
     } else {
-        LOGI("Use custom extension skipLayoutBadgeText");
+        textOffset = GetTextOffsetByPosition(layoutProperty, geometryNode);
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
+    } else {
+        textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
+    }
+    auto textFrameSize = textGeometryNode->GetFrameSize();
+    if (GreatNotEqual(circleSize->ConvertToPx(), 0) && Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
+    }
+    textGeometryNode->SetFrameSize(textFrameSize);
+    textWrapper->Layout();
 
     if (layoutProperty->GetBadgeCount().has_value()) {
         textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
@@ -337,9 +331,6 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         childGeometryNode->SetMarginFrameOffset(OffsetF());
     }
     childWrapper->Layout();
-    if (badgeExtension_) {
-        badgeExtension_->AdjustPosition(hasFontSize_);
-    }
 }
 
 void BadgeLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)

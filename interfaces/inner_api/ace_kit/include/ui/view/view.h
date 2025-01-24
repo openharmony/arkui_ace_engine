@@ -19,7 +19,6 @@
 #include "ui/base/geometry/calc_dimension.h"
 #include "ui/base/macros.h"
 #include "ui/base/referenced.h"
-#include "ui/properties/color.h"
 
 
 namespace OHOS::Ace::Kit {
@@ -28,14 +27,11 @@ class FrameNode;
 
 class ACE_FORCE_EXPORT View : public Referenced {
 public:
-    explicit View(const RefPtr<FrameNode>& node);
     ~View();
     RefPtr<FrameNode> GetNode() const;
 
     void SetWidth(const CalcDimension& width);
     void SetHeight(const CalcDimension& height);
-    void SetBorderWidth(const Dimension& value);
-    void SetBorderColor(const Color& color);
 
 protected:
     View();

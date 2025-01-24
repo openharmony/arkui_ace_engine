@@ -21,8 +21,6 @@
 #include <string>
 
 #include "ui/base/ace_type.h"
-#include "ui/base/geometry/ng/offset_t.h"
-#include "ui/base/geometry/ng/size_t.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
 #include "ui/view/layout/layout_info.h"
@@ -62,13 +60,9 @@ public:
     virtual std::list<RefPtr<FrameNode>> GetChildren() = 0;
     virtual void MarkDirtyNode(NG::PropertyChangeFlag flag = NG::PROPERTY_UPDATE_NORMAL) = 0;
     virtual void RemoveChild(const RefPtr<FrameNode>& child) = 0;
-    virtual void MarkModifyDone() = 0;
 
     virtual std::string GetTag() const = 0;
     virtual int32_t GetId() const = 0;
-    virtual NG::SizeF GetMeasuredSize() = 0;
-    virtual NG::OffsetF GetLayoutPosition() = 0;
-    virtual void SetLayoutPosition(const NG::OffsetF& offset) = 0;
 
     virtual void MeasureChildren() = 0;
     virtual void LayoutChildren() = 0;

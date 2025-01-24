@@ -2299,12 +2299,10 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     isRenderDirtyMarked_ = false;
     if (kitNode_ && kitNode_->GetPattern()) {
         auto method = kitNode_->GetPattern()->CreateNodePaintMethod();
-        if (method) {
-            auto paintWrapper = MakeRefPtr<PaintWrapper>(
-                renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
-            paintWrapper->SetKitNodePaintMethod(method);
-            return paintWrapper;
-        }
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(
+            renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
+        paintWrapper->SetKitNodePaintMethod(method);
+        return paintWrapper;
     }
     auto paintMethod = pattern_->CreateNodePaintMethod();
     if (paintMethod || extensionHandler_ || renderContext_->GetAccessibilityFocus().value_or(false)) {
@@ -4886,12 +4884,8 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
         if (kitNode_ && kitNode_->GetPattern()) {
-            auto kitLayoutAlgorithm = kitNode_->GetPattern()->CreateLayoutAlgorithm();
-            if (kitLayoutAlgorithm) {
-                layoutAlgorithm_ = LayoutAlgorithmWrapper::CreateLayoutAlgorithmWrapper(kitLayoutAlgorithm);
-            } else {
-                layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
-            }
+            layoutAlgorithm_ =
+                LayoutAlgorithmWrapper::CreateLayoutAlgorithmWrapper(kitNode_->GetPattern()->CreateLayoutAlgorithm());
         } else {
             layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
         }

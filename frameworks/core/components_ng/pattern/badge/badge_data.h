@@ -16,6 +16,32 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BADGE_BADGE_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BADGE_BADGE_DATA_H
 
-#include "ui/view/components/badge_data.h"
+#include <optional>
+
+#include "base/geometry/dimension.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/badge/badge_layout_property.h"
+
+namespace OHOS::Ace {
+struct BadgeParameters {
+    std::optional<std::string> badgeValue;
+    std::optional<int> badgeCount;
+    std::optional<int> badgeMaxCount;
+    std::optional<int> badgePosition;
+    std::optional<bool> isPositionXy;
+    std::optional<Dimension> badgePositionX;
+    std::optional<Dimension> badgePositionY;
+
+    std::optional<Color> badgeColor;
+    std::optional<Color> badgeTextColor;
+    std::optional<Color> badgeBorderColor;
+    std::optional<Dimension> badgeFontSize;
+    std::optional<Dimension> badgeCircleSize;
+    std::optional<Dimension> badgeBorderWidth;
+    std::optional<FontWeight> badgeFontWeight;
+};
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BADGE_BADGE_DATA_H
