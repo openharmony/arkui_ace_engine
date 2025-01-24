@@ -20,7 +20,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
-#ifdef ENABLE_VSYNC_MODE_NOTIFY
+#ifdef OHOS_STANDARD_SYSTEM
 #include "event_handler.h"
 #endif
 
@@ -586,7 +586,7 @@ bool PerfMonitor::IsExclusionFrame()
 
 void PerfMonitor::SetVsyncLazyMode()
 {
-#ifdef ENABLE_VSYNC_MODE_NOTIFY
+#ifdef OHOS_STANDARD_SYSTEM
     static bool lastExcusion = false;
     bool needExcusion = isResponseExclusion || isStartAppFrame || isBackgroundApp ||
                         isExclusionWindow || isExceptAnimator;
@@ -595,13 +595,9 @@ void PerfMonitor::SetVsyncLazyMode()
     }
 
     lastExcusion = needExcusion;
-    auto eventhandler = OHOS::AppExecFwk::EventHandler::Current();
-    if (eventhandler == nullptr) {
-        return;
-    }
     ACE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
         isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
-    eventhandler->SetVsyncLazyMode(needExcusion);
+    OHOS::AppExecFwk::EventHandler::SetVsyncLazyMode(needExcusion);
 #endif
 }
 
