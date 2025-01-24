@@ -3567,6 +3567,9 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf, bool checkBoundary) cons
     OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
+        if (!checkBoundary && parent->CheckTopWindowBoundary()) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         offset += renderContext->GetPaintRectWithTransform().GetOffset();
@@ -3583,6 +3586,9 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf, bool checkBoundary) co
     Point point = Matrix4::Invert(context->GetRevertMatrix()) * Point(offset.GetX(), offset.GetY());
     auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
+        if (!checkBoundary && parent->CheckTopWindowBoundary()) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();

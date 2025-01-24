@@ -4588,4 +4588,21 @@ std::shared_ptr<Rosen::RSNode> UIContentImpl::GetRSNodeByStringID(const std::str
     }
     return rsNode;
 }
+
+void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [id = instanceId_, stringId]() {
+            ContainerScope scope(id);
+            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true, true);
+            CHECK_NULL_VOID(frameNode);
+            frameNode->SetTopWindowBoundary(true);
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+}
 } // namespace OHOS::Ace
