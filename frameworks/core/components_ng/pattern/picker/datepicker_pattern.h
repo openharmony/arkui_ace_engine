@@ -762,6 +762,7 @@ public:
 
     void ColumnPatternInitHapticController();
     void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
+    void ColumnPatternStopHaptic();
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:

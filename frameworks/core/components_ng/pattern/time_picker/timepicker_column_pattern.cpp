@@ -169,6 +169,11 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
     }
 }
 
+void TimePickerColumnPattern::StopHaptic()
+{
+    stopHaptic_ = true;
+}
+
 void TimePickerColumnPattern::RegisterWindowStateChangedCallback()
 {
     auto host = GetHost();
@@ -295,6 +300,7 @@ RefPtr<TouchEventImpl> TimePickerColumnPattern::CreateItemTouchEventListener()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto isToss = pattern->GetTossStatus();
+        pattern->stopHaptic_ = false;
         if (info.GetTouches().empty()) {
             return;
         }
@@ -1258,7 +1264,7 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    if (hapticController_ && isEnableHaptic_) {
+    if (hapticController_ && isEnableHaptic_ && !stopHaptic_) {
         hapticController_->PlayOnce();
     }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);
@@ -1274,7 +1280,7 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
     if (hapticController_ && isShow_) {
-        if (isEnableHaptic_) {
+        if (isEnableHaptic_ && !stopHaptic_) {
             hapticController_->HandleDelta(dragDelta);
         }
     }
@@ -1289,6 +1295,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                                                                 : optionProperties_[midIndex].nextDistance;
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         HandleEnterSelectedArea(dragDelta, shiftDistance, dir);
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
