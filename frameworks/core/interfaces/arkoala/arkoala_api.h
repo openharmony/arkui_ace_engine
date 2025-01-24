@@ -834,6 +834,7 @@ enum ArkUINodeType {
     ARKUI_CHECK_BOX_GROUP,
     ARKUI_RATING,
     ARKUI_XCOMPONENT_TEXTURE,
+    ARKUI_ARC_ALPHABET_INDEXER,
 };
 
 enum ArkUIEventCategory {
