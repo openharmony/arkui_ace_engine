@@ -1244,6 +1244,10 @@ public:
     {
         return lastHostParentOffsetToWindow_;
     }
+    void ResetRenderDirtyMarked(bool isRenderDirtyMarked)
+    {
+        isRenderDirtyMarked_ = isRenderDirtyMarked;
+    }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
     void FireFrameNodeDestructorCallback();

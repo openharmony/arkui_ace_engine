@@ -259,4 +259,13 @@ void CustomNode::DumpInfo()
         }
     }
 }
+
+void CustomNode::OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+{
+    if (isDestroying && cleanStatus) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddPendingDeleteCustomNode(Claim(this));
+    }
+}
 } // namespace OHOS::Ace::NG

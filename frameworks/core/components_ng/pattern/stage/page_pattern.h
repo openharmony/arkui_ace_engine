@@ -296,6 +296,7 @@ public:
     {
         isNeedRemove_ = isNeedRemove;
     }
+    void RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType);
 
     bool IsNeedCallbackBackPressed();
 

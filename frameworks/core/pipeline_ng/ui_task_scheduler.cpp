@@ -176,6 +176,8 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
                 continue;
             }
             if (node->IsInDestroying()) {
+                // reset RenderDirtyMarked for recycle node
+                node->ResetRenderDirtyMarked(false);
                 continue;
             }
             time = GetSysTimestamp();

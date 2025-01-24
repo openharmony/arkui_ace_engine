@@ -39,6 +39,7 @@ constexpr int32_t MASK_DURATION = 350;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 constexpr int32_t DEFAULT_REPLACE_DURATION = 150;
 constexpr int32_t INVALID_ANIMATION_ID = -1;
+constexpr int32_t RELEASE_JSCHILD_DELAY_TIME = 50;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.0, 0.67, 1.0);
@@ -666,6 +667,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
             navigation->ResetTransitionAnimationNodeState(preNavDesNode, curNavDesNode);
+            if (preNavdestination->IsInDestroying()) {
+                preNavdestination->SetDestroying(false, false);
+            }
             if (!preUseCustomTransition && preNavdestination->SystemTransitionPopCallback(preAnimationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -680,6 +684,8 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     TransitionUnitInfo preInfo(preNode, preUseCustomTransition, preAnimationId);
     TransitionUnitInfo curInfo(curNode, curUseCustomTransition, curAnimationId);
     CreateAnimationWithPop(preInfo, curInfo, callback, isNavBar);
+    // remove jschild when pop page animation begin
+    RemoveJsChildImmediately(preNode, preUseCustomTransition, preAnimationId);
 
     // clear this flag for navBar layout only
     if (isNavBar) {
@@ -689,6 +695,35 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPopPage");
 #endif
+}
+
+void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
+    int32_t preAnimationId)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+
+    auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+    CHECK_NULL_VOID(preNavdestination);
+
+    if (preUseCustomTransition || !preNavdestination->CheckTransitionPop(preAnimationId)) {
+        return;
+    }
+
+    if (preNode->HasSkipNode()) {
+        return;
+    }
+
+    auto removeJsFun = [weakPreNode = WeakPtr<FrameNode>(preNode)]() {
+        auto preNavDesNode = weakPreNode.Upgrade();
+        CHECK_NULL_VOID(preNavDesNode);
+        preNavDesNode->SetDestroying();
+    };
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(removeJsFun, TaskExecutor::TaskType::UI,
+        RELEASE_JSCHILD_DELAY_TIME, "ArkUIRemoveJsChild");
 }
 
 void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,

@@ -3906,6 +3906,11 @@ void FrameNode::RemoveLastHotZoneRect() const
 
 bool FrameNode::OnRemoveFromParent(bool allowTransition)
 {
+    // the node set isInDestroying state when destroying in pop animation
+    // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
+    if (IsInDestroying()) {
+        return false;
+    }
     // kick out transition animation if needed, wont re-entry if already detached.
     DetachFromMainTree(!allowTransition);
     auto context = GetRenderContext();

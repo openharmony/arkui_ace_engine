@@ -342,6 +342,26 @@ void PipelineContext::FlushFreezeNode()
     }
 }
 
+void PipelineContext::AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node)
+{
+    pendingDeleteCustomNode_.push(node);
+    RequestFrame();
+}
+
+void PipelineContext::FlushPendingDeleteCustomNode()
+{
+    auto pendingStack = std::move(pendingDeleteCustomNode_);
+    while (!pendingStack.empty()) {
+        auto node = pendingStack.top();
+        pendingStack.pop();
+        if (AceType::InstanceOf<NG::CustomNode>(node)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            customNode->FireOnDisappear();
+            customNode->Reset();
+        }
+    }
+}
+
 void PipelineContext::FlushDirtyPropertyNodes()
 {
     // node api property diff before ets update.
@@ -367,6 +387,8 @@ void PipelineContext::FlushDirtyNodeUpdate()
     FlushFreezeNode();
 
     FlushDirtyPropertyNodes();
+
+    FlushPendingDeleteCustomNode();
 
     if (!ViewStackProcessor::GetInstance()->IsEmpty() && !dirtyNodes_.empty()) {
         ACE_SCOPED_TRACE("Error update, node stack non-empty");
