@@ -471,6 +471,25 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
     TabsModelNG::SetBarBackgroundEffect(frameNode, effectOption);
 }
 
+void SetTabsOnSelected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnSelected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnSelected(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnSelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnSelected(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -525,6 +544,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -580,6 +601,8 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
