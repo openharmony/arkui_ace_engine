@@ -2273,9 +2273,30 @@ void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode,
     pattern->SetPredictLayoutParamV2(param);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    context->AddPredictTask(
-        [weak = WeakClaim(RawPtr(frameNode)), value = listMainSizeValues, show = show](int64_t deadline,
-        bool canUseLongPredictTask) { ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline, value, show); });
+    if (!context->IsWindowSizeDragging()) {
+        context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode)), listMainSizeValues, show]
+            (int64_t deadline, bool canUseLongPredictTask) {
+                ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline, listMainSizeValues, show);
+            }
+        );
+        return;
+    }
+    context->AddWindowSizeDragEndCallback([weak = WeakClaim(RawPtr(frameNode)), listMainSizeValues, show]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->GetPredictLayoutParamV2().has_value()) {
+            return;
+        }
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode)), listMainSizeValues, show]
+            (int64_t deadline, bool canUseLongPredictTask) {
+                ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline, listMainSizeValues, show);
+            }
+        );
+    });
 }
 
 float ListLayoutAlgorithm::GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const
