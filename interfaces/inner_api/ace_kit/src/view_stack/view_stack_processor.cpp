@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "interfaces/inner_api/ace_kit/include/ui/view_stack/view_stack_processor.h"
+#include "ui/view_stack/view_stack_processor.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/utils/utils.h"

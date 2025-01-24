@@ -19,11 +19,11 @@
 #include <cstdint>
 #include <optional>
 
+#include "ui/properties/dirty_flag.h"
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-
-#include "interfaces/inner_api/ace_kit/include/ui/properties/dirty_flag.h"
 
 namespace OHOS::Ace::NG {
 

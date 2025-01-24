@@ -14,8 +14,8 @@
  */
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
-#include "interfaces/inner_api/ace_kit/include/ui/view/draw/content_modifier.h"
 #include "interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.h"
+#include "ui/view/draw/content_modifier.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/components_ng/animation/animatable_arithmetic_proxy.h"

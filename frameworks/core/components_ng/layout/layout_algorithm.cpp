@@ -15,7 +15,7 @@
 
 #include "core/components_ng/layout/layout_algorithm.h"
 
-#include "interfaces/inner_api/ace_kit/include/ui/view/layout/layout_algorithm.h"
+#include "ui/view/layout/layout_algorithm.h"
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
