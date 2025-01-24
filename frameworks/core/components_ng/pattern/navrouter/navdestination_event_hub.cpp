@@ -233,4 +233,34 @@ bool NavDestinationEventHub::FireOnBackPressedEvent()
     }
     return false;
 }
+
+void NavDestinationEventHub::FireOnActive(int32_t reason)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "%{public}s lifecycle change to onActive state. navdestinationId:%{public}d, navigationId:%{public}d",
+        name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
+    state_ = NavDestinationState::ON_ACTIVE;
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+        NavDestinationState::ON_ACTIVE);
+    if (onActive_) {
+        onActive_(reason);
+    }
+}
+
+void NavDestinationEventHub::FireOnInactive(int32_t reason)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "%{public}s lifecycle change to onInactive state. navdestinationId:%{public}d, navigationId:%{public}d",
+        name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
+    state_ = NavDestinationState::ON_INACTIVE;
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+        NavDestinationState::ON_INACTIVE);
+    if (onInactive_) {
+        onInactive_(reason);
+    }
+}
 }

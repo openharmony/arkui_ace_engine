@@ -29,6 +29,7 @@ class FrameNodeImpl : public FrameNode {
 
 public:
     FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>& pattern);
+    explicit FrameNodeImpl(const RefPtr<AceNode>& node);
     ~FrameNodeImpl();
 
     void Reset() override;
@@ -42,7 +43,12 @@ public:
     RefPtr<NG::LayoutProperty> GetLayoutProperty() override;
     RefPtr<Pattern> GetPattern() override;
     RefPtr<AceNode> PopAceNode();
+    RefPtr<AceNode> GetAceNode() const;
     NG::LayoutWrapper* GetLayoutWrapper();
+    RefPtr<UIContext> GetUIContext() const override;
+
+    void MeasureChildren() override;
+    void LayoutChildren() override;
 
 private:
     AceNode* frameNode_;

@@ -30,7 +30,8 @@ public:
 
     void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const SvgColorInterpolationType& srcColor,
         SvgColorInterpolationType& currentColor,
-        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash,
+        bool cropRect = false) const override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
 private:

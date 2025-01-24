@@ -83,6 +83,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
     void SetButtonPress(bool value);
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
 
 private:
     void OnAttachToFrameNode() override;

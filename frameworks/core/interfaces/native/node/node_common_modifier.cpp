@@ -1922,8 +1922,8 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
 
 void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
 {
-    std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::BOTTOM, ResizableOption::LEFT,
-        ResizableOption::RIGHT };
+    std::vector<ResizableOption> directions = { ResizableOption::LEFT, ResizableOption::TOP, ResizableOption::RIGHT,
+        ResizableOption::BOTTOM };
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
         SetCalcDimension(optDimension, options, NUM_13, index);
@@ -1941,6 +1941,19 @@ void SetBackgroundImageResizable(ArkUINodeHandle node, ArkUIStringAndFloat* opti
     ImageResizableSlice resizable;
     SetResizableFromVec(resizable, options);
     ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
+}
+
+ArkUIImageResizableSlice GetBackgroundImageResizable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    ArkUIImageResizableSlice arkUISlice {};
+    CHECK_NULL_RETURN(frameNode, arkUISlice);
+    auto slice = ViewAbstract::GetBackgroundImageResizableSlice(frameNode);
+    arkUISlice.left = static_cast<ArkUI_Float32>(slice.left.ConvertToVp());
+    arkUISlice.top = static_cast<ArkUI_Float32>(slice.top.ConvertToVp());
+    arkUISlice.right = static_cast<ArkUI_Float32>(slice.right.ConvertToVp());
+    arkUISlice.bottom = static_cast<ArkUI_Float32>(slice.bottom.ConvertToVp());
+    return arkUISlice;
 }
 
 void ResetBackgroundImageResizable(ArkUINodeHandle node)
@@ -2019,6 +2032,20 @@ void SetBackgroundImage(
     } else {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
     }
+}
+
+void SetBackgroundImageSyncMode(ArkUINodeHandle node, ArkUI_Bool syncMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, syncMode);
+}
+
+void ResetBackgroundImageSyncMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, false);
 }
 
 void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex)
@@ -2939,6 +2966,24 @@ void ResetAccessibilityLevel(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
 }
 
+void SetAccessibilityCustomRole(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityCustomRole(std::string(value));
+}
+
+void ResetAccessibilityCustomRole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityCustomRole();
+}
+
 void SetDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3651,6 +3696,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
             previewOption.isDefaultDragItemGrayEffectEnabled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
         default:
             break;
     }
@@ -3691,8 +3739,15 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(
-        frameNode, { true, false, false, false, false, false, true, false, true, false, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode,
+        { true, false, false, false, false, false, true, false, true, false, false, { .isShowBadge = true } });
+}
+
+void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisableDataPrefetch(frameNode, value);
 }
 
 void SetMouseResponseRegion(
@@ -3786,6 +3841,50 @@ void ResetAccessibilityGroup(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, false);
+}
+
+void SetAccessibilityNextFocusId(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, valueStr);
+}
+
+void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
+}
+
+void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, value);
+}
+
+void ResetAccessibilityDefaultFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, false);
+}
+
+void SetAccessibilityUseSamePage(ArkUINodeHandle node, ArkUI_Bool isFullSilent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string pageMode = isFullSilent ? "FULL_SILENT" : "SEMI_SILENT";
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
+}
+
+void ResetAccessibilityUseSamePage(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
 }
 
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
@@ -6596,6 +6695,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetBackgroundImageSize = ResetBackgroundImageSize,
         .setBackgroundImage = SetBackgroundImage,
         .resetBackgroundImage = ResetBackgroundImage,
+        .setBackgroundImageSyncMode = SetBackgroundImageSyncMode,
+        .resetBackgroundImageSyncMode = ResetBackgroundImageSyncMode,
         .setTranslate = SetTranslate,
         .resetTranslate = ResetTranslate,
         .setScale = SetScale,
@@ -6655,6 +6756,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAllowDrop = ResetAllowDrop,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
         .setDirection = SetDirection,
         .resetDirection = ResetDirection,
         .setLayoutWeight = SetLayoutWeight,
@@ -6724,6 +6827,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetDraggable = ResetDraggable,
         .setAccessibilityGroup = SetAccessibilityGroup,
         .resetAccessibilityGroup = ResetAccessibilityGroup,
+        .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
+        .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
+        .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
+        .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
+        .resetAccessibilityUseSamePage = ResetAccessibilityUseSamePage,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
         .setClickEffect = SetClickEffect,
@@ -6851,6 +6960,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetMask = ResetMask,
         .getAspectRatio = GetAspectRatio,
         .setBackgroundImageResizable = SetBackgroundImageResizable,
+        .getBackgroundImageResizable = GetBackgroundImageResizable,
         .resetBackgroundImageResizable = ResetBackgroundImageResizable,
         .setBackgroundImageSizeWithUnit = SetBackgroundImageSizeWithUnit,
         .getRenderFit = GetRenderFit,
@@ -6920,6 +7030,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
         .getNodeBackdropBlur = GetNodeBackdropBlur,
+        .setDisableDataPrefetch = SetDisableDataPrefetch,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7062,6 +7173,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetAllowDrop = ResetAllowDrop,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
         .setDirection = SetDirection,
         .resetDirection = ResetDirection,
         .setLayoutWeight = SetLayoutWeight,
@@ -7647,6 +7760,8 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
             pressKeyCodeList.push_back(static_cast<int32_t>(*it));
         }
         event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.focusAxisEvent.targetDisplayId = info.GetTargetDisplayId();
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
@@ -7694,7 +7809,8 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
-    touchPoint.pressedTime = locationInfo.GetTimeStamp().time_since_epoch().count();
+    touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
+    touchPoint.operatingHand = locationInfo.GetOperatingHand();
 }
 
 void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
@@ -7729,6 +7845,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
+        points[i].operatingHand = touchPoint.operatingHand;
         i++;
     }
 }
@@ -7762,10 +7879,13 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
             event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            event.touchEvent.changedPointerId = front.GetFingerId();
             ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint, usePx);
         }
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        event.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
             size_t index = 0;
@@ -7856,6 +7976,8 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         }
         touchEvent.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         touchEvent.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        touchEvent.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
             size_t index = 0;
@@ -7921,6 +8043,17 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        std::vector<int32_t> pressedButtonList;
+        auto pressedButtons = info.GetPressedButtons();
+        event.mouseEvent.pressedButtonsLength = static_cast<int32_t>(pressedButtons.size());
+        for (auto it = pressedButtons.begin(); it != pressedButtons.end(); it++) {
+            pressedButtonList.push_back(static_cast<int32_t>(*it));
+        }
+        event.mouseEvent.pressedButtons = pressedButtonList.data();
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);

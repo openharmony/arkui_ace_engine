@@ -1158,18 +1158,6 @@ HWTEST_F(SelectTestNg, SelectOption001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SelectFont001
- * @tc.desc: Test SelectPattern GetFontSize.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SelectFont001, TestSize.Level1)
-{
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    auto props = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
-}
-
-/**
  * @tc.name: ShowSelectMenuTest002
  * @tc.desc: Test ShowSelectMenu of the SelectPattern when the width of select menu fit the width of
  * select button.

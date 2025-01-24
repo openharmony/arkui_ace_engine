@@ -29,6 +29,8 @@ struct PickerDialogInfo {
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate;
+    PickerTime parseStartTime;
+    PickerTime parseEndTime;
     PickerTime pickerTime;
     bool isUseMilitaryTime;
     bool isSelectedTime;

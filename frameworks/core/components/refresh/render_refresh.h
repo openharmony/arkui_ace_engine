@@ -103,7 +103,8 @@ protected:
 
     bool IsWatch() const
     {
-        return SystemProperties::GetDeviceType() == DeviceType::WATCH;
+        return SystemProperties::GetDeviceType() == DeviceType::WATCH ||
+               SystemProperties::GetDeviceType() == DeviceType::WEARABLE;
     }
 
 private:

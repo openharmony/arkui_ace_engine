@@ -36,10 +36,51 @@ void DragDropGlobalController::UpdateMenuShowingStatus(bool isShowing)
     isContextMenuShowing_ = isShowing;
 }
 
+void DragDropGlobalController::PublishMenuStatusWithNode(bool isShowing, const RefPtr<FrameNode>& targetNode)
+{
+    UpdateMenuShowingStatus(isShowing);
+    if (isShowing) {
+        menuLiftingTargetNode_ = targetNode;
+    }
+    auto frameNode = menuLiftingTargetNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    CHECK_NULL_VOID(dragEventActuator);
+    dragEventActuator->NotifyMenuShow(isShowing);
+}
+
 bool DragDropGlobalController::IsMenuShowing() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return isContextMenuShowing_;
+}
+
+void DragDropGlobalController::SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    dragStartRequestStatus_ = dragStartRequestStatus;
+}
+
+DragStartRequestStatus DragDropGlobalController::GetDragStartRequestStatus()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return dragStartRequestStatus_;
+}
+
+void DragDropGlobalController::SetAsyncDragCallback(std::function<void()> asyncDragCallbac)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    asyncDragCallback_ = asyncDragCallbac;
+}
+
+std::function<void()> DragDropGlobalController::GetAsyncDragCallback()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return asyncDragCallback_;
 }
 
 void DragDropGlobalController::UpdateDragDropInitiatingStatus(const RefPtr<FrameNode>& frameNode,

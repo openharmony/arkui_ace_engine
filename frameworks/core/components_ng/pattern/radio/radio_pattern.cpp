@@ -603,6 +603,7 @@ void RadioPattern::startEnterAnimation()
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
     if (radioTheme->IsCircleDial()) {
         delayOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
         delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION_CIRCLE);
@@ -641,6 +642,7 @@ void RadioPattern::startExitAnimation()
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
     if (radioTheme->IsCircleDial()) {
         delayOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
         delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION_CIRCLE);

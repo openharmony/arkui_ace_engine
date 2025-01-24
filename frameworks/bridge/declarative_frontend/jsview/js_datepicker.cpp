@@ -38,8 +38,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_date_picker_theme.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_time_picker_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -446,7 +444,6 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
@@ -458,7 +455,6 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
     }
@@ -479,7 +475,6 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
@@ -698,9 +693,7 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
     ParseDatePickerMode(mode);
-    if (!JSDatePickerTheme::ApplyTheme()) {
-        SetDefaultAttributes();
-    }
+    SetDefaultAttributes();
 }
 
 void JSDatePicker::SetDefaultAttributes()
@@ -709,19 +702,16 @@ void JSDatePicker::SetDefaultAttributes()
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
-    textStyle.textColor = selectedStyle.GetTextColor();
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
-    textStyle.textColor = disappearStyle.GetTextColor();
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
-    textStyle.textColor = normalStyle.GetTextColor();
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
@@ -1107,7 +1097,7 @@ void JSDatePickerDialog::UpdatePickerDialogPositionInfo(
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1545,7 +1535,6 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
     }
@@ -1557,7 +1546,6 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
     }
@@ -1569,7 +1557,6 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
     }
@@ -1578,9 +1565,17 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 
 void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
+    auto startTime = paramObj->GetProperty("start");
+    auto endTime = paramObj->GetProperty("end");
     auto selectedTime = paramObj->GetProperty("selected");
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
+    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
+    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
+    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
+        parseStartTime = theme->GetDefaultStartTime();
+        parseEndTime = theme->GetDefaultEndTime();
+    }
     auto formatValue = paramObj->GetProperty("format");
     bool showSecond = false;
     if (formatValue->IsNumber()) {
@@ -1590,6 +1585,8 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
     }
     TimePickerModel::GetInstance()->CreateTimePicker(theme, showSecond);
+    TimePickerModel::GetInstance()->SetStartTime(parseStartTime);
+    TimePickerModel::GetInstance()->SetEndTime(parseEndTime);
     if (selectedTime->IsObject()) {
         JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
         JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
@@ -1601,9 +1598,7 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
             TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
         }
     }
-    if (!JSTimePickerTheme::ApplyTheme()) {
-        SetDefaultAttributes();
-    }
+    SetDefaultAttributes();
 }
 
 void JSTimePicker::SetDefaultAttributes()
@@ -1612,27 +1607,24 @@ void JSTimePicker::SetDefaultAttributes()
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
-    textStyle.textColor = selectedStyle.GetTextColor();
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
-    textStyle.textColor = disappearStyle.GetTextColor();
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
-    textStyle.textColor = normalStyle.GetTextColor();
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
-PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)
+PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
 {
-    auto pickerTime = PickerTime::Current();
+    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime::Current();
     if (!timeVal->IsObject()) {
         return pickerTime;
     }
@@ -1804,6 +1796,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
             func->Execute();
         };
     }
+    auto startTime = paramObject->GetProperty("start");
+    auto endTime = paramObject->GetProperty("end");
     auto selectedTime = paramObject->GetProperty("selected");
     auto useMilitaryTime = paramObject->GetProperty("useMilitaryTime");
     auto enableCascade = paramObject->GetProperty("enableCascade");
@@ -1813,6 +1807,17 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     settingData.isEnableCascade = enableCascade->ToBoolean();
     pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
     pickerDialog.isEnableCascade = enableCascade->ToBoolean();
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
+    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
+    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
+        parseStartTime = theme->GetDefaultStartTime();
+        parseEndTime = theme->GetDefaultEndTime();
+    }
+    pickerDialog.parseStartTime = parseStartTime;
+    pickerDialog.parseEndTime = parseEndTime;
+
     if (selectedTime->IsObject()) {
         PickerDate dialogTitleDate = ParseDate(selectedTime);
         if (dialogTitleDate.GetYear() != 0) {
@@ -1832,7 +1837,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1990,9 +1995,9 @@ void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     component = timePicker;
 }
 
-PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
+PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
 {
-    auto pickerTime = PickerTime();
+    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime();
     if (!timeVal->IsObject()) {
         return pickerTime;
     }

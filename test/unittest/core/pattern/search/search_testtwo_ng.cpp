@@ -987,7 +987,7 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     searchModelInstance.SetHeight(Dimension(2.5, DimensionUnit::VP));
 
     //test SetOnChange
-    searchModelInstance.SetOnChange([](const std::u16string str, PreviewText previewText) {});
+    searchModelInstance.SetOnChange([](const ChangeValueInfo& changeValueInfo) {});
     EXPECT_NE(eventHub->GetOnChange(), nullptr);
 
     //test SetOnTextSelectionChange
@@ -1661,7 +1661,7 @@ HWTEST_F(SearchTestTwoNg, SetTextFont, TestSize.Level1)
     searchModelInstance.SetIcon(frameNode, "");
     searchModelInstance.SetMaxLength(frameNode, 19);
     searchModelInstance.SetOnSubmit(frameNode, [](const std::u16string& title, NG::TextFieldCommonEvent& event) {});
-    searchModelInstance.SetOnChange(frameNode, [](const std::u16string str, PreviewText previewText) {});
+    searchModelInstance.SetOnChange(frameNode, [](const ChangeValueInfo& changeValueInfo) {});
     searchModelInstance.SetType(frameNode, TextInputType::BEGIN);
     EXPECT_EQ(textFieldLayoutProperty->GetTextInputType().value(), TextInputType::BEGIN);
     searchModelInstance.SetType(frameNode, TextInputType::TEXT);
@@ -1693,6 +1693,13 @@ HWTEST_F(SearchTestTwoNg, CreateSearchNode, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     searchModelInstance.SetSearchDefaultIcon();
     searchModelInstance.CreateSearchNode(nodeId, u"", u"", "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto searchNode = pattern->GetSearchNode();
+    ASSERT_NE(searchNode, nullptr);
+    EXPECT_EQ(searchNode->GetSearchSymbolIconSize(), Dimension(16.0f, DimensionUnit::FP));
 }
 
 /**
@@ -1827,5 +1834,67 @@ HWTEST_F(SearchTestTwoNg, MaxFontScale001, TestSize.Level1)
      * @tc.step: step3. test maxFontScale
      */
     EXPECT_EQ(textFieldLayoutProperty->GetMaxFontScale(), 2.0);
+}
+
+/**
+ * @tc.name: CalcSearchWidth001
+ * @tc.desc: CalcSearchWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, CalcSearchWidth001, TestSize.Level1)
+{
+    auto column = CreateColumn();
+    auto columnFrameNode = column.first;
+    auto columnLayoutWrapper = column.second;
+    RefPtr<LayoutWrapper> layoutWrapper = columnLayoutWrapper;
+    LayoutConstraintT<float> layoutConstraintT;
+    SearchLayoutAlgorithm searchLayoutAlgorithm;
+    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, layoutWrapper.GetRawPtr());
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: CalcSearchWidth002
+ * @tc.desc: CalcSearchWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, CalcSearchWidth002, TestSize.Level1)
+{
+    auto column = CreateColumn();
+    auto columnFrameNode = column.first;
+    auto columnLayoutWrapper = column.second;
+    RefPtr<LayoutWrapper> layoutWrapper = columnLayoutWrapper;
+    auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    childLayoutConstraint->minSize->SetWidth(CalcLength(200.0f));
+    childLayoutConstraint->maxSize->SetWidth(CalcLength(50.0f));
+    LayoutConstraintT<float> layoutConstraintT;
+    layoutConstraintT.percentReference.SetWidth(100.0f);
+    layoutConstraintT.maxSize.SetWidth(150.0f);
+    SearchLayoutAlgorithm searchLayoutAlgorithm;
+    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, layoutWrapper.GetRawPtr());
+    EXPECT_EQ(result, 100.0f);
+}
+
+/**
+ * @tc.name: CalcSearchWidth003
+ * @tc.desc: CalcSearchWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, CalcSearchWidth003, TestSize.Level1)
+{
+    auto column = CreateColumn();
+    auto columnFrameNode = column.first;
+    auto columnLayoutWrapper = column.second;
+    RefPtr<LayoutWrapper> layoutWrapper = columnLayoutWrapper;
+    auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    childLayoutConstraint->minSize->SetWidth(CalcLength(200.0f));
+    childLayoutConstraint->maxSize->SetWidth(CalcLength(50.0f));
+    LayoutConstraintT<float> layoutConstraintT;
+    layoutConstraintT.percentReference.SetWidth(100.0f);
+    layoutConstraintT.maxSize.SetWidth(150.0f);
+    layoutConstraintT.minSize.SetWidth(200.0f);
+    SearchLayoutAlgorithm searchLayoutAlgorithm;
+    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, layoutWrapper.GetRawPtr());
+    EXPECT_EQ(result, 200.0f);
 }
 } // namespace OHOS::Ace::NG

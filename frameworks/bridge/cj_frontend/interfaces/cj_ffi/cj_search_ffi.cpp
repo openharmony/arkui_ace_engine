@@ -275,15 +275,22 @@ void FfiOHOSAceFrameworkSearchSetCopyOption(int32_t copyOption)
 
 void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 {
-    auto onSubmit = [lambda = CJLambda::Create(callback)](const std::string& value) -> void { lambda(value.c_str()); };
-    SearchModel::GetInstance()->SetOnSubmit(std::move(onSubmit));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto task = [func = CJLambda::Create(callback), node = targetNode](
+                    const std::u16string& value, NG::TextFieldCommonEvent& event) {
+        PipelineContext::SetCallBackNode(node);
+        std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+        std::string utf8String = convert.to_bytes(value);
+        func(utf8String.c_str());
+    };
+    SearchModel::GetInstance()->SetOnSubmit(std::move(task));
 }
 
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
 {
     auto onChange = [lambda = CJLambda::Create(callback)]
-        (const std::u16string& value, PreviewText& previewText) -> void {
-        const std::string valueStr = UtfUtils::Str16DebugToStr8(value);
+        (const ChangeValueInfo& info) -> void {
+        const std::string valueStr = UtfUtils::Str16DebugToStr8(info.value);
         lambda(valueStr.c_str());
     };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
@@ -621,5 +628,41 @@ int64_t FfiOHOSAceFrameworkSearchTextMenuItemGetSize(SearchTextMenuItemHandle ve
 {
     auto actualVec = reinterpret_cast<std::vector<FFiSearchTextMenuItem>*>(vec);
     return (*actualVec).size();
+}
+
+CJRectResult FfiOHOSAceFrameworkSearchGetTextContentRect(int64_t selfID)
+{
+    CJRectResult result;
+    auto self = FFIData::GetData<SearchController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentRect();
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+    return result;
+}
+
+int32_t FfiOHOSAceFrameworkSearchGetTextContentLineCount(int64_t selfID)
+{
+    int32_t result = 0;
+    auto self = FFIData::GetData<SearchController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentLinesNum();
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+    return result;
+}
+
+CJCaretOffset FfiOHOSAceFrameworkSearchGetCaretOffset(int64_t selfID)
+{
+    CJCaretOffset result;
+    auto self = FFIData::GetData<SearchController>(selfID);
+    if (self != nullptr) {
+        result = self->GetCaretOffset();
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+    return result;
 }
 }

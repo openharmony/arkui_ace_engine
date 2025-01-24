@@ -39,6 +39,22 @@ RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
     return path;
 }
 
+RSRecordingPath SvgLine::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        return path_.value();
+    }
+    RSRecordingPath path;
+    auto x1 = GetMeasuredPosition(lineAttr_.x1, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y1 = GetMeasuredPosition(lineAttr_.y1, lengthRule, SvgLengthType::VERTICAL);
+    auto x2 = GetMeasuredPosition(lineAttr_.x2, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y2 = GetMeasuredPosition(lineAttr_.y2, lengthRule, SvgLengthType::VERTICAL);
+
+    path.MoveTo(x1, y1);
+    path.LineTo(x2, y2);
+    return path;
+}
+
 bool SvgLine::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgLineAttribute&)> attrs[] = {

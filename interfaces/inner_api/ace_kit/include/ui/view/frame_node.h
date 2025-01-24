@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_FRAME_NODE_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_FRAME_NODE_H
 
+#include <list>
 #include <optional>
 #include <string>
 
@@ -30,6 +31,7 @@ struct LayoutConstraintT;
 namespace OHOS::Ace::Kit {
 
 class Pattern;
+class UIContext;
 class FrameNode : public AceType {
     DECLARE_ACE_TYPE(FrameNode, AceType);
 
@@ -44,6 +46,10 @@ public:
     virtual void Layout() = 0;
     virtual RefPtr<NG::LayoutProperty> GetLayoutProperty() = 0;
     virtual RefPtr<Pattern> GetPattern() = 0;
+    virtual void MeasureChildren() = 0;
+    virtual void LayoutChildren() = 0;
+
+    virtual RefPtr<UIContext> GetUIContext() const = 0;
 };
 } // namespace OHOS::Ace::Kit
 

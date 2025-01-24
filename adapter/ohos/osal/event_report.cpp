@@ -68,6 +68,7 @@ constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
 constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
+constexpr char EVENT_KEY_REAL_SKIPPED_FRAME_TIME[] = "REAL_SKIPPED_FRAME_TIME";
 constexpr char EVENT_KEY_PAGE_NODE_COUNT[] = "PAGE_NODE_COUNT";
 constexpr char EVENT_KEY_PAGE_NODE_THRESHOLD[] = "PAGE_NODE_THRESHOLD";
 constexpr char EVENT_KEY_PAGE_DEPTH[] = "PAGE_DEPTH";
@@ -547,6 +548,7 @@ void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
     const auto& versionName = info.baseInfo.versionName;
     const auto& pageName = info.baseInfo.pageName;
     const auto& skippedFrameTime = info.skippedFrameTime;
+    const auto& realSkippedFrameTime = info.realSkippedFrameTime;
     const auto& windowName = info.windowName;
     const auto& filterType = info.filterType;
     const auto& sceneId = info.sceneId;
@@ -561,6 +563,7 @@ void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
         EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_FILTER_TYPE, filterType,
         EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_REAL_SKIPPED_FRAME_TIME, static_cast<uint64_t>(realSkippedFrameTime),
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_UNFILTERED: skipppedFrameTime=%lld(ms), windowName=%s, filterType=%d",
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str(), filterType);

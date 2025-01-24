@@ -220,6 +220,8 @@ declare class ArkSelectComponent extends ArkComponent {}
 
 declare class ArkToggleComponent extends ArkComponent {}
 
+declare class Scroller {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;
@@ -234,6 +236,7 @@ declare class UIGestureEvent {
   constructor();
   setNodePtr(nodePtr: NodePtr): void;
   setWeakNodePtr(weakPtr: WeakRef<FrameNode>): void;
+  registerFrameNodeDeletedCallback(nodePtr): void;
 }
 
 declare class ModifierWithKey<T extends number | string | boolean | object> {

@@ -52,6 +52,7 @@ function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
  */
 const Trace = (target: Object, propertyKey: string): void => {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Trace`, propertyKey);
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@Trace');
   return trackInternal(target, propertyKey);
 };
 

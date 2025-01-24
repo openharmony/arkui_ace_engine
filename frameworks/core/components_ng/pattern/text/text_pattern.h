@@ -569,7 +569,7 @@ public:
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
-    void SetStyledString(const RefPtr<SpanString>& value);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
@@ -581,6 +581,7 @@ public:
     void HandleOnCopy();
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
+    bool IsShowTranslate();
     bool IsShowSearch();
     void SetTextSelectableMode(TextSelectableMode value);
 
@@ -776,6 +777,7 @@ public:
     void ResetCustomFontColor();
     void OnColorConfigurationUpdate() override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
 protected:
     int32_t GetClickedSpanPosition()

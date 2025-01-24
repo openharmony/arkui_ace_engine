@@ -265,7 +265,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
                 auto index =
                     std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
                 columnNode->MountToParent(tabBarNode, index);
-            } else {
+            } else if (oldColumnNode != columnNode) {
                 tabBarNode->ReplaceChild(oldColumnNode, columnNode);
             }
         }
@@ -294,7 +294,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         if (!oldColumnNode) {
             auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
             columnNode->MountToParent(tabBarNode, index);
-        } else {
+        } else if (oldColumnNode != columnNode) {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);

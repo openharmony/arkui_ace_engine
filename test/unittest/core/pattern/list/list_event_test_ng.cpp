@@ -1052,61 +1052,61 @@ HWTEST_F(ListEventTestNg, StartSnapAnimation001, TestSize.Level1)
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 2);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 0);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 0);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 2);
 }
@@ -1147,34 +1147,34 @@ HWTEST_F(ListEventTestNg, EndSnapAnimation001, TestSize.Level1)
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 4);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 4);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 3);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 2);
 }
@@ -1214,34 +1214,34 @@ HWTEST_F(ListEventTestNg, CenterSnapAnimation001, TestSize.Level1)
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 2);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 0);
 }

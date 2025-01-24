@@ -144,13 +144,6 @@ public:
         return columnWidths_;
     }
 
-    void SetDividerLength(int32_t index, float childCount, const SizeF& pickerContentSize);
-
-    std::optional<float> GetDividerLength() const
-    {
-        return dividerLength_;
-    }
-
     std::vector<NG::TextCascadePickerOptions> GetMultiOptions() const
     {
         return cascadeOriginptions_;
@@ -350,6 +343,8 @@ public:
     size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
 
     void OnColorConfigurationUpdate() override;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void OnDirectionConfigurationUpdate() override;
 
@@ -558,6 +553,7 @@ private:
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
+    std::string GetColumnWidthsStr() const;
     std::string GetOptionsCascadeStr(
         const std::vector<NG::TextCascadePickerOptions>& options) const;
     bool ChangeCurrentOptionValue(NG::TextCascadePickerOptions& option,
@@ -640,7 +636,6 @@ private:
     bool isNeedUpdateSelectedIndex_ = true;
     PickerTextProperties textProperties_;
     std::vector<Dimension> columnWidths_;
-    std::optional<float> dividerLength_;
 
     bool isDisableTextStyleAnimation_ = false;
     bool isEnableHaptic_ = true;

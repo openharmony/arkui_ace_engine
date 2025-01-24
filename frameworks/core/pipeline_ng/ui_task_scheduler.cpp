@@ -73,9 +73,7 @@ void UITaskScheduler::SetLayoutNodeRect()
         OffsetF offset;
         layoutNode->GetOneDepthVisibleFrameWithOffset(children, offset);
         for (auto& child : children) {
-            auto paintRect = child->GetRenderContext()->GetPaintRectWithoutTransform();
-            paintRect.SetOffset(paintRect.GetOffset() + offset);
-            child->GetRenderContext()->UpdatePaintRect(paintRect);
+            child->GetRenderContext()->SetExtraOffset(offset);
         }
     }
 }
@@ -178,6 +176,8 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
                 continue;
             }
             if (node->IsInDestroying()) {
+                // reset RenderDirtyMarked for recycle node
+                node->ResetRenderDirtyMarked(false);
                 continue;
             }
             time = GetSysTimestamp();

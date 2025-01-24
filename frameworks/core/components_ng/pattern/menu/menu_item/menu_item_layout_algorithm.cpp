@@ -29,8 +29,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
-                   static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    horInterval_ = static_cast<float>(theme->GetMenuItemHorIntervalPadding().ConvertToPx());
     middleSpace_ = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
@@ -540,6 +539,10 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
         rowChild->Measure(childConstraint);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
+    if (textAlign == TextAlign::CENTER) {
+        ExtendTextAndRowNode(child, idealSize, horInterval_, childConstraint);
+    }
 }
 
 void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props)
@@ -618,16 +621,13 @@ void MenuItemLayoutAlgorithm::LayoutOption(LayoutWrapper* layoutWrapper, const R
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
         horInterval = optionSize.Width() - childSize.Width() - horInterval_;
     }
-    if (textAlign == TextAlign::CENTER) {
-        ExtendTextAndRowNode(child, optionSize, horInterval);
-    }
     child->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(horInterval, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
     child->Layout();
 }
 
 void MenuItemLayoutAlgorithm::ExtendTextAndRowNode(const RefPtr<LayoutWrapper>& row,
-    const SizeF& optSize, float interval)
+    const SizeF& optSize, float interval, const LayoutConstraintF& constraint)
 {
     CHECK_NULL_VOID(row);
     auto children = row->GetAllChildrenWithBuild();
@@ -650,9 +650,9 @@ void MenuItemLayoutAlgorithm::ExtendTextAndRowNode(const RefPtr<LayoutWrapper>& 
         }
         frameSize = geometryNode->GetMarginFrameSize();
         auto width = optSize.Width() - 2.0f * interval - imageNodeWidth;
-        auto height = frameSize.Height();
-        geometryNode->SetFrameSize(SizeF(width, height));
-        textChild->Layout();
+        auto contentConstraint = constraint;
+        contentConstraint.minSize.SetWidth(width);
+        textChild->Measure(contentConstraint);
     }
     auto geometryNode = row->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);

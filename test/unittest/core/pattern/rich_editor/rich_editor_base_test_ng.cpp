@@ -185,8 +185,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel004, TestSize.Level1)
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorInsertValue info;
-    eventHub->FireAboutToIMEInput(info);
-    EXPECT_EQ(testAboutToIMEInput, 1);
+    EXPECT_TRUE(eventHub->FireAboutToIMEInput(info));
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -238,8 +237,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel006, TestSize.Level1)
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorDeleteValue info;
-    eventHub->FireAboutToDelete(info);
-    EXPECT_EQ(testAboutToDelete, 1);
+    EXPECT_TRUE(eventHub->FireAboutToDelete(info));
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -771,7 +769,8 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest001, TestSize.Level1)
     localOffset.SetX(MAGNIFIERNODE_WIDTH.ConvertToPx());
     controller->SetLocalOffset(localOffset);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2);
+    EXPECT_EQ(magnifierOffset.GetX(),
+        paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2 - 1.0f);
 
     /**
      * @tc.steps: step3. localOffset is on the far right.

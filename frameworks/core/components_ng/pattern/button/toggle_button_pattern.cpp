@@ -827,4 +827,10 @@ void ToggleButtonPattern::SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFu
     }
     toggleMakeFunc_ = std::move(toggleMakeFunc);
 }
+
+void ToggleButtonPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    json->Put(TreeKey::CHECKED, isOn_ ? "true" : "false");
+}
 } // namespace OHOS::Ace::NG

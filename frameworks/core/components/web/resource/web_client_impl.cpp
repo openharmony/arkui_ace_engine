@@ -1186,6 +1186,16 @@ void WebClientImpl::OnShowAutofillPopup(
     delegate->OnShowAutofillPopup(offsetX, offsetY, menu_items);
 }
 
+void WebClientImpl::OnShowAutofillPopupV2(
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnShowAutofillPopupV2(offsetX, offsetY, height, width, menu_items);
+}
+
 void WebClientImpl::OnHideAutofillPopup()
 {
     auto delegate = webDelegate_.Upgrade();

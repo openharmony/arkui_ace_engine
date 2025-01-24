@@ -60,4 +60,42 @@ bool ExecuteCustomTitleAbc()
     }
     return true;
 }
+
+bool ExecuteCustomWindowMaskAbc()
+{
+    uint8_t* binaryBuff = nullptr;
+    int32_t binarySize = 0;
+    std::vector<uint8_t> buffer;
+
+    auto filePath = "/system/etc/abc/arkui/windowmask.abc";
+    // read abc file
+    std::ifstream readFile(filePath, std::ifstream::binary);
+    bool isLoadSuccess = false;
+    if (readFile && readFile.is_open()) {
+        readFile.seekg(0, std::ios::end);
+        binarySize = static_cast<int32_t>(readFile.tellg());
+        readFile.seekg(0, std::ios::beg);
+        buffer.resize(binarySize);
+        if (readFile.read((char*)buffer.data(), binarySize)) {
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "read windowmask abc file success!");
+            binaryBuff = buffer.data();
+            readFile.close();
+            isLoadSuccess = true;
+        } else {
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "open windowmask abc file failed!");
+            return false;
+        }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_APPBAR, "The abc file may not exist.");
+        return false;
+    }
+    // run abc file
+    auto jsEngine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(jsEngine, false);
+    if (!jsEngine->ExecuteJs(binaryBuff, binarySize)) {
+        TAG_LOGE(AceLogTag::ACE_APPBAR, "execute windowmask abc file failed!");
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

@@ -68,6 +68,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -173,8 +174,8 @@ RefPtr<FrameNode> OverlayManagerTestNg::CreateTargetNode()
 
 void OverlayManagerTestNg::CreateSheetStyle(SheetStyle& sheetStyle)
 {
-    if (!sheetStyle.sheetMode.has_value()) {
-        sheetStyle.sheetMode = SheetMode::MEDIUM;
+    if (!sheetStyle.sheetHeight.sheetMode.has_value()) {
+        sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     }
     if (!sheetStyle.showDragBar.has_value()) {
         sheetStyle.showDragBar = true;
@@ -351,37 +352,37 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet001, TestSize.Level1)
     SheetStyle sheetStyle1;
     topSheetPattern->pageHeight_ = 10;
 
-    // sheetStyle1.sheetMode is null.
-    sheetStyle1.sheetMode = std::nullopt;
+    // sheetStyle1.sheetHeight.sheetMode is null.
+    sheetStyle1.sheetHeight.sheetMode = std::nullopt;
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = 2.0;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
 
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = -2.0;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = -2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
 
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = 0.1;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = 0.1;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 1.0));
 
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::VP;
-    sheetStyle1.height->value_ = 2;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::VP;
+    sheetStyle1.sheetHeight.height->value_ = 2;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
 
-    // sheetStyle1.sheetMode is not null.
-    sheetStyle1.sheetMode = SheetMode(5);
+    // sheetStyle1.sheetHeight.sheetMode is not null.
+    sheetStyle1.sheetHeight.sheetMode = SheetMode(5);
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = 2.0;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
 
@@ -468,37 +469,37 @@ HWTEST_F(OverlayManagerTestNg, OpenBindSheetByUIContext001, TestSize.Level1)
     SheetStyle sheetStyle1;
     topSheetPattern->pageHeight_ = 10;
 
-    // sheetStyle1.sheetMode is null.
-    sheetStyle1.sheetMode = std::nullopt;
+    // sheetStyle1.sheetHeight.sheetMode is null.
+    sheetStyle1.sheetHeight.sheetMode = std::nullopt;
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = 2.0;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
 
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = -2.0;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = -2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
 
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = 0.1;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = 0.1;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 1.0));
 
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::VP;
-    sheetStyle1.height->value_ = 2;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::VP;
+    sheetStyle1.sheetHeight.height->value_ = 2;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
 
-    // sheetStyle1.sheetMode is not null.
-    sheetStyle1.sheetMode = SheetMode(5);
+    // sheetStyle1.sheetHeight.sheetMode is not null.
+    sheetStyle1.sheetHeight.sheetMode = SheetMode(5);
     overlayManager->sheetHeight_ = 0;
-    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
-    sheetStyle1.height->value_ = 2.0;
+    sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
     EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
 
@@ -567,8 +568,8 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext001, TestSize.Level1)
      * @tc.steps: step4. UpdateBindSheetByUIContext
      * @tc.expected: related property is updated.
      */
-    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     sheetStyle.showDragBar = false;
     sheetStyle.showCloseIcon = false;
     sheetStyle.isTitleBuilder = false;
@@ -587,8 +588,8 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext001, TestSize.Level1)
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     auto currentStyle = layoutProperty->GetSheetStyleValue();
 
-    EXPECT_EQ(currentStyle.height, sheetStyle.height);
-    EXPECT_EQ(currentStyle.sheetMode, sheetStyle.sheetMode);
+    EXPECT_EQ(currentStyle.sheetHeight.height, sheetStyle.sheetHeight.height);
+    EXPECT_EQ(currentStyle.sheetHeight.sheetMode, sheetStyle.sheetHeight.sheetMode);
     EXPECT_EQ(currentStyle.showDragBar, sheetStyle.showDragBar);
     EXPECT_EQ(currentStyle.showCloseIcon, sheetStyle.showCloseIcon);
     EXPECT_EQ(currentStyle.isTitleBuilder, sheetStyle.isTitleBuilder);
@@ -646,8 +647,8 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
      * @tc.steps: step3. OpenBindSheetByUIContext
      */
     SheetStyle sheetStyle;
-    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     sheetStyle.showDragBar = false;
     sheetStyle.showCloseIcon = false;
     sheetStyle.isTitleBuilder = false;
@@ -670,8 +671,8 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
      * @tc.steps: step4. UpdateBindSheetByUIContext
      * @tc.expected: related property is updated.
      */
-    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     sheetStyle.showDragBar = false;
     sheetStyle.showCloseIcon = false;
     sheetStyle.isTitleBuilder = false;
@@ -690,8 +691,8 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     auto currentStyle = layoutProperty->GetSheetStyleValue();
 
-    EXPECT_EQ(currentStyle.height, sheetStyle.height);
-    EXPECT_EQ(currentStyle.sheetMode, sheetStyle.sheetMode);
+    EXPECT_EQ(currentStyle.sheetHeight.height, sheetStyle.sheetHeight.height);
+    EXPECT_EQ(currentStyle.sheetHeight.sheetMode, sheetStyle.sheetHeight.sheetMode);
     EXPECT_EQ(currentStyle.showDragBar, sheetStyle.showDragBar);
     EXPECT_EQ(currentStyle.showCloseIcon, sheetStyle.showCloseIcon);
     EXPECT_EQ(currentStyle.isTitleBuilder, sheetStyle.isTitleBuilder);
@@ -898,14 +899,14 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet002, TestSize.Level1)
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetNodeLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
     auto style = sheetNodeLayoutProperty->GetSheetStyle();
-    EXPECT_EQ(style->sheetMode.value(), SheetMode::MEDIUM);
+    EXPECT_EQ(style->sheetHeight.sheetMode.value(), SheetMode::MEDIUM);
     EXPECT_EQ(style->showDragBar.value(), true);
 
     /**
      * @tc.steps: step4. Change the sheetStyle.
      * @tc.expected: the sheetStyle is updated successfully
      */
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     sheetStyle.showDragBar = false;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
@@ -913,7 +914,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet002, TestSize.Level1)
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->InitialLayoutProps();
-    sheetStyle.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     sheetNode = overlayManager->modalStack_.top().Upgrade();
@@ -922,7 +923,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet002, TestSize.Level1)
     EXPECT_EQ(sheetPattern->GetTargetId(), topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId());
     sheetNodeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     style = sheetNodeLayoutProperty->GetSheetStyle();
-    EXPECT_EQ(style->sheetMode.value(), SheetMode::MEDIUM);
+    EXPECT_EQ(style->sheetHeight.sheetMode.value(), SheetMode::MEDIUM);
     EXPECT_EQ(style->showDragBar.value(), false);
 
     /**
@@ -1241,10 +1242,10 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetNodeLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
     auto style = sheetNodeLayoutProperty->GetSheetStyle();
-    EXPECT_EQ(style->sheetMode.value(), SheetMode::MEDIUM);
+    EXPECT_EQ(style->sheetHeight.sheetMode.value(), SheetMode::MEDIUM);
     EXPECT_EQ(style->showDragBar.value(), true);
 
-    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
     sheetStyle.showDragBar = false;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
@@ -1269,7 +1270,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
     DirtySwapConfig dirtySwapConfig;
     EXPECT_TRUE(sheetPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
     sheetPattern->InitPanEvent();
-    EXPECT_EQ(style->sheetMode.value(), SheetMode::LARGE);
+    EXPECT_EQ(style->sheetHeight.sheetMode.value(), SheetMode::LARGE);
     EXPECT_EQ(style->showDragBar.value(), false);
 }
 
@@ -1714,8 +1715,16 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.steps: step2. keyboard up, and sheet will goes to correct position.
      * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
      */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
+
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1000));
+    pattern->selectController_->caretInfo_.rect.SetTop(1000.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->height_ = 1800;
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
@@ -1730,7 +1739,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.cases: case3. sheet offset = 1800, sheet goes up with h and not goes up to LARGE.
      */
     sheetPattern->keyboardHeight_ = 0;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
+    pattern->selectController_->caretInfo_.rect.SetTop(1900.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 56);
     EXPECT_FALSE(sheetPattern->isScrolling_);
@@ -1739,7 +1749,6 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      */
     sheetPattern->keyboardHeight_ = 0;
     sheetPattern->height_ = 1950;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 8);
     EXPECT_EQ(sheetPattern->scrollHeight_, 102.0f);
@@ -2090,6 +2099,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_RESIZE.
@@ -2136,11 +2151,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
      *              and isScrolling state is false.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1500));
+    pattern->selectController_->caretInfo_.rect.SetTop(1500.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -2171,7 +2187,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
      *              and isScrolling state is true.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
+    pattern->selectController_->caretInfo_.rect.SetTop(1900.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -
@@ -2266,6 +2283,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_RESIZE.
@@ -2312,11 +2335,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
      *              and isScrolling state is false.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1400));
+    pattern->selectController_->caretInfo_.rect.SetTop(1400.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -2347,7 +2371,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
      *              and isScrolling state is true.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1800));
+    pattern->selectController_->caretInfo_.rect.SetTop(1800.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -
@@ -2765,6 +2790,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_SCROLL.
@@ -2812,11 +2843,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
      *              and isScrolling state is false, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1500));
+    pattern->selectController_->caretInfo_.rect.SetTop(1500.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -2847,7 +2879,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
      *              and isScrolling state is true, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1900));
+    pattern->selectController_->caretInfo_.rect.SetTop(1900.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -
@@ -2937,6 +2970,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
         sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     }
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectController_, nullptr);
 
     /**
      * @tc.steps: step3. set sheet keyboardAvoidMode to TRANSLATE_AND_SCROLL.
@@ -2984,11 +3023,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
      *              and isScrolling state is false, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1400));
+    pattern->selectController_->caretInfo_.rect.SetTop(1400.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = expectedKeyboardHeight - (MockPipelineContext::GetCurrent()->GetRootHeight() -
-        textFieldManager->GetClickPosition().GetY() - textFieldManager->GetHeight());
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight());
     expectedTranslateValue = sheetPattern->pageHeight_ - sheetPattern->height_ - expectedSheetHeightUp;
     EXPECT_TRUE(NearEqual(sheetPattern->keyboardHeight_, expectedKeyboardHeight));
     EXPECT_TRUE(NearEqual(sheetPattern->sheetHeightUp_, expectedSheetHeightUp));
@@ -3019,7 +3059,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
      *              and isScrolling state is true, sheet decreaseHeight value is zero.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(500, 1800));
+    pattern->selectController_->caretInfo_.rect.SetTop(1800.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     sheetPattern->AvoidSafeArea();
     expectedKeyboardHeight = 600.f;
     expectedSheetHeightUp = sheetPattern->pageHeight_ -
@@ -3187,7 +3228,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern3, TestSize.Level1)
     EXPECT_TRUE(NearEqual(topSheetPattern->sheetDetentHeight_.back(), 992));
 
     /**
-     * @tc.steps: step5. test sheetStyle.height has value.
+     * @tc.steps: step5. test sheetStyle.sheetHeight.height has value.
      */
     sheetStyle.detents.clear();
     SheetHeight detent1;
@@ -3274,27 +3315,27 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern4, TestSize.Level1)
     topSheetPattern->isFirstInit_ = true;
 
     /**
-     * @tc.steps: step4. set sheetStyle.height = 0.5, unit is %.
+     * @tc.steps: step4. set sheetStyle.sheetHeight.height = 0.5, unit is %.
      * @tc.expected: height = 1000*0.5 = 500.
      */
     Dimension singleHeight { 0.5, DimensionUnit::PERCENT };
-    sheetStyle.height = singleHeight;
+    sheetStyle.sheetHeight.height = singleHeight;
     EXPECT_TRUE(NearEqual(topSheetPattern->InitialSingleGearHeight(sheetStyle), 500));
 
     /**
-     * @tc.steps: step5. set sheetStyle.height > maxHeight.
+     * @tc.steps: step5. set sheetStyle.sheetHeight.height > maxHeight.
      * @tc.expected: height = 1000-8 = 992.
      */
-    sheetStyle.height->unit_ = DimensionUnit::VP;
-    sheetStyle.height->value_ = 1200;
+    sheetStyle.sheetHeight.height->unit_ = DimensionUnit::VP;
+    sheetStyle.sheetHeight.height->value_ = 1200;
     EXPECT_TRUE(NearEqual(topSheetPattern->InitialSingleGearHeight(sheetStyle), 992));
 
     /**
-     * @tc.steps: step6. set sheetStyle.height < 0.
+     * @tc.steps: step6. set sheetStyle.sheetHeight.height < 0.
      * @tc.expected: height = 1000-8 = 992.
      */
-    sheetStyle.height->unit_ = DimensionUnit::VP;
-    sheetStyle.height->value_ = -10;
+    sheetStyle.sheetHeight.height->unit_ = DimensionUnit::VP;
+    sheetStyle.sheetHeight.height->value_ = -10;
     EXPECT_TRUE(NearEqual(topSheetPattern->InitialSingleGearHeight(sheetStyle), 992));
 }
 
@@ -3877,7 +3918,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern11, TestSize.Level1)
     EXPECT_TRUE(NearEqual(topSheetPattern->sheetDetentHeight_.back(), 992));
 
     /**
-     * @tc.steps: step5. test sheetStyle.height has value.
+     * @tc.steps: step5. test sheetStyle.sheetHeight.height has value.
      * @tc.expected: Call FireOnDetentsDidChange.
      */
     sheetStyle.detents.clear();
@@ -4134,6 +4175,164 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern15, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SheetPresentationPattern16
+ * @tc.desc: Test SheetPresentationPattern::InitialSingleGearHeight().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern16, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test InitialSingleGearHeight().
+     */
+    topSheetPattern->pageHeight_ = 1000;
+    topSheetPattern->sheetMaxHeight_ = 1000;
+    topSheetPattern->isFirstInit_ = true;
+
+    /**
+     * @tc.steps: step4. set sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM.
+     * @tc.expected: height = 1000 * 0.6 = 600.
+     */
+    EXPECT_TRUE(NearEqual(topSheetPattern->InitialSingleGearHeight(sheetStyle), 600));
+}
+
+/**
+ * @tc.name: SheetPresentationPattern17
+ * @tc.desc: Test SheetPresentationPattern::InitialSingleGearHeight().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern17, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->largePercent_ = 0.5;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test InitialSingleGearHeight().
+     */
+    topSheetPattern->pageHeight_ = 1000;
+    topSheetPattern->sheetMaxHeight_ = 1000;
+    topSheetPattern->isFirstInit_ = true;
+    /**
+     * @tc.steps: step5. set sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE && heightApplyFullScreen_ = true.
+     * @tc.expected: height = (1000 - 8) * 0.5 = 1000.
+     */
+    EXPECT_EQ(topSheetPattern->InitialSingleGearHeight(sheetStyle), 496);
+}
+
+/**
+ * @tc.name: SheetPresentationPattern18
+ * @tc.desc: Test SheetPresentationPattern::InitialSingleGearHeight().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern18, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test InitialSingleGearHeight().
+     */
+    topSheetPattern->pageHeight_ = 1000;
+    topSheetPattern->sheetMaxHeight_ = 1000;
+    topSheetPattern->isFirstInit_ = true;
+    /**
+     * @tc.steps: step4. set sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE && heightApplyFullScreen_ = false.
+     * @tc.expected: height = (1000 - 8) * 1.0.
+     */
+    EXPECT_EQ(topSheetPattern->InitialSingleGearHeight(sheetStyle), 992);
+}
+
+/**
  * @tc.name: TestSheetPage001
  * @tc.desc: Test CreateSheetPage.
  * @tc.type: FUNC
@@ -4231,7 +4430,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 2000);
 
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
-    sheetLayoutAlgorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    sheetLayoutAlgorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::AUTO;
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
@@ -4275,14 +4474,14 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
      */
     sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
-    sheetLayoutAlgorithm->sheetStyle_.height = 2.5_pct;
+    sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 2.5_pct;
     sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
-    sheetLayoutAlgorithm->sheetStyle_.height = 2.5_px;
+    sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 2.5_px;
     sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
-    sheetLayoutAlgorithm->sheetStyle_.height = 0.0_px;
+    sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 0.0_px;
     auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx());
-    sheetLayoutAlgorithm->sheetStyle_.height = -1.0_px;
+    sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = -1.0_px;
     height = sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_HEIGHT.ConvertToPx());
 

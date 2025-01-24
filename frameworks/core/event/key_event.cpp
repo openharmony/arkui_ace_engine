@@ -173,4 +173,18 @@ std::string KeyEvent::ConvertCodeToString() const
     return "";
 }
 
+void KeyEventInfo::ParseKeyEvent(KeyEvent& keyEvent)
+{
+    keyEvent.action = GetKeyType();
+    keyEvent.code = GetKeyCode();
+    keyEvent.key.assign(GetKeyText());
+    keyEvent.sourceType = GetKeySource();
+    keyEvent.deviceId = GetDeviceId();
+    keyEvent.metaKey = GetMetaKey();
+    keyEvent.unicode = GetUnicode();
+    keyEvent.timeStamp = GetTimeStamp();
+    keyEvent.keyIntention = GetKeyIntention();
+    keyEvent.pressedCodes = GetPressedKeyCodes();
+}
+
 } // namespace OHOS::Ace

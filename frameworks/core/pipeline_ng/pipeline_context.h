@@ -61,6 +61,11 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
 
+namespace OHOS::Ace::Kit {
+class UIContext;
+class UIContextImpl;
+}
+
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
@@ -111,6 +116,8 @@ public:
     static float GetCurrentRootWidth();
 
     static float GetCurrentRootHeight();
+
+    void MarkDirtyOverlay();
 
     void SetupRootElement() override;
 
@@ -1073,6 +1080,10 @@ public:
 
     void SetHostParentOffsetToWindow(const Offset& offset);
 
+    RefPtr<Kit::UIContext> GetUIContext();
+    void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
+    void FlushPendingDeleteCustomNode();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1157,7 +1168,8 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
-    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node);
+    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
+        SerializedGesture& etsSerializedGesture);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1195,12 +1207,15 @@ private:
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
+    
+    void FlushAnimationDirtysWhenExist(const AnimationOption& option);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
     std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
+    std::stack<RefPtr<CustomNode>> pendingDeleteCustomNode_;
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
@@ -1258,7 +1273,6 @@ private:
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     Rect displayAvailableRect_;
-    std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyRequestFocusNode_;
@@ -1353,6 +1367,8 @@ private:
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
+
+    RefPtr<Kit::UIContextImpl> uiContextImpl_;
 
     friend class ScopedLayout;
     friend class FormGestureManager;

@@ -1133,4 +1133,265 @@ HWTEST_F(MenuItemPatternTestOneNg, ModifyDivider001, TestSize.Level1)
     menuItemPattern->ModifyDivider();
     ASSERT_TRUE(menuProperty->GetItemDivider().has_value());
 }
+
+/**
+ * @tc.name: InitFocusPadding001
+ * @tc.desc: Verify InitFocusPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, InitFocusPadding001, TestSize.Level1)
+{
+    // mock theme
+    MockContainer::Current()->SetApiTargetVersion(99);
+    MockPipelineContextGetTheme();
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    menuItemPattern->InitFocusPadding();
+    auto padding = menuItemPattern->focusPadding_.ConvertToPx();
+    EXPECT_EQ(padding, selectTheme->GetOptionFocusedBoxPadding().ConvertToPx());
+}
+
+/**
+ * @tc.name: InitFocusEvent001
+ * @tc.desc: Verify HandleFocusEvent().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent001, TestSize.Level1)
+{
+    // mock theme
+    MockContainer::Current()->SetApiTargetVersion(99);
+    MockPipelineContextGetTheme();
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step1. MenuItemPattern OnModifyDone
+     * @tc.expected: Check the param value
+     */
+    itemPattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
+    itemPattern->isOptionPattern_ = false;
+    itemPattern->OnModifyDone();
+
+    EXPECT_EQ(leftRow->GetChildren().size(), 0u);
+    ASSERT_EQ(rightRow->GetChildren().size(), 1u);
+    auto labelNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+    ASSERT_NE(labelNode, nullptr);
+    EXPECT_EQ(labelNode->GetTag(), V2::TEXT_ETS_TAG);
+    auto textLayoutProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_EQ(content.value(), u"label");
+    
+    /**
+     * @tc.steps: step2. MenuItemPattern HandleFocusEvent
+     * @tc.expected: Check the param value
+     */
+    itemPattern->isTextFadeOut_ = true;
+    selectTheme->menuItemFocusedShadowStyle_ = 2.0;
+    itemPattern->InitFocusEvent();
+    itemPattern->HandleFocusEvent();
+    EXPECT_EQ(itemPattern->isFocused_, true);
+    EXPECT_EQ(itemPattern->isFocusBGColorSet_, true);
+    EXPECT_EQ(itemPattern->isFocusShadowSet_, true);
+}
+
+/**
+ * @tc.name: InitFocusEvent002
+ * @tc.desc: Verify HandleBlurEvent().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent002, TestSize.Level1)
+{
+    // mock theme
+    MockContainer::Current()->SetApiTargetVersion(99);
+    MockPipelineContextGetTheme();
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step1. MenuItemPattern OnModifyDone
+     * @tc.expected: Check the param value
+     */
+    itemPattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
+    itemPattern->isOptionPattern_ = false;
+    itemPattern->OnModifyDone();
+
+    EXPECT_EQ(leftRow->GetChildren().size(), 0u);
+    ASSERT_EQ(rightRow->GetChildren().size(), 1u);
+    auto labelNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+    ASSERT_NE(labelNode, nullptr);
+    EXPECT_EQ(labelNode->GetTag(), V2::TEXT_ETS_TAG);
+    auto textLayoutProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_EQ(content.value(), u"label");
+    
+    /**
+     * @tc.steps: step2. MenuItemPattern HandleBlurEvent
+     * @tc.expected: Check the param value
+     */
+    itemPattern->isHovered_ = false;
+    itemPattern->isTextFadeOut_ = true;
+    itemPattern->isFocusBGColorSet_ = true;
+    itemPattern->isFocusShadowSet_ = true;
+    selectTheme->menuItemFocusedShadowStyle_ = 2.0;
+    itemPattern->InitFocusEvent();
+    itemPattern->HandleBlurEvent();
+    EXPECT_EQ(itemPattern->isFocused_, false);
+    EXPECT_EQ(itemPattern->isFocusBGColorSet_, false);
+    EXPECT_EQ(itemPattern->isFocusShadowSet_, false);
+}
+
+/**
+ * @tc.name: InitFocusEvent003
+ * @tc.desc: Verify OptionHandleFocusEvent().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent003, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(99);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->optionApplyFocusedStyle_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return textTheme;
+        } else {
+            return selectTheme;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    itemPattern->SetTextNode(textNode);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+    itemPattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->OnModifyDone();
+    EXPECT_EQ(leftRow->GetChildren().size(), 0u);
+    ASSERT_EQ(rightRow->GetChildren().size(), 1u);
+    auto labelNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+    ASSERT_NE(labelNode, nullptr);
+    auto textLayoutProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_EQ(content.value(), u"label");
+    itemPattern->InitFocusEvent();
+    itemPattern->OptionHandleFocusEvent();
+    itemPattern->SetFocusStyle();
+    ASSERT_NE(itemPattern->selectTheme_, nullptr);
+    EXPECT_EQ(itemPattern->selectTheme_->GetoptionApplyFocusedStyle(), true);
+    EXPECT_EQ(itemPattern->isFocusShadowSet_, true);
+}
+
+/**
+ * @tc.name: InitFocusEvent004
+ * @tc.desc: Verify OptionHandleBlurEvent().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent004, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(99);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->optionApplyFocusedStyle_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return textTheme;
+        } else {
+            return selectTheme;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    itemPattern->SetTextNode(textNode);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+    itemPattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->OnModifyDone();
+    EXPECT_EQ(leftRow->GetChildren().size(), 0u);
+    ASSERT_EQ(rightRow->GetChildren().size(), 1u);
+    auto labelNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+    ASSERT_NE(labelNode, nullptr);
+    auto textLayoutProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_EQ(content.value(), u"label");
+    itemPattern->InitFocusEvent();
+    itemPattern->OptionHandleBlurEvent();
+    itemPattern->ClearFocusStyle();
+    ASSERT_NE(itemPattern->selectTheme_, nullptr);
+    EXPECT_EQ(itemPattern->selectTheme_->GetoptionApplyFocusedStyle(), true);
+    EXPECT_EQ(itemPattern->isFocusShadowSet_, false);
+}
 } // namespace OHOS::Ace::NG

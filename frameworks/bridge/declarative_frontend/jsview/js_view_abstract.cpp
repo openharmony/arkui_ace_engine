@@ -310,6 +310,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
             previewOption.isDefaultDragItemGrayEffectEnabled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
         default:
             break;
     }
@@ -2397,6 +2400,10 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     RefPtr<PixelMap> pixmap = nullptr;
     auto jsBackgroundImage = info[0];
     GetJsMediaBundleInfo(jsBackgroundImage, bundle, module);
+    int32_t repeatIndex = 0;
+    bool syncMode = false;
+    ParseBackgroundImageOption(info, repeatIndex, syncMode);
+    ViewAbstractModel::GetInstance()->SetBackgroundImageSyncMode(syncMode);
     if (jsBackgroundImage->IsString()) {
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
@@ -2413,8 +2420,6 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 #endif
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
     }
-
-    int32_t repeatIndex = 0;
     if (info.Length() == 2) {
         auto jsImageRepeat = info[1];
         if (jsImageRepeat->IsNumber()) {
@@ -2423,6 +2428,23 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
+}
+
+void JSViewAbstract::ParseBackgroundImageOption(const JSCallbackInfo& info, int32_t& repeatIndex, bool& syncMode)
+{
+    if (info.Length() < 2) { // 2 represents the least para num;
+        return;
+    }
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsOption  = JSRef<JSObject>::Cast(info[1]);
+    if (jsOption->GetProperty("syncLoad")->IsBoolean()) {
+        syncMode = jsOption->GetProperty("syncLoad")->ToBoolean();
+    }
+    if (jsOption->GetProperty("repeat")->IsNumber()) {
+        repeatIndex = jsOption->GetProperty("repeat")->ToNumber<int32_t>();
+    }
 }
 
 void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption)
@@ -2813,69 +2835,14 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 
 void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t align)
 {
-    if (align > 8 || align < 0) {
+    if (align > 8 || align < 0) { // align ranges from [0, 8].
         return;
     }
     std::vector<std::pair<double, double>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
         { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
         { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
     SetBgImgPosition(
-                DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
-}
-
-void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
-{
-    if (jsObj->HasProperty("type")) {
-        int32_t value = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("type"), value);
-        keyEvent.action = static_cast<KeyAction>(value);
-    }
-    if (jsObj->HasProperty("keyCode")) {
-        int32_t value = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("keyCode"), value);
-        keyEvent.code = static_cast<KeyCode>(value);
-    }
-    if (jsObj->HasProperty("keyText")) {
-        auto jsValue = jsObj->GetProperty("keyText");
-        if (jsValue->IsString()) {
-            keyEvent.key = jsValue->ToString();
-        }
-    }
-    if (jsObj->HasProperty("sourceType")) {
-        int32_t value = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("sourceType"), value);
-        keyEvent.sourceType = static_cast<SourceType>(value);
-    }
-    if (jsObj->HasProperty("deviceId")) {
-        auto jsValue = jsObj->GetProperty("deviceId");
-        if (jsValue->IsNumber()) {
-            keyEvent.deviceId = static_cast<int64_t>(jsValue->ToNumber<int64_t>());
-        }
-    }
-    if (jsObj->HasProperty("metaKey")) {
-        int32_t value = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("metaKey"), value);
-        keyEvent.metaKey = value;
-    }
-    if (jsObj->HasProperty("unicode")) {
-        int32_t value = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("unicode"), value);
-        keyEvent.unicode = value;
-    }
-    if (jsObj->HasProperty("timestamp")) {
-        auto jsValue = jsObj->GetProperty("timestamp");
-        if (jsValue->IsNumber()) {
-            auto timeStamp = jsValue->ToNumber<int64_t>();
-            std::chrono::nanoseconds nanoseconds(timeStamp);
-            TimeStamp time(nanoseconds);
-            keyEvent.timeStamp = time;
-        }
-    }
-    if (jsObj->HasProperty("intentionCode")) {
-        int32_t value = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("intentionCode"), value);
-        keyEvent.keyIntention = static_cast<KeyIntention>(value);
-    }
+        DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
 }
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
@@ -3019,8 +2986,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
-    } else {
-        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -3035,8 +3000,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
-    } else {
-        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
@@ -4583,6 +4546,13 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
     if (toNumericProp->IsFunction()) {
         auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
         result.SetValue(colorVal->ToNumber<uint32_t>());
+
+        auto resourceIdProp = colorObj->GetProperty("getResourceId");
+        if (resourceIdProp->IsFunction()) {
+            auto resourceIdVal = JSRef<JSFunc>::Cast(resourceIdProp)->Call(colorObj, 0, nullptr);
+            result.SetResourceId(resourceIdVal->ToNumber<uint32_t>());
+        }
+
         return true;
     }
     return false;
@@ -5044,7 +5014,7 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
             }
             count = countJsVal->ToNumber<int>();
             auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
-            ReplaceHolder(pluralStr, params, 2);
+            ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
             result = pluralStr;
         } else {
             return false;
@@ -5821,6 +5791,16 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnDrop(std::move(onDrop));
+
+    bool disableDataPrefetch = false;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
+        auto jsDisableDataPrefetch = interObj->GetProperty("disableDataPrefetch");
+        if (jsDisableDataPrefetch->IsBoolean()) {
+            disableDataPrefetch = jsDisableDataPrefetch->ToBoolean();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetDisableDataPrefetch(disableDataPrefetch);
 }
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
@@ -6545,8 +6525,10 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
         return;
     }
     JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
+    auto eventInfoPtr = jsObject->Unwrap<KeyEventInfo>();
+    CHECK_NULL_VOID(eventInfoPtr);
     KeyEvent keyEvent;
-    ParseJsKeyEvent(jsObject, keyEvent);
+    eventInfoPtr->ParseKeyEvent(keyEvent);
     auto result = focusHub->HandleEvent(keyEvent);
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
@@ -6557,9 +6539,8 @@ void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
-    JSRef<JSVal> arg = args[0];
     if (args[0]->IsFunction()) {
-        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(args[0]));
         WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
             GetMainFrameNode());
         auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
@@ -6602,7 +6583,8 @@ bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, N
         if (CheckLengthMetrics(object)) {
             std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
             std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
-            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart =
+                ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
             std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
             auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
             radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
@@ -6826,6 +6808,14 @@ void JSViewAbstract::JsNotifyDragStartRequest(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsCancelDataLoading(const std::string& key)
+{
+    auto ret = ViewAbstractModel::GetInstance()->CancelDataLoading(key);
+    if (ret != 0) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Invalid input parameter.");
+    }
+}
+
 void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -7021,6 +7011,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityChecked", &JSViewAbstract::JsAccessibilityChecked);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityRole", &JSViewAbstract::JsAccessibilityRole);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityFocus", &JSViewAbstract::JsOnAccessibilityFocus);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityDefaultFocus", &JSViewAbstract::JsAccessibilityDefaultFocus);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityUseSamePage", &JSViewAbstract::JsAccessibilityUseSamePage);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
@@ -7049,6 +7041,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("notifyDragStartRequest", &JSViewAbstract::JsNotifyDragStartRequest);
     JSClass<JSViewAbstract>::StaticMethod(
         "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
+    JSClass<JSViewAbstract>::StaticMethod("cancelDataLoading", &JSViewAbstract::JsCancelDataLoading);
 
     JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
     JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);
@@ -9233,9 +9226,9 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
         isGroup = info[1]->ToBoolean();
     }
     bool arrowKeyStepOut = true;
-    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() &&
-        info[2]->IsBoolean()) {
-        arrowKeyStepOut = info[2]->ToBoolean();
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() && // 2:args index.
+        info[2]->IsBoolean()) { // 2:args index.
+        arrowKeyStepOut = info[2]->ToBoolean(); // 2:args index.
     }
     ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }

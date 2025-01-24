@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/pattern/text/span/span_string.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace::Framework {
@@ -120,12 +121,18 @@ public:
         controllerWeak_ = controller;
     }
 
+    RefPtr<SpanString> GetStyledString() const
+    {
+        return styledString_;
+    }
+
     void CloseSelectionMenu();
 
     void SetStyledString(const JSCallbackInfo& info);
     void GetLayoutManager(const JSCallbackInfo& args);
 private:
     WeakPtr<TextControllerBase> controllerWeak_;
+    RefPtr<SpanString> styledString_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextController);
 };
 

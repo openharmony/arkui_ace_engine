@@ -18,6 +18,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr double HALF = 0.5;
+Dimension MIN_HOTREGION = 36.0_vp;
 } // namespace
 
 bool ArcScrollBar::InBarTouchRegion(const Point& point) const
@@ -25,7 +26,7 @@ bool ArcScrollBar::InBarTouchRegion(const Point& point) const
     if (!NeedScrollBar()) {
         return false;
     }
-    return arcHotZoneRect_.IsInRegion(point);
+    return arcHotZoneRect_.IsInRegion(point, static_cast<float>(MIN_HOTREGION.ConvertToPx()));
 }
 
 bool ArcScrollBar::InBarHoverRegion(const Point& point) const
@@ -33,7 +34,7 @@ bool ArcScrollBar::InBarHoverRegion(const Point& point) const
     if (!NeedScrollBar()) {
         return false;
     }
-    return arcHoverRegion_.IsInRegion(point);
+    return arcHoverRegion_.IsInRegion(point, static_cast<float>(MIN_HOTREGION.ConvertToPx()));
 }
 
 bool ArcScrollBar::InBarRectRegion(const Point& point) const
@@ -41,7 +42,7 @@ bool ArcScrollBar::InBarRectRegion(const Point& point) const
     if (!NeedScrollBar()) {
         return false;
     }
-    return arcAarRect_.IsInRegion(point);
+    return arcAarRect_.IsInRegion(point, static_cast<float>(MIN_HOTREGION.ConvertToPx()));
 }
 
 void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size)
@@ -122,11 +123,11 @@ void ArcScrollBar::SetRoundTrickRegion(
         TAG_LOGE(AceLogTag::ACE_SCROLL_BAR, "estimatedHeight:%{public}1f", estimatedHeight);
         return;
     } else {
-        activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary();
+        activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary() * HALF;
     }
     auto minHeight = GetMinAngle() * barRegionSize / GetNormaMaxOffsetAngle();
     if (!NearZero(GetOutBoundary())) {
-        activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary()),
+        activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary() * HALF),
             NormalizeToPx(GetMinDynamicHeight()));
     } else {
         activeSize = std::max(activeSize, minHeight);

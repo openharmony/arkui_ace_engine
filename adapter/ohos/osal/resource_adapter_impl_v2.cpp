@@ -893,6 +893,23 @@ bool ResourceAdapterImplV2::CloseRawFileDescription(const std::string &rawfileNa
     return true;
 }
 
+bool ResourceAdapterImplV2::GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    OHOS::Global::Resource::ResourceManager::RawFileDescriptor descriptor;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto state = manager->GetRawFdNdkFromHap(rawfileName, descriptor);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get raw fd(no cache) error, rawFileName:%{public}s, error:%{public}u",
+            rawfileName.c_str(), state);
+        return false;
+    }
+    rawfileDescription.fd = descriptor.fd;
+    rawfileDescription.offset = descriptor.offset;
+    rawfileDescription.length = descriptor.length;
+    return true;
+}
+
 bool ResourceAdapterImplV2::GetMediaById(const int32_t& resId, std::string& mediaPath) const
 {
     auto manager = GetResourceManager();

@@ -509,6 +509,8 @@ HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     GetFocus();
     MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 }
@@ -544,6 +546,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback004, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     GetFocus();
     pattern_->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern_->moveCaretState_.touchDownOffset, Offset(0.0f, 0.0f));
 }
 
 /**
@@ -778,6 +781,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback012, TestSize.Level1)
     accessibilityProperty->actionCutImpl_.operator()();
     accessibilityProperty->actionPasteImpl_.operator()();
     accessibilityProperty->actionClearSelectionImpl_.operator()();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijfghijklmnopqrstuvwxyz");
 }
 
@@ -894,14 +898,16 @@ HWTEST_F(TextFieldModifyTest, MouseEvent002, TestSize.Level1)
 
     MouseInfo mouseInfo;
     mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
-    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
-    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 }
@@ -1373,6 +1379,7 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
     pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
+    EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 26);
 }
 
 /**
@@ -1418,6 +1425,7 @@ HWTEST_F(TextFieldModifyTest, OnColorConfigurationUpdate001, TestSize.Level1)
      * @tc.steps: step2.call OnColorConfigurationUpdate.
      */
     pattern_->OnColorConfigurationUpdate();
+    EXPECT_EQ(pattern_->floatCaretState_.OriginCursorColor, Color(0x4D000000));
 }
 
 /**
@@ -1549,6 +1557,10 @@ HWTEST_F(TextFieldModifyTest, SetBackgroundColor001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetBackgroundColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR, true);
     });
+    auto paintProperty = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(Color(0x00000000)), Color(0xFF000000));
+
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1556,8 +1568,11 @@ HWTEST_F(TextFieldModifyTest, SetBackgroundColor001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetBackgroundColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR, false);
     });
+    auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty2, nullptr);
+    EXPECT_EQ(paintProperty2->GetBackgroundColorValue(Color(0x00000000)), Color(0xFFFF0000));
 }
- 
+
 /**
  * @tc.name: SetPadding001
  * @tc.desc: Test the OnModifyDone.
@@ -1577,6 +1592,10 @@ HWTEST_F(TextFieldModifyTest, SetPadding001, TestSize.Level1)
         padding.bottom = CalcLength(PADDING_FIVE);
         model.SetPadding(padding, edge, true);
     });
+    auto paintProperty = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    auto padding = paintProperty->GetPaddingByUser();
+    EXPECT_EQ(padding->left, CalcLength(0.0f));
  
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
@@ -1591,6 +1610,10 @@ HWTEST_F(TextFieldModifyTest, SetPadding001, TestSize.Level1)
         padding.bottom = CalcLength(PADDING_FIVE);
         model.SetPadding(padding, edge, false);
     });
+    auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty2, nullptr);
+    auto padding2 = paintProperty2->GetPaddingByUser();
+    EXPECT_EQ(padding2->left, CalcLength(5.0f));
 }
  
 /**
@@ -1755,6 +1778,9 @@ HWTEST_F(TextFieldModifyTest, SetPlaceholderFont001, TestSize.Level1)
         font.fontFamilies = families;
         model.SetPlaceholderFont(font);
     });
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_EQ(layoutProperty->GetPlaceholderFontSizeValue(Dimension(0)), Dimension(2));
 }
  
 /**
@@ -1770,6 +1796,8 @@ HWTEST_F(TextFieldModifyTest, SetShowCounter001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetShowCounter(true);
     });
+    EXPECT_FALSE(pattern_->counterDecorator_);
+
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1777,6 +1805,7 @@ HWTEST_F(TextFieldModifyTest, SetShowCounter001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetShowCounter(false);
     });
+    EXPECT_FALSE(pattern_->counterDecorator_);
 }
  
 /**
@@ -1836,7 +1865,10 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
         caretStyle.caretWidth = STROKE_DASH_1;
         model.SetCaretStyle(frameNode, caretStyle);
     });
- 
+    auto paintProperty = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(Dimension(0.0f)), STROKE_DASH_1);
+
     /**
      * @tc.steps: step2. Initialize text input.
      */
@@ -1845,8 +1877,11 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
         CaretStyle caretStyle;
         model.SetCaretStyle(frameNode, caretStyle);
     });
+    auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty2, nullptr);
+    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(123.0f)), Dimension(0.0f));
 }
- 
+
 /**
  * @tc.name: SetTextFieldText001
  * @tc.desc: Test the OnModifyDone.

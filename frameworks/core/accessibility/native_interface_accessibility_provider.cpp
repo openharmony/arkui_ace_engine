@@ -69,6 +69,50 @@ bool CheckProviderCallback(ArkUI_AccessibilityProviderCallbacks* callbacks)
 
     return result;
 }
+bool CheckProviderCallbackWithInstance(ArkUI_AccessibilityProviderCallbacksWithInstance* callbacks)
+{
+    if (callbacks == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "callbacks is null");
+        return false;
+    }
+
+    if (callbacks->findAccessibilityNodeInfosById == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosById is null");
+        return false;
+    }
+
+    if (callbacks->findAccessibilityNodeInfosByText == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosByText is null");
+        return false;
+    }
+
+    if (callbacks->findFocusedAccessibilityNode == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findFocusedAccessibilityNode is null");
+        return false;
+    }
+
+    if (callbacks->findNextFocusAccessibilityNode == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findNextFocusAccessibilityNode is null");
+        return false;
+    }
+
+    if (callbacks->executeAccessibilityAction == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "executeAccessibilityAction is null");
+        return false;
+    }
+
+    if (callbacks->clearFocusedFocusAccessibilityNode == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "clearFocusedFocusAccessibilityNode is null");
+        return false;
+    }
+
+    if (callbacks->getAccessibilityNodeCursorPosition == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "getAccessibilityNodeCursorPosition is null");
+        return false;
+    }
+
+    return true;
+}
 }
 int32_t ArkUI_AccessibilityProvider::AccessibilityProviderRegisterCallback(
     ArkUI_AccessibilityProviderCallbacks* callbacks)
@@ -81,7 +125,7 @@ int32_t ArkUI_AccessibilityProvider::AccessibilityProviderRegisterCallback(
         return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
     }
 
-    accessibilityProviderCallbacks_ = callbacks;
+    accessibilityProviderCallbacks_ = *callbacks;
     if (registerCallback_) {
         registerCallback_(true);
     }
@@ -89,26 +133,49 @@ int32_t ArkUI_AccessibilityProvider::AccessibilityProviderRegisterCallback(
     return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
+int32_t ArkUI_AccessibilityProvider::AccessibilityProviderRegisterCallbackWithInstance(const char* instanceId,
+    ArkUI_AccessibilityProviderCallbacksWithInstance* callbacks)
+{
+    if (!CheckProviderCallbackWithInstance(callbacks)) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "CheckProviderCallbackWithInstance failed.");
+        if (registerCallback_) {
+            registerCallback_(false);
+        }
+        return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
+    }
+    accessibilityProviderCallbacksWithInstance_ = *callbacks;
+    if (registerCallback_) {
+        registerCallback_(true);
+    }
+    instanceId_ = instanceId;
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "AccessibilityProviderRegisterCallbackWithInstance success");
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
+}
+
 int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosById(
     const int64_t elementId, const int32_t mode, const int32_t requestId,
     std::vector<ArkUI_AccessibilityElementInfo>& infos)
 {
-    if (!accessibilityProviderCallbacks_ ||
-        !accessibilityProviderCallbacks_->findAccessibilityNodeInfosById) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosById is null");
-        return NOT_REGISTERED;
-    }
-
     ArkUI_AccessibilityElementInfoList* accessibilityElementInfoList
         = new (std::nothrow) ArkUI_AccessibilityElementInfoList();
     if (accessibilityElementInfoList == nullptr) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "info list is null");
         return NOT_REGISTERED;
     }
+    int32_t ret = 0;
+    if (accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosById) {
+        ret = accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosById(instanceId_.c_str(),
+            elementId, static_cast<ArkUI_AccessibilitySearchMode>(mode),
+            requestId, accessibilityElementInfoList);
+    } else if (accessibilityProviderCallbacks_.findAccessibilityNodeInfosById) {
+        ret = accessibilityProviderCallbacks_.findAccessibilityNodeInfosById(
+            elementId, static_cast<ArkUI_AccessibilitySearchMode>(mode),
+            requestId, accessibilityElementInfoList);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosById is null");
+        return NOT_REGISTERED;
+    }
 
-    int32_t ret = accessibilityProviderCallbacks_->findAccessibilityNodeInfosById(
-        elementId, static_cast<ArkUI_AccessibilitySearchMode>(mode),
-        requestId, accessibilityElementInfoList);
     if (!accessibilityElementInfoList->CopyAccessibilityElementInfo(infos)) {
         ret = COPY_FAILED;
     }
@@ -122,21 +189,24 @@ int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosByText(
     const int64_t elementId, std::string text, const int32_t requestId,
     std::vector<ArkUI_AccessibilityElementInfo>& infos)
 {
-    if (!accessibilityProviderCallbacks_ ||
-        !accessibilityProviderCallbacks_->findAccessibilityNodeInfosByText) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosByText is null");
-        return NOT_REGISTERED;
-    }
-
     ArkUI_AccessibilityElementInfoList* accessibilityElementInfoList
         = new (std::nothrow) ArkUI_AccessibilityElementInfoList();
     if (accessibilityElementInfoList == nullptr) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "info list is null");
         return NOT_REGISTERED;
     }
+    int32_t ret = 0;
+    if (accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosByText) {
+        ret = accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosByText(instanceId_.c_str(),
+            elementId, text.c_str(), requestId, accessibilityElementInfoList);
+    } else if (accessibilityProviderCallbacks_.findAccessibilityNodeInfosByText) {
+        ret = accessibilityProviderCallbacks_.findAccessibilityNodeInfosByText(
+            elementId, text.c_str(), requestId, accessibilityElementInfoList);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosByText is null");
+        return NOT_REGISTERED;
+    }
 
-    int32_t ret = accessibilityProviderCallbacks_->findAccessibilityNodeInfosByText(
-        elementId, text.c_str(), requestId, accessibilityElementInfoList);
     if (!accessibilityElementInfoList->CopyAccessibilityElementInfo(infos)) {
         ret = COPY_FAILED;
     }
@@ -150,70 +220,78 @@ int32_t ArkUI_AccessibilityProvider::FindFocusedAccessibilityNode(
     const int64_t elementId, int32_t focusType, const int32_t requestId,
     ArkUI_AccessibilityElementInfo& elementInfo)
 {
-    if (!accessibilityProviderCallbacks_ ||
-        !accessibilityProviderCallbacks_->findFocusedAccessibilityNode) {
+    if (accessibilityProviderCallbacksWithInstance_.findFocusedAccessibilityNode) {
+        return accessibilityProviderCallbacksWithInstance_.findFocusedAccessibilityNode(instanceId_.c_str(),
+            elementId, static_cast<ArkUI_AccessibilityFocusType>(focusType), requestId, &elementInfo);
+    } else if (accessibilityProviderCallbacks_.findFocusedAccessibilityNode) {
+        return accessibilityProviderCallbacks_.findFocusedAccessibilityNode(elementId,
+            static_cast<ArkUI_AccessibilityFocusType>(focusType), requestId, &elementInfo);
+    } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findFocusedAccessibilityNode is null");
         return NOT_REGISTERED;
     }
-
-    return accessibilityProviderCallbacks_->findFocusedAccessibilityNode(elementId,
-        static_cast<ArkUI_AccessibilityFocusType>(focusType), requestId, &elementInfo);
 }
 
 int32_t ArkUI_AccessibilityProvider::FindNextFocusAccessibilityNode(
     const int64_t elementId, int32_t direction, const int32_t requestId,
     ArkUI_AccessibilityElementInfo& elementInfo)
 {
-    if (!accessibilityProviderCallbacks_ ||
-        !accessibilityProviderCallbacks_->findNextFocusAccessibilityNode) {
+    if (accessibilityProviderCallbacksWithInstance_.findNextFocusAccessibilityNode) {
+        return accessibilityProviderCallbacksWithInstance_.findNextFocusAccessibilityNode(instanceId_.c_str(),
+            elementId, static_cast<ArkUI_AccessibilityFocusMoveDirection>(direction), requestId, &elementInfo);
+    } else if (accessibilityProviderCallbacks_.findNextFocusAccessibilityNode) {
+        return accessibilityProviderCallbacks_.findNextFocusAccessibilityNode(elementId,
+            static_cast<ArkUI_AccessibilityFocusMoveDirection>(direction), requestId, &elementInfo);
+    } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findNextFocusAccessibilityNode is null");
         return NOT_REGISTERED;
     }
-
-    return accessibilityProviderCallbacks_->findNextFocusAccessibilityNode(elementId,
-        static_cast<ArkUI_AccessibilityFocusMoveDirection>(direction), requestId, &elementInfo);
 }
 
 int32_t ArkUI_AccessibilityProvider::ExecuteAccessibilityAction(
     const int64_t elementId, int32_t action, const int32_t requestId,
     const std::map<std::string, std::string>& actionArguments)
 {
-    if (!accessibilityProviderCallbacks_ ||
-        !accessibilityProviderCallbacks_->executeAccessibilityAction) {
+    if (accessibilityProviderCallbacksWithInstance_.executeAccessibilityAction) {
+        return accessibilityProviderCallbacksWithInstance_.executeAccessibilityAction(instanceId_.c_str(), elementId,
+            static_cast<ArkUI_Accessibility_ActionType>(action),
+            new ArkUI_AccessibilityActionArguments(actionArguments),
+            requestId);
+    } else if (accessibilityProviderCallbacks_.executeAccessibilityAction) {
+        return accessibilityProviderCallbacks_.executeAccessibilityAction(
+            elementId, static_cast<ArkUI_Accessibility_ActionType>(action),
+            new ArkUI_AccessibilityActionArguments(actionArguments), requestId);
+    } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "executeAccessibilityAction is null");
         return NOT_REGISTERED;
     }
-
-    return accessibilityProviderCallbacks_->executeAccessibilityAction(
-        elementId,
-        static_cast<ArkUI_Accessibility_ActionType>(action),
-        new ArkUI_AccessibilityActionArguments(actionArguments),
-        requestId);
-    return NOT_REGISTERED;
 }
 
 int32_t ArkUI_AccessibilityProvider::ClearFocusedAccessibilityNode()
 {
-    if (!accessibilityProviderCallbacks_ ||
-        !accessibilityProviderCallbacks_->clearFocusedFocusAccessibilityNode) {
+    if (accessibilityProviderCallbacksWithInstance_.clearFocusedFocusAccessibilityNode) {
+        return accessibilityProviderCallbacksWithInstance_.clearFocusedFocusAccessibilityNode(instanceId_.c_str());
+    } else if (accessibilityProviderCallbacks_.clearFocusedFocusAccessibilityNode) {
+        return accessibilityProviderCallbacks_.clearFocusedFocusAccessibilityNode();
+    } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "clearFocusedFocusAccessibilityNode is null");
         return NOT_REGISTERED;
     }
-
-    return accessibilityProviderCallbacks_->clearFocusedFocusAccessibilityNode();
 }
 
 int32_t ArkUI_AccessibilityProvider::GetAccessibilityNodeCursorPosition(
     const int64_t elementId, const int32_t requestId, int32_t &cursorPosition)
 {
-    if (!accessibilityProviderCallbacks_ ||
-        !accessibilityProviderCallbacks_->getAccessibilityNodeCursorPosition) {
+    if (accessibilityProviderCallbacksWithInstance_.getAccessibilityNodeCursorPosition) {
+        return accessibilityProviderCallbacksWithInstance_.getAccessibilityNodeCursorPosition(instanceId_.c_str(),
+            elementId, requestId, &cursorPosition);
+    } else if (accessibilityProviderCallbacks_.getAccessibilityNodeCursorPosition) {
+        return accessibilityProviderCallbacks_.getAccessibilityNodeCursorPosition(
+            elementId, requestId, &cursorPosition);
+    } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "getAccessibilityNodeCursorPosition is null");
         return NOT_REGISTERED;
     }
-
-    return accessibilityProviderCallbacks_->getAccessibilityNodeCursorPosition(
-        elementId, requestId, &cursorPosition);
 }
 
 int32_t ArkUI_AccessibilityProvider::SendAccessibilityAsyncEvent(
@@ -249,7 +327,8 @@ void ArkUI_AccessibilityProvider::SetInnerAccessibilityProvider(
 
 bool ArkUI_AccessibilityProvider::IsRegister()
 {
-    return accessibilityProviderCallbacks_ != nullptr;
+    return accessibilityProviderCallbacks_.findAccessibilityNodeInfosById != nullptr ||
+        accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosById != nullptr;
 }
 
 void ArkUI_AccessibilityProvider::SetRegisterCallback(RegisterCallback callback)

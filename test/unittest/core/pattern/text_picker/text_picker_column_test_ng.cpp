@@ -86,6 +86,20 @@ const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
 const std::vector<std::string> DEFAULT_VALUE = { "1", "2", "3" };
 const std::vector<std::string> CUSTOM_VALUE = { "appCustomFont" };
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TextPickerColumnTestNg : public testing::Test {
@@ -193,16 +207,10 @@ void TextPickerColumnTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1771,7 +1779,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest008, TestSize.Level1
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->CalcAlgorithmOffset(DISTANCE);
+    textPickerColumnPattern->CalcAlgorithmOffset(ScrollDirection::UP, DISTANCE);
     EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 5);
 }
 
@@ -1889,7 +1897,6 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest013, TestSize.Level1
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern->SetOptions(range);
     textPickerColumnPattern->SetCurrentIndex(SELECTED_INDEX_2);
-    textPickerColumnPattern->SetScrollDirection(true);
     TextPickerOptionProperty prop;
     prop.height = 4.0f;
     prop.fontheight = 3.0f;

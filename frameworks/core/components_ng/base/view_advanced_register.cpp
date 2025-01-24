@@ -17,14 +17,14 @@
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 
 namespace OHOS::Ace::NG {
-thread_local ViewAdvancedRegister* ViewAdvancedRegister::instance_ = nullptr;
 
 ViewAdvancedRegister* ViewAdvancedRegister::GetInstance()
 {
-    if (ViewAdvancedRegister::instance_ == nullptr) {
-        ViewAdvancedRegister::instance_ = new ViewAdvancedRegister();
+    static thread_local ViewAdvancedRegister* instance;
+    if (instance == nullptr) {
+        instance = new ViewAdvancedRegister();
     }
-    return ViewAdvancedRegister::instance_;
+    return instance;
 }
 
 RefPtr<PagePattern> ViewAdvancedRegister::CreatePagePattern(const RefPtr<PageInfo>& pageInfo)

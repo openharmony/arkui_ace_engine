@@ -103,6 +103,7 @@ export const e1 = {
 };
 const f1 = () => {
 };
+const POPUP_DEFAULT_MAXWIDTH = 400;
 export function Popup(options, parent = null) {
     const w1 = options;
     {
@@ -522,14 +523,16 @@ export class g1 extends ViewPU {
             return u1 = 400;
         }
         if (this.showClose || this.showClose === void (0)) {
-            if (px2vp(v1.width) > 400) {
-                u1 = 400;
-            }
-            else {
+            if (this.messageMaxWidth !== undefined) {
+                if (this.maxWidth > px2vp(v1.width)) {
+                    u1 = px2vp(v1.width);
+                } else {
+                    u1 = this.maxWidth;
+                }
+            } else {
                 if (v1.width != 0) {
                     u1 = px2vp(v1.width);
-                }
-                else {
+                } else {
                     u1 = -1;
                 }
             }
@@ -588,13 +591,20 @@ export class g1 extends ViewPU {
         return this.theme.button.fontWeight;
     }
     getWindowsPadding() {
+        let top = this.theme.l1.padding.top;
+        let bottom = LengthMetrics.vp(this.theme.l1.padding.bottom.value - (this.theme.button.h1.bottom.value / 2));
+        let start = LengthMetrics.vp(this.theme.l1.padding.start.value - (this.theme.button.margin.end.value / 2));
+        let end = this.theme.l1.padding.end;
+        let resolvedMaxWidth = this.toVp(this.maxWidth);
+        if (resolvedMaxWidth === 0) {
+            start = LengthMetrics.vp(0);
+            end = LengthMetrics.vp(0);
+        }
         return {
-            top: this.theme.l1.padding.top,
-            bottom: LengthMetrics.vp(this.theme.l1.padding.bottom.value -
-                (this.theme.button.h1.bottom.value / 2)),
-            start: LengthMetrics.vp(this.theme.l1.padding.start.value -
-                (this.theme.button.margin.end.value / 2)),
-            end: this.theme.l1.padding.end
+            top: top,
+            bottom: bottom,
+            start: start,
+            end: end
         };
     }
     onWillApplyTheme(theme) {
@@ -660,7 +670,7 @@ export class g1 extends ViewPU {
             }
         }
         catch (s18) {
-            return CounterResource.COUNTER_LIST_PADDING;
+            return POPUP_DEFAULT_MAXWIDTH;
         }
     }
     toVp(value) {
@@ -729,6 +739,8 @@ export class g1 extends ViewPU {
         if (this.maxWidth !== undefined) {
             if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
                 f1 = px2vp(this.maxWidth);
+            } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
+                f1 = POPUP_DEFAULT_MAXWIDTH;
             } else {
                 f1 = this.toVp(this.maxWidth);
             }
@@ -752,6 +764,7 @@ export class g1 extends ViewPU {
             o1 = px2vp(q1.height) - 40 - 40;
         }
         p1 = { maxWidth: n1, maxHeight: o1 };
+        this.messageMaxWidth = n1;
         this.messageMaxWeight = this.getMessageMaxWeight();
         return p1;
     }
@@ -761,6 +774,7 @@ export class g1 extends ViewPU {
             Row.direction(this.popupDirection);
             Row.alignItems(VerticalAlign.Top);
             Row.padding(this.getWindowsPadding());
+            Row.constraintSize(ObservedObject.GetRawObject(this.applySizeOptions));
             Row.constraintSize(ObservedObject.GetRawObject(this.getApplyMaxSize()));
             Row.onAreaChange((m1, rect) => {
                 this.applyHeight = rect.height;

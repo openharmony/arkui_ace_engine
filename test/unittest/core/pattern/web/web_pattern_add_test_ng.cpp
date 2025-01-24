@@ -213,6 +213,10 @@ public:
     {
         return false;
     }
+    uint32_t WritePixels(const WritePixelsOptions& opts) override
+    {
+        return 0;
+    }
 };
 
 class NWebDragDataDummy : public NWeb::NWebDragData {

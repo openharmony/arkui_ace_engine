@@ -195,7 +195,7 @@ public:
     {
         return dotResourceId_;
     }
-    
+
     const Color& GetFocusLineColor() const
     {
         return focusLineColor_;
@@ -224,6 +224,16 @@ public:
     const Color& GetFocusedBgUnchecked() const
     {
         return focusedBgUnchecked_;
+    }
+
+    const Dimension& GetHotZoneHorizontalSize() const
+    {
+        return hotZoneHorizontalSize_;
+    }
+
+    const Dimension& GetHotZoneVerticalSize() const
+    {
+        return hotZoneVerticalSize_;
     }
 
 protected:
@@ -271,6 +281,8 @@ protected:
     const float ratio_ = 1.8f;
     InternalResource::ResourceId tickResourceId_ = InternalResource::ResourceId::RADIO_TICK_SVG;
     InternalResource::ResourceId dotResourceId_ = InternalResource::ResourceId::RADIO_DOT_SVG;
+    Dimension hotZoneHorizontalSize_;
+    Dimension hotZoneVerticalSize_;
 };
 
 class CheckboxTheme : public CheckableTheme {
@@ -297,7 +309,7 @@ public:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
 
         void SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
-        
+
         void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
     };
 
@@ -326,12 +338,18 @@ public:
         return colorAnimationDuration_;
     }
 
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
 private:
     Dimension borderRadius_;
     Dimension whiteBorderRadius_;
     Dimension checkStroke_;
     Dimension hoverPaddingSize_;
     double colorAnimationDuration_ = 0.0;
+    bool showCircleDial_ = false;
 };
 
 class SwitchTheme : public CheckableTheme {

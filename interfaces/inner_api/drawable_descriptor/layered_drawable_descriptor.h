@@ -19,32 +19,28 @@
 
 namespace OHOS::Ace::Napi {
 using OptionalPixelMap = std::optional<std::shared_ptr<Media::PixelMap>>;
+struct LayeredDrawableParams {
+    std::unique_ptr<uint8_t[]> jsonBuf;
+    size_t len = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
+    std::string path;
+    uint32_t iconType = 0;
+    uint32_t density = 0;
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> foregroundInfo;
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> backgroundInfo;
+};
 class ACE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
 public:
     LayeredDrawableDescriptor() = default;
-    LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
-        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
-        : jsonBuf_(std::move(jsonBuf)), len_(len)
+
+    explicit LayeredDrawableDescriptor(LayeredDrawableParams&& params)
+        : jsonBuf_(std::move(params.jsonBuf)), len_(params.len), maskPath_(std::move(params.path)),
+          iconType_(params.iconType), density_(params.density)
     {
-        InitialResource(resourceMgr);
-        jsonBuf_.reset();
-    };
-    LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
-        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
-        uint32_t density)
-        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density)
-    {
-        InitialResource(resourceMgr);
-        jsonBuf_.reset();
-    };
-    LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
-        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
-        std::pair<std::unique_ptr<uint8_t[]>, size_t>& foregroundInfo,
-        std::pair<std::unique_ptr<uint8_t[]>, size_t>& backgroundInfo)
-        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType)
-    {
-        InitLayeredParam(foregroundInfo, backgroundInfo);
-        InitialResource(resourceMgr);
+        if (params.foregroundInfo.first && params.backgroundInfo.first) {
+            InitLayeredParam(params.foregroundInfo, params.backgroundInfo);
+        }
+        InitialResource(params.resourceMgr);
         jsonBuf_.reset();
     };
 

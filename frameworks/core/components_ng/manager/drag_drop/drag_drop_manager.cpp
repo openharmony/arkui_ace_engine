@@ -88,7 +88,7 @@ void DragDropManager::SetDragMoveLastPoint(Point point) noexcept
 
 void DragDropManager::SetDelayDragCallBack(const std::function<void()>& cb) noexcept
 {
-    asyncDragCallback_ = cb;
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(cb);
 }
 
 void DragDropManager::ExecuteDeadlineTimer()
@@ -101,7 +101,9 @@ void DragDropManager::ExecuteDeadlineTimer()
         [weakManager = WeakClaim(this)]() {
             auto dragDropManager = weakManager.Upgrade();
             CHECK_NULL_VOID(dragDropManager);
-            dragDropManager->asyncDragCallback_();
+            if (DragDropGlobalController::GetInstance().GetAsyncDragCallback()) {
+                DragDropGlobalController::GetInstance().GetAsyncDragCallback()();
+            }
             dragDropManager->RemoveDeadlineTimer();
         },
         TaskExecutor::TaskType::UI, TASK_DELAY_TIME, "ArkUIDragDeadlineTimer");
@@ -109,8 +111,8 @@ void DragDropManager::ExecuteDeadlineTimer()
 
 void DragDropManager::RemoveDeadlineTimer()
 {
-    asyncDragCallback_ = nullptr;
-    dragStartRequestStatus_ = DragStartRequestStatus::READY;
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(nullptr);
+    DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::READY);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -122,15 +124,15 @@ void DragDropManager::HandleSyncOnDragStart(DragStartRequestStatus dragStartRequ
 {
     if (dragStartRequestStatus == DragStartRequestStatus::WAITING) {
         ExecuteDeadlineTimer();
-        dragStartRequestStatus_ = dragStartRequestStatus;
+        DragDropGlobalController::GetInstance().SetDragStartRequestStatus(dragStartRequestStatus);
     }
-    if (dragStartRequestStatus == DragStartRequestStatus::READY && asyncDragCallback_) {
-        dragStartRequestStatus_ = dragStartRequestStatus;
-        asyncDragCallback_();
+    if (dragStartRequestStatus == DragStartRequestStatus::READY &&
+        DragDropGlobalController::GetInstance().GetAsyncDragCallback()) {
+        DragDropGlobalController::GetInstance().SetDragStartRequestStatus(dragStartRequestStatus);
+        DragDropGlobalController::GetInstance().GetAsyncDragCallback()();
         RemoveDeadlineTimer();
     }
 }
-
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowItemDragOverlay(
     const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub)
@@ -698,6 +700,13 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "TransDragWindowToDragFwk is %{public}d", isDragFwkShow_);
     ACE_SCOPED_TRACE("drag: set drag window visible by transfer");
+    if (draggedFrameNode_) {
+        auto gestureHub = draggedFrameNode_->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto dragEventActuator = gestureHub->GetDragEventActuator();
+        CHECK_NULL_VOID(dragEventActuator);
+        dragEventActuator->NotifyTransDragWindowToFwk();
+    }
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     isDragFwkShow_ = true;
@@ -723,6 +732,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
     SetIsWindowConsumed(false);
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(Point(-1, -1));
+    NotifyPullEventListener(pointerEvent);
     if (preTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Leave the current window, windowId is %{public}d,"
             " pointerEventId is %{public}d. PreTargetFrameNode is %{public}s, depth is %{public}d.",
@@ -800,6 +810,7 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     if (ReachMoveLimit(pointerEvent, point)) {
         return;
     }
+    NotifyPullEventListener(pointerEvent);
     preMovePoint_ = point;
     preTimeStamp_ = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
@@ -933,9 +944,15 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     RequestDragSummaryInfoAndPrivilege();
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
-    if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
-        auto unifiedData = RequestUDMFDataWithUDKey(udKey);
-        DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
+    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->GetDisableDataPrefetch()) {
+        if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
+            auto unifiedData = RequestUDMFDataWithUDKey(udKey);
+            DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
+        }
+    } else {
+        DoDropAction(dragFrameNode, pointerEvent, nullptr, udKey);
     }
 }
 
@@ -1973,7 +1990,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     }
     CHECK_NULL_VOID(overlayManager);
     CHECK_NULL_VOID(gestureHub);
-    bool isDragStartPending = HasDelayDragCallBack();
+    bool isDragStartPending = DragDropGlobalController::GetInstance().GetAsyncDragCallback() != nullptr;
     if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_
         && !isDragStartPending)) {
@@ -2412,6 +2429,32 @@ void DragDropManager::RegisterDragStatusListener(int32_t nodeId, const WeakPtr<F
     }
 }
 
+void DragDropManager::RegisterPullEventListener(
+    int32_t uniqueIdentify, std::function<void(const DragPointerEvent&)> callback)
+{
+    pullEventListener_[uniqueIdentify] = callback;
+}
+
+void DragDropManager::UnRegisterPullEventListener(int32_t uniqueIdentify)
+{
+    auto it = pullEventListener_.find(uniqueIdentify);
+    if (it != pullEventListener_.end()) {
+        pullEventListener_.erase(it);
+    }
+}
+
+void DragDropManager::NotifyPullEventListener(const DragPointerEvent& pointerEvent)
+{
+    if (pullEventListener_.empty()) {
+        return;
+    }
+    for (const auto& pair : pullEventListener_) {
+        if (pair.second) {
+            pair.second(pointerEvent);
+        }
+    }
+}
+
 bool DragDropManager::IsDraggingPressed(int32_t currentPointerId) const
 {
     if (currentPointerId_ == currentPointerId) {
@@ -2486,5 +2529,10 @@ bool DragDropManager::IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, in
         }
     }
     return false;
+}
+
+int32_t DragDropManager::CancelUDMFDataLoading(const std::string& key)
+{
+    return UdmfClient::GetInstance()->Cancel(key);
 }
 } // namespace OHOS::Ace::NG

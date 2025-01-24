@@ -38,8 +38,38 @@ class stateMgmtDFX {
   }
 
   public static reportStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>): void {
-    let stateInfo: DumpInfo = new DumpInfo();
-    let decoratorInfo: string = target instanceof ViewV2 ? ObserveV2.getObserve().getDecoratorInfo(target, attrName) : '@Trace';
+    const stateInfo: DumpInfo = new DumpInfo();
+    try {
+      stateMgmtDFX.HandlerStateInfoToProfilerV2(target, attrName, changeIdSet, stateInfo);
+      ViewStackProcessor.sendStateInfo(JSON.stringify(stateInfo));
+    } catch (error) {
+      stateMgmtConsole.applicationError(`An ${error.message} occurred when reporting ${target.constructor.name} information`);
+    }
+  }
+
+  private static HandlerStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>, stateInfo: DumpInfo) {
+    const decoratorInfo: string = ObserveV2.getObserve().getDecoratorInfo(target, attrName);
+    let val;
+    let id;
+    if (Array.isArray(target) || target instanceof Set || target instanceof Map || target instanceof Date) {
+      val = target;
+      id = Utils.getArkTsUtil().getHash(target)?.toString();
+    }
+    if ((target instanceof ViewV2) || ObserveV2.IsObservedObjectV2(target)) {
+      val = Reflect.get(target, attrName);
+      id = Utils.getArkTsUtil().getHash(target)?.toString() + attrName;
+    }
+    // handle MakeObsered
+    if (target[RefInfo.MAKE_OBSERVED_PROXY]) {
+      let raw = UIUtilsImpl.instance().getTarget(target[RefInfo.MAKE_OBSERVED_PROXY]);
+      if (Array.isArray(raw) || raw instanceof Set || raw instanceof Map || raw instanceof Date) {
+        val = raw;
+        id = Utils.getArkTsUtil().getHash(target)?.toString();
+      } else {
+        val = Reflect.get(raw, attrName);
+        id = Utils.getArkTsUtil().getHash(raw)?.toString() + attrName;
+      }
+    }
 
     const dependentElementIds: Array<ElementType | string> = Array<ElementType | string>();
     changeIdSet.forEach((id: number) => {
@@ -55,16 +85,10 @@ class stateMgmtDFX {
       ownedTarget = { className: target.constructor.name, id: Utils.getArkTsUtil().getHash(target) };
     }
     stateInfo.observedPropertiesInfo.push({
-      decorator: decoratorInfo, propertyName: attrName,
-      idV2: target instanceof ViewV2 ? target.id__().toString() + attrName : Utils.getArkTsUtil().getHash(target)?.toString() + attrName,
-      value: stateMgmtDFX.getRawValue(Reflect.get(target, attrName)), inRenderingElementId: ObserveV2.getCurrentRecordedId(),
+      decorator: decoratorInfo, propertyName: attrName, idV2: id,
+      value: stateMgmtDFX.getRawValue(val), inRenderingElementId: ObserveV2.getCurrentRecordedId(),
       dependentElementIds: { mode: 'v2', propertyDependencies: dependentElementIds }, owningView: ownedTarget
     });
-    try {
-      ViewStackProcessor.sendStateInfo(JSON.stringify(stateInfo));
-    } catch (error) {
-      stateMgmtConsole.applicationError(`An ${error.message} occurred when reporting ${target.constructor.name} information`);
-    }
   }
 
   /**
@@ -86,7 +110,7 @@ class stateMgmtDFX {
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(view, varName);
-        if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
+        if (prop && typeof prop === 'object' && 'debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
           dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
         }
@@ -159,7 +183,7 @@ class stateMgmtDFX {
     if (arr.length > stateMgmtDFX.DUMP_MAX_LENGTH) {
       dumpArr.splice(stateMgmtDFX.DUMP_MAX_LENGTH - stateMgmtDFX.DUMP_LAST_LENGTH, stateMgmtDFX.DUMP_LAST_LENGTH, '...', ...arr.slice(-stateMgmtDFX.DUMP_LAST_LENGTH));
     }
-    return dumpArr.map(item => typeof item === 'object' ? this.getType(item) : item);
+    return dumpArr.map(item => (item && typeof item === 'object') ? this.getType(item) : item);
   }
 
   private static dumpMap(map: Map<RawValue, RawValue>): Array<DumpBuildInType> {
@@ -176,7 +200,7 @@ class stateMgmtDFX {
         .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
         .forEach((varName: string) => {
           const propertyValue = Reflect.get(value as Object, varName);
-          tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
+          tempObj[varName] = (propertyValue && typeof propertyValue === 'object') ? this.getType(propertyValue) : propertyValue;
         });
       if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
         tempObj['...'] = '...';
@@ -214,7 +238,7 @@ class stateMgmtDFX {
 
   private static getRawValueLength<T>(observedProp: ObservedPropertyAbstractPU<T>): number {
     let wrappedValue: T = observedProp.getUnmonitored();
-    if (typeof wrappedValue !== 'object') {
+    if (!wrappedValue || typeof wrappedValue !== 'object') {
       return -1;
     }
     let rawObject: T = ObservedObject.GetRawObject(wrappedValue);

@@ -751,9 +751,9 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
     //AvoidKeyboard() can get page node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->currentFocus_ = false;
-    eventHub->focusHub_ = focusHub;
+    node->focusHub_ = focusHub;
     node->eventHub_ = eventHub;
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -949,9 +949,9 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
     //AvoidKeyboard() can get overlay node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->currentFocus_ = false;
-    eventHub->focusHub_ = focusHub;
+    node->focusHub_ = focusHub;
     node->eventHub_ = eventHub;
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

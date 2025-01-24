@@ -145,6 +145,7 @@ private:
     float endMainPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float barGridMargin_ = 0.0f;
+    float verticalPadding_ = 0.0f;
     std::map<int32_t, float> visibleItemLength_;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     std::optional<int32_t> jumpIndex_;

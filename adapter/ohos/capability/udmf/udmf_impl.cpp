@@ -28,6 +28,10 @@
 #include "plain_text.h"
 #include "udmf_client.h"
 #include "application_defined_record.h"
+#include "async_task_params.h"
+#include "data_params_conversion.h"
+#include "get_data_params_napi.h"
+#include "udmf_async_client.h"
 #include "unified_data.h"
 #include "unified_data_napi.h"
 #include "unified_types.h"
@@ -150,6 +154,23 @@ int32_t UdmfClientImpl::GetData(const RefPtr<UnifiedData>& unifiedData, const st
     CHECK_NULL_RETURN(udData, UDMF::E_ERROR);
     int ret = client.GetData(queryOption, *udData->GetUnifiedData());
     return ret;
+}
+
+int32_t UdmfClientImpl::StartAsyncDataRetrieval(napi_env env, napi_value napiValue, const std::string& key)
+{
+    UDMF::GetDataParams getDataParams;
+    getDataParams.query.key = key;
+    getDataParams.query.intention = UDMF::Intention::UD_INTENTION_DRAG;
+    auto status = UDMF::GetDataParamsNapi::Convert2NativeValue(env, napiValue, getDataParams, key);
+    if (!status) {
+        return -1;
+    }
+    return static_cast<int32_t>(UDMF::UdmfAsyncClient::GetInstance().StartAsyncDataRetrieval(getDataParams));
+}
+
+int32_t UdmfClientImpl::Cancel(const std::string& key)
+{
+    return static_cast<int32_t>(UDMF::UdmfAsyncClient::GetInstance().Cancel(key));
 }
 
 int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap)

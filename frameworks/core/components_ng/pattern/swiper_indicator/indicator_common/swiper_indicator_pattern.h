@@ -48,10 +48,12 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::DOT) {
-            return MakeRefPtr<DotIndicatorPaintProperty>();
-        } else if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::ARC_DOT) {
+        if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             return MakeRefPtr<CircleDotIndicatorPaintProperty>();
+        }
+
+        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+            return MakeRefPtr<DotIndicatorPaintProperty>();
         } else {
             return MakeRefPtr<PaintProperty>();
         }
@@ -121,7 +123,10 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-        paintMethod->SetTouchBottomPageRate(swiperPattern->CalcCurrentTurnPageRate());
+        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+            swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
+            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate();
+        paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
     }
@@ -239,10 +244,12 @@ public:
     virtual bool GetDotCurrentOffset(OffsetF& offset, float indicatorWidth, float indicatorHeight);
     void OnModifyDone() override;
     void IndicatorOnChange();
+    void InitIndicatorEvent();
     virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
-
+    void ResetDotModifier();
+    
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -270,7 +277,6 @@ private:
     bool CheckIsTouchBottom(const GestureEvent& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleLongPress(GestureEvent& info);
-    void HandleLongDragUpdate(const TouchLocationInfo& info);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
     int32_t GetInitialIndex() const;
@@ -291,7 +297,6 @@ private:
     void RegisterIndicatorChangeEvent();
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
-    void ResetDotModifier();
     void UpdateFocusable() const;
     void CheckDragAndUpdate(
         const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
@@ -329,6 +334,7 @@ protected:
     OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
     OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
     virtual void FireChangeEvent() const {}
+    virtual void FireIndicatorIndexChangeEvent(int32_t index) const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
     virtual void ShowPrevious();
     virtual void ShowNext();
@@ -339,6 +345,10 @@ protected:
     virtual int32_t GetCurrentShownIndex() const;
     virtual int32_t DisplayIndicatorTotalCount() const;
     virtual bool IsLoop() const;
+    virtual int32_t GetTouchCurrentIndex() const;
+    virtual std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
+    virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
+
     RefPtr<SwiperPattern> GetSwiperPattern() const
     {
         auto swiperNode = GetSwiperNode();
@@ -380,6 +390,11 @@ protected:
         }
     }
 
+    void ResetOptinalMouseClickIndex()
+    {
+        mouseClickIndex_ = std::nullopt;
+    }
+
     const TouchBottomType& GetTouchBottomType() const
     {
         return touchBottomType_;
@@ -404,6 +419,17 @@ protected:
     {
         overlongDotIndicatorModifier_ = overlongDotIndicatorModifier;
     }
+
+    const PointF& GetDragStartPoint() const
+    {
+        return dragStartPoint_;
+    }
+
+    void SetDragStartPoint(PointF dragStartPoint)
+    {
+        dragStartPoint_ = dragStartPoint;
+    }
+
     RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();

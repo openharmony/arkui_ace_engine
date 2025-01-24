@@ -110,20 +110,18 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
     ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
-    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
-        return std::nullopt;
-    }
     auto pattern = host->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
     CheckNeedReCreateParagraph(textLayoutProperty, pattern);
     TextStyle textStyle;
-    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
+    bool needRemain = false;
+    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
         auto result = BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
-        ResetNeedReCreateParagraph(textLayoutProperty);
+        ResetNeedReCreateParagraph(textLayoutProperty, needRemain);
         return result;
     }
     if (isSpanStringMode_ && spanStringHasMaxLines_) {
@@ -137,7 +135,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
-    ResetNeedReCreateParagraph(textLayoutProperty);
+    ResetNeedReCreateParagraph(textLayoutProperty, needRemain);
     textStyle_ = textStyle;
     baselineOffset_ = textStyle.GetBaselineOffset().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -201,8 +199,10 @@ void TextLayoutAlgorithm::CheckNeedReCreateParagraph(
         textLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL) == EllipsisMode::MIDDLE;
 }
 
-void TextLayoutAlgorithm::ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty)
+void TextLayoutAlgorithm::ResetNeedReCreateParagraph(
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, bool needRemain)
 {
+    CHECK_NULL_VOID(!needRemain);
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->ResetNeedReCreateParagraph();
 }

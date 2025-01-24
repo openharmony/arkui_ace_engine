@@ -314,6 +314,9 @@ public:
 
     static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
 
+    static void FireNavigationLifecycle(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle,
+        NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
+
     static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
@@ -323,6 +326,16 @@ public:
     static bool CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode);
     static bool CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode);
     static void NotifyPerfMonitorPageMsg(const std::string& pageName);
+
+    bool CheckParentDestinationInactive();
+
+    void FireOnActiveLifecycle(const RefPtr<NavDestinationGroupNode>& curDestination,
+        NavDestinationActiveReason reason);
+
+    void FireOnInactiveLifecycle(const RefPtr<NavDestinationGroupNode>& curDestination,
+        NavDestinationActiveReason reason);
+
+    void FireOnShowLifecycle(const RefPtr<NavDestinationGroupNode>& curDestination);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandard);
@@ -364,8 +377,8 @@ public:
     void AddToDumpManager();
     void RemoveFromDumpManager();
 
-    void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
-        NavDestinationLifecycle lifecycle);
+    void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode, NavDestinationLifecycle lifecycle,
+        NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
     void SetParentCustomNode(const RefPtr<UINode>& parentNode)
@@ -425,6 +438,7 @@ public:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     void FollowStdNavdestinationAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+    bool FindInCurStack(const RefPtr<FrameNode>& navDestinationNode);
 
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
     void RestoreJsStackIfNeeded();
