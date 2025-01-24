@@ -689,7 +689,6 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
         auto isInitScroll = (snapType == SnapType::LIST_SNAP && snapDirection_ == SnapDirection::NONE) ||
                             (snapType == SnapType::SCROLL_SNAP && state_ == AnimationState::IDLE);
         if (isInitScroll) {
-            snapDelta = 0.f;
             snapDirection = Positive(mainDelta) ? SnapDirection::FORWARD : SnapDirection::BACKWARD;
         } else {
             if (snapDirection_ == SnapDirection::BACKWARD && !Positive(mainDelta)) {
@@ -723,8 +722,9 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
     }
     lastAxisVsyncTime_ = currentVsyncTime;
     if (axisAnimator_) {
-        ACE_SCOPED_TRACE("ProcessAxisUpdateEvent onAxis, mainDelta:%f, currentPos_:%f, id:%d, tag:%s", mainDelta,
-            currentPos_, nodeId_, nodeTag_.c_str());
+        ACE_SCOPED_TRACE(
+            "ProcessAxisUpdateEvent onAxis, IsAxisAnimationRunning:%u, mainDelta:%f, currentPos_:%f, id:%d, tag:%s",
+            IsAxisAnimationRunning(), mainDelta, currentPos_, nodeId_, nodeTag_.c_str());
         axisAnimator_->OnAxis(mainDelta, currentPos_);
     }
 }
