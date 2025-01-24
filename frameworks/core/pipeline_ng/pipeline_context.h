@@ -482,6 +482,8 @@ public:
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
 
+    void AddWindowSizeDragEndCallback(std::function<void()>&& callback);
+
     void AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode);
 
     void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
@@ -1084,6 +1086,13 @@ public:
     void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
     void FlushPendingDeleteCustomNode();
 
+    bool IsWindowSizeDragging() const
+    {
+        return isWindowSizeDragging_;
+    }
+
+    void SetIsWindowSizeDragging(bool isDragging);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1226,6 +1235,8 @@ private:
     std::set<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
+    // window size drag end
+    std::list<std::function<void()>> onWindowSizeDragEndCallbacks_;
 
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
@@ -1294,6 +1305,7 @@ private:
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
+    bool isWindowSizeDragging_ = false;
     KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 

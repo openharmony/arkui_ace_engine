@@ -2861,6 +2861,16 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
         context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
+            bool isDragging = reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START;
+            taskExecutor->PostTask(
+                [weak = AceType::WeakClaim(AceType::RawPtr(context)), isDragging]() {
+                    auto pipelineContext = weak.Upgrade();
+                    CHECK_NULL_VOID(pipelineContext);
+                    pipelineContext->SetIsWindowSizeDragging(isDragging);
+                }, TaskExecutor::TaskType::UI, "ArkUIWindowSizeDragStartEnd", PriorityType::VIP);
+        }
     }
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {

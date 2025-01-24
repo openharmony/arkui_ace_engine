@@ -4228,6 +4228,24 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId)
     onWindowSizeChangeCallbacks_.remove(nodeId);
 }
 
+void PipelineContext::AddWindowSizeDragEndCallback(std::function<void()>&& callback)
+{
+    onWindowSizeDragEndCallbacks_.emplace_back(std::move(callback));
+}
+
+void PipelineContext::SetIsWindowSizeDragging(bool isDragging)
+{
+    isWindowSizeDragging_ = isDragging;
+    if (!isDragging) {
+        decltype(onWindowSizeDragEndCallbacks_) dragEndCallbacks(std::move(onWindowSizeDragEndCallbacks_));
+        for (const auto& func : dragEndCallbacks) {
+            if (func) {
+                func();
+            }
+        }
+    }
+}
+
 void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode)
 {
     CHECK_RUN_ON(UI);
