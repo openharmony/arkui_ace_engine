@@ -15,11 +15,11 @@
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/property.h"
 
-#include "interfaces/inner_api/ace_kit/include/ui/view/frame_node.h"
+#include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
-#include "view/frame_node_impl.h"
+#include "ui/view/frame_node.h"
 
 #include "core/components_ng/property/property.h"
 

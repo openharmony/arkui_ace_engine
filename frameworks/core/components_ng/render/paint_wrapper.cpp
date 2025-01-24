@@ -15,8 +15,8 @@
 
 #include "core/components_ng/render/paint_wrapper.h"
 
-#include "interfaces/inner_api/ace_kit/include/ui/view/draw/node_paint_method.h"
 #include "ui/base/utils/utils.h"
+#include "ui/view/draw/node_paint_method.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/node_paint_method.h"
