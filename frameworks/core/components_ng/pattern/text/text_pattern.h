@@ -991,7 +991,8 @@ private:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS,
+                                             .surfaceName = std::nullopt };
     }
 
     SourceTool GetCurrentDragTool() const

@@ -315,10 +315,8 @@ void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField
 {
     CHECK_NULL_VOID(textField);
     auto parent = textField->GetAncestorNodeOfFrame(true);
-    bool findSheet = false;
     while (parent) {
         if (parent->GetHostTag() == V2::SHEET_PAGE_TAG) {
-            findSheet = true;
             break;
         }
         parent = parent->GetAncestorNodeOfFrame(true);

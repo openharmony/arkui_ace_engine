@@ -6992,11 +6992,9 @@ void TextFieldPattern::UpdateScrollBarOffset()
         return;
     }
     auto paddingHeight = GetPaddingTop() + GetPaddingBottom();
-    auto paddingRight = GetPaddingRight();
     auto contentHeight = contentRect_.Height();
     if (inlineFocusState_) {
         paddingHeight = 0.0f;
-        paddingRight = 0.0f;
         contentHeight = GetSingleLineHeight() * GetMaxLines();
     }
     Size size(frameRect_.Width(), contentHeight + paddingHeight);
