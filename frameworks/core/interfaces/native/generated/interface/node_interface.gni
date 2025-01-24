@@ -24,6 +24,7 @@ generated_sources = [
   "implementation/all_events.cpp",
   "implementation/all_modifiers.cpp",
   "implementation/alphabet_indexer_modifier.cpp",
+  "implementation/animation_extender_accessor.cpp",
   "implementation/animator_modifier.cpp",
   "implementation/badge_modifier.cpp",
   "implementation/base_event_accessor.cpp",
