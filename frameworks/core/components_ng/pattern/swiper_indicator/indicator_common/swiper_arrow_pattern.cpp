@@ -45,6 +45,7 @@ void SwiperArrowPattern::OnModifyDone()
         UpdateArrowContent();
     }
     UpdateButtonNode(index_);
+    InitAccessibilityText();
 }
 
 void SwiperArrowPattern::InitOnKeyEvent()
@@ -186,6 +187,47 @@ void SwiperArrowPattern::ButtonClickEvent()
     }
 
     OnClick();
+}
+
+void SwiperArrowPattern::InitAccessibilityText()
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(buttonAccessibilityProperty);
+    auto preAccessibilityText = swiperIndicatorTheme->GetPreAccessibilityText();
+    auto nextAccessibilityText = swiperIndicatorTheme->GetNextAccessibilityText();
+    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+        std::string accessibilityLeftText = "";
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
+            accessibilityLeftText = nextAccessibilityText;
+        } else {
+            accessibilityLeftText = preAccessibilityText;
+        }
+        buttonAccessibilityProperty->SetAccessibilityText(accessibilityLeftText);
+    }
+    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        std::string accessibilityRightText = "";
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
+            accessibilityRightText = preAccessibilityText;
+        } else {
+            accessibilityRightText = nextAccessibilityText;
+        }
+        buttonAccessibilityProperty->SetAccessibilityText(accessibilityRightText);
+    }
 }
 
 void SwiperArrowPattern::InitNavigationArrow()
