@@ -850,6 +850,9 @@ void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
         }
     }
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
+
+    auto isShown = info.Length() > 1 && info[1]->IsBoolean() && info[1]->ToBoolean();
+    SwiperModel::GetInstance()->SetCachedIsShown(isShown);
 }
 
 void JSSwiper::SetCurve(const JSCallbackInfo& info)

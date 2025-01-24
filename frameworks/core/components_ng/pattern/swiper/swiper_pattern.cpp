@@ -178,6 +178,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     } else if (targetIndex_) {
         algo->SetTargetIndex(targetIndex_.value());
     }
+    algo->SetCachedShow(IsCachedShow());
     algo->SetCurrentIndex(currentIndex_);
     algo->SetContentCrossSize(contentCrossSize_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
@@ -3803,6 +3804,13 @@ float SwiperPattern::GetItemSpace() const
         itemSpace = 0.0f;
     }
     return itemSpace;
+}
+
+bool SwiperPattern::IsCachedShow() const
+{
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    return props->GetCachedIsShown().value_or(false);
 }
 
 float SwiperPattern::GetPrevMargin() const
