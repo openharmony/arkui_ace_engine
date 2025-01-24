@@ -51,6 +51,14 @@ using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 
+class MockGestureEventResult : public GestureEventResult {
+    DECLARE_ACE_TYPE(MockGestureEventResult, GestureEventResult);
+
+public:
+    void SetGestureEventResult(bool result) override {}
+    void SetGestureEventResult(bool result, bool stopPropagation) override {}
+};
+
 class WebModifierTest2 : public ModifierTestBase<GENERATED_ArkUIWebModifier,
     &GENERATED_ArkUINodeModifiers::getWebModifier, GENERATED_ARKUI_WEB> {
 };
@@ -527,6 +535,87 @@ HWTEST_F(WebModifierTest2, onAdsBlockedTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->url, url);
     EXPECT_EQ(checkEvent->adsBlocked, adsBlocked);
+}
+
+/*
+ * @tc.name: onNativeEmbedLifecycleChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest2, onNativeEmbedLifecycleChangeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    std::string embedId = "embed_id";
+    std::string surfaceId = "surface_id";
+    NativeEmbedStatus status = NativeEmbedStatus::CREATE;
+    EmbedInfo embedInfo;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        std::optional<std::string> embedId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativeEmbedDataInfo data) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .embedId = Converter::OptConvert<std::string>(data.embedId),
+        };
+    };
+
+    Callback_NativeEmbedDataInfo_Void arkCallback =
+        Converter::ArkValue<Callback_NativeEmbedDataInfo_Void>(checkCallback, contextId);
+
+    modifier_->setOnNativeEmbedLifecycleChange(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnNativeEmbedLifecycleChangeEvent(std::make_shared<NativeEmbedDataInfo>(
+        status, surfaceId, embedId, embedInfo));
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->embedId, embedId);
+}
+
+/*
+ * @tc.name: onNativeEmbedLifecycleChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    std::string embedId = "embed_id";
+    TouchEventInfo touchEventInfo("touchEvent");
+    auto param = AceType::MakeRefPtr<MockGestureEventResult>();
+
+    struct CheckEvent {
+        int32_t resourceId;
+        std::optional<std::string> embedId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo data) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .embedId = Converter::OptConvert<std::string>(data.embedId),
+        };
+    };
+
+    Callback_NativeEmbedTouchInfo_Void arkCallback =
+        Converter::ArkValue<Callback_NativeEmbedTouchInfo_Void>(checkCallback, contextId);
+
+    modifier_->setOnNativeEmbedGestureEvent(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    auto info = std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param);
+    webEventHub->FireOnNativeEmbedGestureEvent(info);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->embedId, embedId);
 }
 
 } // namespace OHOS::Ace::NG
