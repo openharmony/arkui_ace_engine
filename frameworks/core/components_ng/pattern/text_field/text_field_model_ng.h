@@ -68,7 +68,6 @@ public:
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override;
     void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) override;
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override {};
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;

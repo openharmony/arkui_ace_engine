@@ -6335,6 +6335,46 @@ FrameNode* CommonBridge::GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
     return frameNode;
 }
 
+Local<panda::ObjectRef> CommonBridge::CreateChangeValueInfoObj(EcmaVM* vm, const ChangeValueInfo& changeValueInfo)
+{
+    const char* previewTextKeys[] = { "value", "offset" };
+    Local<JSValueRef> previewTextValues[] = {
+        panda::StringRef::NewFromUtf16(vm, changeValueInfo.previewText.value.c_str()),
+        panda::NumberRef::New(vm, changeValueInfo.previewText.offset) };
+    auto previewTextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(previewTextKeys),
+        previewTextKeys, previewTextValues);
+
+    const char* rangeKeys[] = { "start", "end" };
+    Local<JSValueRef> rangeBeforeValues[] = {
+        panda::NumberRef::New(vm, changeValueInfo.rangeBefore.start),
+        panda::NumberRef::New(vm, changeValueInfo.rangeBefore.end) };
+    auto rangeBeforeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(rangeKeys),
+        rangeKeys, rangeBeforeValues);
+    Local<JSValueRef> rangeAfterValues[] = {
+        panda::NumberRef::New(vm, changeValueInfo.rangeAfter.start),
+        panda::NumberRef::New(vm, changeValueInfo.rangeAfter.end) };
+    auto rangeAfterObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(rangeKeys),
+        rangeKeys, rangeAfterValues);
+    Local<JSValueRef> oldPreviewTextValues[] = {
+        panda::StringRef::NewFromUtf16(vm, changeValueInfo.oldPreviewText.value.c_str()),
+        panda::NumberRef::New(vm, changeValueInfo.oldPreviewText.offset) };
+    auto oldPreviewTextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(previewTextKeys),
+        previewTextKeys, oldPreviewTextValues);
+
+    const char* optionsKeys[] = { "rangeBefore", "rangeAfter", "oldContent", "oldPreviewText" };
+    Local<JSValueRef> optionsValues[] = { rangeBeforeObj, rangeAfterObj,
+        panda::StringRef::NewFromUtf16(vm, changeValueInfo.oldContent.c_str()), oldPreviewTextObj };
+    auto optionsObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(optionsKeys),
+        optionsKeys, optionsValues);
+
+    const char* changeValueInfoKeys[] = { "content", "previewText", "options" };
+    Local<JSValueRef> changeValueInfoValues[] = { panda::StringRef::NewFromUtf16(vm, changeValueInfo.value.c_str()),
+        previewTextObj, optionsObj };
+    auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(changeValueInfoKeys),
+        changeValueInfoKeys, changeValueInfoValues);
+    return eventObject;
+}
+
 Local<panda::ObjectRef> CommonBridge::CreateGestureInfo(EcmaVM* vm, const RefPtr<NG::GestureInfo>& gestureInfo)
 {
     if (gestureInfo->GetTag().has_value()) {

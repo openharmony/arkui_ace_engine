@@ -20,6 +20,7 @@
 
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
+#include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/node_data_cache.h"
 
 namespace OHOS::Ace::Recorder {
@@ -116,16 +117,36 @@ EventParamsBuilder& EventParamsBuilder::SetTextArray(const std::vector<std::stri
     return *this;
 }
 
+void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const RefPtr<NG::FrameNode>& host)
+{
+    if (eventType != EventType::CLICK || !builder.GetValue(KEY_TEXT).empty()) {
+        return;
+    }
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_PARENT_TEXT)) {
+        return;
+    }
+    if (!host->GetChildren().empty()) {
+        return;
+    }
+    auto parent = host->GetParentFrameNode();
+    CHECK_NULL_VOID(parent);
+    auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(property);
+    builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
+}
+
 EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& node)
 {
-    if (node) {
-        if (EventRecorder::Get().IsRecordEnable(EventCategory::CATEGORY_RECT)) {
-            auto rect = node->GetTransformRectRelativeToWindow().ToBounds();
-            params_->emplace(Recorder::KEY_NODE_RECT, std::move(rect));
-        }
-        params_->emplace(KEY_ACE_ID, std::to_string(node->GetId()));
-        SetPageUrl(GetPageUrlByNode(node));
+    if (!node) {
+        return *this;
     }
+    if (EventRecorder::Get().IsRecordEnable(EventCategory::CATEGORY_RECT)) {
+        auto rect = node->GetTransformRectRelativeToWindow().ToBounds();
+        params_->emplace(Recorder::KEY_NODE_RECT, std::move(rect));
+    }
+    params_->emplace(KEY_ACE_ID, std::to_string(node->GetId()));
+    SetPageUrl(GetPageUrlByNode(node));
+    FillExtraTextIfNeed(eventType_, *this, node);
     return *this;
 }
 
@@ -356,23 +377,25 @@ bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::st
     return iter->second == identifier;
 }
 
-void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& param)
+void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name)
 {
     pageUrl_ = pageUrl;
     NodeDataCache::Get().OnPageShow(pageUrl);
     Recorder::EventParamsBuilder builder;
     builder.SetType(std::to_string(PageEventType::ROUTER_PAGE))
         .SetPageUrl(pageUrl)
+        .SetExtra(KEY_NAME, name)
         .SetExtra(Recorder::KEY_PAGE_PARAM, param);
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_SHOW), std::move(builder.build()));
 }
 
-void EventRecorder::OnPageHide(const std::string& pageUrl, const int64_t duration)
+void EventRecorder::OnPageHide(const std::string& pageUrl, const int64_t duration, const std::string& name)
 {
     Recorder::EventParamsBuilder builder;
     builder.SetType(std::to_string(PageEventType::ROUTER_PAGE))
         .SetPageUrl(pageUrl)
+        .SetExtra(KEY_NAME, name)
         .SetExtra(KEY_DURATION, std::to_string(duration));
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_HIDE), std::move(builder.build()));

@@ -33,6 +33,7 @@ enum class Direction {
     NEXT,
 };
 using ChangeIndicatorEvent = std::function<void()>;
+using IndicatorIndexChangeEvent = std::function<void(int32_t index)>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeEventWithPreIndex = std::function<void(int32_t preIndex, int32_t currentIndex)>;
@@ -62,6 +63,11 @@ public:
         changeIndicatorEvent_ = std::move(changeEvent);
     }
 
+    void SetIndicatorIndexChangeEvent(IndicatorIndexChangeEvent&& indicatorIndexChangeEvent)
+    {
+        indicatorIndexChangeEvent_ = std::move(indicatorIndexChangeEvent);
+    }
+
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
     {
         changeDoneEvent_ = std::move(changeDoneEvent);
@@ -82,6 +88,11 @@ public:
         gestureSwipeEvent_ = std::move(gestureSwipeEvent);
     }
 
+    void AddOnSlectedEvent(const ChangeEventPtr& changeEvent)
+    {
+        selectedEvents_.emplace_back(changeEvent);
+    }
+
     void FireChangeDoneEvent(bool direction)
     {
         if (changeDoneEvent_) {
@@ -91,6 +102,29 @@ public:
                 direction_ = Direction::PRE;
             }
             changeDoneEvent_();
+        }
+    }
+
+    void AddOnUnselectedEvent(const ChangeEventPtr& changeEvent)
+    {
+        unselectedEvents_.emplace_back(changeEvent);
+    }
+
+    void FireUnselectedEvent(int32_t index)
+    {
+        auto frameNode = GetFrameNode();
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper FireUnselectedEvent id:%{public}d, index:%{public}d",
+            frameNode ? frameNode->GetId() : -1, index);
+        ACE_SCOPED_TRACE("Swiper FireUnselectedEvent, id: %d, index: %d", frameNode ? frameNode->GetId() : -1, index);
+        if (!unselectedEvents_.empty()) {
+            std::for_each(unselectedEvents_.begin(), unselectedEvents_.end(),
+                [index](const ChangeEventPtr& changeEvent) {
+                if (!changeEvent || !(*changeEvent)) {
+                    return;
+                }
+                auto event = *changeEvent;
+                event(index);
+            });
         }
     }
 
@@ -143,6 +177,13 @@ public:
     {
         if (changeIndicatorEvent_) {
             changeIndicatorEvent_();
+        }
+    }
+
+    void FireIndicatorIndexChangeEvent(int32_t index) const
+    {
+        if (indicatorIndexChangeEvent_) {
+            indicatorIndexChangeEvent_(index);
         }
     }
 
@@ -235,6 +276,21 @@ public:
         }
     }
 
+    void FireSelectedEvent(int32_t index)
+    {
+        auto frameNode = GetFrameNode();
+        ACE_SCOPED_TRACE("Swiper FireSelectedEvent, id: %d, index: %d", frameNode ? frameNode->GetId() : -1, index);
+        if (!selectedEvents_.empty()) {
+            std::for_each(selectedEvents_.begin(), selectedEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+                if (!changeEvent || !(*changeEvent)) {
+                    return;
+                }
+                auto event = *changeEvent;
+                event(index);
+            });
+        }
+    }
+
 private:
     void FireJSChangeEvent(int32_t preIndex, int32_t index)
     {
@@ -254,10 +310,13 @@ private:
     }
 
     Direction direction_;
+    std::list<ChangeEventPtr> unselectedEvents_;
     std::list<ChangeEventPtr> changeEvents_;
+    std::list<ChangeEventPtr> selectedEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
+    IndicatorIndexChangeEvent indicatorIndexChangeEvent_;
     std::list<AnimationStartEventPtr> animationStartEvents_;
     std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;

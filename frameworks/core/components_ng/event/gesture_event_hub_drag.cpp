@@ -571,7 +571,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInf
     if (dragInfoData.isNeedCreateTiled) {
         return false;
     }
-    if (IsPixelMapNeedScale() || dragDropManager->HasDelayDragCallBack()) {
+    if (IsPixelMapNeedScale() || DragDropGlobalController::GetInstance().GetAsyncDragCallback() != nullptr) {
         return true;
     }
     CHECK_NULL_RETURN(dragEventActuator_, false);
@@ -605,15 +605,16 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     DragDropInfo dragPreviewInfo;
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
-    auto continueFunc = [weak = WeakClaim(this), dragPreviewInfo, info, event, dragDropInfo, frameNode,
-        pipeline]() {
+    auto continueFunc = [id = Container::CurrentId(), weak = WeakClaim(this), dragPreviewInfo, info, event,
+        dragDropInfo, frameNode, pipeline]() {
+        ContainerScope scope(id);
         auto gestureEventHub = weak.Upgrade();
         CHECK_NULL_VOID(gestureEventHub);
         gestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     };
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsDragStartNeedToBePended() == DragStartRequestStatus::READY) {
+    if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::READY) {
         DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     } else {
         dragDropManager->SetDelayDragCallBack(continueFunc);
@@ -1546,7 +1547,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, textNode, data.badgeNumber, data.previewScale,
         data.dragPreviewOffsetToScreen - subWindowOffset);
     DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
-
+    HideMenu();
     auto subwindowContext = data.imageNode->GetContext();
     if (subwindowContext) {
         subwindowContext->FlushSyncGeometryNodeTasks();
@@ -1554,7 +1555,6 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     }
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
-    HideMenu();
     DragAnimationHelper::ShowBadgeAnimation(textNode);
     DragAnimationHelper::HideDragNodeCopy(overlayManager);
     auto dragDropManager = pipeline->GetDragDropManager();

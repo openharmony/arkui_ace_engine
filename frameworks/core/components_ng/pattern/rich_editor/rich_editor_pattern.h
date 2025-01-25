@@ -640,6 +640,7 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
+    void HandleOnShare();
     void HandleDraggableFlag(bool isTouchSelectArea);
     void SetIsTextDraggable(bool isTextDraggable = true) override;
     bool JudgeContentDraggable();
@@ -1101,6 +1102,17 @@ public:
         return isStopBackPress_;
     }
 
+    void SetKeyboardAppearance(KeyboardAppearance value)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
+        keyboardAppearance_ = value;
+    }
+
+    KeyboardAppearance GetKeyboardAppearance() const
+    {
+        return keyboardAppearance_;
+    }
+
     bool IsDragging() const override
     {
         return status_ == Status::DRAGGING || status_ == Status::FLOATING;
@@ -1421,7 +1433,7 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
-    int32_t CalculateTruncationLength(const std::u16string& insertValue, int32_t index, int32_t allowInsertLength);
+    int32_t CalculateTruncationLength(const std::u16string& insertValue, int32_t start);
     bool ProcessTextTruncationOperation(std::u16string& text, bool calledByImf);
     void ProcessInsertValueMore(const std::u16string& text, OperationRecord record, OperationType operationType,
         RichEditorChangeValue changeValue, PreviewTextRecord preRecord);
@@ -1600,6 +1612,7 @@ private:
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
+    KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
 };
 } // namespace OHOS::Ace::NG
 

@@ -17,7 +17,7 @@
 
 #define private public
 #define protected public
-
+#include "accessibility_system_ability_client.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -25,6 +25,7 @@
 #include "base/log/dump_log.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
+#include "adapter/ohos/entrance/ace_container.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -346,6 +347,62 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager007, TestSize.Level1)
      * @tc.steps: step5. test UnsubscribeStateObserver
      */
     ret = jsAccessibilityManager->UnsubscribeStateObserver(16);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager008
+ * @tc.desc: SendAccessibilitySyncEvent, TransferAccessibilityAsyncEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+
+    /**
+     * @tc.steps: step2. test SendAccessibilitySyncEvent with register true
+     */
+    AccessibilityEvent accessibilityEvent;
+    Accessibility::AccessibilityEventInfo eventInfo;
+    auto ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    if (client) {
+        bool isEnabled = false;
+        client->IsEnabled(isEnabled);
+        EXPECT_EQ(ret, isEnabled);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    
+    /**
+     * @tc.steps: step3. test TransferAccessibilityAsyncEvent with register true
+     */
+    int64_t uiExtensionOffset = 1000;
+    ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
+    if (client) {
+        bool isEnabled = false;
+        client->IsEnabled(isEnabled);
+        EXPECT_EQ(ret, isEnabled);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+
+    /**
+     * @tc.steps: step4. test SendAccessibilitySyncEvent with register false
+     */
+    jsAccessibilityManager->Register(false);
+    ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    EXPECT_EQ(ret, false);
+    /**
+     * @tc.steps: step5. test TransferAccessibilityAsyncEvent with register false
+     */
+    ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
     EXPECT_EQ(ret, false);
 }
 
@@ -726,5 +783,132 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager019, TestSize.Level1)
     EXPECT_EQ(callback0, jsAccessibilityManager->componentSACallbackMap_[elementId0]);
     jsAccessibilityManager->DeregisterAccessibilitySAObserverCallback(elementId0);
     EXPECT_EQ(0, jsAccessibilityManager->componentSACallbackMap_.size());
+}
+/**
+ * @tc.name: UpdateWindowInfo001
+ * @tc.desc: UpdateWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateWindowInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    jsAccessibilityManager->context_ = pipelineContext;
+
+    /**
+     * @tc.steps: step2. construct windowInfo
+     */
+    AccessibilityWindowInfo windowInfo;
+    windowInfo.left = 10;
+    windowInfo.top = 10;
+    windowInfo.scaleX = 1.0f;
+    windowInfo.scaleY = 1.0f;
+
+    /**
+     * @tc.steps: step3. call and test UpdateWindowInfo method
+     */
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
+    EXPECT_EQ(windowInfo.left, 10);
+    EXPECT_EQ(windowInfo.top, 10);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.6f));
+
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
+    EXPECT_EQ(windowInfo.left, 107.0f);
+    EXPECT_EQ(windowInfo.top, 206.0f);
+    EXPECT_EQ(windowInfo.scaleX, 0.7f);
+    EXPECT_EQ(windowInfo.scaleY, 0.6f);
+}
+
+/**
+ * @tc.name: GenerateWindowInfo001
+ * @tc.desc: GenerateWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GenerateWindowInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step3. call and test GenerateWindowInfo method
+     */
+    auto windowInfo = jsAccessibilityManager->GenerateWindowInfo(nullptr, nullptr);
+    EXPECT_EQ(windowInfo.left, 0);
+    EXPECT_EQ(windowInfo.top, 0);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    windowInfo = jsAccessibilityManager->GenerateWindowInfo(frameNode, nullptr);
+    
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    jsAccessibilityManager->context_ = pipelineContext;
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    auto singleHandTransform = container->GetSingleHandTransform();
+    container->SetSingleHandTransform(Platform::SingleHandTransform(0.0f, 0.0f, 1.0f, 1.0f));
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->getParentRectHandler_ = nullptr;
+    jsAccessibilityManager->getParentRectHandlerNew_ = nullptr;
+    windowInfo = jsAccessibilityManager->GenerateWindowInfo(nullptr, context);
+
+    EXPECT_EQ(windowInfo.left, 0);
+    EXPECT_EQ(windowInfo.top, 0);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    /**
+     * @tc.steps: step4. mock SingleHandTransform, and then test GenerateWindowInfo method again
+     */
+    container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.7f));
+
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
+    EXPECT_EQ(windowInfo.left, 100.0f);
+    EXPECT_EQ(windowInfo.top, 200.0f);
+    EXPECT_EQ(windowInfo.scaleX, 0.7f);
+    EXPECT_EQ(windowInfo.scaleY, 0.7f);
+}
+
+/**
+ * @tc.name: SingleHandTransformTest001
+ * @tc.desc: SetSingleHandTransform & GetSingleHandTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SingleHandTransformTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AceContainer
+     */
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetSingleHandTransform & GetSingleHandTransform
+     */
+    container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.6f));
+    auto singleHandTransform = container->GetSingleHandTransform();
+    EXPECT_EQ(singleHandTransform.x_, 100.0f);
+    EXPECT_EQ(singleHandTransform.y_, 200.0f);
+    EXPECT_EQ(singleHandTransform.scaleX_, 0.7f);
+    EXPECT_EQ(singleHandTransform.scaleY_, 0.6f);
 }
 } // namespace OHOS::Ace::NG

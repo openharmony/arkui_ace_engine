@@ -56,6 +56,7 @@ public:
     static void SetOnDidChange(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
+    static void SetOnShare(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
@@ -88,6 +89,7 @@ public:
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
+    static void SetKeyboardAppearance(const JSCallbackInfo& info);
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);

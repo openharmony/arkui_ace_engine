@@ -1273,4 +1273,154 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId)
     searchKey.displayId = displayId;
     return searchKey;
 }
+
+int32_t SubwindowManager::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Show selectOverlay enter.");
+    CHECK_NULL_RETURN(overlayNode, -1);
+    auto containerId = Container::CurrentIdSafelyWithCheck();
+    auto windowType = GetToastWindowType(containerId);
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, -1);
+    auto windowId = container->GetWindowId();
+    // Get the parent window ID before the asynchronous operation
+    auto mainWindowId = container->GetParentMainWindowId(windowId);
+    auto subwindow = GetOrCreateSelectOverlayWindow(containerId, windowType, mainWindowId);
+    if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Get or create SelectOverlay subwindow failed.");
+        return -1;
+    }
+    auto isShowSuccess = subwindow->ShowSelectOverlay(overlayNode);
+    if (!isShowSuccess) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Show selectOverlay subwindow failed.");
+        return -1;
+    }
+    return containerId;
+}
+
+void SubwindowManager::HideSelectOverlay(const int32_t instanceId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Hide selectOverlay subwindow enter.");
+    auto subwindow = GetSelectOverlaySubwindow(instanceId);
+    if (subwindow) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the existed selectOverlay subwindow.");
+        subwindow->HideSubWindowNG();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to hide selectOverlay subwindow, subwindow is not existed.");
+    }
+}
+
+const RefPtr<Subwindow> SubwindowManager::GetSelectOverlaySubwindow(int32_t instanceId)
+{
+    SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
+    std::lock_guard<std::mutex> lock(selectOverlayMutex_);
+    auto result = selectOverlayWindowMap_.find(searchKey);
+    if (result != selectOverlayWindowMap_.end()) {
+        return result->second;
+    }
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in selectOverlayWindowMap_, searchKey is %{public}s.",
+        searchKey.ToString().c_str());
+    return nullptr;
+}
+
+void SubwindowManager::AddSelectOverlaySubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
+{
+    if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add selectOverlay subwindow failed, subwindow is null.");
+        return;
+    }
+
+    SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "Add selectOverlay subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,
+        subwindow->GetSubwindowId());
+    std::lock_guard<std::mutex> lock(selectOverlayMutex_);
+    auto result = selectOverlayWindowMap_.try_emplace(searchKey, subwindow);
+    if (!result.second) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add failed of this instance %{public}d.", instanceId);
+        return;
+    }
+}
+
+RefPtr<Subwindow> SubwindowManager::GetOrCreateSelectOverlayWindow(
+    int32_t containerId, const ToastWindowType& windowType, uint32_t mainWindowId)
+{
+    RefPtr<Subwindow> subwindow = GetSelectOverlaySubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        if (!subwindow) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Create selectOverlay subwindow failed.");
+            return nullptr;
+        }
+        subwindow->SetToastWindowType(windowType);
+        subwindow->SetMainWindowId(mainWindowId);
+        AddSelectOverlaySubwindow(containerId, subwindow);
+    }
+    return subwindow;
+}
+
+void SubwindowManager::SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Set selectOverlay hot areas enter.");
+    auto subwindow = GetSelectOverlaySubwindow(instanceId);
+    if (subwindow) {
+        subwindow->SetHotAreas(rects, nodeId);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to set selectOverlay subwindow hotAreas, subwindow is null.");
+    }
+}
+
+void SubwindowManager::DeleteSelectOverlayHotAreas(int32_t instanceId, int32_t nodeId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Delete selectOverlay subwindow hot areas enter.");
+    auto subwindow = GetSelectOverlaySubwindow(instanceId);
+    if (subwindow) {
+        subwindow->DeleteHotAreas(nodeId);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to delete selectOverlay subwindow hotAreas, subwindow is null.");
+    }
+}
+
+bool SubwindowManager::IsWindowEnableSubWindowMenu(
+    const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+
+    if (instanceId >= MIN_SUBCONTAINER_ID) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow does not support create subwindow menu.");
+        return false;
+    }
+
+    if (container->IsUIExtensionWindow()) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "UIExtensionWindow does not support create subwindow menu.");
+        return false;
+    }
+
+    if (container->IsScenceBoardWindow()) {
+        if (!container->IsSceneBoardEnabled()) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Disabled sceneBoard does not support create subwindow menu.");
+            return false;
+        }
+        // If the callerFrameNode is on the lock screen, the subwinow menu will be obscured by the lock screen.
+        if (Container::IsNodeInKeyGuardWindow(callerFrameNode)) {
+            TAG_LOGW(
+                AceLogTag::ACE_SUB_WINDOW, "The node in the key guard window does not support create subwindow menu.");
+            return false;
+        }
+
+        return true;
+    }
+
+    if (container->IsSubWindow() || container->IsMainWindow() || container->IsDialogWindow()) {
+        return true;
+    }
+
+    if (container->IsSystemWindow()) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "System window does not support create subwindow menu.");
+        return false;
+    }
+
+    return false;
+}
 } // namespace OHOS::Ace

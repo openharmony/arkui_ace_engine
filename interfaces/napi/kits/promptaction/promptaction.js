@@ -89,6 +89,18 @@ const closeCustomDialog = function closeCustomDialog(content) {
     return __prompt__.closeCustomDialog(content);
 };
 
+let LevelMode;
+(function (LevelMode) {
+    LevelMode[LevelMode.OVERLAY = 0] = 'OVERLAY';
+    LevelMode[LevelMode.EMBEDDED = 1] = 'EMBEDDED';
+})(LevelMode || (LevelMode = {}));
+
+let ImmersiveMode;
+(function (ImmersiveMode) {
+    ImmersiveMode[ImmersiveMode.DEFAULT = 0] = 'DEFAULT';
+    ImmersiveMode[ImmersiveMode.EXTEND = 1] = 'EXTEND';
+})(ImmersiveMode || (ImmersiveMode = {}));
+
 export default {
     CommonController,
     DialogController,
@@ -102,5 +114,7 @@ export default {
     updateCustomDialog,
     closeCustomDialog,
     showActionMenu,
-    ToastShowMode: __prompt__.ToastShowMode
+    ToastShowMode: __prompt__.ToastShowMode,
+    LevelMode,
+    ImmersiveMode
 };

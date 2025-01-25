@@ -261,6 +261,7 @@ export struct ArcButton {
   @Local private fontColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
   @Local private isExceed: boolean = false;
   @Local private pathString: string = '';
+  @Local private fontSize: string = ''
   private btnNormalColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
   private btnPressColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
   private btnDisableColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
@@ -275,6 +276,7 @@ export struct ArcButton {
   @Monitor('options.label', 'options.type', 'options.fontSize', 'options.styleMode', 'options.status',
   'options.backgroundColor', 'options.fontColor')
   optionsChange() {
+    this.fontSize = this.cover(this.options.fontSize)
     this.judgeTextWidth()
     this.changeStatus()
   }
@@ -351,12 +353,20 @@ export struct ArcButton {
   private judgeTextWidth() {
     const measureTextWidth = measure.measureText({
       textContent: this.options.label,
-      fontSize: this.cover(this.options.fontSize)
+      fontStyle: this.options.fontStyle,
+      fontFamily: this.options.fontFamily,
+      fontWeight: FontWeight.Medium,
+      maxLines: 1,
+      fontSize: `${Constants.MIN_FONT_SIZE}fp`
     })
     this.isExceed = measureTextWidth > this.getUIContext().vp2px(this.textWidth);
   }
 
   aboutToAppear() {
+    if (arcButtonTheme.BUTTON_HEIGHT === 0) {
+      console.error("arcbutton can't obtain sys float value.")
+      return
+    }
     this.initValues();
     this.dataProcessUtil.initData();
     const pathData = this.dataProcessUtil.calculate();
@@ -412,12 +422,12 @@ export struct ArcButton {
   }
 
   @Builder
-  TextBuilder() {
+  TextBuilderIsExceed() {
     Text(this.options.label)
       .width(this.textWidth)
       .height(this.textHeight)
       .fontColor(this.fontColor.color)
-      .fontSize(this.cover(this.options.fontSize))
+      .fontSize(this.fontSize)
       .maxLines(1)
       .textAlign(TextAlign.Center)
       .fontWeight(FontWeight.Medium)
@@ -425,6 +435,27 @@ export struct ArcButton {
       .fontFamily(this.options.fontFamily)
       .backgroundColor(Color.Transparent)
       .textOverflow({ overflow: TextOverflow.MARQUEE })
+      .margin({
+        start: this.options.fontMargin.start,
+        top: this.isUp ? this.options.fontMargin.bottom : this.options.fontMargin.top,
+        end: this.options.fontMargin.end,
+        bottom: this.options.fontMargin.bottom
+      })
+  }
+
+  @Builder
+  TextBuilderNormal() {
+    Text(this.options.label)
+      .width(this.textWidth)
+      .height(this.textHeight)
+      .textAlign(TextAlign.Center)
+      .fontColor(this.fontColor.color)
+      .maxFontSize(`${Constants.MAX_FONT_SIZE}fp`)
+      .minFontSize(`${Constants.MIN_FONT_SIZE}fp`)
+      .fontWeight(FontWeight.Medium)
+      .fontStyle(this.options.fontStyle)
+      .fontFamily(this.options.fontFamily)
+      .maxLines(1)
       .margin({
         start: this.options.fontMargin.start,
         top: this.isUp ? this.options.fontMargin.bottom : this.options.fontMargin.top,
@@ -469,7 +500,11 @@ export struct ArcButton {
         .backgroundColor(this.btnColor.color)
         .backgroundBlurStyle(this.options.backgroundBlurStyle)
         .shadow(this.getShadow())
-      this.TextBuilder()
+        if (this.isExceed) {
+          this.TextBuilderIsExceed()
+        } else {
+          this.TextBuilderNormal()
+        }
     }
     .enabled(this.options.status !== ArcButtonStatus.DISABLED)
     .opacity((this.options.styleMode === ArcButtonStyleMode.EMPHASIZED_LIGHT &&

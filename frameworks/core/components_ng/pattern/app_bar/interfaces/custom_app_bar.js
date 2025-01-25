@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-"use strict";
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
@@ -25,18 +24,19 @@ const t = '20vp';
 const u = '16vp';
 const a1 = '1px';
 const b1 = '10vp';
-const c1 = '16vp';
+const c1 = '8vp';
 const g1 = '#182431';
 const h1 = '#33000000';
 const t1 = '#99FFFFFF';
-const i1 = "arkui_app_bar_color_configuration";
-const j1 = "arkui_app_bar_menu_safe_area";
-const l1 = "arkui_app_bar_content_safe_area";
-const m1 = "arkui_app_bar_info";
-const n1 = "arkui_app_bar_screen";
-const e2 = "arkui_custom_app_bar_menu_click";
-const f2 = "arkui_custom_app_bar_close_click";
-const g2 = "arkui_custom_app_bar_did_build";
+const i1 = 'arkui_app_bar_color_configuration';
+const j1 = 'arkui_app_bar_menu_safe_area';
+const l1 = 'arkui_app_bar_content_safe_area';
+const m1 = 'arkui_app_bar_info';
+const n1 = 'arkui_app_bar_screen';
+const i2 = 'arkui_app_bg_color';
+const e2 = 'arkui_custom_app_bar_menu_click';
+const f2 = 'arkui_custom_app_bar_close_click';
+const g2 = 'arkui_custom_app_bar_did_build';
 const h2 = 10;
 class o1 {
     constructor(a2, b2) {
@@ -76,6 +76,7 @@ class e1 extends ViewPU {
         this.__menubarBorderColor = new ObservedPropertySimplePU(this.getResourceColor(h1), this, "menubarBorderColor");
         this.__menubarBackColor = new ObservedPropertySimplePU(this.getResourceColor(t1), this, "menubarBackColor");
         this.__dividerBackgroundColor = new ObservedPropertySimplePU(this.getResourceColor(h1), this, "dividerBackgroundColor");
+        this.__contentBgColor = new ObservedPropertySimplePU('#FFFFFFFF', this, "contentBgColor");
         this.__contentMarginTop = new ObservedPropertySimplePU('0vp', this, "contentMarginTop");
         this.__contentMarginLeft = new ObservedPropertySimplePU('0vp', this, "contentMarginLeft");
         this.__contentMarginRight = new ObservedPropertySimplePU('0vp', this, "contentMarginRight");
@@ -107,6 +108,9 @@ class e1 extends ViewPU {
         if (params.dividerBackgroundColor !== undefined) {
             this.dividerBackgroundColor = params.dividerBackgroundColor;
         }
+        if (params.contentBgColor !== undefined) {
+            this.contentBgColor = params.contentBgColor;
+        }
         if (params.contentMarginTop !== undefined) {
             this.contentMarginTop = params.contentMarginTop;
         }
@@ -136,6 +140,7 @@ class e1 extends ViewPU {
         this.__menubarBorderColor.purgeDependencyOnElmtId(rmElmtId);
         this.__menubarBackColor.purgeDependencyOnElmtId(rmElmtId);
         this.__dividerBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__contentBgColor.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginTop.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginLeft.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginRight.purgeDependencyOnElmtId(rmElmtId);
@@ -150,6 +155,7 @@ class e1 extends ViewPU {
         this.__menubarBorderColor.aboutToBeDeleted();
         this.__menubarBackColor.aboutToBeDeleted();
         this.__dividerBackgroundColor.aboutToBeDeleted();
+        this.__contentBgColor.aboutToBeDeleted();
         this.__contentMarginTop.aboutToBeDeleted();
         this.__contentMarginLeft.aboutToBeDeleted();
         this.__contentMarginRight.aboutToBeDeleted();
@@ -199,6 +205,12 @@ class e1 extends ViewPU {
     }
     set dividerBackgroundColor(newValue) {
         this.__dividerBackgroundColor.set(newValue);
+    }
+    get contentBgColor() {
+        return this.__contentBgColor.get();
+    }
+    set contentBgColor(newValue) {
+        this.__contentBgColor.set(newValue);
     }
     get contentMarginTop() {
         return this.__contentMarginTop.get();
@@ -268,6 +280,9 @@ class e1 extends ViewPU {
         }
         else if (eventName === n1) {
         }
+        else if (eventName === i2) {
+            this.contentBgColor = param;
+        }
     }
     onColorConfigurationUpdate(s1) {
         this.isDark = s1;
@@ -276,6 +291,8 @@ class e1 extends ViewPU {
         this.menubarBorderColor = this.getResourceColor(h1);
         this.dividerBackgroundColor = this.getResourceColor(h1);
         this.menubarBackColor = this.getResourceColor(t1);
+    }
+    setAppIcon(pixelMap) {
     }
     onMenuButtonClick() {
         ContainerAppBar.callNative(e2);
@@ -292,7 +309,7 @@ class e1 extends ViewPU {
             Column.height('100%');
             Column.width('100%');
             Column.justifyContent(FlexAlign.End);
-            Column.backgroundColor(Color.Transparent);
+            Column.backgroundColor(this.contentBgColor);
             Column.hitTestBehavior(HitTestMode.Transparent);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -322,6 +339,7 @@ class e1 extends ViewPU {
             Row.justifyContent(FlexAlign.End);
             Row.margin({ top: this.menuMarginTop, left: c1, right: c1 });
             Row.height(m);
+            Row.hitTestBehavior(HitTestMode.Transparent);
             Row.width('100%');
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -334,7 +352,6 @@ class e1 extends ViewPU {
             Row.width(i);
             Row.align(Alignment.Top);
             Row.draggable(false);
-            Row.hitTestBehavior(HitTestMode.Transparent);
             Row.id('AtomicServiceMenubarId');
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {

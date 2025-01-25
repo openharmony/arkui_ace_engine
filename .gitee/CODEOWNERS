@@ -887,8 +887,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h @arkui_image
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h @arkuilayout
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.cpp @arkuiabilitygroup
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.cpp @arkuilayout
@@ -1546,6 +1546,8 @@ frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.h @arkwebina
 frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/scroll_bar/  @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/text_menu/js_text_menu.cpp @huawei_g_five
+frameworks/bridge/declarative_frontend/jsview/text_menu/js_text_menu.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/window_scene/
 frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h @arkuiframework
@@ -3067,6 +3069,7 @@ test/unittest/core/image_provider/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent
+test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/pattern/animator/ @arkui_superman
 test/unittest/core/pattern/app_bar/ @arkuievent

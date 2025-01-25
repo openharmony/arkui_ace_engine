@@ -134,6 +134,8 @@ export struct DatePickerBootcamp {
   @State compFlexBasis: number | string = 'auto';
   @State enableCompDirection: boolean = false;
   @State compDirection: Direction = Direction.Auto;
+  @State enableHapticFeedback: boolean = false;
+  @State hapticFeedback: boolean = true;
   //part1
   // size
   @State enableCompWidth: boolean = false;
@@ -1090,6 +1092,7 @@ export struct DatePickerBootcamp {
           })
           .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
           .direction(useEnabled(this.enableCompDirection, this.compDirection))
+          .enableHapticFeedback(useEnabled(this.enableHapticFeedback, this.hapticFeedback))
             //part1
           .width(useEnabled(this.enableCompWidth, this.compWidth))
           .height(useEnabled(this.enableCompHeight, this.compHeight))
@@ -2951,6 +2954,16 @@ export struct DatePickerBootcamp {
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false },
+          ]
+        })
+
+        RadioBlock({
+          title: 'hapticFeedback',
+          isEnabled: this.enableHapticFeedback,
+          value: this.hapticFeedback,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
       }.width('100%')

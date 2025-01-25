@@ -240,6 +240,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     if (iter == children_.end()) {
         return children_.end();
     }
+
+    // the node set isInDestroying state when destroying in pop animation
+    // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
+    if (IsInDestroying()) {
+        return children_.end();
+    }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
     // disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved until the
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
@@ -380,6 +386,9 @@ void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationC
 
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
+    if (IsInDestroying()) {
+        return false;
+    }
     // The recursive flag will used by RenderContext, if recursive flag is false,
     // it may trigger transition
     DetachFromMainTree(!allowTransition);
@@ -712,6 +721,9 @@ void UINode::DetachFromMainTree(bool recursive)
     if (!onMainTree_) {
         return;
     }
+    if (IsInDestroying()) {
+        return;
+    }
     onMainTree_ = false;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
@@ -869,7 +881,7 @@ void UINode::UpdateGeometryTransition()
 bool UINode::IsAutoFillContainerNode()
 {
     return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
-        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
+        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG || tag_ == V2::POPUP_ETS_TAG;
 }
 
 void UINode::DumpViewDataPageNodes(
@@ -1666,7 +1678,10 @@ bool UINode::GetIsRootBuilderNode() const
 void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
     std::list<int32_t>& reservedElmtId, bool isEntry)
 {
-    auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
+    ContainerScope scope(instanceId_);
+    auto container = Container::Current();
+    auto greatOrEqualApi13 =
+        container && container->GetApiTargetVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
         bool needByTransition = child->IsDisappearing();
         if (greatOrEqualApi13) {
@@ -1678,7 +1693,7 @@ void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, s
             if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
                 CollectCleanedChildren(child->GetChildren(), removedElmtId, reservedElmtId, false);
             }
-        } else if (needByTransition) {
+        } else if (needByTransition && greatOrEqualApi13) {
             child->CollectReservedChildren(reservedElmtId);
         }
     }
@@ -1722,6 +1737,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
 void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
 {
     removedElmtId.emplace_back(child->GetId());
+    child->OnCollectRemoved();
     // Fetch all the child elementIDs recursively
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
@@ -1921,5 +1937,37 @@ void UINode::SetAllowReusableV2Descendant(bool allow)
 bool UINode::IsAllowReusableV2Descendant() const
 {
     return allowReusableV2Descendant_;
+}
+
+void UINode::SetDestroying(bool isDestroying, bool cleanStatus)
+{
+    if (isInDestroying_ == isDestroying) {
+        return;
+    }
+
+    isInDestroying_ = isDestroying;
+    for (const auto& child : GetChildren()) {
+        if (child->GetTag() == "BuilderProxyNode") {
+            child->SetDestroying(isDestroying, false);
+        } else {
+            child->SetDestroying(isDestroying, cleanStatus);
+        }
+    }
+    // add customnode to pipiline when state change, destroy them next vsync
+    OnDestroyingStateChange(isDestroying, cleanStatus);
+}
+
+bool UINode::HasSkipNode()
+{
+    for (const auto& child : children_) {
+        if (child->GetTag() == V2::WEB_ETS_TAG) {
+            return true;
+        }
+
+        if (child->HasSkipNode()) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

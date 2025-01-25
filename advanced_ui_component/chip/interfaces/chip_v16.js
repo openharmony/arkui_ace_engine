@@ -155,6 +155,13 @@ export const defaultTheme = {
             'moduleName': '__harDefaultModuleName__'
         },
         fontFamily: 'HarmonyOS Sans',
+        fontWeight: {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.chip_text_font_weight'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        },
         normalMargin: {
             left: 6,
             right: 6,
@@ -297,20 +304,20 @@ export const defaultTheme = {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }],
-        normalSymbolFontSize: {
+        normalSymbolFontSize: LengthMetrics.resource({
             'id': -1,
             'type': 10002,
             params: ['sys.float.chip_normal_icon_size'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
-        },
-        smallSymbolFontSize: {
+        }).value,
+        smallSymbolFontSize: LengthMetrics.resource({
             'id': -1,
             'type': 10002,
             params: ['sys.float.chip_small_icon_size'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
-        },
+        }).value,
         defaultEffect: -1,
     },
     chipNode: {
@@ -390,20 +397,20 @@ export const defaultTheme = {
             'moduleName': '__harDefaultModuleName__'
         },
         borderWidth: 2,
-        focusBtnScaleX: LengthMetrics.resource({
+        focusBtnScaleX: {
             'id': -1,
             'type': 10002,
             params: ['sys.float.chip_focused_btn_scale'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
-        }).value,
-        focusBtnScaleY: LengthMetrics.resource({
+        },
+        focusBtnScaleY: {
             'id': -1,
             'type': 10002,
             params: ['sys.float.chip_focused_btn_scale'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
-        }).value,
+        },
         localizedNormalPadding: {
             start: LengthMetrics.resource({
                 'id': -1,
@@ -522,9 +529,9 @@ export function Chip(d5, e5 = null) {
                     onClose: j5.onClose,
                     onClicked: j5.onClicked,
                 }, undefined, h5, () => {
-                }, { page: 'library/src/main/ets/components/chip_v16.ets', line: 343, col: 3 });
+                }, { page: 'library/src/main/ets/components/chip_v16.ets', line: 345, col: 3 });
                 ViewPU.create(k5);
-                let i2 = () => {
+                let g3 = () => {
                     return {
                         chipSize: j5.size,
                         prefixIcon: j5.prefixIcon,
@@ -548,7 +555,7 @@ export function Chip(d5, e5 = null) {
                         onClicked: j5.onClicked
                     };
                 };
-                k5.paramsGenerator_ = i2;
+                k5.paramsGenerator_ = g3;
             } else {
                 (e5 ? e5 : this).updateStateVarsOfChildByElmtId(h5, {
                     chipSize: j5.size,
@@ -615,7 +622,7 @@ export class ChipComponent extends ViewPU {
         this.__breakPoint = new ObservedPropertySimplePU(BreakPointsType.SM, this, 'breakPoint');
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
-        this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
+        this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
         this.onClose = undefined;
         this.onClicked = undefined;
         this.__chipNodeInFocus = new ObservedPropertySimplePU(false, this, 'chipNodeInFocus');
@@ -1028,35 +1035,44 @@ export class ChipComponent extends ViewPU {
     }
 
     isSetActiveChipBgColor() {
-        if (this.chipNodeActivatedBackgroundColor == null) {
+        if (this.chipNodeActivatedBackgroundColor) {
             return false;
         }
-        return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
-        ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
+        try {
+            return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
+            ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
+        } catch (f3) {
+            console.error(`[Chip] failed to get ColorMetrics.resourceColor`);
+            return false;
+        }
     }
 
     isSetNormalChipBgColor() {
-        if (this.chipNodeBackgroundColor == null) {
+        if (this.chipNodeBackgroundColor) {
             return false;
         }
-        return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
-        ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
+        try {
+            return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
+            ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
+        } catch (i2) {
+            console.error(`[Chip] failed to get resourceColor`);
+            return false;
+        }
     }
 
     getShadowStyles() {
-        let n1 = this.isSmallChipSize() ? this.theme.chipNode.smallShadowStyle :
-        this.theme.chipNode.normalShadowStyle;
-        if (this.resourceToNumber(n1, -1) === -1) {
+        if (!this.chipNodeInFocus) {
             return undefined;
         }
-        return this.resourceToNumber(n1, -1);
+        return this.resourceToNumber(this.isSmallChipSize() ? this.theme.chipNode.smallShadowStyle :
+        this.theme.chipNode.normalShadowStyle, -1);
     }
 
     ChipBuilder(j1 = null) {
         this.observeComponentCreation2((d3, e3) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.clip(false);
-            Button.shadow(this.chipNodeInFocus ? this.getShadowStyles() : undefined);
+            Button.shadow(this.getShadowStyles());
             Button.padding(0);
             Button.focusable(true);
             Button.size(this.getChipSize());
@@ -1075,7 +1091,13 @@ export class ChipComponent extends ViewPU {
             Button.accessibilitySelected(this.getAccessibilitySelected());
             Button.onClick(this.getChipOnClicked());
             Button.onKeyEvent((m1) => {
-                if (m1.type === KeyType.Down && m1.keyCode === KeyCode.KEYCODE_FORWARD_DEL) {
+                if (!m1 || m1.type === null || m1.type !== KeyType.Down) {
+                    return;
+                }
+                let k1 = m1.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
+                let l1 = m1.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose && !this.suffixIcon?.src &&
+                this.isSuffixIconFocusStyleCustomized;
+                if (k1 || l1) {
                     this.deleteChip();
                 }
             });
@@ -1083,8 +1105,8 @@ export class ChipComponent extends ViewPU {
                 if (this.isSuffixIconFocusStyleCustomized) {
                     this.chipNodeInFocus = true;
                     this.chipScale = {
-                        x: this.theme.chipNode.focusBtnScaleX ?? 1,
-                        y: this.theme.chipNode.focusBtnScaleY ?? 1,
+                        x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+                        y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
                     };
                 }
             });
@@ -1608,7 +1630,10 @@ export class ChipComponent extends ViewPU {
     }
 
     getLabelFontWeight() {
-        return this.isChipActivated() ? FontWeight.Medium : FontWeight.Regular;
+        if (this.isChipActivated()) {
+            return FontWeight.Medium;
+        }
+        return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular);
     }
 
     getLabelFontFamily() {
@@ -1752,26 +1777,26 @@ export class ChipComponent extends ViewPU {
 
     resourceToNumber(x, y) {
         if (!x || !x.type) {
-            console.error('[Chip] failed: resource get fail.');
+            console.error('[Chip] failed: resource get fail');
             return y;
         }
         const z = this.getUIContext().getHostContext()?.resourceManager;
         if (!z) {
-            console.error('[Chip] failed to get resourceManager.');
+            console.error('[Chip] failed to get resourceManager');
             return y;
         }
         switch (x.type) {
             case RESOURCE_TYPE_FLOAT:
             case RESOURCE_TYPE_INTEGER:
-                if (x.id !== -1) {
-                    return z.getNumber(x);
+                try {
+                    if (x.id !== -1) {
+                        return z.getNumber(x);
+                    }
+                    return z.getNumberByName(x.params[0].split('.')[2]);
+                } catch (o) {
+                    console.error(`[Chip] get resource error, return defaultValue`);
+                    return y;
                 }
-                if (x.params && x.params.length > 0 && x.params[0] && x.params[0].split('.') > 2 &&
-                x.params[0].split('.')[2]) {
-                    let t1 = x.params[0].split('.')[2];
-                    return z.getNumberByName(t1);
-                }
-                return y;
             default:
                 return y;
         }

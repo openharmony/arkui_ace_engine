@@ -233,10 +233,11 @@ bool SubwindowOhos::InitContainer()
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
         windowOption->SetDisplayId(displayId);
+        OHOS::Rosen::WMError ret;
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
-            std::to_string(windowId_), windowOption, parentWindow->GetContext());
-        if (!window_) {
-            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
+            std::to_string(windowId_), windowOption, parentWindow->GetContext(), ret);
+        if (!window_ || ret != OHOS::Rosen::WMError::WM_OK) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
             return false;
         }
     }
@@ -954,6 +955,7 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
 void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", nodeId);
+    CHECK_NULL_VOID(window_);
     hotAreasMap_.erase(nodeId);
     if (hotAreasMap_.size() == 0) {
         // Set min window hot area so that sub window can transparent event.
@@ -2019,13 +2021,36 @@ void SubwindowOhos::InitializeSafeArea()
     auto navSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, windowRect);
     pipeline->UpdateSystemSafeArea(systemSafeArea);
     pipeline->UpdateNavSafeArea(navSafeArea);
-    if (pipeline->GetUseCutout()) {
-        auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
-        pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
-    }
+    auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
+    pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
 
     auto safeAreaInsets = pipeline->GetScbSafeArea();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "initializeSafeArea by windowRect: %{public}s, safeAreaInsets: %{public}s",
         windowRect.value_or(NG::RectF()).ToString().c_str(), safeAreaInsets.ToString().c_str());
+}
+
+bool SubwindowOhos::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Show selectOverlay enter");
+    ContainerScope scope(childContainerId_);
+    CHECK_NULL_RETURN(window_, false);
+    ResizeWindow();
+    ShowWindow(false);
+    if (!isShowed_) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+            "Show selectOverlay subwindow failed, subwindow not show after showWindow called.");
+        return false;
+    }
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, false);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    CHECK_NULL_RETURN(overlayNode, false);
+    overlayNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    window_->SetTouchable(true);
+    window_->KeepKeyboardOnFocus(true);
+    window_->SetFocusable(false);
+    return true;
 }
 } // namespace OHOS::Ace

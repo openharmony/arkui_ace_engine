@@ -2026,9 +2026,9 @@ HWTEST_F(DragEventTestNg, DragClog001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->asyncDragCallback_ = []() {};
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback([](){});
     dragDropManager->RemoveDeadlineTimer();
-    EXPECT_EQ(dragDropManager->asyncDragCallback_, nullptr);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetAsyncDragCallback(), nullptr);
     auto frameNode = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
@@ -2036,6 +2036,6 @@ HWTEST_F(DragEventTestNg, DragClog001, TestSize.Level1)
     info.SetSourceDevice(SourceType::MOUSE);
     guestureEventHub->HandleOnDragStart(info);
     dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::READY);
-    EXPECT_EQ(dragDropManager->asyncDragCallback_, nullptr);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetAsyncDragCallback(), nullptr);
 }
 } // namespace OHOS::Ace::NG

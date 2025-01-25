@@ -2835,14 +2835,14 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 
 void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t align)
 {
-    if (align > 8 || align < 0) {
+    if (align > 8 || align < 0) { // align ranges from [0, 8].
         return;
     }
     std::vector<std::pair<double, double>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
         { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
         { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
     SetBgImgPosition(
-                DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
+        DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
 }
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
@@ -2986,8 +2986,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
-    } else {
-        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -3002,8 +3000,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
-    } else {
-        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
@@ -5018,7 +5014,7 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
             }
             count = countJsVal->ToNumber<int>();
             auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
-            ReplaceHolder(pluralStr, params, 2);
+            ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
             result = pluralStr;
         } else {
             return false;
@@ -6543,9 +6539,8 @@ void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
-    JSRef<JSVal> arg = args[0];
     if (args[0]->IsFunction()) {
-        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(args[0]));
         WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
             GetMainFrameNode());
         auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
@@ -6588,7 +6583,8 @@ bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, N
         if (CheckLengthMetrics(object)) {
             std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
             std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
-            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart =
+                ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
             std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
             auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
             radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
@@ -9230,9 +9226,9 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
         isGroup = info[1]->ToBoolean();
     }
     bool arrowKeyStepOut = true;
-    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() &&
-        info[2]->IsBoolean()) {
-        arrowKeyStepOut = info[2]->ToBoolean();
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() && // 2:args index.
+        info[2]->IsBoolean()) { // 2:args index.
+        arrowKeyStepOut = info[2]->ToBoolean(); // 2:args index.
     }
     ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }

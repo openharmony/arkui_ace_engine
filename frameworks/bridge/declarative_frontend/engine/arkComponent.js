@@ -4628,7 +4628,7 @@ class TapGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.count = options.count;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
   onAction(event) {
@@ -4652,7 +4652,7 @@ class LongPressGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4689,7 +4689,7 @@ class PanGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.distance = options.distance;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4731,7 +4731,7 @@ class SwipeGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.speed = options.speed;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4757,7 +4757,7 @@ class PinchGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.distance = options.distance;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4798,7 +4798,7 @@ class RotationGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.angle = options.angle;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4839,7 +4839,6 @@ class GestureGroupHandler extends GestureHandler {
     if (options !== undefined) {
       this.mode = options.mode;
       this.gestures = options.gestures;
-      this.limitFingerCount = options.limitFingerCount;
     }
   }
 
@@ -6170,6 +6169,21 @@ class FlingSpeedLimitModifier extends ModifierWithKey {
 }
 FlingSpeedLimitModifier.identity = Symbol('flingSpeedLimit');
 
+class BackToTopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetBackToTop(node);
+    }
+    else {
+      getUINativeModule().scrollable.setBackToTop(node, this.value);
+    }
+  }
+}
+BackToTopModifier.identity = Symbol('backToTop');
+
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6204,6 +6218,10 @@ class ArkScrollable extends ArkComponent {
 
   flingSpeedLimit(value) {
     modifierWithKey(this._modifiersWithKeys, FlingSpeedLimitModifier.identity, FlingSpeedLimitModifier, value);
+    return this;
+  }
+  backToTop(value) {
+    modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
     return this;
   }
 }
@@ -8115,7 +8133,7 @@ class ArkImageAnimatorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorIterationsModeModifier.identity, ImageAnimatorIterationsModeModifier, value);
     return this;
   }
-  autoMonitorInvisibleArea(value) {
+  monitorInvisibleArea(value) {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorAutoMonitorInvisibleAreaModifier.identity,
       ImageAnimatorAutoMonitorInvisibleAreaModifier, value);
     return this;
@@ -9052,6 +9070,24 @@ class RichEditorStopBackPressModifier extends ModifierWithKey {
 }
 RichEditorStopBackPressModifier.identity = Symbol('richEditorStopBackPress');
 
+class RichEditorKeyboardAppearanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetKeyboardAppearance(node);
+    }
+    else {
+      getUINativeModule().richEditor.setKeyboardAppearance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorKeyboardAppearanceModifier.identity = Symbol('richEditorKeyboardAppearance');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9192,6 +9228,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   stopBackPress(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorStopBackPressModifier.identity, RichEditorStopBackPressModifier, value);
+    return this;
+  }
+  keyboardAppearance(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorKeyboardAppearanceModifier.identity, RichEditorKeyboardAppearanceModifier, value);
     return this;
   }
 }
@@ -10147,6 +10187,19 @@ class SearchInitializeModifier extends ModifierWithKey {
   }
 }
 SearchInitializeModifier.identity = Symbol('searchInitialize');
+class SearchOnWillChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnWillChange(node);
+    } else {
+      getUINativeModule().search.setOnWillChange(node, this.value);
+    }
+  }
+}
+SearchOnWillChangeModifier.identity = Symbol('searchOnWillChange');
 class SearchOnWillInsertModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10475,6 +10528,10 @@ class ArkSearchComponent extends ArkComponent {
     searchInputFilter.error = error;
 
     modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
+    return this;
+  }
+  onWillChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillChangeModifier.identity, SearchOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback) {
@@ -13998,6 +14055,19 @@ class TextAreaMarginModifier extends ModifierWithKey {
   }
 }
 TextAreaMarginModifier.identity = Symbol('textAreaMargin');
+class TextAreaOnWillChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillChange(node);
+    } else {
+      getUINativeModule().textArea.setOnWillChange(node, this.value);
+    }
+  }
+}
+TextAreaOnWillChangeModifier.identity = Symbol('textAreaOnWillChange');
 class TextAreaOnWillInsertModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14494,6 +14564,10 @@ class ArkTextAreaComponent extends ArkComponent {
     else {
       modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillChangeModifier.identity, TextAreaOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback) {
@@ -15843,6 +15917,19 @@ class TextInputMarginModifier extends ModifierWithKey {
   }
 }
 TextInputMarginModifier.identity = Symbol('textInputMargin');
+class TextInputOnWillChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillChange(node);
+    } else {
+      getUINativeModule().textInput.setOnWillChange(node, this.value);
+    }
+  }
+}
+TextInputOnWillChangeModifier.identity = Symbol('textInputOnWillChange');
 class TextInputOnWillInsertModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16371,6 +16458,10 @@ class ArkTextInputComponent extends ArkComponent {
     else {
       modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillChangeModifier.identity, TextInputOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback) {
@@ -24378,6 +24469,24 @@ class CalendarPickerBorderColorModifier extends ModifierWithKey {
 }
 CalendarPickerBorderColorModifier.identity = Symbol('calendarPickerBorderColor');
 
+class CalendarPickerMarkTodayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerMarkToday(node);
+    }
+    else {
+      getUINativeModule().calendarPicker.setCalendarPickerMarkToday(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CalendarPickerMarkTodayModifier.identity = Symbol('calendarPickerMarkToday');
+
 class ArkCalendarPickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -24496,6 +24605,10 @@ class ArkCalendarPickerComponent extends ArkComponent {
   }
   borderColor(value) {
     modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderColorModifier.identity, CalendarPickerBorderColorModifier, value);
+    return this;
+  }
+  markToday(value) {
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerMarkTodayModifier.identity, CalendarPickerMarkTodayModifier, value);
     return this;
   }
 }
@@ -29477,6 +29590,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, value);
     return this;
   }
+  onSelected(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnSelectedModifier.identity, SwiperOnSelectedModifier, value);
+    return this;
+  }
   indicatorStyle(value) {
     throw new Error('Method not implemented.');
   }
@@ -29502,6 +29619,10 @@ class ArkSwiperComponent extends ArkComponent {
   }
   onGestureSwipe(value) {
     modifierWithKey(this._modifiersWithKeys, SwiperOnGestureSwipeModifier.identity, SwiperOnGestureSwipeModifier, value);
+    return this;
+  }
+  onUnselected(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnUnselectedModifier.identity, SwiperOnUnselectedModifier, value);
     return this;
   }
   nestedScroll(value) {
@@ -29842,6 +29963,22 @@ class SwiperOnChangeModifier extends ModifierWithKey {
   }
 }
 SwiperOnChangeModifier.identity = Symbol('swiperOnChange');
+class SwiperOnSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnSelected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnSelected(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnSelectedModifier.identity = Symbol('swiperOnSelected');
 class SwiperEffectModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -30063,6 +30200,22 @@ class SwiperOnGestureSwipeModifier extends ModifierWithKey {
   }
 }
 SwiperOnGestureSwipeModifier.identity = Symbol('swiperOnGestureSwipe');
+class SwiperOnUnselectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnUnselected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnUnselected(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnUnselectedModifier.identity = Symbol('swiperOnUnselected');
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -30450,8 +30603,16 @@ class ArkTabsComponent extends ArkComponent {
   onChange(event) {
     throw new Error('Method not implemented.');
   }
+  onSelected(event) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnSelectedModifier.identity, TabsOnSelectedModifier, event);
+    return this;
+  }
   onTabBarClick(event) {
     throw new Error('Method not implemented.');
+  }
+  onUnselected(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, value);
+    return this;
   }
   fadingEdge(value) {
     modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
@@ -30675,6 +30836,25 @@ class AnimationModeModifier extends ModifierWithKey {
   }
 }
 AnimationModeModifier.identity = Symbol('animationMode');
+
+class TabsOnSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnSelected(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabsOnSelected(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnSelectedModifier.identity = Symbol('tabsOnSelected');
+
 class ScrollableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -30839,6 +31019,20 @@ class BarBackgroundEffectModifier extends ModifierWithKey {
   }
 }
 BarBackgroundEffectModifier.identity = Symbol('barBackgroundEffect');
+class TabsOnUnselectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabOnUnselected(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabOnUnselected(node, this.value);
+    }
+  }
+}
+TabsOnUnselectedModifier.identity = Symbol('tabOnUnselected');
 class FadingEdgeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

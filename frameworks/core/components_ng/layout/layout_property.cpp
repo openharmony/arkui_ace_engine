@@ -165,6 +165,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
 
     PaddingToJsonValue(json, filter);
     MarginToJsonValue(json, filter);
+    SafeAreaPaddingToJsonValue(json, filter);
 
     json->PutExtAttr("visibility",
         VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
@@ -220,6 +221,30 @@ void LayoutProperty::MarginToJsonValue(std::unique_ptr<JsonValue>& json,
     }
 }
 
+void LayoutProperty::SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (!safeAreaPadding_) {
+        json->PutExtAttr("safeAreaPadding", "0.00vp", filter);
+        return;
+    }
+    auto hasAllValue = safeAreaPadding_->top.has_value() && safeAreaPadding_->right.has_value() &&
+                       safeAreaPadding_->left.has_value() && safeAreaPadding_->bottom.has_value();
+    if (hasAllValue) {
+        json->PutExtAttr("safeAreaPadding", safeAreaPadding_->ToJsonString().c_str(), filter);
+        return;
+    }
+    auto safeAreaPaddingJsonValue = JsonUtil::Create(true);
+    safeAreaPaddingJsonValue->Put(
+        "top", safeAreaPadding_->top.has_value() ? safeAreaPadding_->top.value().ToString().c_str() : "0.00vp");
+    safeAreaPaddingJsonValue->Put(
+        "right", safeAreaPadding_->right.has_value() ? safeAreaPadding_->right.value().ToString().c_str() : "0.00vp");
+    safeAreaPaddingJsonValue->Put("bottom",
+        safeAreaPadding_->bottom.has_value() ? safeAreaPadding_->bottom.value().ToString().c_str() : "0.00vp");
+    safeAreaPaddingJsonValue->Put(
+        "left", safeAreaPadding_->left.has_value() ? safeAreaPadding_->left.value().ToString().c_str() : "0.00vp");
+    json->PutExtAttr("safeAreaPadding", safeAreaPaddingJsonValue->ToString().c_str(), filter);
+}
+
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     UpdateCalcLayoutProperty(MeasureProperty::FromJson(json));
@@ -232,6 +257,10 @@ void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     auto margin = json->GetString("margin");
     if (margin != "0.0") {
         UpdateMargin(MarginProperty::FromJsonString(margin));
+    }
+    auto safeAreaPadding = json->GetString("safeAreaPadding");
+    if (safeAreaPadding != "0.0") {
+        UpdateSafeAreaPadding(PaddingProperty::FromJsonString(safeAreaPadding));
     }
     UpdateVisibility(StringToVisibleType(json->GetString("visibility")));
     UpdateLayoutDirection(StringToTextDirection(json->GetString("direction")));

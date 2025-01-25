@@ -401,23 +401,16 @@ std::vector<int32_t> NavigationManager::FindNavigationInTargetParent(int32_t tar
     return it->second;
 }
 
-void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle)
+void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto currentState = container->WindowIsShow();
-    NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION;
-    if (currentState != lastWindowShow_) {
-        reason = NavDestinationActiveReason::APP_STATE_CHANGE;
-    }
-    lastWindowShow_ = currentState;
-    if (reason == NavDestinationActiveReason::TRANSITION) {
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    if (activeReason == NavDestinationActiveReason::TRANSITION) {
         NavigationPattern::FireNavigationLifecycle(node, static_cast<NavDestinationLifecycle>(lifecycle),
-            static_cast<NavDestinationActiveReason>(reason));
+            activeReason);
         return;
     }
     // fire navdestination lifecycle in outer layer
-    FireLowerLayerLifecycle(nullptr, lifecycle, static_cast<int32_t>(reason));
+    FireLowerLayerLifecycle(nullptr, lifecycle, reason);
 }
 
 void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
@@ -481,5 +474,14 @@ void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int3
     auto lastPage = stageManager->GetLastPage();
     CHECK_NULL_VOID(lastPage);
     NavigationPattern::FireNavigationLifecycle(lastPage, lowerLifecycle, activeReason);
+}
+
+void NavigationManager::FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetMainPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->FireLowerLayerLifecycle(node, lifecycle, reason);
 }
 } // namespace OHOS::Ace::NG

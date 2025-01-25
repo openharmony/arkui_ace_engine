@@ -1969,6 +1969,7 @@ private:
         CHECK_NULL_RETURN(context, true);
         return !(context->GetIsFocusActive() && independentControlKeyboard_);
     }
+    void SetIsEnableSubWindowMenu();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2161,6 +2162,7 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isPreviewTextOverCount_ = false;
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;

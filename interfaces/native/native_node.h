@@ -1865,25 +1865,45 @@ typedef enum {
     NODE_TAB_STOP = 98,
 
     /**
-     * @brief Defines blur attribute of backdrop, which can be set, reset, and obtained as required through APIs.
+     * @brief Defines the backdrop blur attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
-     * .value[1]?.f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
-     * The value range is [0,127].\n
-     * .value[2]?.f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
-     * The value range is [0,127].\n
+     * .value[0].f32：backdrop blur radius, in px. The value range is [0, +∞).\n
+     * .value[1]?.f32：grayscale blur settings that control the brightness of the black color.\n
+     * The value range is [0, 127].\n
+     * .value[2]?.f32：grayscale blur settings that control the darkness of the white color.\n
+     * The value range is [0, 127].\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
-     * .value[1].f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
-     * The value range is [0,127].\n
-     * .value[2].f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
-     * The value range is [0,127].\n
+     * .value[0].f32：backdrop blur radius, in px. The value range is [0, +∞).\n
+     * .value[1].f32：grayscale blur settings that control the brightness of the black color.\n
+     * The value range is [0, 127].\n
+     * .value[2].f32：grayscale blur settings that control the darkness of the white color.\n
+     * The value range is [0, 127].\n
      *
      * @since 16
      */
     NODE_BACKDROP_BLUR = 99,
+
+    /**
+     * @brief Defines the background image resizable attribute, which can be set, reset,
+     * and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32：width of the left edge. The unit is vp. \n
+     * .value[1].f32：width of the top edge. The unit is vp. \n
+     * .value[2].f32：width of the right edge. The unit is vp. \n
+     * .value[3].f32：width of the bottom edge. The unit is vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32：width of the left edge. The unit is vp. \n
+     * .value[1].f32：width of the top edge. The unit is vp. \n
+     * .value[2].f32：width of the right edge. The unit is vp. \n
+     * .value[3].f32：width of the bottom edge. The unit is vp. \n
+     *
+     * @since 16
+     */
+    NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE = 100,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -4973,6 +4993,22 @@ typedef enum {
     NODE_SCROLL_CLIP_CONTENT,
 
     /**
+     * @brief Defines whether the scrollable scrolls back to top when status bar is clicked.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the scrollable scrolls back to top when status bar is clicked. \n
+     * The value <b>1</b> means to scroll back to top, and <b>0</b> means the opposite.
+     * The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0]i.32: whether the scrollable scrolls back to top when status bar is clicked. \n
+     * 
+     * @since 16
+     */
+    NODE_SCROLL_BACK_TO_TOP,
+    
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *
@@ -6094,6 +6130,34 @@ typedef enum {
      *
     */
     NODE_IMAGE_ANIMATOR_ITERATION = 19006,
+    /**
+     * @brief Defines the disabled date range of the calendar picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: A string of dates. The `1st start date`,`1st end date`,`2nd start date`,`2nd end date`,
+     * ...,`nth start date`,`nth end date` of the disabled date range.\n
+     *  Example: 1910-01-01,1910-12-31,2020-01-01,2020-12-31\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: A string of dates.\n
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_DISABLED_DATE_RANGE = 16006,
+    /**
+     * @brief Defines whether the calendar picker marks today.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to the calendar picker marks today. The default value is: <b>false</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to the calendar picker marks today.
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_MARK_TODAY = 16007,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -7015,6 +7079,42 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[3].f32</b>: length of the page in the main axis direction. \n
      */
     NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL,
+
+    /**
+     * @brief Defines the event triggered when a new <b>ARKUI_NODE_SWIPER</b> instance becomes selected.
+     * Animation is not necessarily complete.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index of the element becomes selected. \n
+     */
+    NODE_SWIPER_EVENT_ON_SELECTED,
+
+    /**
+     * @brief Defines the event triggered when a new <b>ARKUI_NODE_SWIPER</b> instance becomes unselected.
+     * Animation is not necessarily complete.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index of the element becomes unselected. \n
+     */
+    NODE_SWIPER_EVENT_ON_UNSELECTED = 1001006,
+
+    /**
+     * @brief Defines the event triggered when content in the swiper component will scroll.
+     * Instructions: Before page scrolling, the </b>ContentWillScrollCallback</b> callback is invoked. \n \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index value of the current child page. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: the index value of the child page that will display. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: the sliding offset of each frame.
+     * Positive numbers indicating slide backward(e.g. from index=1 to index=0), negative numbers indicating
+     * slide forward(e.g. from index=0 to index=1). \n
+     */
+    NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL = 1001007,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.

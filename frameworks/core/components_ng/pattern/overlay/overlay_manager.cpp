@@ -150,6 +150,9 @@ constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
 
+const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
+    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
+
 RefPtr<FrameNode> GetLastPage()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -1842,6 +1845,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     };
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
+    FireAutoSave(popupNode);
     RemovePixelMapAnimation(false, 0, 0);
     RemoveGatherNodeWithAnimation();
     RemoveFilter();
@@ -6644,12 +6648,16 @@ void OverlayManager::MarkDirtyOverlay()
     auto child = root->GetLastChild();
     CHECK_NULL_VOID(child);
     // sheetPage Node will MarkDirty when VirtualKeyboard Height Changes
-    auto sheetParent = DynamicCast<FrameNode>(child);
-    if (sheetParent && sheetParent->GetTag() == V2::SHEET_WRAPPER_TAG) {
-        auto sheet = sheetParent->GetChildAtIndex(0);
+    auto overlayNode = DynamicCast<FrameNode>(child);
+    CHECK_NULL_VOID(overlayNode);
+    if (overlayNode->GetTag() == V2::SHEET_WRAPPER_TAG) {
+        auto sheet = overlayNode->GetChildAtIndex(0);
         if (sheet) {
             sheet->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+    }
+    if (overlayNode->GetTag() == V2::DIALOG_ETS_TAG) {
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -6996,6 +7004,11 @@ void OverlayManager::RemoveMenuNotInSubWindow(
         rootNode = overlayManager->FindWindowScene(menu);
     }
     CHECK_NULL_VOID(rootNode);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    if (menuWrapperPattern && menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper()) {
+        SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(
+            menuWrapperPattern->GetContainerId(), menu->GetId());
+    }
     RemoveChildWithService(rootNode, menu);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -7212,6 +7225,9 @@ RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& pare
     CHECK_NULL_RETURN(parentNode, nullptr);
     const auto& children = parentNode->GetChildren();
     for (const auto& childNode : children) {
+        if (childNode->GetTag() == V2::STAGE_ETS_TAG) {
+            continue;
+        }
         if (childNode && childNode->GetInspectorId().value_or("") == key) {
             return childNode;
         }
@@ -7332,22 +7348,29 @@ SafeAreaInsets OverlayManager::GetSafeAreaInsets(const RefPtr<FrameNode>& frameN
 void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle,
     bool isLowerOnly, int32_t reason)
 {
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
     auto pipelineContext = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto navigationManager = pipelineContext->GetNavigationManager();
     CHECK_NULL_VOID(navigationManager);
-    if (node->GetTag() == V2::DIALOG_ETS_TAG) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(node);
-        CHECK_NULL_VOID(frameNode);
-        auto layoutProperty = frameNode->GetLayoutProperty<DialogLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto isShowInSubWindow = layoutProperty->GetShowInSubWindow().value_or(false);
-        if (isShowInSubWindow) {
+    auto pattern = frameNode->GetPattern();
+    if (InstanceOf<DialogPattern>(pattern)) {
+        auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_VOID(dialogPattern);
+        auto dialogProperties = dialogPattern->GetDialogProperties();
+        if (!dialogProperties.isUserCreatedDialog || dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
             return;
         }
-        auto dialogPattern = frameNode->GetPattern<DialogPattern>();
-        CHECK_NULL_VOID(dialogPattern);
-        if (dialogPattern->GetIsPickerDialog()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire dialog change to cause navdestination lifecycle: %{public}d",
+            static_cast<int32_t>(lifecycle));
+        if (dialogProperties.isShowInSubWindow) {
+            navigationManager->FireSubWindowLifecycle(node, lifecycle, reason);
+            return;
+        }
+    } else if (node->GetTag() == V2::SHEET_PAGE_TAG) {
+        auto layoutProperty = frameNode->GetLayoutProperty<SheetPresentationProperty>();
+        if (layoutProperty && layoutProperty->GetSheetStyleValue().showInPage.value_or(false)) {
             return;
         }
     }
@@ -7356,5 +7379,18 @@ void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t
         return;
     }
     navigationManager->FireOverlayLifecycle(node, lifecycle, reason);
+}
+
+bool OverlayManager::isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal)
+{
+    auto lastNode = GetLastChildNotRemoving(currentNode);
+    if (lastNode && EMBEDDED_DIALOG_NODE_TAG.find(lastNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog/%{public}d begin consumed backpressed event", lastNode->GetId());
+        return true;
+    }
+    if (!skipModal && !IsModalEmpty()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

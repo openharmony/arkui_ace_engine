@@ -106,21 +106,26 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         auto safeArea = manager->GetSafeArea();
         auto pageCurrentOffset = GetPageCurrentOffset();
         auto pageHasOffset = LessNotEqual(pageCurrentOffset, 0.0f);
-        if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+        auto keyboardOffset = manager->GetKeyboardOffset();
+        auto lastChild = host->GetLastChild();
+        if (GetHostTag() == V2::PAGE_ETS_TAG && lastChild && lastChild->GetTag() == V2::DIALOG_ETS_TAG) {
+            keyboardOffset = 0.0f;
+        }
+        if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
             renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
             return false;
         }
         auto geometryNode = GetGeometryNode();
         auto x = geometryNode->GetFrameOffset().GetX();
         if (manager->IsAtomicService()) {
-            auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
+            auto usingRect = RectF(OffsetF(x, keyboardOffset), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
             geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
             renderContext->SyncPartialRsProperties();
             return true;
         }
         auto usingRect =
-            RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
+            RectF(OffsetF(x, safeArea.top_.Length() + keyboardOffset), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
         geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
         renderContext->SyncPartialRsProperties();

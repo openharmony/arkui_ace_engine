@@ -57,6 +57,17 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
+    bool needRemain = false;
+    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+}
+
+void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle, bool& needRemain)
+{
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
+        needRemain = true;
+        return;
+    }
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -205,9 +216,6 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
-    if (lineStyle->HasHalfLeading()) {
-        pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
-    }
     if (layoutWrapper) {
         pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
     } else {
@@ -227,6 +235,7 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
+        TAG_LOGI(AceLogTag::ACE_TEXT, "FontRegisterCallback callback id:%{public}d", frameNode->GetId());
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->OnPropertyChangeMeasure();
@@ -401,8 +410,7 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .indent = textStyle.GetTextIndent(),
-        .halfLeading = textStyle.GetHalfLeading()
+        .indent = textStyle.GetTextIndent()
         };
 }
 
@@ -456,7 +464,11 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
                     paragraphNewWidth, paragraph->GetMaxWidth(), indentWidth, contentConstraint.ToString().c_str());
             }
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
-                OTHER_DURATION();
+                int32_t id = -1;
+                if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+                    id = Container::CurrentId();
+                }
+                OTHER_DURATION(id);
                 paragraph->Layout(std::ceil(paragraphNewWidth));
             }
         }

@@ -1031,7 +1031,7 @@ HWTEST_F(TextFieldPatternTestTwo, TextTypeToString001, TestSize.Level0)
     auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
-    int32_t intValue = 26;
+    int32_t intValue = 38;
     layoutProperty->UpdateTextContentType(static_cast<TextContentType>(intValue));
     auto ret1 = pattern->TextContentTypeToString();
     EXPECT_EQ(ret1, "TextContentType.UNSPECIFIED");

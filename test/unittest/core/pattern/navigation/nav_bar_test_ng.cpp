@@ -870,6 +870,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern013, TestSize.Level1)
 HWTEST_F(NavBarTestNg, NavBarPattern014, TestSize.Level1)
 {
     float offset = 0.001;
+    float currentOffset = 0.0;
     auto frameNode =
         FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
     EXPECT_NE(frameNode, nullptr);
@@ -877,7 +878,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern014, TestSize.Level1)
     EXPECT_NE(navBarPattern, nullptr);
     navBarPattern->isHideTitlebar_ = true;
     navBarPattern->titleMode_ = NavigationTitleMode::MINI;
-    navBarPattern->OnCoordScrollUpdate(offset);
+    navBarPattern->OnCoordScrollUpdate(offset, currentOffset);
 }
 
 /**
@@ -888,6 +889,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern014, TestSize.Level1)
 HWTEST_F(NavBarTestNg, NavBarPattern015, TestSize.Level1)
 {
     float offset = 0.001;
+    float currentOffset = 0.0;
     auto frameNode =
         FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
     EXPECT_NE(frameNode, nullptr);
@@ -895,7 +897,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern015, TestSize.Level1)
     EXPECT_NE(navBarPattern, nullptr);
     navBarPattern->isHideTitlebar_ = false;
     navBarPattern->titleMode_ = NavigationTitleMode::FREE;
-    navBarPattern->OnCoordScrollUpdate(offset);
+    navBarPattern->OnCoordScrollUpdate(offset, currentOffset);
 }
 
 /**

@@ -20,9 +20,6 @@
 namespace OHOS::Ace::NG {
 SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, {});
-    CHECK_NULL_RETURN(pipeline->GetUseCutout(), {});
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
 
@@ -94,8 +91,7 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
 {
     uint32_t bottom;
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    if (systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+    if (container && systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
         bottom = systemSafeArea_.bottom_.start;
         ACE_SCOPED_TRACE("calc keyboardRect use systemSafeArea_.bottom_");
     } else {
@@ -116,7 +112,7 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (!IsSafeAreaValid()) {
         return {};
     }
-    if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
+    if ((opts.type & SAFE_AREA_TYPE_CUTOUT) && useCutout_) {
         res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
@@ -244,9 +240,14 @@ SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
-    if (!IsSafeAreaValid()) {
-        return {};
+    if (IsSafeAreaValid() && useCutout_) {
+        return cutoutSafeArea_;
     }
+    return {};
+}
+
+SafeAreaInsets SafeAreaManager::GetCutoutSafeAreaWithoutProcess() const
+{
     return cutoutSafeArea_;
 }
 
@@ -255,7 +256,8 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     if (!IsSafeAreaValid()) {
         return {};
     }
-    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
@@ -268,7 +270,8 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
-    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
 }
 
 // Effective only in API 16 and later versions
@@ -283,7 +286,7 @@ SafeAreaInsets SafeAreaManager::GetScbSafeArea() const
     if (scbSystemSafeArea_.has_value()) {
         scbSafeArea = scbSafeArea.Combine(scbSystemSafeArea_.value());
     }
-    if (scbCutoutSafeArea_.has_value() && pipeline->GetUseCutout()) {
+    if (scbCutoutSafeArea_.has_value() && useCutout_) {
         scbSafeArea = scbSafeArea.Combine(scbCutoutSafeArea_.value());
     }
     if (scbNavSafeArea_.has_value()) {
@@ -305,7 +308,8 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
         }
 #endif
     }
-    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
     PaddingPropertyF result;
     if (combinedSafeArea.left_.IsValid()) {
         result.left = combinedSafeArea.left_.Length();

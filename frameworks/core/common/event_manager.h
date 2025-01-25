@@ -297,6 +297,11 @@ public:
         return idToTouchPoints_;
     }
 
+    inline void EraseFingerId(int32_t id)
+    {
+        idToTouchPoints_.erase(id);
+    }
+
     inline void SetIdToTouchPoint(std::unordered_map<int32_t, TouchEvent>&& idToTouchPoint)
     {
         idToTouchPoints_ = std::move(idToTouchPoint);

@@ -95,8 +95,6 @@ void JSIfElse::GetRetakenElmtIds(const JSCallbackInfo& info)
     }
 }
 
-// JS signature:
-// branchId(branchId:number, removedIfElseChildelmtIds:Array<number>, reservedIfElseChildelmtIds:Array<number>)
 void JSIfElse::SetBranchId(const JSCallbackInfo& info)
 {
     int32_t paramsLength = 3;

@@ -27,6 +27,7 @@
 #include <utility>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_performance_monitor.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
@@ -1267,16 +1268,6 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    void SetUseCutout(bool useCutout)
-    {
-        useCutout_ = useCutout;
-    }
-
-    bool GetUseCutout() const
-    {
-        return useCutout_;
-    }
-
     bool GetOnFoucs() const
     {
         return onFocus_;
@@ -1474,6 +1465,8 @@ public:
 
     virtual void SetEnableSwipeBack(bool isEnable) {}
 
+    std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1646,7 +1639,6 @@ private:
     bool halfLeading_ = false;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
-    bool useCutout_ = false;
     // whether visible area need to be calculate at each vsync after approximate timeout.
     bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
@@ -1666,6 +1658,7 @@ private:
     std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
+    std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

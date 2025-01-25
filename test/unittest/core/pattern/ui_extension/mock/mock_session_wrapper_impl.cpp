@@ -166,7 +166,7 @@ int32_t SessionWrapperImpl::GetWindowSceneId()
     return 1;
 }
 
-Rosen::WSRect SessionWrapperImpl::GetWindowSceneRcet()
+Rosen::WSRect SessionWrapperImpl::GetWindowSceneRect()
 {
     Rosen::WSRect rect = {0, 0, 0, 0};
     return rect;

@@ -662,6 +662,7 @@ public:
     }
 
     virtual void OnFocusNodeChange(FocusReason focusReason) {}
+    virtual void OnCollectRemoved() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

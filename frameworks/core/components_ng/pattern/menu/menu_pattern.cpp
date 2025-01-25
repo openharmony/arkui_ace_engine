@@ -297,7 +297,13 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-    UpdateMenuBorderAndBackgroundBlur();
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        UpdateMenuBorderAndBackgroundBlur();
+    }
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -414,7 +420,13 @@ void InnerMenuPattern::OnModifyDone()
     auto uiNode = AceType::DynamicCast<UINode>(host);
     UpdateMenuItemChildren(uiNode);
     SetAccessibilityAction();
-    InitDefaultBorder(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        InitDefaultBorder(host);
+    }
 }
 
 // close menu on touch up
@@ -2212,5 +2224,15 @@ float MenuPattern::GetSelectMenuWidthFromTheme() const
         finalWidth = defaultWidth;
     }
     return finalWidth;
+}
+
+bool MenuPattern::IsSelectOverlayDefaultModeRightClickMenu()
+{
+    CHECK_NULL_RETURN(IsSelectOverlayRightClickMenu(), false);
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    return !menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
 }
 } // namespace OHOS::Ace::NG

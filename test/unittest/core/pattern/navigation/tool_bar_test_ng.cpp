@@ -465,13 +465,17 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest007, TestSize.Level1)
  */
 HWTEST_F(ToolBarTestNg, ToolBarPatternTest008, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 201, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    auto navToolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
 
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto gestureHub = toolbarNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());

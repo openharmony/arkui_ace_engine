@@ -132,6 +132,12 @@ public:
             isActive_ = active;
         }
     }
+    void SetDestroying(bool isDestroying = true, bool cleanStatus = true) override
+    {
+        if (builder_) {
+            builder_->SetDestroying(isDestroying, cleanStatus);
+        }
+    }
     void PaintDebugBoundaryTreeAll(bool flag) override
     {
         if (builder_) {

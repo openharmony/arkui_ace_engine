@@ -49,7 +49,11 @@ void CustomNode::Render()
             FireOnAppear();
         }
         {
-            COMPONENT_CREATION_DURATION();
+            int32_t id = -1;
+            if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+                id = Container::CurrentId();
+            }
+            COMPONENT_CREATION_DURATION(id);
             ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(), GetId(),
                 GetParent() ? GetParent()->GetId() : 0);
             // first create child node and wrapper.
@@ -253,6 +257,15 @@ void CustomNode::DumpInfo()
         if (decoratorInfo != nullptr) {
             DumpDecoratorInfo(decoratorInfo);
         }
+    }
+}
+
+void CustomNode::OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+{
+    if (isDestroying && cleanStatus) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddPendingDeleteCustomNode(Claim(this));
     }
 }
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,9 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int NUM_12 = 12;
+constexpr int DATE_SIZE = 3;
+const bool DEFAULT_MARK_TODAY = false;
 std::string g_strValue;
 } // namespace
 void SetHintRadius(ArkUINodeHandle node, float radius, int32_t unit)
@@ -376,6 +379,102 @@ void ResetCalendarPickerBorder(ArkUINodeHandle node)
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
 
+void SetCalendarPickerMarkToday(ArkUINodeHandle node, ArkUI_Bool isMarkToday)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalendarPickerModelNG::SetMarkToday(frameNode, isMarkToday);
+}
+
+void ResetCalendarPickerMarkToday(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalendarPickerModelNG::SetMarkToday(frameNode, DEFAULT_MARK_TODAY);
+}
+
+ArkUI_Bool GetCalendarPickerMarkToday(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_MARK_TODAY);
+    auto isMarkToday = CalendarPickerModelNG::GetMarkToday(frameNode);
+    return isMarkToday;
+}
+
+bool IsValidDate(uint32_t year, uint32_t month, uint32_t day)
+{
+    if (year <= 0) {
+        return false;
+    }
+    if (month < NUM_1 || month > NUM_12) {
+        return false;
+    }
+    uint32_t daysInMonth[] = { 31, PickerDate::IsLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    if (day < 1 || day > daysInMonth[month - 1]) {
+        return false;
+    }
+    return true;
+}
+
+PickerDate ParseDateFromString(const std::string& dateStr)
+{
+    std::vector<std::string> dateVec;
+    StringUtils::StringSplitter(dateStr, '-', dateVec);
+    PickerDate date;
+    if (dateVec.size() != DATE_SIZE) {
+        return date;
+    }
+    auto year = StringUtils::StringToInt(dateVec[NUM_0].c_str());
+    auto month = StringUtils::StringToInt(dateVec[NUM_1].c_str());
+    auto day = StringUtils::StringToInt(dateVec[NUM_2].c_str());
+    if (!IsValidDate(year, month, day)) {
+        return date;
+    }
+    date.SetYear(year);
+    date.SetMonth(month);
+    date.SetDay(day);
+    return date;
+}
+
+void SetCalendarPickerDisabledDateRange(ArkUINodeHandle node, ArkUI_CharPtr disabledDateRangeStr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::string> dateStrVector;
+    StringUtils::StringSplitter(std::string(disabledDateRangeStr), ',', dateStrVector);
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    for (size_t i = 0; i + 1 < dateStrVector.size(); i += 2) {  // 2 pair size
+        std::pair<PickerDate, PickerDate> pickerDateRange;
+        auto start = ParseDateFromString(dateStrVector[i]);
+        auto end = ParseDateFromString(dateStrVector[i + 1]);
+        if (start.GetYear() == 0 || end.GetYear() == 0 || end < start) {
+            continue;
+        }
+        pickerDateRange.first = start;
+        pickerDateRange.second = end;
+        disabledDateRange.emplace_back(pickerDateRange);
+    }
+    PickerDate::SortAndMergeDisabledDateRange(disabledDateRange);
+    CalendarPickerModelNG::SetDisabledDateRange(frameNode, disabledDateRange);
+}
+
+void ResetCalendarPickerDisabledDateRange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    CalendarPickerModelNG::SetDisabledDateRange(frameNode, disabledDateRange);
+}
+
+ArkUI_CharPtr GetCalendarPickerDisabledDateRange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+
+    g_strValue = CalendarPickerModelNG::GetDisabledDateRange(frameNode);
+    return g_strValue.c_str();
+}
+
 namespace NodeModifier {
 const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
@@ -391,6 +490,10 @@ const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         .resetStartDate = ResetStartDate,
         .setEndDate = SetEndDate,
         .resetEndDate = ResetEndDate,
+        .setCalendarPickerMarkToday = SetCalendarPickerMarkToday,
+        .resetCalendarPickerMarkToday = ResetCalendarPickerMarkToday,
+        .setCalendarPickerDisabledDateRange = SetCalendarPickerDisabledDateRange,
+        .resetCalendarPickerDisabledDateRange = ResetCalendarPickerDisabledDateRange,
         .setEdgeAlign = SetEdgeAlign,
         .resetEdgeAlign = ResetEdgeAlign,
         .setCalendarPickerPadding = SetCalendarPickerPadding,
@@ -402,6 +505,8 @@ const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         .getCalendarPickerTextStyle = GetTextStyle,
         .getStartDate = GetStartDate,
         .getEndDate = GetEndDate,
+        .getCalendarPickerMarkToday = GetCalendarPickerMarkToday,
+        .getCalendarPickerDisabledDateRange = GetCalendarPickerDisabledDateRange,
         .getEdgeAlign = GetEdgeAlign,
         .setCalendarPickerHeight = SetCalendarPickerHeight,
         .resetCalendarPickerHeight = ResetCalendarPickerHeight,
@@ -430,6 +535,10 @@ const CJUICalendarPickerModifier* GetCJUICalendarPickerModifier()
         .resetStartDate = ResetStartDate,
         .setEndDate = SetEndDate,
         .resetEndDate = ResetEndDate,
+        .setCalendarPickerMarkToday = SetCalendarPickerMarkToday,
+        .resetCalendarPickerMarkToday = ResetCalendarPickerMarkToday,
+        .setCalendarPickerDisabledDateRange = SetCalendarPickerDisabledDateRange,
+        .resetCalendarPickerDisabledDateRange = ResetCalendarPickerDisabledDateRange,
         .setEdgeAlign = SetEdgeAlign,
         .resetEdgeAlign = ResetEdgeAlign,
         .setCalendarPickerPadding = SetCalendarPickerPadding,
@@ -441,6 +550,8 @@ const CJUICalendarPickerModifier* GetCJUICalendarPickerModifier()
         .getCalendarPickerTextStyle = GetTextStyle,
         .getStartDate = GetStartDate,
         .getEndDate = GetEndDate,
+        .getCalendarPickerMarkToday = GetCalendarPickerMarkToday,
+        .getCalendarPickerDisabledDateRange = GetCalendarPickerDisabledDateRange,
         .getEdgeAlign = GetEdgeAlign,
         .setCalendarPickerHeight = SetCalendarPickerHeight,
         .resetCalendarPickerHeight = ResetCalendarPickerHeight,

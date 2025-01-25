@@ -137,6 +137,7 @@ interface LabelTheme {
   smallMargin: Margin;
   localizedSmallMargin: LocalizedMargin;
   defaultFontSize: Dimension;
+  fontWeight: Resource;
 }
 
 interface ChipNodeOpacity {
@@ -165,8 +166,8 @@ interface ChipNodeTheme {
   borderColor: ResourceColor,
   defaultBorderWidth: Dimension;
   activatedBorderColor: ResourceColor;
-  focusBtnScaleX: number;
-  focusBtnScaleY: number;
+  focusBtnScaleX: Resource;
+  focusBtnScaleY: Resource;
   focusBgColor: ResourceColor;
   focusActivatedBgColor: ResourceColor;
   normalShadowStyle: Resource;
@@ -214,6 +215,7 @@ export const defaultTheme: ChipTheme = {
     fontColor: $r('sys.color.chip_font_color'),
     activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
     fontFamily: 'HarmonyOS Sans',
+    fontWeight: $r('sys.float.chip_text_font_weight'),
     normalMargin: {
       left: 6,
       right: 6,
@@ -260,8 +262,8 @@ export const defaultTheme: ChipTheme = {
   defaultSymbol: {
     normalFontColor: [$r('sys.color.chip_usually_icon_color')],
     activatedFontColor: [$r('sys.color.chip_active_icon_color')],
-    normalSymbolFontSize: $r('sys.float.chip_normal_icon_size'),
-    smallSymbolFontSize: $r('sys.float.chip_small_icon_size'),
+    normalSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_normal_icon_size')).value as Length,
+    smallSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_small_icon_size')).value as Length,
     defaultEffect: -1,
   },
   chipNode: {
@@ -281,8 +283,8 @@ export const defaultTheme: ChipTheme = {
     normalBorderRadius: $r('sys.float.chip_border_radius_normal'),
     smallBorderRadius: $r('sys.float.chip_border_radius_small'),
     borderWidth: 2,
-    focusBtnScaleX: LengthMetrics.resource($r('sys.float.chip_focused_btn_scale')).value,
-    focusBtnScaleY: LengthMetrics.resource($r('sys.float.chip_focused_btn_scale')).value,
+    focusBtnScaleX: $r('sys.float.chip_focused_btn_scale'),
+    focusBtnScaleY: $r('sys.float.chip_focused_btn_scale'),
     localizedNormalPadding: {
       start: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
       end: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
@@ -394,7 +396,7 @@ export struct ChipComponent {
   @State breakPoint: BreakPointsType = BreakPointsType.SM;
   @State fontSizeScale: number = 1;
   private isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
-  private isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
+  private isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
   public onClose?: VoidCallback;
   public onClicked?: VoidCallback;
   @State chipNodeInFocus: boolean = false;
@@ -445,28 +447,37 @@ export struct ChipComponent {
   }
 
   private isSetActiveChipBgColor(): boolean {
-    if (this.chipNodeActivatedBackgroundColor == null) {
+    if (this.chipNodeActivatedBackgroundColor) {
       return false;
     }
-    return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
-    ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
+    try {
+      return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
+      ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
+    } catch (error) {
+      console.error(`[Chip] failed to get ColorMetrics.resourceColor`);
+       return false;
+    }
   }
 
   private isSetNormalChipBgColor(): boolean {
-    if (this.chipNodeBackgroundColor == null) {
+    if (this.chipNodeBackgroundColor) {
       return false;
     }
-    return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
-    ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
+    try {
+      return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
+      ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
+    } catch (error) {
+      console.error(`[Chip] failed to get resourceColor`);
+       return false;
+    }
   }
 
   private getShadowStyles(): ShadowStyle | undefined {
-    let shadowStyle = this.isSmallChipSize() ? this.theme.chipNode.smallShadowStyle :
-    this.theme.chipNode.normalShadowStyle;
-    if (this.resourceToNumber(shadowStyle, -1) === -1) {
+    if (!this.chipNodeInFocus) {
       return undefined;
     }
-    return this.resourceToNumber(shadowStyle, -1) as ShadowStyle;
+    return this.resourceToNumber(this.isSmallChipSize() ? this.theme.chipNode.smallShadowStyle :
+      this.theme.chipNode.normalShadowStyle, -1);
   }
 
   @Builder
@@ -580,7 +591,7 @@ export struct ChipComponent {
       .constraintSize(this.getChipConstraintSize())
     }
     .clip(false)
-    .shadow(this.chipNodeInFocus ? this.getShadowStyles() : undefined)
+    .shadow(this.getShadowStyles())
     .padding(0)
     .focusable(true)
     .size(this.getChipSize())
@@ -599,16 +610,22 @@ export struct ChipComponent {
     .accessibilitySelected(this.getAccessibilitySelected())
     .onClick(this.getChipOnClicked())
     .onKeyEvent((event) => {
-      if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL) {
-        this.deleteChip()
+      if (!event || event.type === null || event.type !== KeyType.Down) {
+        return;
+      }
+      let isDeleteChip = event.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
+      let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose && !this.suffixIcon?.src &&
+      this.isSuffixIconFocusStyleCustomized;
+      if (isDeleteChip || isEnterDeleteChip) {
+        this.deleteChip();
       }
     })
     .onFocus(() => {
       if (this.isSuffixIconFocusStyleCustomized) {
         this.chipNodeInFocus = true;
         this.chipScale = {
-          x: this.theme.chipNode.focusBtnScaleX ?? 1,
-          y: this.theme.chipNode.focusBtnScaleY ?? 1,
+          x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+          y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
         };
       }
     })
@@ -969,7 +986,10 @@ export struct ChipComponent {
   }
 
   getLabelFontWeight(): string | number | FontWeight {
-    return this.isChipActivated() ? FontWeight.Medium : FontWeight.Regular;
+    if (this.isChipActivated()) {
+      return FontWeight.Medium;
+    }
+    return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular) as FontWeight;
   }
 
   getLabelFontFamily(): ResourceStr {
@@ -1111,28 +1131,28 @@ export struct ChipComponent {
     return this.chipActivated ?? false;
   }
 
-  resourceToNumber(resource: Resource, defaultValue: number): number | undefined {
+  resourceToNumber(resource: Resource, defaultValue: number): number {
     if (!resource || !resource.type) {
-      console.error('[Chip] failed: resource get fail.');
+      console.error('[Chip] failed: resource get fail');
       return defaultValue;
     }
     const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
     if (!resourceManager) {
-      console.error('[Chip] failed to get resourceManager.');
+      console.error('[Chip] failed to get resourceManager');
       return defaultValue;
     }
     switch (resource.type) {
       case RESOURCE_TYPE_FLOAT:
       case RESOURCE_TYPE_INTEGER:
-        if (resource.id !== -1) {
-          return resourceManager.getNumber(resource);
+        try {
+          if (resource.id !== -1) {
+            return resourceManager.getNumber(resource);
+          }
+          return resourceManager.getNumberByName((resource.params as string[])[0].split('.')[2]);
+        } catch (error) {
+          console.error(`[Chip] get resource error, return defaultValue`);
+          return defaultValue;
         }
-        if (resource.params && resource.params.length > 0 && resource.params[0] && resource.params[0].split('.') > 2 &&
-        resource.params[0].split('.')[2]) {
-          let param = resource.params[0].split('.')[2] as string;
-          return resourceManager.getNumberByName(param);
-        }
-        return defaultValue;
       default:
         return defaultValue;
     }

@@ -232,6 +232,11 @@ ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
 }
 
+ArkUI_Bool IsRightToLeft()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft();
+}
+
 void CreateNewScope()
 {
     ViewStackModel::GetInstance()->NewScope();
@@ -493,6 +498,9 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
     NodeModifier::SetSwiperOnContentDidScroll,
+    NodeModifier::SetSwiperSelected,
+    NodeModifier::SetSwiperUnselected,
+    NodeModifier::SetSwiperContentWillScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -695,6 +703,9 @@ const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 };
 
 const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1925,30 +1936,32 @@ ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
 
 const ArkUIDialogAPI* GetDialogAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        SetDialogContent,
-        RemoveDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogModalMode,
-        SetDialogAutoCancel,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridColumnCount,
-        EnableDialogCustomStyle,
-        EnableDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegisterOnWillDialogDismiss,
-        RegisterOnWillDismissWithUserData,
-        SetKeyboardAvoidDistance,
-        SetDialogLevelMode,
-        SetDialogLevelUniqueId,
-        SetDialogImmersiveMode,
+        .create = CreateDialog,
+        .dispose = DisposeDialog,
+        .setContent = SetDialogContent,
+        .removeContent = RemoveDialogContent,
+        .setContentAlignment = SetDialogContentAlignment,
+        .resetContentAlignment = ResetDialogContentAlignment,
+        .setModalMode = SetDialogModalMode,
+        .setAutoCancel = SetDialogAutoCancel,
+        .setMask = SetDialogMask,
+        .setBackgroundColor = SetDialogBackgroundColor,
+        .setCornerRadius = SetDialogCornerRadius,
+        .setGridColumnCount = SetDialogGridColumnCount,
+        .enableCustomStyle = EnableDialogCustomStyle,
+        .enableCustomAnimation = EnableDialogCustomAnimation,
+        .show = ShowDialog,
+        .close = CloseDialog,
+        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
+        .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
+        .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
+        .setLevelMode = SetDialogLevelMode,
+        .setLevelUniqueId = SetDialogLevelUniqueId,
+        .setImmersiveMode = SetDialogImmersiveMode,
     };
+    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
 }
 
@@ -2001,6 +2014,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .createCustomNode = CreateCustomNode,
     .getOrCreateCustomNode = GetOrCreateCustomNode,
     .getRSNodeByNode = GetRSNodeByNode,
+    .isRightToLeft = IsRightToLeft,
     .createNewScope = CreateNewScope,
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
@@ -2364,8 +2378,14 @@ ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshot
 
 const ArkUISnapshotAPI* GetComponentSnapshotAPI()
 {
-    static const ArkUISnapshotAPI impl { CreateSnapshotOptions, DestroySnapshotOptions, SnapshotOptionsSetScale,
-        GetNodeSnapshot };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISnapshotAPI impl {
+        .createSnapshotOptions = CreateSnapshotOptions,
+        .destroySnapshotOptions = DestroySnapshotOptions,
+        .snapshotOptionsSetScale = SnapshotOptionsSetScale,
+        .getSyncSnapshot = GetNodeSnapshot
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 

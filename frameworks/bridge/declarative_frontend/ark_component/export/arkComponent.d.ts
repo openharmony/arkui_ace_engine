@@ -388,7 +388,7 @@ declare class ArkImageAnimatorComponent extends ArkComponent implements CommonMe
     preDecode(value: number): ImageAnimatorAttribute;
     fillMode(value: FillMode): ImageAnimatorAttribute;
     iterations(value: number): ImageAnimatorAttribute;
-    autoMonitorInvisibleArea(value: boolean): ImageAnimatorAttribute;
+    monitorInvisibleArea(value: boolean): ImageAnimatorAttribute;
     onStart(event: () => void): ImageAnimatorAttribute;
     onPause(event: () => void): ImageAnimatorAttribute;
     onRepeat(event: () => void): ImageAnimatorAttribute;
@@ -1850,6 +1850,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     disableSwipe(value: boolean): this;
     curve(value: string | Curve | ICurve): this;
     onChange(event: (index: number) => void): this;
+    onUnselected(event: (index: number) => void): this;
     indicatorStyle(value?: IndicatorStyle | undefined): this;
     prevMargin(value: Length): this;
     nextMargin(value: Length): this;
@@ -1879,6 +1880,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     animationMode(value: AnimationMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
+    onUnselected(event: (index: number) => void): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;

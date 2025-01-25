@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -853,13 +853,13 @@ HWTEST_F(SwiperArrowTestNg, ClickArrowRTL001, TestSize.Level1)
      */
     leftArrowPattern->ButtonClickEvent();
     FlushUITasks();
-    EXPECT_EQ(pattern_->currentIndex_, 1);
+    EXPECT_TRUE(CurrentIndex(1));
     /**
      * @tc.steps: step2. Click the right arrow in RTL layout.
      */
     rightArrowPattern->ButtonClickEvent();
     FlushUITasks();
-    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -1096,7 +1096,7 @@ HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
     controller->SetSwiperNode(targetNode, indicatorNode);
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.f, 0.f, 0.f, 0.f)));
     indicatorPattern->SaveDotIndicatorProperty();
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.0f, 0.f, 31.98f, 87.9f)));
 }
 } // namespace OHOS::Ace::NG

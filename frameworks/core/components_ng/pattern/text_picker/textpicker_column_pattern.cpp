@@ -108,7 +108,8 @@ void TextPickerColumnPattern::OnModifyDone()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto theme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
@@ -210,6 +211,13 @@ void TextPickerColumnPattern::UnregisterWindowStateChangedCallback()
 void TextPickerColumnPattern::OnWindowHide()
 {
     isShow_ = false;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void TextPickerColumnPattern::StopHapticController()
+{
     if (hapticController_) {
         hapticController_->Stop();
     }
@@ -372,6 +380,7 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
                 auto TossEndPosition = toss->GetTossEndPosition();
                 pattern->SetYLast(TossEndPosition);
                 toss->StopTossAnimation();
+                pattern->StopHapticController();
             } else {
                 pattern->animationBreak_ = false;
                 pattern->clickBreak_ = false;
@@ -1105,7 +1114,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
@@ -1806,15 +1815,13 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     yOffset_ = dragDelta;
     yLast_ = offsetY;
 
+    StopHapticController();
     if (useRebound && !pressed_ && isTossStatus_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
         overscroller_.UpdateTossSpring(offsetY);
         if (overscroller_.ShouldStartRebound()) {
             auto toss = GetToss();
             CHECK_NULL_VOID(toss);
             toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
-            if (hapticController_) {
-                hapticController_->Stop();
-            }
         }
     }
     SpringCurveTailEndProcess(useRebound, stopMove);

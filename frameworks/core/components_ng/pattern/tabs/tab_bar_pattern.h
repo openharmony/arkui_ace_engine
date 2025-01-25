@@ -678,6 +678,7 @@ private:
     void InitTabBarProperties(const RefPtr<TabTheme>& tabTheme);
     void InitFocusEvent();
     const Color& GetSubTabBarHoverColor(int32_t index) const;
+    void UpdateFocusToSelectedNode(bool isFocusActive);
     void UpdateFocusTabBarPageState();
     void UpdateSubTabBarItemStyles(const RefPtr<FrameNode>& columnNode, int32_t focusedColumnId,
         int32_t selectedColumnId, OHOS::Ace::Axis axis, int32_t index);

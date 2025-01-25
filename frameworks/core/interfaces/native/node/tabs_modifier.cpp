@@ -91,6 +91,17 @@ void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, fadingEdge);
 }
+void SetTabOnUnselected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnUnselected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnUnselected(frameNode, nullptr);
+    }
+}
 void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -242,12 +253,17 @@ void ResetDivider(ArkUINodeHandle node)
 
     TabsModelNG::SetDivider(frameNode, divider);
 }
-
 void ResetFadingEdge(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, true);
+}
+void ResetTabOnUnselected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnUnselected(frameNode, nullptr);
 }
 void ResetBarBackgroundColor(ArkUINodeHandle node)
 {
@@ -455,6 +471,25 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
     TabsModelNG::SetBarBackgroundEffect(frameNode, effectOption);
 }
 
+void SetTabsOnSelected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnSelected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnSelected(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnSelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnSelected(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -465,6 +500,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setBarGridAlign = SetBarGridAlign,
         .setDivider = SetDivider,
         .setFadingEdge = SetFadingEdge,
+        .setTabOnUnselected = SetTabOnUnselected,
         .setBarBackgroundColor = SetBarBackgroundColor,
         .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
         .setBarOverlap = SetBarOverlap,
@@ -482,6 +518,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetBarGridAlign = ResetBarGridAlign,
         .resetDivider = ResetDivider,
         .resetFadingEdge = ResetFadingEdge,
+        .resetTabOnUnselected = ResetTabOnUnselected,
         .resetBarBackgroundColor = ResetBarBackgroundColor,
         .resetBarBackgroundBlurStyle = ResetBarBackgroundBlurStyle,
         .resetBarOverlap = ResetBarOverlap,
@@ -507,6 +544,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -562,6 +601,8 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

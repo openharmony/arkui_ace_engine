@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_accessibility.h"
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t INDICATOR_DEFAULT_DURATION = 400;
+const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
+} // namespace
 class IndicatorPattern : public SwiperIndicatorPattern {
     DECLARE_ACE_TYPE(IndicatorPattern, SwiperIndicatorPattern);
 
@@ -138,6 +142,9 @@ public:
         if (!GetDotIndicatorModifier()) {
             SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
         }
+        GetDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
+        float motionVelocity = 0.0f;
+        GetDotIndicatorModifier()->SetLongPointHeadCurve(DEFAULT_CURVE, motionVelocity);
 
         auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(GetDotIndicatorModifier());
         SetDotIndicatorPaintMethodInfoInSingleMode(paintMethod);
@@ -154,6 +161,7 @@ public:
         paintMethod->SetHorizontalAndRightToLeft(GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(RealTotalCount());
         paintMethod->SetGestureState(singleGestureState_);
+        singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         paintMethod->SetIsLoop(IsLoop());
         paintMethod->SetIsHover(IsHover());
         paintMethod->SetIsPressed(IsPressed());
@@ -163,7 +171,9 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
-        GetOptinalMouseClickIndex() = std::nullopt;
+        paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
+        paintMethod->SetFirstIndex(lastIndex_);
+        ResetOptinalMouseClickIndex();
     }
 
     const bool& IsIndicatorCustomSize() const
@@ -190,6 +200,8 @@ public:
     void GetTextContentSub(std::string& firstContent, std::string& lastContent) const override;
     void SwipeTo(std::optional<int32_t> mouseClickIndex) override;
     void OnModifyDone() override;
+    int32_t GetTouchCurrentIndex() const override;
+    std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex) override;
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -198,6 +210,7 @@ public:
 
 protected:
     void FireChangeEvent() const override;
+    void FireIndicatorIndexChangeEvent(int32_t index) const override;
     SwiperIndicatorType GetIndicatorTypeFromProperty() const;
     Axis GetDirectionFromProperty() const;
     int32_t GetInitialIndexFromProperty() const;
@@ -217,6 +230,8 @@ private:
     ChangeEventPtr changeEvent_;
     GestureState singleGestureState_ = GestureState::GESTURE_STATE_INIT;
     bool isCustomSize_ = false;
+    TouchBottomTypeLoop singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    int32_t lastIndex_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

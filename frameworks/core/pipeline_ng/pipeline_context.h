@@ -61,6 +61,11 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
 
+namespace OHOS::Ace::Kit {
+class UIContext;
+class UIContextImpl;
+}
+
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
@@ -476,6 +481,8 @@ public:
     void AddWindowSizeChangeCallback(int32_t nodeId);
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
+
+    void AddWindowSizeDragEndCallback(std::function<void()>&& callback);
 
     void AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode);
 
@@ -1075,6 +1082,17 @@ public:
 
     void SetHostParentOffsetToWindow(const Offset& offset);
 
+    RefPtr<Kit::UIContext> GetUIContext();
+    void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
+    void FlushPendingDeleteCustomNode();
+
+    bool IsWindowSizeDragging() const
+    {
+        return isWindowSizeDragging_;
+    }
+
+    void SetIsWindowSizeDragging(bool isDragging);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1206,6 +1224,7 @@ private:
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
     std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
+    std::stack<RefPtr<CustomNode>> pendingDeleteCustomNode_;
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
@@ -1216,6 +1235,8 @@ private:
     std::set<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
+    // window size drag end
+    std::list<std::function<void()>> onWindowSizeDragEndCallbacks_;
 
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
@@ -1284,6 +1305,7 @@ private:
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
+    bool isWindowSizeDragging_ = false;
     KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
@@ -1357,6 +1379,8 @@ private:
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
+
+    RefPtr<Kit::UIContextImpl> uiContextImpl_;
 
     friend class ScopedLayout;
     friend class FormGestureManager;

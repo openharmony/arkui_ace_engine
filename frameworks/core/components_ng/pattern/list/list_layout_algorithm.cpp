@@ -1332,7 +1332,9 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
                 break;
             }
         }
-        predictEndPos = index * itemHeight - startPos;
+        int32_t gap = index - itemPosition_.begin()->first;
+        predictEndPos = totalOffset_ - currentOffset_ + itemPosition_.begin()->second.startPos + gap * itemHeight -
+            startPos;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
         } else if (GreatNotEqual(predictEndPos, maxPos)) {
@@ -1370,7 +1372,9 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
                 break;
             }
         }
-        predictEndPos = index * itemHeight + itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        int32_t gap = index - itemPosition_.begin()->first;
+        predictEndPos = totalOffset_ - currentOffset_ + itemPosition_.begin()->second.startPos + gap * itemHeight +
+            itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
         if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
             predictEndPos = itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
         } else if (GreatNotEqual(
@@ -1412,7 +1416,9 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
                 break;
             }
         }
-        predictEndPos = index * itemHeight - endPos - spaceWidth_;
+        int32_t gap = index - itemPosition_.begin()->first;
+        predictEndPos = totalOffset_ - currentOffset_ + itemPosition_.begin()->second.startPos + gap * itemHeight -
+            endPos - spaceWidth_;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
         } else if (GreatNotEqual(predictEndPos, maxPos)) {
@@ -2273,9 +2279,30 @@ void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode,
     pattern->SetPredictLayoutParamV2(param);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    context->AddPredictTask(
-        [weak = WeakClaim(RawPtr(frameNode)), value = listMainSizeValues, show = show](int64_t deadline,
-        bool canUseLongPredictTask) { ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline, value, show); });
+    if (!context->IsWindowSizeDragging()) {
+        context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode)), listMainSizeValues, show]
+            (int64_t deadline, bool canUseLongPredictTask) {
+                ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline, listMainSizeValues, show);
+            }
+        );
+        return;
+    }
+    context->AddWindowSizeDragEndCallback([weak = WeakClaim(RawPtr(frameNode)), listMainSizeValues, show]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->GetPredictLayoutParamV2().has_value()) {
+            return;
+        }
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode)), listMainSizeValues, show]
+            (int64_t deadline, bool canUseLongPredictTask) {
+                ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline, listMainSizeValues, show);
+            }
+        );
+    });
 }
 
 float ListLayoutAlgorithm::GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const

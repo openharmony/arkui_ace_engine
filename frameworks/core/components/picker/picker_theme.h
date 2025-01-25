@@ -36,11 +36,11 @@ constexpr Dimension PICKER_FOCUS_PADDING = 2.0_vp;
 constexpr uint32_t FOCUS_AREA_TYPE_IMPL = 1;
 } // namespace
 
-class PickerTheme final : public virtual Theme {
+class PickerTheme : public virtual Theme {
     DECLARE_ACE_TYPE(PickerTheme, Theme);
 
 public:
-    class Builder final {
+    class Builder {
     public:
         Builder() = default;
         ~Builder() = default;
@@ -48,31 +48,31 @@ public:
         RefPtr<PickerTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<PickerTheme> theme = AceType::Claim(new PickerTheme());
-            if (!themeConstants) {
-                return theme;
-            }
+            InitTheme(theme, themeConstants);
+            return theme;
+        }
 
+    protected:
+        void InitTheme(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            CHECK_NULL_VOID(themeConstants);
             auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-
+            CHECK_NULL_VOID(themeStyle);
             InitializeTextStyles(theme, themeStyle);
             theme->optionSizeUnit_ = DimensionUnit::VP;
             theme->lunarWidth_ =
                 Dimension(36.0, DimensionUnit::VP); // 36.0: lunarWidth, this width do not need setting by outer.
             theme->lunarHeight_ =
                 Dimension(18.0, DimensionUnit::VP); // 18.0: lunarHeight, this height do not need setting by outer.
-            theme->rotateInterval_ = 15.0; // when rotate 15.0 angle handle scroll of picker column.
+            theme->rotateInterval_ = 15.0;          // when rotate 15.0 angle handle scroll of picker column.
             theme->dividerThickness_ = DIVIDER_THICKNESS;
             Parse(themeStyle, theme);
             InitializeSelectorItemStyles(theme, themeStyle);
-            return theme;
         }
 
+    private:
         void Parse(const RefPtr<ThemeStyle>& style, const RefPtr<PickerTheme>& theme) const;
 
-    private:
         void InitializeButtonTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
@@ -185,7 +185,7 @@ public:
     };
 
     ~PickerTheme() override = default;
-
+    PickerTheme() = default;
     RefPtr<PickerTheme> clone() const
     {
         auto theme = AceType::Claim(new PickerTheme());
@@ -618,7 +618,6 @@ public:
         return selectorItemNormalBgColor_;
     }
 private:
-    PickerTheme() = default;
 
     Color focusColor_;
     Color hoverColor_;

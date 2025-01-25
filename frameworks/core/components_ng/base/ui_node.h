@@ -844,6 +844,10 @@ public:
      */
     void SetAllowReusableV2Descendant(bool allow);
     bool IsAllowReusableV2Descendant() const;
+
+    bool HasSkipNode();
+    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus) {}
+    virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -908,6 +912,7 @@ protected:
     void CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
         std::list<int32_t>& reservedElmtId, bool isEntry);
     void CollectReservedChildren(std::list<int32_t>& reservedElmtId);
+    virtual void OnCollectRemoved() {}
 
     bool needCallChildrenUpdate_ = true;
 

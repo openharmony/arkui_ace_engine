@@ -387,6 +387,7 @@ void AceContainer::Destroy()
         }
     }
     DestroyToastSubwindow(instanceId_);
+    DestroySelectOverlaySubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -1044,7 +1045,7 @@ void AceContainer::InitializeCallback()
                                     WindowSizeChangeReason type,
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
-        ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
+        ACE_SCOPED_TRACE_COMMERCIAL("ViewChangeCallback(%d, %d)", width, height);
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -1565,6 +1566,7 @@ private:
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
     uint32_t autoFillSessionId, bool isNative)
 {
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UpdatePopupUIExtension called");
     CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
@@ -2447,7 +2449,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         CHECK_NULL_VOID(ngPipeline);
         auto uiExtManager = ngPipeline->GetUIExtensionManager();
         CHECK_NULL_VOID(uiExtManager);
-        uiExtManager->SendPageModeToUEA(ngPipeline);
+        uiExtManager->SendPageModeRequestToHost(ngPipeline);
     }
 }
 
@@ -3298,7 +3300,8 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
         MMI::PointerEvent::PointerItem pointerItem;
-        if (!currentEvent->GetPointerItem(pointerId, pointerItem)) {
+        if (!currentEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed() ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             for (const auto& callback : callbacksIter->second) {
                 if (callback) {
                     callback();
@@ -3306,16 +3309,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
             callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
         } else {
-            if (!pointerItem.IsPressed() || pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-                for (const auto& callback : callbacksIter->second) {
-                    if (callback) {
-                        callback();
-                    }
-                }
-                callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
-            } else {
-                ++callbacksIter;
-            }
+            ++callbacksIter;
         }
     }
 }
@@ -3342,6 +3336,7 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
     dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
+    dragPointerEvent.originId = pointerItem.GetOriginPointerId();
     RegisterStopDragCallback(dragPointerEvent.pointerId, std::move(stopDragCallback));
     return true;
 }
@@ -3365,6 +3360,25 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
         list.emplace_back(std::move(stopDragCallback));
         stopDragCallbackMap_.emplace(pointerId, list);
     }
+}
+
+bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    auto iter = currentEvents_.find(dragPointerEvent.originId);
+    if (iter == currentEvents_.end()) {
+        return false;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    auto currentPointerEvent = iter->second;
+    CHECK_NULL_RETURN(currentPointerEvent, false);
+    if (!currentPointerEvent->GetPointerItem(currentPointerEvent->GetPointerId(), pointerItem) ||
+        !pointerItem.IsPressed()) {
+        return false;
+    }
+    dragPointerEvent.displayX = pointerItem.GetDisplayX();
+    dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    return true;
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(

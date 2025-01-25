@@ -1134,4 +1134,28 @@ namespace OHOS::Ace::NG {
             node.second.second->PaintDebugBoundaryTreeAll(flag);
         }
     }
+    void LazyForEachBuilder::SetDestroying(bool isDestroying, bool cleanStatus)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            if (node.second.second->GetTag() == "BuilderProxyNode") {
+                node.second.second->SetDestroying(isDestroying, false);
+            } else {
+                node.second.second->SetDestroying(isDestroying, cleanStatus);
+            }
+        }
+
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            if (node.second.second->GetTag() == "BuilderProxyNode") {
+                node.second.second->SetDestroying(isDestroying, false);
+            } else {
+                node.second.second->SetDestroying(isDestroying, cleanStatus);
+            }
+        }
+    }
 }

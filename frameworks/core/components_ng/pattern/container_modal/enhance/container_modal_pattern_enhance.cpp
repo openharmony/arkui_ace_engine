@@ -201,9 +201,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     renderContext->SetClipToBounds(true);
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     // only floating window show border
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
-    renderContext->UpdateBorderRadius(borderRadius);
     BorderColorProperty borderColor;
     borderColor.SetColor((isFloatingWindow && isShow) ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
     renderContext->UpdateBorderColor(borderColor);
@@ -248,6 +245,9 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         EventHubOnModifyDone(customTitleRow);
         EventHubOnModifyDone(gestureRow);
         EventHubOnModifyDone(floatingTitleRow);
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
     
     UpdateGestureRowVisible();

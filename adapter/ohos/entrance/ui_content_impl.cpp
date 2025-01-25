@@ -229,13 +229,13 @@ void AddSetAppColorModeToResConfig(
 
 std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    std::string res = "[";
-    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&res](const auto& avoidArea) {
-        res =
-            res + "(" + std::to_string(static_cast<int32_t>(avoidArea.first)) + "," + avoidArea.second.ToString() + ")";
+    std::stringstream ss;
+    ss << "[";
+    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&ss](const auto& avoidArea) {
+        ss << "(" << static_cast<int32_t>(avoidArea.first) << "," << avoidArea.second.ToString() << ")";
     });
-    res = res + "]";
-    return res;
+    ss << "]";
+    return ss.str();
 }
 } // namespace
 
@@ -357,7 +357,7 @@ bool ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
             safeAreaUpdated |= safeAreaManager->UpdateSystemSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             safeAreaUpdated |= safeAreaManager->UpdateNavArea(ConvertAvoidArea(avoidArea.second));
-        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && context->GetUseCutout()) {
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
             safeAreaUpdated |= safeAreaManager->UpdateCutoutSafeArea(ConvertAvoidArea(avoidArea.second),
                 NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
         }
@@ -574,7 +574,7 @@ public:
                     pipeline->UpdateSystemSafeArea(safeArea, true);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea, true);
-                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea, true);
                 }
                 // for ui extension component
@@ -779,6 +779,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     if (CJUtils::IsCJFrontendContext(context)) {
         LOGD("UIContentImpl cj");
         context_ = context->weak_from_this();
+        SetConfiguration(context->GetConfiguration());
     } else {
         auto hapModuleInfo = context->GetHapModuleInfo();
         CHECK_NULL_VOID(hapModuleInfo);
@@ -1157,6 +1158,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
             ImageFileCache::GetInstance().SetCacheFileInfo();
+            ImageFileCache::GetInstance().ClearAllCacheFiles();
         });
     }
 
@@ -1669,6 +1671,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         ImageFileCache::GetInstance().SetCacheFileInfo();
+        ImageFileCache::GetInstance().ClearAllCacheFiles();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
@@ -2102,7 +2105,15 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
-    pipeline->SetUseCutout(useCutout);
+    if (pipeline) {
+        auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (pipelineContext) {
+            auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+            if (safeAreaManager) {
+                safeAreaManager->SetUseCutout(useCutout);
+            }
+        }
+    }
     container->CheckAndSetFontFamily();
     SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
@@ -2227,9 +2238,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
             window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
             pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
-            if (pipeline->GetUseCutout()) {
-                pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-            }
+            pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
             pipeline->UpdateNavSafeArea(
                 container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
         }
@@ -2275,6 +2284,7 @@ void UIContentImpl::Foreground()
         instanceId_);
     if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+        PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsBegin();
     }
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
@@ -2294,6 +2304,7 @@ void UIContentImpl::Background()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
+    PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
@@ -2771,17 +2782,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
-         "rsTransaction nullptr %{public}d",
+    std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
+    TAG_LOGI(ACE_LAYOUT,
+        "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
+        "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
-        rsTransaction == nullptr);
+        rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
     if (lastReason_ == OHOS::Rosen::WindowSizeChangeReason::UNDEFINED) {
         lastReason_ = reason;
     }
     bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
     lastReason_ = reason;
-    std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
-    TAG_LOGI(ACE_LAYOUT, "updateAvoidAreas size %{public}zu, %{public}s", avoidAreas.size(), stringifiedMap.c_str());
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
@@ -2819,7 +2830,6 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         }
     };
     auto updateDisplayIdAndAreaTask = [container, context, rsWindow = window_]() {
-        CHECK_NULL_VOID(rsWindow);
         if (!rsWindow) {
             TAG_LOGE(AceLogTag::ACE_WINDOW, "Current container has invalid window data.");
             return;
@@ -2859,6 +2869,16 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
         context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
+            bool isDragging = reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START;
+            taskExecutor->PostTask(
+                [weak = AceType::WeakClaim(AceType::RawPtr(context)), isDragging]() {
+                    auto pipelineContext = weak.Upgrade();
+                    CHECK_NULL_VOID(pipelineContext);
+                    pipelineContext->SetIsWindowSizeDragging(isDragging);
+                }, TaskExecutor::TaskType::UI, "ArkUIWindowSizeDragStartEnd", PriorityType::VIP);
+        }
     }
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
@@ -4173,6 +4193,14 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
     } else {
         taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleVisible");
     }
+}
+
+bool UIContentImpl::GetContainerModalTitleVisible()
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return NG::ContainerModalViewEnhance::GetContainerModalTitleVisible(pipeline);
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
