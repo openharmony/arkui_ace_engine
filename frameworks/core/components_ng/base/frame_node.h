@@ -1257,6 +1257,7 @@ protected:
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void OnCollectRemoved() override;
 
 private:
     void MarkDirtyNode(

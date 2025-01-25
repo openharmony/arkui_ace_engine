@@ -5427,6 +5427,11 @@ void FrameNode::DetachContext(bool recursive)
     UINode::DetachContext(recursive);
 }
 
+void FrameNode::OnCollectRemoved()
+{
+    pattern_->OnCollectRemoved();
+}
+
 RectF FrameNode::ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const
 {
     RectF newRect = rect;
