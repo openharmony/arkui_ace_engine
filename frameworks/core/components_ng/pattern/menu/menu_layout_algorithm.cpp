@@ -832,7 +832,7 @@ void MenuLayoutAlgorithm::UpdateSelectFocus(LayoutWrapper* layoutWrapper, Layout
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->IsSelectMenu()) {
+    if (!pattern->IsSelectMenu()) {
         return;
     }
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
