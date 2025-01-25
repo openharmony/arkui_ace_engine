@@ -148,7 +148,7 @@ int32_t TextFieldController::AddText(std::u16string text, int32_t offset)
     }
     textFieldPattern->FinishTextPreviewOperation();
     int32_t length = textFieldPattern->GetTextUtf16Value().length();
-    if (offset == -1) {
+    if (offset == -1 || offset > length) {
         offset = length;
     }
     return textFieldPattern->InsertValueByController(text, offset);

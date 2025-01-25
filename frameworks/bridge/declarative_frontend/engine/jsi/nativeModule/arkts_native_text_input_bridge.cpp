@@ -38,6 +38,7 @@ constexpr int CALL_ARG_3 = 3;
 constexpr int CALL_ARG_4 = 4;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
+constexpr int PARAM_ARR_LENGTH_3 = 3;
 constexpr int32_t ARG_GROUP_LENGTH = 4;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr uint32_t ILLEGAL_VALUE = 0;
@@ -1816,18 +1817,17 @@ ArkUINativeModuleValue TextInputBridge::SetOnChange(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::u16string&, PreviewText&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::u16string& changeValue, PreviewText& previewText) {
+    std::function<void(const ChangeValueInfo&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const ChangeValueInfo& changeValueInfo) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "offset", "value" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
-            panda::StringRef::NewFromUtf16(vm, previewText.value.c_str()) };
-        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
-            panda::StringRef::NewFromUtf16(vm, changeValue.c_str()), eventObject };
-        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+        auto eventObject = CommonBridge::CreateChangeValueInfoObj(vm, changeValueInfo);
+        auto contentObj = eventObject->Get(vm, "content");
+        auto previewTextObj = eventObject->Get(vm, "previewText");
+        auto optionsObj = eventObject->Get(vm, "options");
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_3] = { contentObj, previewTextObj, optionsObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_3);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnChange(
         nativeNode, reinterpret_cast<void*>(&callback));

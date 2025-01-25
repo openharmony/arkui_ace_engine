@@ -3955,9 +3955,6 @@ bool TextFieldPattern::InitValueText(std::u16string content)
     if (!isWillChange) {
         return false;
     }
-    if (changeValueInfo.oldContent == content) {
-        return false;
-    }
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetTextUtf16Value().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
