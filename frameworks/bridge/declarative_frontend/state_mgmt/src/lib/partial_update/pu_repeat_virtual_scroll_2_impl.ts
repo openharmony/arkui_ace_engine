@@ -231,6 +231,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // .template 3rd parameter, cachedCount
     private templateOptions_: { [type: string]: RepeatTemplateImplOptions };
 
+    // reuse node in L2 cache or not
+    private reusable_?: boolean = true;
+
     // factory for interface RepeatItem<T> objects
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
@@ -332,6 +335,11 @@ class __RepeatVirtualScroll2Impl<T> {
             this.keyGenFunc_ = config.keyGenFunc;
             this.useKeys_ = config.keyGenFuncSpecified;
 
+            if (config.reusable !== undefined) {
+                this.reusable_ = config.reusable;
+            }
+            stateMgmtConsole.debug(`   ...reusable:${this.reusable_}`);
+
             this.mkRepeatItem_ = config.mkRepeatItem;
             this.onMoveHandler_ = config.onMoveHandler;
 
@@ -350,7 +358,8 @@ class __RepeatVirtualScroll2Impl<T> {
     private initialRender(): void {
         this.repeatElmtId_ = ObserveV2.getCurrentRecordedId();
 
-        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender() data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender()`,
+            `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
 
         // Create the RepeatVirtualScrollNode object
         // pass the C++ to TS callback functions.
@@ -549,7 +558,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 continue;
             }
 
-            const optRid = this.canUpdate(newActiveDataItemAtActiveIndex.ttype);
+            const optRid = this.reusable_ ? this.canUpdate(newActiveDataItemAtActiveIndex.ttype) : -1;
             if (optRid > 0) {
                 const ridMeta = this.meta4Rid_.get(optRid);
                 if (ridMeta) {
@@ -703,7 +712,7 @@ class __RepeatVirtualScroll2Impl<T> {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}, ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start start ++++++++`);
 
         // spare UINode / RID available to update?
-        const optRid = this.canUpdateTryMatch(ttype, dataItem, key);
+        const optRid = this.reusable_ ? this.canUpdateTryMatch(ttype, dataItem, key) : -1;
 
         const result: [number, number] = (optRid > 0)
             ? this.updateChild(optRid, ttype, forIndex, key)
