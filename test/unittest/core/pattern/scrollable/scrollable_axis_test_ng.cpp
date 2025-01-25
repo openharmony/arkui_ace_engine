@@ -161,4 +161,76 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     DragEnd(scrollable, -500.f);
     EXPECT_FLOAT_EQ(scrollable->lastGestureVelocity_, 0.f);
 }
+
+/**
+ * @tc.name: AxisAnimatorTest002
+ * @tc.desc: test the interception of the axis drag event by the vsync time.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableAxisTestNg, AxisDragTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG listModel;
+    listModel.Create();
+    listModel.SetEdgeEffect(EdgeEffect::NONE, false);
+    ViewAbstract::SetWidth(CalcLength(SCROLLABLE_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLLABLE_HEIGHT));
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(450));
+    ViewStackProcessor::GetInstance()->Pop();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto listNode = AceType::DynamicCast<FrameNode>(element);
+    FlushLayoutTask(listNode);
+    ASSERT_NE(listNode, nullptr);
+    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(listLayoutProperty, nullptr);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. trigger the drag start event.
+     * @tc.expected: the position of axisAnimator is correct.
+     */
+    auto scrollable = GetScrollable(listNode);
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->context_ = PipelineContext::GetCurrentContext();
+    auto context = scrollable->context_.Upgrade();
+    ASSERT_NE(context, nullptr);
+    DragStart(scrollable);
+    ASSERT_NE(scrollable->axisAnimator_, nullptr);
+    auto axisScrollMotion = scrollable->axisAnimator_->axisScrollMotion_;
+    ASSERT_NE(axisScrollMotion, nullptr);
+    EXPECT_FLOAT_EQ(axisScrollMotion->currentPos_, 0.f);
+
+    /**
+     * @tc.steps: step3. modify the vysnc time and trigger the drag update event.
+     * @tc.expected: the drag update event can be executed and the lastAxisVsyncTime_ is correct.
+     */
+    EXPECT_EQ(scrollable->lastAxisVsyncTime_, 0);
+    context->SetVsyncTime(1);
+    DragUpdate(scrollable, -100.f);
+    ASSERT_NE(scrollable->axisAnimator_->axisScrollAnimator_, nullptr);
+    EXPECT_EQ(scrollable->lastAxisVsyncTime_, 1);
+    context->SetVsyncTime(2);
+    DragUpdate(scrollable, -100.f);
+    EXPECT_EQ(scrollable->lastAxisVsyncTime_, 2);
+
+    /**
+     * @tc.steps: step4. modify the ScrollSnapAlign of list and the vysnc time.
+     * @tc.expected: the drag update event can be executed and the lastAxisVsyncTime_ is correct.
+     */
+    listLayoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    EXPECT_EQ(scrollable->GetSnapType(), SnapType::LIST_SNAP);
+    context->SetVsyncTime(2);
+    DragUpdate(scrollable, -100.f);
+    EXPECT_EQ(scrollable->lastAxisVsyncTime_, 2);
+    EXPECT_EQ(scrollable->snapDirection_, SnapDirection::NONE);
+    context->SetVsyncTime(3);
+    DragUpdate(scrollable, -100.f);
+    EXPECT_EQ(scrollable->lastAxisVsyncTime_, 3);
+    EXPECT_EQ(scrollable->snapDirection_, SnapDirection::BACKWARD);
+}
 } // namespace OHOS::Ace::NG
