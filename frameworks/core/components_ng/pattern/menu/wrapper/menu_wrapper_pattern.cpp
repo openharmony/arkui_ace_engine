@@ -610,8 +610,9 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
-    if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide()) ||
-        GetIsSelectOverlaySubWindowWrapper()) {
+    if (host->IsOnMainTree() &&
+        ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide()) ||
+            GetIsSelectOverlaySubWindowWrapper())) {
         SetHotAreas(dirty);
     }
     MarkAllMenuNoDraggable();
