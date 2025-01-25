@@ -1627,6 +1627,9 @@ HWTEST_F(UIExtensionComponentTestNg, SecurityUIExtensionComponentNgTest002, Test
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->instanceId_ = IGNORE_POSITION_TRANSITION_SWITCH;
     /**
      * @tc.steps: step1. construct a UIExtensionComponent Node
      */

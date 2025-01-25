@@ -1132,7 +1132,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     CHECK_NULL_VOID(sessionWrapper_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate(false, true);
+    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto renderContext = host->GetRenderContext();
