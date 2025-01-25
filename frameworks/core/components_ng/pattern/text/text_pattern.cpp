@@ -58,6 +58,7 @@ const std::u16string SYMBOL_TRANS = u"\uF0001";
 const std::u16string WIDE_NEWLINE = u"\n";
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
+const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 
 bool IsJumpLink(const std::string& content)
 {
@@ -850,6 +851,7 @@ void TextPattern::HandleOnSelectAll()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetOriginCaretPosition();
 }
 
 bool TextPattern::IsShowTranslate()
@@ -1599,6 +1601,7 @@ void TextPattern::InitFocusEvent()
         CHECK_NULL_VOID(contentModifier);
         contentModifier->SetIsFocused(false);
         pattern->RemoveIsFocusActiveUpdateEvent();
+        pattern->ResetOriginCaretPosition();
     };
     focusHub->SetOnBlurInternal(blurTask);
 
@@ -1770,6 +1773,9 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleMouseRightButton(info, textOffset);
         sourceType_ = info.GetSourceDevice();
+    }
+    if (!IsSelected()) {
+        ResetOriginCaretPosition();
     }
 }
 
@@ -1973,6 +1979,7 @@ void TextPattern::MarkDirtySelf()
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     DoGestureSelection(info);
+    ResetOriginCaretPosition();
 }
 
 void TextPattern::InitKeyEvent()
@@ -2064,6 +2071,10 @@ void TextPattern::HandleOnSelect(KeyCode code)
         default:
             break;
     }
+    if (!(shiftFlag_ && (code == KeyCode::KEY_DPAD_UP ||
+                         code == KeyCode::KEY_DPAD_DOWN))) {
+        ResetOriginCaretPosition();
+    }
 }
 
 void TextPattern::HandleSelectionUp()
@@ -2078,8 +2089,12 @@ void TextPattern::HandleSelectionUp()
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
+    RecordOriginCaretPosition({ secondOffsetX, secondOffsetY });
+    OffsetF originCaretPosition;
+    auto caretXPosition = GetOriginCaretPosition(originCaretPosition) ? // recorded offset x
+        originCaretPosition.GetX() : secondOffsetX;
     double height = GetTextHeight(end, false);
-    Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
+    Offset offset = { caretXPosition, secondOffsetY - height * 0.5 };
     auto caculateIndex = GetHandleIndex(offset);
     if (end == caculateIndex) {
         caculateIndex = 0;
@@ -2099,8 +2114,12 @@ void TextPattern::HandleSelectionDown()
     CaretMetricsF secondHandleMetrics;
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
+    RecordOriginCaretPosition({ secondOffsetX, secondHandleMetrics.offset.GetY() });
+    OffsetF originCaretPosition;
+    auto caretXPosition = GetOriginCaretPosition(originCaretPosition) ? // recorded offset x
+        originCaretPosition.GetX() : secondOffsetX;
     double height = GetTextHeight(end, true);
-    auto caculateIndex = GetHandleIndex({ secondOffsetX, height });
+    auto caculateIndex = GetHandleIndex({ caretXPosition, height });
     if (NearZero(height) || caculateIndex == end || caculateIndex > lastIndex) {
         caculateIndex = lastIndex;
     }
@@ -3417,6 +3436,7 @@ void TextPattern::ResetAfterTextChange()
 {
     CloseSelectOverlay();
     ResetSelection();
+    ResetOriginCaretPosition();
 }
 
 void TextPattern::ParseOriText(const std::u16string& currentText)
@@ -4048,6 +4068,32 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
     }
     return false;
+}
+
+// return: whether the offset is valid, return false if invalid
+bool TextPattern::GetOriginCaretPosition(OffsetF& offset) const
+{
+    if (!originCaretPosition_.NonNegative()) {
+        return false;
+    }
+    offset = originCaretPosition_;
+    return true;
+}
+
+void TextPattern::ResetOriginCaretPosition()
+{
+    originCaretPosition_ = DEFAULT_NEGATIVE_CARET_OFFSET;
+}
+
+// Record current caret position if originCaretPosition_ is invalid
+// return: whether the current offset is recorded and valid
+bool TextPattern::RecordOriginCaretPosition(const OffsetF& offset)
+{
+    if (originCaretPosition_.NonNegative() || !offset.NonNegative()) {
+        return false;
+    }
+    originCaretPosition_ = offset;
+    return true;
 }
 
 void TextPattern::ResetCustomFontColor()
