@@ -6760,6 +6760,28 @@ void JsAccessibilityManager::SetFocusMoveSearchResult(
     }
 }
 
+void JsAccessibilityManager::SetFocusMoveResultWithNode(
+    const WeakPtr<NG::FrameNode>& hostNode, AccessibilityElementOperatorCallback& callback, const int32_t requestId)
+{
+    if (!IsRegister()) {
+        return;
+    }
+    AccessibilityElementInfo nodeInfo;
+    auto host = hostNode.Upgrade();
+    if (host) {
+        auto context = host->GetContextRefPtr();
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        CommonProperty commonProperty;
+        GenerateCommonProperty(ngPipeline, commonProperty, ngPipeline, host);
+        UpdateAccessibilityElementInfo(host, commonProperty, nodeInfo, ngPipeline);
+    } else {
+        nodeInfo.SetValidElement(false);
+    }
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+            "SetFocusMoveResultWithNode : %{public}" PRId64, nodeInfo.GetAccessibilityId());
+    SetFocusMoveSearchResult(callback, nodeInfo, requestId);
+}
+
 void JsAccessibilityManager::SetExecuteActionResult(
     AccessibilityElementOperatorCallback& callback, const bool succeeded, const int32_t requestId)
 {

@@ -379,14 +379,27 @@ void JsThirdProviderInteractionOperation::FocusMoveSearch(
     Accessibility::AccessibilityElementInfo info;
     bool ret = FocusMoveSearchProvider(
         splitElementId, direction, requestId, info);
-    if (!ret) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
-            "FocusMoveSearch failed.");
-        info.SetValidElement(false);
-    }
-
     // 3. Return result
-    SetFocusMoveSearchResult(callback, info, requestId);
+    if (!ret) {
+        auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(context->GetTaskExecutor());
+        context->GetTaskExecutor()->PostTask(
+            [jsMgr = jsAccessibilityManager_, weakHost = host_, &callback, requestId] () {
+                auto jsAccessibilityManager = jsMgr.Upgrade();
+                if ((!jsAccessibilityManager) || (!jsAccessibilityManager->IsRegister())) {
+                    AccessibilityElementInfo nodeInfo;
+                    nodeInfo.SetValidElement(false);
+                    callback.SetFocusMoveSearchResult(nodeInfo, requestId);
+                    return;
+                }
+                jsAccessibilityManager->SetFocusMoveResultWithNode(weakHost, callback, requestId);
+            }, TaskExecutor::TaskType::UI, "AccessibilityThirdPartyFocusMoveSearchFail");
+    } else {
+        SetFocusMoveSearchResult(callback, info, requestId);
+    }
 }
 
 bool JsThirdProviderInteractionOperation::FocusMoveSearchProvider(
