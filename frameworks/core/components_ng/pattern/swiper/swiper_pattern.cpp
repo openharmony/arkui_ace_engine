@@ -52,6 +52,7 @@
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2186,6 +2187,7 @@ void SwiperPattern::BuildForEachChild(const std::set<int32_t>& indexSet, const R
 
     auto forEachNode = AceType::DynamicCast<ForEachNode>(childNode.value());
     auto repeatNode = AceType::DynamicCast<RepeatVirtualScrollNode>(childNode.value());
+    auto repeatNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(childNode.value());
     for (auto index : indexSet) {
         if (forEachNode && forEachNode->GetChildAtIndex(index)) {
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d, id:%{public}d", index, swiperId_);
@@ -2195,6 +2197,10 @@ void SwiperPattern::BuildForEachChild(const std::set<int32_t>& indexSet, const R
 
         if (repeatNode) {
             repeatNode->GetFrameChildByIndex(index, true);
+        }
+
+        if (repeatNode2) {
+            repeatNode2->GetFrameChildByIndex(index, true);
         }
     }
 }
@@ -5019,6 +5025,11 @@ void SwiperPattern::SetLazyLoadIsLoop() const
         if (repeatVirtualNode) {
             repeatVirtualNode->SetIsLoop(IsLoop());
         }
+
+        auto repeatVirtualNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(targetNode.value());
+        if (repeatVirtualNode2) {
+            repeatVirtualNode2->SetIsLoop(IsLoop());
+        }
     }
 }
 
@@ -6530,6 +6541,9 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
     if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
         return baseNode;
     }
+    if (AceType::DynamicCast<RepeatVirtualScroll2Node>(baseNode)) {
+        return baseNode;
+    }
     if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
         return std::nullopt;
     }
@@ -6549,6 +6563,10 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindForEachNode(const RefPtr<UINode
     }
 
     if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
+        return baseNode;
+    }
+
+    if (AceType::DynamicCast<RepeatVirtualScroll2Node>(baseNode)) {
         return baseNode;
     }
 
