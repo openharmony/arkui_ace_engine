@@ -1162,15 +1162,12 @@ void ArcIndexerPattern::UpdateBubbleBackgroundView()
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    BlurStyleOption styleOption;
-    if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
-        styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
-    } else {
-        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-    }
     auto bubbleRenderContext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(bubbleRenderContext);
-    bubbleRenderContext->UpdateBackBlurStyle(styleOption);
+    if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
+        BlurStyleOption styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
+        bubbleRenderContext->UpdateBackBlurStyle(styleOption);
+    }
     bubbleRenderContext->UpdateBackgroundColor(
         paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
 }
