@@ -757,7 +757,7 @@ public:
     }
 
     void UpdateResourceOrientation(int32_t orientation);
-    void UpdateResourceDensity(double density);
+    void UpdateResourceDensity(double density, bool isUpdateResConfig);
     void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
