@@ -632,7 +632,7 @@ int32_t SessionWrapperImpl::GetWindowSceneId()
     return windowSceneId;
 }
 
-Rosen::WSRect SessionWrapperImpl::GetWindowSceneRcet()
+Rosen::WSRect SessionWrapperImpl::GetWindowSceneRect()
 {
     Rosen::WSRect rect = {0, 0, 0, 0};
     auto hostPattern = GetWindowScene();
@@ -984,7 +984,7 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_RETURN(container, false);
     if (container->IsScenceBoardWindow()) {
-        Rosen::WSRect rect = GetWindowSceneRcet();
+        Rosen::WSRect rect = GetWindowSceneRect();
         curWindow.SetRect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     if (keyboardHeight > 0) {

@@ -114,7 +114,7 @@ private:
     void UpdateSessionConfig();
     RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
-    Rosen::WSRect GetWindowSceneRcet();
+    Rosen::WSRect GetWindowSceneRect();
     bool InnerNotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime);
     bool RegisterDataConsumer();
