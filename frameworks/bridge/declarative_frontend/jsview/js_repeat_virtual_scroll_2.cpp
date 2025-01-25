@@ -58,7 +58,8 @@ static bool ParseAndVerifyParams(const JSCallbackInfo& info)
     auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
     return (handlers->GetProperty("onGetRid4Index")->IsFunction() &&
             handlers->GetProperty("onRecycleItems")->IsFunction() &&
-            handlers->GetProperty("onActiveRange")->IsFunction() && handlers->GetProperty("onPurge")->IsFunction());
+            handlers->GetProperty("onActiveRange")->IsFunction() &&
+            handlers->GetProperty("onPurge")->IsFunction());
 }
 
 void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
@@ -96,9 +97,9 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
     };
 
     auto onActiveRange = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onActiveRange")](
-        int32_t fromIndex, int32_t toIndex, int32_t fromCache, int32_t toCache, bool isLoop) -> void {
+        int32_t fromIndex, int32_t toIndex) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto params = ConvertToJSValues(fromIndex, toIndex, fromCache, toCache, isLoop);
+        auto params = ConvertToJSValues(fromIndex, toIndex);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 

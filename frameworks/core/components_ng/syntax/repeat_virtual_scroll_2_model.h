@@ -38,7 +38,7 @@ public:
     virtual void Create(uint32_t totalCount,
         const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)> onRecycleItems,
-        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange,
+        const std::function<void(int32_t, int32_t)> onActiveRange,
         const std::function<void()> onPurge) = 0;
 
     virtual void RemoveNode(uint32_t rid) = 0;

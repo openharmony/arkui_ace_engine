@@ -72,7 +72,7 @@ declare class RepeatVirtualScroll2Native {
     handlers: {
       onGetRid4Index: (forIndex: number) => [number, number],
       onRecycleItems: (fromIndex: number, toIndex: number) => void,
-      onActiveRange: (fromIndex: number, toIndex: number, fromCache: number, toCache: number, isLoop: boolean) => void,
+      onActiveRange: (fromIndex: number, toIndex: number) => void,
       onPurge: () => void;
     }
   ): void;

@@ -53,7 +53,7 @@
  *  C++ lambdas to call these TS functions
  *     onGetRid4Index: (forIndex: number) => [number, number],
  *     onRecycleItems: (fromIndex: number, toIndex: number) => void,
- *     onActiveRange: (fromIndex: number, toIndex: number, fromCache: number, toCache: number, isLoop:boolean) => void,
+ *     onActiveRange: (fromIndex: number, toIndex: number) => void,
  *     onPurge: () => void;
  *     onMoveHandler: (from: number, to: number) => void;
  *
@@ -95,13 +95,13 @@ public:
     static RefPtr<RepeatVirtualScroll2Node> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)> onRecycleItems,
-        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange,
+        const std::function<void(int32_t, int32_t)> onActiveRange,
         const std::function<void()> onPurge);
 
     RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)> onRecycleItems,
-        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange,
+        const std::function<void(int32_t, int32_t)> onActiveRange,
         const std::function<void()> onPurge);
 
     ~RepeatVirtualScroll2Node() override = default;
@@ -223,17 +223,21 @@ private:
     RefPtr<UINode> GetFrameChildByIndexImpl(
         uint32_t index, bool needBuild, bool isCache, bool addToRenderTree);
 
-    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart,
-      int32_t cacheEnd, RefPtr<FrameNode>& frameNode, RepeatVirtualScroll2Caches::CacheItem& cacheItem);
-
-    bool RebuildL1(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
-    bool processActiveL2Nodes();
+    bool RebuildL1(int32_t start, int32_t end, int32_t nStart, int32_t nEnd);
+    bool ProcessActiveL2Nodes();
 
     void RequestSyncTree();
     void PostIdleTask();
 
     // tell TS to purge nodes exceeding cachedCount
     void Purge();
+
+    // check whether index is in the L1 cache range
+    bool CheckNode4IndexInL1(
+        int32_t index, int32_t nStart, int32_t nEnd, RepeatVirtualScroll2Caches::CacheItem& cacheItem);
+
+    // process params sent by parent
+    ActiveRangeType CheckActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
 
     // RepeatVirtualScroll2Node is not instance of FrameNode
     // needs to propagate active state to all items inside
@@ -269,7 +273,7 @@ private:
     bool forceRunDoSetActiveRange_ = false;
 
     std::function<void(IndexType, IndexType)> onRecycleItems_;
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange_;
+    std::function<void(int32_t, int32_t)> onActiveRange_;
     std::function<void()> onPurge_;
 
     // true in the time from requesting idle / predict task until exec predict tsk.

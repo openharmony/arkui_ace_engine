@@ -114,6 +114,7 @@ public:
 
 using IndexType = int32_t;
 using RIDType = uint32_t;
+using ActiveRangeType = std::pair<IndexType, IndexType>;
 
 
 // result codes of onGetRid4Index result (2nd 2nd in the pair)

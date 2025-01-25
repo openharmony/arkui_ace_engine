@@ -46,7 +46,7 @@ RepeatVirtualScroll2Caches::RepeatVirtualScroll2Caches(
  */
 GetFrameChildResult RepeatVirtualScroll2Caches::GetFrameChild(IndexType index, bool needBuild)
 {
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "    ... GetFrameChild(index %{public}d, needBuild: %{public}d", index,
+    TAG_LOGE(AceLogTag::ACE_REPEAT, "    ... GetFrameChild(index %{public}d, needBuild: %{public}d)", index,
         static_cast<int32_t>(needBuild));
     OptCacheItem optCacheItem = GetL1CacheItem4Index(index);
     if (optCacheItem.has_value()) {
@@ -173,7 +173,6 @@ std::optional<IndexType> RepeatVirtualScroll2Caches::GetL1Index4Node(const RefPt
 {
     if (frameNode == nullptr) {
         return std::nullopt;
-        ;
     }
 
     for (const auto iter : l1Rid4Index_) {

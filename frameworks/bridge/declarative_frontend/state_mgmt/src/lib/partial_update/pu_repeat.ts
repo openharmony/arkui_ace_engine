@@ -197,7 +197,7 @@ class __Repeat<T> implements RepeatAPI<T> {
 
     public virtualScroll(options? : { totalCount?: number, reusable?: boolean }): RepeatAPI<T> {
         // totalCount must be integer and must be 0 or larger
-        if (Number.isInteger(options?.totalCount) && options.totalCount >=0) {
+        if (Number.isInteger(options?.totalCount) && options.totalCount >= 0) {
             this.config.totalCount = options.totalCount;
             this.config.totalCountSpecified = true;
         } else {
