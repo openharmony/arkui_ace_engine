@@ -658,6 +658,8 @@ public:
         return true;
     }
 
+    virtual void OnCollectRemoved() {}
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
