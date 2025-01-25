@@ -28,6 +28,8 @@ using AxisAnimationStartCallback = std::function<void(float)>;
 using AxisAnimationFinishCallback = std::function<void()>;
 
 class AxisAnimator : public AceType {
+    DECLARE_ACE_TYPE(AxisAnimator, AceType);
+
 public:
     AxisAnimator() = default;
     AxisAnimator(AxisAnimationCallback&& axisAnimationCallback, AxisAnimationStartCallback&& axisAnimationStartCallback,
@@ -73,6 +75,8 @@ private:
 
     RefPtr<AxisScrollMotion> axisScrollMotion_;
     RefPtr<Animator> axisScrollAnimator_;
+    
+    ACE_DISALLOW_COPY_AND_MOVE(AxisAnimator);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_AXIS_AXIS_ANIMATOR_H
