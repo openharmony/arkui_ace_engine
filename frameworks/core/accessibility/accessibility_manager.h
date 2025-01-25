@@ -317,7 +317,7 @@ public:
         return AccessibilityWindowInfo();
     }
 
-    virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) {}
+    virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
 
     virtual AccessibilityWorkMode GetAccessibilityWorkMode()
     {

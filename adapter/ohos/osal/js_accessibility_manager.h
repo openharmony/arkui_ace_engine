@@ -312,7 +312,7 @@ public:
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;
-    void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) override;
+    void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
 
     AccessibilityWorkMode GetAccessibilityWorkMode() override;
 
