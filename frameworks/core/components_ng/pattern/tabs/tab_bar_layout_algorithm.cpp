@@ -159,6 +159,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto frameHeight = std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f) + verticalPadding_);
         frameSize.SetHeight(std::clamp(frameHeight, constraint->minSize.Height(), constraint->maxSize.Height()));
     }
+    CheckBorderAndPadding(frameSize, padding);
     geometryNode->SetFrameSize(frameSize);
     MeasureMask(layoutWrapper);
 }
@@ -318,6 +319,16 @@ float TabBarLayoutAlgorithm::GetCurrentOffset(
         currentOffset = (1.0 + alignment.GetVertical()) * (contentMainSize_ - visibleChildrenMainSize_) / TWO;
     }
     return currentOffset;
+}
+
+void TabBarLayoutAlgorithm::CheckBorderAndPadding(SizeF& frameSize, const PaddingPropertyF& padding)
+{
+    if (GreatNotEqual(padding.Width(), frameSize.Width())) {
+        frameSize.SetWidth(padding.Width());
+    }
+    if (GreatNotEqual(padding.Height(), frameSize.Height())) {
+        frameSize.SetHeight(padding.Height());
+    }
 }
 
 bool TabBarLayoutAlgorithm::NeedAdaptForAging(RefPtr<FrameNode> host)
