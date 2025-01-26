@@ -52,14 +52,14 @@ public:
         layoutConstraintInfo_ = contentConstraint;
     }
 
-    virtual Kit::LayoutConstraintInfo GetLayoutConstraint()
+    virtual const LayoutConstraintInfo& GetLayoutConstraint() const
     {
         return layoutConstraintInfo_;
     }
 
 protected:
     WeakPtr<FrameNode> host_;
-    Kit::LayoutConstraintInfo layoutConstraintInfo_;
+    LayoutConstraintInfo layoutConstraintInfo_;
 };
 
 } // namespace OHOS::Ace::Kit

@@ -27,7 +27,7 @@ View::View() = default;
 
 View::~View() = default;
 
-RefPtr<FrameNode> View::GetNode() const
+const RefPtr<FrameNode>& View::GetNode() const
 {
     return node_;
 }

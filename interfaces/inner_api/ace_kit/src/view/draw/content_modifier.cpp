@@ -39,7 +39,7 @@ void ContentModifier::InitAdapter()
     }
 }
 
-std::shared_ptr<ContentModifierAdapter> ContentModifier::GetRSModifier()
+const std::shared_ptr<ContentModifierAdapter>& ContentModifier::GetRSModifier() const
 {
     return modifierAdapter_;
 }

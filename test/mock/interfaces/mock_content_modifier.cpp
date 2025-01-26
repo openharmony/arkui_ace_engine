@@ -27,7 +27,7 @@ void ContentModifier::AttachRSProperty(const std::shared_ptr<Rosen::RSPropertyBa
 
 void ContentModifier::InitAdapter() {}
 
-std::shared_ptr<ContentModifierAdapter> ContentModifier::GetRSModifier()
+const std::shared_ptr<ContentModifierAdapter>& ContentModifier::GetRSModifier() const
 {
     return nullptr;
 }

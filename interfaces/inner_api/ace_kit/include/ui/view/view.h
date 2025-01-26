@@ -28,7 +28,7 @@ class FrameNode;
 class ACE_FORCE_EXPORT View : public Referenced {
 public:
     ~View() override;
-    RefPtr<FrameNode> GetNode() const;
+    const RefPtr<FrameNode>& GetNode() const;
 
     void SetWidth(const CalcDimension& width);
     void SetHeight(const CalcDimension& height);

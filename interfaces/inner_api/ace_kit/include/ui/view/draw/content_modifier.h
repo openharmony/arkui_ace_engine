@@ -28,13 +28,13 @@ class ACE_FORCE_EXPORT ContentModifier : public Modifier {
 
 public:
     ContentModifier();
-    ~ContentModifier();
+    ~ContentModifier() override;
 
     virtual void OnDraw(const DrawingContext& context) = 0;
     void AttachRSProperty(const std::shared_ptr<Rosen::RSPropertyBase>& property) override;
 
     void InitAdapter();
-    std::shared_ptr<ContentModifierAdapter> GetRSModifier();
+    const std::shared_ptr<ContentModifierAdapter>& GetRSModifier() const;
 
 private:
     std::shared_ptr<ContentModifierAdapter> modifierAdapter_;
