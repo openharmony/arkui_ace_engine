@@ -1037,7 +1037,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
 {
     double limit = 0.0;
     if (info.GetDoubleArg(0, limit)) {
-        if (limit == 0 && apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
             return;
         }
         renderingContext2DModel_->SetMiterLimit(limit);
