@@ -133,6 +133,7 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMessageTest, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
+<<<<<<< HEAD
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementDefaultValueTest, TestSize.Level1)
 {
     Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
@@ -1098,5 +1099,93 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsShowInSubwind
     NG::PopupInfo popupInfo;
     subWindow->GetPopupInfoNG(blankRef->GetId(), popupInfo);
     ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+=======
+class EmptyPixelMap : public PixelMap {
+    DECLARE_ACE_TYPE(EmptyPixelMap, PixelMap)
+
+public:
+    EmptyPixelMap(std::unique_ptr<PixelMap>&& pixmap) 
+        : pixmap_(std::move(pixmap)) {}
+
+    virtual int32_t GetWidth() const { return 0; };
+    virtual int32_t GetHeight() const { return 0; };
+    virtual bool GetPixelsVec(std::vector<uint8_t>& data) const { return true; };
+    virtual const uint8_t* GetPixels() const { return nullptr; };
+    virtual PixelFormat GetPixelFormat() const { return PixelFormat::ALPHA_8; };
+    virtual AlphaType GetAlphaType() const { return AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN; };
+    virtual int32_t GetRowStride() const { return 0; };
+    virtual int32_t GetRowBytes() const { return 0; };
+    virtual int32_t GetByteCount() const { return 0; };
+    virtual AllocatorType GetAllocatorType() const { return AllocatorType::DEFAULT; };
+    virtual bool IsHdr() const { return false; };
+    virtual void* GetPixelManager() const { return nullptr; };
+    virtual void* GetRawPixelMapPtr() const { return static_cast<void*>(pixmap_.get()); };
+    virtual std::string GetId() override;
+    virtual std::string GetModifyId() override;
+    virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override;
+    virtual void* GetWritablePixels() const { return nullptr; };
+    virtual void Scale(float xAxis, float yAxis) {};
+    virtual void Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) {};
+    virtual void SavePixelMapToFile(const std::string& dst) const {};
+    virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) { return nullptr; };
+    virtual bool EncodeTlv(std::vector<uint8_t>& buff) { return false; };
+
+private:
+    std::unique_ptr<PixelMap> pixmap_;
+    mutable std::string id_;  // Предполагается, что идентификатор может меняться при модификации объекта
+    mutable std::string modifyId_;  // Идентификатор изменения
+};
+
+std::string EmptyPixelMap::GetId() {
+    if (id_.empty()) {
+        id_ = std::to_string(reinterpret_cast<uintptr_t>(this));
+    }
+    return id_;
+}
+
+std::string EmptyPixelMap::GetModifyId() {
+    modifyId_ = GetId();  // Предполагается, что идентификатор изменения совпадает с основным
+    return modifyId_;
+}
+
+std::shared_ptr<Media::PixelMap> EmptyPixelMap::GetPixelMapSharedPtr() {
+    return std::move(pixmap_);
+}
+
+HWTEST_F(CommonMethodModifierTest11, setDragPreview_DragItemInfoTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    const DragDropInfo defaultDragPreview = frameNode->GetDragPreview();
+
+    int callsCount(0);
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest11> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+
+    auto pixelMapPtr = std::make_unique<EmptyPixelMap>();
+    PixelMap* basePointer = pixelMapPtr.release(); // Передаем владение базовому указателю
+    auto pixMap = AceType::MakeRefPtr<PixelMap>(basePointer);
+    Ark_PixelMap expectedPixelMap{.ptr = reinterpret_cast<Ark_NativePointer>(pixMap.GetRawPtr())};
+
+    std::string expectedExtraInfo{"extraInfo"};
+
+    Ark_DragItemInfo dragItemInfo = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder),
+        .extraInfo = Converter::ArkValue<Opt_String>(expectedExtraInfo),
+        .pixelMap = Converter::ArkValue<Opt_PixelMap>(expectedPixelMap)};
+
+    auto unionValue = Converter::ArkUnion<Ark_Union_CustomBuilder_DragItemInfo_String,
+        Ark_DragItemInfo>(dragItemInfo);
+    modifier_->setDragPreview(node_, &unionValue);
+
+    const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
+
+    EXPECT_EQ(builderHelper.GetCustomNode(), reinterpret_cast<FrameNode*>(resultDragPreview.customNode.GetRawPtr()));
+    EXPECT_EQ(resultDragPreview.extraInfo, expectedExtraInfo);
+    EXPECT_EQ(reinterpret_cast<Ark_NativePointer>(resultDragPreview.pixelMap.GetRawPtr()), expectedPixelMap.ptr);
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+>>>>>>> 9e58a2b1c1 (EmptyPixelMap version 1)
 }
 }
