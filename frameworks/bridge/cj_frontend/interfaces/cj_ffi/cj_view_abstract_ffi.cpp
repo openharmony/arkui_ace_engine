@@ -2832,44 +2832,44 @@ void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CB
 {
     borderImage->SetEdgeOutset(
         BorderImageDirection::LEFT,
-        Dimension(option.outset.top, static_cast<DimensionUnit>(option.outset.topUnit)));
+        Dimension(option.outset.left, static_cast<DimensionUnit>(option.outset.leftUnit)));
     borderImage->SetEdgeOutset(
         BorderImageDirection::RIGHT,
         Dimension(option.outset.right, static_cast<DimensionUnit>(option.outset.rightUnit)));
     borderImage->SetEdgeOutset(
         BorderImageDirection::TOP,
-        Dimension(option.outset.bottom, static_cast<DimensionUnit>(option.outset.bottomUnit)));
+        Dimension(option.outset.top, static_cast<DimensionUnit>(option.outset.topUnit)));
     borderImage->SetEdgeOutset(
         BorderImageDirection::BOTTOM,
-        Dimension(option.outset.left, static_cast<DimensionUnit>(option.outset.leftUnit)));
+        Dimension(option.outset.bottom, static_cast<DimensionUnit>(option.outset.bottomUnit)));
     bitset |= BorderImage::OUTSET_BIT;
 
     borderImage->SetEdgeWidth(
         BorderImageDirection::LEFT,
-        Dimension(option.width.top, static_cast<DimensionUnit>(option.width.topUnit)));
+        Dimension(option.width.left, static_cast<DimensionUnit>(option.width.leftUnit)));
     borderImage->SetEdgeWidth(
         BorderImageDirection::RIGHT,
         Dimension(option.width.right, static_cast<DimensionUnit>(option.width.rightUnit)));
     borderImage->SetEdgeWidth(
         BorderImageDirection::TOP,
-        Dimension(option.width.bottom, static_cast<DimensionUnit>(option.width.bottomUnit)));
+        Dimension(option.width.top, static_cast<DimensionUnit>(option.width.topUnit)));
     borderImage->SetEdgeWidth(
         BorderImageDirection::BOTTOM,
-        Dimension(option.width.left, static_cast<DimensionUnit>(option.width.leftUnit)));
+        Dimension(option.width.bottom, static_cast<DimensionUnit>(option.width.bottomUnit)));
     bitset |= BorderImage::WIDTH_BIT;
 
     borderImage->SetEdgeSlice(
         BorderImageDirection::LEFT,
-        Dimension(option.slice.top, static_cast<DimensionUnit>(option.slice.topUnit)));
+        Dimension(option.slice.left, static_cast<DimensionUnit>(option.slice.leftUnit)));
     borderImage->SetEdgeSlice(
         BorderImageDirection::RIGHT,
         Dimension(option.slice.right, static_cast<DimensionUnit>(option.slice.rightUnit)));
     borderImage->SetEdgeSlice(
         BorderImageDirection::TOP,
-        Dimension(option.slice.bottom, static_cast<DimensionUnit>(option.slice.bottomUnit)));
+        Dimension(option.slice.top, static_cast<DimensionUnit>(option.slice.topUnit)));
     borderImage->SetEdgeSlice(
         BorderImageDirection::BOTTOM,
-        Dimension(option.slice.left, static_cast<DimensionUnit>(option.slice.leftUnit)));
+        Dimension(option.slice.bottom, static_cast<DimensionUnit>(option.slice.bottomUnit)));
     bitset |= BorderImage::SLICE_BIT;
 
     borderImage->SetRepeatMode(static_cast<BorderImageRepeat>(option.repeat));
