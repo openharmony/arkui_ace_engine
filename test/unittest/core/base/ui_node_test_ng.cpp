@@ -421,6 +421,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg011, TestSize.Level1)
     ONE->MountToParent(ZERO, 1, false);
     retPageId = ONE->GetPageId();
     EXPECT_EQ(retPageId, 1);
+    ZERO->SetDestroying(false);
     ONE->Clean();
     ZERO->Clean();
 }
@@ -987,6 +988,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg033, TestSize.Level1)
     ZERO->children_.emplace_back(nullptr);
     ZERO->SetChildrenInDestroying();
     EXPECT_EQ(ZERO->children_.size(), 3);
+    ONE->SetDestroying(false);
+    TWO->SetDestroying(false);
     ZERO->children_.clear();
     ZERO->Clean();
 }
