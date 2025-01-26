@@ -6443,7 +6443,7 @@ void FrameNode::FireFrameNodeDestructorCallback()
     }
 }
 
-RefPtr<Kit::FrameNode> FrameNode::GetKitNode() const
+const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
 }

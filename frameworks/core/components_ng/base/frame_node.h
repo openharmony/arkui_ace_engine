@@ -1208,7 +1208,7 @@ public:
     void OnPropertyChangeMeasure() const;
 
     void SetKitNode(const RefPtr<Kit::FrameNode>& node);
-    RefPtr<Kit::FrameNode> GetKitNode() const;
+    const RefPtr<Kit::FrameNode>& GetKitNode() const;
 
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
