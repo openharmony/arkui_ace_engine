@@ -140,6 +140,22 @@ private:
         NotifyAll(&V2::DataChangeListener::OnDataChanged, args);
     }
 
+    void OnDataBulkChanged(const JSCallbackInfo& args)
+    {
+        useOldInterface = true;
+        if (useAnotherInterface(useNewInterface)) {
+            return;
+        }
+        ContainerScope scope(instanceId_);
+        size_t index = 0;
+        size_t count = 0;
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
+            !ConvertFromJSCallbackInfo(args, 1, count)) {
+            return;
+        }
+        NotifyAll(&V2::DataChangeListener::OnDataBulkChanged, index, count);
+    }
+
     void OnDataMoved(const JSCallbackInfo& args)
     {
         useOldInterface = true;
