@@ -128,7 +128,11 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     if (enableContainerModalGesture_) {
         AddPanEvent(customTitleRow);
         AddPanEvent(gestureRow);
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
+
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
