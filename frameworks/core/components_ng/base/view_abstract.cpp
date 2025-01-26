@@ -890,6 +890,13 @@ void ViewAbstract::DisableOnHover()
     eventHub->ClearUserOnHover();
 }
 
+void ViewAbstract::DisableOnHoverMove()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHoverMove();
+}
+
 void ViewAbstract::DisableOnAccessibilityHover()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -1052,6 +1059,13 @@ void ViewAbstract::DisableOnHover(FrameNode* frameNode)
     eventHub->ClearUserOnHover();
 }
 
+void ViewAbstract::DisableOnHoverMove(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHoverMove();
+}
+
 void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();
@@ -1173,6 +1187,13 @@ void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverMoveEvent(std::move(onHoverMoveEventFunc));
 }
 
 void ViewAbstract::SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
@@ -4014,6 +4035,13 @@ void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFu
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
+void ViewAbstract::SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHoverMoveEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverMoveEvent(std::move(onHoverMoveEventFunc));
+}
+
 void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -4866,6 +4894,22 @@ void ViewAbstract::ClearJSFrameNodeOnHover(FrameNode* frameNode)
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnHover();
+}
+
+void ViewAbstract::SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetJSFrameNodeOnHoverMoveEvent(std::move(onHoverMoveEventFunc));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnHoverMove(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnHoverMove();
 }
 
 void ViewAbstract::SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)

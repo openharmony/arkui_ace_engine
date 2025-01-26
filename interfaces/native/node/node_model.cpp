@@ -512,7 +512,8 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_KEY_EVENT, HandleKeyEvent},
             {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
             {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
-            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent}
+            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_HOVER_MOVE, HandleTouchEvent},
         };
 
         auto it = eventHandlers.find(eventType);

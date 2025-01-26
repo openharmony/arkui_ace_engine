@@ -900,6 +900,29 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnBlur(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& hoverInfo)
+{
+    const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
+        "displayX", "displayY", "windowX", "windowY", "x", "y", };
+    double density = PipelineBase::GetCurrentDensity();
+    const Offset& globalOffset = hoverInfo.GetGlobalLocation();
+    const Offset& localOffset = hoverInfo.GetLocalLocation();
+    const Offset& screenOffset = hoverInfo.GetScreenLocation();
+    Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
+        panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceDevice())),
+        CreateEventTargetObject(vm, hoverInfo),
+        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetDeviceId())),
+        panda::NumberRef::New(vm, density != 0 ? screenOffset.GetX() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? screenOffset.GetY() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? globalOffset.GetX() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? globalOffset.GetY() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? localOffset.GetX() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0) };
+        return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -929,15 +952,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto isHoverParam = panda::BooleanRef::New(vm, isHover);
-        const char* keys[] = { "stopPropagation", "getModifierKeyState",
-            "timestamp", "source", "target", "deviceId" };
-        Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
-            panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-            panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceDevice())),
-            CreateEventTargetObject(vm, hoverInfo),
-            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetDeviceId())) };
-        auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        auto obj = CreateHoverInfo(vm, hoverInfo);
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
@@ -947,6 +962,43 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnHoverMove(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = IsCustomFrameNode(frameNode);
+    auto onHoverMove = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                       node = AceType::WeakClaim(frameNode), containerId](HoverInfo& hoverInfo) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        auto obj = CreateHoverInfo(vm, hoverInfo);
+        obj->SetNativePointerFieldCount(vm, 1);
+        obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
+        panda::Local<panda::JSValueRef> params[] = { obj };
+        function->Call(vm, function.ToLocal(), params, ArraySize(params));
+    };
+    NG::ViewAbstract::SetJSFrameNodeOnHoverMove(frameNode, std::move(onHoverMove));
+    return panda::JSValueRef::Undefined(vm);
+}
 Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& info)
 {
     const Offset& globalOffset = info.GetGlobalLocation();

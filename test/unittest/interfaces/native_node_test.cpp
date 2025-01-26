@@ -1083,6 +1083,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_VISIBLE_AREA_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_HOVER, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_HOVER));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_HOVER_MOVE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_HOVER_MOVE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_MOUSE, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_MOUSE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_EVENT_ON_ATTACH, nodeType);
@@ -1310,6 +1312,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_EVENT_ON_VISIBLE_AREA_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_HOVER);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_HOVER));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_HOVER_MOVE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_HOVER_MOVE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_MOUSE);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_MOUSE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_ATTACH);

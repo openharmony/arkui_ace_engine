@@ -194,6 +194,7 @@ public:
     void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
+    void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
@@ -249,6 +250,7 @@ public:
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
     void DisableOnHover() override {};
+    void DisableOnHoverMove() override {};
     void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
     void DisableOnAppear() override {};

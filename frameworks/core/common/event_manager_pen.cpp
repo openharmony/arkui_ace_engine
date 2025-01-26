@@ -35,6 +35,7 @@ void EventManager::PenHoverTest(
         point, point, point, touchRestrict, testResult, event.id, responseLinkResult);
     SetResponseLinkRecognizers(testResult, responseLinkResult);
     UpdatePenHoverNode(event, testResult);
+    UpdatePenHoverMoveNode(event, testResult);
 }
 
 void EventManager::UpdatePenHoverNode(const TouchEvent& event, const TouchTestResult& testResult)
@@ -59,6 +60,18 @@ void EventManager::UpdatePenHoverNode(const TouchEvent& event, const TouchTestRe
         lastPenHoverResults_ = std::move(curPenHoverResults_);
         curPenHoverResults_ = std::move(penHoverTestResult);
     }
+}
+
+void EventManager::UpdatePenHoverMoveNode(const TouchEvent& event, const TouchTestResult& testResult)
+{
+    HoverTestResult penHoverTestResult;
+    for (const auto& result : testResult) {
+        auto penHoverResult = AceType::DynamicCast<HoverEventTarget>(result);
+        if (penHoverResult && penHoverResult->IsPenHoverMoveTarget()) {
+            penHoverTestResult.emplace_back(penHoverResult);
+        }
+    }
+    curPenHoverMoveResults_ = std::move(penHoverTestResult);
 }
 
 void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
@@ -107,6 +120,15 @@ void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
         // there may have previous hover nodes in the invalid part of current hover nodes. Those nodes exit hover also
         if (std::find(currHoverEndNode, curPenHoverResults_.end(), *hoverResultIt) != curPenHoverResults_.end()) {
             (*hoverResultIt)->HandlePenHoverEvent(false, event);
+        }
+    }
+}
+
+void EventManager::DispatchPenHoverMoveEventNG(const TouchEvent& event)
+{
+    for (const auto& hoverMoveResult : curPenHoverMoveResults_) {
+        if (!hoverMoveResult->HandlePenHoverMoveEvent(event)) {
+            break;
         }
     }
 }

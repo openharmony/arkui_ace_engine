@@ -1878,6 +1878,20 @@ class OnHoverModifier extends ModifierWithKey {
   }
 }
 OnHoverModifier.identity = Symbol('onHover');
+
+class OnHoverMoveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnHoverMove(node);
+    } else {
+      getUINativeModule().common.setOnHoverMove(node, this.value);
+    }
+  }
+}
+OnHoverMoveModifier.identity = Symbol('onHoverMove');
 class OnMouseModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3707,6 +3721,10 @@ class ArkComponent {
   }
   onHover(event) {
     modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
+    return this;
+  }
+  onHoverMove(event) {
+    modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
     return this;
   }
   hoverEffect(value) {
@@ -25907,6 +25925,12 @@ class ArkXComponentComponent extends ArkComponent {
   }
   hoverEffect(value) {
     throw new Error('Method not implemented.');
+  }
+  onHoverMove(event) {
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
+    }
+    return this;
   }
   onMouse(event) {
     throw new Error('Method not implemented.');
