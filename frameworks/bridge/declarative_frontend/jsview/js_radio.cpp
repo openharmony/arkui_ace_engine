@@ -320,12 +320,10 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         }
     } else {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        if (frameNode != nullptr) {
-            auto pattern = frameNode->GetPattern<NG::RadioPattern>();
-            if (pattern != nullptr) {
-                pattern->SetIsUserSetUncheckBorderColor(true);
-            }
-        }
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::RadioPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsUserSetUncheckBorderColor(true); 
     }
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
     Color indicatorColorVal;
