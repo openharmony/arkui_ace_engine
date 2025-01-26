@@ -2446,8 +2446,9 @@ void PipelineContext::OnTouchEvent(
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }
-        touchTestResults_ = eventManager_->touchTestResults_;
-        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint, touchTestResults_)) {
+        auto touchTestResults = eventManager_->touchTestResults_;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(
+            scalePoint, eventManager_->touchTestResults_)) {
             eventManager_->ClearTouchTestTargetForPenStylus(scalePoint);
             return;
         }
@@ -2463,25 +2464,25 @@ void PipelineContext::OnTouchEvent(
                 recognizer->BeginReferee(scalePoint.id, true);
                 std::list<RefPtr<NGGestureRecognizer>> combined;
                 combined.emplace_back(recognizer);
-                for (auto iter = touchTestResults_[point.id].begin();
-                    iter != touchTestResults_[point.id].end(); iter++) {
+                for (auto iter = touchTestResults[point.id].begin();
+                    iter != touchTestResults[point.id].end(); iter++) {
                     auto outRecognizer = AceType::DynamicCast<NGGestureRecognizer>(*iter);
                     if (outRecognizer) {
                         combined.emplace_back(outRecognizer);
-                        touchTestResults_[point.id].erase(iter);
+                        touchTestResults[point.id].erase(iter);
                         break;
                     }
                 }
                 auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(combined));
                 exclusiveRecognizer->AttachFrameNode(node);
                 exclusiveRecognizer->BeginReferee(scalePoint.id);
-                touchTestResults_[point.id].emplace_back(exclusiveRecognizer);
-                eventManager_->touchTestResults_ = touchTestResults_;
+                touchTestResults[point.id].emplace_back(exclusiveRecognizer);
+                eventManager_->touchTestResults_ = touchTestResults;
                 eventManager_->SetInnerFlag(true);
             }
         }
-        if (IsFormRender() && touchTestResults_.find(point.id) != touchTestResults_.end()) {
-            for (const auto& touchResult : touchTestResults_[point.id]) {
+        if (IsFormRender() && touchTestResults.find(point.id) != touchTestResults.end()) {
+            for (const auto& touchResult : touchTestResults[point.id]) {
                 auto recognizer = AceType::DynamicCast<NG::RecognizerGroup>(touchResult);
                 if (recognizer) {
                     auto gesture = recognizer->CreateGestureFromRecognizer();
