@@ -564,7 +564,10 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         }
     } else {
         pattern->StopTwinkling();
-        selectController->MoveSecondHandleToContentRect(selectController->GetSecondHandleIndex(), false);
+        // single handle use caret offset.
+        auto caretRect = selectController->GetCaretRect();
+        selectController->UpdateCaretInfoByOffset(
+            Offset(caretRect.Left(), caretRect.Top() + caretRect.Height() / 2.0f));
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->SetHandleCircleIsShow(isFirst, true);
