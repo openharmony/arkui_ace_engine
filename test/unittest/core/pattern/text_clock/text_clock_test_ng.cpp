@@ -714,6 +714,48 @@ HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextClockTest012
+ * @tc.desc: Test TextClockPattern of TextClock.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetFormat(), CLOCK_FORMAT);
+    EXPECT_EQ(layoutProperty->GetHoursWest(), HOURS_WEST);
+
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    pattern->isForm_ = true;
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_TRUE(pattern->isInVisibleArea_);
+    EXPECT_TRUE(pattern->isForm_);
+
+    pattern->OnVisibleChange(false);
+    pattern->OnVisibleAreaChange(false);
+    EXPECT_FALSE(pattern->isSetVisible_);
+    EXPECT_FALSE(pattern->isInVisibleArea_);
+
+    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_TRUE(pattern->isSetVisible_);
+    EXPECT_TRUE(pattern->isInVisibleArea_);
+}
+
+/**
  * @tc.name: TextClockTest011
  * @tc.desc: Test event function when TextClock visible be changed.
  * @tc.type: FUNC
@@ -777,48 +819,6 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
     MockPipelineContext::TearDown();
-}
-
-/**
- * @tc.name: TextClockTest012
- * @tc.desc: Test TextClockPattern of TextClock.
- * @tc.type: FUNC
- */
-HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textClock frameNode.
-     */
-    TestProperty testProperty;
-    testProperty.format = std::make_optional(CLOCK_FORMAT);
-    testProperty.hoursWest = std::make_optional(HOURS_WEST);
-    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextClockPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetFormat(), CLOCK_FORMAT);
-    EXPECT_EQ(layoutProperty->GetHoursWest(), HOURS_WEST);
-
-    /**
-     * @tc.steps: step2. get the properties of all settings.
-     * @tc.expected: step2. check whether the properties is correct.
-     */
-    pattern->isForm_ = true;
-    pattern->OnVisibleAreaChange(true);
-    EXPECT_TRUE(pattern->isInVisibleArea_);
-    EXPECT_TRUE(pattern->isForm_);
-
-    pattern->OnVisibleChange(false);
-    pattern->OnVisibleAreaChange(false);
-    EXPECT_FALSE(pattern->isSetVisible_);
-    EXPECT_FALSE(pattern->isInVisibleArea_);
-
-    pattern->OnVisibleChange(true);
-    pattern->OnVisibleAreaChange(true);
-    EXPECT_TRUE(pattern->isSetVisible_);
-    EXPECT_TRUE(pattern->isInVisibleArea_);
 }
 
 /**
