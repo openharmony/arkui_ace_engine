@@ -409,9 +409,11 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
     NodeModifier::SetOnKeyEventDispatch,
+    nullptr,
     NodeModifier::SetOnAxisEvent,
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
+    NodeModifier::SetOnHoverMove,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -631,7 +633,11 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnKeyPreIme,
     NodeModifier::ResetOnFocusAxisEvent,
     nullptr,
+    nullptr,
     NodeModifier::ResetOnAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnHoverMove,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

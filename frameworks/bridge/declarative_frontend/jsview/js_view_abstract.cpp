@@ -6951,6 +6951,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onAxisEvent", &JSViewAbstract::JsOnAxisEvent);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
+    JSClass<JSViewAbstract>::StaticMethod("onHoverMove", &JSViewAbstract::JsOnHoverMove);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHover", &JSViewAbstract::JsOnAccessibilityHover);
     JSClass<JSViewAbstract>::StaticMethod("onDigitalCrown", &JSViewAbstract::JsOnCrownEvent);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
@@ -8030,6 +8031,28 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
         func->HoverExecute(isHover, hoverInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
+}
+
+void JSViewAbstract::JsOnHoverMove(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnHoverMove();
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    RefPtr<JsHoverFunction> jsOnHoverMoveFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onHoverMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverMoveFunc), node = frameNode](
+                       HoverInfo& hoverInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onHoverMove");
+        PipelineContext::SetCallBackNode(node);
+        func->HoverMoveExecute(hoverInfo);
+    };
+    ViewAbstractModel::GetInstance()->SetOnHoverMove(std::move(onHoverMove));
 }
 
 void JSViewAbstract::JsOnAccessibilityHover(const JSCallbackInfo& info)

@@ -986,6 +986,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnHover));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHover"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnHover));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHoverMove"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnHoverMove));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHoverMove"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnHoverMove));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnMouse"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnMouse));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnMouse"),
@@ -4127,6 +4131,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnBlur));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHover"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnHover));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHoverMove"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnHoverMove));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnMouse"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnMouse));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSizeChange"),

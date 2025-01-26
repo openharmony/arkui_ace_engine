@@ -6579,6 +6579,16 @@ void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle n
     ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
 }
 
+void SetOnHoverMoveExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onHoverMove = [node, eventReceiver](HoverInfo& info) {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnHoverMove(reinterpret_cast<FrameNode*>(node), std::move(onHoverMove));
+}
+
 void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -7116,6 +7126,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOnBlur = SetOnBlurExt,
         .setOnTouch = SetOnTouchExt,
         .setOnHover = SetOnHoverExt,
+        .setOnHoverMove = SetOnHoverMoveExt,
         .setOnChange = SetOnChangeExt,
         .setOnClick = SetOnClickExt,
         .setOnAppear = SetOnAppearExt,
@@ -8263,6 +8274,28 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnHover(frameNode, onEvent);
 }
 
+void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](HoverInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = TOUCH_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.touchEvent.subKind = ON_HOVER_MOVE;
+        event.touchEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX();
+        event.touchEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY();
+        event.touchEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX();
+        event.touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
+        event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
+        event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        SendArkUISyncEvent(&event);
+    };
+    ViewAbstract::SetOnHoverMove(frameNode, onEvent);
+}
+
 void SetOnMouseInfo(ArkUINodeEvent& event, MouseInfo& info, bool usePx)
 {
     const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
@@ -8479,6 +8512,13 @@ void ResetOnHover(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnHover(frameNode);
+}
+
+void ResetOnHoverMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnHoverMove(frameNode);
 }
 
 void ResetOnMouse(ArkUINodeHandle node)

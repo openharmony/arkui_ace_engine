@@ -996,6 +996,11 @@ public:
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     }
 
+    void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) override
+    {
+        ViewAbstract::SetOnHoverMove(std::move(onHoverMoveEventFunc));
+    }
+
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override
     {
         ViewAbstract::SetOnAccessibilityHover(std::move(onAccessibilityHoverEventFunc));
@@ -1449,6 +1454,11 @@ public:
     void DisableOnHover() override
     {
         ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnHoverMove() override
+    {
+        ViewAbstract::DisableOnHoverMove();
     }
 
     void DisableOnAccessibilityHover() override
