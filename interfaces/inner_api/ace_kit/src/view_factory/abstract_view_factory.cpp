@@ -27,7 +27,7 @@ RefPtr<FrameNode> AbstractViewFactory::CreateFrameNode(
 {
     auto aceFrameNode = NG::FrameNode::GetOrCreateFrameNode(
         tag, nodeId, [pattern]() { return AceType::MakeRefPtr<ExtendPattern>(pattern); });
-
+    CHECK_NULL_RETURN(aceFrameNode, nullptr);
     auto frameNode = AceType::DynamicCast<FrameNodeImpl>(aceFrameNode->GetKitNode());
     if (frameNode == nullptr) {
         frameNode = AceType::MakeRefPtr<FrameNodeImpl>(aceFrameNode, pattern);
