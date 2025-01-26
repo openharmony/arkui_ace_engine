@@ -465,9 +465,10 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    auto containerId = Container::CurrentId();
-    auto foldablewindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(containerId));
-    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return false; });
+
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetFoldStatus(FoldStatus::FOLDED);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
     MockPipelineContext::GetCurrent()->rootHeight_ = 6.0f;
     MockPipelineContext::GetCurrent()->rootWidth_ = 5.0f;
     EXPECT_FALSE(sheetPattern->IsFoldExpand());
@@ -476,7 +477,9 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     sheetPattern->GetSheetTypeWithAuto(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM);
 
-    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
+
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->sheetBottom_ = "bottom";
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
@@ -518,9 +521,10 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    auto containerId = Container::CurrentId();
-    auto foldablewindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(containerId));
-    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
+
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->sheetBottom_ = "undefined";
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
@@ -556,14 +560,7 @@ HWTEST_F(SheetPresentationTestNg, IsFoldExpand001, TestSize.Level1)
     SheetPresentationTestNg::SetUpTestCase();
 
     /**
-     * @tc.steps: step1. set API15.
-     */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN));
-
-    /**
-     * @tc.steps: step2. set container FoldStatus FOLDED.
+     * @tc.steps: step1. set container FoldStatus FOLDED.
      */
     RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
     displayInfo->SetFoldStatus(FoldStatus::FOLDED);
@@ -577,7 +574,7 @@ HWTEST_F(SheetPresentationTestNg, IsFoldExpand001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. excute IsFoldExpand func.
+     * @tc.steps: step2. excute IsFoldExpand func.
      * @tc.expected: false
      */
     EXPECT_FALSE(sheetPattern->IsFoldExpand());
