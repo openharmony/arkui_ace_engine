@@ -301,15 +301,18 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
 void RichEditorPattern::InsertValueInStyledStringMore(RefPtr<SpanString> insertStyledString, int32_t changeStart,
     int32_t changeLength, std::u16string& subValue, bool needReplaceInTextPreview)
 {
+    bool isSingleHandleMoving = selectOverlay_->IsSingleHandleMoving();
+    if (textSelector_.IsValid()) {
+        ResetSelection();
+    }
+    CloseSelectOverlay();
     if (insertStyledString) {
         styledString_->InsertSpanString(changeStart, insertStyledString);
     } else {
         styledString_->InsertString(changeStart, subValue);
     }
     SetCaretPosition(changeStart + static_cast<int32_t>(subValue.length()), !needReplaceInTextPreview);
-    if (!caretVisible_) {
-        StartTwinkling();
-    }
+    IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -351,10 +354,6 @@ void RichEditorPattern::InsertValueInStyledString(const std::u16string& insertVa
         auto isUpdateCaret = !needReplaceInTextPreview;
         DeleteValueInStyledString(start, changeLength, false, isUpdateCaret);
     }
-    if (textSelector_.IsValid()) {
-        ResetSelection();
-    }
-    CloseSelectOverlay();
     InsertValueInStyledStringMore(insertStyledString, changeStart, changeLength, subValue, needReplaceInTextPreview);
 }
 
