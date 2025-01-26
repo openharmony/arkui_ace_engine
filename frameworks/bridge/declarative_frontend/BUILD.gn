@@ -284,6 +284,7 @@ template("declarative_js_engine") {
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -499,7 +500,6 @@ template("declarative_js_engine") {
     if (!ace_engine_feature_wearable) {
       sources += [
         "jsview/js_column_split.cpp",
-        "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
@@ -851,6 +851,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -968,7 +969,6 @@ template("declarative_js_engine_ng") {
     if (!ace_engine_feature_wearable) {
       sources += [
         "jsview/js_column_split.cpp",
-        "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
