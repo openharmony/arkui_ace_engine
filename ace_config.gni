@@ -91,7 +91,8 @@ use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
 use_ios = "${current_os}_${current_cpu}" == "ios_x64" ||
           "${current_os}_${current_cpu}" == "ios_arm64"
-use_linux = "${current_os}_${current_cpu}" == "linux_x64"
+use_linux = "${current_os}_${current_cpu}" == "linux_x64" ||
+            "${current_os}_${current_cpu}" == "linux_arm64"
 
 use_hilog = is_mingw || is_mac || is_linux || is_ohos || is_ohos_standard_system
 
