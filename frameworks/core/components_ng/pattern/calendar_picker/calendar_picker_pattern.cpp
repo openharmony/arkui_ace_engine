@@ -440,8 +440,20 @@ bool CalendarPickerPattern::IsInNodeRegion(const RefPtr<FrameNode>& node, const 
     return rect.IsInRegion(point);
 }
 
+bool CalendarPickerPattern::ReportChangeEvent(const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    PickerDate pickerDate;
+    CHECK_NULL_RETURN(CalendarDialogView::GetReportChangeEventDate(pickerDate, eventData), false);
+    CHECK_NULL_RETURN(CalendarDialogView::CanReportChangeEvent(reportedPickerDate_, pickerDate), false);
+    return CalendarDialogView::ReportChangeEvent(host->GetId(), compName, eventName, pickerDate);
+}
+
 void CalendarPickerPattern::FireChangeEvents(const std::string& info)
 {
+    ReportChangeEvent("CalendarPicker", "onChange", info);
     auto eventHub = GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateInputChangeEvent(info);
@@ -464,6 +476,7 @@ void CalendarPickerPattern::ShowDialog()
     auto changeId = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->ReportChangeEvent("CalendarPicker", "onChange", info);
         pattern->SetDate(info);
     };
     auto acceptId = [weak = WeakClaim(this)](const std::string& /* info */) {
