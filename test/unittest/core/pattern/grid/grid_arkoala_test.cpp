@@ -14,15 +14,23 @@
  */
 #include "grid_test_ng.h"
 #include "test/mock/core/pattern/mock_koala_lazy_for_each.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 class GridArkoalaTest : public GridTestNg {
 private:
+    void IncrementAndLayout()
+    {
+        lazy_.Increment();
+        frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FlushLayoutTask(frameNode_);
+    }
     void InitMockLazy(int32_t itemCnt)
     {
-        lazy_ = MockKoalaLazyForEach(
-            frameNode_.GetRawPtr(), itemCnt, [](int32_t idx) { return GridItemModelNG::CreateGridItem(-1); });
+        lazy_ = MockKoalaLazyForEach(frameNode_.GetRawPtr(), itemCnt, [](int32_t idx) {
+            auto node = GridItemModelNG::CreateGridItem(-1);
+            node->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(450.0f)));
+            return node;
+        });
         auto adapter = pattern_->GetOrCreateScrollWindowAdapter();
         adapter->RegisterUpdater([&](int32_t s, int32_t e, void* pointer) {
             // frontend
@@ -33,6 +41,7 @@ private:
 
     MockKoalaLazyForEach lazy_ { nullptr, 0, nullptr };
 };
+
 /**
  * @tc.name: Basic001
  * @tc.desc: Test ScrollWindowAdapter with MockKoala
@@ -49,12 +58,23 @@ HWTEST_F(GridArkoalaTest, Basic001, TestSize.Level1)
     InitMockLazy(100);
     CreateDone(frameNode_);
 
-    lazy_.Increment();
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    IncrementAndLayout();
 
-    EXPECT_EQ(frameNode_->GetChildren().size(), 2);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 4);
+    EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (0.00, 0.00) - [240.00 x 450.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (240.00, 0.00) - [240.00 x 450.00]");
+
+    UpdateCurrentOffset(-200.0f);
+    IncrementAndLayout();
+    EXPECT_EQ(frameNode_->GetChildren().size(), 6);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).ToString(), "RectT (0.00, 700.00) - [240.00 x 450.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 5).ToString(), "RectT (240.00, 700.00) - [240.00 x 450.00]");
+
+    UpdateCurrentOffset(-500.0f);
+    IncrementAndLayout();
+    EXPECT_EQ(frameNode_->GetChildren().size(), 6);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 1));
+    EXPECT_EQ(GetChildRect(frameNode_, 2).ToString(), "RectT (0.00, -250.00) - [240.00 x 450.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (240.00, -250.00) - [240.00 x 450.00]");
 }
 } // namespace OHOS::Ace::NG

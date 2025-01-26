@@ -71,10 +71,10 @@ void MockKoalaLazyForEach::RangeModeUpdate(int32_t s, int32_t e)
 
 void MockKoalaLazyForEach::Update(int32_t s, int32_t e, void* pointer)
 {
-    taskQ_.push([&] { RangeModeUpdate(s, e); });
+    taskQ_.push([=] { RangeModeUpdate(s, e); });
     return;
 
-    taskQ_.push([&]() { NormalModeUpdate(s, e, pointer); });
+    taskQ_.push([=]() { NormalModeUpdate(s, e, pointer); });
 }
 
 RefPtr<FrameNode> MockKoalaLazyForEach::CreateItem(int32_t idx)
