@@ -323,7 +323,7 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<NG::RadioPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetIsUserSetUncheckBorderColor(true); 
+        pattern->SetIsUserSetUncheckBorderColor(true);
     }
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
     Color indicatorColorVal;
