@@ -915,7 +915,7 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
     return 0.0f;
 }
 
-int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, InteractionHand *hand)
+int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, ArkUI_InteractionHand *hand)
 {
     if (!event || !hand) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -923,7 +923,7 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            *hand = static_cast<InteractionHand>(touchEvent->actionTouchPoint.operatingHand);
+            *hand = static_cast<ArkUI_InteractionHand>(touchEvent->actionTouchPoint.operatingHand);
             break;
         }
         default:
@@ -932,8 +932,8 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIdx(const ArkUI_UIInputEvent *event, int32_t pointerIndex,
-    InteractionHand *hand)
+int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIndex(const ArkUI_UIInputEvent *event, int32_t pointerIndex,
+    ArkUI_InteractionHand *hand)
 {
     if (!event || !hand) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -945,7 +945,7 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIdx(const ArkUI_UIInputEvent *
             if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
                 return ARKUI_ERROR_CODE_PARAM_INVALID;
             }
-            *hand = static_cast<InteractionHand>(touchEvent->touchPointes[pointerIndex].operatingHand);
+            *hand = static_cast<ArkUI_InteractionHand>(touchEvent->touchPointes[pointerIndex].operatingHand);
             break;
         }
         default:

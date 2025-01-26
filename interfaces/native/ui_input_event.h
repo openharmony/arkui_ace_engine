@@ -249,13 +249,13 @@ enum {
  * @since 16
  */
 typedef enum {
-    /** None. */
-    HAND_NONE = 0,
+    /** UnKnown. */
+    ARKUI_HAND_NONE = 0,
     /** Left hand. */
-    HAND_LEFT = 1,
+    ARKUI_HAND_LEFT = 1,
     /** Right hand. */
-    HAND_RIGHT = 2,
-} InteractionHand;
+    ARKUI_HAND_RIGHT = 2,
+} ArkUI_InteractionHand;
 
 /**
  * @brief Obtains the type of this UI input event.
@@ -503,7 +503,7 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
  * @since 16
  */
-int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, InteractionHand *hand);
+int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, ArkUI_InteractionHand *hand);
 
 /**
  * @brief Obtains the interaction hand of a touch point.
@@ -516,8 +516,8 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
  * @since 16
  */
-int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIdx(
-    const ArkUI_UIInputEvent *event, int32_t pointerIndex, InteractionHand *hand);
+int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIndex(
+    const ArkUI_UIInputEvent *event, int32_t pointerIndex, ArkUI_InteractionHand *hand);
 
 /**
  * @brief Obtains the width of the touch area from a directional input event (for example, a touch event).
