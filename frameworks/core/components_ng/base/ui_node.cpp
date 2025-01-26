@@ -1674,6 +1674,47 @@ bool UINode::GetIsRootBuilderNode() const
 }
 
 // Collects  all the child elements of "children" in a recursive manner
+// Fills the "removedElmtId" list and the "reservedElmtId" list with the collected child elements
+void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
+    std::list<int32_t>& reservedElmtId, bool isEntry)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Container::Current();
+    auto greatOrEqualApi13 =
+        container && container->GetApiTargetVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    for (auto const& child : children) {
+        bool needByTransition = child->IsDisappearing();
+        if (greatOrEqualApi13) {
+            needByTransition = isEntry && child->IsDisappearing() && child->GetInspectorIdValue("") != "";
+        }
+
+        if (!needByTransition && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
+            removedElmtId.emplace_back(child->GetId());
+            if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+                CollectCleanedChildren(child->GetChildren(), removedElmtId, reservedElmtId, false);
+            }
+        } else if (needByTransition && greatOrEqualApi13) {
+            child->CollectReservedChildren(reservedElmtId);
+        }
+    }
+    if (isEntry) {
+        children_.clear();
+    }
+}
+
+void UINode::CollectReservedChildren(std::list<int32_t>& reservedElmtId)
+{
+    reservedElmtId.emplace_back(GetId());
+    if (GetTag() == V2::JS_VIEW_ETS_TAG) {
+        SetJSViewActive(false);
+    } else {
+        for (auto const& child : GetChildren()) {
+            child->CollectReservedChildren(reservedElmtId);
+        }
+    }
+}
+
+// Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)

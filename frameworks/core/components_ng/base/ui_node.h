@@ -909,6 +909,9 @@ protected:
     void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
         std::list<int32_t>& removedElmtId, bool isEntry);
     void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
+    void CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
+        std::list<int32_t>& reservedElmtId, bool isEntry);
+    void CollectReservedChildren(std::list<int32_t>& reservedElmtId);
     virtual void OnCollectRemoved() {}
 
     bool needCallChildrenUpdate_ = true;
