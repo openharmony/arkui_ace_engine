@@ -218,7 +218,8 @@ enum AceLogTag : uint8_t {
     ACE_BADGE = 92,                // C0395C
     ACE_QRCODE = 93,               // C0395D
     ACE_PROGRESS = 94,             // C0395E
-    ACE_DYNAMIC_COMPONENT = 95,    // C0395E
+    ACE_DYNAMIC_COMPONENT = 95,    // C0395F
+    ACE_DRAWABLE_DESCRIPTOR = 96,  // C03960
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
