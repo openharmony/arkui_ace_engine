@@ -2063,17 +2063,10 @@ void SheetPresentationPattern::ResetToInvisible()
 bool SheetPresentationPattern::IsFoldExpand()
 {
     bool isExpand = false;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        auto foldStatus = container->GetCurrentFoldStatus();
-        isExpand = foldStatus != FoldStatus::FOLDED && foldStatus != FoldStatus::UNKNOWN;
-    } else {
-        auto containerId = Container::CurrentId();
-        auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
-        CHECK_NULL_RETURN(foldWindow, false);
-        isExpand = foldWindow->IsFoldExpand();
-    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto foldStatus = container->GetCurrentFoldStatus();
+    isExpand = foldStatus != FoldStatus::FOLDED && foldStatus != FoldStatus::UNKNOWN;
     if (isExpand) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "Get Fold status IsFoldExpand is true");
         return true;
