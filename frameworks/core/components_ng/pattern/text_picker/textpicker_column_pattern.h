@@ -360,15 +360,6 @@ public:
     int32_t GetOverScrollDeltaIndex() const;
     void SetCanLoop(bool isLoop);
 
-    void SetScrollDirection(bool isDown)
-    {
-        isDownScroll_ = isDown;
-    }
-
-    bool IsDownScroll()
-    {
-        return isDownScroll_;
-    }
     void ResetOptionPropertyHeight();
     void ResetTotalDelta();
 
@@ -391,7 +382,7 @@ private:
     std::vector<TextPickerOptionProperty> optionProperties_;
     std::vector<int32_t> algorithmOffset_;
     void ResetAlgorithmOffset();
-    void CalcAlgorithmOffset(double distancePercent);
+    void CalcAlgorithmOffset(ScrollDirection dir, double distancePercent);
     void SetOptionShiftDistance();
     double GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir);
     double GetShiftDistance(int32_t index, ScrollDirection dir);
@@ -508,7 +499,6 @@ private:
     bool animationBreak_ = false;
     bool needOptionPropertyHeightReset_ = false;
     bool isLoop_ = true;
-    bool isDownScroll_ = false;
 
     bool hasAppCustomFont_ = false;
     bool hasUserDefinedDisappearFontFamily_ = false;

@@ -1611,15 +1611,13 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternPlayResetAnimation001, TestSi
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
-    /**
-     * @tc.cases: case. cover isDownScroll_ == false
-     */
+
     textPickerColumnPattern_->PlayResetAnimation();
     EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
 
-    textPickerColumnPattern_->scrollDelta_ = 10.0f;
+    textPickerColumnPattern_->scrollDelta_ = -10.0f;
     textPickerColumnPattern_->PlayResetAnimation();
-    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 15.0f);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, -5.0f);
 }
 
 /**
@@ -1639,14 +1637,10 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternPlayResetAnimation002, TestSi
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
-    /**
-     * @tc.cases: case. cover isDownScroll_ == true
-     */
-    textPickerColumnPattern_->SetScrollDirection(true);
+
     textPickerColumnPattern_->PlayResetAnimation();
     EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
 
-    textPickerColumnPattern_->SetScrollDirection(true);
     textPickerColumnPattern_->scrollDelta_ = 10.0f;
     textPickerColumnPattern_->PlayResetAnimation();
     EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 3.0f);
