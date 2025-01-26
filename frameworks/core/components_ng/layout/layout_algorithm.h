@@ -27,6 +27,10 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+namespace OHOS::Ace::Kit {
+class LayoutAlgorithm;
+}
+
 namespace OHOS::Ace::NG {
 class LayoutWrapper;
 
@@ -89,18 +93,11 @@ class ACE_EXPORT LayoutAlgorithmWrapper : public LayoutAlgorithm {
 
 public:
     explicit LayoutAlgorithmWrapper(
-        const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure = false, bool skipLayout = false)
-        : layoutAlgorithm_(layoutAlgorithmT), skipMeasure_(skipMeasure), skipLayout_(skipLayout)
-    {}
-    ~LayoutAlgorithmWrapper() override = default;
+        const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure = false, bool skipLayout = false);
+    ~LayoutAlgorithmWrapper() override;
 
     static RefPtr<LayoutAlgorithmWrapper> CreateLayoutAlgorithmWrapper(
-        const RefPtr<Kit::LayoutAlgorithm>& layoutAlgorithm)
-    {
-        auto layoutAlgorithmWrapper = MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
-        layoutAlgorithmWrapper->SetAbsLayoutAlgorithm(layoutAlgorithm);
-        return layoutAlgorithmWrapper;
-    }
+        const RefPtr<Kit::LayoutAlgorithm>& layoutAlgorithm);
 
     void OnReset() override
     {
@@ -110,40 +107,9 @@ public:
     }
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override
-    {
-        if (!layoutAlgorithm_) {
-            if (absLayoutAlgorithm_) {
-                absLayoutAlgorithm_->MeasureContent(contentConstraint);
-            }
-            return std::nullopt;
-        }
-        return layoutAlgorithm_->MeasureContent(contentConstraint, layoutWrapper);
-    }
-
-    void Measure(LayoutWrapper* layoutWrapper) override
-    {
-        if (!layoutAlgorithm_) {
-            if (absLayoutAlgorithm_) {
-                absLayoutAlgorithm_->Measure();
-            }
-            return;
-        }
-        layoutAlgorithm_->Measure(layoutWrapper);
-        // automatically reset when layoutAlgorithm_ destruct each frame
-        layoutAlgorithm_->SetHasMeasured(true);
-    }
-
-    void Layout(LayoutWrapper* layoutWrapper) override
-    {
-        if (!layoutAlgorithm_) {
-            if (absLayoutAlgorithm_) {
-                absLayoutAlgorithm_->Layout();
-            }
-            return;
-        }
-        layoutAlgorithm_->Layout(layoutWrapper);
-    }
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
     void SetSkipMeasure()
     {
@@ -210,10 +176,7 @@ public:
         return percentHeight_;
     }
 
-    void SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm)
-    {
-        absLayoutAlgorithm_ = absLayoutAlgorithm;
-    }
+    void SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm);
 
 private:
     RefPtr<LayoutAlgorithm> layoutAlgorithm_;

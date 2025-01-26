@@ -3765,6 +3765,7 @@ void RosenRenderContext::FlushKitContentModifier(const RefPtr<Kit::Modifier>& mo
 
     auto modifierAdapter = ConvertKitContentModifier(modifier);
     rsNode_->AddModifier(modifierAdapter);
+    modifier->OnAttached();
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)

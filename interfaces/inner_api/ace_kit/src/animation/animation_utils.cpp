@@ -70,4 +70,4 @@ void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animati
     OHOS::Ace::AnimationUtils::StopAnimation(animation->animation_);
     animation->animation_.reset();
 }
-} // OHOS::Ace::Kit
+} // namespace OHOS::Ace::Kit

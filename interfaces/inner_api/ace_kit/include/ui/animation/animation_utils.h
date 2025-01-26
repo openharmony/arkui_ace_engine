@@ -37,5 +37,5 @@ public:
         const AnimationCallback& repeatCallback = nullptr, bool flushUITasks = true);
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };
-} // OHOS::Ace::Kit
+} // namespace OHOS::Ace::Kit
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_ANIMATION_UTIL_H
