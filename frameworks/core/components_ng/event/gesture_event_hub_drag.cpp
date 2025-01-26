@@ -271,7 +271,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
     }
 
     // use menuPreview's size and offset for drag framework.
-    if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
+    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
@@ -280,13 +280,14 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
     }
 }
 
-float GestureEventHub::GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap)
+float GestureEventHub::GetDefaultPixelMapScale(
+    const RefPtr<FrameNode>& frameNode, const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap)
 {
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
     CHECK_NULL_RETURN(pixelMap, defaultPixelMapScale);
     // use menuPreviewScale for drag framework. this is not final solution.
-    if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
+    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         int32_t originPixelMapWidth = pixelMap->GetWidth();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
@@ -407,7 +408,11 @@ RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale,
     ACE_SCOPED_TRACE("drag: get scaled pixmal, %f", targetScale);
     float preScale = 1.0f;
     CHECK_NULL_RETURN(dragEventActuator_, defaultPixelMap);
-    RefPtr<PixelMap> preScaledPixelMap = dragEventActuator_->GetPreScaledPixelMapForDragThroughTouch(preScale);
+    auto frameNode = GetFrameNode();
+    RefPtr<PixelMap> preScaledPixelMap;
+    if (!(frameNode && frameNode->GetDragPreview().onlyForLifting)) {
+        preScaledPixelMap = dragEventActuator_->GetPreScaledPixelMapForDragThroughTouch(preScale);
+    }
     if (preScale == targetScale && preScaledPixelMap != nullptr) {
         return preScaledPixelMap;
     }
@@ -663,7 +668,7 @@ bool GestureEventHub::ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragD
     } else if (dragPreviewInfo.customNode != nullptr) {
         dragDropInfo.customNode = dragPreviewInfo.customNode;
     }
-    return false;
+    return dragDropInfo.pixelMap;
 }
 
 void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
@@ -693,6 +698,15 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
 #endif
     TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropInfo is empty.");
     ACE_SCOPED_TRACE("drag: handling without preview");
+    if (!dragDropInfo.pixelMap) {
+        GenerateMousePixelMap(info);
+        dragDropInfo.pixelMap = pixelMap_;
+    }
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !dragDropInfo.pixelMap) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "no any pixmap got, get node snapshot final try");
+        ACE_SCOPED_TRACE("drag: no any pixmap got, get node snapshot final try");
+        dragDropInfo.pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
+    }
     OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
 }
 
@@ -757,31 +771,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
     }
     dragDropManager->SetSummaryMap(summary);
-    RefPtr<PixelMap> pixelMap;
-    if (dragDropInfo.pixelMap != nullptr) {
-        pixelMap = dragDropInfo.pixelMap;
-        SetPixelMap(dragDropInfo.pixelMap);
-    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "no any pixmap got, get node snapshot final try");
-        ACE_SCOPED_TRACE("drag: no any pixmap got, get node snapshot final try");
-        if (!GetTextDraggable()) {
-            GenerateMousePixelMap(info);
+    RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
+    if (pixelMap_ == nullptr) {
+        FireCustomerOnDragEnd(pipeline, eventHub);
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
+        if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            SetMouseDragMonitorState(false);
         }
-        if (pixelMap_) {
-            pixelMap = pixelMap_;
-        } else {
-            pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
-        }
-    } else {
-        if (pixelMap_ == nullptr) {
-            FireCustomerOnDragEnd(pipeline, eventHub);
-            TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-                SetMouseDragMonitorState(false);
-            }
-            return;
-        }
-        pixelMap = pixelMap_;
+        return;
     }
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
     if (dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
@@ -800,7 +797,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
-    float defaultPixelMapScale = GetDefaultPixelMapScale(info, isMenuShow, pixelMap);
+    float defaultPixelMapScale = GetDefaultPixelMapScale(frameNode, info, isMenuShow, pixelMap);
     auto windowScale = dragDropManager->GetWindowScale();
     float scale = windowScale * defaultPixelMapScale;
     auto isNeedCreateTiled =
@@ -830,11 +827,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             ACE_SCOPED_TRACE("drag: sub window show");
             auto mainPipeline = PipelineContext::GetMainPipelineContext();
             subWindow = SubwindowManager::GetInstance()->ShowPreviewNG((pipeline != mainPipeline));
-        }
-        if (subWindow) {
-            if (pixelMap_ != nullptr) {
-                pixelMap = pixelMap_;
-            }
         }
     }
     if (!overlayManager->GetIsOnAnimation()) {
@@ -1168,7 +1160,15 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
         dragDropInfo.pixelMap = nullptr;
         dragDropInfo.customNode = nullptr;
     } else {
-        dragPreviewInfo = frameNode->GetDragPreview();
+        auto dragPreview = frameNode->GetDragPreview();
+        if (dragPreview.onlyForLifting) {
+            return dragDropInfo;
+        }
+        if (!dragPreview.customNode && dragPreview.delayCreating && dragPreview.buildFunc) {
+            dragPreview.customNode = dragPreview.buildFunc();
+        }
+        frameNode->SetDragPreview(dragPreview);
+        dragPreviewInfo = dragPreview;
     }
     return dragDropInfo;
 }
