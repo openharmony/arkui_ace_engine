@@ -1113,6 +1113,8 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const App
         wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
     }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
+        formInfo.enableBlurBackground);
 }
 
 

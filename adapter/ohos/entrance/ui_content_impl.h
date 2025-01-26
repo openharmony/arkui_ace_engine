@@ -343,6 +343,8 @@ public:
 
     void SetFormRenderingMode(int8_t renderMode) override;
 
+    void SetFormEnableBlurBackground(bool enableBlurBackground) override;
+
     void SetContentNodeGrayScale(float grayscale) override;
 
     void PreLayout() override;

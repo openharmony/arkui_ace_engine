@@ -366,6 +366,11 @@ public:
         renderingMode_ = renderMode;
     }
 
+    void SetFormEnableBlurBackground(bool enableBlurBackground)
+    {
+        enableBlurBackground_ = enableBlurBackground;
+    }
+
     const Color& GetAppBgColor() const
     {
         return appBgColor_;
@@ -1549,6 +1554,7 @@ protected:
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
     int8_t renderingMode_ = 0;
+    bool enableBlurBackground_ = false;
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;

@@ -5134,7 +5134,7 @@ void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color)
 
 bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 {
-    if (!isFormRender_ || (renderingMode_ != RENDERING_SINGLE_COLOR)) {
+    if (!isFormRender_ || (renderingMode_ != RENDERING_SINGLE_COLOR) || !enableBlurBackground_) {
         return false;
     }
     return true;
