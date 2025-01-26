@@ -892,8 +892,11 @@ float SwiperLayoutAlgorithm::GetChildMainAxisSize(
 bool SwiperLayoutAlgorithm::NeedMeasureForward(
     int32_t currentIndex, float currentEndPos, float forwardEndPos, bool cachedLayout) const
 {
-    return LessNotEqual(currentEndPos, forwardEndPos) || (targetIndex_ && currentIndex < targetIndex_.value()) ||
-           (cachedLayout && currentIndex < cachedEndIndex_);
+    if (cachedLayout) {
+        return currentIndex < cachedEndIndex_;
+    }
+
+    return LessNotEqual(currentEndPos, forwardEndPos) || (targetIndex_ && currentIndex < targetIndex_.value());
 }
 
 void SwiperLayoutAlgorithm::AdjustOffsetOnForward(float currentEndPos)
@@ -1043,9 +1046,12 @@ void SwiperLayoutAlgorithm::SetInactiveOnBackward(LayoutWrapper* layoutWrapper)
 bool SwiperLayoutAlgorithm::NeedMeasureBackward(
     int32_t currentIndex, float currentStartPos, float backwardStartPos, bool isStretch, bool cachedLayout) const
 {
+    if (cachedLayout) {
+        return currentIndex > cachedStartIndex_;
+    }
+
     return GreatNotEqual(currentStartPos, backwardStartPos) ||
-           (!isStretch && targetIndex_ && currentIndex > targetIndex_.value()) ||
-           (cachedLayout && currentIndex > cachedStartIndex_);
+           (!isStretch && targetIndex_ && currentIndex > targetIndex_.value());
 }
 
 void SwiperLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
