@@ -905,6 +905,10 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
         return;
     }
+    if (module == "Repeat") {
+        JSRepeat::JSBind(globalObj);
+        return;
+    }
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
