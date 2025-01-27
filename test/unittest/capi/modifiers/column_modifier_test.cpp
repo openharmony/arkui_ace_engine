@@ -37,7 +37,7 @@ namespace  {
 
     // Valid values for attribute 'alignItems' of method 'alignItems'
     static const std::vector<std::tuple<std::string,
-        enum Ark_HorizontalAlign,
+        Ark_HorizontalAlign,
         std::string>> alignItemsAlignItemsValidValues = {
         {"ARK_HORIZONTAL_ALIGN_START", ARK_HORIZONTAL_ALIGN_START, "HorizontalAlign.Start"},
         {"ARK_HORIZONTAL_ALIGN_CENTER", ARK_HORIZONTAL_ALIGN_CENTER, "HorizontalAlign.Center"},
@@ -46,7 +46,7 @@ namespace  {
 
     // Valid values for attribute 'justifyContent' of method 'justifyContent'
     static const std::vector<std::tuple<std::string,
-        enum Ark_FlexAlign,
+        Ark_FlexAlign,
         std::string>> justifyContentJustifyContentValidValues = {
         {"ARK_FLEX_ALIGN_START", ARK_FLEX_ALIGN_START, "FlexAlign.Start"},
         {"ARK_FLEX_ALIGN_CENTER", ARK_FLEX_ALIGN_CENTER, "FlexAlign.Center"},
