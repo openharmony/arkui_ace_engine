@@ -15,7 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/implementation/accessibility_hover_event_peer.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AccessibilityHoverEventAccessor {
