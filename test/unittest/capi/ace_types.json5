@@ -3988,6 +3988,20 @@
                 "setSourceSizeTestDefaultValues",
                 "setSourceSizeTestSourceSizeWidthValidValues",
                 "setSourceSizeTestSourceSizeHeightValidValues",
+                "setPointLightTestDefaultValues", // No values in the JSON. Need investigate it in the ace_engine
+                "setPointLightTestPointLightLightSourcePositionXValidValues",  // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionXInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionYValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionYInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionZValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionZInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceIntensityValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceColorValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceColorInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightIlluminatedValidValues", // No values in the JSON
+                "setPointLightTestPointLightIlluminatedInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightBloomValidValues", // No values in the JSON
+                "setPointLightTestPointLightBloomInvalidValues", // No values in the JSON
             ],
             "disable": [
                 "setImageOptions0TestSrcValidValues", // No fixture is defined for type Ark_CustomObject
@@ -4003,20 +4017,6 @@
                 "setDynamicRangeModeTestDynamicRangeModeInvalidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setColorFilterTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setCopyOptionTestCopyOptionValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
-                "setPointLightTestDefaultValues", // No values in the JSON. Need investigate it in the ace_engine
-                "setPointLightTestPointLightLightSourcePositionXValidValues",  // No values in the JSON
-                "setPointLightTestPointLightLightSourcePositionXInvalidValues", // No values in the JSON
-                "setPointLightTestPointLightLightSourcePositionYValidValues", // No values in the JSON
-                "setPointLightTestPointLightLightSourcePositionYInvalidValues", // No values in the JSON
-                "setPointLightTestPointLightLightSourcePositionZValidValues", // No values in the JSON
-                "setPointLightTestPointLightLightSourcePositionZInvalidValues", // No values in the JSON
-                "setPointLightTestPointLightLightSourceIntensityValidValues", // No values in the JSON
-                "setPointLightTestPointLightLightSourceColorValidValues", // No values in the JSON
-                "setPointLightTestPointLightLightSourceColorInvalidValues", // No values in the JSON
-                "setPointLightTestPointLightIlluminatedValidValues", // No values in the JSON
-                "setPointLightTestPointLightIlluminatedInvalidValues", // No values in the JSON
-                "setPointLightTestPointLightBloomValidValues", // No values in the JSON
-                "setPointLightTestPointLightBloomInvalidValues", // No values in the JSON
                 "setAnalyzerConfigTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setResizableTestDefaultValues", // No values in the JSON
                 "setEdgeAntialiasingTestEdgeAntialiasingValidValues", // possible double or integer

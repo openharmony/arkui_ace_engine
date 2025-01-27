@@ -14,18 +14,19 @@
  */
 
 #include <gtest/gtest.h>
-#include <tuple>
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "generated/test_fixtures.h"
+#include "point_light_test.h"
+#include "generated/type_helpers.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::NG::TypeHelper;
+using namespace OHOS::Ace::NG::PointLight;
 
 namespace OHOS::Ace::NG {
 namespace Converter {
@@ -58,6 +59,7 @@ LoadImageSuccessEvent Convert(const Ark_Type_ImageAttribute_onComplete_callback_
 } // OHOS::Ace::NG::Converter
 
 namespace  {
+    
     const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
     const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
     const auto OPACITY_COLOR = "#FF000000";
@@ -68,11 +70,10 @@ namespace  {
     const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
     const auto ATTRIBUTE_SOURCE_SIZE_DEFAULT_VALUE = "[0.00 x 0.00]";
 
-
     // Valid values for boolean values
     const std::vector<std::tuple<std::string, Ark_Boolean, std::string>> validBoolean = {
-        {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-        {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+        {"true", ArkValue<Ark_Boolean>(true), "true"},
+        {"false", ArkValue<Ark_Boolean>(false), "false"},
     };
 
     struct EventsTracker {
@@ -96,6 +97,11 @@ public:
         for (auto&& res : Fixtures::resourceInitTable) {
             AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
             AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
+        }
+
+        for (auto& [id, strid, res] : resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
         }
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
@@ -129,27 +135,27 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)),
+        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor,
+        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor,
             Ark_String>(std::get<1>(value)), OPACITY_COLOR);
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)),
+        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
+        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)),
+        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)),
+        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)),
             ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
     }
 }
@@ -252,7 +258,7 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     EventsTracker::getImageEventsReceiver.onError = [](
         Ark_Int32 nodeId, const Ark_ImageError error)
     {
-        auto event = Converter::Convert<LoadImageFailEvent>(error);
+        auto event = Convert<LoadImageFailEvent>(error);
         checkEvent = {
             .nodeId = nodeId,
             .width = event.GetComponentWidth(),
@@ -338,8 +344,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetResourceUrl, testing::ext::TestSi
     std::string urlStringId = "https://www.example.com/xxx_id.png";
     AddResource(resID, urlStringId);
 
-    const auto RES_NAME = NamedResourceId{resName.c_str(), Converter::ResourceType::STRING};
-    const auto RES_ID = IntResourceId{resID, Converter::ResourceType::STRING};
+    const auto RES_NAME = NamedResourceId{resName.c_str(), ResourceType::STRING};
+    const auto RES_ID = IntResourceId{resID, ResourceType::STRING};
 
     std::vector<std::pair<Ark_ResourceStr, std::string>> tests = {
         {CreateResourceUnion<Ark_ResourceStr>(RES_NAME), urlString},
@@ -347,7 +353,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetResourceUrl, testing::ext::TestSi
     };
 
     for (auto & v: tests) {
-        auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(
+        auto imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(
             v.first);
         modifier_->setImageOptions0(node_, &imageRc);
         auto json = GetJsonValue(node_);
@@ -369,8 +375,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetUndefinedResourceUrl, testing::ex
 
     // set initial nondefault state
     std::string urlString = "https://www.example.com/xxx.jpg";
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    auto imageBefore = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+    auto image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
+    auto imageBefore = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
     modifier_->setImageOptions0(node_, &imageBefore);
     // verify the change
     auto json = GetJsonValue(node_);
@@ -378,9 +384,9 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetUndefinedResourceUrl, testing::ex
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
     // try unknown resource id
-    const auto emptyRes = IntResourceId{-1, Converter::ResourceType::STRING};
+    const auto emptyRes = IntResourceId{-1, ResourceType::STRING};
     auto resUnion = CreateResourceUnion<Ark_ResourceStr>(emptyRes);
-    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(resUnion);
+    auto imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(resUnion);
     modifier_->setImageOptions0(node_, &imageRc);
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
@@ -400,8 +406,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetStringUrl, testing::ext::TestSize
     ASSERT_NE(frameNode, nullptr);
 
     std::string urlString = "https://www.example.com/xxx.jpg";
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+    auto image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
+    auto imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
 
     modifier_->setImageOptions0(node_, &imageRc);
     auto json = GetJsonValue(node_);
@@ -421,8 +427,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetEmptyUrl, testing::ext::TestSize.
     ASSERT_NE(frameNode, nullptr);
     // set initial state
     std::string urlString = "https://www.example.com/xxx.jpg";
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+    auto image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
+    auto imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
 
     modifier_->setImageOptions0(node_, &imageRc);
     auto json = GetJsonValue(node_);
@@ -431,8 +437,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetEmptyUrl, testing::ext::TestSize.
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
 
     urlString = "";
-    image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
+    image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
+    imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(image);
 
     modifier_->setImageOptions0(node_, &imageRc);
     json = GetJsonValue(node_);
@@ -535,11 +541,11 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeWidthValues, TestSize.Lev
 {
     // Fixture 'NumberAnything' for type 'Ark_Number'
     const std::vector<std::tuple<std::string, Ark_Number, std::string>> testPlan = {
-        { "100", Converter::ArkValue<Ark_Number>(100), "[100.00 x 100.00]" },
-        { "0", Converter::ArkValue<Ark_Number>(0), "[0.00 x 100.00]" },
-        { "-100", Converter::ArkValue<Ark_Number>(-100), "[0.00 x 0.00]" },
-        { "12.34", Converter::ArkValue<Ark_Number>(12.34), "[12.34 x 100.00]" },
-        { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "[0.00 x 0.00]" },
+        { "100", ArkValue<Ark_Number>(100), "[100.00 x 100.00]" },
+        { "0", ArkValue<Ark_Number>(0), "[0.00 x 100.00]" },
+        { "-100", ArkValue<Ark_Number>(-100), "[0.00 x 0.00]" },
+        { "12.34", ArkValue<Ark_Number>(12.34), "[12.34 x 100.00]" },
+        { "-56.78", ArkValue<Ark_Number>(-56.78), "[0.00 x 0.00]" },
     };
 
     Ark_ImageSourceSize initValueSourceSize;
@@ -574,11 +580,11 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeHeightValues, TestSize.Le
 {
     // Fixture 'NumberAnything' for type 'Ark_Number'
     const std::vector<std::tuple<std::string, Ark_Number, std::string>> testPlan = {
-        { "100", Converter::ArkValue<Ark_Number>(100), "[100.00 x 100.00]" },
-        { "0", Converter::ArkValue<Ark_Number>(0), "[100.00 x 0.00]" },
-        { "-100", Converter::ArkValue<Ark_Number>(-100), "[0.00 x 0.00]" },
-        { "12.34", Converter::ArkValue<Ark_Number>(12.34), "[100.00 x 12.34]" },
-        { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "[0.00 x 0.00]" },
+        { "100", ArkValue<Ark_Number>(100), "[100.00 x 100.00]" },
+        { "0", ArkValue<Ark_Number>(0), "[100.00 x 0.00]" },
+        { "-100", ArkValue<Ark_Number>(-100), "[0.00 x 0.00]" },
+        { "12.34", ArkValue<Ark_Number>(12.34), "[100.00 x 12.34]" },
+        { "-56.78", ArkValue<Ark_Number>(-56.78), "[0.00 x 0.00]" },
     };
 
     Ark_ImageSourceSize initValueSourceSize;
@@ -638,7 +644,7 @@ HWTEST_F(ImageModifierTest, setOnCompleteTest, TestSize.Level1)
     auto onComplete = [](
         const Ark_Int32 resourceId, const Opt_Type_ImageAttribute_onComplete_callback_event event)
     {
-        auto info = Converter::OptConvert<LoadImageSuccessEvent>(event);
+        auto info = OptConvert<LoadImageSuccessEvent>(event);
         if (info) {
             checkEvent = {
                 .resourceId = resourceId,
@@ -648,7 +654,7 @@ HWTEST_F(ImageModifierTest, setOnCompleteTest, TestSize.Level1)
     };
 
     auto arkCallback =
-        Converter::ArkValue<Callback_Type_ImageAttribute_onComplete_callback_event_Void>(onComplete, contextId);
+        ArkValue<Callback_Type_ImageAttribute_onComplete_callback_event_Void>(onComplete, contextId);
 
     EXPECT_FALSE(checkEvent);
     modifier_->setOnComplete(node_, &arkCallback);
@@ -685,7 +691,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_setImageContent_EMPTY, testing::ext
     ASSERT_NE(frameNode, nullptr);
     auto json = GetJsonValue(node_);
     auto srcBefore = GetAttrValue<std::string>(json, "src");
-    auto option = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+    auto option = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
          Ark_ImageContent>(
             Ark_ImageContent::ARK_IMAGE_CONTENT_EMPTY);
     modifier_->setImageOptions1(node_, &option);
@@ -712,8 +718,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetResourceUrl, testing::ext::TestS
     std::string urlStringId = "https://www.example.com/xxx_id.png";
     AddResource(resID, urlStringId);
 
-    const auto RES_NAME = NamedResourceId{resName.c_str(), Converter::ResourceType::STRING};
-    const auto RES_ID = IntResourceId{resID, Converter::ResourceType::STRING};
+    const auto RES_NAME = NamedResourceId{resName.c_str(), ResourceType::STRING};
+    const auto RES_ID = IntResourceId{resID, ResourceType::STRING};
 
     std::vector<std::pair<Ark_ResourceStr, std::string>> tests = {
         {CreateResourceUnion<Ark_ResourceStr>(RES_NAME), urlString},
@@ -722,7 +728,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetResourceUrl, testing::ext::TestS
 
     for (auto & v: tests) {
         auto imageRc =
-            Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+            ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
             Ark_ResourceStr>(v.first);
         modifier_->setImageOptions1(node_, &imageRc);
         auto json = GetJsonValue(node_);
@@ -744,9 +750,9 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetUndefinedResourceUrl, testing::e
 
     // set initial nondefault state
     std::string urlString = "https://www.example.com/xxx.jpg";
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    auto image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
     auto imageBefore =
-        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+        ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
             Ark_ResourceStr>(image);
     modifier_->setImageOptions1(node_, &imageBefore);
     // verify the change
@@ -755,9 +761,9 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetUndefinedResourceUrl, testing::e
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
     // try unknown resource id
-    const auto emptyRes = IntResourceId{-1, Converter::ResourceType::STRING};
+    const auto emptyRes = IntResourceId{-1, ResourceType::STRING};
     auto resUnion = CreateResourceUnion<Ark_ResourceStr>(emptyRes);
-    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+    auto imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
         Ark_ResourceStr>(resUnion);
     modifier_->setImageOptions1(node_, &imageRc);
     json = GetJsonValue(node_);
@@ -778,9 +784,9 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetStringUrl, testing::ext::TestSiz
     ASSERT_NE(frameNode, nullptr);
 
     std::string urlString = "https://www.example.com/xxx.jpg";
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    auto image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
     auto imageRc =
-        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+        ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
             Ark_ResourceStr>(image);
 
     modifier_->setImageOptions1(node_, &imageRc);
@@ -801,8 +807,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetEmptyUrl, testing::ext::TestSize
     ASSERT_NE(frameNode, nullptr);
     // set initial state
     std::string urlString = "https://www.example.com/xxx.jpg";
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+    auto image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
+    auto imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
         Ark_ResourceStr>(image);
 
     modifier_->setImageOptions1(node_, &imageRc);
@@ -812,8 +818,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetEmptyUrl, testing::ext::TestSize
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
 
     urlString = "";
-    image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+    image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
+    imageRc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
         Ark_ResourceStr>(image);
 
     modifier_->setImageOptions1(node_, &imageRc);
@@ -821,6 +827,497 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetEmptyUrl, testing::ext::TestSize
     ASSERT_TRUE(json);
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+}
+
+/*
+ * @tc.name: setPointLightTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
+{
+    auto jsonValue = GetJsonValue(node_);
+    auto resultPointLight =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    std::string resultStr;
+    double resultDouble;
+
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
+    resultDouble = StringUtils::StringToDouble(resultStr);
+    EXPECT_NEAR(resultDouble, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE, FLT_EPSILON) <<
+        "Default value for attribute 'pointLight.lightSource.intensity'";
+
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE) <<
+        "Default value for attribute 'pointLight.lightSource'";
+
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
+        "Default value for attribute 'pointLight.illuminated'";
+
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
+    resultDouble = StringUtils::StringToDouble(resultStr);
+    EXPECT_NEAR(resultDouble, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
+        "Default value for attribute 'pointLight.bloom'";
+    auto resultPointLightPosition =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+    EXPECT_EQ(resultPointLightPosition->ToString(), ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_DEFAULT_VALUE) <<
+        "Default value for attribute 'pointLight.lightSource.position'";
+    EXPECT_TRUE(resultPointLightPosition->IsObject()) <<
+        "Default value for attribute 'pointLight.lightSource.position'";
+    EXPECT_FALSE(resultPointLightPosition->IsNull()) <<
+        "Default value for attribute 'pointLight.lightSource.position'";
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightLightSourcePositionXValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionXValidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](
+                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        WriteTo(inputValuePointLight.lightSource).positionX = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultLightSource =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionX";
+    };
+
+    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightLightSourcePositionYValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionYValidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](
+                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        WriteTo(inputValuePointLight.lightSource).positionY = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultLightSource =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionY";
+    };
+
+    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightLightSourcePositionZValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](
+                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        WriteTo(inputValuePointLight.lightSource).positionZ = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultLightSource =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionZ";
+    };
+
+    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightLightSourceIntensity
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceIntensity, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](
+                          const std::string& input, const double& expected, const Ark_Number& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        WriteTo(inputValuePointLight.lightSource).intensity = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultLightSource =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
+        auto result = StringUtils::StringToDouble(resultStr);
+        EXPECT_NEAR(result, expected, FLT_EPSILON) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.intensity";
+    };
+
+    for (auto& [input, value, expected] : testFixtureIntensityValidValues) {
+        checkValue(input, expected, value);
+    }
+
+    for (auto& [input, value] : testFixtureIntensityInvalidValues) {
+        checkValue(input, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE, value);
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightLightSourceColorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorValidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        WriteTo(inputValuePointLight.lightSource).color = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultPointLight =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource =
+            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.color";
+    };
+
+    for (auto& [input, value, expected] : testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightLightSourceColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorInvalidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_ResourceColor& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        WriteTo(inputValuePointLight.lightSource).color = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultPointLight =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE) <<
+            "Default value for attribute 'pointLight.lightSource'";
+    };
+
+    for (auto& [input, value] : testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightIlluminatedValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedValidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](
+                          const std::string& input, const std::string& expectedStr, const Opt_IlluminatedType& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        inputValuePointLight.illuminated = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
+    };
+
+    for (auto& [input, value, expected] : testFixtureEnumIlluminatedTypeValidValues) {
+        checkValue(input, expected, ArkValue<Opt_IlluminatedType>(value));
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightIlluminatedInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_IlluminatedType& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        inputValuePointLight.illuminated = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
+    };
+
+    for (auto& [input, value] : testFixtureEnumIlluminatedTypeInvalidValues) {
+        checkValue(input, ArkValue<Opt_IlluminatedType>(value));
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightBloomValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        inputValuePointLight.bloom = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultPointLight =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource =
+            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
+        auto result = StringUtils::StringToDouble(resultStr);
+        EXPECT_NEAR(result, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
+    };
+
+    for (auto& [input, value, expected] : testFixtureBloomValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestPointLightBloomInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSize.Level1)
+{
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    WriteTo(initValuePointLight.lightSource).positionX =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionY =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).positionZ =
+        std::get<1>(testFixtureLenghtLightPosition[0]);
+    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
+    WriteTo(initValuePointLight.lightSource).color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+    initValuePointLight.illuminated =
+        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
+    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+
+    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_Number& value) {
+        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        inputValuePointLight.bloom = value;
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultPointLight =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource =
+            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
+        auto result = StringUtils::StringToDouble(resultStr);
+        EXPECT_NEAR(result, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
+            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 } // namespace OHOS::Ace::NG

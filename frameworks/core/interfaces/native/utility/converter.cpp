@@ -634,12 +634,6 @@ Dimension Convert(const Ark_Number& src)
 }
 
 template<>
-int Convert(const Ark_IlluminatedType& src)
-{
-    return static_cast<int>(src);
-}
-
-template<>
 StringArray Convert(const Ark_CustomObject& src)
 {
     LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
