@@ -84,7 +84,7 @@ namespace  {
                 return &getImageEventsReceiver;
             }
         };
-    }; // EventsTracker   
+    }; // EventsTracker
 } // namespace
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,

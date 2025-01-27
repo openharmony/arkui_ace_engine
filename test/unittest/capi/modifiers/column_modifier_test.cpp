@@ -36,14 +36,18 @@ namespace  {
     const auto ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
 
     // Valid values for attribute 'alignItems' of method 'alignItems'
-    static const std::vector<std::tuple<std::string, enum Ark_HorizontalAlign, std::string>> alignItemsAlignItemsValidValues = {
+    static const std::vector<std::tuple<std::string,
+        enum Ark_HorizontalAlign,
+        std::string>> alignItemsAlignItemsValidValues = {
         {"ARK_HORIZONTAL_ALIGN_START", ARK_HORIZONTAL_ALIGN_START, "HorizontalAlign.Start"},
         {"ARK_HORIZONTAL_ALIGN_CENTER", ARK_HORIZONTAL_ALIGN_CENTER, "HorizontalAlign.Center"},
         {"ARK_HORIZONTAL_ALIGN_END", ARK_HORIZONTAL_ALIGN_END, "HorizontalAlign.End"},
     };
 
     // Valid values for attribute 'justifyContent' of method 'justifyContent'
-    static const std::vector<std::tuple<std::string, enum Ark_FlexAlign, std::string>> justifyContentJustifyContentValidValues = {
+    static const std::vector<std::tuple<std::string,
+        enum Ark_FlexAlign,
+        std::string>> justifyContentJustifyContentValidValues = {
         {"ARK_FLEX_ALIGN_START", ARK_FLEX_ALIGN_START, "FlexAlign.Start"},
         {"ARK_FLEX_ALIGN_CENTER", ARK_FLEX_ALIGN_CENTER, "FlexAlign.Center"},
         {"ARK_FLEX_ALIGN_END", ARK_FLEX_ALIGN_END, "FlexAlign.End"},
