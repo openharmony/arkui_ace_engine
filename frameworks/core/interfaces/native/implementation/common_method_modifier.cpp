@@ -1772,13 +1772,6 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
     dst.fingerList = holder.ArkValue();
 #endif
 }
-
-template<>
-RefPtr<PixelMap> Convert(const Ark_PixelMap& src)
-{
-    LOGE("ARKOALA: Convert to [RefPtr<PixelMap>] from [Ark_PixelMap] is not supported\n");
-    return nullptr;
-}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 

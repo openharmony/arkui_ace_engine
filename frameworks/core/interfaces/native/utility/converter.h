@@ -472,6 +472,7 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
+    template<> RefPtr<PixelMap> Convert(const Ark_PixelMap& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_ShadowOptions& src);

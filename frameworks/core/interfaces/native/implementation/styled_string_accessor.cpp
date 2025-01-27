@@ -78,8 +78,8 @@ ImageSpanAttribute Convert(const Ark_ImageAttachment& src)
 template<>
 ImageSpanOptions Convert(const Ark_ImageAttachment& src)
 {
-    LOGE("Converter::Convert Ark_ImageAttachment, the PixelMap support not implemented");
     return {
+        .imagePixelMap = OptConvert<RefPtr<PixelMap>>(src.value),
         .imageAttribute = OptConvert<ImageSpanAttribute>(src)
     };
 }
@@ -170,10 +170,9 @@ LeadingMargin Convert(const Ark_Number& src)
 template<>
 LeadingMargin Convert(const Ark_LeadingMarginPlaceholder& src)
 {
-    LOGE("Converter::Convert Ark_LeadingMarginPlaceholder, the PixelMap support not implemented");
     return {
         .size = Convert<LeadingMarginSize>(src.size),
-        .pixmap = nullptr
+        .pixmap = Convert<RefPtr<PixelMap>>(src.pixelMap)
     };
 }
 

@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
@@ -31,7 +32,48 @@ constexpr int TEST_START_LNHT = TEST_START_TSH + TEST_LENGTH + 1;
 constexpr int TEST_START_BGCL = TEST_START_LNHT + TEST_LENGTH + 1;
 constexpr int TEST_START_URL = TEST_START_BGCL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSST = TEST_START_URL + TEST_LENGTH + 1;
+constexpr int TEST_START_PSPM = TEST_START_PSST + TEST_LENGTH + 1;
 constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.";
+
+
+PixelMapPeer* CreatePixelMap()
+{
+    static PixelMapPeer pixelMapPeer;
+    static std::string src = "test";
+    auto voidChar = src.data();
+    void* voidPtr = static_cast<void*>(voidChar);
+    pixelMapPeer.pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    return &pixelMapPeer;
+}
+const Ark_PixelMap TEST_PIXELMAP {
+    .ptr = static_cast<void*>(CreatePixelMap()),
+};
+const std::string TEST_SIZEOPTIONS = "1.00px";
+const Ark_SizeOptions TEST_ARK_SIZEOPTIONS {
+    .width = Converter::ArkValue<Opt_Length>(TEST_SIZEOPTIONS),
+    .height = Converter::ArkValue<Opt_Length>(TEST_SIZEOPTIONS)
+};
+const std::tuple<VerticalAlign, Ark_ImageSpanAlignment> TEST_VERTICALALIGN = {
+    VerticalAlign::CENTER, ARK_IMAGE_SPAN_ALIGNMENT_CENTER};
+const std::tuple<ImageFit, Ark_ImageFit> TEST_IMAGEFIT = { ImageFit::FILL, ARK_IMAGE_FIT_FILL };
+const Ark_LengthMetrics TEST_LENGTHMETRICS = Converter::ArkValue<Ark_LengthMetrics>(123.0_vp);
+const std::string TEST_LENGTHMETRICS_STR = "[123.00vp,123.00vp,123.00vp,123.00vp]";
+const std::string TEST_LENGTHMETRICS_BR_STR =
+    "radiusTopLeft: [123.00vp]radiusTopRight: [123.00vp]radiusBottomLeft: [123.00vp]radiusBottomRight: [123.00vp]";
+
+const Ark_ImageAttachmentLayoutStyle TEST_IMAGELAYOUTSTYLE {
+    .margin = Converter::ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(TEST_LENGTHMETRICS),
+    .padding = Converter::ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(TEST_LENGTHMETRICS),
+    .borderRadius = Converter::ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(TEST_LENGTHMETRICS)
+};
+
+const Ark_ImageAttachment IMAGEATTACHMENT_TEST_VALUE {
+    .value = TEST_PIXELMAP,
+    .size = Converter::ArkValue<Opt_SizeOptions>(TEST_ARK_SIZEOPTIONS),
+    .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(std::get<1>(TEST_VERTICALALIGN)),
+    .objectFit = Converter::ArkValue<Opt_ImageFit>(std::get<1>(TEST_IMAGEFIT)),
+    .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(TEST_IMAGELAYOUTSTYLE)
+};
 
 const std::tuple<std::string, int32_t> TEST_FONT_SIZE = { "16.00vp", 16 };
 const std::tuple<Ace::FontWeight, int32_t> TEST_FONT_WEIGHT = { FontWeight::W900, 900 };
@@ -65,7 +107,15 @@ const std::tuple<Ace::TextOverflow, Ark_TextOverflow> TEST_PSST_OVERFLOW = {
 const std::tuple<Ace::WordBreak, Ark_WordBreak> TEST_PSST_WORD_BREAK = {
     Ace::WordBreak::BREAK_ALL, ARK_WORD_BREAK_BREAK_ALL };
 const std::tuple<std::string, int> TEST_PSST_LEADING_MARGIN = { "width: 2.00vp height: 2.00vp", 2 };
-
+const std::tuple<std::string, Ark_Tuple_Dimension_Dimension> TEST_TUPLE_DIMENSION_DIMENSION = {
+    "width: 0.10fp height: 10.00vp",
+    Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> {
+        0.1_fp, 10.0_vp
+    })};
+const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
+    .pixelMap = TEST_PIXELMAP,
+    .size = std::get<1>(TEST_TUPLE_DIMENSION_DIMENSION)
+};
 
 const std::vector<Ace::SpanType> SPAN_TYPE_TEST_VALUES = {
     Ace::SpanType::Font,
@@ -142,6 +192,15 @@ namespace {
         .leadingMargin = Converter::ArkUnion<
             Opt_Union_Number_LeadingMarginPlaceholder, Ark_Number>(std::get<1>(TEST_PSST_LEADING_MARGIN)),
     };
+    const Ark_ParagraphStyle paragraphStylePM {
+        .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
+        .textIndent = Converter::ArkValue<Opt_Number>(TEST_PSST_TEXT_INDEN),
+        .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
+        .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
+        .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
+        .leadingMargin = Converter::ArkUnion<
+            Opt_Union_Number_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(TEST_PSPM_LEADING_MARGIN),
+    };
     const std::vector<Ark_StyleOptions> testArrayStyles = std::vector {
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_STR),
@@ -196,6 +255,12 @@ namespace {
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[8]),
             .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(paragraphStyle)
+        },
+        Ark_StyleOptions {
+            .start = Converter::ArkValue<Opt_Number>(TEST_START_PSPM),
+            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
+            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[8]),
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(paragraphStylePM)
         }
     };
     Converter::ArkArrayHolder<Array_StyleOptions> holderStyles(testArrayStyles);
@@ -223,6 +288,16 @@ struct StyledStringUnionString {
     }
 };
 
+struct StyledStringUnionImageAttachment {
+    Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpan, Ark_ImageAttachment>(IMAGEATTACHMENT_TEST_VALUE);
+    Ark_Union_String_ImageAttachment_CustomSpan* Union()
+    {
+        return &value;
+    }
+    Opt_Array_StyleOptions* Styles() { return nullptr; }
+};
+
 template <typename V1>
 class StyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIStyledStringAccessor,
     &GENERATED_ArkUIAccessors::getStyledStringAccessor, StyledStringPeer> {
@@ -245,6 +320,7 @@ private:
 
 using StyledStringAccessorUnionNullTest = StyledStringAccessorTest<StyledStringUnionNull>;
 using StyledStringAccessorUnionStringTest = StyledStringAccessorTest<StyledStringUnionString>;
+using StyledStringAccessorUnionImageAttachmentTest = StyledStringAccessorTest<StyledStringUnionImageAttachment>;
 
 /**
  * @tc.name: peerSucceeded
@@ -293,6 +369,8 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansOn, TestSize.
     EXPECT_EQ(spansUrl.size(), 1);
     auto paragraphSpan = peer_->spanString->GetSpans(TEST_START_PSST, TEST_LENGTH);
     EXPECT_EQ(paragraphSpan.size(), 1);
+    auto paragraphSpanPM = peer_->spanString->GetSpans(TEST_START_PSPM, TEST_LENGTH);
+    EXPECT_EQ(paragraphSpanPM.size(), 1);
 }
 
 /**
@@ -523,13 +601,24 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStyle, Te
 }
 
 /**
- * @tc.name:DISABLED_styledStringCtorParagraphStylePixelMap
- * @tc.desc:
+ * @tc.name: styledStringCtorParagraphStylePixelMap
+ * @tc.desc: PixelMap check in the ParagraphStyle
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorParagraphStylePixelMap, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixelMap, TestSize.Level1)
 {
-    // not implement PixelMap for leadingMargin
+    ASSERT_NE(peer_->spanString, nullptr);
+    auto spans = peer_->spanString->GetSpans(TEST_START_PSPM, TEST_LENGTH);
+    ASSERT_EQ(spans.size(), 1);
+    auto paragraphSpan = AceType::DynamicCast<ParagraphStyleSpan>(spans[0]);
+    ASSERT_NE(paragraphSpan, nullptr);
+    SpanParagraphStyle style = paragraphSpan->GetParagraphStyle();
+    ASSERT_TRUE(style.leadingMargin.has_value());
+    auto size = style.leadingMargin.value().size;
+    EXPECT_EQ(size.ToString(), std::get<0>(TEST_TUPLE_DIMENSION_DIMENSION));
+    auto pixMap = style.leadingMargin.value().pixmap;
+    auto pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
+    EXPECT_EQ(pixMap, pixMapPeer->pixelMap);
 }
 
 /**
@@ -635,5 +724,43 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling, 
 HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringUnmarshalling, TestSize.Level1)
 {
     // not implement
+}
+
+/**
+ * @tc.name:styledStringCtorImageAttachment
+ * @tc.desc: ImageAttachment check
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAttachment, TestSize.Level1)
+{
+    ASSERT_NE(peer_->spanString, nullptr);
+    auto spans = peer_->spanString->GetSpans(0, 1);
+    ASSERT_EQ(spans.size(), 1);
+    auto imageSpan = AceType::DynamicCast<ImageSpan>(spans[0]);
+    ASSERT_NE(imageSpan, nullptr);
+    const ImageSpanOptions& options = imageSpan->GetImageSpanOptions();
+    auto pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
+    ASSERT_TRUE(options.imagePixelMap.has_value());
+    EXPECT_EQ(options.imagePixelMap.value(), pixMapPeer->pixelMap);
+    const std::optional<ImageSpanAttribute>& imageAttribute = imageSpan->GetImageAttribute();
+    ASSERT_TRUE(imageAttribute.has_value());
+    ASSERT_TRUE(imageAttribute.value().size.has_value());
+    ASSERT_TRUE(imageAttribute->size->width.has_value());
+    ASSERT_TRUE(imageAttribute->size->height.has_value());
+    EXPECT_EQ(imageAttribute->size->width->ToString(), TEST_SIZEOPTIONS);
+    EXPECT_EQ(imageAttribute->size->height->ToString(), TEST_SIZEOPTIONS);
+    ASSERT_TRUE(imageAttribute.value().verticalAlign.has_value());
+    EXPECT_EQ(imageAttribute.value().verticalAlign.value(), std::get<0>(TEST_VERTICALALIGN));
+    ASSERT_TRUE(imageAttribute.value().objectFit.has_value());
+    EXPECT_EQ(imageAttribute.value().objectFit.value(), std::get<0>(TEST_IMAGEFIT));
+    ASSERT_TRUE(imageAttribute.value().marginProp.has_value());
+    auto marginStr = imageAttribute.value().marginProp.value().ToString();
+    EXPECT_EQ(marginStr, TEST_LENGTHMETRICS_STR);
+    ASSERT_TRUE(imageAttribute.value().borderRadius.has_value());
+    auto borderRadiusStr = imageAttribute.value().borderRadius.value().ToString();
+    EXPECT_EQ(borderRadiusStr, TEST_LENGTHMETRICS_BR_STR);
+    ASSERT_TRUE(imageAttribute.value().paddingProp.has_value());
+    auto paddingStr = imageAttribute.value().paddingProp.value().ToString();
+    EXPECT_EQ(paddingStr, TEST_LENGTHMETRICS_STR);
 }
 } // namespace OHOS::Ace::NG
