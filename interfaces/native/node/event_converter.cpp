@@ -358,6 +358,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
         case NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE:
             return ON_CHECKBOX_GROUP_CHANGE;
+        case NODE_ON_AXIS:
+            return ON_AXIS;
         default:
             return -1;
     }
@@ -586,6 +588,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT;
         case ON_CHECKBOX_GROUP_CHANGE:
             return NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE;
+        case ON_AXIS:
+            return NODE_ON_AXIS;
         default:
             return -1;
     }
@@ -671,6 +675,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case TEXT_INPUT_CHANGE: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->textChangeEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case AXIS_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->axisEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }

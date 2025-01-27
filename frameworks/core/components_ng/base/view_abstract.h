@@ -295,6 +295,7 @@ public:
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
+    static void SetOnAxisEvent(OnAxisEventFunc &&onAxisEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
     static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
@@ -439,6 +440,8 @@ public:
     static void DisableOnFocus();
     static void DisableOnBlur();
     static void DisableOnFocusAxisEvent();
+    static void DisableOnAxisEvent();
+    static void DisableOnAxisEvent(FrameNode* frameNode);
     static void DisableOnFocusAxisEvent(FrameNode* frameNode);
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnDragStart(FrameNode* frameNode);
@@ -688,6 +691,7 @@ public:
     static void SetOnDragLeave(FrameNode* frameNode,
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
+    static void SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
     static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);

@@ -258,6 +258,9 @@ struct ArkUIAxisEvent {
     ArkUI_Float64 verticalAxis;
     ArkUI_Float64 pinchAxisScale;
     ArkUI_Int32 targetDisplayId;
+    ArkUI_Int32 subKind;
+    bool propagation;
+    ArkUI_Int32 scrollStep;
 };
 
 struct ArkUIDragEvent {
@@ -862,6 +865,7 @@ enum ArkUIEventCategory {
     KEY_INPUT_EVENT = 13, // KEY_EVENT is already defined as a macro in wincon.h
     FOCUS_AXIS_EVENT = 14,
     TEXT_INPUT_CHANGE = 15,
+    AXIS_EVENT = 16,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -894,6 +898,7 @@ enum ArkUIEventSubKind {
     ON_KEY_PREIME,
     ON_FOCUS_AXIS,
     ON_KEY_DISPATCH,
+    ON_AXIS,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -1247,6 +1252,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextInputMixed textChangeEvent;
         ArkUIClickEvent clickEvent;
         ArkUIHoverEvent hoverEvent;
+        ArkUIAxisEvent axisEvent;
     };
 };
 

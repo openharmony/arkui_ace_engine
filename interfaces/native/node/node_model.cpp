@@ -466,6 +466,13 @@ void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEven
     uiEvent.inputEvent = &(innerEvent->focusAxisEvent);
 }
 
+void HandleAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    uiEvent.eventTypeId = C_AXIS_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->axisEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -505,6 +512,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
             {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
             {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_AXIS, HandleAxisEvent},
         };
 
         auto it = eventHandlers.find(eventType);
@@ -566,6 +574,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case TEXT_INPUT_CHANGE:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->textChangeEvent.subKind);
+            break;
+        case AXIS_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->axisEvent.subKind);
             break;
         default:
             break; /* Empty */

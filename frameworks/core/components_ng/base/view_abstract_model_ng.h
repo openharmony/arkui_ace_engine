@@ -986,6 +986,11 @@ public:
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     }
 
+    void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) override
+    {
+        ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc));
+    }
+
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
@@ -1437,6 +1442,11 @@ public:
         ViewAbstract::DisableOnMouse();
     }
 
+    void DisableOnAxisEvent() override
+    {
+        ViewAbstract::DisableOnAxisEvent();
+    }
+    
     void DisableOnAppear() override
     {
         ViewAbstract::DisableOnAppear();

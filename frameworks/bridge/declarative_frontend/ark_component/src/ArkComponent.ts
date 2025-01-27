@@ -2019,6 +2019,21 @@ class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   }
 }
 
+declare type AxisEventCallback = (event: AxisEvent) => void;
+class OnAxisEventModifier extends ModifierWithKey<AxisEventCallback> {
+  constructor(value: AxisEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAxisEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAxisEvent(node);
+    } else {
+      getUINativeModule().common.setOnAxisEvent(node, this.value);
+    }
+  }
+}
+
 declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
   constructor(value: SizeChangeEventCallback) {
@@ -4019,6 +4034,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onAxisEvent(event: (event?: AxisEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnAxisEventModifier.identity, OnAxisEventModifier, event);
+    return this;
+  }
+  
   onTouch(event: (event?: TouchEvent) => void): this {
     modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
     return this;

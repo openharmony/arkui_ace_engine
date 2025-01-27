@@ -195,6 +195,7 @@ public:
     void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override {};
 #endif
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
+    void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
@@ -256,6 +257,7 @@ public:
     void DisableOnHover() override {};
     void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
+    void DisableOnAxisEvent() override {};
     void DisableOnAppear() override {};
     void DisableOnDisAppear() override {};
     void DisableOnAttach() override {};

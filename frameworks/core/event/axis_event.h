@@ -74,6 +74,8 @@ struct AxisEvent final : public PointerEvent {
     int32_t originalId = 0;
     bool isInjected = false;
 
+    int32_t scrollStep = 0;
+
     AxisEvent()
     {
         eventType = UIInputEventType::AXIS;
@@ -83,12 +85,12 @@ struct AxisEvent final : public PointerEvent {
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
         int64_t deviceId, SourceType sourceType, SourceTool sourceTool,
         std::shared_ptr<const MMI::PointerEvent> pointerEvent, std::vector<KeyCode> pressedCodes,
-        int32_t targetDisplayId, int32_t originalId, bool isInjected)
+        int32_t targetDisplayId, int32_t originalId, bool isInjected, int32_t scrollStep)
         : PointerEvent(x, y, screenX, screenY, timestamp), id(id), verticalAxis(verticalAxis),
           horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
           isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
           sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), pressedCodes(pressedCodes),
-          targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected)
+          targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected), scrollStep(scrollStep)
     {
         eventType = UIInputEventType::AXIS;
     }
@@ -116,6 +118,7 @@ public:
     ~AxisInfo() override = default;
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
+    int32_t GetScrollStep() const;
     void SetVerticalAxis(float axis);
     float GetVerticalAxis() const;
     void SetHorizontalAxis(float axis);
@@ -136,6 +139,7 @@ public:
 
 private:
     AxisAction action_ = AxisAction::NONE;
+    int32_t scrollStep_ = 0;
     float verticalAxis_ = 0.0;
     float horizontalAxis_ = 0.0;
     float pinchAxisScale_ = 0.0;

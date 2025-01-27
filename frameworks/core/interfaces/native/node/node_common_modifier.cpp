@@ -8133,6 +8133,41 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnMouse(frameNode, onEvent);
 }
 
+void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](AxisInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
+        event.axisEvent.subKind = ON_AXIS;
+        event.axisEvent.action = static_cast<int32_t>(info.GetAction());
+        event.axisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.axisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.axisEvent.verticalAxis = static_cast<double>(info.GetVerticalAxis());
+        event.axisEvent.horizontalAxis = static_cast<double>(info.GetHorizontalAxis());
+        event.axisEvent.pinchAxisScale = static_cast<double>(info.GetPinchAxisScale());
+        event.axisEvent.scrollStep = static_cast<int32_t>(info.GetScrollStep());
+        event.axisEvent.propagation = false;
+        event.axisEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(!event.axisEvent.propagation);
+    };
+    ViewAbstract::SetOnAxisEvent(frameNode, onEvent);
+}
+
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -8248,6 +8283,13 @@ void ResetOnMouse(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnMouse(frameNode);
+}
+
+void ResetOnAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAxisEvent(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

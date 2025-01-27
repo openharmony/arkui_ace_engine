@@ -925,6 +925,27 @@ int32_t OH_ArkUI_MouseEvent_GetPressedButtons(
  */
 int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event);
 
+/**
+ * @brief Sets whether to enable axis event propagation.
+ *
+ * @param event Pointer to the UI input event.
+ * @param propagation Whether to enable event propagation.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_AxisEvent_SetPropagation(const ArkUI_UIInputEvent* event, bool propagation);
+
+/**
+ * @brief Obtains the scroll step configuration of the mouse wheel axis event.
+ *
+ * @param event Pointer to the UI input event.
+ * @return Returns the scroll step configuration of the mouse wheel axis event.
+ * @since 16
+ */
+int32_t OH_ArkUI_AxisEvent_GetScrollStep(const ArkUI_UIInputEvent* event);
+
 #ifdef __cplusplus
 };
 #endif

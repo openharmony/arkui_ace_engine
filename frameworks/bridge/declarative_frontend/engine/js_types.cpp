@@ -34,6 +34,17 @@ Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
     return JSValueRef::Undefined(info->GetVM());
 }
 
+Local<JSValueRef> JsPropagation(panda::JsiRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (eventInfo) {
+        eventInfo->SetStopPropagation(false);
+    }
+    return JSValueRef::Undefined(info->GetVM());
+}
+
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();

@@ -1897,6 +1897,19 @@ class OnMouseModifier extends ModifierWithKey {
   }
 }
 OnMouseModifier.identity = Symbol('onMouse');
+class OnAxisEventModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().common.resetOnAxisEvent(node);
+      } else {
+        getUINativeModule().common.setOnAxisEvent(node, this.value);
+      }
+    }
+  }
+OnAxisEventModifier.identity = Symbol('onAxisEvent');
 class OnSizeChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3840,6 +3853,10 @@ class ArkComponent {
   }
   onMouse(event) {
     modifierWithKey(this._modifiersWithKeys, OnMouseModifier.identity, OnMouseModifier, event);
+    return this;
+  }
+  onAxisEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, OnAxisEventModifier.identity, OnAxisEventModifier, event);
     return this;
   }
   onTouch(event) {
