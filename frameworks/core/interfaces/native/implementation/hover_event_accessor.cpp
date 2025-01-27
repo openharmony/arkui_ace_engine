@@ -46,4 +46,5 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
     };
     return &HoverEventAccessorImpl;
 }
+
 }

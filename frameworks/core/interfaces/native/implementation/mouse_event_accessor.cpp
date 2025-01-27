@@ -146,4 +146,5 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
     };
     return &MouseEventAccessorImpl;
 }
+
 }

@@ -142,4 +142,5 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
     };
     return &BaseEventAccessorImpl;
 }
+
 }

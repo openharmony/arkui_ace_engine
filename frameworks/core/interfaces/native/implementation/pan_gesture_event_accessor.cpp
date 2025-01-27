@@ -91,4 +91,5 @@ const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor()
     };
     return &PanGestureEventAccessorImpl;
 }
+
 }

@@ -97,4 +97,5 @@ const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor()
     };
     return &UICommonEventAccessorImpl;
 }
+
 }

@@ -136,4 +136,5 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
     };
     return &KeyEventAccessorImpl;
 }
+
 }

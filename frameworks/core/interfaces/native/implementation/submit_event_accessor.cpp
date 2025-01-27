@@ -54,4 +54,5 @@ const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()
     };
     return &SubmitEventAccessorImpl;
 }
+
 }

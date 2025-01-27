@@ -156,4 +156,5 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
     };
     return &GestureEventAccessorImpl;
 }
+
 }

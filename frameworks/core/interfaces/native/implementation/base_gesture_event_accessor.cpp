@@ -46,4 +46,5 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
     };
     return &BaseGestureEventAccessorImpl;
 }
+
 }

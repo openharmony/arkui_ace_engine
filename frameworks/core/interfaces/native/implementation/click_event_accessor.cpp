@@ -126,4 +126,5 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
     };
     return &ClickEventAccessorImpl;
 }
+
 }
