@@ -15,13 +15,22 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H
 
+#include "base/memory/referenced.h"
 #ifdef XCOMPONENT_SUPPORTED
+#include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #endif // XCOMPONENT_SUPPORTED
 
-struct XComponentControllerPeer {
+struct XComponentControllerPeer : public OHOS::Ace::Referenced {
 #ifdef XCOMPONENT_SUPPORTED
+    void TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
+        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     std::shared_ptr<OHOS::Ace::NG::XComponentControllerNG> controller;
+
+private:
+    bool isImageAnalyzing_ = false;
+    std::vector<OHOS::Ace::ImageAnalyzerType> config_;
 #endif // XCOMPONENT_SUPPORTED
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H

@@ -583,6 +583,20 @@ std::u16string Convert(const Ark_String& src)
 }
 
 template<>
+std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
+{
+    std::vector<ImageAnalyzerType> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto opt = Converter::OptConvert<ImageAnalyzerType>(*(src.array + i));
+        if (opt) {
+            dst.push_back(*opt);
+        }
+    }
+    return dst;
+}
+
+template<>
 std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 {
     return { Convert<Shadow>(src) };

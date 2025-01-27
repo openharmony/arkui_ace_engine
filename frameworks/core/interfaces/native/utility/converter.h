@@ -60,6 +60,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
 struct TextDetectConfig;
@@ -488,6 +489,7 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::u16string Convert(const Ark_String& src);
+    template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
 
     // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
@@ -583,6 +585,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);
     template<> void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src);
+    template<> void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageAnalyzerType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src);
     template<> void AssignCast(std::optional<ImageInterpolation>& dst, const Ark_ImageInterpolation& src);

@@ -229,6 +229,16 @@ void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringS
 }
 
 template<>
+void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
+{
+    switch (src) {
+        case ARK_IMAGE_ANALYZER_TYPE_TEXT: dst = ImageAnalyzerType::TEXT; break;
+        case ARK_IMAGE_ANALYZER_TYPE_SUBJECT: dst = ImageAnalyzerType::SUBJECT; break;
+        default: LOGE("Unexpected enum value in Ark_ImageAnalyzerType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
 {
     switch (src) {

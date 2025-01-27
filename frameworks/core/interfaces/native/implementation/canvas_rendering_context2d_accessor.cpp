@@ -37,29 +37,6 @@ inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSetti
 {
     dst = Converter::OptConvert<bool>(src.antialias);
 }
-template<>
-inline void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
-{
-    switch (src) {
-        case ARK_IMAGE_ANALYZER_TYPE_TEXT: dst = ImageAnalyzerType::TEXT; break;
-        case ARK_IMAGE_ANALYZER_TYPE_SUBJECT: dst = ImageAnalyzerType::SUBJECT; break;
-        default: LOGE("Unexpected enum value in Ark_ImageAnalyzerType: %{public}d", src);
-    }
-}
-template<>
-std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
-{
-    std::vector<ImageAnalyzerType> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto opt = Converter::OptConvert<ImageAnalyzerType>(*(src.array + i));
-        if (opt) {
-            dst.push_back(*opt);
-        }
-    }
-    return dst;
-}
-
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -108,10 +85,7 @@ void StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(config);
-
-    auto vector = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    peerImpl->TriggerStartImageAnalyzer(vector);
+    peerImpl->TriggerStartImageAnalyzer(config, outputArgumentForReturningPromise);
 }
 void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
 {
