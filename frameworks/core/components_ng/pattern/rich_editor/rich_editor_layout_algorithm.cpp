@@ -171,7 +171,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     auto optionalTextSize = spans_.empty()
         ? MeasureEmptyContentSize(contentConstraint, layoutWrapper)
         : MeasureContentSize(contentConstraint, layoutWrapper);
-    CHECK_NULL_RETURN(optionalTextSize, {});
+    CHECK_NULL_RETURN(optionalTextSize.has_value(), {});
     auto newContentConstraint = ReMeasureContent(optionalTextSize.value(), contentConstraint, layoutWrapper);
     SizeF res = optionalTextSize.value();
     res.AddHeight(spans_.empty() ? 0 : shadowOffset_);
@@ -268,6 +268,7 @@ void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     MultipleParagraphLayoutAlgorithm::Measure(layoutWrapper);
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
     OptionalSizeF idealSize =
         CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (layoutConstraint->maxSize.Width() < layoutConstraint->minSize.Width()) {
@@ -319,7 +320,7 @@ void RichEditorLayoutAlgorithm::HandleEmptyParagraph(RefPtr<Paragraph> paragraph
     auto content = spanItem->GetSpanContent(spanItem->GetSpanContent());
     CHECK_NULL_VOID(content.empty());
     auto textStyle = spanItem->GetTextStyle();
-    CHECK_NULL_VOID(textStyle);
+    CHECK_NULL_VOID(textStyle.has_value());
     paragraph->PushStyle(textStyle.value());
 }
 
