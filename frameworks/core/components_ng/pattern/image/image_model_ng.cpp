@@ -1106,16 +1106,11 @@ void ImageModelNG::SetOrientation(ImageRotateOrientation orientation)
 
 void ImageModelNG::SetOrientation(FrameNode *frameNode, const std::optional<ImageRotateOrientation>& orientation)
 {
+    const auto orientationValue = orientation.value_or(ImageRotateOrientation::UP);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientationValue, frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    if (orientation) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation.value(), frameNode);
-        pattern->SetOrientation(orientation.value());
-    } else {
-        const auto defaultValue = ImageRotateOrientation::UP;
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, defaultValue, frameNode);
-        pattern->SetOrientation(defaultValue);
-    }
+    pattern->SetOrientation(orientationValue);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
