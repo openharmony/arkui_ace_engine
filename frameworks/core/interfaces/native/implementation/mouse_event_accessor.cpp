@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MouseEventAccessor {
 void DestroyPeerImpl(MouseEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new MouseEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -145,8 +146,4 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
     };
     return &MouseEventAccessorImpl;
 }
-
-struct MouseEventPeer {
-    virtual ~MouseEventPeer() = default;
-};
 }

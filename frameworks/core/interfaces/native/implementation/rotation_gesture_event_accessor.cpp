@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureEventAccessor {
 void DestroyPeerImpl(RotationGestureEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new RotationGestureEventPeer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -50,8 +51,4 @@ const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccess
     };
     return &RotationGestureEventAccessorImpl;
 }
-
-struct RotationGestureEventPeer {
-    virtual ~RotationGestureEventPeer() = default;
-};
 }
