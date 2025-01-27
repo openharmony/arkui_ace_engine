@@ -1175,26 +1175,26 @@ HWTEST_F(CommonMethodModifierTest11, AccessibilityVirtualNodeTest, TestSize.Leve
 
 //////// Overlay
 using OverlayTestStep = std::tuple<Ark_Alignment, std::string>;
-    static const std::vector<OverlayTestStep> testPlan = {
-        {Ark_Alignment::ARK_ALIGNMENT_TOP_START, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.TopStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_TOP, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.Top\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_TOP_END, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.TopEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_START, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.Start\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_CENTER, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.Center\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_END, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.End\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.BottomStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.Bottom\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, "{\"title\":\"overlay string\","
-            "\"options\":{\"align\":\"Alignment.BottomEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    };
+static const std::vector<OverlayTestStep> testPlan = {
+    {Ark_Alignment::ARK_ALIGNMENT_TOP_START, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.TopStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_TOP, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.Top\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_TOP_END, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.TopEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_START, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.Start\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_CENTER, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.Center\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_END, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.End\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.BottomStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.Bottom\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, "{\"title\":\"overlay string\","
+        "\"options\":{\"align\":\"Alignment.BottomEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+};
 
 /*
  * @tc.name: OverlayTestDefaultValues
@@ -1243,8 +1243,8 @@ HWTEST_F(CommonMethodModifierTest11, OverlayTest_Union_String_CustomNodeBuilder_
     int callsCount(0);
     CustomNodeBuilderTestHelper<CommonMethodModifierTest11> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Ark_Union_String_CustomBuilder_ComponentContent, CustomNodeBuilder>(
-        builder);
+    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Ark_Union_String_CustomBuilder_ComponentContent,
+        CustomNodeBuilder>(builder);
     modifier_->setOverlay(node_, &unionCustomNodeBuilderValue, &optOverlayOptions);
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }

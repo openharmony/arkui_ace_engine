@@ -16,128 +16,150 @@
 #ifndef CAPI_STUBS_ACE_PIXELMAP_STUB_H
 #define CAPI_STUBS_ACE_PIXELMAP_STUB_H
 
-#include <chrono>
-#include <fstream>
+// #include <chrono>
+// #include <fstream>
 #include <string>
-#include <vector>
+// #include <vector>
 
-#include "base/geometry/dimension.h"
+// #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 
 #include "frameworks/base/image/pixel_map.h"
-#include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
+// #include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
 
 namespace OHOS::Ace {
 class PixelMapStub : public PixelMap {
 public:
     PixelMapStub() = default;
 
-    int32_t GetWidth() const override {
+    int32_t GetWidth() const override
+    {
         return stubWidth;
     }
 
-    int32_t GetHeight() const override {
+    int32_t GetHeight() const override
+    {
         return stubHeight;
     }
 
-    bool GetPixelsVec(std::vector<uint8_t>& data) const override {
+    bool GetPixelsVec(std::vector<uint8_t>& data) const override
+    {
         // Implement pixel data retrieval here
         data = stubPixelData;
         return true;  // Return true to indicate success
     }
 
-    const uint8_t* GetPixels() const override {
+    const uint8_t* GetPixels() const override
+    {
         if (!stubPixelData.empty()) {
             return stubPixelData.data();
         }
         return nullptr;
     }
 
-    PixelFormat GetPixelFormat() const override {
+    PixelFormat GetPixelFormat() const override
+    {
         return PixelFormat::ARGB_8888;  // Example format
     }
 
-    AlphaType GetAlphaType() const override {
+    AlphaType GetAlphaType() const override
+    {
         return AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;  // Example alpha type
     }
 
-    int32_t GetRowStride() const override {
+    int32_t GetRowStride() const override
+    {
         return stubWidth * 4;  // Assuming ARGB_8888 where each pixel is 4 bytes
     }
 
-    int32_t GetRowBytes() const override {
+    int32_t GetRowBytes() const override
+    {
         return GetRowStride();
     }
 
-    int32_t GetByteCount() const override {
+    int32_t GetByteCount() const override
+    {
         return GetRowStride() * stubHeight;
     }
 
-    AllocatorType GetAllocatorType() const override {
+    AllocatorType GetAllocatorType() const override
+    {
         return AllocatorType::DEFAULT;  // Example allocator type
     }
 
-    bool IsHdr() const override {
+    bool IsHdr() const override
+    {
         return false;  // Assuming not HDR for simplicity
     }
 
-    void* GetPixelManager() const override {
+    void* GetPixelManager() const override
+    {
         return nullptr;  // Return null pointer as placeholder
     }
 
-    void* GetRawPixelMapPtr() const override {
+    void* GetRawPixelMapPtr() const override
+    {
         return nullptr;  // Return null pointer as placeholder
     }
 
-    std::string GetId() override {
+    std::string GetId() override
+    {
         return stubId;
     }
 
-    std::string GetModifyId() override {
+    std::string GetModifyId() override
+    {
         return stubModifyId;
     }
 
-    std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override {
+    std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override
+    {
         return nullptr;  // Return null pointer as placeholder
     }
 
-    void* GetWritablePixels() const override {
+    void* GetWritablePixels() const override
+    {
         if (!stubPixelData.empty()) {
             return const_cast<uint8_t*>(stubPixelData.data());
         }
         return nullptr;
     }
 
-    void Scale(float xAxis, float yAxis) override {
+    void Scale(float xAxis, float yAxis) override
+    {
         // Implement scaling logic here
         stubWidth *= xAxis;
         stubHeight *= yAxis;
     }
 
-    void Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) override {
+    void Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) override
+    {
         // Implement scaled with anti-aliasing option
         Scale(xAxis, yAxis);  // Reuse the existing scaling function for simplicity
     }
 
-    void SavePixelMapToFile(const std::string& dst) const override {
+    void SavePixelMapToFile(const std::string& dst) const override
+    {
         // Implement file saving logic here
         std::cout << "Stub implementation: Saving to file " << dst << std::endl;
     }
 
-    RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) override {
+    RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) override
+    {
         // Implement cropping logic here and return a new PixelMap instance
         return nullptr;  // Return null pointer as placeholder
     }
 
-    bool EncodeTlv(std::vector<uint8_t>& buff) override {
+    bool EncodeTlv(std::vector<uint8_t>& buff) override
+    {
         // Implement TLV encoding logic here
         buff = stubEncodedData;
         return true;  // Return true to indicate success
     }
 
 private:
-    int32_t stubWidth = 10;
-    int32_t stubHeight = 10;
+    int32_t stubWidth = 2;
+    int32_t stubHeight = 2;
     std::vector<uint8_t> stubPixelData = std::vector<uint8_t>(stubWidth * stubHeight * 4, 0); // ARGB_8888
     std::string stubId = "StubPixelMapId";
     std::string stubModifyId = "StubPixelMapModifyId";
