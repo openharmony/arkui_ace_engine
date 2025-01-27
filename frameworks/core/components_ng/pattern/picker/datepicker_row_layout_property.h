@@ -114,11 +114,8 @@ public:
         selectedTextStyle->Put("font", selectedFont);
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
         auto crownSensitivity = GetDigitalCrownSensitivity();
-        if (crownSensitivity.has_value()) {
-            json->PutExtAttr("digitalCrownSensitivity", std::to_string(crownSensitivity.value()).c_str(), filter);
-        } else {
-            json->PutExtAttr("digitalCrownSensitivity", std::to_string(DEFAULT_CROWNSENSITIVITY).c_str(), filter);
-        }
+        json->PutExtAttr("digitalCrownSensitivity",
+            std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
     }
 
     std::string GetDateStart() const

@@ -142,32 +142,48 @@ void TimePickerRowPattern::ColumnPatternInitHapticController()
     }
 }
 
-#ifdef ARKUI_CIRCLE_FEATURE
-bool TimePickerRowPattern::SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
+bool TimePickerRowPattern::IsCircle()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    return pickerTheme->IsCircleDial();
+}
+
+void TimePickerRowPattern::SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
     const std::string &id, bool focus, const std::function<void(const std::string&)>& call)
 {
     auto column = it->second.Upgrade();
     if (!column) {
-        return false;
+        return;
     }
     auto tmpPattern = column->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_VOID(tmpPattern);
     tmpPattern->SetSelectedMarkId(id);
     tmpPattern->SetSelectedMarkListener(call);
     if (focus) {
         tmpPattern->SetSelectedMark(true, false);
         selectedColumnId_ = id;
     }
-    return true;
 }
 
 void TimePickerRowPattern::ClearFocus()
 {
+    if (!IsCircle()) {
+        return ;
+    }
+
     if (!selectedColumnId_.empty()) {
         auto it = allChildNode_.find(selectedColumnId_);
         if (it != allChildNode_.end()) {
             auto column = it->second.Upgrade();
             CHECK_NULL_VOID(column);
             auto tmpPattern = column->GetPattern<TimePickerColumnPattern>();
+            CHECK_NULL_VOID(tmpPattern);
             tmpPattern->SetSelectedMark(false, false);
         }
 
@@ -177,6 +193,10 @@ void TimePickerRowPattern::ClearFocus()
 
 void TimePickerRowPattern::SetDefaultFocus()
 {
+    if (!IsCircle()) {
+        return ;
+    }
+
     std::function<void(const std::string &focusId)> call =  [weak = WeakClaim(this)](const std::string &focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -189,36 +209,22 @@ void TimePickerRowPattern::SetDefaultFocus()
             auto tmpColumn = it->second.Upgrade();
             if (tmpColumn) {
                 auto tmpPattern = tmpColumn->GetPattern<TimePickerColumnPattern>();
+                CHECK_NULL_VOID(tmpPattern);
                 tmpPattern->SetSelectedMark(false, false);
             }
         }
         pattern->selectedColumnId_ = focusId;
     };
-    static const std::string am = "amPm";
-    bool setFocus = false;
-    auto it = allChildNode_.find(am);
-    if (it != allChildNode_.end()) {
-        if (SetDefaultColoumnFocus(it, am, true, call)) {
-            setFocus = true;
+    static const std::string columnName[] = {"amPm", "hour", "minute", "second"};
+    bool setFocus = true;
+    for (size_t i = 0; i < sizeof(columnName) / sizeof(columnName[0]); i++) {
+        auto it = allChildNode_.find(columnName[i]);
+        if (it != allChildNode_.end()) {
+            SetDefaultColoumnFocus(it, columnName[i], setFocus, call);
+            setFocus = false;
         }
     }
-    static const std::string hour = "hour";
-    it = allChildNode_.find(hour);
-    if (it != allChildNode_.end()) {
-        SetDefaultColoumnFocus(it, hour, !setFocus, call);
-    }
-    static const std::string min = "minute";
-    it = allChildNode_.find(min);
-    if (it != allChildNode_.end()) {
-        SetDefaultColoumnFocus(it, min, false, call);
-    }
-    static const std::string sec = "second";
-    it = allChildNode_.find(sec);
-    if (it != allChildNode_.end()) {
-        SetDefaultColoumnFocus(it, sec, false, call);
-    }
 }
-#endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
 void TimePickerRowPattern::InitOnCrownEvent(const RefPtr<FocusHub>& focusHub)
@@ -261,7 +267,7 @@ bool TimePickerRowPattern::OnCrownEvent(const CrownEvent& event)
 }
 #endif
 
-void TimePickerRowPattern::initFocusEvent()
+void TimePickerRowPattern::InitFocusEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -287,7 +293,7 @@ void TimePickerRowPattern::UpdateTitleNodeContent()
     }
 }
 
-void TimePickerRowPattern::ToSetCallBack()
+void TimePickerRowPattern::SetCallBack()
 {
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
@@ -308,10 +314,6 @@ void TimePickerRowPattern::ToSetCallBack()
 
 void TimePickerRowPattern::OnModifyDone()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
-    auto switchFlag = isSwitchChange_;
-    isSwitchChange_ = TimeFormatChange::HOUR_UNCHANGE;
-#endif
     Pattern::CheckLocalized();
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
@@ -322,11 +324,8 @@ void TimePickerRowPattern::OnModifyDone()
     isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
-#ifdef ARKUI_CIRCLE_FEATURE
-    if (switchFlag == TimeFormatChange::HOUR_CHANGE) {
-        ClearFocus();
-    }
-#endif
+
+    ClearFocus();
     isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
@@ -341,15 +340,11 @@ void TimePickerRowPattern::OnModifyDone()
     OnColumnsBuilding();
     FlushColumn();
     InitDisabled();
-    ToSetCallBack();
-    initFocusEvent();
+    SetCallBack();
+    InitFocusEvent();
     UpdateTitleNodeContent();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-#ifdef ARKUI_CIRCLE_FEATURE
-    if (switchFlag == TimeFormatChange::HOUR_CHANGE) {
-        SetDefaultFocus();
-    }
-#endif
+    SetDefaultFocus();
 }
 
 void TimePickerRowPattern::LimitSelectedTimeInRange()

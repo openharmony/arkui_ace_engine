@@ -530,7 +530,7 @@ public:
 private:
     void OnModifyDone() override;
     void InitCrownAndKeyEvent();
-    void ToSetCallBack();
+    void SetCallBack();
     void SetLayoutDirection(TextDirection textDirection);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -551,10 +551,10 @@ private:
     void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
     const RefPtr<FrameNode> GetFocusButtonNode() const;
     double CalculateHeight();
-#ifdef ARKUI_CIRCLE_FEATURE
+
     void ClearFocus();
     void SetDefaultFocus();
-#endif
+    bool IsCircle();
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
     bool OnCrownEvent(const CrownEvent& event);
@@ -653,10 +653,7 @@ private:
     bool isDisableTextStyleAnimation_ = false;
     bool isEnableHaptic_ = true;
     bool isHapticChanged_ = false;
-#ifdef ARKUI_CIRCLE_FEATURE
     int32_t selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
-    int32_t needSelectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

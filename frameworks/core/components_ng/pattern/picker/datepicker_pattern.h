@@ -801,10 +801,9 @@ private:
     void ShowColumnByDatePickMode();
     void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
         const VisibleType visibleType, const int32_t weight);
-#ifdef ARKUI_CIRCLE_FEATURE
     void ClearFocus();
     void SetDefaultFocus();
-#endif
+    bool IsCircle();
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
@@ -896,9 +895,7 @@ private:
     bool isHapticChanged_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
-#ifdef ARKUI_CIRCLE_FEATURE
     std::string selectedColumnId_;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

@@ -345,10 +345,7 @@ void DatePickerColumnPattern::OnTouchDown()
 
 void DatePickerColumnPattern::OnTouchUp()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
-
     if (hoverd_) {
         PlayPressAnimation(GetButtonHoverColor());
     } else {
@@ -700,12 +697,9 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 {
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-#ifdef ARKUI_CIRCLE_FEATURE
     if (selectedMarkPaint_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
-    } else
-#endif
-    {
+    } else {
         textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetSelectedColor().value_or(
             pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     }
@@ -871,7 +865,6 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-#ifdef ARKUI_CIRCLE_FEATURE
     if (selectedMarkPaint_ && (index == showCount / PICKER_SELECT_AVERAGE)) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -879,7 +872,7 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
         CHECK_NULL_VOID(pickerTheme);
         updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
     }
-#endif
+
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
         textLayoutProperty->UpdateFontWeight(animationProperties_[index].fontWeight);
@@ -989,10 +982,7 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
-
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -1471,9 +1461,7 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
         pipeline->RequestFrame();
     }
 
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
 }
 
 void DatePickerColumnPattern::PlayRestAnimation()
@@ -1550,14 +1538,23 @@ void DatePickerColumnPattern::AddHotZoneRectToText()
     }
 }
 
-#ifdef ARKUI_CIRCLE_FEATURE
 void DatePickerColumnPattern::SetSelectedMarkFocus()
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    SetSelectedMark(pickerTheme, true);
+    if (pickerTheme->IsCircleDial()) {
+#ifdef ARKUI_WEARABLE
+        SetSelectedMark(pickerTheme, true);
+#endif
+    }
+}
+
+#ifdef ARKUI_WEARABLE
+void DatePickerColumnPattern::SetSelectedMarkPaint(bool paint)
+{
+    selectedMarkPaint_ = paint;
 }
 
 void DatePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
@@ -1587,6 +1584,23 @@ void DatePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<Picker
     UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+}
+#else
+void DatePickerColumnPattern::SetSelectedMarkListener(std::function<void(std::string& focusId)>& listener)
+{
+    (void)listener;
+}
+
+void DatePickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
+{
+    (void)focus;
+    (void)notify;
+    (void)reRender;
+}
+
+void DatePickerColumnPattern::SetSelectedMarkId(const std::string &strColumnId)
+{
+    (void)strColumnId;
 }
 #endif
 
@@ -1646,7 +1660,6 @@ void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
-        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
     }
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);

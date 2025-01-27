@@ -33,10 +33,10 @@ const uint32_t FLAG_SELECTED_FONTSIZE = 0x0020;
 const uint32_t FLAG_DISAPPEAR_WEIGHT = 0x0040;
 const uint32_t FLAG_WEIGHT = 0x0080;
 const uint32_t FLAG_SELECTED_WEIGHT = 0x0100;
-constexpr double PICKER_ANGULAR_VELOCITY_FACTOR  = 532 / 360.0 * 0.013;
-constexpr float PICKER_ANGULAR_VELOCITY_SLOW = 0.1f;
-constexpr float PICKER_ANGULAR_VELOCITY_MEDIUM = 0.3f;
-constexpr float PICKER_ANGULAR_VELOCITY_FAST = 0.8f;
+constexpr double PICKER_ANGULAR_VELOCITY_FACTOR  = 0.001f;
+constexpr float PICKER_ANGULAR_VELOCITY_SLOW = 0.07f;
+constexpr float PICKER_ANGULAR_VELOCITY_MEDIUM = 0.2f;
+constexpr float PICKER_ANGULAR_VELOCITY_FAST = 0.54f;
 constexpr float PICKER_DISPLAY_CONTROL_RATIO_VERY_SLOW = 4.83f;
 constexpr float PICKER_DISPLAY_CONTROL_RATIO_SLOW = 2.51f;
 constexpr float PICKER_DISPLAY_CONTROL_RATIO_MEDIUM = 4.47f;
@@ -50,9 +50,6 @@ constexpr int32_t DEFAULT_CROWNSENSITIVITY = 1;
 constexpr int32_t INVALID_SELECTED_COLUMN_INDEX = -1;
 constexpr int32_t CROWN_SENSITIVITY_MIN = 0;
 constexpr int32_t CROWN_SENSITIVITY_MAX = 2;
-
-constexpr char WATCHHAPTIC_CROWN_STRENGTH1[] = "watchhaptic.feedback.crown.strength3";
-constexpr char WATCHHAPTIC_CROWN_STRENGTH5[] = "watchhaptic.feedback.crown.impact";
 
 struct PickerTextStyle {
     std::optional<Color> textColor;

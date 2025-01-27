@@ -121,12 +121,11 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
     }
     timePickerRowPattern->SetHasSecond(hasSecond);
     stack->Push(timePickerNode);
-#ifdef ARKUI_CIRCLE_FEATURE
+
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = timePickerNode->GetRenderContext();
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
     }
-#endif
 }
 
 RefPtr<FrameNode> TimePickerModelNG::CreateStackNode()
@@ -889,7 +888,7 @@ void TimePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
 {
     if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
-        return ;
+        return;
     }
 
     CHECK_NULL_VOID(frameNode);

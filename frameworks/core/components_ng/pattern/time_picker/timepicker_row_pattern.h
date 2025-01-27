@@ -40,13 +40,12 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension TIME_FOCUS_PAINT_WIDTH = 2.0_vp;
-#ifdef ARKUI_CIRCLE_FEATURE
+
 enum class TimeFormatChange {
     HOUR_CHANGE,
     HOUR_UNCHANGE,
     UNKNOWN
 };
-#endif
 }
 
 class TimePickerRowPattern : public LinearLayoutPattern {
@@ -246,13 +245,6 @@ public:
     void SetHour24(bool value)
     {
         isForceUpdate_ = value != hour24_;
-#ifdef ARKUI_CIRCLE_FEATURE
-        if (isSwitchChange_ == TimeFormatChange::UNKNOWN) {
-            isSwitchChange_ = TimeFormatChange::HOUR_CHANGE;
-        } else {
-            isSwitchChange_ = isForceUpdate_ ? TimeFormatChange::HOUR_CHANGE : TimeFormatChange::HOUR_UNCHANGE;
-        }
-#endif
         hour24_ = value;
     }
 
@@ -661,12 +653,11 @@ public:
     void ColumnPatternInitHapticController();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
-#ifdef ARKUI_CIRCLE_FEATURE
-    bool SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
+    void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
         const std::string &id, bool focus, const std::function<void(const std::string&)>& call);
     void ClearFocus();
     void SetDefaultFocus();
-#endif
+    bool IsCircle();
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
@@ -729,8 +720,8 @@ private:
     bool IsAmJudgeByAmPmColumn(const RefPtr<FrameNode>& amPmColumn);
     void MinOrSecColumnBuilding(
         const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
-    void initFocusEvent();
-    void ToSetCallBack();
+    void InitFocusEvent();
+    void SetCallBack();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -802,10 +793,7 @@ private:
     std::vector<std::string> defined24Hours_;
     std::string oldHourValue_;
     std::string oldMinuteValue_;
-#ifdef ARKUI_CIRCLE_FEATURE
     std::string selectedColumnId_;
-    TimeFormatChange isSwitchChange_ = TimeFormatChange::UNKNOWN;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

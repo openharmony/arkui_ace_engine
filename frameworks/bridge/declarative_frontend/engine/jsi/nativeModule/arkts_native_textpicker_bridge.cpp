@@ -32,6 +32,7 @@ constexpr int32_t STROKE_WIDTH_INDEX = 1;
 constexpr int32_t COLOR_INDEX = 2;
 constexpr int32_t START_MARGIN_INDEX = 3;
 constexpr int32_t END_MARGIN_INDEX = 4;
+constexpr int32_t NUM_1 = 1;
 
 constexpr int32_t ARG_GROUP_LENGTH = 3;
 bool ParseDividerDimension(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& valueDim)
@@ -117,17 +118,7 @@ ArkUINativeModuleValue TextPickerBridge::SetCanLoop(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> canLoopArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto context = reinterpret_cast<FrameNode*>(nativeNode)->GetContext();
-    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-
     bool canLoop = true;
-    if (pickerTheme->IsCircleDial()) {
-        canLoop = false;
-    }
-
     if (canLoopArg->IsBoolean()) {
         canLoop = canLoopArg->ToBoolean(vm)->Value();
     }
@@ -623,8 +614,8 @@ ArkUINativeModuleValue TextPickerBridge::SetDigitalCrownSensitivity(ArkUIRuntime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
-    Local<JSValueRef> crownSensitivityArg = runtimeCallInfo->GetCallArgRef(1); // 1: index of parameter crown sensitivity
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    Local<JSValueRef> crownSensitivityArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t crownSensitivity = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
     if (crownSensitivityArg->IsNumber()) {
@@ -640,7 +631,7 @@ ArkUINativeModuleValue TextPickerBridge::ResetDigitalCrownSensitivity(ArkUIRunti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto modifier = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));

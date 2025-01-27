@@ -76,11 +76,7 @@ void ResetTextPickerCanLoop(ArkUINodeHandle node)
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    if (!pickerTheme->IsCircleDial()) {
-        TextPickerModelNG::SetCanLoop(frameNode, false);
-    } else {
-        TextPickerModelNG::SetCanLoop(frameNode, true);
-    }
+    TextPickerModelNG::SetCanLoop(frameNode, true);
 }
 
 void SetTextPickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)

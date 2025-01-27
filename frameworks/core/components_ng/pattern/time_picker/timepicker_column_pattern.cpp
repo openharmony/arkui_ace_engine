@@ -341,9 +341,7 @@ void TimePickerColumnPattern::OnTouchDown()
 
 void TimePickerColumnPattern::OnTouchUp()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
     if (hoverd_) {
         PlayPressAnimation(hoverColor_);
     } else {
@@ -567,12 +565,9 @@ void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-#ifdef ARKUI_CIRCLE_FEATURE
     if (selectedMarkPaint_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
-    } else
-#endif
-    {
+    } else {
         textLayoutProperty->UpdateTextColor(
             timePickerLayoutProperty->GetSelectedColor().value_or(
                 pickerTheme->GetOptionStyle(true, false).GetTextColor()));
@@ -778,8 +773,6 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-
-#ifdef ARKUI_CIRCLE_FEATURE
     if (selectedMarkPaint_ && (index == showCount / PICKER_SELECT_AVERAGE)) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -787,7 +780,6 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
         CHECK_NULL_VOID(pickerTheme);
         updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
     }
-#endif
 
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
@@ -867,9 +859,7 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
 
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
@@ -1461,9 +1451,7 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
         pipeline->RequestFrame();
     }
 
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
 }
 void TimePickerColumnPattern::TossAnimationStoped()
 {
@@ -1547,14 +1535,23 @@ void TimePickerColumnPattern::AddHotZoneRectToText()
     }
 }
 
-#ifdef ARKUI_CIRCLE_FEATURE
 void TimePickerColumnPattern::SetSelectedMarkFocus()
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    SetSelectedMark(pickerTheme, true);
+    if (pickerTheme->IsCircleDial()) {
+#ifdef ARKUI_WEARABLE
+        SetSelectedMark(pickerTheme, true);
+#endif
+    }
+}
+
+#ifdef ARKUI_WEARABLE
+void TimePickerColumnPattern::SetSelectedMarkPaint(bool paint)
+{
+    selectedMarkPaint_ = paint;
 }
 
 void TimePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
@@ -1586,6 +1583,24 @@ void TimePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<Picker
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
+#else
+void TimePickerColumnPattern::SetSelectedMarkListener(const std::function<void(const std::string& focusId)>& listener)
+{
+    (void)listener;
+}
+
+void TimePickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
+{
+    (void)focus;
+    (void)notify;
+    (void)reRender;
+}
+
+void TimePickerColumnPattern::SetSelectedMarkId(const std::string &strColumnId)
+{
+    (void)strColumnId;
+}
+
 #endif
 
 #ifdef SUPPORT_DIGITAL_CROWN

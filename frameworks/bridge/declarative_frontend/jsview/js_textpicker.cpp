@@ -1085,7 +1085,7 @@ void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
 void JSTextPicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
 {
     int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
-    if (info[0]->IsNumber()) {
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }
     TextPickerModel::GetInstance()->SetDigitalCrownSensitivity(value);

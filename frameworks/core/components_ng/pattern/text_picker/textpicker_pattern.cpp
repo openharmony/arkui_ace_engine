@@ -453,11 +453,26 @@ void TextPickerPattern::ColumnPatternInitHapticController()
     }
 }
 
-#ifdef ARKUI_CIRCLE_FEATURE
+
+bool TextPickerPattern::IsCircle()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    return pickerTheme->IsCircleDial();
+}
+
 void TextPickerPattern::ClearFocus()
 {
+    if (!IsCircle()) {
+        return;
+    }
+
     if (selectedColumnId_ == INVALID_SELECTED_COLUMN_INDEX) {
-        needSelectedColumnId_ = 0;
         return;
     }
     const auto& frameNodes = GetColumnNodes();
@@ -467,12 +482,15 @@ void TextPickerPattern::ClearFocus()
         CHECK_NULL_VOID(textPickerColumnPattern);
         textPickerColumnPattern->SetSelectedMark(false, false);
     }
-    needSelectedColumnId_ = selectedColumnId_;
     selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
 }
 
 void TextPickerPattern::SetDefaultFocus()
 {
+    if (!IsCircle()) {
+        return;
+    }
+
     std::function<void(int32_t& focusId)>  call = [weak = WeakClaim(this)](int32_t& focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -499,15 +517,13 @@ void TextPickerPattern::SetDefaultFocus()
         CHECK_NULL_VOID(textPickerColumnPattern);
         textPickerColumnPattern->SetSelectedMarkId(index);
         textPickerColumnPattern->SetSelectedMarkListener(call);
-        if (index == needSelectedColumnId_) {
+        if (index == 0) {
             textPickerColumnPattern->SetSelectedMark(true, false);
-            selectedColumnId_ = needSelectedColumnId_;
+            selectedColumnId_ = 0;
         }
         index++;
     }
-    needSelectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
 }
-#endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
 void TextPickerPattern::InitOnCrownEvent(const RefPtr<FocusHub>& focusHub)
@@ -600,7 +616,7 @@ void TextPickerPattern::InitCrownAndKeyEvent()
 #endif
 }
 
-void TextPickerPattern::ToSetCallBack()
+void TextPickerPattern::SetCallBack()
 {
     if (cascadeOptions_.size() > 0) {
         SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag,
@@ -645,21 +661,17 @@ void TextPickerPattern::OnModifyDone()
     if (layoutDirection != TextDirection::AUTO) {
         SetLayoutDirection(layoutDirection);
     }
-#ifdef ARKUI_CIRCLE_FEATURE
     ClearFocus();
-#endif
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
-    ToSetCallBack();
+    SetCallBack();
     InitFocusEvent();
     InitDisabled();
     InitCrownAndKeyEvent();
     InitSelectorProps();
     isNeedUpdateSelectedIndex_ = true;
-#ifdef ARKUI_CIRCLE_FEATURE
     SetDefaultFocus();
-#endif
 }
 
 void TextPickerPattern::SetEventCallback(EventCallback&& value)

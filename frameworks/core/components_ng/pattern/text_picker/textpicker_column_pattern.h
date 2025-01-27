@@ -33,9 +33,8 @@
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #endif
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #endif
 
@@ -86,7 +85,7 @@ enum class OptionIndex {
     COLUMN_INDEX_6
 };
 
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
 class TextPickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<int32_t> {
 #else
 class TextPickerColumnPattern : public LinearLayoutPattern {
@@ -94,7 +93,7 @@ class TextPickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
 
 public:
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
     TextPickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils(-1) {};
 #else
     TextPickerColumnPattern() : LinearLayoutPattern(true) {};
@@ -420,6 +419,11 @@ public:
     }
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void StopHapticController();
+#ifndef ARKUI_WEARABLE
+    void SetSelectedMarkListener(std::function<void(int& focusId)>& listener);
+    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const int strColumnId);
+#endif
 
 private:
     void OnModifyDone() override;
@@ -434,15 +438,18 @@ private:
 
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void SetSelectedMarkFocus();
+#ifdef ARKUI_WEARABLE
+    void SetSelectedMarkPaint(bool paint) override;
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
+#endif
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event) override;
     void HandleCrownMoveEvent(const CrownEvent& event) override;
     void HandleCrownEndEvent(const CrownEvent& event) override;
 #endif
-#ifdef ARKUI_CIRCLE_FEATURE
-    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
-    void SetSelectedMarkFocus();
-#endif
+
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
@@ -608,6 +615,7 @@ private:
     bool isDisableTextStyleAnimation_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     uint32_t currentEnterIndex_ = 0;

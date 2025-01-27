@@ -28,7 +28,7 @@ namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
 } // namespace
 
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
 CanvasDrawFunction TimePickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -51,11 +51,12 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
-#ifdef ARKUI_CIRCLE_FEATURE
+    CHECK_NULL_RETURN(theme, nullptr);
+
     if (theme->IsCircleDial()) {
         return nullptr;
     }
-#endif
+
     auto dividerColor = theme->GetDividerColor();
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);

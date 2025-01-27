@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,15 +34,16 @@ namespace OHOS::Ace::NG {
 constexpr int32_t CONST_AVERAGE = 2;
 constexpr int32_t BACKGROUND_HIGH = 12;
 constexpr int32_t SELECTED_ROW_BACKGROUND_COLOR = 0x33FFFFFF;
+constexpr double  CONST_HALF_VALUE = 2.0;
+constexpr int32_t CONST_DELTA_STEP = 1;
+constexpr int32_t CONST_LINE_DIFF = 1;
 
 class PickerPaintMethodCircleUtils {
 public:
-    PickerPaintMethodCircleUtils()
-    {
-    }
-    virtual ~PickerPaintMethodCircleUtils()
-    {
-    }
+    PickerPaintMethodCircleUtils() {}
+
+    virtual ~PickerPaintMethodCircleUtils() {}
+
 protected:
     template<class T>
     CanvasDrawFunction GetContentDrawFunctionL(PaintWrapper* paintWrapper, const RefPtr<PipelineBase>& pipeline)
@@ -73,8 +74,8 @@ protected:
             RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
                 frameRect.Width() - padding.Width(), frameRect.Height() - padding.Height() };
             if (GreatOrEqual(contentRect.Height(), dividerSpacing)) {
-                double upperLine = (contentRect.Height() - dividerSpacing) / 2.0 + contentRect.GetY();
-                double downLine = (contentRect.Height() + dividerSpacing) / 2.0 + contentRect.GetY();
+                double upperLine = (contentRect.Height() - dividerSpacing) / CONST_HALF_VALUE + contentRect.GetY();
+                double downLine = (contentRect.Height() + dividerSpacing) / CONST_HALF_VALUE + contentRect.GetY();
                 DrawCapsule(upperLine, downLine, contentRect.Width(), BACKGROUND_HIGH, paintcolor, canvas);
             }
         };
@@ -98,13 +99,15 @@ protected:
         int32_t x = 0;
         int32_t y = radius;
         int32_t delta = CONST_AVERAGE - CONST_AVERAGE * radius;
+        const double penWidth = 1.0;
 
         RSPen pen;
         pen.SetColor(paintcolor.GetValue());
-        pen.SetWidth(1.0);
+        pen.SetWidth(penWidth);
         canvas.AttachPen(pen);
 
-        std::vector<int32_t> xOffset(down - up + 1);
+        // draw the capsule algorithm
+        std::vector<int32_t> xOffset(down - up + CONST_LINE_DIFF);
         std::fill(xOffset.begin(), xOffset.end(), 0);
         while (x <= y) {
             checkRepeat(xOffset, x, yC + y, up);
@@ -113,10 +116,10 @@ protected:
             checkRepeat(xOffset, y, yC - x, up);
 
             if (delta > 0) {
-                    delta += CONST_AVERAGE * (x - y) + 1;
-                    y--;
+                delta += CONST_AVERAGE * (x - y) + CONST_DELTA_STEP;
+                y--;
             } else {
-                    delta += CONST_AVERAGE * x + 1;
+                delta += CONST_AVERAGE * x + CONST_DELTA_STEP;
             }
             x++;
         }

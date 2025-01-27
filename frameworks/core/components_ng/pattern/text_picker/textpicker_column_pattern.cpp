@@ -436,7 +436,7 @@ void TextPickerColumnPattern::ParseTouchListener()
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
             pattern->SetSelectedMark(true);
 #endif
             pattern->OnMiddleButtonTouchUp();
@@ -1006,12 +1006,10 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 {
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-#ifdef ARKUI_CIRCLE_FEATURE
+
     if (selectedMarkPaint_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
-    } else
-#endif
-    {
+    } else {
         textLayoutProperty->UpdateTextColor(
             textPickerLayoutProperty->GetSelectedColor().value_or(
                 pickerTheme->GetOptionStyle(true, false).GetTextColor()));
@@ -1151,7 +1149,6 @@ void TextPickerColumnPattern::SetSelectColor(const RefPtr<TextLayoutProperty>& t
 {
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, percent);
-#ifdef ARKUI_CIRCLE_FEATURE
     if (selectedMarkPaint_ && isEqual) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -1159,7 +1156,7 @@ void TextPickerColumnPattern::SetSelectColor(const RefPtr<TextLayoutProperty>& t
         CHECK_NULL_VOID(pickerTheme);
         updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
     }
-#endif
+
     textLayoutProperty->UpdateTextColor(updateColor);
 }
 
@@ -1341,10 +1338,7 @@ RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() cons
 
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
-
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto offsetY = event.GetGlobalPoint().GetY();
@@ -1381,6 +1375,7 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
         return;
     }
     animationBreak_ = false;
+    CHECK_NULL_VOID(pressed_);
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -1887,7 +1882,6 @@ double TextPickerColumnPattern::GetDragDeltaLessThanJumpInterval(
                 overscroller_.IsBackOverScroll() ? overscroller_.GetBackScroll() : overscroller_.GetOverScroll();
         }
     }
-
     return dragDelta;
 }
 
@@ -2056,9 +2050,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
         CHECK_NULL_VOID(pipeline);
         pipeline->RequestFrame();
     }
-#ifdef ARKUI_CIRCLE_FEATURE
     SetSelectedMarkFocus();
-#endif
 }
 
 void TextPickerColumnPattern::PlayResetAnimation()
@@ -2102,14 +2094,25 @@ void TextPickerColumnPattern::SetCanLoop(bool isLoop)
     }
 }
 
-#ifdef ARKUI_CIRCLE_FEATURE
+
 void TextPickerColumnPattern::SetSelectedMarkFocus()
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    SetSelectedMark(pickerTheme, true);
+    if (pickerTheme->IsCircleDial()) {
+#ifdef ARKUI_WEARABLE
+        SetSelectedMark(pickerTheme, true);
+#endif
+    }
+}
+
+#ifdef ARKUI_WEARABLE
+
+void TextPickerColumnPattern::SetSelectedMarkPaint(bool paint)
+{
+    selectedMarkPaint_ = paint;
 }
 
 void TextPickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
@@ -2141,6 +2144,23 @@ void TextPickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<Picker
 
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+}
+#else
+void TextPickerColumnPattern::SetSelectedMarkListener(std::function<void(int& focusId)>& listener)
+{
+    (void)listener;
+}
+
+void TextPickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
+{
+    (void)focus;
+    (void)notify;
+    (void)reRender;
+}
+
+void TextPickerColumnPattern::SetSelectedMarkId(const int strColumnId)
+{
+    (void)strColumnId;
 }
 #endif
 
@@ -2215,7 +2235,7 @@ void TextPickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
     ScrollDirection dir = GreatNotEqual(scrollDelta_, 0.0f) ? ScrollDirection::DOWN : ScrollDirection::UP;
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
     auto shiftDistance = (dir == ScrollDirection::DOWN) ? optionProperties_[middleIndex].nextDistance
-                                       : optionProperties_[middleIndex].prevDistance;
+                                                        : optionProperties_[middleIndex].prevDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);

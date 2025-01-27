@@ -355,9 +355,7 @@ void DatePickerPattern::OnModifyDone()
         isFiredDateChange_ = false;
         return;
     }
-#ifdef ARKUI_CIRCLE_FEATURE
     ClearFocus();
-#endif
     isForceUpdate_ = false;
     InitDisabled();
     if (ShowMonthDays()) {
@@ -380,9 +378,7 @@ void DatePickerPattern::OnModifyDone()
         }
     });
     InitFocusKeyEvent();
-#ifdef ARKUI_CIRCLE_FEATURE
     SetDefaultFocus();
-#endif
     InitFocusEvent();
     InitSelectorProps();
 }
@@ -2767,6 +2763,7 @@ bool DatePickerPattern::NeedAdaptForAging()
 #ifdef SUPPORT_DIGITAL_CROWN
 void DatePickerPattern::InitOnCrownEvent(const RefPtr<FocusHub>& focusHub)
 {
+    CHECK_NULL_VOID(focusHub);
     auto onCrowEvent = [wp = WeakClaim(this)](const CrownEvent& event)->bool {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -2801,7 +2798,7 @@ bool DatePickerPattern::OnCrownEvent(const CrownEvent& event)
                 crownPickerColumnPattern = pickerColumnPattern;
             }
         }
-        if (crownPickerColumnPattern != nullptr) {
+        if (crownPickerColumnPattern) {
             return crownPickerColumnPattern->OnCrownEvent(event);
         }
     }
@@ -2810,9 +2807,24 @@ bool DatePickerPattern::OnCrownEvent(const CrownEvent& event)
 }
 #endif
 
-#ifdef ARKUI_CIRCLE_FEATURE
+bool DatePickerPattern::IsCircle()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    return pickerTheme->IsCircleDial();
+}
+
 void DatePickerPattern::ClearFocus()
 {
+    if (!IsCircle()) {
+        return;
+    }
+
     if (!selectedColumnId_.empty()) {
         const auto& allChildNode = GetAllChildNode();
         auto it = allChildNode.find(selectedColumnId_);
@@ -2827,6 +2839,10 @@ void DatePickerPattern::ClearFocus()
 
 void DatePickerPattern::SetDefaultFocus()
 {
+    if (!IsCircle()) {
+        return;
+    }
+
     std::function<void(std::string& focusId)> call =  [weak = WeakClaim(this)](std::string& focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2845,34 +2861,23 @@ void DatePickerPattern::SetDefaultFocus()
     };
 
     const auto& allChildNode = GetAllChildNode();
-    static const std::string year = "year";
-    auto it = allChildNode.find(year);
-    if (it != allChildNode.end()) {
-        auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
-        tmpPattern->SetSelectedMarkId(year);
-        tmpPattern->SetSelectedMarkListener(call);
-
-        tmpPattern->SetSelectedMark(true, false);
-        selectedColumnId_ = year;
-    }
-
-    static const std::string month = "month";
-    it = allChildNode.find(month);
-    if (it != allChildNode.end()) {
-        auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
-        tmpPattern->SetSelectedMarkId(month);
-        tmpPattern->SetSelectedMarkListener(call);
-    }
-
-    static const std::string day = "day";
-    it = allChildNode.find(day);
-    if (it != allChildNode.end()) {
-        auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
-        tmpPattern->SetSelectedMarkId(day);
-        tmpPattern->SetSelectedMarkListener(call);
+    static const std::string columnName[] = {"year", "month", "day"};
+    bool setFocus = true;
+    for (size_t i = 0; i < sizeof(columnName) / sizeof(columnName[0]); i++) {
+        auto it = allChildNode.find(columnName[i]);
+        if (it != allChildNode.end()) {
+            auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+            CHECK_NULL_VOID(tmpPattern);
+            tmpPattern->SetSelectedMarkId(columnName[i]);
+            tmpPattern->SetSelectedMarkListener(call);
+            if (setFocus) {
+                selectedColumnId_ = columnName[i];
+            }
+            tmpPattern->SetSelectedMark(setFocus, false);
+            setFocus = false;
+        }
     }
 }
-#endif
 
 void DatePickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 {

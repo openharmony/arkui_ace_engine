@@ -181,13 +181,9 @@ public:
             V2::ConvertWrapTextOverflowToString(GetDefaultTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         defaultTextStyle->Put("font", defaultFont);
         json->PutExtAttr("defaultTextStyle", defaultTextStyle, filter);
-
         auto crownSensitivity = GetDigitalCrownSensitivity();
-        if (crownSensitivity.has_value()) {
-            json->PutExtAttr("digitalCrownSensitivity", std::to_string(crownSensitivity.value()).c_str(), filter);
-        } else {
-            json->PutExtAttr("digitalCrownSensitivity", std::to_string(DEFAULT_CROWNSENSITIVITY).c_str(), filter);
-        }
+        json->PutExtAttr("digitalCrownSensitivity",
+            std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);

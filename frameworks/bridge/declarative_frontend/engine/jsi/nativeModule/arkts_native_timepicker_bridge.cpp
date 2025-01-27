@@ -388,8 +388,9 @@ ArkUINativeModuleValue TimepickerBridge::SetDigitalCrownSensitivity(ArkUIRuntime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
-    Local<JSValueRef> crownSensitivityArg = runtimeCallInfo->GetCallArgRef(1); // 1: index of parameter crown sensitivity
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> crownSensitivityArg =
+        runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t crownSensitivity = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
     if (crownSensitivityArg->IsNumber()) {
@@ -405,7 +406,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetDigitalCrownSensitivity(ArkUIRunti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto modifier = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));

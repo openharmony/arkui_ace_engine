@@ -52,6 +52,7 @@ public:
         void SetDigitalCrownSensitivity(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
 #ifdef SUPPORT_DIGITAL_CROWN
+            CHECK_NULL_VOID(themeStyle);
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
             if (pattern) {
                 auto sensitivity = pattern->GetAttr<int>("picker_crown_sensitivity",

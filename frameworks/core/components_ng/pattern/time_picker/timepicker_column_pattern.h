@@ -32,9 +32,8 @@
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #endif
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #endif
 
@@ -86,7 +85,7 @@ enum class TimePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
 class TimePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<std::string> {
 #else
 class TimePickerColumnPattern : public LinearLayoutPattern {
@@ -94,7 +93,7 @@ class TimePickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TimePickerColumnPattern, LinearLayoutPattern);
 
 public:
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
     TimePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils("") {};
 #else
     TimePickerColumnPattern() : LinearLayoutPattern(true) {};
@@ -349,6 +348,12 @@ public:
         enterSelectedAreaEventCallback_ = value;
     }
 
+#ifndef ARKUI_WEARABLE
+    void SetSelectedMarkListener(const std::function<void(const std::string& focusId)>& listener);
+    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const std::string &strColumnId);
+#endif
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -364,9 +369,9 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-
-#ifdef ARKUI_CIRCLE_FEATURE
     void SetSelectedMarkFocus();
+#ifdef ARKUI_WEARABLE
+    void SetSelectedMarkPaint(bool paint) override;
     void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
 #endif
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -482,6 +487,7 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };

@@ -146,12 +146,11 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
         }
     }
     stack->Push(dateNode);
-#ifdef ARKUI_CIRCLE_FEATURE
+
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = dateNode->GetRenderContext();
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
     }
-#endif
 }
 
 void DatePickerModelNG::createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
@@ -688,7 +687,7 @@ void DatePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 void DatePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
 {
     if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
-        return ;
+        return;
     }
 
     CHECK_NULL_VOID(frameNode);

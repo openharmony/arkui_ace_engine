@@ -29,16 +29,13 @@ constexpr uint8_t DOUBLE = 2;
 const Dimension PICKER_DIALOG_DIVIDER_MARGIN = 24.0_vp;
 } // namespace
 
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
 CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     CanvasDrawFunction drawFun = GetContentDrawFunctionL<TextPickerLayoutProperty>(paintWrapper, pipeline);
-    if (!drawFun) {
-        return nullptr;
-    }
-
+    CHECK_NULL_RETURN(drawFun, nullptr);
     return [weak = WeakClaim(this), drawFun](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
@@ -49,13 +46,10 @@ CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* p
 
 CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    if (theme->IsCircleDial()) {
-        return nullptr;
-    }
-#endif
+    CHECK_NULL_RETURN(theme, nullptr);
+    CHECK_NULL_RETURN(theme->IsCircleDial(), nullptr);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();

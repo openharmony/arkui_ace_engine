@@ -122,12 +122,11 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     }
     stack->Push(textPickerNode);
     options_.clear();
-#ifdef ARKUI_CIRCLE_FEATURE
+
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = textPickerNode->GetRenderContext();
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
     }
-#endif
 }
 
 void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme)
@@ -158,11 +157,7 @@ void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTh
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, normalStyle.GetFontWeight());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle, normalStyle.GetFontStyle());
-#ifdef SUPPORT_DIGITAL_CROWN
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, false);
-#else
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, true);
-#endif
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, DigitalCrownSensitivity, pickerTheme->GetDigitalCrownSensitivity());
 }
@@ -607,7 +602,7 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     stack->Push(textPickerNode);
     rangeValue_.clear();
-#ifdef ARKUI_CIRCLE_FEATURE
+#ifdef ARKUI_WEARABLE
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = textPickerNode->GetRenderContext();
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
@@ -916,7 +911,7 @@ void TextPickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
 {
     if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
-        return ;
+        return;
     }
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();

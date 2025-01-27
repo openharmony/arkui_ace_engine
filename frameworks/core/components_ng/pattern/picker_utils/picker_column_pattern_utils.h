@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,13 +55,13 @@ public:
         selectedMark_ = focus;
         bool IsCircleDial = pickerTheme->IsCircleDial();
         if (IsCircleDial) {
-            selectedMarkPaint_ = selectedMark_;
+            SetSelectedMarkPaint(selectedMark_);
         }
         if (reRender && IsCircleDial) {
             ToUpdateSelectedTextProperties(pickerTheme);
         }
 
-        if (focus && notify && (nullptr != focusedListerner_)) {
+        if (focus && notify && focusedListerner_) {
             focusedListerner_(selectedColumnId_);
         }
     }
@@ -107,18 +107,20 @@ public:
 
     double GetCrownRotatePx(const CrownEvent& event)
     {
+        float ration[][2] = {
+            {PICKER_ANGULAR_VELOCITY_SLOW, PICKER_DISPLAY_CONTROL_RATIO_VERY_SLOW},
+            {PICKER_ANGULAR_VELOCITY_MEDIUM, PICKER_DISPLAY_CONTROL_RATIO_SLOW},
+            {PICKER_ANGULAR_VELOCITY_FAST, PICKER_DISPLAY_CONTROL_RATIO_MEDIUM}};
         double velocity = std::abs(event.angularVelocity * PICKER_ANGULAR_VELOCITY_FACTOR);
-        double px = 0.0;
+        double px = (Dimension(PICKER_DISPLAY_CONTROL_RATIO_FAST, DimensionUnit::VP) * event.degree).ConvertToPx();
         // Calculate the offset based on the angle of rotation of the crown
-        if (LessOrEqualCustomPrecision(velocity, PICKER_ANGULAR_VELOCITY_SLOW, 0.01f)) {
-            px = (Dimension(PICKER_DISPLAY_CONTROL_RATIO_VERY_SLOW, DimensionUnit::VP) * event.degree).ConvertToPx();
-        } else if (LessOrEqualCustomPrecision(velocity, PICKER_ANGULAR_VELOCITY_MEDIUM, 0.01f)) {
-            px = (Dimension(PICKER_DISPLAY_CONTROL_RATIO_SLOW, DimensionUnit::VP) * event.degree).ConvertToPx();
-        } else if (LessOrEqualCustomPrecision(velocity, PICKER_ANGULAR_VELOCITY_FAST, 0.01f)) {
-            px = (Dimension(PICKER_DISPLAY_CONTROL_RATIO_MEDIUM, DimensionUnit::VP) * event.degree).ConvertToPx();
-        } else {
-            px = (Dimension(PICKER_DISPLAY_CONTROL_RATIO_FAST, DimensionUnit::VP) * event.degree).ConvertToPx();
+        for (size_t i = 0; i < sizeof(ration) / sizeof(ration[0]); i++) {
+            if (LessOrEqualCustomPrecision(velocity, ration[i][0], 0.01f)) {
+                px = (Dimension(ration[i][1], DimensionUnit::VP) * event.degree).ConvertToPx();
+                break;
+            }
         }
+
         // Recalculate offset based on sensitivity
         int32_t crownSensitivity = GetDigitalCrownSensitivity();
         switch (crownSensitivity) {
@@ -159,6 +161,7 @@ public:
 
 private:
     virtual void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) = 0;
+    virtual void SetSelectedMarkPaint(bool pait) = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void HandleCrownBeginEvent(const CrownEvent& event)= 0;
     virtual void HandleCrownMoveEvent(const CrownEvent& event) = 0;
@@ -170,7 +173,6 @@ protected:
     bool isCrownEventEnded_ = true;
 #endif
     bool selectedMark_ = false;
-    bool selectedMarkPaint_ = false;
     T selectedColumnId_;
     std::function<void(T&)> focusedListerner_ = nullptr;
     int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
