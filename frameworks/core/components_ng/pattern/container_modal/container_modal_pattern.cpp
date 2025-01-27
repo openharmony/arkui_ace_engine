@@ -275,6 +275,9 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
         auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
+            auto currentWindowMode = windowManager->GetCurrentWindowMaximizeMode();
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "container window pan recognized. currentWindowMode = %{public}d",
+                currentWindowMode);
             if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
                 (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
                 windowManager->WindowStartMove();
