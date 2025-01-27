@@ -97,7 +97,7 @@ const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_PRIVACY_SENSITIVE_NAME = "privacySensitive";
 const auto ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_ORIENTATION_NAME = "orientation";
-const auto ATTRIBUTE_ORIENTATION_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_ORIENTATION_DEFAULT_VALUE = "1";
 } // namespace
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
@@ -2248,7 +2248,7 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setOrientationTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -2262,12 +2262,12 @@ HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestDefaultValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestOrientationValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setOrientationTestOrientationValidValues, TestSize.Level1)
 {
     Ark_ImageRotateOrientation initValueOrientation;
 
     // Initial setup
-    initValueOrientation = std::get<1>(Fixtures::testFixtureEnumImageRotateOrientationValidValues[0]);
+    initValueOrientation = std::get<1>(Fixtures::testFixtureImageRotateOrientationValidValues[0]);
 
     auto checkValue = [this, &initValueOrientation](const std::string& input, const std::string& expectedStr,
                           const Ark_ImageRotateOrientation& value) {
@@ -2281,7 +2281,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestOrientationValidValues, T
             "Input value is: " << input << ", method: setOrientation, attribute: orientation";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumImageRotateOrientationValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureImageRotateOrientationValidValues) {
         checkValue(input, expected, value);
     }
 }
@@ -2291,12 +2291,12 @@ HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestOrientationValidValues, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestOrientationInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setOrientationTestOrientationInvalidValues, TestSize.Level1)
 {
     Ark_ImageRotateOrientation initValueOrientation;
 
     // Initial setup
-    initValueOrientation = std::get<1>(Fixtures::testFixtureEnumImageRotateOrientationValidValues[0]);
+    initValueOrientation = std::get<1>(Fixtures::testFixtureImageRotateOrientationValidValues[0]);
 
     auto checkValue = [this, &initValueOrientation](const std::string& input, const Ark_ImageRotateOrientation& value) {
         Ark_ImageRotateOrientation inputValueOrientation = initValueOrientation;
@@ -2310,7 +2310,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestOrientationInvalidValues,
             "Input value is: " << input << ", method: setOrientation, attribute: orientation";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureEnumImageRotateOrientationInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureImageRotateOrientationInvalidValues) {
         checkValue(input, value);
     }
 }

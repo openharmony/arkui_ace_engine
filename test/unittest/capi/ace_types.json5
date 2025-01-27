@@ -446,6 +446,21 @@
             ]
         },
         {
+            "name": "ImageRotateOrientation",
+            "type": "Ark_ImageRotateOrientation",
+            "validValues": [
+                ["ARK_IMAGE_ROTATE_ORIENTATION_AUTO", "0"],
+                ["ARK_IMAGE_ROTATE_ORIENTATION_UP", "1"],
+                ["ARK_IMAGE_ROTATE_ORIENTATION_RIGHT", "2"],
+                ["ARK_IMAGE_ROTATE_ORIENTATION_DOWN", "3"],
+                ["ARK_IMAGE_ROTATE_ORIENTATION_LEFT", "4"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_ImageRotateOrientation>(-1)",
+                "static_cast<Ark_ImageRotateOrientation>(INT_MAX)"
+            ]
+        },
+        {
             "name": "LengthNonNegNonPct",
             "type": "Ark_Length",
             "validValues": [
@@ -3789,7 +3804,7 @@
         },
         {
             "name": "Image",
-             "attributes": [
+            "attributes": [
                 {
                     "name": "analyzerConfig",
                     "attributes": [
@@ -3960,6 +3975,11 @@
                 {
                     "name": "enableAnalyzer",
                     "default": "false"
+                },
+                {
+                    "name": "orientation",
+                    "default": "1",
+                    "fixtures": ["ImageRotateOrientation"]
                 }
             ],
             "remove": [
@@ -4009,11 +4029,6 @@
                 "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
                 "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
                 "setObjectFitTestObjectFitValidValues", // Changes in master
-
-                // New attr in API 105?
-                "setOrientationTestDefaultValues",
-                "setOrientationTestOrientationValidValues",
-                "setOrientationTestOrientationInvalidValues",
             ]
         },
         {

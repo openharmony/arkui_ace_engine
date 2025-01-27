@@ -358,6 +358,11 @@ extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsAlpha20E
 extern std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureVariableFontWeightEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableFontWeightEnumInvalidValues;
 
+// Fixture 'ImageRotateOrientation' for type 'Ark_ImageRotateOrientation'
+extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::string>>
+    testFixtureImageRotateOrientationValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>> testFixtureImageRotateOrientationInvalidValues;
+
 // Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues;

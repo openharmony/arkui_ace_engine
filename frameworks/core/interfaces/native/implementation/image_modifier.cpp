@@ -51,6 +51,19 @@ void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageContent& src
 {
     dst.reset();
 }
+
+template<>
+void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotateOrientation& src)
+{
+    switch (src) {
+        case ARK_IMAGE_ROTATE_ORIENTATION_AUTO: dst = ImageRotateOrientation::AUTO; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_UP: dst = ImageRotateOrientation::UP; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_RIGHT: dst = ImageRotateOrientation::RIGHT; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_DOWN: dst = ImageRotateOrientation::DOWN; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_LEFT: dst = ImageRotateOrientation::LEFT; break;
+        default: LOGE("Unexpected enum value in Ark_ImageRotateOrientation: %{public}d", src);
+    }
+}
 } // Converter
 } // OHOS::Ace::NG
 
@@ -363,9 +376,8 @@ void OrientationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ImageModelNG::SetOrientation(frameNode, convValue);
+    auto convValue = Converter::OptConvert<ImageRotateOrientation>(value);
+    ImageModelNG::SetOrientation(frameNode, convValue);
 }
 } // ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()
