@@ -26,7 +26,6 @@
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Ace::NG::TypeHelper;
-using namespace OHOS::Ace::NG::Converter;
 using namespace OHOS::Ace::NG::PointLight;
 
 namespace OHOS::Ace::NG {
@@ -60,6 +59,7 @@ LoadImageSuccessEvent Convert(const Ark_Type_ImageAttribute_onComplete_callback_
 } // OHOS::Ace::NG::Converter
 
 namespace  {
+    
     const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
     const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
     const auto OPACITY_COLOR = "#FF000000";

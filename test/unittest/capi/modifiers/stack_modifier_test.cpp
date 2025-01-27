@@ -28,35 +28,10 @@ using namespace OHOS::Ace::NG::PointLight;
 using namespace OHOS::Ace::NG::TypeHelper;
 
 namespace OHOS::Ace::NG {
-namespace  {
-
-    const auto ATTRIBUTE_ALIGN_ITEMS_NAME = "alignItems";
-    const auto ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE = "HorizontalAlign.Center";
-    const auto ATTRIBUTE_JUSTIFY_CONTENT_NAME = "justifyContent";
-    const auto ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
-
-    // Valid values for attribute 'alignItems' of method 'alignItems'
-    static const std::vector<std::tuple<std::string, enum Ark_HorizontalAlign, std::string>> alignItemsAlignItemsValidValues = {
-        {"ARK_HORIZONTAL_ALIGN_START", ARK_HORIZONTAL_ALIGN_START, "HorizontalAlign.Start"},
-        {"ARK_HORIZONTAL_ALIGN_CENTER", ARK_HORIZONTAL_ALIGN_CENTER, "HorizontalAlign.Center"},
-        {"ARK_HORIZONTAL_ALIGN_END", ARK_HORIZONTAL_ALIGN_END, "HorizontalAlign.End"},
-    };
-
-    // Valid values for attribute 'justifyContent' of method 'justifyContent'
-    static const std::vector<std::tuple<std::string, enum Ark_FlexAlign, std::string>> justifyContentJustifyContentValidValues = {
-        {"ARK_FLEX_ALIGN_START", ARK_FLEX_ALIGN_START, "FlexAlign.Start"},
-        {"ARK_FLEX_ALIGN_CENTER", ARK_FLEX_ALIGN_CENTER, "FlexAlign.Center"},
-        {"ARK_FLEX_ALIGN_END", ARK_FLEX_ALIGN_END, "FlexAlign.End"},
-        {"ARK_FLEX_ALIGN_SPACE_BETWEEN", ARK_FLEX_ALIGN_SPACE_BETWEEN, "FlexAlign.SpaceBetween"},
-        {"ARK_FLEX_ALIGN_SPACE_AROUND", ARK_FLEX_ALIGN_SPACE_AROUND, "FlexAlign.SpaceAround"},
-        {"ARK_FLEX_ALIGN_SPACE_EVENLY", ARK_FLEX_ALIGN_SPACE_EVENLY, "FlexAlign.SpaceEvenly"},
-    };
-} // namespace
-
-class ColumnModifierTest : public ModifierTestBase<
-    GENERATED_ArkUIColumnModifier,
-    &GENERATED_ArkUINodeModifiers::getColumnModifier,
-    GENERATED_ARKUI_COLUMN
+class StackModifierTest : public ModifierTestBase<
+    GENERATED_ArkUIStackModifier,
+    &GENERATED_ArkUINodeModifiers::getStackModifier,
+    GENERATED_ARKUI_STACK
 > {
 public:
     static void SetUpTestCase()
@@ -70,97 +45,11 @@ public:
 };
 
 /*
- * @tc.name: setAlignItemsTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ColumnModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setAlignItemsTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ColumnModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_HorizontalAlign inputValueAlignItems;
-    Ark_HorizontalAlign initValueAlignItems;
-
-    // Initial setup
-    initValueAlignItems = std::get<1>(alignItemsAlignItemsValidValues[0]);
-
-
-    // Verifying attribute's  values
-    inputValueAlignItems = initValueAlignItems;
-    for (auto&& value: alignItemsAlignItemsValidValues) {
-        inputValueAlignItems = std::get<1>(value);
-        modifier_->setAlignItems(node_, inputValueAlignItems);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-/*
- * @tc.name: setJustifyContentTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ColumnModifierTest, setJustifyContentTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JUSTIFY_CONTENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setJustifyContentTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ColumnModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_FlexAlign inputValueJustifyContent;
-    Ark_FlexAlign initValueJustifyContent;
-
-    // Initial setup
-    initValueJustifyContent = std::get<1>(justifyContentJustifyContentValidValues[0]);
-
-
-    // Verifying attribute's  values
-    inputValueJustifyContent = initValueJustifyContent;
-    for (auto&& value: justifyContentJustifyContentValidValues) {
-        inputValueJustifyContent = std::get<1>(value);
-        modifier_->setJustifyContent(node_, inputValueJustifyContent);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JUSTIFY_CONTENT_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-/*
  * @tc.name: setPointLightTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto resultPointLight =
@@ -200,7 +89,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourcePositionXValidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightLightSourcePositionXValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -243,7 +132,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourcePositionXVali
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourcePositionYValidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightLightSourcePositionYValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -286,7 +175,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourcePositionYVali
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -329,7 +218,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourcePositionZVali
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourceIntensity, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightLightSourceIntensity, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -377,7 +266,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourceIntensity, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourceColorValidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightLightSourceColorValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -431,7 +320,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourceColorValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourceColorInvalidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightLightSourceColorInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -480,7 +369,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourceColorInvalidV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightIlluminatedValidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightIlluminatedValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -521,7 +410,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightIlluminatedValidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -560,7 +449,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightIlluminatedInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
@@ -606,7 +495,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightBloomValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColumnModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSize.Level1)
+HWTEST_F(StackModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSize.Level1)
 {
     Ark_PointLightStyle initValuePointLight;
 
