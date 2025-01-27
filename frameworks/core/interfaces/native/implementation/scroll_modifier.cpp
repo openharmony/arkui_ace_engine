@@ -185,8 +185,19 @@ void OnDidScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto callValue = Converter::OptConvert<ScrollOnScrollCallback>(*value);
+    if (!callValue.has_value()) {
+        return;
+    }
+    auto call = [arkCallback = CallbackHelper(callValue.value())](
+        Dimension xIn, Dimension yIn, ScrollState stateIn) {
+            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
+            auto x = Converter::ArkValue<Ark_Number>(xIn);
+            auto y = Converter::ArkValue<Ark_Number>(yIn);
+            arkCallback.Invoke(x, y, state);
+    };
+    ScrollModelNG::SetOnDidScroll(frameNode, std::move(call));
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
