@@ -133,7 +133,6 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMessageTest, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-<<<<<<< HEAD
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementDefaultValueTest, TestSize.Level1)
 {
     Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
@@ -1099,78 +1098,23 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsShowInSubwind
     NG::PopupInfo popupInfo;
     subWindow->GetPopupInfoNG(blankRef->GetId(), popupInfo);
     ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
-=======
-class EmptyPixelMap : public PixelMap {
-    DECLARE_ACE_TYPE(EmptyPixelMap, PixelMap)
-
-public:
-    EmptyPixelMap(std::unique_ptr<PixelMap>&& pixmap) 
-        : pixmap_(std::move(pixmap)) {}
-
-    virtual int32_t GetWidth() const { return 0; };
-    virtual int32_t GetHeight() const { return 0; };
-    virtual bool GetPixelsVec(std::vector<uint8_t>& data) const { return true; };
-    virtual const uint8_t* GetPixels() const { return nullptr; };
-    virtual PixelFormat GetPixelFormat() const { return PixelFormat::ALPHA_8; };
-    virtual AlphaType GetAlphaType() const { return AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN; };
-    virtual int32_t GetRowStride() const { return 0; };
-    virtual int32_t GetRowBytes() const { return 0; };
-    virtual int32_t GetByteCount() const { return 0; };
-    virtual AllocatorType GetAllocatorType() const { return AllocatorType::DEFAULT; };
-    virtual bool IsHdr() const { return false; };
-    virtual void* GetPixelManager() const { return nullptr; };
-    virtual void* GetRawPixelMapPtr() const { return static_cast<void*>(pixmap_.get()); };
-    virtual std::string GetId() override;
-    virtual std::string GetModifyId() override;
-    virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override;
-    virtual void* GetWritablePixels() const { return nullptr; };
-    virtual void Scale(float xAxis, float yAxis) {};
-    virtual void Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) {};
-    virtual void SavePixelMapToFile(const std::string& dst) const {};
-    virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) { return nullptr; };
-    virtual bool EncodeTlv(std::vector<uint8_t>& buff) { return false; };
-
-private:
-    std::unique_ptr<PixelMap> pixmap_;
-    mutable std::string id_;  // Предполагается, что идентификатор может меняться при модификации объекта
-    mutable std::string modifyId_;  // Идентификатор изменения
-};
-
-std::string EmptyPixelMap::GetId() {
-    if (id_.empty()) {
-        id_ = std::to_string(reinterpret_cast<uintptr_t>(this));
-    }
-    return id_;
-}
-
-std::string EmptyPixelMap::GetModifyId() {
-    modifyId_ = GetId();  // Предполагается, что идентификатор изменения совпадает с основным
-    return modifyId_;
-}
-
-std::shared_ptr<Media::PixelMap> EmptyPixelMap::GetPixelMapSharedPtr() {
-    return std::move(pixmap_);
-}
-
 HWTEST_F(CommonMethodModifierTest11, setDragPreview_DragItemInfoTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDragPreview, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-
-    const DragDropInfo defaultDragPreview = frameNode->GetDragPreview();
-
+    // CustomNodeBuilder
     int callsCount(0);
     CustomNodeBuilderTestHelper<CommonMethodModifierTest11> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-
-    auto pixelMapPtr = std::make_unique<EmptyPixelMap>();
-    PixelMap* basePointer = pixelMapPtr.release(); // Передаем владение базовому указателю
-    auto pixMap = AceType::MakeRefPtr<PixelMap>(basePointer);
-    Ark_PixelMap expectedPixelMap{.ptr = reinterpret_cast<Ark_NativePointer>(pixMap.GetRawPtr())};
-
+    // PixelMap
+    Ace::RefPtr<Ace::PixelMap> expectedPixelMapRefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
+    PixelMapPeer pixelMapPeer;
+    pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
+    Ark_PixelMap expectedPixelMap{.ptr = reinterpret_cast<Ark_NativePointer>(&pixelMapPeer)};
+    // ExtraInfo
     std::string expectedExtraInfo{"extraInfo"};
-
+    // struct DragItemInfo
     Ark_DragItemInfo dragItemInfo = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder),
         .extraInfo = Converter::ArkValue<Opt_String>(expectedExtraInfo),
@@ -1179,13 +1123,130 @@ HWTEST_F(CommonMethodModifierTest11, setDragPreview_DragItemInfoTest, TestSize.L
     auto unionValue = Converter::ArkUnion<Ark_Union_CustomBuilder_DragItemInfo_String,
         Ark_DragItemInfo>(dragItemInfo);
     modifier_->setDragPreview(node_, &unionValue);
-
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
     EXPECT_EQ(builderHelper.GetCustomNode(), reinterpret_cast<FrameNode*>(resultDragPreview.customNode.GetRawPtr()));
     EXPECT_EQ(resultDragPreview.extraInfo, expectedExtraInfo);
-    EXPECT_EQ(reinterpret_cast<Ark_NativePointer>(resultDragPreview.pixelMap.GetRawPtr()), expectedPixelMap.ptr);
+    EXPECT_EQ(resultDragPreview.pixelMap, expectedPixelMapRefPtr);
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 >>>>>>> 9e58a2b1c1 (EmptyPixelMap version 1)
 }
+
+/*
+ * @tc.name: setDragPreview_String
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest11, setDragPreview_String, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string expectedString{"DragPreview_String"};
+    auto arkExpectedString = Converter::ArkValue<Ark_String>(expectedString);
+
+    auto unionValue = Converter::ArkUnion<Ark_Union_CustomBuilder_DragItemInfo_String, Ark_String>(arkExpectedString);
+    modifier_->setDragPreview(node_, &unionValue);
+
+    const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
+
+    EXPECT_EQ(resultDragPreview.extraInfo, expectedString);
+}
+
+//////// AccessibilityVirtualNode
+/*
+ * @tc.name: AccessibilityVirtualNode
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest11, AccessibilityVirtualNodeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    int callsCount(0);
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest11> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    modifier_->setAccessibilityVirtualNode(node_, &builder);
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+}
+
+//////// Overlay
+using OverlayTestStep = std::tuple<Ark_Alignment, std::string>;
+    static const std::vector<OverlayTestStep> testPlan = {
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_START, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.TopStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.Top\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_END, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.TopEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_START, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.Start\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_CENTER, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.Center\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_END, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.End\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.BottomStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.Bottom\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, "{\"title\":\"overlay string\","
+            "\"options\":{\"align\":\"Alignment.BottomEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
+    };
+
+/*
+ * @tc.name: OverlayTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest11, OverlayTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_OVERLAY_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_OVERLAY_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: OverlayTest_Union_String_CustomNodeBuilder_Values
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest11, OverlayTest_Union_String_CustomNodeBuilder_Values, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string expectedStr = "overlay string";
+    auto arkExpectedStr = Converter::ArkValue<Ark_String>(expectedStr);
+    auto unionStringValue = Converter::ArkUnion<Ark_Union_String_CustomBuilder_ComponentContent, Ark_String>(
+        arkExpectedStr);
+    Ark_OverlayOffset arkOverlayOffset = {
+        .x = Converter::ArkValue<Opt_Number>(5), .y = Converter::ArkValue<Opt_Number>(6)};
+    Ark_OverlayOptions arkOverlayOptions;
+    Opt_OverlayOptions optOverlayOptions;
+
+    for (auto [inputValue, expectedValue]: testPlan) {
+        arkOverlayOptions = {
+            .align = Converter::ArkValue<Opt_Alignment>(inputValue),
+            .offset = Converter::ArkValue<Opt_OverlayOffset>(arkOverlayOffset),
+        };
+        optOverlayOptions = Converter::ArkValue<Opt_OverlayOptions>(arkOverlayOptions);
+        modifier_->setOverlay(node_, &unionStringValue, &optOverlayOptions);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_OVERLAY_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+
+    // test CustomNodeBuilder
+    int callsCount(0);
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest11> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Ark_Union_String_CustomBuilder_ComponentContent, CustomNodeBuilder>(
+        builder);
+    modifier_->setOverlay(node_, &unionCustomNodeBuilderValue, &optOverlayOptions);
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+}
+
 }
