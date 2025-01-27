@@ -406,7 +406,6 @@ BorderRadiusProperty GetHoverPreviewBorderRadius(
     CHECK_NULL_RETURN(menuTheme, {});
     auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
     if (menuParam.previewBorderRadius.has_value() && !menuParam.previewBorderRadius->multiValued) {
         auto paramRadius = menuParam.previewBorderRadius->radiusTopLeft;
         radius = (paramRadius->Unit() == DimensionUnit::PERCENT)
