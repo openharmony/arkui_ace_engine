@@ -2285,6 +2285,20 @@ typedef enum {
 } ArkUI_SafeAreaEdge;
 
 /**
+ * @brief Enumerates the expand modes.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Expand. */
+    ARKUI_EXPAND = 0,
+    /** Not expand. */
+    ARKUI_NOT_EXPAND = 1,
+    /** Lazy expand. Expand the children of node if needed. */
+    ARKUI_LAZY_EXPAND = 2,
+} ArkUI_ExpandMode;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12
