@@ -23,6 +23,12 @@ interface CrossLanguageOptions {
   attributeSetting?: boolean;
 }
 
+enum ExpandMode {
+  EXPAND = 0,
+  NOT_EXPAND = 1,
+  LAZY_EXPAND = 2,
+}
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
@@ -282,8 +288,8 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
   }
-  getChild(index: number, isExpanded?: boolean): FrameNode | null {
-    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
+  getChild(index: number, expandMode?: ExpandMode): FrameNode | null {
+    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -293,6 +299,14 @@ class FrameNode {
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getFirstChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getFirstChildIndexWithoutExpand(this.getNodePtr());
+  }
+
+  getLastChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getLastChildIndexWithoutExpand(this.getNodePtr());
   }
 
   getFirstChild(isExpanded?: boolean): FrameNode | null {
