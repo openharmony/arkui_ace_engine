@@ -415,7 +415,7 @@ bool NavDestinationGroupNode::CheckTransitionPop(const int32_t animationId)
     return true;
 }
 
-bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId)
+bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent)
 {
     if (animationId_ != animationId) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
@@ -433,12 +433,14 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animatio
     CHECK_NULL_RETURN(preNavDesPattern, false);
 
     // NavRouter will restore the preNavDesNode and needs to set the initial state after the animation ends.
-    auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
-    if (shallowBuilder && !IsCacheNode()) {
-        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-    }
-    if (!IsCacheNode() && GetContentNode()) {
-        GetContentNode()->Clean();
+    if (isNeedCleanContent) {
+        auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
+        if (shallowBuilder && !IsCacheNode()) {
+            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+        }
+        if (!IsCacheNode() && GetContentNode()) {
+            GetContentNode()->Clean();
+        }
     }
     GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
