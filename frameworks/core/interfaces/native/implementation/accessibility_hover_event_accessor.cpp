@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AccessibilityHoverEventAccessor {
 void DestroyPeerImpl(AccessibilityHoverEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new AccessibilityHoverEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

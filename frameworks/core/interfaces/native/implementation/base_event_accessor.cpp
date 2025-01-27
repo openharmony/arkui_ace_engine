@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/base_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseEventAccessor {
 void DestroyPeerImpl(BaseEventPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new BaseEventPeerImpl();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
