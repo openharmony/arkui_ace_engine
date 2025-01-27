@@ -2051,8 +2051,6 @@ typedef enum {
     ARKUI_ERROR_CODE_NO_ERROR = 0,
     /** Invalid parameters. */
     ARKUI_ERROR_CODE_PARAM_INVALID = 401,
-    /** CAPI init error. */
-    ARKUI_ERROR_CODE_CAPI_INIT_ERROR = 500,
     /** The component does not support specific attributes or events. */
     /**
      * @error Internal error occurs, such as failure occurs because of the internal environment error,
@@ -2150,6 +2148,20 @@ typedef enum {
     /** Tail area. */
     ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
 } ArkUI_SafeAreaEdge;
+
+/**
+ * @brief Enumerates the expand modes.
+ *
+ * @since 15
+ */
+typedef enum {
+    /** Not expand. */
+    ARKUI_NOT_EXPAND = 0,
+    /** Expand. */
+    ARKUI_EXPAND = 1,
+    /** Lazy expand. Expand the children of node if needed. */
+    ARKUI_LAZY_EXPAND = 2,
+} ArkUI_ExpandMode;
 
 /**
  * @brief Defines parameter used by the system font style callback event.
