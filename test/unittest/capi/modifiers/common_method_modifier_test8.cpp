@@ -38,6 +38,12 @@ namespace {
     const auto ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_RESTORE_ID_NAME = "restoreId";
     const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = "";
+    const auto ATTRIBUE_MONOPOLIZE_EVENTS_NAME = "monopolizeEvents";
+    const auto ATTRIBUE_MONOPOLIZE_EVENTS_DEFAULT_VALUE = "false";
+    const auto ACTUAL_TRUE = true;
+    const auto ACTUAL_FALSE = false;
+    const auto EXPECTED_TRUE = "true";
+    const auto EXPECTED_FALSE = "false";
 }
 namespace Converter {
 
@@ -121,6 +127,35 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSi
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
+
+/*
+ * @tc.name: setMonopolizeEventsTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest8, setMonopolizeEventsTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMonopolizeEvents, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto fullJson = GetJsonValue(node_);
+    auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
+    EXPECT_EQ(resultValue, ATTRIBUE_MONOPOLIZE_EVENTS_DEFAULT_VALUE);
+
+    Ark_Boolean arkTrueValue = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    modifier_->setMonopolizeEvents(node_, arkTrueValue);
+    fullJson = GetJsonValue(node_);
+    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
+    EXPECT_EQ(resultValue, EXPECTED_TRUE);
+
+    Ark_Boolean arkFalseValue = Converter::ArkValue<Ark_Boolean>(ACTUAL_FALSE);
+    modifier_->setMonopolizeEvents(node_, arkFalseValue);
+    fullJson = GetJsonValue(node_);
+    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
+    EXPECT_EQ(resultValue, EXPECTED_FALSE);
+}
+
 /*
  * @tc.name: setBindContentCover0Test
  * @tc.desc:
