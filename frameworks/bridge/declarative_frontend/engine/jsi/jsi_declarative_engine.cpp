@@ -442,7 +442,11 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     arkRuntime->SetPkgAliasList(pkgAliasMap_);
     arkRuntime->SetpkgContextInfoList(pkgContextInfoMap_);
 #endif
-
+    auto container = Container::Current();
+    if (container) {
+        auto uid = container->GetAppRunningUniqueId();
+        runtime_->SetUniqueId(uid);
+    }
     runtime_->SetLogPrint(PrintLog);
     std::string libraryPath = "";
     if (debuggerMode) {
