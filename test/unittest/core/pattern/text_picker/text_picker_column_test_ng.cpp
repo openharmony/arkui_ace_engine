@@ -1771,7 +1771,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest008, TestSize.Level1
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->CalcAlgorithmOffset(DISTANCE);
+    textPickerColumnPattern->CalcAlgorithmOffset(ScrollDirection::UP, DISTANCE);
     EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 5);
 }
 
