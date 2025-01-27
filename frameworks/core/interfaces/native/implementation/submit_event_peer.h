@@ -18,22 +18,7 @@
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-struct SubmitEventPeer : public BaseEventPeer {
+struct SubmitEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::NG::TextFieldCommonEvent> {
     ~SubmitEventPeer() override = default;
-
-    using SubmitEventInfoPtr = std::shared_ptr<OHOS::Ace::NG::TextFieldCommonEvent>;
-
-    const SubmitEventInfoPtr& GetSubmitEventInfo() const
-    {
-        return eventInfo;
-    }
-
-    void SetSubmitEventInfo(const SubmitEventInfoPtr& info)
-    {
-        SetBaseInfo(info);
-        eventInfo = info;
-    }
-
-private:
-    SubmitEventInfoPtr eventInfo;
 };

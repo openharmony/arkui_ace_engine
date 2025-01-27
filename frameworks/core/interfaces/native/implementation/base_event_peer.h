@@ -21,18 +21,34 @@
 struct BaseEventPeer {
     virtual ~BaseEventPeer() = default;
 
-    using BaseEventInfoPtr = std::shared_ptr<OHOS::Ace::BaseEventInfo>;
+    virtual OHOS::Ace::BaseEventInfo* GetBaseInfo() = 0;
+};
 
-    const BaseEventInfoPtr& GetBaseInfo() const
+namespace OHOS::Ace::NG::GeneratedModifier {
+template<typename AceInfo>
+class EventPeer : public BaseEventPeer {
+public:
+    ~EventPeer() override = default;
+
+    BaseEventInfo* GetBaseInfo() override
     {
-        return eventInfo;
+        return GetEventInfo();
     }
 
-    void SetBaseInfo(const BaseEventInfoPtr& info)
+    AceInfo* GetEventInfo()
+    {
+        CHECK_NULL_RETURN(eventInfo, nullptr);
+        return &eventInfo.value();
+    }
+
+    void SetEventInfo(const AceInfo& info)
     {
         eventInfo = info;
     }
 
 private:
-    BaseEventInfoPtr eventInfo;
+    std::optional<AceInfo> eventInfo;
 };
+
+using BaseEventPeerImpl = EventPeer<BaseEventInfo>;
+} // namespace OHOS::Ace::NG::GeneratedModifier

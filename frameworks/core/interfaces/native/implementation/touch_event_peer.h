@@ -18,22 +18,7 @@
 #include "core/event/touch_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-struct TouchEventPeer : public BaseEventPeer {
+struct TouchEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::TouchEventInfo> {
     ~TouchEventPeer() override = default;
-
-    using TouchEventInfoPtr = std::shared_ptr<OHOS::Ace::TouchEventInfo>;
-
-    const TouchEventInfoPtr& GetTouchEventInfo() const
-    {
-        return eventInfo;
-    }
-
-    void SetTouchEventInfo(const TouchEventInfoPtr& info)
-    {
-        SetBaseInfo(info);
-        eventInfo = info;
-    }
-
-private:
-    TouchEventInfoPtr eventInfo;
 };

@@ -18,22 +18,7 @@
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-struct BaseGestureEventPeer : public BaseEventPeer {
+struct BaseGestureEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::BaseGestureEvent> {
     ~BaseGestureEventPeer() override = default;
-
-    using BaseGestureEventInfoPtr = std::shared_ptr<OHOS::Ace::BaseGestureEvent>;
-
-    const BaseGestureEventInfoPtr& GetBaseGestureEventInfo() const
-    {
-        return eventInfo;
-    }
-
-    void SetBaseGestureEventInfo(const BaseGestureEventInfoPtr& info)
-    {
-        SetBaseInfo(info);
-        eventInfo = info;
-    }
-
-private:
-    BaseGestureEventInfoPtr eventInfo;
 };

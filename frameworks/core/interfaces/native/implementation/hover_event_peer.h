@@ -18,22 +18,7 @@
 #include "core/event/mouse_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-struct HoverEventPeer : public BaseEventPeer {
+struct HoverEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::HoverInfo> {
     ~HoverEventPeer() override = default;
-
-    using HoverEventInfoPtr = std::shared_ptr<OHOS::Ace::HoverInfo>;
-
-    const HoverEventInfoPtr& GetHoverEventInfo() const
-    {
-        return eventInfo;
-    }
-
-    void SetHoverEventInfo(const HoverEventInfoPtr& info)
-    {
-        SetBaseInfo(info);
-        eventInfo = info;
-    }
-
-private:
-    HoverEventInfoPtr eventInfo;
 };
