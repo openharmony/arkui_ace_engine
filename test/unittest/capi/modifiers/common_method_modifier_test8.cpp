@@ -332,7 +332,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover0ModalTransition
  */
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Level1)
 {
-    std::printf("\nbindeContent1: [===test_111===] start\n\n");
+    std::printf("\nbindeContent1: [===test_111===] start\n");
     
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -343,7 +343,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
         Ark_NativePointer parentNode;
     };
     static std::optional<CheckBuilderEvent> checkBuilderEvent = std::nullopt;
-
     int32_t nodeId = EXPECTED_NODE_ID;
     auto node = BlankModelNG::CreateFrameNode(nodeId);
     EXPECT_NE(node, nullptr);
@@ -370,9 +369,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
     };
     static constexpr int32_t contextId = EXPECTED_CONTEXT_ID;
     CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, contextId);
-
-
-    // parameters
     auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(Ark_Empty());
 
@@ -385,7 +381,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
     // test!!! eof
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
-
     modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
 
     // test!!!
@@ -397,11 +392,12 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
         std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss(),
         checkBuilderEvent ? checkBuilderEvent->resourceId : -1
         );
-   
     std::printf("\n");
     // test!!! eof
+
+    EXPECT_TRUE(checkBuilderEvent.has_value());
+    EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
     
-      // parameters
     arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
 
@@ -414,7 +410,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
     // test!!! eof
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
-
     modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
 
     // test!!!
@@ -425,10 +420,13 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
         modal ? "[+]" : "-", pattern ? "[+]" : "-", 
         std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss(),
         checkBuilderEvent ? checkBuilderEvent->resourceId : -1);
-
     std::printf("\n\n\n");
     // test!!! eof
+
+    EXPECT_FALSE(checkBuilderEvent.has_value());
 }
+
+
 
 /*
  * @tc.name: setBindContentCover1Test
