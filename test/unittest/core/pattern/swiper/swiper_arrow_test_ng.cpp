@@ -1099,4 +1099,42 @@ HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.0f, 0.f, 31.98f, 87.9f)));
 }
+
+/**
+ * @tc.name: InitAccessibilityText001
+ * @tc.desc: Test clicking the left arrows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitAccessibilityText001, TestSize.Level1)
+{
+    CreateWithArrow();
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    ASSERT_NE(buttonNode, nullptr);
+    leftArrowPattern->InitAccessibilityText();
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
+    buttonAccessibilityProperty->SetAccessibilityText("left");
+    auto text = buttonAccessibilityProperty->GetAccessibilityText();
+    EXPECT_EQ(text, "left");
+}
+
+/**
+ * @tc.name: InitAccessibilityText002
+ * @tc.desc: Test clicking the right arrows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitAccessibilityText002, TestSize.Level1)
+{
+    CreateWithArrow();
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto buttonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
+    ASSERT_NE(buttonNode, nullptr);
+    rightArrowPattern->InitAccessibilityText();
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
+    buttonAccessibilityProperty->SetAccessibilityText("right");
+    auto text = buttonAccessibilityProperty->GetAccessibilityText();
+    EXPECT_EQ(text, "right");
+}
 } // namespace OHOS::Ace::NG
