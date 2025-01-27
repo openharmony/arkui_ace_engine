@@ -6823,6 +6823,7 @@ void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
 
 void JsAccessibilityManager::UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context)
 {
+    CHECK_NULL_VOID(context);
     auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
     CHECK_NULL_VOID(container);
     auto singleHandTransform = container->GetSingleHandTransform();
@@ -6851,28 +6852,33 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
     } else {
         ngPipeline = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext().Upgrade());
     }
-
-    if (getParentRectHandler_) {
-        getParentRectHandler_(windowInfo.top, windowInfo.left);
-    } else if (getParentRectHandlerNew_) {
-        AccessibilityParentRectInfo rectInfo;
-        getParentRectHandlerNew_(rectInfo);
-        windowInfo.top = rectInfo.top;
-        windowInfo.left = rectInfo.left;
-        windowInfo.scaleX = rectInfo.scaleX;
-        windowInfo.scaleY = rectInfo.scaleY;
-    } else {
-        CHECK_NULL_RETURN(ngPipeline, windowInfo);
-        windowInfo.left = GetWindowLeft(ngPipeline->GetWindowId());
-        windowInfo.top = GetWindowTop(ngPipeline->GetWindowId());
-        auto container = Container::CurrentSafely();
-        if (container) {
-            auto windowScale = container->GetWindowScale();
-            windowInfo.scaleX = windowScale;
-            windowInfo.scaleY = windowScale;
+    auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
+    if (container && !container->IsSubWindow()) {
+        // subwindow by subpipeline, donot use getParentRectHandler when it is registered in mainpipeline
+        if (getParentRectHandler_) {
+            getParentRectHandler_(windowInfo.top, windowInfo.left);
+            return windowInfo;
+        } else if (getParentRectHandlerNew_) {
+            AccessibilityParentRectInfo rectInfo;
+            getParentRectHandlerNew_(rectInfo);
+            windowInfo.top = rectInfo.top;
+            windowInfo.left = rectInfo.left;
+            windowInfo.scaleX = rectInfo.scaleX;
+            windowInfo.scaleY = rectInfo.scaleY;
+            return windowInfo;
         }
-        UpdateWindowInfo(windowInfo, context);
     }
+    CHECK_NULL_RETURN(ngPipeline, windowInfo);
+    windowInfo.left = GetWindowLeft(ngPipeline->GetWindowId());
+    windowInfo.top = GetWindowTop(ngPipeline->GetWindowId());
+    CHECK_NULL_RETURN(container, windowInfo);
+    if (container) {
+        auto windowScale = container->GetWindowScale();
+        windowInfo.scaleX = windowScale;
+        windowInfo.scaleY = windowScale;
+    }
+    UpdateWindowInfo(windowInfo, ngPipeline);
+
     return windowInfo;
 }
 
