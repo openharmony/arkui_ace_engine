@@ -18,22 +18,7 @@
 #include "core/event/key_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-struct KeyEventPeer : public BaseEventPeer {
+struct KeyEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::KeyEventInfo> {
     ~KeyEventPeer() override = default;
-
-    using KeyEventInfoPtr = std::shared_ptr<OHOS::Ace::KeyEventInfo>;
-
-    const KeyEventInfoPtr& GetKeyEventInfo() const
-    {
-        return eventInfo;
-    }
-
-    void SetKeyEventInfo(const KeyEventInfoPtr& info)
-    {
-        SetBaseInfo(info);
-        eventInfo = info;
-    }
-
-private:
-    KeyEventInfoPtr eventInfo;
 };

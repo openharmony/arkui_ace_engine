@@ -21,19 +21,24 @@
 struct GestureEventPeer : public BaseGestureEventPeer {
     ~GestureEventPeer() override = default;
 
-    using GestureEventInfoPtr = std::shared_ptr<OHOS::Ace::GestureEvent>;
+    using GestureInfo = OHOS::Ace::GestureEvent;
 
-    const GestureEventInfoPtr& GetGestureEventInfo() const
+    OHOS::Ace::BaseEventInfo* GetBaseInfo() override
     {
-        return eventInfo;
+        return GetGestureInfo();
     }
 
-    void SetGestureEventInfo(const GestureEventInfoPtr& info)
+    GestureInfo* GetGestureInfo()
     {
-        SetBaseInfo(info);
-        eventInfo = info;
+        CHECK_NULL_RETURN(gestureInfo, nullptr);
+        return &gestureInfo.value();
+    }
+
+    void SetGestureInfo(const GestureInfo& info)
+    {
+        gestureInfo = info;
     }
 
 private:
-    GestureEventInfoPtr eventInfo;
+    std::optional<GestureInfo> gestureInfo;
 };

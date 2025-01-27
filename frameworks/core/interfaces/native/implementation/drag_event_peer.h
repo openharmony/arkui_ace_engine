@@ -19,18 +19,7 @@
 #include "arkoala_api_generated.h"
 
 struct DragEventPeer {
-    using DragEventInfoPtr = std::shared_ptr<OHOS::Ace::DragEvent>;
+    virtual ~DragEventPeer() = default;
 
-    const DragEventInfoPtr& GetDragEventInfo() const
-    {
-        return eventInfo;
-    }
-
-    void SetDragEventInfo(const DragEventInfoPtr& info)
-    {
-        eventInfo = info;
-    }
-
-private:
-    DragEventInfoPtr eventInfo;
+    std::optional<OHOS::Ace::DragEvent> dragInfo;
 };

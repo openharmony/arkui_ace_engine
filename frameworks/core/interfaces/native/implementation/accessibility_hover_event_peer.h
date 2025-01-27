@@ -18,22 +18,7 @@
 #include "core/event/mouse_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-struct AccessibilityHoverEventPeer : public BaseEventPeer {
+struct AccessibilityHoverEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::AccessibilityHoverInfo> {
     ~AccessibilityHoverEventPeer() override = default;
-
-    using AccessibilityHoverInfoPtr = std::shared_ptr<OHOS::Ace::AccessibilityHoverInfo>;
-
-    const AccessibilityHoverInfoPtr& GetAccessibilityHoverInfo() const
-    {
-        return eventInfo;
-    }
-
-    void SetAccessibilityHoverInfo(const AccessibilityHoverInfoPtr& info)
-    {
-        SetBaseInfo(info);
-        eventInfo = info;
-    }
-
-private:
-    AccessibilityHoverInfoPtr eventInfo;
 };
