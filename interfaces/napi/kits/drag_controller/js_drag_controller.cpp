@@ -48,6 +48,7 @@
 #include "core/event/ace_events.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/base/json/json_util.h"
+#include "frameworks/core/event/pointer_event.h"
 #include "drag_preview.h"
 #endif
 namespace OHOS::Ace::Napi {
@@ -89,17 +90,13 @@ struct DragControllerAsyncCtx {
     bool isArray = false;
     napi_value customBuilder;
     std::vector<napi_ref> customBuilderList;
-    int32_t pointerId = -1;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
     std::mutex mutex;
     bool hasHandle = false;
-    int32_t globalX = -1;
-    int32_t globalY = -1;
-    uint64_t displayId = 0;
-    int32_t sourceType = 0;
+    PointerEvent dragPointerEvent;
     float windowScale = 1.0f;
     float dipScale = 0.0;
     int parseBuilderCount = 0;
@@ -546,7 +543,7 @@ void GetCallBackDataForJs(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg&
 
 void SetMouseDragMonitorState(DragControllerAsyncCtx *asyncCtx, bool state)
 {
-    if (asyncCtx->sourceType != SOURCE_TYPE_MOUSE) {
+    if (asyncCtx->dragPointerEvent.sourceType != SOURCE_TYPE_MOUSE) {
         return;
     }
     auto ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->SetMouseDragMonitorState(state);
@@ -660,9 +657,11 @@ void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [ctx = asyncCtx, context = pipelineContext]() {
-            context->OnDragEvent({ ctx->globalX, ctx->globalY }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
+            context->OnDragEvent({ ctx->dragPointerEvent.displayX, ctx->dragPointerEvent.displayY },
+                DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
             NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
-                { ctx->globalX, ctx->globalY }, ctx->extraParams, ctx->pointerId, ctx->instanceId);
+                { ctx->dragPointerEvent.displayX, ctx->dragPointerEvent.displayY }, ctx->extraParams,
+                ctx->dragPointerEvent.pointerId, ctx->instanceId);
         },
         TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart", PriorityType::VIP);
 }
@@ -726,7 +725,7 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
-    asyncCtx->displayId = displayInfo->GetDisplayId();
+    asyncCtx->dragPointerEvent.displayId = displayInfo->GetDisplayId();
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
@@ -740,7 +739,7 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
-    auto pointerId = asyncCtx->pointerId;
+    auto pointerId = asyncCtx->dragPointerEvent.pointerId;
     std::string udKey;
     std::map<std::string, int64_t> summary;
     int32_t dataSize = 1;
@@ -761,10 +760,11 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
     auto windowId = container->GetWindowId();
     auto arkExtraInfoJson = JsonUtil::Create(true);
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
+    arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
-    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
-        recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
-        asyncCtx->displayId, windowId, true, false, summary };
+    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
+        asyncCtx->dragPointerEvent.sourceType, recordSize, pointerId, asyncCtx->dragPointerEvent.displayX,
+        asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)
@@ -781,7 +781,8 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
         HandleDragEnd(asyncCtx, dragNotifyMsg);
     };
-    NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
+    NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
+        asyncCtx->dragPointerEvent.pointerId, asyncCtx->instanceId);
     NG::DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
@@ -853,7 +854,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     asyncCtx->windowScale = windowScale;
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
-    asyncCtx->displayId = displayInfo->GetDisplayId();
+    asyncCtx->dragPointerEvent.displayId = displayInfo->GetDisplayId();
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -875,7 +876,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             }
             CHECK_NULL_VOID(asyncCtx->pixelMap);
             int32_t dataSize = 1;
-            auto pointerId = asyncCtx->pointerId;
+            auto pointerId = asyncCtx->dragPointerEvent.pointerId;
             std::string udKey;
             std::map<std::string, int64_t> summary;
             if (asyncCtx->unifiedData) {
@@ -916,17 +917,20 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             CHECK_NULL_VOID(container);
             auto arkExtraInfoJson = JsonUtil::Create(true);
             arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
+            arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
             NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
             auto windowId = container->GetWindowId();
             Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
             Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams,
-                arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX,
-                asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
+                arkExtraInfoJson->ToString(), asyncCtx->dragPointerEvent.sourceType, dataSize, pointerId,
+                asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY,
+                asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
             };
-            NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
+            NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
+                asyncCtx->dragPointerEvent.pointerId, asyncCtx->instanceId);
             int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData,
                 std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
             if (ret != 0) {
@@ -1419,7 +1423,7 @@ bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
         errMsg = "pointerId which type is number must be given";
         return false;
     }
-    status = napi_get_value_int32(asyncCtx->env, pointerIdNApi, &asyncCtx->pointerId);
+    status = napi_get_value_int32(asyncCtx->env, pointerIdNApi, &asyncCtx->dragPointerEvent.pointerId);
     if (status != napi_ok) {
         errMsg = "parse pointerId fail";
         return false;
@@ -1551,14 +1555,13 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
                 TaskExecutor::TaskType::JS, "ArkUIDragStop");
         }
     };
-    int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(
-        asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType,
-        sourceTool, std::move(stopDragCallback));
-    if (asyncCtx->sourceType == SOURCE_TYPE_MOUSE) {
-        asyncCtx->pointerId = MOUSE_POINTER_ID;
-    } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
-        asyncCtx->pointerId = PEN_POINTER_ID;
+        asyncCtx->dragPointerEvent, std::move(stopDragCallback));
+    if (asyncCtx->dragPointerEvent.sourceType == SOURCE_TYPE_MOUSE) {
+        asyncCtx->dragPointerEvent.pointerId = MOUSE_POINTER_ID;
+    } else if (asyncCtx->dragPointerEvent.sourceType == SOURCE_TYPE_TOUCH &&
+        static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool) == SOURCE_TOOL_PEN) {
+        asyncCtx->dragPointerEvent.pointerId = PEN_POINTER_ID;
     }
     return getPointSuccess;
 }
