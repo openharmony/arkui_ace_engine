@@ -3570,6 +3570,16 @@ bool AceContainer::UIExtensionIsHalfScreen()
     return uiExtensionContext->GetScreenMode() == EXTENSION_HALF_SCREEN_MODE;
 }
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    uniqueId_ = uniqueId;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    return uniqueId_;
+}
+
 Rosen::WMError AceContainer::RegisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)
 {
     if (!uiWindow_) {

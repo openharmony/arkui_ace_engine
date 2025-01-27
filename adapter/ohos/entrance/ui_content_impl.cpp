@@ -30,6 +30,7 @@
 #include "locale_config.h"
 #include "native_reference.h"
 #include "ohos/init_data.h"
+#include "application_context.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -1364,8 +1365,9 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             taskWrapper_, false, false, useNewPipe);
-
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+    auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
+    container->SetAppRunningUniqueId(appContext->GetAppRunningUniqueId());
     container->SetIsFormRender(isFormRender_);
     container->SetIsDynamicRender(isDynamicRender_);
     container->SetUIContentType(uIContentType_);
@@ -1928,6 +1930,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 }),
             false, false, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+    auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
+    container->SetAppRunningUniqueId(appContext->GetAppRunningUniqueId());
     container->SetUIContentType(uIContentType_);
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
@@ -3287,17 +3291,29 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
             }), false, true, true);
+        if (container) {
+            auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
+            container->SetAppRunningUniqueId(appContext->GetAppRunningUniqueId());
+        }
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                 }), false, true, true);
+            if (container) {
+                auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
+                container->SetAppRunningUniqueId(appContext->GetAppRunningUniqueId());
+            }
         } else {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                 }), false, true);
+            if (container) {
+                auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
+                container->SetAppRunningUniqueId(appContext->GetAppRunningUniqueId());
+            }
         }
 #endif
     }

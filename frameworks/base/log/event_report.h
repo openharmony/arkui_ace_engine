@@ -188,7 +188,8 @@ public:
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
     static void JsErrReport(
-        const std::string& packageName, const std::string& reason, const std::string& summary);
+        const std::string& packageName, const std::string& reason, const std::string& summary,
+        const std::string& uniqueId = "");
     static void ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
         const std::string& processName, const std::string& msg = " ");
     static void ANRShowDialog(int32_t uid, const std::string& packageName,

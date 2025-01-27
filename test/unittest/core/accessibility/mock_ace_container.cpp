@@ -67,6 +67,17 @@ AceContainer::~AceContainer() {}
 
 RefPtr<AceContainer> container_;
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
 RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
 {
     if (container_) {

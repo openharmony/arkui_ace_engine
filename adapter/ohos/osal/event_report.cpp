@@ -38,6 +38,7 @@ constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_CMD[] = "CMD";
 constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
+constexpr char APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char EVENT_NAME_JS_ERROR[] = "JS_ERROR";
 constexpr char STATISTIC_DURATION[] = "DURATION";
 constexpr char EVENT_KEY_STARTTIME[] = "STARTTIME";
@@ -279,13 +280,14 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
 }
 
 void EventReport::JsErrReport(
-    const std::string& packageName, const std::string& reason, const std::string& summary)
+    const std::string& packageName, const std::string& reason, const std::string& summary, const std::string& uniqueId)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_REASON, reason,
-        EVENT_KEY_SUMMARY, summary);
+        EVENT_KEY_SUMMARY, summary,
+        APP_RUNNING_UNIQUE_ID, uniqueId);
 }
 
 void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,

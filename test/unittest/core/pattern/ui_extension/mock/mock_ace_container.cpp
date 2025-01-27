@@ -112,6 +112,17 @@ bool AceContainer::IsKeyboard()
     return true;
 }
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
 void AceContainer::DestroyView() {}
 
 void AceContainer::Dispatch(const std::string& group, std::vector<uint8_t>&& data,
