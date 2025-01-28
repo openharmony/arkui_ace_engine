@@ -294,8 +294,16 @@ void OnSubmit1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnSubmit1(frameNode, convValue);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onSubmit = [arkCallback = CallbackHelper(*value), node = weakNode](
+            const std::string& value, NG::TextFieldCommonEvent& info) {
+        PipelineContext::SetCallBackNode(node);
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
+        const auto event = Converter::ArkSubmitEventSync(info);
+        auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
+        arkCallback.Invoke(arkStringValue, eventArkValue);
+    };
+    SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const EditableTextOnChangeCallback* value)

@@ -212,7 +212,7 @@ void OnSubmitImpl(Ark_NativePointer node,
         const auto event = Converter::ArkSubmitEventSync(info);
         arkCallback.Invoke(enterKeyType, event.ArkValue());
     };
-    TextFieldModelNG::SetOnSubmit(frameNode, onSubmit);
+    TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const EditableTextOnChangeCallback* value)
