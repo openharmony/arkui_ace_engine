@@ -198,7 +198,7 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
         popupOffset.SetY(offsetVal.value().second->ConvertToPx());
         popupParam->SetTargetOffset(popupOffset);
     }
-    popupParam->SetMaskColor(Converter::OptConvert<Color>(src.popupColor));
+    popupParam->SetBackgroundColor(Converter::OptConvert<Color>(src.popupColor));
     popupParam->SetHasAction(Converter::OptConvert<bool>(src.autoCancel).value_or(popupParam->HasAction()));
     auto width = Converter::OptConvert<CalcDimension>(src.width);
     Validator::ValidateNonNegative(width);
