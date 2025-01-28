@@ -5200,48 +5200,18 @@ void BindContentCover0Impl(Ark_NativePointer node,
                            const CustomNodeBuilder* builder,
                            const Opt_ModalTransition* type)
 {
-    std::printf("bindContent0: modifier: start\n");
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     bool isShowValue = Converter::Convert<bool>(isShow);
     auto weakNode = AceType::WeakClaim(frameNode);
-
-    std::printf("bindContent0: modifier: 002 isShow: %d\n", isShowValue);
-
     auto buildFunc = [arkCallback = CallbackHelper(*builder, frameNode), weakNode, node]() -> RefPtr<UINode> {
-        std::printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-        std::printf("bindContent0: modifier: builder\n");
         PipelineContext::SetCallBackNode(weakNode);
-
-        std::printf("bindContent0: modifier: builder: 002\n");
-        
-        auto uiNode =  arkCallback.BuildSync(node);
-        std::printf("bindContent0: modifier: builder: 003 uiNode %s id: %d \n", uiNode ? "object" : "null", uiNode->GetId());
-        std::printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-        return uiNode;
+        return arkCallback.BuildSync(node);
     };
-
-
     ModalStyle modalStyle;
     modalStyle.modalTransition = (type ? Converter::OptConvert<ModalTransition>(*type) : std::nullopt)
         .value_or(ModalTransition::DEFAULT);
-
-    auto value2 = std::underlying_type_t<ModalTransition>(*modalStyle.modalTransition);
-    std::printf("bindContent0: modifier: 003 modalStyle: %d\n", value2);
-
     ContentCoverParam contentCoverParam;
-
-    // frameNode               frameNode, 
-    // isShowValue             bool isShow, 
-    // nullptr                         std::function<void(const std::string&)>&& callback, 
-    // buildFunc               std::function<RefPtr<UINode>()>&& buildFunc,
-    // modalStyle              NG::ModalStyle& modalStyle, 
-    // nullptr                         std::function<void()>&& onAppear, 
-    // nullptr                         std::function<void()>&& onDisappear,
-    // nullptr                         std::function<void()>&& onWillAppear, 
-    // nullptr                         std::function<void()>&& onWillDisappear,
-    // contentCoverParam       const NG::ContentCoverParam& contentCoverParam)
-
     ViewAbstractModelNG::BindContentCover(frameNode, isShowValue, nullptr, std::move(buildFunc), modalStyle,
         nullptr, nullptr, nullptr, nullptr, contentCoverParam);
 }

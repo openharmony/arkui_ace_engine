@@ -3909,55 +3909,19 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
         if (targetModalNode) {
             const auto& targetModalPattern = targetModalNode->GetPattern<ModalPresentationPattern>();
             CHECK_NULL_VOID(targetModalPattern);
-            RefPtr<NG::RenderContext> modalRenderContext = targetModalNode->GetRenderContext();
+            auto modalRenderContext = targetModalNode->GetRenderContext();
             CHECK_NULL_VOID(modalRenderContext);
             if (modalStyle.backgroundColor.has_value()) {
-                std::printf(
-                    "bindContent1: ### onBindContentCover targetModalNode: %d context: %s backgroundColor: %s\n",
-                    targetModalNode->GetId(), modalRenderContext->GetBackgroundColor()->ToString().c_str(),
-                    modalStyle.backgroundColor.value().ToString().c_str());
-
                 modalRenderContext->UpdateBackgroundColor(modalStyle.backgroundColor.value());
-
-                std::printf(
-                    "bindContent1: ### onBindContentCover targetModalNode: %d context: %s backgroundColor: %s\n",
-                    targetModalNode->GetId(), modalRenderContext->GetBackgroundColor()->ToString().c_str(),
-                    modalStyle.backgroundColor.value().ToString().c_str());
             }
-
-                targetModalPattern->UpdateOnDisappear(std::move(onDisappear));
-                targetModalPattern->UpdateOnWillDisappear(std::move(onWillDisappear));
-                targetModalPattern->UpdateOnAppear(std::move(onAppear));
-                targetModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
-                targetModalPattern->SetType(modalTransition.value());
-
-                auto modalTransition2 =
-                    modalTransition ? std::underlying_type_t<ModalTransition>(*modalTransition) : -1;
-                std::printf("bindContent1: ### onBindContentCover modalTransition: %d\n", modalTransition2);
-
-                auto modal = std::underlying_type_t<ModalTransition>(targetModalPattern->GetType());
-                std::printf("bindContent0: OnBindContentCover modalNode: %d pattern: %d modalList: %zu\n",
-                    targetModalNode->GetId(), modal, modalList_.size());
-
-                targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
-
-                auto effect = reinterpret_cast<ChainedScaleEffect *>(AceType::RawPtr(contentCoverParam.transitionEffect));
-                std::printf("bindContent1: ### onBindContentCover before transitionEffect: %s cx: %s cy: %s\n",
-                    contentCoverParam.transitionEffect ? "[+]" : "-",
-                    effect->GetEffect().centerX.ToString().c_str(),
-                    effect->GetEffect().centerY.ToString().c_str()
-                    );
-
-                modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
-
-                effect = reinterpret_cast<ChainedScaleEffect *>(AceType::RawPtr(contentCoverParam.transitionEffect));
-                std::printf("bindContent1: ### onBindContentCover after transitionEffect: %s cx: %s cy: %s\n",
-                    contentCoverParam.transitionEffect ? "[+]" : "-",
-                    effect->GetEffect().centerX.ToString().c_str(),
-                    effect->GetEffect().centerY.ToString().c_str()
-                    );
-
-                return;
+            targetModalPattern->UpdateOnDisappear(std::move(onDisappear));
+            targetModalPattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+            targetModalPattern->UpdateOnAppear(std::move(onAppear));
+            targetModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
+            targetModalPattern->SetType(modalTransition.value());
+            targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+            modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
+            return;
         }
         if (onWillAppear) {
             onWillAppear();
@@ -3989,23 +3953,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<ModalPresentationPattern>(
             targetId, static_cast<ModalTransition>(modalTransition.value()), std::move(callback)));
-
-            auto modalTransition2 = modalTransition?std::underlying_type_t<ModalTransition>(*modalTransition):-1;
-            std::printf("bindContent1: ### HandleModalShow modalTransition: %d\n", modalTransition2);
-
-
     CHECK_NULL_VOID(modalNode);
     if (modalStyle.backgroundColor.has_value()) {
-        std::printf("bindContent1: ### HandleModalShow targetModalNode: %d context: %s backgroundColor: %s\n",
-            modalNode->GetId(), modalNode->GetRenderContext()->GetBackgroundColor()->ToString().c_str(),
-            modalStyle.backgroundColor.value().ToString().c_str());
-
         modalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
-
-            std::printf("bindContent1: ### HandleModalShow targetModalNode: %d context: %s backgroundColor: %s\n",
-                modalNode->GetId(), modalNode->GetRenderContext()->GetBackgroundColor()->ToString().c_str(),
-                modalStyle.backgroundColor.value().ToString().c_str());
-
     }
     auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
     CHECK_NULL_VOID(modalPagePattern);
@@ -4017,29 +3967,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->SetProhibitedRemoveByRouter(modalStyle.prohibitedRemoveByRouter);
     modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
-
-     auto effect = reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(contentCoverParam.transitionEffect));
-    std::printf("bindContent1: ### HandleModalShow before transitionEffect: %s cx: %s cy: %s\n",
-        contentCoverParam.transitionEffect ? "[+]" : "-", 
-        effect->GetEffect().centerX.ToString().c_str(),
-        effect->GetEffect().centerY.ToString().c_str()
-    );
-
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
-
-    effect = reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(contentCoverParam.transitionEffect));
-    std::printf("bindContent1: ### HandleModalShow after transitionEffect: %s cx: %s cy: %s\n",
-        contentCoverParam.transitionEffect ? "[+]" : "-", 
-        effect->GetEffect().centerX.ToString().c_str(),
-        effect->GetEffect().centerY.ToString().c_str()
-    );
-
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
-
-    auto modal = std::underlying_type_t<ModalTransition>(modalPagePattern->GetType());
-    std::printf("bindContent0: HandleModalShow modalNode: %d pattern: %d modalList: %zu\n", modalNode->GetId(), modal, modalList_.size());
-    
     SaveLastModalNode();
     if (targetId < 0) {
         // modaluiextention node mounting
