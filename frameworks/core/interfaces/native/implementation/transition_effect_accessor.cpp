@@ -166,7 +166,7 @@ Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
     CHECK_NULL_RETURN(transitionEffect, peer);
     auto lastEffect = peer;
     while (lastEffect->handler->GetNext() != nullptr) {
-      lastEffect->handler = lastEffect->handler->GetNext();
+        lastEffect->handler = lastEffect->handler->GetNext();
     }
     const auto nextPeer = reinterpret_cast<TransitionEffectPeer*>(transitionEffect->ptr);
     lastEffect->handler->SetNext(nextPeer->handler);
