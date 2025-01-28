@@ -39,6 +39,9 @@
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "base/log/log_wrapper.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "base/memory/referenced.h"
+#include "base/memory/ace_type.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -1216,6 +1219,10 @@ GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
+namespace NG::GeneratedModifier {
+    const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
+}
+
 void AssignArkValue(Ark_PreDragStatus& dst, const PreDragStatus& src)
 {
     switch (src) {
@@ -1247,13 +1254,11 @@ void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
     }
 }
 
-void AssignArkValue(Ark_DragEvent& dst, const DragEvent& src)
+void AssignArkValue(Ark_DragEvent& dragEvent, const DragEvent& info)
 {
-#ifdef WRONG_TYPE
-    bool isUseCustomAnimation2 = src.IsUseCustomAnimation();
-    dst.useCustomDropAnimation = NG::Converter::ArkValue<Ark_Boolean>(isUseCustomAnimation2);
-    dst.dragBehavior = NG::Converter::ArkValue<Ark_DragBehavior>(src.GetDragBehavior());
-#endif
+    const auto peer = reinterpret_cast<DragEventPeer*>(NG::GeneratedModifier::GetDragEventAccessor()->ctor());
+    peer->dragInfo = OHOS::Ace::AceType::Claim<DragEvent>(const_cast<DragEvent*>(&info));
+    dragEvent.ptr = peer;
 }
 } // namespace OHOS::Ace::NG
 
