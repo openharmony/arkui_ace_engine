@@ -51,7 +51,40 @@ void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageContent& src
 {
     dst.reset();
 }
+template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Resource& src)
+{
+    /*
+    typedef struct Ark_Resource {
+        Ark_String bundleName;
+        Ark_String moduleName;
+        Ark_Number id;
+        Opt_Array_String params;
+        Opt_Number type; // Assuming type is an optional number
+    } Ark_Resource;
+    */
+    std::string bundleName = Converter::Convert<std::string>(src.bundleName);
+    std::string moduleName = Converter::Convert<std::string>(src.moduleName);
 
+    // Предполагается, что imageSrc может быть пустой строкой или содержать имя файла/ресурса.
+    std::string imageSrc;
+    
+    if (src.params && !src.params->empty()) {
+        // Например, используем первый элемент массива как source
+        imageSrc = Converter::Convert<std::string>((*src.params)[0]);
+    }
+
+    auto resourceId = Converter::OptConvert<InternalResource::ResourceId>(src.id);
+
+    return ImageSourceInfo(
+        imageSrc,
+        bundleName,
+        moduleName,
+        Dimension(-1),  // width
+        Dimension(-1),  // height
+        resourceId.value_or(InternalResource::ResourceId(InternalResource::ResourceId::NO_ID))
+    );
+}
 template<>
 void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotateOrientation& src)
 {
@@ -125,9 +158,34 @@ void AltImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    // auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    std::optional<ImageSourceInfo> optConvInfo;
+    Converter::VisitUnion(*value,
+        [frameNode, &optInfo](const Ark_String& value) {
+            ImageSourceInfo convValue(Converter::Convert<std::string>(value));
+            optConvInfo = convValue;
+        },
+        [frameNode, &optInfo](const Ark_Resource& value) {
+            /*
+            Ark_Resource {
+                Ark_String bundleName;
+                Ark_String moduleName;
+                Ark_Number id;
+                Opt_Array_String params;
+                Opt_Number type;
+            }
+            */
+            ImageSourceInfo convValue(Converter::Convert<std::string>(value));
+            optConvInfo = convValue;
+        },
+        [frameNode, &optInfo](const Ark_PixelMap& value) {
+            auto convValue = Converter::Convert<CalcLength>(value);
+             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+        },
+        []() {}
+    );
     LOGE("Arkoala: GENERATED_ArkUIImageModifier.AltImpl - method doesn't support PixelMap");
-    ImageModelNG::SetAlt(frameNode, info);
+    ImageModelNG::SetAlt(frameNode, optConvInfo);
 }
 void MatchTextDirectionImpl(Ark_NativePointer node,
                             Ark_Boolean value)
