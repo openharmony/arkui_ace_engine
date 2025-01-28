@@ -3940,10 +3940,22 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
                     targetModalNode->GetId(), modal, modalList_.size());
 
                 targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+
+                auto effect = reinterpret_cast<ChainedScaleEffect *>(AceType::RawPtr(contentCoverParam.transitionEffect));
+                std::printf("bindContent1: ### onBindContentCover before transitionEffect: %s cx: %s cy: %s\n",
+                    contentCoverParam.transitionEffect ? "[+]" : "-",
+                    effect->GetEffect().centerX.ToString().c_str(),
+                    effect->GetEffect().centerY.ToString().c_str()
+                    );
+
                 modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
 
-                std::printf("bindContent1: ### onBindContentCover transitionEffect: %s\n",
-                    contentCoverParam.transitionEffect ? "[+]" : "-");
+                effect = reinterpret_cast<ChainedScaleEffect *>(AceType::RawPtr(contentCoverParam.transitionEffect));
+                std::printf("bindContent1: ### onBindContentCover after transitionEffect: %s cx: %s cy: %s\n",
+                    contentCoverParam.transitionEffect ? "[+]" : "-",
+                    effect->GetEffect().centerX.ToString().c_str(),
+                    effect->GetEffect().centerY.ToString().c_str()
+                    );
 
                 return;
         }
@@ -3993,7 +4005,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
             std::printf("bindContent1: ### HandleModalShow targetModalNode: %d context: %s backgroundColor: %s\n",
                 modalNode->GetId(), modalNode->GetRenderContext()->GetBackgroundColor()->ToString().c_str(),
                 modalStyle.backgroundColor.value().ToString().c_str());
-                
+
     }
     auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
     CHECK_NULL_VOID(modalPagePattern);
@@ -4005,10 +4017,22 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->SetProhibitedRemoveByRouter(modalStyle.prohibitedRemoveByRouter);
     modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+
+     auto effect = reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(contentCoverParam.transitionEffect));
+    std::printf("bindContent1: ### HandleModalShow before transitionEffect: %s cx: %s cy: %s\n",
+        contentCoverParam.transitionEffect ? "[+]" : "-", 
+        effect->GetEffect().centerX.ToString().c_str(),
+        effect->GetEffect().centerY.ToString().c_str()
+    );
+
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
 
-    std::printf("bindContent1: ### HandleModalShow transitionEffect: %s\n", contentCoverParam.transitionEffect?"[+]":"-");
-
+    effect = reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(contentCoverParam.transitionEffect));
+    std::printf("bindContent1: ### HandleModalShow after transitionEffect: %s cx: %s cy: %s\n",
+        contentCoverParam.transitionEffect ? "[+]" : "-", 
+        effect->GetEffect().centerX.ToString().c_str(),
+        effect->GetEffect().centerY.ToString().c_str()
+    );
 
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));

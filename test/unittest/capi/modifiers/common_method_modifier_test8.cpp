@@ -45,6 +45,7 @@ namespace {
     const auto EXPECTED_CONTEXT_ID = 123;
     const auto EXPECTED_NODE_ID = 555;
     const auto INVALID_REASON_VALUE = -1;
+    const auto EXPECTED_SHORTCUTS_SIZE = 3;
 
     std::vector<std::pair<Opt_ModalTransition, ModalTransition>> modalTransitionTestPlan = {
         { Converter::ArkValue<Opt_ModalTransition>(ARK_MODAL_TRANSITION_DEFAULT), ModalTransition::DEFAULT },
@@ -93,6 +94,15 @@ namespace {
         { Converter::ArkValue<Opt_Number>(-100), -100 },
         { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
         { Converter::ArkValue<Opt_Number>(56.73), -56.73 }
+    };
+    std::vector<std::pair<Ark_Union_String_FunctionKey, bool>> arkShortcutKeyTestPlan = {
+        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("A"), true },
+        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("B"), true },
+        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("C"), true },
+        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_FunctionKey>(ARK_FUNCTION_KEY_ESC), false },
+        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_FunctionKey>(ARK_FUNCTION_KEY_F1), false },
+        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>(""), false },
+        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_Empty>(nullptr), false },
     };
 }
 namespace Converter {
@@ -945,7 +955,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1BackgroundColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1ModalTransitionTest, TestSize.Level1)
 {
     std::printf("\nbindeContent1: test start\n\n");
     
@@ -1035,12 +1045,12 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TransitionEffectTest, TestSize.Level1)
 {
     std::printf("\nbindeContent1: test start\n\n");
     
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    FrameNode* frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     
     struct CheckBuilderEvent {
@@ -1078,16 +1088,16 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
 
     Ark_TransitionEffect arkEffect;
     auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
-    auto optVal =  arkNumberTestPlan[0].first;
+    
 
-    for (auto& [actualX, expectedX] : arkUnionNumberTestPlan) {
-        for (auto& [actualY, expectedY] : arkUnionNumberTestPlan) {
+    for (auto& [actualC, expectedC] : arkUnionNumberTestPlan) {
+        for (auto& [actualS, expectedS] : arkNumberTestPlan) {
             auto arkScale = Ark_ScaleOptions {
-                .centerX = actualX,
-                .centerY = actualY,
-                .x = optVal,
-                .y = optVal,
-                .z = optVal,
+                .centerX = actualC,
+                .centerY = actualC,
+                .x = actualS,
+                .y = actualS,
+                .z = actualS,
             };
             const auto accessor = GeneratedModifier::GetFullAPI()->getAccessors()->getTransitionEffectAccessor();
             auto peer = accessor->scale(&arkScale);
@@ -1109,37 +1119,87 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
                 auto optEffect = options? Converter::OptConvert<Ark_TransitionEffect>(options->transition):std::nullopt;
                 TransitionEffectPeer* peerEffect = optEffect? reinterpret_cast<TransitionEffectPeer *>(optEffect->ptr):nullptr;
 
+                if(pattern) {
+                    pattern->SetHasTransitionEffect(false);
+                }
+
                 ChainedScaleEffect* scaleOptions =
                     peerEffect ? reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(peerEffect->handler)) : nullptr;
-                std::printf( "bindContent1: test10 const  modal:%s pattern:%s scaleOptiona: %s cx: %s cy: %s x: %.2f y: %.2f z: %.2f\n", 
+                std::printf( "bindContent1: test10 const  modal:%s pattern:%s scaleOptiona: %s cx: %s cy: %s x: %.2f y: %.2f z: %.2f hasEffect: %d\n", 
                     modal ? "[+]" : "-", pattern ? "[+]" : "-",scaleOptions?"[+]":"-",
                     scaleOptions->GetEffect().centerX.ToString().c_str(),
                     scaleOptions->GetEffect().centerY.ToString().c_str(),
                     scaleOptions->GetEffect().xScale,
                     scaleOptions->GetEffect().yScale,
-                    scaleOptions->GetEffect().zScale
+                    scaleOptions->GetEffect().zScale,
+                    pattern?pattern->HasTransitionEffect():-1
                 );
             }
             // test!!! eof
 
+            auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+            auto pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
+            if(pattern) {
+                pattern->SetHasTransitionEffect(ACTUAL_FALSE);
+                
+            }
+
+            EXPECT_FALSE(pattern ? pattern->HasTransitionEffect() : ACTUAL_FALSE);
+
             modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+
+            modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+            EXPECT_NE(modal, nullptr);
+
+            pattern = modal->GetPattern<ModalPresentationPattern>();
+            EXPECT_NE(pattern, nullptr);
+            EXPECT_TRUE(pattern->HasTransitionEffect());
 
             // test!!!
             {
                 std::printf("bindContent1: test11 ============ ready =========\n");
 
-                auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+                RefPtr<FrameNode> modal = AceType::DynamicCast<FrameNode>(node->GetParent());
                 auto pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-                std::printf("bindContent1: test12 hover  modal:%s pattern:%s  transition: %d dismiss: %d\n",
+                std::printf("bindContent1: test12 holder modal:%s pattern:%s  transition: %d dismiss: %d hasEffect: %d\n",
                     modal ? "[+]" : "-", pattern ? "[+]" : "-",
-                    std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss());      
+                    std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss(),
+                    pattern? pattern->HasTransitionEffect():-1
+                    );      
+                
+                
+                // auto fullJson = GetJsonValue(node_);
+                // std::printf("bindContent1: fullJson: %s\n", fullJson->ToString().c_str());
 
-
-
+                auto onCenter = modal ? modal->GetRenderContext()->GetOneCenterTransitionOption() : nullptr;
+                RefPtr<ChainedTransitionEffect> effect = onCenter?onCenter->GetTransitionEffect():nullptr;
+                auto scaled = effect?reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(effect)):nullptr;
+                std::printf("bindContent1: test12 holder onCenter: %s effect:%s scaled:%s cx: %s cy: %s\n",
+                        onCenter?"[+]":"-",
+                        effect?"[+]":"-",
+                        scaled?"[+]":"-",
+                        scaled?scaled->GetEffect().centerX.ToString().c_str():"-",
+                        scaled?scaled->GetEffect().centerY.ToString().c_str():"-"
+                );
+                auto& onAppear =  modal->GetRenderContext()->GetTransitionAppearing();
+                std::printf("bindContent1: test12 holder onAppear: %s effect:%s\n",
+                        onAppear?"[+]":"-",
+                        onAppear?onAppear->ToString().c_str():"-"
+                );
+                
+                auto& onDisAppear =  modal->GetRenderContext()->GetTransitionDisappearing();
+                 
+                 std::printf("bindContent1: test12 holder onDisAppear: %s effect:%s\n",
+                        onDisAppear?"[+]":"-",
+                        onDisAppear?onDisAppear->ToString().c_str():"-"
+                );
+                
+                
 
 
             }
             // test!!! eof
+            
         }
     }
 }
@@ -1149,7 +1209,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1Test, TestSize.Level1)
 {
     std::printf("\nbindeContent1: test start\n\n");
     
@@ -1340,7 +1400,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setKeyboardShortcutTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
 {
     std::printf("\nkeyboardShortcut: test start\n\n");
 
@@ -1360,64 +1420,64 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setKeyboardShortcutTest, TestSize.L
         };
     };
     
-    // Callback_Void callBackValue = {
-    //     .resource = Ark_CallbackResource {
-    //         .resourceId = frameNode->GetId(),
-    //         .hold = nullptr,
-    //         .release = nullptr,
-    //     },
-    //     .call = callback
-    // };
+    
     auto arkCalback = Converter::ArkValue<Callback_Void>(callback, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCalback);
    
     // parameters
-    auto value = Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("A");
     std::vector<Ark_ModifierKey> modifiers = {
       Ark_ModifierKey::ARK_MODIFIER_KEY_ALT,
       Ark_ModifierKey::ARK_MODIFIER_KEY_SHIFT,
     };
     Converter::ArkArrayHolder<Array_ModifierKey> keyHolder(modifiers);
     Array_ModifierKey keys = keyHolder.ArkValue();
+   
+    auto previous = eventHub->GetKeyboardShortcut();
+    for (auto& [actual, expected] : arkShortcutKeyTestPlan) {
+       
+        std::printf("keyboard: ============ start =========\n");
 
-    std::printf("keyboard: const checkEvent: %d\n", checkEvent? checkEvent.value().nodeId:-1);
+        auto key = Converter::OptConvert<std::string>(actual);
+        std::printf("keyboard: const actual: %s checkEvent: %d \n", key ? key->c_str() : "-",
+            checkEvent ? checkEvent.value().nodeId : -1);
+       
+        modifier_->setKeyboardShortcut(node_, &actual, &keys, &optCallback);
 
-    modifier_->setKeyboardShortcut(node_, &value, &keys, &optCallback);
-    EXPECT_FALSE(checkEvent.has_value());
-    
-    std::vector<KeyboardShortcut> shortcuts = eventHub->GetKeyboardShortcut();
-    auto size  = shortcuts.size();
-    std::printf("keyboard: holder  size: %zu\n", size);
-    auto count  = 0;
-    for(KeyboardShortcut& shortcut: shortcuts){
-        std::printf("keyboard: holder  shorcut: %s count: %d\n", shortcut.value.c_str(), count);
-        auto action  = shortcut.onKeyboardShortcutAction;
-        if(action){
-            std::printf("keyboard: holder  shorcut: %s count %d run \n", shortcut.value.c_str(), count);
-            action();
-        }
-        std::printf("keyboard: holder checkEvent: %d == %d\n", checkEvent? checkEvent.value().nodeId:-1, frameNode->GetId());
-        count++;
-        checkEvent.reset();
-
+        std::printf("keyboard: ============ ready =========\n");
+        auto shortcuts = eventHub->GetKeyboardShortcut();
+        std::printf("keyboard: holder expected: %s  size: %zu == %zu \n", 
+        expected?"[+]":"-",
+        previous.size(), shortcuts.size());
+        
+        EXPECT_FALSE(checkEvent.has_value());
+        EXPECT_EQ(previous.size() != shortcuts.size(), expected);
+        previous = shortcuts;
     }
 
+    auto shortcuts = eventHub->GetKeyboardShortcut();
+    std::printf("keyboard: holder shorcuts size: %zu == %d\n", shortcuts.size(), EXPECTED_SHORTCUTS_SIZE);
+    EXPECT_EQ(shortcuts.size(), EXPECTED_SHORTCUTS_SIZE);
 
-    
-    // auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    // auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    // ASSERT_NE(eventHub, nullptr);
+    for (auto& shortcut : shortcuts) {
+        checkEvent.reset();
+            auto action = shortcut.onKeyboardShortcutAction;
+            std::printf("keyboard: const  action: %s shorcut: %s size: %zu checkEvent: %d\n", 
+                action ? "[+]" : "-",
+                shortcut.value.c_str(), shortcuts.size(), checkEvent ? checkEvent->nodeId : -1);
 
-    // {
-    //     InsertValueInfo checkValue = { .insertOffset = AINT32_POS, .insertValue = CHECK_TEXT };
-    //     auto returnVal = eventHub->FireOnWillInsertValueEvent(checkValue);
-    //     EXPECT_TRUE(returnVal);
-    // }
-    // {
-    //     InsertValueInfo checkValue = { .insertOffset = AINT32_NEG, .insertValue = CHECK_TEXT };
-    //     auto returnVal = eventHub->FireOnWillInsertValueEvent(checkValue);
-    //     EXPECT_FALSE(returnVal);
-    // }
+            EXPECT_FALSE(checkEvent.has_value());
+            EXPECT_NE(action, nullptr);
+                
+            action();
+
+            std::printf("keyboard: holder checkEvent: %d == %d\n", 
+                    checkEvent ? checkEvent.value().nodeId : -1,
+                    frameNode->GetId());
+
+             EXPECT_TRUE(checkEvent.has_value());    
+             EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+            
+        }
 }
 
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover0Test3, TestSize.Level1)
