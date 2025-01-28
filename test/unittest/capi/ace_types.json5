@@ -1001,6 +1001,29 @@
             "invalidValues": ["-100", "-56.78", "0"],
         },
         {
+            "name": "TextMarqueeStep",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100.00"],
+                ["12.34", "12.34"],
+                ["1", "1.00"],
+                ["0.09", "0.09"]
+            ],
+            "invalidValues": ["0", "-1", "-100", "-23.45"],
+        },
+        {
+            "name": "TextMarqueeLoop",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["7", "7"],
+                ["0", "-1"],
+                ["-100", "-1"],
+                ["12.34", "12"],
+                ["-56.78", "-1"],
+            ],
+        },
+        {
             "name": "NumberPercentageThresholdFloor",
             "type": "Ark_Number",
             "validValues": [
@@ -4751,6 +4774,42 @@
                     "fixtures": ["LengthMetricsNonNeg"]
                 },
                 {
+                    "name": "marqueeOptions",
+                    "attributes": [
+                        {
+                            "name": "start",
+                            "default": "true"
+                        },
+                        {
+                            "name": "step",
+                            "fixtures": ["TextMarqueeStep"],
+                            "default": "4.00"
+                        },
+                        {
+                            "name": "loop",
+                            "fixtures": ["TextMarqueeLoop"],
+                            "default": "-1"
+                        },
+                        {
+                            "name": "fromStart",
+                            "default": "true"
+                        },
+                        {
+                            "name": "delay",
+                            "fixtures": ["NumberNonNegIntFloor"],
+                            "default": "0"
+                        },
+                        {
+                            "name": "fadeout",
+                            "default": "false"
+                        },
+                        {
+                            "name": "marqueeStartPolicy",
+                            "default": "MarqueeStartPolicy.DEFAULT"
+                        }
+                    ]
+                },
+                {
                     "name": "maxLines",
                     "fixtures": ["NumberPosIntFloor"],
                 },
@@ -4858,6 +4917,11 @@
                 "setTextOverflowTestDefaultValues",
                 "setTextOverflowTestTextOverflowOverflowInvalidValues",
                 "setTextOverflowTestTextOverflowOverflowValidValues",
+                "setMarqueeOptionsTestDefaultValues",
+                "setMarqueeOptionsTestMarqueeOptionsFromStartValidValues",
+                "setMarqueeOptionsTestMarqueeOptionsFromStartInvalidValues",
+                "setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyValidValues",
+                "setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyInvalidValues",
 
                 // Default value is not clear
                 "setLetterSpacingTestDefaultValues",
@@ -4884,22 +4948,6 @@
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsFillValidValues",
                 "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
-
-                // New API 111
-                "setMarqueeOptionsTestDefaultValues",
-                "setMarqueeOptionsTestMarqueeOptionsStartValidValues",
-                "setMarqueeOptionsTestMarqueeOptionsStepValidValues",
-                "setMarqueeOptionsTestMarqueeOptionsStepInvalidValues",
-                "setMarqueeOptionsTestMarqueeOptionsLoopValidValues",
-                "setMarqueeOptionsTestMarqueeOptionsLoopInvalidValues",
-                "setMarqueeOptionsTestMarqueeOptionsFromStartValidValues",
-                "setMarqueeOptionsTestMarqueeOptionsFromStartInvalidValues",
-                "setMarqueeOptionsTestMarqueeOptionsDelayValidValues",
-                "setMarqueeOptionsTestMarqueeOptionsDelayInvalidValues",
-                "setMarqueeOptionsTestMarqueeOptionsFadeoutValidValues",
-                "setMarqueeOptionsTestMarqueeOptionsFadeoutInvalidValues",
-                "setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyValidValues",
-                "setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyInvalidValues",
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",

@@ -1329,6 +1329,31 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureFlingSpeedLimitInval
     { "0", Converter::ArkValue<Ark_Number>(0) },
 };
 
+// Fixture 'TextMarqueeStep' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMarqueeStepValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100.00" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.34" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1.00" },
+    { "0.09", Converter::ArkValue<Ark_Number>(0.09), "0.09" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureTextMarqueeStepInvalidValues = {
+    { "0", Converter::ArkValue<Ark_Number>(0) },
+    { "-1", Converter::ArkValue<Ark_Number>(-1) },
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+    { "-23.45", Converter::ArkValue<Ark_Number>(-23.45) },
+};
+
+// Fixture 'TextMarqueeLoop' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMarqueeLoopValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "7", Converter::ArkValue<Ark_Number>(7), "7" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "-1" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "-1" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12" },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "-1" },
+};
+
 // Fixture 'NumberPercentageThresholdFloor' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberPercentageThresholdFloorValidValues = {
     { "1", Converter::ArkValue<Ark_Number>(1), "1" },

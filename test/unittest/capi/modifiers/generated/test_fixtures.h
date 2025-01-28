@@ -502,6 +502,13 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegI
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFlingSpeedLimitValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFlingSpeedLimitInvalidValues;
 
+// Fixture 'TextMarqueeStep' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMarqueeStepValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureTextMarqueeStepInvalidValues;
+
+// Fixture 'TextMarqueeLoop' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMarqueeLoopValidValues;
+
 // Fixture 'NumberPercentageThresholdFloor' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>>
     testFixtureNumberPercentageThresholdFloorValidValues;

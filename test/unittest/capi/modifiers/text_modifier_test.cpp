@@ -34,6 +34,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+using namespace TypeHelper;
+
 namespace {
 const std::string FONT_COLOR_ATTR = "fontColor";
 const std::string FONT_SIZE_ATTR = "fontSize";
@@ -101,6 +103,9 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME = "offsetY";
 const auto ATTRIBUTE_CONTENT_NAME = "content";
 const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME = "dataDetectorConfig";
+const auto ATTRIBUTE_MARQUEE_OPTIONS_NAME = "marqueeOptions";
+const auto ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_NAME = "startPolicy";
+const auto ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_DEFAULT_VALUE = "MarqueeStartPolicy.DEFAULT";
 
 static constexpr int32_t NODE_ID = 555;
 static bool g_isCalled = false;
@@ -1334,5 +1339,185 @@ HWTEST_F(TextModifierTest, setSelectionTest, TestSize.Level1)
     ASSERT_FALSE(range.empty());
     EXPECT_EQ(range.front().start, expectedStart);
     EXPECT_EQ(range.front().end, expectedEnd);
+}
+
+/*
+ * @tc.name: setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyValidValues, TestSize.Level1)
+{
+    Opt_TextMarqueeOptions initValueMarqueeOptions;
+
+    // Initial setup
+    WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueMarqueeOptions).step =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
+    WriteTo(initValueMarqueeOptions).loop =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fromStart =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).delay =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fadeout =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
+        ArkValue<Opt_MarqueeStartPolicy>(std::get<1>(Fixtures::testFixtureEnumMarqueeStartPolicyValidValues[0]));
+
+    auto checkValue = [this, &initValueMarqueeOptions](const std::string& input, const std::string& expectedStr,
+                          const Opt_MarqueeStartPolicy& value) {
+        Opt_TextMarqueeOptions inputValueMarqueeOptions = initValueMarqueeOptions;
+
+        WriteTo(inputValueMarqueeOptions).marqueeStartPolicy = value;
+        modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultMarqueeOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARQUEE_OPTIONS_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultMarqueeOptions, ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setMarqueeOptions, attribute: marqueeOptions.marqueeStartPolicy";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumMarqueeStartPolicyValidValues) {
+        checkValue(input, expected, ArkValue<Opt_MarqueeStartPolicy>(value));
+    }
+}
+
+/*
+ * @tc.name: setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicyInvalidValues, TestSize.Level1)
+{
+    Opt_TextMarqueeOptions initValueMarqueeOptions;
+
+    // Initial setup
+    WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueMarqueeOptions).step =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
+    WriteTo(initValueMarqueeOptions).loop =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fromStart =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).delay =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fadeout =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
+        ArkValue<Opt_MarqueeStartPolicy>(std::get<1>(Fixtures::testFixtureEnumMarqueeStartPolicyValidValues[0]));
+
+    auto checkValue = [this, &initValueMarqueeOptions](const std::string& input, const Opt_MarqueeStartPolicy& value) {
+        Opt_TextMarqueeOptions inputValueMarqueeOptions = initValueMarqueeOptions;
+
+        modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
+        WriteTo(inputValueMarqueeOptions).marqueeStartPolicy = value;
+        modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultMarqueeOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARQUEE_OPTIONS_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultMarqueeOptions, ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setMarqueeOptions, attribute: marqueeOptions.marqueeStartPolicy";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumMarqueeStartPolicyInvalidValues) {
+        checkValue(input, ArkValue<Opt_MarqueeStartPolicy>(value));
+    }
+}
+
+/*
+ * @tc.name: setMarqueeOptionsTestMarqueeOptionsFromStartValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsFromStartValidValues, TestSize.Level1)
+{
+    Opt_TextMarqueeOptions initValueMarqueeOptions;
+
+    // Initial setup
+    WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueMarqueeOptions).step =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
+    WriteTo(initValueMarqueeOptions).loop =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fromStart =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).delay =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fadeout =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
+        ArkValue<Opt_MarqueeStartPolicy>(std::get<1>(Fixtures::testFixtureEnumMarqueeStartPolicyValidValues[0]));
+
+    auto checkValue = [this, &initValueMarqueeOptions](
+                          const std::string& input, const MarqueeDirection& expected, const Opt_Boolean& value) {
+        Opt_TextMarqueeOptions inputValueMarqueeOptions = initValueMarqueeOptions;
+
+        WriteTo(inputValueMarqueeOptions).fromStart = value;
+        modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        std::optional<MarqueeDirection> direction = layoutProperty->GetTextMarqueeDirection();
+        ASSERT_TRUE(direction.has_value());
+        EXPECT_EQ(direction.value(), expected) <<
+            "Input value is: " << input << ", method: setMarqueeOptions, attribute: marqueeOptions.fromStart";
+    };
+
+    std::vector<std::tuple<std::string, Ark_Boolean, MarqueeDirection>> fromStartValidValues = {
+        { "true", Converter::ArkValue<Ark_Boolean>(true), MarqueeDirection::DEFAULT },
+        { "false", Converter::ArkValue<Ark_Boolean>(false), MarqueeDirection::DEFAULT_REVERSE },
+    };
+
+    for (auto& [input, value, expected] : fromStartValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setMarqueeOptionsTestMarqueeOptionsFromStartInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsFromStartInvalidValues, TestSize.Level1)
+{
+    Opt_TextMarqueeOptions initValueMarqueeOptions;
+
+    // Initial setup
+    WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueMarqueeOptions).step =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
+    WriteTo(initValueMarqueeOptions).loop =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fromStart =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).delay =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
+    WriteTo(initValueMarqueeOptions).fadeout =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
+        ArkValue<Opt_MarqueeStartPolicy>(std::get<1>(Fixtures::testFixtureEnumMarqueeStartPolicyValidValues[0]));
+
+    auto checkValue = [this, &initValueMarqueeOptions](const std::string& input, const Opt_Boolean& value) {
+        Opt_TextMarqueeOptions inputValueMarqueeOptions = initValueMarqueeOptions;
+
+        modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
+        WriteTo(inputValueMarqueeOptions).fromStart = value;
+        modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        std::optional<MarqueeDirection> direction = layoutProperty->GetTextMarqueeDirection();
+        EXPECT_FALSE(direction.has_value());
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 }
