@@ -3912,20 +3912,7 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
             RefPtr<NG::RenderContext> modalRenderContext = targetModalNode->GetRenderContext();
             CHECK_NULL_VOID(modalRenderContext);
             if (modalStyle.backgroundColor.has_value()) {
-    
-                std::printf("bindContent1: ### onBindContentCover targetModalNode: %d context: %s backgroundColor: %s\n", 
-                    targetModalNode->GetId(),
-                    modalRenderContext->GetBackgroundColor()->ToString().c_str(),
-                       modalStyle.backgroundColor.value().ToString().c_str()
-                    );
-    
                 modalRenderContext->UpdateBackgroundColor(modalStyle.backgroundColor.value());
-                
-                std::printf("bindContent1: ### onBindContentCover targetModalNode: %d context: %s backgroundColor: %s\n", 
-                    targetModalNode->GetId(),
-                    modalRenderContext->GetBackgroundColor()->ToString().c_str(),
-                       modalStyle.backgroundColor.value().ToString().c_str()
-                    );
             }
             targetModalPattern->UpdateOnDisappear(std::move(onDisappear));
             targetModalPattern->UpdateOnWillDisappear(std::move(onWillDisappear));
@@ -3983,20 +3970,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
 
     CHECK_NULL_VOID(modalNode);
     if (modalStyle.backgroundColor.has_value()) {
-        
-        std::printf("bindContent1: ### HandleModalShow targetModalNode: %d context: %s backgroundColor: %s\n",
-            modalNode->GetId(), modalNode->GetRenderContext()->GetBackgroundColor()->ToString().c_str(),
-            modalStyle.backgroundColor.value().ToString().c_str());
-
-
         modalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
-
-
-        std::printf("bindContent1: ### HandleModalShow targetModalNode: %d context: %s backgroundColor: %s\n",
-            modalNode->GetId(), modalNode->GetRenderContext()->GetBackgroundColor()->ToString().c_str(),
-            modalStyle.backgroundColor.value().ToString().c_str());
-
-
     }
     auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
     CHECK_NULL_VOID(modalPagePattern);

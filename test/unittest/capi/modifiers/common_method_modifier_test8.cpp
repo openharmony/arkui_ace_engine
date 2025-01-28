@@ -52,7 +52,6 @@ namespace {
             false },
         { Converter::ArkValue<Opt_ModalTransition>(Ark_Empty()), ModalTransition::DEFAULT, false },
     };
-
     std::vector<std::pair<uint32_t, std::optional<BindSheetDismissReason>>> bindSheetDissmisReasonTestPlan = {
         { std::underlying_type_t<BindSheetDismissReason>(BindSheetDismissReason::BACK_PRESSED),
             std::make_optional(BindSheetDismissReason::BACK_PRESSED) },
@@ -63,6 +62,22 @@ namespace {
         { std::underlying_type_t<BindSheetDismissReason>(BindSheetDismissReason::SLIDE_DOWN),
             std::make_optional(BindSheetDismissReason::SLIDE_DOWN) },
         { INVALID_REASON_VALUE, std::nullopt },
+    };
+    std::vector<std::pair<Opt_ResourceColor, std::string>> colorTestPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(static_cast<Ark_Color>(-1)), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr), "#00000000" },
     };
 }
 namespace Converter {
@@ -818,6 +833,111 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
+    
+    // custom builder
+    struct CheckBuilderEvent {
+        int32_t resourceId;
+        Ark_NativePointer parentNode;
+    };
+    static std::optional<CheckBuilderEvent> checkBuilderEvent = std::nullopt;
+
+    int32_t nodeId = EXPECTED_NODE_ID;
+    auto node = BlankModelNG::CreateFrameNode(nodeId);
+    EXPECT_NE(node, nullptr);
+    static std::optional<RefPtr<UINode>> uiNode = node;
+    auto checkCallback = [](
+        Ark_VMContext context,
+        const Ark_Int32 resourceId,
+        const Ark_NativePointer parentNode,
+        const Callback_Pointer_Void continuation) {
+        checkBuilderEvent = {
+            .resourceId = resourceId,
+            .parentNode = parentNode
+        };
+
+        // test!!!
+        FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
+        std::printf("bindContent1: test8 *** fired *** checkCallback builder  id: %d resourceId: %d parent: %d\n", 
+        uiNode.value()->GetId(),  checkBuilderEvent->resourceId, parenFrametNode->GetId());
+        // test!!! eof
+
+        if (uiNode) {
+            CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+        }
+    };
+    static constexpr int32_t contextId = EXPECTED_CONTEXT_ID;
+    CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, contextId);
+    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    
+    for(auto&[actual, expected]: colorTestPlan) {
+        auto arkOptions = Ark_ContentCoverOptions {
+            .backgroundColor = actual,
+        };
+        auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
+       
+        // test!!!
+        {
+            std::printf("bindContent1: test9 ============ start =========\n");
+            // test show
+            auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+            RefPtr<ModalPresentationPattern> pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
+            std::printf("bindContent1: test10 const  modal:%s pattern:%s\n",
+                modal ? std::to_string(modal->GetId()).c_str() : "-", pattern ? "[+]" : "-");
+
+            auto fullJson = GetJsonValue(node_);
+            auto resultValue = GetAttrValue<std::string>(fullJson, "backgroundColor");
+            std::printf("bindContent1: const fullJson: %s  modal: %s backgroundColor: %s actual: %s, expected: %s\n",
+                resultValue.c_str(), modal ? std::to_string(modal->GetId()).c_str() : "-",
+                modal ? modal->GetRenderContext()->GetBackgroundColor()->ToString().c_str() : "-",
+                Converter::OptConvert<Color>(actual)?Converter::OptConvert<Color>(actual)->ToString().c_str():"-",
+                expected.c_str());
+        }
+        // test!!! eof
+
+        modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+
+        // test!!!
+        {
+            std::printf("bindContent1: test11 ============ ready =========\n");
+
+            auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+            auto pattern = modal->GetPattern<ModalPresentationPattern>();
+            std::printf("bindContent1: test12 hover  modal:%s pattern:%s  transition: %d dismiss: %d\n",
+                modal ? std::to_string(modal->GetId()).c_str() : "-", pattern ? "[+]" : "-",
+                std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss());
+       
+            auto fullJson = GetJsonValue(node_);
+            auto resultValue = GetAttrValue<std::string>(fullJson, "backgroundColor");
+            std::printf("bindContent1: const fullJson backgroundColor: %s modal: %s backgroundColor: %s == %s\n",
+                resultValue.c_str(), modal ? std::to_string(modal->GetId()).c_str() : "-",
+                modal ? modal->GetRenderContext()->GetBackgroundColor()->ToString().c_str() : "-",
+                expected.c_str());
+        }
+        // test!!! eof
+
+        auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+        EXPECT_NE(modal, nullptr);
+        auto context = modal->GetRenderContext();
+        EXPECT_NE(context, nullptr);
+        auto backgroundColor = context->GetBackgroundColor();
+        EXPECT_TRUE(backgroundColor.has_value());
+        EXPECT_EQ(backgroundColor->ToString(), expected);
+    }
+}
+
+/*
+ * @tc.name: setBindContentCover1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, TestSize.Level1)
+{
+    std::printf("\nbindeContent1: test start\n\n");
+    
+    ASSERT_NE(modifier_->setBindContentCover1, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
     // callback
     struct CheckEvent {
         int32_t nodeId;
@@ -959,59 +1079,42 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
 
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
 
-    
+    std::printf("bindContent1: test9 ============ start =========\n");
+    // test show
+    auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+    RefPtr<ModalPresentationPattern> pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
+    std::printf("bindContent1: test10 const  modal:%s pattern:%s\n", modal ? "[+]" : "-", pattern ? "[+]" : "-");
 
-    // test!!!
-    {
-        std::printf("bindContent1: test9 ============ start =========\n");
-        // test show
-        auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-        RefPtr<ModalPresentationPattern> pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-        std::printf("bindContent1: test10 const  modal:%s pattern:%s backgroundColor: %s\n",
-            modal ? std::to_string(modal->GetId()).c_str():"-",
-            pattern ? "[+]" : "-", Converter::OptConvert<Color>(arkOptions.backgroundColor)->ToString().c_str());
-
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, "backgroundColor");
-        std::printf("bindContent1: const fullJson backgroundColor: %s  modal: %s backgroundColor: %s\n", resultValue.c_str(),
-            modal?std::to_string(modal->GetId()).c_str():"-",
-            modal?modal->GetRenderContext()->GetBackgroundColor()->ToString().c_str():"-"
-          );
-
-        // auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
-        // EXPECT_EQ(resultValue, ATTRIBUE_MONOPOLIZE_EVENTS_DEFAULT_VALUE);
-    }
-    // test!!! eof
-    
     modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
 
-    // test!!!
-    {
     std::printf("bindContent1: test11 ============ ready =========\n");
     
-    auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    auto pattern = modal->GetPattern<ModalPresentationPattern>();
+    modal = AceType::DynamicCast<FrameNode>(node->GetParent());
+    pattern = modal->GetPattern<ModalPresentationPattern>();
     std::printf("bindContent1: test12 hover  modal:%s pattern:%s  transition: %d dismiss: %d\n", 
-        modal ? std::to_string(modal->GetId()).c_str():"-",
-        pattern ? "[+]" : "-", 
+        modal ? "[+]" : "-", pattern ? "[+]" : "-", 
         std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss());
-
+   
+   
     auto reason = std::underlying_type_t<BindSheetDismissReason>(BindSheetDismissReason::SLIDE_DOWN);
     std::printf("bindContent1: test14 hover dismiss func start reason: %d\n", reason);
     pattern->CallOnWillDismiss(reason);
 
-    auto fullJson = GetJsonValue(node_);
-    auto resultValue = GetAttrValue<std::string>(fullJson, "backgroundColor");
-    std::printf("bindContent1: holder fullJson backgroundColor: %s  modal: %s backgroundColor: %s\n",
-        resultValue.c_str(), modal ? std::to_string(modal->GetId()).c_str() : "-",
-        modal ? modal->GetRenderContext()->GetBackgroundColor()->ToString().c_str() : "-");
- 
-
+#ifdef CUSTOM_TIME_CODE
+    int counter = 0;
+    auto time = GetCurrentTimestamp();
+    while (!checkEventDisAppear) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        time = GetCurrentTimestamp();
+        std::printf("bindContent1: test12 sleep time: %zu\n", time);
+        counter++;
+        if (counter > 50) {
+            break;
+        }
     }
-    // test!!! eof
+#endif
 
 }
-
 
 /*
  * @tc.name: setBindContentCover1Test
