@@ -38,6 +38,7 @@ void DestroyPeerImpl(TransitionEffectPeer* peer)
 Ark_NativePointer CtorImpl(const Ark_String* type,
                            const Ark_TransitionEffects* effect)
 {
+    CHECK_NULL_RETURN(type && effect, nullptr);
     auto valueText = Converter::Convert<std::string>(*type);
     TransitionEffectPeer* peer = new TransitionEffectPeer();
     auto emptyDimension = Dimension();
@@ -76,8 +77,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
         peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
     } else if (valueText == ASYMMETRIC_TOKEN) {
-        CHECK_NULL_RETURN(effect, nullptr);
-        CHECK_NULL_RETURN(effect->asymmetric.appear.ptr, nullptr);
+        CHECK_NULL_RETURN(effect && effect->asymmetric.appear.ptr, nullptr);
         auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
         CHECK_NULL_RETURN(app, nullptr);
         CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);

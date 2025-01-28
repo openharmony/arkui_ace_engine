@@ -45,6 +45,7 @@ namespace {
     const auto BUBBLE_LAYOUT_PROP_FOLLOW_TRANSFORM = "followTransformOfTarget";
     const auto BUBBLE_LAYOUT_PROP_BLOCK_EVENT = "blockEvent";
     const auto BUBBLE_LAYOUT_PROP_POSITION_OFFSET = "positionOffset";
+    const auto BUBBLE_LAYOUT_PROP_SHOW_IN_SUBWINDOW = "showInSubWindow";
     const auto BUBBLE_RENDER_PROP = "bubbleRenderProperty";
     const auto BUBBLE_RENDER_PROP_ARROW_OFFSET = "arrowOffset";
     const auto BUBBLE_RENDER_PROP_AUTO_CANCEL = "autoCancel";
@@ -1073,16 +1074,16 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorNumberResour
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsShowInSubwindowTest
+ * @tc.name: bindPopupPopupOptionsShowInSubWindowTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsShowInSubwindowTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsShowInSubWindowTest, TestSize.Level1)
 {
     Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
     Ark_PopupOptions arkOptions = {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .showInSubWindow = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
+        .showInSubWindow = Converter::ArkValue<Opt_Boolean>(Ark_Empty())
     };
     Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
     TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
@@ -1092,11 +1093,29 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsShowInSubwind
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
     auto context = blankNode->GetContext();
     ASSERT_NE(context, nullptr);
-    auto containerId = context->GetInstanceId();
-    RefPtr<Subwindow> subWindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-    ASSERT_NE(subWindow.GetRawPtr(), nullptr);
-    NG::PopupInfo popupInfo;
-    subWindow->GetPopupInfoNG(blankRef->GetId(), popupInfo);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_SHOW_IN_SUBWINDOW);
+    EXPECT_FALSE(checkValue);
+
+    arkOptions = {
+        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .showInSubWindow = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
+    };
+    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
+    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+
+    popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
+    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_SHOW_IN_SUBWINDOW);
+    EXPECT_TRUE(checkValue);
 }
 }
