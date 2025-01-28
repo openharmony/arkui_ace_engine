@@ -320,12 +320,10 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0ModalTransitionTest, Tes
  */
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Level1)
 {
-    std::printf("\nbindeContent1: [===test_111===] start\n");
-    
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-   
+
     struct CheckBuilderEvent {
         int32_t resourceId;
         Ark_NativePointer parentNode;
@@ -344,13 +342,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
             .resourceId = resourceId,
             .parentNode = parentNode
         };
-        
-        // test!!!
-        FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
-        std::printf("bindContent1: [===test_111===] *** fired *** checkCallback builder  id: %d resourceId: %d parent: %d\n", 
-        uiNode.value()->GetId(),  checkBuilderEvent->resourceId, parenFrametNode->GetId());
-        // test!!! eof
-
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
@@ -360,57 +351,16 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
     auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(Ark_Empty());
 
-    // test!!!
-    std::printf("bindContent1: [===test_111===] ============ start =========\n");
-    auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    auto pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-    std::printf("bindContent1: [===test_111===] const  modal:%s pattern:%s checkBuilderEvent: %d\n",
-        modal ? "[+]" : "-", pattern ? "[+]" : "-", checkBuilderEvent ? checkBuilderEvent->resourceId : -1);
-    // test!!! eof
-
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
-
-    // test!!!
-    std::printf("bindContent1: [===test_111===] ============ ready =========\n");
-    modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    pattern = modal->GetPattern<ModalPresentationPattern>();
-    std::printf("bindContent1: [===test_111===] hover  modal:%s pattern:%s  transition: %d dismiss: %d checkBuilderEvent: %d\n", 
-        modal ? "[+]" : "-", pattern ? "[+]" : "-", 
-        std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss(),
-        checkBuilderEvent ? checkBuilderEvent->resourceId : -1
-        );
-    std::printf("\n");
-    // test!!! eof
-
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
-    
+
     arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
 
-    // test!!!
-    std::printf("bindContent1: [===test_111===] ============ start =========\n");
-    modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-    std::printf("bindContent1: [===test_111===] const  modal:%s pattern:%s checkBuilderEvent: %d\n", modal ? "[+]" : "-", pattern ? "[+]" : "-",
-    checkBuilderEvent ? checkBuilderEvent->resourceId : -1);
-    // test!!! eof
-
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
-
-    // test!!!
-    std::printf("bindContent1: [===test_111===] ============ ready =========\n");
-    modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    pattern = modal->GetPattern<ModalPresentationPattern>();
-    std::printf("bindContent1: [===test_111===] hover  modal:%s pattern:%s  transition: %d dismiss: %d checkBuilderEvent: %d\n", 
-        modal ? "[+]" : "-", pattern ? "[+]" : "-", 
-        std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss(),
-        checkBuilderEvent ? checkBuilderEvent->resourceId : -1);
-    std::printf("\n\n\n");
-    // test!!! eof
-
     EXPECT_FALSE(checkBuilderEvent.has_value());
 }
 
@@ -421,10 +371,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
  */
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover1AppearCallbacksTest, TestSize.Level1)
 {
-    // test!!!
-    std::printf("\nbindeContent1: test start\n\n");
-    // test!!! eof
-    
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -436,28 +382,19 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1AppearCallbacksTest, Tes
     static std::optional<CheckEvent> checkEventDisAppear = std::nullopt;
     static std::optional<CheckEvent> checkEventWillAppear = std::nullopt;
     static std::optional<CheckEvent> checkEventWillDisAppear = std::nullopt;
-    
+
     auto onAppearCallback = [](Ark_Int32 nodeId) {
         checkEventAppear = {
             .nodeId = nodeId,
         };
-        // test!!!
-        std::printf("bindContent1: test2 *** fired *** low level onAppearCallback id: %d\n", checkEventAppear.value().nodeId);
-        // test!!! eof
     };
     auto arkOnAppearCalback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
     auto optOnAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnAppearCalback);
-   
-   auto onDisAppearCallback = [](Ark_Int32 nodeId) {
+
+    auto onDisAppearCallback = [](Ark_Int32 nodeId) {
         checkEventDisAppear = {
             .nodeId = nodeId,
         };
-        // test!!!
-        auto time = GetCurrentTimestamp();
-        std::printf("bindContent1: test3 *** fired *** low level onDisAppearCallback id: %d time: %zu\n",
-        checkEventDisAppear.value().nodeId, time );
-        // test!!! eof
-
     };
     auto arkOnDisAppearCalback = Converter::ArkValue<Callback_Void>(onDisAppearCallback, frameNode->GetId());
     auto optOnDisAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnDisAppearCalback);
@@ -466,27 +403,18 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1AppearCallbacksTest, Tes
         checkEventWillAppear = {
             .nodeId = nodeId,
         };
-        // test!!!
-        std::printf("bindContent1: test4 *** fired *** low level onWillAppearCallback id: %d\n", checkEventWillAppear.value().nodeId);
-        // test!!! eof
-
     };
     auto arkOnWillAppearCalback = Converter::ArkValue<Callback_Void>(onWillAppearCallback, frameNode->GetId());
     auto optOnWillAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillAppearCalback);
-   
+
     auto onWillDisAppearCallback = [](Ark_Int32 nodeId) {
         checkEventWillDisAppear = {
             .nodeId = nodeId,
         };
-        // test!!!
-        auto time = GetCurrentTimestamp();
-        std::printf("bindContent1: test5 *** fired *** low level onWillDisAppearCallback id: %d time: %zu\n", 
-        checkEventWillDisAppear.value().nodeId, time );
-        // test!!! eof
     };
     auto arkOnWillDisAppearCalback = Converter::ArkValue<Callback_Void>(onWillDisAppearCallback, frameNode->GetId());
     auto optOnWillDisAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillDisAppearCalback);
-    
+
     struct CheckBuilderEvent {
         int32_t resourceId;
         Ark_NativePointer parentNode;
@@ -506,13 +434,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1AppearCallbacksTest, Tes
             .resourceId = resourceId,
             .parentNode = parentNode
         };
-
-        // test!!!     
-        FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
-        std::printf("bindContent1: test8 *** fired *** checkCallback builder  id: %d resourceId: %d parent: %d\n", 
-        uiNode.value()->GetId(),  checkBuilderEvent->resourceId, parenFrametNode->GetId());
-        // test!!! eof
-
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
@@ -528,98 +449,37 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1AppearCallbacksTest, Tes
         .onWillDisappear = optOnWillDisAppearCalback,
     };
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
-
-    // test!!!
-    {
-        std::printf("bindContent1: test9 ============ start =========\n");
-        auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-        std::printf("bindContent1: test9 modal:%s\n", modal ? "[+]" : "-");
-        auto pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-        std::printf("bindContent1: test10 const  modal:%s pattern:%s  transition: %d dismiss: %d\n",
-            modal ? "[+]" : "-", pattern ? "[+]" : "-",
-            pattern ? std::underlying_type_t<ModalTransition>(pattern->GetType()) : -1,
-            pattern ? pattern->HasOnWillDismiss() : -1);
-
-        std::printf("bindContent1: test10 const  checkAppear:%d checkDisAppear: %d checkWillAppear: %d "
-                    "checkWillDisAppear: %d\n",
-            checkEventAppear ? checkEventAppear->nodeId : -1, checkEventDisAppear ? checkEventDisAppear->nodeId : -1,
-            checkEventWillAppear ? checkEventWillAppear->nodeId : -1,
-            checkEventWillDisAppear ? checkEventWillDisAppear->nodeId : -1);
-    }
-    // test!!! eof
-
     auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    
+
     EXPECT_FALSE(checkBuilderEvent.has_value());
     EXPECT_FALSE(checkEventAppear.has_value());
     EXPECT_FALSE(checkEventDisAppear.has_value());
     EXPECT_FALSE(checkEventWillAppear.has_value());
     EXPECT_FALSE(checkEventWillDisAppear.has_value());
-    
+
     modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
 
     modal = AceType::DynamicCast<FrameNode>(node->GetParent());
     EXPECT_NE(modal, nullptr);
     auto pattern = modal->GetPattern<ModalPresentationPattern>();
     EXPECT_NE(pattern, nullptr);
-   
-
-    // test!!!
-    {
-    auto time  = GetCurrentTimestamp();
-    std::printf("bindContent1: test11 ============ ready ========= %zu\n", time );
-    auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    std::printf("bindContent1: test12 modal:%s\n",modal ? "[+]" : "-");
-    auto pattern = modal?modal->GetPattern<ModalPresentationPattern>():nullptr;
-    std::printf("bindContent1: test12 hover  modal:%s pattern:%s  transition: %d dismiss: %d\n", 
-        modal ? "[+]" : "-", pattern ? "[+]" : "-", 
-        pattern? std::underlying_type_t<ModalTransition>(pattern->GetType()):-1, pattern?pattern->HasOnWillDismiss():-1);
-
-    std::printf("bindContent1: test12 const  checkAppear:%d checkDisAppear: %d checkWillAppear: %d checkWillDisAppear: %d time: %zu\n",
-        checkEventAppear? checkEventAppear->nodeId: -1,
-        checkEventDisAppear? checkEventDisAppear->nodeId: -1,
-        checkEventWillAppear? checkEventWillAppear->nodeId: -1,
-        checkEventWillDisAppear? checkEventWillDisAppear->nodeId: -1,
-        time
-     );
-     FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
-     std::printf("bindContent1: node:%d frameNode: %d modal: %d bilder: resourceId: %d parentNode: %d\n",
-        node->GetId(), frameNode->GetId(), modal->GetId(), checkBuilderEvent->resourceId, parenFrametNode->GetId()
-     );
-    }
-    // test!!! eof 
 
     pattern->OnDisappear();
     pattern->OnWillDisappear();
-  
 
-    // test!!!
-    {
-    auto time  = GetCurrentTimestamp();
-    std::printf("bindContent1: test12 const  checkAppear:%d checkDisAppear: %d checkWillAppear: %d checkWillDisAppear: %d time: %zu\n",
-        checkEventAppear? checkEventAppear->nodeId: -1,
-        checkEventDisAppear? checkEventDisAppear->nodeId: -1,
-        checkEventWillAppear? checkEventWillAppear->nodeId: -1,
-        checkEventWillDisAppear? checkEventWillDisAppear->nodeId: -1,
-        time
-     );
-    }
-    // test!!! eof
-   
-        auto parentNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
+    auto parentNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
     EXPECT_NE(parentNode, nullptr);
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
     EXPECT_EQ(parentNode->GetId(), frameNode->GetId());
     EXPECT_TRUE(checkEventAppear.has_value());
-    EXPECT_EQ(checkEventAppear->nodeId,frameNode->GetId());
+    EXPECT_EQ(checkEventAppear->nodeId, frameNode->GetId());
     EXPECT_TRUE(checkEventDisAppear.has_value());
     EXPECT_EQ(checkEventDisAppear->nodeId, frameNode->GetId());
     EXPECT_TRUE(checkEventWillAppear.has_value());
     EXPECT_EQ(checkEventWillAppear->nodeId, frameNode->GetId());
     EXPECT_TRUE(checkEventWillDisAppear.has_value());
     EXPECT_EQ(checkEventWillDisAppear->nodeId, frameNode->GetId());
-
 }
 
 /*
@@ -629,8 +489,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1AppearCallbacksTest, Tes
  */
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, TestSize.Level1)
 {
-    std::printf("\nbindeContent1: test start\n\n");
-    
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -647,23 +505,14 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
             .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason)
         };
         auto arkCallback = Converter::OptConvert<Callback_Void>(parameter.dismiss);
-
-        // test!!!
-        auto reason = checkNestedEvent->reason? std::underlying_type_t<BindSheetDismissReason>(*checkNestedEvent->reason):-1;
-        std::printf("bindContent1: test6 *** fired *** dismissCallback id: %d arkCallback:%s ark reason: %d\n", 
-        checkNestedEvent.value().resourceId, arkCallback?"[+]":"-", reason);
-        // test!!! eof
-
         if (arkCallback) {
             auto helper = CallbackHelper(*arkCallback);
             checkNestedEvent->fired = true;
-            std::printf("bindContent1: test7 *** fired *** low level dismissCallback arkCallback\n");
-
             helper.Invoke();
-
         }
     };
-    auto arkDismissCallback = Converter::ArkValue<Callback_DismissContentCoverAction_Void>(dismissCallback, frameNode->GetId());
+    auto arkDismissCallback =
+        Converter::ArkValue<Callback_DismissContentCoverAction_Void>(dismissCallback, frameNode->GetId());
 
     struct CheckBuilderEvent {
         int32_t resourceId;
@@ -684,13 +533,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
             .resourceId = resourceId,
             .parentNode = parentNode
         };
-        
-        // test!!!
-        FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
-        std::printf("bindContent1: test8 *** fired *** checkCallback builder  id: %d resourceId: %d parent: %d\n", 
-        uiNode.value()->GetId(),  checkBuilderEvent->resourceId, parenFrametNode->GetId());
-        // test!!! eof
-
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
@@ -704,19 +546,9 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
     };
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
 
-    // test!!!
-    {
-        std::printf("bindContent1: test9 ============ start =========\n");
-        // test show
-        auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-        RefPtr<ModalPresentationPattern> pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-        std::printf("bindContent1: test10 const  modal:%s pattern:%s\n", modal ? "[+]" : "-", pattern ? "[+]" : "-");
-    }
-    // test!!! eof 
-
     auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
     EXPECT_EQ(modal, nullptr);
-   
+
     modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
 
     modal = AceType::DynamicCast<FrameNode>(node->GetParent());
@@ -727,57 +559,14 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
     for (auto& [actual, expected] : bindSheetDissmisReasonTestPlan) {
         checkNestedEvent.reset();
         EXPECT_FALSE(checkNestedEvent.has_value());
-    
-    
-    // test!!!
-    {
-    std::printf("bindContent1: test11 ============ ready =========\n");
-    
-    auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-    auto pattern = modal->GetPattern<ModalPresentationPattern>();
-    std::printf("bindContent1: test12 hover  modal:%s pattern:%s frameNode: %d transition: %d dismiss: %d\n", 
-        modal ? "[+]" : "-", pattern ? "[+]" : "-", frameNode->GetId(), 
-        std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss());
-    std::printf("bindContent1: test14 hover dismiss func start actual: %d expected: %d\n", actual,
-    expected?std::underlying_type_t<BindSheetDismissReason>(*expected):-1
-    );
-    std::printf("bindContent1: test14 before dismissCallback id: %d ark reason: %d fired: %d expected: %d\n", 
-        checkNestedEvent->resourceId, 
-        checkNestedEvent->reason?std::underlying_type_t<BindSheetDismissReason>(*checkNestedEvent->reason):-1,
-        checkNestedEvent->fired,
-        expected?std::underlying_type_t<BindSheetDismissReason>(*expected):-1
-    );
+
+        pattern->CallOnWillDismiss(actual);
+
+        EXPECT_TRUE(checkNestedEvent.has_value());
+        EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkNestedEvent->reason, expected);
+        EXPECT_TRUE(checkNestedEvent->fired);
     }
-    // test!!! eof
-   
-
-    pattern->CallOnWillDismiss(actual);
-
-    // test!!!
-    {
-        auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-        auto pattern = modal->GetPattern<ModalPresentationPattern>();
-        std::printf("bindContent1: test15 hover  modal:%s pattern:%s  transition: %d dismiss: %d\n",
-            modal ? "[+]" : "-", pattern ? "[+]" : "-", std::underlying_type_t<ModalTransition>(pattern->GetType()),
-            pattern->HasOnWillDismiss());
-        std::printf("bindContent1: test15 after dismissCallback id: %d ark reason: %d fired: %d expected: %d\n",
-            checkNestedEvent->resourceId,
-            checkNestedEvent->reason ? std::underlying_type_t<BindSheetDismissReason>(*checkNestedEvent->reason) : -1,
-            checkNestedEvent->fired,
-            expected?std::underlying_type_t<BindSheetDismissReason>(*expected):-1
-            );
-    }
-    // test!!! eof
-
-    EXPECT_TRUE(checkNestedEvent.has_value());
-    EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
-    EXPECT_EQ(checkNestedEvent->reason, expected);
-    EXPECT_TRUE(checkNestedEvent->fired);
-
-    }
-
-    
-
 }
 
 /*
@@ -787,14 +576,10 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
  */
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, TestSize.Level1)
 {
-    std::printf("\nbindeContent1: test start\n\n");
-    
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    
-    // custom builder
     struct CheckBuilderEvent {
         int32_t resourceId;
         Ark_NativePointer parentNode;
@@ -814,13 +599,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
             .resourceId = resourceId,
             .parentNode = parentNode
         };
-
-        // test!!!
-        FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
-        std::printf("bindContent1: test8 *** fired *** checkCallback builder  id: %d resourceId: %d parent: %d\n", 
-        uiNode.value()->GetId(),  checkBuilderEvent->resourceId, parenFrametNode->GetId());
-        // test!!! eof
-
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
@@ -828,53 +606,13 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
     static constexpr int32_t contextId = EXPECTED_CONTEXT_ID;
     CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, contextId);
     auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
-    
+
     for(auto&[actual, expected]: colorTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
             .backgroundColor = actual,
         };
         auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
-       
-        // test!!!
-        {
-            std::printf("bindContent1: test9 ============ start =========\n");
-            // test show
-            auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-            RefPtr<ModalPresentationPattern> pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-            std::printf("bindContent1: test10 const  modal:%s pattern:%s\n",
-                modal ? std::to_string(modal->GetId()).c_str() : "-", pattern ? "[+]" : "-");
-
-            auto fullJson = GetJsonValue(node_);
-            auto resultValue = GetAttrValue<std::string>(fullJson, "backgroundColor");
-            std::printf("bindContent1: const fullJson: %s  modal: %s backgroundColor: %s actual: %s, expected: %s\n",
-                resultValue.c_str(), modal ? std::to_string(modal->GetId()).c_str() : "-",
-                modal ? modal->GetRenderContext()->GetBackgroundColor()->ToString().c_str() : "-",
-                Converter::OptConvert<Color>(actual)?Converter::OptConvert<Color>(actual)->ToString().c_str():"-",
-                expected.c_str());
-        }
-        // test!!! eof
-
         modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
-
-        // test!!!
-        {
-            std::printf("bindContent1: test11 ============ ready =========\n");
-
-            auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-            auto pattern = modal->GetPattern<ModalPresentationPattern>();
-            std::printf("bindContent1: test12 hover  modal:%s pattern:%s  transition: %d dismiss: %d\n",
-                modal ? std::to_string(modal->GetId()).c_str() : "-", pattern ? "[+]" : "-",
-                std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss());
-       
-            auto fullJson = GetJsonValue(node_);
-            auto resultValue = GetAttrValue<std::string>(fullJson, "backgroundColor");
-            std::printf("bindContent1: const fullJson backgroundColor: %s modal: %s backgroundColor: %s == %s\n",
-                resultValue.c_str(), modal ? std::to_string(modal->GetId()).c_str() : "-",
-                modal ? modal->GetRenderContext()->GetBackgroundColor()->ToString().c_str() : "-",
-                expected.c_str());
-        }
-        // test!!! eof
-
         auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
         EXPECT_NE(modal, nullptr);
         auto context = modal->GetRenderContext();
@@ -892,8 +630,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
  */
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, TestSize.Level1)
 {
-    std::printf("\nbindeContent1: test start\n\n");
-    
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -917,13 +653,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, Tes
             .resourceId = resourceId,
             .parentNode = parentNode
         };
-
-        // test!!!       
-        FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
-        std::printf("bindContent1: test8 *** fired *** checkCallback builder  id: %d resourceId: %d parent: %d\n", 
-        uiNode.value()->GetId(),  checkBuilderEvent->resourceId, parenFrametNode->GetId());
-        // test!!! eof
-
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
@@ -937,40 +666,11 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, Tes
             .modalTransition = actual,
         };
         auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
-
-        // test!!!
-        {
-            std::printf("bindContent1: test9 ============ start =========\n");
-            // test show
-            auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-            RefPtr<ModalPresentationPattern> pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-            std::printf("bindContent1: test10 const  modal:%s pattern:%s actual: %d expected: %d\n",
-                modal ? "[+]" : "-", pattern ? "[+]" : "-",
-                Converter::OptConvert<ModalTransition>(actual)
-                    ? std::underlying_type_t<ModalTransition>(*Converter::OptConvert<ModalTransition>(actual))
-                    : -1,
-                std::underlying_type_t<ModalTransition>(expected));
-        }
-        // test!!! eof
-
         modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
         auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
         EXPECT_NE(modal, nullptr);
         auto pattern = modal->GetPattern<ModalPresentationPattern>();
         EXPECT_NE(pattern, nullptr);
-
-        // temp!!!
-        {
-            std::printf("bindContent1: test11 ============ ready =========\n");
-            auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-            auto pattern = modal->GetPattern<ModalPresentationPattern>();
-            std::printf("bindContent1: test10 const  modal:%s pattern:%s actual: %d == %d\n",
-                modal ? "[+]" : "-", pattern ? "[+]" : "-",
-                pattern ? std::underlying_type_t<ModalTransition>(pattern->GetType()) : -1,
-                std::underlying_type_t<ModalTransition>(expected));
-        }
-        // temp!!! eof
-
         EXPECT_EQ(pattern->GetType(), expected);
     }
 }
@@ -982,12 +682,10 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, Tes
  */
 HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, TestSize.Level1)
 {
-    std::printf("\nbindeContent1: test start\n\n");
-    
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     FrameNode* frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    
+
     struct CheckBuilderEvent {
         int32_t resourceId;
         Ark_NativePointer parentNode;
@@ -1007,13 +705,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
             .resourceId = resourceId,
             .parentNode = parentNode
         };
-        
-        // test!!!
-        FrameNode* parenFrametNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
-        std::printf("bindContent1: test8 *** fired *** checkCallback builder  id: %d resourceId: %d parent: %d\n", 
-        uiNode.value()->GetId(),  checkBuilderEvent->resourceId, parenFrametNode->GetId());
-        // test!!! eof
-
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
@@ -1023,7 +714,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
 
     Ark_TransitionEffect arkEffect;
     auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
-    
 
     for (auto& [actualC, expectedC] : arkUnionNumberTestPlan) {
         for (auto& [actualS, expectedS] : arkNumberTestPlan) {
@@ -1037,104 +727,22 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
             const auto accessor = GeneratedModifier::GetFullAPI()->getAccessors()->getTransitionEffectAccessor();
             auto peer = accessor->scale(&arkScale);
             arkEffect.ptr = peer;
-
-            auto arkOptions = Ark_ContentCoverOptions { 
-                    .transition = Converter::ArkValue<Opt_TransitionEffect>(arkEffect) 
+            auto arkOptions = Ark_ContentCoverOptions {
+                .transition = Converter::ArkValue<Opt_TransitionEffect>(arkEffect)
             };
-
             auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
-
-            {
-                // test!!!
-                std::printf("bindContent1: test9 ============ start =========\n");
-                // test show
-                auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-                auto pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-                auto options = Converter::OptConvert<Ark_ContentCoverOptions>(optOptions);
-                auto optEffect = options? Converter::OptConvert<Ark_TransitionEffect>(options->transition):std::nullopt;
-                TransitionEffectPeer* peerEffect = optEffect? reinterpret_cast<TransitionEffectPeer *>(optEffect->ptr):nullptr;
-
-                if(pattern) {
-                    pattern->SetHasTransitionEffect(false);
-                }
-
-                ChainedScaleEffect* scaleOptions =
-                    peerEffect ? reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(peerEffect->handler)) : nullptr;
-                std::printf( "bindContent1: test10 const  modal:%s pattern:%s scaleOptiona: %s cx: %s cy: %s x: %.2f y: %.2f z: %.2f hasEffect: %d\n", 
-                    modal ? "[+]" : "-", pattern ? "[+]" : "-",scaleOptions?"[+]":"-",
-                    scaleOptions->GetEffect().centerX.ToString().c_str(),
-                    scaleOptions->GetEffect().centerY.ToString().c_str(),
-                    scaleOptions->GetEffect().xScale,
-                    scaleOptions->GetEffect().yScale,
-                    scaleOptions->GetEffect().zScale,
-                    pattern?pattern->HasTransitionEffect():-1
-                );
-            }
-            // test!!! eof
-
             auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
             auto pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-            if(pattern) {
+            if (pattern) {
                 pattern->SetHasTransitionEffect(ACTUAL_FALSE);
-                
             }
-
             EXPECT_FALSE(pattern ? pattern->HasTransitionEffect() : ACTUAL_FALSE);
-
             modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
-
             modal = AceType::DynamicCast<FrameNode>(node->GetParent());
             EXPECT_NE(modal, nullptr);
-
             pattern = modal->GetPattern<ModalPresentationPattern>();
             EXPECT_NE(pattern, nullptr);
             EXPECT_TRUE(pattern->HasTransitionEffect());
-
-            // test!!!
-            {
-                std::printf("bindContent1: test11 ============ ready =========\n");
-
-                RefPtr<FrameNode> modal = AceType::DynamicCast<FrameNode>(node->GetParent());
-                auto pattern = modal ? modal->GetPattern<ModalPresentationPattern>() : nullptr;
-                std::printf("bindContent1: test12 holder modal:%s pattern:%s  transition: %d dismiss: %d hasEffect: %d\n",
-                    modal ? "[+]" : "-", pattern ? "[+]" : "-",
-                    std::underlying_type_t<ModalTransition>(pattern->GetType()), pattern->HasOnWillDismiss(),
-                    pattern? pattern->HasTransitionEffect():-1
-                    );      
-                
-                
-                // auto fullJson = GetJsonValue(node_);
-                // std::printf("bindContent1: fullJson: %s\n", fullJson->ToString().c_str());
-
-                auto onCenter = modal ? modal->GetRenderContext()->GetOneCenterTransitionOption() : nullptr;
-                RefPtr<ChainedTransitionEffect> effect = onCenter?onCenter->GetTransitionEffect():nullptr;
-                auto scaled = effect?reinterpret_cast<ChainedScaleEffect*>(AceType::RawPtr(effect)):nullptr;
-                std::printf("bindContent1: test12 holder onCenter: %s effect:%s scaled:%s cx: %s cy: %s\n",
-                        onCenter?"[+]":"-",
-                        effect?"[+]":"-",
-                        scaled?"[+]":"-",
-                        scaled?scaled->GetEffect().centerX.ToString().c_str():"-",
-                        scaled?scaled->GetEffect().centerY.ToString().c_str():"-"
-                );
-                auto& onAppear =  modal->GetRenderContext()->GetTransitionAppearing();
-                std::printf("bindContent1: test12 holder onAppear: %s effect:%s\n",
-                        onAppear?"[+]":"-",
-                        onAppear?onAppear->ToString().c_str():"-"
-                );
-                
-                auto& onDisAppear =  modal->GetRenderContext()->GetTransitionDisappearing();
-                 
-                 std::printf("bindContent1: test12 holder onDisAppear: %s effect:%s\n",
-                        onDisAppear?"[+]":"-",
-                        onDisAppear?onDisAppear->ToString().c_str():"-"
-                );
-                
-                
-
-
-            }
-            // test!!! eof
-            
         }
     }
 }
@@ -1146,8 +754,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
  */
 HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
 {
-    std::printf("\nkeyboardShortcut: test start\n\n");
-
     ASSERT_NE(modifier_->setKeyboardShortcut, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1163,70 +769,35 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
             .nodeId = nodeId,
         };
     };
-    
-    
     auto arkCalback = Converter::ArkValue<Callback_Void>(callback, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCalback);
-   
-    // parameters
+
     std::vector<Ark_ModifierKey> modifiers = {
-      Ark_ModifierKey::ARK_MODIFIER_KEY_ALT,
-      Ark_ModifierKey::ARK_MODIFIER_KEY_SHIFT,
+        Ark_ModifierKey::ARK_MODIFIER_KEY_ALT,
+        Ark_ModifierKey::ARK_MODIFIER_KEY_SHIFT,
     };
     Converter::ArkArrayHolder<Array_ModifierKey> keyHolder(modifiers);
     Array_ModifierKey keys = keyHolder.ArkValue();
-   
     auto previous = eventHub->GetKeyboardShortcut();
+
     for (auto& [actual, expected] : arkShortcutKeyTestPlan) {
-       
-        std::printf("keyboard: ============ start =========\n");
-
-        auto key = Converter::OptConvert<std::string>(actual);
-        std::printf("keyboard: const actual: %s checkEvent: %d \n", key ? key->c_str() : "-",
-            checkEvent ? checkEvent.value().nodeId : -1);
-       
         modifier_->setKeyboardShortcut(node_, &actual, &keys, &optCallback);
-
-        std::printf("keyboard: ============ ready =========\n");
         auto shortcuts = eventHub->GetKeyboardShortcut();
-        std::printf("keyboard: holder expected: %s  size: %zu == %zu \n", 
-        expected?"[+]":"-",
-        previous.size(), shortcuts.size());
-        
         EXPECT_FALSE(checkEvent.has_value());
         EXPECT_EQ(previous.size() != shortcuts.size(), expected);
         previous = shortcuts;
     }
-
     auto shortcuts = eventHub->GetKeyboardShortcut();
-    std::printf("keyboard: holder shorcuts size: %zu == %d\n", shortcuts.size(), EXPECTED_SHORTCUTS_SIZE);
     EXPECT_EQ(shortcuts.size(), EXPECTED_SHORTCUTS_SIZE);
 
     for (auto& shortcut : shortcuts) {
         checkEvent.reset();
-            auto action = shortcut.onKeyboardShortcutAction;
-            std::printf("keyboard: const  action: %s shorcut: %s size: %zu checkEvent: %d\n", 
-                action ? "[+]" : "-",
-                shortcut.value.c_str(), shortcuts.size(), checkEvent ? checkEvent->nodeId : -1);
-
-            EXPECT_FALSE(checkEvent.has_value());
-            EXPECT_NE(action, nullptr);
-                
-            action();
-
-            std::printf("keyboard: holder checkEvent: %d == %d\n", 
-                    checkEvent ? checkEvent.value().nodeId : -1,
-                    frameNode->GetId());
-
-             EXPECT_TRUE(checkEvent.has_value());    
-             EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-            
-        }
-}
-
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover0Test3, TestSize.Level1)
-{
- int *p = nullptr;
- *p = 0;
+        auto action = shortcut.onKeyboardShortcutAction;
+        EXPECT_FALSE(checkEvent.has_value());
+        EXPECT_NE(action, nullptr);
+        action();
+        EXPECT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    }
 }
 }
