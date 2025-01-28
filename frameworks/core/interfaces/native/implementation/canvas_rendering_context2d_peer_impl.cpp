@@ -149,7 +149,9 @@ void CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(const Ark_Image
         return;
     }
 
-    config_ = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
+    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
+    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
+    config_.types = std::move(types);
     void* aceConfig = reinterpret_cast<void*>(&config_);
 
     OnAnalyzedCallback onAnalyzed = [weakCtx = WeakClaim(this),

@@ -114,13 +114,14 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
     Callback_Opt_Array_String_Void cont{};
     accessor_->startImageAnalyzer(peer_, &arkConfig, &cont);
 
-    std::vector<ImageAnalyzerType>* config = reinterpret_cast<std::vector<ImageAnalyzerType>*>(holder->config);
-    std::vector<ImageAnalyzerType> vector = *config;
+    ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(holder->config);
+    ASSERT_NE(configPtr, nullptr);
+    ImageAnalyzerConfig config = *configPtr;
     auto length = IMAGE_TYPE_TEST_PLAN.size();
+    EXPECT_EQ(config.types.size(), length);
     for (int i = 0; i < length; i++) {
-        ImageAnalyzerType actual = vector[i]; //*(config + i);
         ImageAnalyzerType expected = IMAGE_TYPE_TEST_PLAN[i];
-        EXPECT_EQ(actual, expected);
+        EXPECT_TRUE(config.types.count(expected));
     }
     OnAnalyzedCallback onAnalyzed = holder->onAnalyzed;
 

@@ -91,7 +91,7 @@ private:
     void AddCallbackToList(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
 
     bool isImageAnalyzing_ = false;
-    std::vector<ImageAnalyzerType> config_;
+    ImageAnalyzerConfig config_;
     CanvasCallbackList attachCallback_;
     CanvasCallbackList detachCallback_;
 };

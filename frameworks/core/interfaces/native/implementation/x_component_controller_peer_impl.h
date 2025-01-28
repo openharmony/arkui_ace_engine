@@ -30,7 +30,7 @@ struct XComponentControllerPeer : public OHOS::Ace::Referenced {
 
 private:
     bool isImageAnalyzing_ = false;
-    std::vector<OHOS::Ace::ImageAnalyzerType> config_;
+    OHOS::Ace::ImageAnalyzerConfig config_;
 #endif // XCOMPONENT_SUPPORTED
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H

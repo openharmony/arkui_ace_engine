@@ -48,7 +48,9 @@ void XComponentControllerPeer::TriggerStartImageAnalyzer(const Ark_ImageAnalyzer
         return;
     }
 
-    auto config_ = OHOS::Ace::NG::Converter::Convert<std::vector<OHOS::Ace::ImageAnalyzerType>>(config->types);
+    auto vectorIATypes = OHOS::Ace::NG::Converter::Convert<std::vector<OHOS::Ace::ImageAnalyzerType>>(config->types);
+    std::set<OHOS::Ace::ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
+    config_.types = std::move(types);
     void* aceConfig = reinterpret_cast<void*>(&config_);
 
     OHOS::Ace::OnAnalyzedCallback onAnalyzed =
