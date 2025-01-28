@@ -14,17 +14,25 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+
+struct GlobalScopePeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_commonAccessor {
 void DestroyPeerImpl(GlobalScope_commonPeer* peer)
 {
+    auto commonPeer = reinterpret_cast<GlobalScopePeer*>(peer);
+    if (commonPeer) {
+        delete commonPeer;
+    }
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new GlobalScopePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -57,37 +65,154 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
 }
 Ark_Int32 Vp2pxImpl(const Ark_Number* value)
 {
-    return 0;
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
+    double vpValue = Converter::Convert<double>(*value);
+    double density = PipelineBase::GetCurrentDensity();
+    double pxValue = vpValue * density;
+    return static_cast<Ark_Int32>(pxValue);
 }
 Ark_Int32 Px2vpImpl(const Ark_Number* value)
 {
-    return 0;
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
+    double pxValue = Converter::Convert<double>(*value);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density) || density == 0) {
+        return Converter::ArkValue<Ark_Int32>(0);
+    }
+    double vpValue = pxValue / density;
+    return static_cast<Ark_Int32>(vpValue);
 }
 Ark_Int32 Fp2pxImpl(const Ark_Number* value)
 {
-    return 0;
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
+    double density = PipelineBase::GetCurrentDensity();
+    double fpValue = Converter::Convert<double>(*value);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
+    auto pipelineContext = container->GetPipelineContext();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
+    double pxValue = fpValue * density * fontScale;
+    return static_cast<Ark_Int32>(pxValue);
 }
 Ark_Int32 Px2fpImpl(const Ark_Number* value)
 {
-    return 0;
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        return Converter::ArkValue<Ark_Int32>(0);
+    }
+    double pxValue = Converter::Convert<double>(*value);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
+    auto pipelineContext = container->GetPipelineContext();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
+    double ratio = density * fontScale;
+    double fpValue = pxValue / ratio;
+    return static_cast<Ark_Int32>(fpValue);
 }
 Ark_Int32 Lpx2pxImpl(const Ark_Number* value)
 {
-    return 0;
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
+
+    auto pipelineContext = container->GetPipelineContext();
+#ifdef ARKUI_CAPI_UNITTEST
+    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Int32>(0));
+    auto width = pipelineContext->GetCurrentWindowRect().Width();
+    static WindowConfig windowConfig;
+#else
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, Converter::ArkValue<Ark_Int32>(0));
+    auto width = window->GetCurrentWindowRect().Width();
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, Converter::ArkValue<Ark_Int32>(0));
+    auto windowConfig = frontend->GetWindowConfig();
+#endif // ARKUI_CAPI_UNITTEST
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        int32_t multiplier = 2;
+        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
+    double lpxValue = Converter::Convert<double>(*value);
+    double pxValue = lpxValue * windowConfig.designWidthScale;
+    return static_cast<Ark_Int32>(pxValue);
 }
 Ark_Int32 Px2lpxImpl(const Ark_Number* value)
 {
-    return 0;
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
+
+    auto pipelineContext = container->GetPipelineContext();
+#ifdef ARKUI_CAPI_UNITTEST
+    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Int32>(0));
+    auto width = pipelineContext->GetCurrentWindowRect().Width();
+    static WindowConfig windowConfig;
+#else
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, Converter::ArkValue<Ark_Int32>(0));
+    auto width = window->GetCurrentWindowRect().Width();
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, Converter::ArkValue<Ark_Int32>(0));
+    auto windowConfig = frontend->GetWindowConfig();
+#endif // ARKUI_CAPI_UNITTEST
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        int32_t multiplier = 2;
+        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
+    double pxValue = Converter::Convert<double>(*value);
+    double lpxValue = pxValue / windowConfig.designWidthScale;
+    return static_cast<Ark_Int32>(lpxValue);
 }
 Ark_Boolean RequestFocusImpl(const Ark_String* value)
 {
-    return 0;
+    bool result = false;
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Boolean>(result));
+    std::string inspectorKey = Converter::Convert<std::string>(*value);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Boolean>(result));
+    if (!pipelineContext->GetTaskExecutor()) {
+        return Converter::ArkValue<Ark_Boolean>(result);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
+        TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
+    return Converter::ArkValue<Ark_Boolean>(result);
 }
 void SetCursorImpl(Ark_PointerStyle value)
 {
+    int32_t intValue = static_cast<int32_t>(value);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext->GetTaskExecutor()) {
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
+        TaskExecutor::TaskType::UI, "ArkUIJsSetCursor");
 }
 void RestoreDefaultImpl()
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext->GetTaskExecutor()) {
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(); },
+        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
 }
 } // GlobalScope_commonAccessor
 const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor()
