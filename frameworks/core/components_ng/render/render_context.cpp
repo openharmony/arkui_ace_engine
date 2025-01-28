@@ -135,6 +135,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     } else {
         json->PutExtAttr("transform", JsonUtil::Create(true), filter);
     }
+
+    std::printf("bindContent1: renderContext json backgroundColor: %s\n", propBackgroundColor_? propBackgroundColor_->ToString().c_str():"-" );
+
+
     json->PutExtAttr("backgroundColor",
         propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
     json->PutExtAttr("zIndex", propZIndex_.value_or(0), filter);
