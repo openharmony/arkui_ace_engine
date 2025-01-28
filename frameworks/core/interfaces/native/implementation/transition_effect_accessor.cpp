@@ -163,8 +163,14 @@ Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
                               const Ark_TransitionEffect* transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    //LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
-    return nullptr;
+    CHECK_NULL_RETURN(transitionEffect, peer);
+    auto lastEffect = peer;
+    while (lastEffect->handler->GetNext() != nullptr) {
+      lastEffect->handler = lastEffect->handler->GetNext();
+    }
+    const auto nextPeer = reinterpret_cast<TransitionEffectPeer*>(transitionEffect->ptr);
+    lastEffect->handler->SetNext(nextPeer->handler);
+    return peer;
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
