@@ -40,16 +40,6 @@ namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_BIND_SELECTION_MENU_NAME = "bindSelectionMenu";
     const auto ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE = "[]";
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getTextEventsReceiver = [] () -> const GENERATED_ArkUITextEventsReceiver* {
-                return &textEventReceiver;
-            }
-        };
-    };
 } // namespace
 
 struct SelectionMenuOptions {
@@ -73,16 +63,7 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
         SetupTheme<TextTheme>();
-
-        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
-            AddResource(id, res);
-            AddResource(strid, res);
-        }
-
-        // setup the test event handler
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -105,8 +86,8 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-using OneTestStep = std::tuple<Ark_TextSpanType, Ark_TextResponseType>;
-static const std::vector<OneTestStep> testPlan = {
+using OneTestTextSpanTypeStep = std::tuple<Ark_TextSpanType, Ark_TextResponseType>;
+static const std::vector<OneTestTextSpanTypeStep> testPlan = {
     {ARK_TEXT_SPAN_TYPE_TEXT, ARK_TEXT_RESPONSE_TYPE_SELECT},
     {ARK_TEXT_SPAN_TYPE_MIXED, ARK_TEXT_RESPONSE_TYPE_SELECT},
     {ARK_TEXT_SPAN_TYPE_IMAGE, ARK_TEXT_RESPONSE_TYPE_SELECT},
@@ -117,14 +98,25 @@ static const std::vector<OneTestStep> testPlan = {
     {ARK_TEXT_SPAN_TYPE_MIXED, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
     {ARK_TEXT_SPAN_TYPE_IMAGE, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
 };
-
+std::optional<SelectOverlayInfo> GetSelectionMenuParams_Patched(FrameNode* frameNode, Ark_TextSpanType arkSpanType,
+                                                                Ark_TextResponseType arkResponseType)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    pattern->SetSelectedType(Converter::OptConvert<TextSpanType>(arkSpanType).value_or(TextSpanType::NONE));
+    pattern->SetTextResponseType(
+        Converter::OptConvert<TextResponseType>(arkResponseType).value_or(TextResponseType::NONE));
+    SelectOverlayInfo selectInfo;
+    pattern->CopySelectionMenuParams(selectInfo);
+    return selectInfo;
+}
 HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    int callsCount(0);
+    int callsCount = 0;
     CustomNodeBuilderTestHelper<TextModifierTest2> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
 
@@ -138,21 +130,23 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
         .menuType = Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU};
     auto options2 = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions2);
 
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    SelectOverlayInfo selectInfo;
+    std::optional<SelectOverlayInfo> selectInfo;
 
     for (auto [spanType, responseType]: testPlan) {
         modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options1);
-        pattern->CopySelectionMenuParams(selectInfo);
-        ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
-        selectInfo.menuInfo.menuBuilder();
+        selectInfo = GetSelectionMenuParams_Patched(frameNode, spanType, responseType);
+        ASSERT_TRUE(selectInfo.has_value());
+        ASSERT_NE(selectInfo->menuInfo.menuBuilder, nullptr);
+        selectInfo->menuInfo.menuBuilder();
         EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+
         modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options2);
-        pattern->CopySelectionMenuParams(selectInfo);
-        ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
-        selectInfo.menuInfo.menuBuilder();
+        selectInfo = GetSelectionMenuParams_Patched(frameNode, spanType, responseType);
+        ASSERT_TRUE(selectInfo.has_value());
+        ASSERT_NE(selectInfo->menuInfo.menuBuilder, nullptr);
+        selectInfo->menuInfo.menuBuilder();
         EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+
         fullJson = GetJsonValue(node_);
         resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
     }
@@ -167,6 +161,46 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
         "{\"spanType\":2,\"responseType\":0,\"menuType\":0},"
         "{\"spanType\":2,\"responseType\":1,\"menuType\":0},"
         "{\"spanType\":2,\"responseType\":2,\"menuType\":0}]";
+    EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+}
+
+/*
+ * @tc.name: DISABLED_bindSelectionMenu_MenuTypeTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest2, DISABLED_bindSelectionMenu_MenuTypeTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    using OneTestMenuTypeStep = std::tuple<Ark_MenuType, int32_t>;
+    static const std::vector<OneTestMenuTypeStep> testPlan = {
+        {Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU, 0},
+        {Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU, 1},
+    };
+
+    CustomNodeBuilderTestHelper<TextModifierTest2> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    std::unique_ptr<JsonValue> fullJson;
+    std::string resultValue;
+    auto spanType = Ark_TextSpanType::ARK_TEXT_SPAN_TYPE_TEXT;
+    auto responseType = Ark_TextResponseType::ARK_TEXT_RESPONSE_TYPE_SELECT;
+    SelectionMenuOptions selectionMenuOptions = {};
+    Opt_SelectionMenuOptions options;
+
+    for (auto [arkMenuType, aceMenuType]: testPlan) {
+        selectionMenuOptions.menuType = arkMenuType;
+        options = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions);
+        modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options);
+        fullJson = GetJsonValue(node_);
+        resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
+    }
+
+    std::string expectedValue =
+        "[{\"spanType\":0,\"responseType\":2,\"menuType\":0},"
+        "{\"spanType\":0,\"responseType\":2,\"menuType\":1}]";
     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
 }
 }

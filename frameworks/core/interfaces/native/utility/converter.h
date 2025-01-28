@@ -654,6 +654,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
     template<> void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src);
+    template<> void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src);
+    template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src);
     template<> void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& src);
     template<> void AssignCast(std::optional<ThreatType>& dst, const Ark_ThreatType& src);
     template<> void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src);

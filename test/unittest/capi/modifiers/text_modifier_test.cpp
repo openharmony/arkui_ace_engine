@@ -1274,6 +1274,9 @@ HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     SelectOverlayInfo selectInfo;
+    // responseType and selectedType accord in setBindSelectionMenu
+    pattern->SetSelectedType(TextSpanType::TEXT);
+    pattern->SetTextResponseType(TextResponseType::RIGHT_CLICK);
     pattern->CopySelectionMenuParams(selectInfo);
     ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
     checkCBEvent = std::nullopt;

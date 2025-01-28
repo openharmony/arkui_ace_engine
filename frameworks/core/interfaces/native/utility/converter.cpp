@@ -1006,6 +1006,32 @@ TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
 }
 
 template<>
+void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
+{
+    switch (src) {
+        case ARK_TEXT_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
+        case ARK_TEXT_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
+        case ARK_TEXT_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
+        default:
+            LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src);
+            dst = std::nullopt;
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
+{
+    switch (src) {
+        case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
+        case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
+        case ARK_TEXT_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        default:
+            LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src);
+            dst = std::nullopt;
+    }
+}
+
+template<>
 void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
 {
     CHECK_NULL_VOID(src.array);
@@ -1922,21 +1948,7 @@ KeyboardOptions Convert(const Ark_KeyboardOptions& src)
 template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
-    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {},
-        .menuType = std::nullopt};
-    auto menuType = Converter::OptConvert<Ark_MenuType>(src.menuType);
-    if (menuType.has_value()) {
-        switch (menuType.value()) {
-            case Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU:
-                selectMenuParam.menuType = SelectionMenuType::SELECTION_MENU;
-                break;
-            case Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU:
-                selectMenuParam.menuType = SelectionMenuType::PREVIEW_MENU;
-                break;
-            default:
-                break;
-        }
-    }
+    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
     auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
     if (optOnAppear.has_value()) {
         selectMenuParam.onAppear =
