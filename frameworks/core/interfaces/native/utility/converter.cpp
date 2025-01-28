@@ -17,6 +17,7 @@
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -29,6 +30,10 @@ namespace {
     constexpr int32_t NUM_4 = 4;
     constexpr int32_t STD_TM_START_YEAR = 1900;
 } // namespace
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+}
 
 namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src)
@@ -196,49 +201,9 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
 
 void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info)
 {
-#ifdef WRONG_TYPE
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
-
-    onClick.axisHorizontal = ArkValue<Opt_Number>();
-    onClick.axisVertical = ArkValue<Opt_Number>();
-    onClick.displayX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    onClick.displayY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-
-    onClick.pressure = ArkValue<Ark_Number>(0.0f);
-
-    onClick.screenX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    onClick.screenY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    onClick.source = static_cast<Ark_SourceType>(info.GetSourceDevice());
-
-    onClick.sourceTool = static_cast<Ark_SourceTool>(0);
-    onClick.deviceId = ArkValue<Opt_Number>();
-    onClick.target.area.globalPosition.x.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
-    onClick.target.area.globalPosition.y.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
-    onClick.target.area.position.x.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
-    onClick.target.area.position.y.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
-    onClick.target.area.height = ArkValue<Ark_Length>(0);
-    onClick.target.area.width = ArkValue<Ark_Length>(0);
-
-    onClick.tiltX = ArkValue<Ark_Number>(0);
-    onClick.tiltY = ArkValue<Ark_Number>(0);
-
-    onClick.timestamp = ArkValue<Ark_Number>(
-        static_cast<float>(info.GetTimeStamp().time_since_epoch().count()));
-
-    onClick.windowX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    onClick.windowY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    onClick.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    onClick.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-    onClick.preventDefault = {
-        { 0, stubHoldRelease, stubHoldRelease },
-        stubCall,
-    };
-#endif
+    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
+    peer->SetGestureInfo(info);
+    onClick.ptr = peer;
 }
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
