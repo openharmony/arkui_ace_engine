@@ -16,6 +16,7 @@
 #include "reverse_converter.h"
 
 #include "base/utils/string_utils.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "validators.h"
 
@@ -30,6 +31,7 @@ const int32_t SEC_TO_MILLISEC = 1000;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
 }
 
@@ -81,6 +83,13 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
         .minute = ArkValue<Ark_Number>(minute),
         .second = ArkValue<Ark_Number>(second),
     };
+}
+
+void AssignArkValue(Ark_MouseEvent& dst, const MouseInfo& src)
+{
+    const auto peer = reinterpret_cast<MouseEventPeer*>(NG::GeneratedModifier::GetMouseEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)

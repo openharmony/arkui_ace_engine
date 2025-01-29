@@ -2713,48 +2713,12 @@ void OnMouseImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (!value) {
-        ViewAbstract::DisableOnMouse(frameNode);
+        return ViewAbstract::DisableOnMouse(frameNode);
     }
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onMouse = [arkCallback = CallbackHelper(*value), node = weakNode](MouseInfo& mouseInfo) {
         PipelineContext::SetCallBackNode(node);
-        auto stopPropagationHandler = [&mouseInfo]() {
-            mouseInfo.SetStopPropagation(true);
-        };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
-            std::move(stopPropagationHandler));
-        Ark_MouseEvent event;
-#ifdef WRONG_TYPE
-        event.button = Converter::ArkValue<Ark_MouseButton>(mouseInfo.GetButton());
-        event.action = Converter::ArkValue<Ark_MouseAction>(mouseInfo.GetAction());
-        const OHOS::Ace::Offset& globalLocation = mouseInfo.GetGlobalLocation();
-        event.windowX = Converter::ArkValue<Ark_Number>(
-            PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
-        event.windowY = Converter::ArkValue<Ark_Number>(
-            PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
-        const OHOS::Ace::Offset& localLocation = mouseInfo.GetLocalLocation();
-        event.x = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
-        event.y = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
-        const OHOS::Ace::Offset& screenLocation = mouseInfo.GetScreenLocation();
-        event.displayX = Converter::ArkValue<Ark_Number>(
-            PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
-        event.displayY = Converter::ArkValue<Ark_Number>(
-            PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
-        event.timestamp = Converter::ArkValue<Ark_Number>(static_cast<double>(
-            mouseInfo.GetTimeStamp().time_since_epoch().count()));
-        event.stopPropagation = stopPropagation;
-        event.deviceId = Converter::ArkValue<Opt_Number>(mouseInfo.GetDeviceId());
-        event.source = Converter::ArkValue<Ark_SourceType>(mouseInfo.GetSourceDevice());
-        event.pressure = Converter::ArkValue<Ark_Number>(mouseInfo.GetForce());
-        event.tiltX = Converter::ArkValue<Ark_Number>(mouseInfo.GetTiltX().value_or(0.0f));
-        event.tiltY = Converter::ArkValue<Ark_Number>(mouseInfo.GetTiltY().value_or(0.0f));
-        event.sourceTool = Converter::ArkValue<Ark_SourceTool>(mouseInfo.GetSourceTool());
-        event.axisVertical = Converter::ArkValue<Opt_Number>(0.0f);
-        event.axisHorizontal = Converter::ArkValue<Opt_Number>(0.0f);
-        event.target.area = Converter::ArkValue<Ark_Area>(mouseInfo);
-#endif
-        arkCallback.Invoke(event);
-        stopPropagation.resource.release(stopPropagation.resource.resourceId);
+        arkCallback.Invoke(Converter::ArkValue<Ark_MouseEvent>(mouseInfo));
     };
     ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
 }
