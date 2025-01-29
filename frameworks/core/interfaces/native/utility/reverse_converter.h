@@ -45,7 +45,6 @@
 #include "core/components_v2/list/list_properties.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
-#include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
 #include "ace_engine_types.h"
 
@@ -133,6 +132,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
+    void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);

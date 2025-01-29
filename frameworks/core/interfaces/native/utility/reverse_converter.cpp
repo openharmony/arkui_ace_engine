@@ -17,9 +17,11 @@
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+    const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
     const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
 }
@@ -82,6 +84,13 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
             AssignArkValue(dst.value, 0.0);
             dst.unit = ARK_LENGTH_UNIT_VP;
     }
+}
+
+void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
+{
+    const auto peer = reinterpret_cast<DragEventPeer*>(NG::GeneratedModifier::GetDragEventAccessor()->ctor());
+    peer->dragInfo = info;
+    dragEvent.ptr = peer;
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
