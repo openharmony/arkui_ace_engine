@@ -445,22 +445,26 @@ void FromHtmlImpl(const Ark_String* html,
     auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
         (MutableStyledStringPeer* peer, StringArray errors) {
         Converter::ArkArrayHolder<Array_String> errorHolder(errors);
-        auto arkError = errorHolder.OptValue<Opt_Array_String>();
-        Opt_StyledString styledStringPeer = Converter::ArkValue<Opt_StyledString>(*peer);
-        arkCallback.Invoke(styledStringPeer, arkError);
+        arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(*peer), errorHolder.OptValue<Opt_Array_String>());
     };
 
     auto htmlStr = html ? Converter::Convert<std::string>(*html) : std::string();
-    if (htmlStr.empty()) { errorsStr.emplace_back("html is empty");
-        callback(mStyledStringPeer, errorsStr); return;
+    if (htmlStr.empty()) {
+        errorsStr.emplace_back("html is empty");
+        callback(mStyledStringPeer, errorsStr);
+        return;
     }
     auto container = Container::CurrentSafely();
-    if (!container) { errorsStr.emplace_back("FromHtml container is null");
-        callback(mStyledStringPeer, errorsStr); return;
+    if (!container) {
+        errorsStr.emplace_back("FromHtml container is null");
+        callback(mStyledStringPeer, errorsStr);
+        return;
     }
     auto taskExecutor = container->GetTaskExecutor();
-    if (taskExecutor == nullptr) { errorsStr.emplace_back("FromHtml taskExecutor is null");
-        callback(mStyledStringPeer, errorsStr); return;
+    if (taskExecutor == nullptr) {
+        errorsStr.emplace_back("FromHtml taskExecutor is null");
+        callback(mStyledStringPeer, errorsStr);
+        return;
     }
 
     auto instanceId = Container::CurrentIdSafely();
@@ -486,9 +490,9 @@ void FromHtmlImpl(const Ark_String* html,
         taskExecutor->PostTask([callback, mStyledStringPeer, errors]() mutable {
             callback(mStyledStringPeer, errors);
         }, TaskExecutor::TaskType::UI,
-           "FromHtmlReturn", PriorityType::VIP);
+            "FromHtmlReturn", PriorityType::VIP);
     }, TaskExecutor::TaskType::BACKGROUND,
-       "FromHtml", PriorityType::IMMEDIATE);
+        "FromHtml", PriorityType::IMMEDIATE);
 }
 void ToHtmlImpl(const Ark_StyledString* styledString)
 {
