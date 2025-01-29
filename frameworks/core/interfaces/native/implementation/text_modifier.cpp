@@ -49,7 +49,14 @@ struct TextOptions {
 };
 
 template<>
-void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPolicy& src);
+void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPolicy& src)
+{
+    switch (src) {
+        case ARK_MARQUEE_START_POLICY_DEFAULT: dst = MarqueeStartPolicy::DEFAULT; break;
+        case ARK_MARQUEE_START_POLICY_ON_FOCUS: dst = MarqueeStartPolicy::ON_FOCUS; break;
+        default: LOGE("Unexpected enum value in Ark_MarqueeStartPolicy: %{public}d", src);
+    }
+}
 
 template<>
 inline FontSettingOptions Convert(const Ark_FontSettingOptions& src)
@@ -118,16 +125,6 @@ void AssignCast(std::optional<TextSelectableMode>& dst, const Ark_TextSelectable
         case ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE: dst = TextSelectableMode::SELECTABLE_FOCUSABLE; break;
         case ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE: dst = TextSelectableMode::UNSELECTABLE; break;
         default: LOGE("Unexpected enum value in Ark_TextSelectableMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPolicy& src)
-{
-    switch (src) {
-        case ARK_MARQUEE_START_POLICY_DEFAULT: dst = MarqueeStartPolicy::DEFAULT; break;
-        case ARK_MARQUEE_START_POLICY_ON_FOCUS: dst = MarqueeStartPolicy::ON_FOCUS; break;
-        default: LOGE("Unexpected enum value in Ark_MarqueeStartPolicy: %{public}d", src);
     }
 }
 
