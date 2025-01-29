@@ -16,6 +16,8 @@
 #include "reverse_converter.h"
 
 #include "base/utils/string_utils.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "validators.h"
@@ -31,6 +33,8 @@ const int32_t SEC_TO_MILLISEC = 1000;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
     const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
 }
@@ -70,6 +74,13 @@ void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
         origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp());
     dst.width = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetWidth().ConvertToVp());
     dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
+}
+
+void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
+    peer->SetGestureInfo(src);
+    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -133,6 +144,13 @@ void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 {
     dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
     dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
+}
+
+void AssignArkValue(Ark_KeyEvent& dst, const OHOS::Ace::KeyEventInfo& src)
+{
+    const auto peer = reinterpret_cast<KeyEventPeer*>(GeneratedModifier::GetKeyEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
