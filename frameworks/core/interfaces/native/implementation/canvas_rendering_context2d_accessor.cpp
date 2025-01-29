@@ -16,7 +16,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-
+#include "core/interfaces/native/utility/validators.h"
 #include "canvas_rendering_context2d_peer_impl.h"
 #include "drawing_rendering_context_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -25,6 +25,10 @@
 
 namespace {
 constexpr auto ERROR_VALUE = -1;
+constexpr auto IMAGE_TYPE_DEFAULT = "image/png";
+constexpr auto IMAGE_QUALITY_MIN = 0.0f;
+constexpr auto IMAGE_QUALITY_MAX = 1.0f;
+constexpr auto IMAGE_QUALITY_DEFAULT = 0.92f;
 } // namespace
 
 namespace OHOS::Ace::NG::Converter {
@@ -72,12 +76,11 @@ void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(type);
     CHECK_NULL_VOID(quality);
-
-    auto dataUrl = Converter::OptConvert<std::string>(*type);
-    if (!dataUrl) {
-        return;
-    }
-    LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerToDataURL Opt_CustomObject not implemented.");
+    auto imageType = Converter::OptConvert<std::string>(*type).value_or(IMAGE_TYPE_DEFAULT);
+    auto optQuality = Converter::OptConvert<float>(*quality);
+    Validator::ValidateByRange(optQuality, IMAGE_QUALITY_MIN, IMAGE_QUALITY_MAX);
+    auto imageQuality = optQuality.value_or(IMAGE_QUALITY_DEFAULT);
+    peerImpl->ToDataURL(imageType, imageQuality);
 }
 void StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
                             const Ark_ImageAnalyzerConfig* config,
