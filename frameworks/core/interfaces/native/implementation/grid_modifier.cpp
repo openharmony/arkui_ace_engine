@@ -272,13 +272,15 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragStart = [frameNode](const ItemDragInfo& dragInfo, int32_t itemIndex) {
+    auto onItemDragStart = [callback = CallbackHelper(*value, frameNode), frameNode, node](
+        const ItemDragInfo& dragInfo, int32_t itemIndex
+    ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onItemDragStart(
-            frameNode->GetId(), arkDragInfo, arkItemIndex);
-        // onItemDragStart should return value [builder] but it is a void
-        LOGE("ARKOALA onItemDragStart doesn`t handle builder returned value");
+        auto builder =
+            callback.InvokeWithObtainResult<CustomNodeBuilder, Callback_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
+        auto uiNode = CallbackHelper(builder, frameNode).BuildSync(node);
+        ViewStackProcessor::GetInstance()->Push(uiNode);
     };
     GridModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
