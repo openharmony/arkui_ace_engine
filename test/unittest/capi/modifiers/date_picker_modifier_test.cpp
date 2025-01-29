@@ -1101,39 +1101,19 @@ HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
 
 /*
  * @tc.name: setLunar1Test
- * @tc.desc: Check the functionality of DatePickerModifier.LunarImpl
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(DatePickerModifierTest, setLunar1Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLunar1, nullptr);
     auto initialValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
-    
-    std::printf("lunar1: const initialValue: %s \n", initialValue.c_str());
-    // EXPECT_EQ(initialValue, ATTRIBUTE_LUNAR_DEFAULT_VALUE);
+    EXPECT_EQ(initialValue, ATTRIBUTE_LUNAR_DEFAULT_VALUE);
 
     for (auto& [actual, expected] : OPT_BOOL_TEST_PLAN) {
-        auto lunar = Converter::OptConvert<bool>(actual);    
-        std::printf("lunar1: const actual: %s expected: %s \n", lunar?(lunar.value()?"true":"false"):"-", expected.c_str());
-
         modifier_->setLunar1(node_, &actual);
         auto result = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
-        
-        std::printf("lunar1: holder result: %s == %s \n", result.c_str(), expected.c_str());
-        // EXPECT_EQ(checkValue, lunar.second);
+        EXPECT_EQ(result, expected);
     }
 }
-
-/*
- * @tc.name: setLunarTest
- * @tc.desc: Check the functionality of DatePickerModifier.LunarImpl
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerModifierTest, setLunar1Test2, TestSize.Level1) {
-
-int * p = nullptr;
-*p = 0;
-}
-
-
 } // namespace OHOS::Ace::NG
