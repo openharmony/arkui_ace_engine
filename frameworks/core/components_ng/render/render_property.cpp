@@ -364,11 +364,8 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     jsonValue->Put("perspective", std::to_string(transformRotate.v).c_str());
     jsonValue->Put("centerX", center.GetX().ToString().c_str());
     jsonValue->Put("centerY", center.GetY().ToString().c_str());
-    if (center.GetZ().has_value()) {
-        jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
-    } else {
-        json->PutExtAttr("centerZ", Dimension().ToString().c_str(), filter);
-    }
+    auto centerZ = center.GetZ().value_or(Dimension());
+    jsonValue->Put("centerZ", centerZ.ToString().c_str());
     json->PutExtAttr("rotate", jsonValue, filter);
 
     if (propTransformScale.has_value()) {

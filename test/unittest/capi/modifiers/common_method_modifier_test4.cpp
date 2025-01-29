@@ -128,6 +128,10 @@ const auto ATTRIBUTE_SAFE_AREA_LEFT_NAME = "left";
 const auto ATTRIBUTE_SAFE_AREA_TOP_NAME = "top";
 const auto ATTRIBUTE_SAFE_AREA_RIGHT_NAME = "right";
 const auto ATTRIBUTE_SAFE_AREA_BOTTOM_NAME = "bottom";
+const auto ATTRIBUTE_ROTATE_NAME = "rotate";
+const auto ATTRIBUTE_ROTATE_I_CENTER_Z_NAME = "centerZ";
+const auto ATTRIBUTE_ROTATE_I_ANGLE_NAME = "angle";
+const auto ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_ARRAY_DEFAULT_SIZE = 0;
 }
 struct PixelStretchEffect {
@@ -1227,4 +1231,269 @@ HWTEST_F(CommonMethodModifierTest4, setOnSizeChangeTest, TestSize.Level1)
         test(vecSizePair[i]);
     }
 }
+
+std::vector<std::tuple<std::string, Ark_Number, std::string>> dimensionsFLoatValidValues = {
+    { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
+    { "1.23", Converter::ArkValue<Ark_Number>(1.23), "1.23vp" },
+    { "-2", Converter::ArkValue<Ark_Number>(-2), "-2.00vp" },
+    { "-3.45", Converter::ArkValue<Ark_Number>(-3.45), "-3.45vp" },
+};
+
+/*
+ * @tc.name: setRotate0TestRotateCenterZValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZValidValues, TestSize.Level1)
+{
+    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
+    auto checkValue = [this, defNumValue](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_RotateOptions inputValueRotate;
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        inputValueRotate.x = optValue;
+        inputValueRotate.y = optValue;
+        inputValueRotate.z = optValue;
+        inputValueRotate.perspective = Converter::ArkValue<Opt_Number>(defNumValue);
+        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(defNumValue);
+        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerZ = optValue;
+        modifier_->setRotate0(node_, &inputValueRotate);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.centerZ";
+    };
+
+    for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRotate0TestRotateCenterZInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZInvalidValues, TestSize.Level1)
+{
+    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
+    auto checkValue = [this, defNumValue](
+                          const std::string& input, const std::string& expectedStr,
+                          const Ark_Number& value, const Opt_Number& invalidValue) {
+        Ark_RotateOptions inputValueRotate;
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        inputValueRotate.x = optValue;
+        inputValueRotate.y = optValue;
+        inputValueRotate.z = optValue;
+        inputValueRotate.perspective = Converter::ArkValue<Opt_Number>(defNumValue);
+        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(defNumValue);
+        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerZ = invalidValue;
+        modifier_->setRotate0(node_, &inputValueRotate);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.centerZ";
+    };
+
+    for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
+        checkValue(input, ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE, value, Converter::ArkValue<Opt_Number>());
+    }
+}
+
+/*
+ * @tc.name: setRotate1TestRotateCenterZValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateCenterZValidValues, TestSize.Level1)
+{
+    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
+    auto checkValue = [this, defNumValue](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_RotateOptions inputValueRotate;
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        inputValueRotate.x = optValue;
+        inputValueRotate.y = optValue;
+        inputValueRotate.z = optValue;
+        inputValueRotate.perspective = Converter::ArkValue<Opt_Number>(defNumValue);
+        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(defNumValue);
+        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerZ = optValue;
+
+        auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
+        modifier_->setRotate1(node_, &optRotateOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRotate1, attribute: rotate.centerZ";
+    };
+
+    for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRotate1TestRotateCenterZInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateCenterZInvalidValues, TestSize.Level1)
+{
+    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
+    auto checkValue = [this, defNumValue](
+                          const std::string& input, const std::string& expectedStr,
+                          const Ark_Number& value, const Opt_Number& invalidValue) {
+        Ark_RotateOptions inputValueRotate;
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        inputValueRotate.x = optValue;
+        inputValueRotate.y = optValue;
+        inputValueRotate.z = optValue;
+        inputValueRotate.perspective = Converter::ArkValue<Opt_Number>(defNumValue);
+        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(defNumValue);
+        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerZ = invalidValue;
+        auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
+        modifier_->setRotate1(node_, &optRotateOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRotate1, attribute: rotate.centerZ";
+    };
+
+    for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
+        checkValue(input, ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE, value, Converter::ArkValue<Opt_Number>());
+    }
+}
+
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testNumberFloatValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "-100.000000" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.340000" },
+    { "-56.73", Converter::ArkValue<Ark_Number>(-56.73), "-56.730000" },
+};
+
+std::vector<std::tuple<std::string, Ark_String, std::string>> testStringFloatValues = {
+    { "100", Converter::ArkValue<Ark_String>("100"), "100.000000" },
+    { "0", Converter::ArkValue<Ark_String>("0"), "0.000000" },
+    { "-100", Converter::ArkValue<Ark_String>("-100"), "-100.000000" },
+    { "12.34", Converter::ArkValue<Ark_String>("12.34"), "12.340000" },
+    { "-56.73", Converter::ArkValue<Ark_String>("-56.73"), "-56.730000" },
+};
+
+/*
+ * @tc.name: setRotate0TestRotateAngleValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateAngleValidValues, TestSize.Level1)
+{
+    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
+    auto checkValue = [this, defNumValue](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_RotateOptions inputValueRotate;
+        auto optValue = Converter::ArkValue<Opt_Number>(defNumValue);
+        inputValueRotate.x = optValue;
+        inputValueRotate.y = optValue;
+        inputValueRotate.z = optValue;
+        inputValueRotate.perspective = optValue;
+        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerZ = optValue;
+
+        modifier_->setRotate0(node_, &inputValueRotate);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.angle";
+    };
+
+    for (auto& [input, value, expected] : testNumberFloatValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRotate0TestRotateAngleStringValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateAngleStringValidValues, TestSize.Level1)
+{
+    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
+    auto checkValue = [this, defNumValue](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_RotateOptions inputValueRotate;
+        auto optValue = Converter::ArkValue<Opt_Number>(defNumValue);
+        inputValueRotate.x = optValue;
+        inputValueRotate.y = optValue;
+        inputValueRotate.z = optValue;
+        inputValueRotate.perspective = optValue;
+        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(value);
+        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(value);
+        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(value);
+        inputValueRotate.centerZ = optValue;
+
+        modifier_->setRotate0(node_, &inputValueRotate);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.angle";
+    };
+
+    for (auto& [input, value, expected] : testStringFloatValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRotate1TestRotateAngleValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateAngleValidValues, TestSize.Level1)
+{
+    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
+    auto checkValue = [this, defNumValue](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_RotateOptions inputValueRotate;
+        auto optValue = Converter::ArkValue<Opt_Number>(defNumValue);
+        inputValueRotate.x = optValue;
+        inputValueRotate.y = optValue;
+        inputValueRotate.z = optValue;
+        inputValueRotate.perspective = optValue;
+        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
+        inputValueRotate.centerZ = optValue;
+
+        auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
+        modifier_->setRotate1(node_, &optRotateOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRotate1, attribute: rotate.angle";
+    };
+
+    for (auto& [input, value, expected] : testNumberFloatValues) {
+        checkValue(input, expected, value);
+    }
+}
+
 }

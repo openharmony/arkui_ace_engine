@@ -1291,6 +1291,8 @@ RotateOpt Convert(const Ark_RotateOptions& src)
 
     auto centerX =  OptConvert<Dimension>(src.centerX);
     auto centerY =  OptConvert<Dimension>(src.centerY);
+    Validator::ValidateNonPercent(centerX);
+    Validator::ValidateNonPercent(centerY);
     if (centerX.has_value() && centerY.has_value()) {
         auto center = DimensionOffset(centerX.value(), centerY.value());
         auto centerZ =  OptConvert<Dimension>(src.centerZ);
@@ -3106,8 +3108,9 @@ void MotionBlur1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetMotionBlur1(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<MotionBlurOption>(*value);
+    ViewAbstract::SetMotionBlur(frameNode, convValue);
 }
 void Brightness0Impl(Ark_NativePointer node,
                      const Ark_Number* value)
@@ -3416,8 +3419,12 @@ void Rotate1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetRotate1(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<RotateOpt>(*value);
+    if (convValue.has_value()) {
+        ViewAbstract::SetPivot(frameNode, convValue->center);
+        ViewAbstract::SetRotate(frameNode, convValue->vec5f);
+    }
 }
 void Transform0Impl(Ark_NativePointer node,
                     const Ark_CustomObject* value)
@@ -4461,7 +4468,7 @@ void RenderFit0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<RenderFit>(value); // for enums
+    auto convValue = Converter::OptConvert<RenderFit>(value);
     ViewAbstract::SetRenderFit(frameNode, convValue);
 }
 void RenderFit1Impl(Ark_NativePointer node,
@@ -4469,8 +4476,9 @@ void RenderFit1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetRenderFit1(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<RenderFit>(*value);
+    ViewAbstract::SetRenderFit(frameNode, convValue);
 }
 void GestureModifierImpl(Ark_NativePointer node,
                          const Ark_GestureModifier* value)

@@ -86,7 +86,7 @@ using TransitionFinishCallback = std::function<void(bool)>;
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 namespace {
-    NG::Vector5F DEFAULT_ROTATE_VEC = { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
+    NG::Vector5F DEFAULT_ROTATE_VEC = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 }
 
 // RenderContext is used for render node to paint.
