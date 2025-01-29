@@ -47,7 +47,7 @@ public:
     void TriggerStopImageAnalyzer();
     Ark_Int32 TriggerGetHeight();
     Ark_Int32 TriggerGetWidth();
-    void ToDataURL(const std::string& type, double quality);
+    void ToDataURL(const std::string& type, float& quality);
 
     void UpdateDensity()
     {

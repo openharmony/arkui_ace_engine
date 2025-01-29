@@ -1361,6 +1361,13 @@ void CanvasPattern::Translate(double x, double y)
 
 std::string CanvasPattern::ToDataURL(const std::string& type, double quality)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->type = type;
+        holder->quality = quality;
+        return "";
+    }
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
     paintMethod_->FlushUITasks();
     return paintMethod_->ToDataURL(type, quality);
