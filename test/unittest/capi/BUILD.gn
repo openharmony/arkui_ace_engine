@@ -64,8 +64,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   }
 
   sources = [
-    "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
     "$ace_root/adapter/ohos/capability/html/html_to_span.cpp",
+    "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
@@ -87,9 +87,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   sources += rebased_generated_sources
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
-  external_deps = [
-    "libxml2:libxml2",
-  ]
+  external_deps = [ "libxml2:libxml2" ]
 
   deps += [ ":copy_libxml2" ]
 
