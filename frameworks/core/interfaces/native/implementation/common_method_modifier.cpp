@@ -1257,7 +1257,7 @@ void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
 void AssignArkValue(Ark_DragEvent& dragEvent, const DragEvent& info)
 {
     const auto peer = reinterpret_cast<DragEventPeer*>(NG::GeneratedModifier::GetDragEventAccessor()->ctor());
-    peer->dragInfo = OHOS::Ace::AceType::Claim<DragEvent>(const_cast<DragEvent*>(&info));
+    peer->dragInfo = AceType::Claim<DragEvent>(const_cast<DragEvent*>(&info));
     dragEvent.ptr = peer;
 }
 } // namespace OHOS::Ace::NG
