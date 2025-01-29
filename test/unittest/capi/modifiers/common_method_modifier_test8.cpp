@@ -86,14 +86,14 @@ namespace {
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(0), 0 },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-100), -100 },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(12.34), 12.34 },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(56.73), -56.73 }
+        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-56.73), -56.73 }
     };
     std::vector<std::pair<Opt_Number, double>> arkNumberTestPlan = {
         { Converter::ArkValue<Opt_Number>(100), 100 },
         { Converter::ArkValue<Opt_Number>(0), 0 },
         { Converter::ArkValue<Opt_Number>(-100), -100 },
         { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
-        { Converter::ArkValue<Opt_Number>(56.73), -56.73 }
+        { Converter::ArkValue<Opt_Number>(-56.73), -56.73 }
     };
     std::vector<std::pair<Ark_Union_String_FunctionKey, bool>> arkShortcutKeyTestPlan = {
         { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("A"), true },
