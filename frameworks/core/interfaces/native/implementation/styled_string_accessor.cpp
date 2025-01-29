@@ -451,32 +451,25 @@ void FromHtmlImpl(const Ark_String* html,
     };
 
     auto htmlStr = html ? Converter::Convert<std::string>(*html) : std::string();
-    if (htmlStr.empty()) {
-        errorsStr.emplace_back("html is empty");
-        callback(mStyledStringPeer, errorsStr);
-        return;
+    if (htmlStr.empty()) { errorsStr.emplace_back("html is empty");
+        callback(mStyledStringPeer, errorsStr); return;
     }
     auto container = Container::CurrentSafely();
-    if (!container) {
-        errorsStr.emplace_back("FromHtml container is null");
-        callback(mStyledStringPeer, errorsStr);
-        return;
+    if (!container) { errorsStr.emplace_back("FromHtml container is null");
+        callback(mStyledStringPeer, errorsStr); return;
     }
     auto taskExecutor = container->GetTaskExecutor();
-    if (taskExecutor == nullptr) {
-        errorsStr.emplace_back("FromHtml taskExecutor is null");
-        callback(mStyledStringPeer, errorsStr);
-        return;
+    if (taskExecutor == nullptr) { errorsStr.emplace_back("FromHtml taskExecutor is null");
+        callback(mStyledStringPeer, errorsStr); return;
     }
 
     auto instanceId = Container::CurrentIdSafely();
     taskExecutor->PostTask([callback, mStyledStringPeer, htmlStr, errors = errorsStr, instanceId]() mutable {
         ContainerScope scope(instanceId);
-        auto styledString = OHOS::Ace::HtmlUtils::FromHtml(htmlStr);
-        if (!styledString) {
-            errors.emplace_back("Convert html to styledString fails");
-        } else {
+        if (auto styledString = OHOS::Ace::HtmlUtils::FromHtml(htmlStr); styledString) {
             mStyledStringPeer->spanString = styledString;
+        } else {
+            errors.emplace_back("Convert html to styledString fails");
         }
         auto container = OHOS::Ace::AceEngine::Get().GetContainer(instanceId);
         if (!container) {
@@ -492,8 +485,10 @@ void FromHtmlImpl(const Ark_String* html,
         }
         taskExecutor->PostTask([callback, mStyledStringPeer, errors]() mutable {
             callback(mStyledStringPeer, errors);
-        }, TaskExecutor::TaskType::UI, "FromHtmlReturn", PriorityType::VIP);
-    }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
+        }, TaskExecutor::TaskType::UI,
+           "FromHtmlReturn", PriorityType::VIP);
+    }, TaskExecutor::TaskType::BACKGROUND,
+       "FromHtml", PriorityType::IMMEDIATE);
 }
 void ToHtmlImpl(const Ark_StyledString* styledString)
 {
