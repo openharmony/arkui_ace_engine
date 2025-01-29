@@ -3281,19 +3281,9 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
     auto onTouchIntercept = [arkCallback = CallbackHelper(*value), node = weakNode](
         TouchEventInfo& info) -> HitTestMode {
         PipelineContext::SetCallBackNode(node);
-        auto preventDefaultHandler = [&info]() {
-            info.SetPreventDefault(true);
-        };
-        auto preventDefault = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(preventDefaultHandler));
-        auto handler = [&info]() {
-            info.SetStopPropagation(true);
-        };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(handler));
         Ark_TouchEvent event = Converter::ArkValue<Ark_TouchEvent>(info);
         Callback_HitTestMode_Void continuation;
         arkCallback.Invoke(event, continuation);
-        preventDefault.resource.release(preventDefault.resource.resourceId);
-        stopPropagation.resource.release(stopPropagation.resource.resourceId);
         LOGE("CommonMethodModifier::OnTouchInterceptImpl return value can be incorrect");
         return HitTestMode::HTMDEFAULT;
     };
