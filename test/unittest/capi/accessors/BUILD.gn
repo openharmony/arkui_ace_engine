@@ -102,9 +102,7 @@ ace_unittest("capi_all_accessors_test") {
     "../stubs:capi-ut-stubs",
   ]
 
-  external_deps = [
-    "libxml2:libxml2",
-  ]
+  external_deps = [ "libxml2:libxml2" ]
 }
 
 group("capi_accessors_unittest") {
