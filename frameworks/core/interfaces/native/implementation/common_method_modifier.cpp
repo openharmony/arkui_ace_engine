@@ -40,7 +40,6 @@
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "base/log/log_wrapper.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
-#include "base/memory/referenced.h"
 #include "base/memory/ace_type.h"
 
 using namespace OHOS::Ace::NG::Converter;
