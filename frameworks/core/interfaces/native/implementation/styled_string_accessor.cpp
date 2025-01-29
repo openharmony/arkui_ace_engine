@@ -440,9 +440,8 @@ void FromHtmlImpl(const Ark_String* html,
 {
     ContainerScope scope(Container::CurrentIdSafely());
     StringArray errorsStr;
-    MutableStyledStringPeer* mStyledStringPeer = reinterpret_cast<MutableStyledStringPeer*>(
-        GetMutableStyledStringAccessor()->ctor());
-    
+    auto mStyledStringPeer = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
+
     auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
         (MutableStyledStringPeer* peer, StringArray errors) {
         Converter::ArkArrayHolder<Array_String> errorHolder(errors);
@@ -451,6 +450,12 @@ void FromHtmlImpl(const Ark_String* html,
         arkCallback.Invoke(styledStringPeer, arkError);
     };
 
+    auto htmlStr = html ? Converter::Convert<std::string>(*html) : std::string();
+    if (htmlStr.empty()) {
+        errorsStr.emplace_back("html is empty");
+        callback(mStyledStringPeer, errorsStr);
+        return;
+    }
     auto container = Container::CurrentSafely();
     if (!container) {
         errorsStr.emplace_back("FromHtml container is null");
@@ -463,24 +468,13 @@ void FromHtmlImpl(const Ark_String* html,
         callback(mStyledStringPeer, errorsStr);
         return;
     }
-    if (!html) {
-        errorsStr.emplace_back("html is null");
-        callback(mStyledStringPeer, errorsStr);
-        return;
-    }
-    auto htmlStr = Converter::Convert<std::string>(*html);
-    if (htmlStr.empty()) {
-        errorsStr.emplace_back("html is empty");
-        callback(mStyledStringPeer, errorsStr);
-        return;
-    }
 
     auto instanceId = Container::CurrentIdSafely();
     taskExecutor->PostTask([callback, mStyledStringPeer, htmlStr, errors = errorsStr, instanceId]() mutable {
         ContainerScope scope(instanceId);
         auto styledString = OHOS::Ace::HtmlUtils::FromHtml(htmlStr);
         if (!styledString) {
-            errors.emplace_back("styledString is null");
+            errors.emplace_back("Convert html to styledString fails");
         } else {
             mStyledStringPeer->spanString = styledString;
         }

@@ -752,10 +752,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Lev
         std::optional<StringArray> errors;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onFromHtmlFunc = [](
-        const Ark_Int32 resourceId,
-        const Opt_StyledString value,
-        const Opt_Array_String error) {
+    auto onFromHtmlFunc = [](const Ark_Int32 resourceId, const Opt_StyledString value, const Opt_Array_String error) {
         checkEvent = {
             .nodeId = resourceId,
             .value = reinterpret_cast<MutableStyledStringPeer*>(value.value.ptr),
@@ -782,9 +779,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Lev
     ASSERT_TRUE(checkEvent->errors.has_value());
     StringArray errors = checkEvent->errors.value();
     if (errors.size() > 0) {
-        for (const auto& error : errors) {
-            EXPECT_EQ(error, "");
-        }
+        for (const auto& error : errors) { EXPECT_EQ(error, ""); }
     } else {
         EXPECT_EQ(checkEvent->errors.value().size(), 0);
         ASSERT_TRUE(checkEvent->value.has_value());
