@@ -183,6 +183,22 @@ TextResponseType Convert(const Ark_TextResponseType& src)
     }
     return responseType;
 }
+
+void AssignArkValue(Ark_MarqueeState& dst, int32_t src)
+{
+    const int32_t START = 0;
+    const int32_t BOUNCE = 1;
+    const int32_t FINISH = 2;
+    switch (src) {
+        case START: dst = ARK_MARQUEE_STATE_START; break;
+        case BOUNCE: dst = ARK_MARQUEE_STATE_BOUNCE; break;
+        case FINISH: dst = ARK_MARQUEE_STATE_FINISH; break;
+        default:
+            dst = static_cast<Ark_MarqueeState>(-1);
+            LOGE("Unexpected enum value in Ark_MarqueeState: %{public}d", src);
+            break;
+    }
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -608,8 +624,11 @@ void OnMarqueeStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextModelNG::SetOnMarqueeStateChange(frameNode, convValue);
+    auto modelCallback = [callbackHelper = CallbackHelper(*value, frameNode)](int32_t marqueeState) {
+        auto arkMarqueeState = Converter::ArkValue<Ark_MarqueeState>(marqueeState);
+        callbackHelper.Invoke(arkMarqueeState);
+    };
+    TextModelNG::SetOnMarqueeStateChange(frameNode, std::move(modelCallback));
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           Ark_Boolean value)

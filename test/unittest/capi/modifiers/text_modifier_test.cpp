@@ -1520,4 +1520,66 @@ HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsFromStartInvalidVa
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Boolean>());
 }
+
+/*
+ * @tc.name: setOnMarqueeStateChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setOnMarqueeStateChangeTest, TestSize.Level1)
+{
+    const int32_t contextId = 123;
+
+    static std::optional<Ark_MarqueeState> checkMarqueeState;
+    auto checkCallback = [](const Ark_Int32 resourceId, Ark_MarqueeState marqueeState) {
+        checkMarqueeState = marqueeState;
+    };
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_MarqueeState_Void>(checkCallback, contextId);
+    modifier_->setOnMarqueeStateChange(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    const int32_t start = 0;
+    const int32_t bounce = 1;
+    const int32_t finish = 2;
+    const int32_t invalidValue = 100;
+
+    eventHub->FireOnMarqueeStateChange(start);
+    ASSERT_TRUE(checkMarqueeState.has_value());
+    EXPECT_EQ(checkMarqueeState.value(), ARK_MARQUEE_STATE_START);
+
+    eventHub->FireOnMarqueeStateChange(bounce);
+    ASSERT_TRUE(checkMarqueeState.has_value());
+    EXPECT_EQ(checkMarqueeState.value(), ARK_MARQUEE_STATE_BOUNCE);
+
+    eventHub->FireOnMarqueeStateChange(finish);
+    ASSERT_TRUE(checkMarqueeState.has_value());
+    EXPECT_EQ(checkMarqueeState.value(), ARK_MARQUEE_STATE_FINISH);
+
+    eventHub->FireOnMarqueeStateChange(invalidValue);
+    ASSERT_TRUE(checkMarqueeState.has_value());
+    EXPECT_EQ(checkMarqueeState.value(), static_cast<Ark_MarqueeState>(-1));
+}
+
+/*
+ * @tc.name: setMarqueeOptionsTestEmpty
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestEmpty, TestSize.Level1)
+{
+    // Check that there is no crash
+
+    // Case 1
+    modifier_->setMarqueeOptions(node_, nullptr);
+
+    // Case 2
+    auto marqueeOptions = ArkValue<Opt_TextMarqueeOptions>();
+    modifier_->setMarqueeOptions(node_, &marqueeOptions);
+}
 }
