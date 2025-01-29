@@ -326,6 +326,19 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 
 namespace StyledStringAccessor {
+RefPtr<TaskExecutor> CreateTaskExecutor(StringArray& errors) {
+    auto container = Container::CurrentSafely();
+    if (!container) {
+        errors.emplace_back("FromHtml container is null");
+        return nullptr;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (taskExecutor == nullptr) {
+        errors.emplace_back("FromHtml taskExecutor is null");
+        return nullptr;
+    }
+    return taskExecutor;
+}
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
     delete peer;
@@ -440,10 +453,10 @@ void FromHtmlImpl(const Ark_String* html,
 {
     ContainerScope scope(Container::CurrentIdSafely());
     StringArray errorsStr;
-    auto mStyledStringPeer = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
+    auto peer = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
 
     auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
-        (MutableStyledStringPeer* peer, StringArray errors) {
+        (MutableStyledStringPeer* peer, const StringArray& errors) {
         Converter::ArkArrayHolder<Array_String> errorHolder(errors);
         arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(*peer), errorHolder.OptValue<Opt_Array_String>());
     };
@@ -451,47 +464,39 @@ void FromHtmlImpl(const Ark_String* html,
     auto htmlStr = html ? Converter::Convert<std::string>(*html) : std::string();
     if (htmlStr.empty()) {
         errorsStr.emplace_back("html is empty");
-        callback(mStyledStringPeer, errorsStr);
+        callback(peer, errorsStr);
         return;
     }
-    auto container = Container::CurrentSafely();
-    if (!container) {
-        errorsStr.emplace_back("FromHtml container is null");
-        callback(mStyledStringPeer, errorsStr);
-        return;
-    }
-    auto taskExecutor = container->GetTaskExecutor();
+    auto taskExecutor = CreateTaskExecutor(errorsStr);
     if (taskExecutor == nullptr) {
-        errorsStr.emplace_back("FromHtml taskExecutor is null");
-        callback(mStyledStringPeer, errorsStr);
+        callback(peer, errorsStr);
         return;
     }
 
     auto instanceId = Container::CurrentIdSafely();
-    taskExecutor->PostTask([callback, mStyledStringPeer, htmlStr, errors = errorsStr, instanceId]() mutable {
+    taskExecutor->PostTask([callback, peer, htmlStr, errors = errorsStr, instanceId]() mutable {
         ContainerScope scope(instanceId);
         if (auto styledString = OHOS::Ace::HtmlUtils::FromHtml(htmlStr); styledString) {
-            mStyledStringPeer->spanString = styledString;
+            peer->spanString = styledString;
         } else {
             errors.emplace_back("Convert html to styledString fails");
         }
         auto container = OHOS::Ace::AceEngine::Get().GetContainer(instanceId);
         if (!container) {
             errors.emplace_back("FromHtmlReturn container is null");
-            callback(mStyledStringPeer, errors);
+            callback(peer, errors);
             return;
         }
         auto taskExecutor = container->GetTaskExecutor();
         if (!taskExecutor) {
             errors.emplace_back("FromHtmlReturn taskExecutor is null");
-            callback(mStyledStringPeer, errors);
+            callback(peer, errors);
             return;
         }
-        taskExecutor->PostTask([callback, mStyledStringPeer, errors]() mutable {
-            callback(mStyledStringPeer, errors);
-        }, TaskExecutor::TaskType::UI,
+        taskExecutor->PostTask([callback, peer, errors]() mutable { callback(peer, errors); },
+            TaskExecutor::TaskType::UI,
             "FromHtmlReturn", PriorityType::VIP);
-    }, TaskExecutor::TaskType::BACKGROUND,
+        }, TaskExecutor::TaskType::BACKGROUND,
         "FromHtml", PriorityType::IMMEDIATE);
 }
 void ToHtmlImpl(const Ark_StyledString* styledString)
