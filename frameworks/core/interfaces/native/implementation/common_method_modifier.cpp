@@ -3928,15 +3928,17 @@ void DragPreviewImpl(Ark_NativePointer node,
         ViewAbstract::SetDragPreview(frameNode, std::nullopt);
         return;
     }
-    auto optConvValue = std::optional<DragDropInfo>({});
+    std::optional<DragDropInfo> optConvValue;
     Converter::VisitUnion(*value,
         [&optConvValue](const Ark_String& val) {
-            optConvValue->extraInfo = Converter::OptConvert<std::string>(val).value_or(std::string());
+            optConvValue = std::optional<DragDropInfo>(
+                {.extraInfo = Converter::OptConvert<std::string>(val).value_or(std::string())});
         },
         [node, frameNode, &optConvValue](const CustomNodeBuilder& val) {
-            optConvValue->customNode = CallbackHelper(val, frameNode).BuildSync(node);
+            optConvValue = std::optional<DragDropInfo>(
+                {.customNode = CallbackHelper(val, frameNode).BuildSync(node)});
         },
-        [node, frameNode, &optConvValue](const Ark_DragItemInfo& val) {
+        [node, &optConvValue](const Ark_DragItemInfo& val) {
             optConvValue = Converter::Ark_DragItemInfoToDragDropInfo(val, node);
         },
         []() {
