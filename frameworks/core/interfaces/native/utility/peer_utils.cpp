@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/peer_utils.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 std::vector<std::string> PeerUtils::CreateAIError(OHOS::Ace::ImageAnalyzerState state)
 {

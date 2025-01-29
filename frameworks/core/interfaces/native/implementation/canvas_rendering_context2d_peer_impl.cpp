@@ -14,7 +14,7 @@
  */
 
 #include "canvas_rendering_context2d_peer_impl.h"
-#include "core/interfaces/native/implementation/peer_utils.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 namespace {
 constexpr auto ERROR_VALUE = -1;

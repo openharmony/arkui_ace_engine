@@ -14,7 +14,7 @@
  */
 
 #include "x_component_controller_peer_impl.h"
-#include "core/interfaces/native/implementation/peer_utils.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 #ifdef XCOMPONENT_SUPPORTED
 #include "base/utils/utils.h"
