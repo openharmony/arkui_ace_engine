@@ -603,7 +603,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
     CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, contextId);
     auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
 
-    for(auto&[actual, expected]: colorTestPlan) {
+    for (auto& [actual, expected] : colorTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
             .backgroundColor = actual,
         };

@@ -57,7 +57,7 @@ void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
 template<>
 void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
 {
-        switch (src) {
+    switch (src) {
         case ARK_DISMISS_REASON_PRESS_BACK : dst = BindSheetDismissReason::BACK_PRESSED; break;
         case ARK_DISMISS_REASON_TOUCH_OUTSIDE: dst = BindSheetDismissReason::TOUCH_OUTSIDE; break;
         case ARK_DISMISS_REASON_CLOSE_BUTTON: dst = BindSheetDismissReason::CLOSE_BUTTON; break;
