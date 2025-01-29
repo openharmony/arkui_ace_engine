@@ -14,7 +14,11 @@
  */
 
 #include "reverse_converter.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 
+namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+}
 namespace OHOS::Ace::NG::Converter {
 void *ConvContext::Allocate(std::size_t size)
 {
@@ -44,6 +48,13 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
         .minute = ArkValue<Ark_Number>(minute),
         .second = ArkValue<Ark_Number>(second),
     };
+}
+
+void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)
+{
+    const auto peer = reinterpret_cast<TouchEventPeer*>(GeneratedModifier::GetTouchEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)

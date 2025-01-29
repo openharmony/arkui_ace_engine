@@ -147,26 +147,6 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     dst.area = area;
 }
 
-void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)
-{
-#ifdef WRONG_TYPE
-    TouchEvent touchEvent = src.ConvertToTouchEvent();
-    dst.tiltX = Converter::ArkValue<Ark_Number>(src.GetTiltX().value_or(0.0f));
-    dst.tiltY = Converter::ArkValue<Ark_Number>(src.GetTiltY().value_or(0.0f));
-    dst.deviceId = Converter::ArkValue<Opt_Number>(src.GetDeviceId());
-    dst.target = Converter::ArkValue<Ark_EventTarget>(src.GetTarget());
-    dst.source = Converter::ArkValue<Ark_SourceType>(src.GetSourceDevice());
-    dst.sourceTool = Converter::ArkValue<Ark_SourceTool>(src.GetSourceTool());
-    dst.axisHorizontal = Converter::ArkValue<Opt_Number>(touchEvent.x);
-    dst.axisVertical = Converter::ArkValue<Opt_Number>(touchEvent.y);
-    dst.timestamp = Converter::ArkValue<Ark_Number>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-                src.GetTimeStamp().time_since_epoch()).count());
-    dst.pressure = Converter::ArkValue<Ark_Number>(touchEvent.force);
-    dst.type = Converter::ArkValue<Ark_TouchType>(touchEvent.type);
-#endif
-}
-
 void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src)
 {
     switch (src) {

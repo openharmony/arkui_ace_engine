@@ -54,6 +54,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/native/utility/callback_keeper.h"
 
 #include "ace_engine_types.h"
 #include "core/interfaces/native/utility/generated/converter_generated.h"
