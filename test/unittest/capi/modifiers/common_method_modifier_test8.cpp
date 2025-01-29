@@ -99,10 +99,6 @@ namespace {
         { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("A"), true },
         { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("B"), true },
         { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("C"), true },
-        // { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_FunctionKey>(ARK_FUNCTION_KEY_ESC), false },
-        // { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_FunctionKey>(ARK_FUNCTION_KEY_F1), false },
-        // { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>(""), false },
-        // { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_Empty>(nullptr), false },
     };
 }
 namespace Converter {
