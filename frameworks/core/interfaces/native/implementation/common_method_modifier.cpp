@@ -560,7 +560,7 @@ void ValidateByRange(std::optional<InvertVariant>& value, const float& left, con
 } // namespace Validator
 
 namespace Converter {
-DragDropInfo Convert(const Ark_DragItemInfo& src, Ark_NativePointer node)
+DragDropInfo Ark_DragItemInfoToDragDropInfo(const Ark_DragItemInfo& src, Ark_NativePointer node)
 {
     DragDropInfo dst = {};
     dst.extraInfo = Converter::OptConvert<std::string>(src.extraInfo).value_or(std::string());
@@ -3925,7 +3925,11 @@ void DragPreviewImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    DragDropInfo convValue = {};
+    std::optional<DragDropInfo> convValue = value ? {} : std::nullopt;
+    if (!convValue.has_value()) {
+        ViewAbstract::SetDragPreview(frameNode, convValue);
+        return;
+    }
     Converter::VisitUnion(*value,
         [&convValue](const Ark_String& val) {
             convValue.extraInfo = Converter::OptConvert<std::string>(val).value_or(std::string());
@@ -3934,10 +3938,11 @@ void DragPreviewImpl(Ark_NativePointer node,
             convValue.customNode = CallbackHelper(val, frameNode).BuildSync(node);
         },
         [node, frameNode, &convValue](const Ark_DragItemInfo& val) {
-            convValue = Converter::Convert(val, node);
+            convValue = Converter::Ark_DragItemInfoToDragDropInfo(val, node);
         },
         []() {
             LOGE("DragPreviewImpl(): Invalid union argument");
+            convValue = std::nullopt;
         });
     ViewAbstract::SetDragPreview(frameNode, convValue);
 }
