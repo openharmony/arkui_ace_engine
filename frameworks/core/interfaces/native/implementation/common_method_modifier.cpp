@@ -3924,27 +3924,25 @@ void DragPreviewImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::optional<DragDropInfo> convValue = value ? {} : std::nullopt;
-    if (!convValue.has_value()) {
-        ViewAbstract::SetDragPreview(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::SetDragPreview(frameNode, std::nullopt);
         return;
     }
+    auto optConvValue = std::optional<DragDropInfo>({});
     Converter::VisitUnion(*value,
-        [&convValue](const Ark_String& val) {
-            convValue.extraInfo = Converter::OptConvert<std::string>(val).value_or(std::string());
+        [&optConvValue](const Ark_String& val) {
+            optConvValue->extraInfo = Converter::OptConvert<std::string>(val).value_or(std::string());
         },
-        [node, frameNode, &convValue](const CustomNodeBuilder& val) {
-            convValue.customNode = CallbackHelper(val, frameNode).BuildSync(node);
+        [node, frameNode, &optConvValue](const CustomNodeBuilder& val) {
+            optConvValue->customNode = CallbackHelper(val, frameNode).BuildSync(node);
         },
-        [node, frameNode, &convValue](const Ark_DragItemInfo& val) {
-            convValue = Converter::Ark_DragItemInfoToDragDropInfo(val, node);
+        [node, frameNode, &optConvValue](const Ark_DragItemInfo& val) {
+            optConvValue = Converter::Ark_DragItemInfoToDragDropInfo(val, node);
         },
         []() {
             LOGE("DragPreviewImpl(): Invalid union argument");
-            convValue = std::nullopt;
         });
-    ViewAbstract::SetDragPreview(frameNode, convValue);
+    ViewAbstract::SetDragPreview(frameNode, optConvValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
