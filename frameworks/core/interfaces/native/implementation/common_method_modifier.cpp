@@ -2742,7 +2742,7 @@ void OnDragEnterImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
         callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragEnter(frameNode, onDragEnter);
+    ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
 }
 void OnDragMoveImpl(Ark_NativePointer node,
                     const Callback_DragEvent_String_Void* value)
@@ -2756,7 +2756,7 @@ void OnDragMoveImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
         callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragMove(frameNode, onDragMove);
+    ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
 }
 void OnDragLeaveImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Void* value)
@@ -2770,7 +2770,7 @@ void OnDragLeaveImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
         callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragLeave(frameNode, onDragLeave);
+    ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
 }
 void OnDropImpl(Ark_NativePointer node,
                 const Callback_DragEvent_String_Void* value)
@@ -2784,7 +2784,7 @@ void OnDropImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
         callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDrop(frameNode, onDrop);
+    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
 }
 void OnDragEndImpl(Ark_NativePointer node,
                    const Callback_DragEvent_String_Void* value)
@@ -2798,7 +2798,7 @@ void OnDragEndImpl(Ark_NativePointer node,
         std::string extraParams = "";
         callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragEnd(frameNode, onDragEnd);
+    ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
 }
 void AllowDropImpl(Ark_NativePointer node,
                    const Opt_Array_UniformDataType* value)
