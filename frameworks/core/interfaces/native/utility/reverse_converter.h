@@ -45,6 +45,7 @@
 #include "core/components_v2/list/list_properties.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "generated/converter_generated.h"
 #include "ace_engine_types.h"
 
