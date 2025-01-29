@@ -481,46 +481,18 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, toDataURLTest, TestSize.Level1)
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->toDataURL, nullptr);
 
-    for(auto &[actualType, expectedType]: OPT_IMAGE_TYPE_TEST_PLAN){
-        for(auto&[actualQuality, expectedQuality]: OPT_IMAGE_QUALITY_TEST_PLAN){
+    for (auto& [actualType, expectedType] : OPT_IMAGE_TYPE_TEST_PLAN) {
+        for (auto& [actualQuality, expectedQuality] : OPT_IMAGE_QUALITY_TEST_PLAN) {
             holder->SetUp();
-
-            auto type = Converter::OptConvert<std::string>(actualType);
-            auto quality = Converter::OptConvert<float>(actualQuality);
-            std::printf("toDatUrl: ============= start ============\n");
-            std::printf("toDatUrl: const type: %s expected: %s quality: %s expected: %s\n",
-                type?type.value().c_str():"-", expectedType.c_str(),
-                quality?std::to_string(*quality).c_str():"-", std::to_string(expectedQuality).c_str()
-            );
-            
             EXPECT_FALSE(holder->type.has_value());
             EXPECT_FALSE(holder->quality.has_value());
-            
-
             accessor_->toDataURL(peer_, &actualType, &actualQuality);
 
-          
-            std::printf("toDatUrl: ==== ready\n");
-            std::printf("toDatUrl: holder type: %s == %s quality: %s == %s\n",
-                holder->type?holder->type.value().c_str():"-", expectedType.c_str(),
-                holder->quality?std::to_string(*holder->quality).c_str():"-", std::to_string(expectedQuality).c_str()
-            );
-            std::printf("toDatUrl: ============= end ============\n");
             EXPECT_EQ(holder->type.value(), expectedType);
             EXPECT_TRUE(LessOrEqualCustomPrecision(holder->quality.value(), expectedQuality));
             EXPECT_TRUE(holder->isCalled);
-  
-
-            holder->TearDown();   
+            holder->TearDown();
         }
     }
-    
-    
-}
-
-HWTEST_F(CanvasRenderingContext2DAccessorTest, toDataURLTest2, TestSize.Level1)
-{
-    int *p = nullptr;
-    *p = 0;
 }
 } // namespace OHOS::Ace::NG
