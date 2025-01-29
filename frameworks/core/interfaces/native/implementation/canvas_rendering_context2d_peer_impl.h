@@ -42,7 +42,8 @@ public:
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
 
-    Ark_NativePointer TriggerStartImageAnalyzer(const std::vector<ImageAnalyzerType> vector);
+    void TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
+        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void TriggerStopImageAnalyzer();
     Ark_Int32 TriggerGetHeight();
     Ark_Int32 TriggerGetWidth();
@@ -90,7 +91,7 @@ private:
     void AddCallbackToList(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
 
     bool isImageAnalyzing_ = false;
-    std::vector<ImageAnalyzerType> vector_;
+    ImageAnalyzerConfig config_;
     CanvasCallbackList attachCallback_;
     CanvasCallbackList detachCallback_;
 };

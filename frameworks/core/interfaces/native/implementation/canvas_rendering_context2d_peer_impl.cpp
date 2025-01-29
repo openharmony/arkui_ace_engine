@@ -14,6 +14,7 @@
  */
 
 #include "canvas_rendering_context2d_peer_impl.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 namespace {
 constexpr auto ERROR_VALUE = -1;
@@ -123,31 +124,47 @@ void CanvasRenderingContext2DPeerImpl::Off(CallbackHelper<Callback_Void> &&callb
     DeleteCallbackFromList(callback, type);
 }
 
-Ark_NativePointer CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(
-    const std::vector<ImageAnalyzerType> vector)
+void CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
+    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(pattern_);
+    CHECK_NULL_VOID(config);
+    CHECK_NULL_VOID(outputArgumentForReturningPromise);
+    auto onError = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
+        (std::vector<std::string> error) -> void {
+        if (!error.empty()) {
+            Converter::ArkArrayHolder<Array_String> stringHolder(error);
+            Array_String stringArrayValues = stringHolder.ArkValue();
+            auto arkError = Converter::ArkValue<Opt_Array_String>(stringArrayValues);
+            arkCallback.Invoke(arkError);
+        } else {
+            auto arkEmptyMessage = Converter::ArkValue<Opt_Array_String>(Ark_Empty());
+            arkCallback.Invoke(arkEmptyMessage);
+        }
+    };
+
     if (isImageAnalyzing_) {
-        return 0;
-    }
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer pattern "
-             "not bound to component.");
-        return 0;
+        auto error = PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING);
+        onError(error);
+        return;
     }
 
-    vector_ = vector;
-    void* config = reinterpret_cast<void*>(&vector_);
+    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
+    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
+    config_.types = std::move(types);
+    void* aceConfig = reinterpret_cast<void*>(&config_);
 
-    OnAnalyzedCallback onAnalyzed = [weakCtx = WeakClaim(this)](ImageAnalyzerState state) -> void {
+    OnAnalyzedCallback onAnalyzed = [weakCtx = WeakClaim(this),
+        callback = std::move(onError)](ImageAnalyzerState state) -> void {
         auto ctx = weakCtx.Upgrade();
         CHECK_NULL_VOID(ctx);
+        auto error = PeerUtils::CreateAIError(state);
+        callback(error);
         ctx->isImageAnalyzing_ = false;
     };
 
     isImageAnalyzing_ = true;
-    pattern_->StartImageAnalyzer(config, onAnalyzed);
-    LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer return pointer not implemented.");
-    return 0;
+    pattern_->StartImageAnalyzer(aceConfig, onAnalyzed);
 }
 
 void CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer()
