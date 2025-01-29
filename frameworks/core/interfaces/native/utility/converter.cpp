@@ -17,7 +17,6 @@
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -30,10 +29,6 @@ namespace {
     constexpr int32_t NUM_4 = 4;
     constexpr int32_t STD_TM_START_YEAR = 1900;
 } // namespace
-
-namespace OHOS::Ace::NG::GeneratedModifier {
-    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
-}
 
 namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src)
@@ -197,13 +192,6 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
     touch.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.y.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-}
-
-void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info)
-{
-    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
-    peer->SetGestureInfo(info);
-    onClick.ptr = peer;
 }
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)

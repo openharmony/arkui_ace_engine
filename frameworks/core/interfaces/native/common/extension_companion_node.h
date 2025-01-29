@@ -50,9 +50,20 @@ public:
         return flags_;
     }
 
+    void SetVMContext(Ark_VMContext context)
+    {
+        context_ = context;
+    }
+
+    Ark_VMContext GetVMContext() const
+    {
+        return context_;
+    }
+
 private:
     Ark_UInt32 flags_ = 0;
     Ark_Int32 alignment_ = 0;
+    Ark_VMContext context_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_EXTENSION_COMPANION_NODE_H
