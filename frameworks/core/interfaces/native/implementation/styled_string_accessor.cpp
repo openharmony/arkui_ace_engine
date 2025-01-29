@@ -326,7 +326,8 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 
 namespace StyledStringAccessor {
-RefPtr<TaskExecutor> CreateTaskExecutor(StringArray& errors) {
+RefPtr<TaskExecutor> CreateTaskExecutor(StringArray& errors)
+{
     auto container = Container::CurrentSafely();
     if (!container) {
         errors.emplace_back("FromHtml container is null");
