@@ -16,16 +16,9 @@
 #ifndef CAPI_STUBS_ACE_PIXELMAP_STUB_H
 #define CAPI_STUBS_ACE_PIXELMAP_STUB_H
 
-// #include <chrono>
-// #include <fstream>
 #include <string>
-// #include <vector>
-
-// #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
-
 #include "frameworks/base/image/pixel_map.h"
-// #include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
 
 namespace OHOS::Ace {
 class PixelMapStub : public PixelMap {

@@ -29,6 +29,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+    const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
+    const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_OVERLAY_NAME = "overlay";
     const auto ATTRIBUTE_OVERLAY_DEFAULT_VALUE = "{\"title\":\"\","
         "\"options\":{\"align\":\"Alignment.Center\",\"offset\":{\"x\":\"0.00px\",\"y\":\"0.00px\"}}}";
@@ -50,6 +52,18 @@ public:
         ModifierTestBase::SetUpTestCase();
     }
 };
+
+//////////// DragPreview
+/*
+ * @tc.name: setDragPreviewTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest12, setDragPreviewTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_DRAG_PREVIEW_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE);
+}
 
 /*
  * @tc.name: setDragPreview_DragItemInfoTest
