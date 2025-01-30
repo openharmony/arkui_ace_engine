@@ -31,13 +31,6 @@ namespace OHOS::Ace::NG::Converter {
         return unifiedDataPeer ? unifiedDataPeer->unifiedData : nullptr;
     }
 
-    void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
-    {
-        const auto peer = reinterpret_cast<UnifiedDataPeer*>(NG::GeneratedModifier::GetUnifiedDataAccessor()->ctor());
-        peer->unifiedData = data;
-        arkData.ptr = peer;
-    }
-
     template<>
     void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
     {
@@ -46,20 +39,7 @@ namespace OHOS::Ace::NG::Converter {
             case ARK_DRAG_RESULT_DRAG_FAILED: dst = DragRet::DRAG_FAIL; break;
             case ARK_DRAG_RESULT_DRAG_CANCELED: dst = DragRet::DRAG_CANCEL; break;
             case ARK_DRAG_RESULT_DROP_ENABLED: dst = DragRet::ENABLE_DROP; break;
-            case ARK_DRAG_RESULT_DROP_DISABLED: dst = Alignment::DISABLE_DROP; break;
-            default: LOGE("Unexpected enum value in DragRet: %{public}d", src);
-        }
-    }
-
-    template<>
-    void AssignArkValue(Ark_DragResult& dst, const DragRet& src)
-    {
-        switch (src) {
-            case ARK_DRAG_RESULT_DRAG_SUCCESSFUL: dst = DragRet::DRAG_SUCCESS; break;
-            case ARK_DRAG_RESULT_DRAG_FAILED: dst = DragRet::DRAG_FAIL; break;
-            case ARK_DRAG_RESULT_DRAG_CANCELED: dst = DragRet::DRAG_CANCEL; break;
-            case ARK_DRAG_RESULT_DROP_ENABLED: dst = DragRet::ENABLE_DROP; break;
-            case ARK_DRAG_RESULT_DROP_DISABLED: dst = Alignment::DISABLE_DROP; break;
+            case ARK_DRAG_RESULT_DROP_DISABLED: dst = DragRet::DISABLE_DROP; break;
             default: LOGE("Unexpected enum value in DragRet: %{public}d", src);
         }
     }
@@ -110,14 +90,13 @@ void SetDataImpl(DragEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->dragInfo);
+    std::cout << unifiedData->ptr << std::endl;
     peer->dragInfo->SetData(Convert<RefPtr<UnifiedData>>(*unifiedData));
 }
 Ark_NativePointer GetDataImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    auto arkData = ArkValue<Ark_UnifiedData>(peer->dragInfo->GetData());
-    return reinterpret_cast<void *>(&arkData);
+    LOGE("DragEventAccessor::GetDataImpl wrong return data");
+    return nullptr;
 }
 Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 {
@@ -128,20 +107,19 @@ void SetResultImpl(DragEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->dragInfo);
-    peer->dragInfo->SetResult(Convert<DragRet>(dragResult));
+    auto result = OptConvert<DragRet>(dragResult);
+    if (result) {
+        peer->dragInfo->SetResult(*result);
+    }
 }
 Ark_NativePointer GetResultImpl(DragEventPeer* peer)
 {
-    // CHECK_NULL_RETURN(peer, 0);
-    // CHECK_NULL_RETURN(peer->dragInfo, 0);
-    // return ArkValue<Ark_NativePointer>(peer->dragInfo->GetResult()); // fix it
+    LOGE("DragEventAccessor::GetResultImpl wrong return data");
     return nullptr;
 }
 Ark_NativePointer GetPreviewRectImpl(DragEventPeer* peer)
 {
-    // CHECK_NULL_RETURN(peer, 0);
-    // CHECK_NULL_RETURN(peer->dragInfo, 0);
-    // return ArkValue<Ark_NativePointer>(peer->dragInfo->GetPreviewRect()); // fix it
+    LOGE("DragEventAccessor::GetPreviewRectImpl wrong return data");
     return nullptr;
 }
 Ark_Int32 GetVelocityXImpl(DragEventPeer* peer)
