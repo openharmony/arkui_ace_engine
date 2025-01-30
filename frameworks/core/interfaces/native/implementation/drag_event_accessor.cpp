@@ -15,8 +15,29 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/revserse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/unified_data_peer.h"
 #include "unified_data_peer.h"
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
+}
+namespace OHOS::Ace::NG::Converter {
+    template<>
+    RefPtr<UnifiedData> Convert(const Ark_UnifiedData& data)
+    {
+        auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(data.ptr);
+        return unifiedDataPeer ? unifiedDataPeer->unifiedData : nullptr;
+    }
+
+    void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
+    {
+        const auto peer = reinterpret_cast<UnifiedDataPeer*>(NG::GeneratedModifier::GetUnifiedDataAccessor()->ctor());
+        peer->unifiedData = data;
+        arkData.ptr = peer;
+    }
+} // namespace Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
@@ -58,16 +79,6 @@ Ark_Int32 GetYImpl(DragEventPeer* peer)
     return 0;
 }
 
-namespace Converter {
-    template<>
-    RefPtr<UnifiedData> Convert(const Ark_UnifiedData& data)
-    {
-        auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(data.ptr);
-        return unifiedDataPeer ? unifiedDataPeer->unifiedData : nullptr;
-    }
-} // namespace Converter
-
-
 void SetDataImpl(DragEventPeer* peer,
                  const Ark_UnifiedData* unifiedData)
 {
@@ -77,9 +88,9 @@ void SetDataImpl(DragEventPeer* peer,
 }
 Ark_NativePointer GetDataImpl(DragEventPeer* peer)
 {
-    // CHECK_NULL_RETURN(peer, 0);
-// CHECK_NULL_RETURN(peer->dragInfo, 0);
-    // return ArkValue<Ark_NativePointer>(peer->dragInfo->GetData());
+    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer->dragInfo, 0);
+    return ArkValue<Ark_NativePointer>(peer->dragInfo->GetData());
     return nullptr;
 }
 Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
