@@ -491,4 +491,24 @@ HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, Test
         EXPECT_EQ(resultValue, plan.expectedEnableBreathe);
     }
 }
+
+/*
+ * @tc.name: setFocusBoxTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest3, setFocusBoxTest, TestSize.Level1)
+{
+    Ark_FocusBoxStyle style;
+    style.margin.value = {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(10)};
+    style.strokeWidth.value = {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(5)};
+    modifier_->setFocusBox(node_, &style);
+    const auto json = GetJsonValue(node_);
+    auto focusbox = json->GetValue("focusBox");
+    auto resultValue = GetAttrValue<std::string>(focusbox, "strokeWidth");
+    EXPECT_EQ(resultValue, "5.00px");
+    resultValue = GetAttrValue<std::string>(focusbox, "margin");
+    EXPECT_EQ(resultValue, "10.00px");
+}
+
 } // namespace OHOS::Ace::NG

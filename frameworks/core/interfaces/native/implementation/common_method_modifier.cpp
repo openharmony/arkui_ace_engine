@@ -3001,7 +3001,6 @@ void FocusBoxImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA: CommonMethod::FocusBoxImpl: Ark_FocusBoxStyle.CustomObject is not supported.\n");
     auto convValue = Converter::OptConvert<NG::FocusBoxStyle>(*value);
     ViewAbstract::SetFocusBoxStyle(frameNode, convValue);
 }
@@ -3793,7 +3792,6 @@ void OnDragStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("DragDropInfo contains pixelMap which is not supported by C-API. ");
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onDragStart = [callback = CallbackHelper(*value, frameNode), weakNode]
         (const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) -> DragDropInfo {
@@ -4724,7 +4722,7 @@ void BackgroundImageImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    LOGE("CommonMethodModifier::BackgroundImageImpl, the PixelMap support not implemented");
+
     std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvert<ImageSourceInfo>(*src);
     ViewAbstract::SetBackgroundImage(frameNode, sourceInfo);
 
