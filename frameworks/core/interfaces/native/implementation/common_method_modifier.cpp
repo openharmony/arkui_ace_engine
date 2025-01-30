@@ -2764,57 +2764,8 @@ void OnTouchImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](TouchEventInfo& eventInfo) {
-        Ark_TouchEvent onTouch{};
-#ifdef WRONG_TYPE
-        onTouch.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onTouch.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onTouch.changedTouches.array = nullptr;
-        onTouch.changedTouches.length = 0;
-        auto changedTouches = eventInfo.GetChangedTouches();
-        if (!changedTouches.empty()) {
-            std::vector<Ark_TouchObject> array;
-            for (auto& info : changedTouches) {
-                array.push_back(Converter::ArkValue<Ark_TouchObject>(info));
-            }
-            onTouch.changedTouches.array = &array[0];
-            onTouch.changedTouches.length = changedTouches.size();
-        }
-        onTouch.pressure.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onTouch.pressure.f32 = 0.0f;
-        onTouch.source = static_cast<Ark_SourceType>(eventInfo.GetSourceDevice());
-        onTouch.sourceTool = static_cast<Ark_SourceTool>(0);
-        onTouch.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onTouch.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onTouch.target.area.height.type = 0;
-        onTouch.target.area.height.unit = 1;
-        onTouch.target.area.height.value = 0;
-        onTouch.target.area.width.type = 0;
-        onTouch.target.area.width.unit = 1;
-        onTouch.target.area.width.value = 0;
-        onTouch.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onTouch.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onTouch.tiltX.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onTouch.tiltX.f32 = 0;
-        onTouch.tiltY.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onTouch.tiltY.f32 = 0;
-        onTouch.timestamp.tag = Ark_Tag::ARK_TAG_INT32;
-        onTouch.timestamp.i32 = eventInfo.GetTimeStamp().time_since_epoch().count();
-        onTouch.type = static_cast<Ark_TouchType>(0);
-        onTouch.touches.array = nullptr;
-        onTouch.touches.length = 0;
-        auto touches = eventInfo.GetTouches();
-        if (!touches.empty()) {
-            std::vector<Ark_TouchObject> array;
-            for (auto& info : touches) {
-                array.push_back(Converter::ArkValue<Ark_TouchObject>(info));
-            }
-            onTouch.touches.array = &array[0];
-            onTouch.touches.length = touches.size();
-        }
-#endif
-
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onTouch(frameNode->GetId(), onTouch);
+    auto onEvent = [callback = CallbackHelper(*value)](TouchEventInfo& info) {
+        callback.Invoke(Converter::ArkValue<Ark_TouchEvent>(info));
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
@@ -4607,44 +4558,9 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
     auto onTouchIntercept = [arkCallback = CallbackHelper(*value), node = weakNode](
         TouchEventInfo& info) -> HitTestMode {
         PipelineContext::SetCallBackNode(node);
-        auto preventDefaultHandler = [&info]() {
-            info.SetPreventDefault(true);
-        };
-        auto preventDefault = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(preventDefaultHandler));
-        auto handler = [&info]() {
-            info.SetStopPropagation(true);
-        };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(handler));
-        Ark_TouchEvent event;
-#ifdef WRONG_TYPE
-        event.source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice());
-        event.timestamp = ArkValue<Ark_Number>(static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
-        event.target.area = Converter::ArkValue<Ark_Area>(info);
-        event.pressure = Converter::ArkValue<Ark_Number>(info.GetForce());
-        event.deviceId = Converter::ArkValue<Opt_Number>(info.GetDeviceId());
-        event.preventDefault = preventDefault;
-        event.tiltX = Converter::ArkValue<Ark_Number>(info.GetTiltX().value_or(0.0f));
-        event.tiltY = Converter::ArkValue<Ark_Number>(info.GetTiltY().value_or(0.0f));
-        event.sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool());
-        const std::list<TouchLocationInfo>& touchList = info.GetTouches();
-        std::vector<TouchLocationInfo> touchVector(touchList.begin(), touchList.end());
-        Converter::ArkArrayHolder<Array_TouchObject> touchesHolder(touchVector);
-        event.touches = touchesHolder.ArkValue();
-        const std::list<TouchLocationInfo>& changedTouches = info.GetChangedTouches();
-        std::vector<TouchLocationInfo> changedTouchesVector(changedTouches.begin(), changedTouches.end());
-        Converter::ArkArrayHolder<Array_TouchObject> changedTouchesHolder(changedTouchesVector);
-        event.changedTouches = changedTouchesHolder.ArkValue();
-        if (changedTouches.size() > 0) {
-            event.type = Converter::ArkValue<Ark_TouchType>(changedTouches.front().GetTouchType());
-        }
-        event.axisVertical = Converter::ArkValue<Opt_Number>(0.0f);
-        event.axisHorizontal = Converter::ArkValue<Opt_Number>(0.0f);
-        event.stopPropagation = stopPropagation;
-#endif
+        Ark_TouchEvent event = Converter::ArkValue<Ark_TouchEvent>(info);
         Callback_HitTestMode_Void continuation;
         arkCallback.Invoke(event, continuation);
-        preventDefault.resource.release(preventDefault.resource.resourceId);
-        stopPropagation.resource.release(stopPropagation.resource.resourceId);
         LOGE("CommonMethodModifier::OnTouchInterceptImpl return value can be incorrect");
         return HitTestMode::HTMDEFAULT;
     };
