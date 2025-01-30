@@ -150,7 +150,6 @@ namespace Converter {
             std::optional<uint32_t> ToSymbol();
             std::optional<Color> ToColor();
             std::optional<bool> ToBoolean();
-            std::optional<ImageSourceInfo> ToImageSourceInfo();
 
             const std::string& BundleName() { return bundleName_; }
             const std::string& ModuleName() { return moduleName_; }

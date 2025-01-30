@@ -32,6 +32,8 @@ namespace {
     const auto ATTRIBUTE_ALLOW_DROP_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
     const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
+    const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_MOTION_PATH_NAME = "motionPath";
     const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_KEY_NAME = "id";
@@ -315,6 +317,30 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setDraggableTestValidValues, TestSi
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_DRAGGABLE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
+}
+
+//////////// DragPreview
+/*
+ * @tc.name: setDragPreviewTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setDragPreviewTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_DRAG_PREVIEW_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setDragPreviewTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setDragPreviewTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    LOGE("ARKOALA: CommonMethod::setsetDragPreview: "
+        "Ark_Union_CustomBuilder_DragItemInfo_String.DragDropInfo.pixelMap is not supported.\n");
 }
 
 //////////// MotionPath

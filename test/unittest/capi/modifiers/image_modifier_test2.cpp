@@ -60,7 +60,7 @@ LoadImageSuccessEvent Convert(const Ark_Type_ImageAttribute_onComplete_callback_
 
 namespace  {
     
-    const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
+    const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor"; 
     const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
 
     // Valid values for boolean values
