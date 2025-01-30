@@ -162,7 +162,7 @@ HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
 HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->animation, nullptr);
-    Ark_AnimateParam animParam;    
+    Ark_AnimateParam animParam;
     animParam.duration = Converter::ArkValue<Opt_Number>(333);
 
     TransitionEffectPeer peer;
