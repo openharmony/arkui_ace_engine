@@ -54,41 +54,35 @@ namespace GeneratedModifier {
 namespace BaseEventAccessor {
 
 namespace {
+const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
+const Ark_Int32 DefaultValueInt32 = Converter::ArkValue<Ark_Int32>(0);
+
 bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vector<KeyCode>& keysCodes)
 {
     auto contains = [](const std::vector<KeyCode>& values, const KeyCode& value) -> bool {
         auto it = std::find(values.begin(), values.end(), value);
         return it != values.end();
     };
-    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    std::unordered_map<std::string, std::vector<KeyCode>> validKeyCodes = { 
+    {"ctrl", {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT}},
+    {"shift", {KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT}},
+    {"alt", {KeyCode::KEY_ALT_LEFT, KeyCode::KEY_ALT_RIGHT}},
+    {"fn", {KeyCode::KEY_FN}}};
     for (const auto& str : keysStrs) {
         std::string code;
         std::transform(str.begin(), str.end(), std::back_inserter(code),
             [](const char& c) { return std::tolower(c); });
-        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code);
+        auto it = validKeyCodes.find(code);
         if (it == validKeyCodes.end()) {
             return false;
         }
-        if (code == "ctrl") {
-            if (!contains(keysCodes, KeyCode::KEY_CTRL_LEFT) &&
-                    !contains(keysCodes, KeyCode::KEY_CTRL_RIGHT)) {
-                return false;
+        bool foundKey = false;
+        for (const auto& key : it->second) {
+            if (contains(keysCodes, key)) {
+                foundKey = true;
             }
-        } else if (code == "shift") {
-            if (!contains(keysCodes, KeyCode::KEY_SHIFT_LEFT) &&
-                    !contains(keysCodes, KeyCode::KEY_SHIFT_RIGHT)) {
-                return false;
-            }
-        } else if (code == "alt") {
-            if (!contains(keysCodes, KeyCode::KEY_ALT_LEFT) &&
-                    !contains(keysCodes, KeyCode::KEY_ALT_RIGHT)) {
-                return false;
-            }
-        } else if (code == "fn") {
-            if (!contains(keysCodes, KeyCode::KEY_FN)) {
-                return false;
-            }
-        } else {
+        }
+        if (!foundKey) {
             return false;
         }
     }
@@ -111,8 +105,8 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Boolean GetModifierKeyStateImpl(BaseEventPeer* peer,
                                     const Array_String* keys)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
-    CHECK_NULL_RETURN(keys, 0);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueBoolean);
+    CHECK_NULL_RETURN(keys, DefaultValueBoolean);
     auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
     return Converter::ArkValue<Ark_Boolean>(CheckKeysPressed(keysStr, eventKeys));
@@ -126,7 +120,7 @@ void SetTargetImpl(BaseEventPeer* peer,
 }
 Ark_Int32 GetTimestampImpl(BaseEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
     auto tstamp = std::chrono::duration_cast<std::chrono::milliseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(tstamp));
@@ -171,7 +165,7 @@ void SetAxisVerticalImpl(BaseEventPeer* peer,
 }
 Ark_Int32 GetPressureImpl(BaseEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->GetBaseInfo()->GetForce()));
 }
 void SetPressureImpl(BaseEventPeer* peer,
@@ -183,7 +177,7 @@ void SetPressureImpl(BaseEventPeer* peer,
 }
 Ark_Int32 GetTiltXImpl(BaseEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
     auto value = peer->GetBaseInfo()->GetTiltX();
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value.value_or(0)));
 }
@@ -196,7 +190,7 @@ void SetTiltXImpl(BaseEventPeer* peer,
 }
 Ark_Int32 GetTiltYImpl(BaseEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
     auto value = peer->GetBaseInfo()->GetTiltY();
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value.value_or(0)));
 }
@@ -222,7 +216,7 @@ void SetSourceToolImpl(BaseEventPeer* peer,
 }
 Ark_Int32 GetDeviceIdImpl(BaseEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId()));
 }
 void SetDeviceIdImpl(BaseEventPeer* peer,
