@@ -159,9 +159,17 @@ HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getAnimationTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->animation, nullptr);
+    Ark_AnimateParam animParam;    
+    animParam.duration = Converter::ArkValue<Opt_Number>(333);
+
+    TransitionEffectPeer peer;
+    peer.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(33);
+    
+    auto peer2 = accessor_->animation(reinterpret_cast<TransitionEffectPeer*>(&peer), &animParam);
+    ASSERT_NE(peer2, nullptr);
 }
 
 /**
@@ -169,9 +177,21 @@ HWTEST_F(TransitionEffectAccessorTest, DISABLED_getAnimationTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getCombineTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->combine, nullptr);
+    auto opacity = 444;
+
+    TransitionEffectPeer peer1;
+    peer1.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
+
+    TransitionEffectPeer peer2;
+    peer2.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
+
+    const Ark_TransitionEffect effect { .ptr = &peer2 };
+
+    auto peer = accessor_->combine(reinterpret_cast<TransitionEffectPeer*>(&peer1), &effect);
+    ASSERT_NE(peer, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

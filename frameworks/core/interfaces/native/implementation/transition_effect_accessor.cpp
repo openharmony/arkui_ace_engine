@@ -47,7 +47,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
         auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
         TranslateOptions translate(x.value_or(emptyDimension), y.value_or(emptyDimension), z.value_or(emptyDimension));
-        peer->handler = new ChainedTranslateEffect(translate);
+        peer->handler = AceType::MakeRefPtr<ChainedTranslateEffect>(translate);
     } else if (valueText == ROTATE_TOKEN) {
         auto x = Converter::Convert<float>(effect->rotate.x.value);
         auto y = Converter::Convert<float>(effect->rotate.y.value);
@@ -61,7 +61,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
             centerX.value_or(emptyDimension),
             centerY.value_or(emptyDimension),
             centerZ.value_or(emptyDimension), perspective);
-        peer->handler = new ChainedRotateEffect(rotate);
+        peer->handler = AceType::MakeRefPtr<ChainedRotateEffect>(rotate);
     } else if (valueText == SCALE_TOKEN) {
         auto x = Converter::Convert<float>(effect->scale.x.value);
         auto y = Converter::Convert<float>(effect->scale.y.value);
@@ -69,13 +69,13 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto centerX = Converter::OptConvert<CalcDimension>(effect->scale.centerX.value);
         auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
         ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
-        peer->handler = new ChainedScaleEffect(scale);
+        peer->handler = AceType::MakeRefPtr<ChainedScaleEffect>(scale);
     } else if (valueText == OPACITY_TOKEN) {
         auto opacity = Converter::Convert<float>(effect->opacity);
-        peer->handler = new ChainedOpacityEffect(opacity);
+        peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
     } else if (valueText == MOVE_TOKEN) {
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
-        peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
+        peer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(move.value_or(TransitionEdge::TOP));
     } else if (valueText == ASYMMETRIC_TOKEN) {
         CHECK_NULL_RETURN(effect && effect->asymmetric.appear.ptr, nullptr);
         auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
@@ -83,7 +83,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
         auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
         CHECK_NULL_RETURN(disapp, nullptr);
-        peer->handler = new ChainedAsymmetricEffect(app->handler, disapp->handler);
+        peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(app->handler, disapp->handler);
     }
     return peer;
 }
