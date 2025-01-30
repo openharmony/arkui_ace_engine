@@ -2000,15 +2000,16 @@ void OnKeyEventImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (!value) {
         ViewAbstract::DisableOnKeyEvent(frameNode);
+    } else {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
+            PipelineContext::SetCallBackNode(node);
+            auto event = Converter::ArkValue<Ark_KeyEvent>(info);
+            arkCallback.Invoke(event);
+            return false;
+        };
+        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
-        PipelineContext::SetCallBackNode(node);
-        auto event = Converter::ArkValue<Ark_KeyEvent>(info);
-        arkCallback.Invoke(event);
-        return false;
-    };
-    ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
 }
 void OnKeyPreImeImpl(Ark_NativePointer node,
                      const Callback_KeyEvent_Boolean* value)
@@ -2017,16 +2018,17 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (!value) {
         ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+    } else {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](KeyEventInfo& info)
+            -> bool {
+            PipelineContext::SetCallBackNode(node);
+            auto event = Converter::ArkValue<Ark_KeyEvent>(info);
+            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
+            return Converter::Convert<bool>(arkResult);
+        };
+        ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
     }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](KeyEventInfo& info)
-        -> bool {
-        PipelineContext::SetCallBackNode(node);
-        auto event = Converter::ArkValue<Ark_KeyEvent>(info);
-        auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
-        return Converter::Convert<bool>(arkResult);
-    };
-    ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
 }
 void FocusableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
