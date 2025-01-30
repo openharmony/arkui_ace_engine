@@ -92,8 +92,8 @@ void Lunar1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //DatePickerModelNG::SetLunar1(frameNode, convValue);
+    auto lunar = Converter::OptConvert<bool>(*value).value_or(false);
+    DatePickerModelNG::SetShowLunar(frameNode, lunar);
 }
 void DisappearTextStyle0Impl(Ark_NativePointer node,
                              const Ark_PickerTextStyle* value)

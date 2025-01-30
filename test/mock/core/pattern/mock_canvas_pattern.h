@@ -77,6 +77,8 @@ public:
         direction = std::nullopt;
         textAlign = std::nullopt;
         baseline = std::nullopt;
+        type = std::nullopt;
+        quality = std::nullopt;
     }
 
     void TearDown()
@@ -96,6 +98,8 @@ public:
         direction = std::nullopt;
         textAlign = std::nullopt;
         baseline = std::nullopt;
+        type = std::nullopt;
+        quality = std::nullopt;
     }
 
     void* config = nullptr;
@@ -142,6 +146,8 @@ public:
     std::optional<Ace::TextDirection> direction = std::nullopt;
     std::optional<Ace::TextAlign> textAlign = std::nullopt;
     std::optional<Ace::TextBaseline> baseline = std::nullopt;
+    std::optional<std::string> type = std::nullopt;
+    std::optional<double> quality = std::nullopt;
 };
 
 } // namespace OHOS::Ace::NG

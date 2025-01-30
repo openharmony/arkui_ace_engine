@@ -39,6 +39,12 @@ public:
     ~MockCanvasPattern() override = default;
 };
 
+const std::string IMAGE_PNG = "image/png";
+const std::string IMAGE_JPEG = "image/jpeg";
+const std::string IMAGE_WEBP = "image/webp";
+const std::string EMPTY_STRING = "";
+const auto IMAGE_QUALITY_DEFAULT = 0.92f;
+
 // test plans
 typedef std::pair<double, Ark_Int32> DoubleValueTestStep;
 const std::vector<DoubleValueTestStep> DOUBLE_VALUE_TEST_PLAN = {
@@ -60,6 +66,25 @@ const std::vector<Ark_ImageAnalyzerType> ARK_IMAGE_TYPE_TEST_PLAN {
     static_cast<Ark_ImageAnalyzerType>(-100)
 };
 
+const std::vector<std::pair<Opt_String, std::string>> OPT_IMAGE_TYPE_TEST_PLAN {
+    { Converter::ArkValue<Opt_String>(IMAGE_PNG),  IMAGE_PNG},
+    { Converter::ArkValue<Opt_String>(IMAGE_JPEG),  IMAGE_JPEG},
+    { Converter::ArkValue<Opt_String>(IMAGE_WEBP),  IMAGE_WEBP},
+    { Converter::ArkValue<Opt_String>(EMPTY_STRING),  IMAGE_PNG},
+    { Converter::ArkValue<Opt_String>(Ark_Empty()),  IMAGE_PNG},
+};
+const std::vector<std::pair<Opt_Number, float>> OPT_IMAGE_QUALITY_TEST_PLAN {
+    { Converter::ArkValue<Opt_Number>(-10.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(-1.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(-0.75f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(0.0f), 0.0f },
+    { Converter::ArkValue<Opt_Number>(0.5f), 0.5f },
+    { Converter::ArkValue<Opt_Number>(0.92f), 0.92f },
+    { Converter::ArkValue<Opt_Number>(1.0f), 1.0f },
+    { Converter::ArkValue<Opt_Number>(1.25f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(10.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(Ark_Empty()), IMAGE_QUALITY_DEFAULT },
+};
 } // namespace
 
 class CanvasRenderingContext2DAccessorTest
@@ -444,5 +469,30 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTestAll, TestSize.Leve
     }
     EXPECT_EQ(holder->counter, 1);
     holder->TearDown();
+}
+
+/**
+ * @tc.name: toDataURLTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, toDataURLTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->toDataURL, nullptr);
+
+    for (auto& [actualType, expectedType] : OPT_IMAGE_TYPE_TEST_PLAN) {
+        for (auto& [actualQuality, expectedQuality] : OPT_IMAGE_QUALITY_TEST_PLAN) {
+            holder->SetUp();
+            EXPECT_FALSE(holder->type.has_value());
+            EXPECT_FALSE(holder->quality.has_value());
+            accessor_->toDataURL(peer_, &actualType, &actualQuality);
+
+            EXPECT_EQ(holder->type.value(), expectedType);
+            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->quality.value(), expectedQuality));
+            EXPECT_TRUE(holder->isCalled);
+            holder->TearDown();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

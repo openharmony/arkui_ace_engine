@@ -199,4 +199,11 @@ Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
     return  Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width));
 }
 
+void CanvasRenderingContext2DPeerImpl::ToDataURL(const std::string& type, float& quality)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetWidth pattern not bound to component.");
+    }
+    pattern_->ToDataURL(type, quality);
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier
