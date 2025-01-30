@@ -1230,5 +1230,8 @@ void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
+
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

@@ -62,6 +62,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+    "$ace_root/frameworks/core/animation/animation_pub.cpp",
     "$ace_root/frameworks/core/common/card_scope.cpp",
     "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_model_static_ng.cpp",
