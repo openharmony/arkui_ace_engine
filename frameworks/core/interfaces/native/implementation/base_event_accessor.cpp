@@ -59,9 +59,16 @@ const Ark_Int32 DefaultValueInt32 = Converter::ArkValue<Ark_Int32>(0);
 
 bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vector<KeyCode>& keysCodes)
 {
-    auto contains = [](const std::vector<KeyCode>& values, const KeyCode& value) -> bool {
-        auto it = std::find(values.begin(), values.end(), value);
-        return it != values.end();
+    auto intersects = [](const std::vector<KeyCode>& lv, const std::vector<KeyCode>& rv) -> bool {
+        bool found = false;
+        for (const auto& key : lv) {
+            auto it = std::find(rv.begin(), rv.end(), key);
+            if (it != rv.end()) {
+                found = true;
+                break;
+            }
+        }
+        return found;
     };
     std::unordered_map<std::string, std::vector<KeyCode>> validKeyCodes = { 
     {"ctrl", {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT}},
@@ -76,13 +83,7 @@ bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vecto
         if (it == validKeyCodes.end()) {
             return false;
         }
-        bool foundKey = false;
-        for (const auto& key : it->second) {
-            if (contains(keysCodes, key)) {
-                foundKey = true;
-            }
-        }
-        if (!foundKey) {
+        if (intersects(keysCodes, it->second)) {
             return false;
         }
     }
@@ -121,7 +122,7 @@ void SetTargetImpl(BaseEventPeer* peer,
 Ark_Int32 GetTimestampImpl(BaseEventPeer* peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
-    auto tstamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+    auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(tstamp));
 }
