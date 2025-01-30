@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace Converter {
+    template<> void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
     template<> void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src);
     template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src);
     template<> void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src);

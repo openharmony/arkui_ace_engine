@@ -15,7 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/revserse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/unified_data_peer.h"
 #include "unified_data_peer.h"
@@ -36,6 +36,32 @@ namespace OHOS::Ace::NG::Converter {
         const auto peer = reinterpret_cast<UnifiedDataPeer*>(NG::GeneratedModifier::GetUnifiedDataAccessor()->ctor());
         peer->unifiedData = data;
         arkData.ptr = peer;
+    }
+
+    template<>
+    void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
+    {
+        switch (src) {
+            case ARK_DRAG_RESULT_DRAG_SUCCESSFUL: dst = DragRet::DRAG_SUCCESS; break;
+            case ARK_DRAG_RESULT_DRAG_FAILED: dst = DragRet::DRAG_FAIL; break;
+            case ARK_DRAG_RESULT_DRAG_CANCELED: dst = DragRet::DRAG_CANCEL; break;
+            case ARK_DRAG_RESULT_DROP_ENABLED: dst = DragRet::ENABLE_DROP; break;
+            case ARK_DRAG_RESULT_DROP_DISABLED: dst = Alignment::DISABLE_DROP; break;
+            default: LOGE("Unexpected enum value in DragRet: %{public}d", src);
+        }
+    }
+
+    template<>
+    void AssignArkValue(Ark_DragResult& dst, const DragRet& src)
+    {
+        switch (src) {
+            case ARK_DRAG_RESULT_DRAG_SUCCESSFUL: dst = DragRet::DRAG_SUCCESS; break;
+            case ARK_DRAG_RESULT_DRAG_FAILED: dst = DragRet::DRAG_FAIL; break;
+            case ARK_DRAG_RESULT_DRAG_CANCELED: dst = DragRet::DRAG_CANCEL; break;
+            case ARK_DRAG_RESULT_DROP_ENABLED: dst = DragRet::ENABLE_DROP; break;
+            case ARK_DRAG_RESULT_DROP_DISABLED: dst = Alignment::DISABLE_DROP; break;
+            default: LOGE("Unexpected enum value in DragRet: %{public}d", src);
+        }
     }
 } // namespace Converter
 
@@ -83,15 +109,15 @@ void SetDataImpl(DragEventPeer* peer,
                  const Ark_UnifiedData* unifiedData)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->dragInfo);//const RefPtr<UnifiedData>& unifiedData
-    peer->dragInfo->SetData(Convert<RefPtr<UnifiedData>>(*unifiedData)); // RefPtr<UnifiedData>
+    CHECK_NULL_VOID(peer->dragInfo);
+    peer->dragInfo->SetData(Convert<RefPtr<UnifiedData>>(*unifiedData));
 }
 Ark_NativePointer GetDataImpl(DragEventPeer* peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_NativePointer>(peer->dragInfo->GetData());
-    return nullptr;
+    auto arkData = ArkValue<Ark_UnifiedData>(peer->dragInfo->GetData());
+    return reinterpret_cast<void *>(&arkData);
 }
 Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 {
@@ -100,9 +126,9 @@ Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 void SetResultImpl(DragEventPeer* peer,
                    Ark_DragResult dragResult)
 {
-    // CHECK_NULL_RETURN(peer, 0);
-    // CHECK_NULL_RETURN(peer->dragInfo, 0);
-    // peer->dragInfo->SetResult(Convert<UnifiedData>(dragResult)); // DragRet
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->dragInfo);
+    peer->dragInfo->SetResult(Convert<DragRet>(dragResult));
 }
 Ark_NativePointer GetResultImpl(DragEventPeer* peer)
 {
