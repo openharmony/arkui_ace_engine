@@ -146,11 +146,6 @@ public:
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
         json->PutExtAttr("fontFeature", GetFontFeatureStr().c_str(), filter);
-        json->PutExtAttr("stopBackPress", GetStopBackPress().value_or(true), filter);
-        json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(0.0)).c_str(), filter);
-        json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(1.0)).c_str(), filter);
-        json->PutExtAttr("ellipsisMode",
-        V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str(), filter);
         ToJsonValueForOption(json, filter);
     }
 
