@@ -1072,17 +1072,7 @@ void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
     Ark_TouchEvent touchEvent = Converter::ArkValue<Ark_TouchEvent>(touchEventInfo);
-#ifdef WRONG_TYPE
-    std::list<TouchLocationInfo> touches = touchEventInfo.GetTouches();
-    std::vector<TouchLocationInfo> vTouches { std::begin(touches), std::end(touches) };
-    Converter::ArkArrayHolder<Array_TouchObject> touchesHolder(vTouches);
-    touchEvent.touches = touchesHolder.ArkValue();
-    std::list<TouchLocationInfo> changedTouches = touchEventInfo.GetChangedTouches();
-    std::vector<TouchLocationInfo> vChangedTouches { std::begin(changedTouches), std::end(changedTouches) };
-    Converter::ArkArrayHolder<Array_TouchObject> changedTouchesHolder(vChangedTouches);
-    touchEvent.changedTouches = changedTouchesHolder.ArkValue();
     parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(touchEvent);
-#endif
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
     peer->handler = eventInfo->GetResult();
