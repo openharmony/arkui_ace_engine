@@ -440,6 +440,12 @@ std::optional<bool> ResourceConverter::ToBoolean()
     return std::nullopt;
 }
 
+std::optional<ImageSourceInfo> ToImageSourceInfo()
+{
+    ???
+    return std::nullopt;
+}
+
 template<>
 ScaleOpt Convert(const Ark_ScaleOptions& src)
 {
@@ -1595,6 +1601,44 @@ void AssignCast(std::optional<FontFamilies>& dst, const Ark_Resource& value)
         temp.families = families.value();
         dst = temp;
     }
+}
+
+template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Resource& value)
+{
+    dst = std::nullopt;
+    ResourceConverter converter(value);
+    ///////////////
+    /*
+    typedef struct Ark_Resource {
+        Ark_String bundleName;
+        Ark_String moduleName;
+        Ark_Number id;
+        Opt_Array_String params;
+        Opt_Number type; // Assuming type is an optional number
+    } Ark_Resource;
+    */
+    std::string bundleName = converter.BundleName();
+    std::string moduleName = converter.moduleName();
+
+    // Предполагается, что imageSrc может быть пустой строкой или содержать имя файла/ресурса.
+    std::string imageSrc;
+    
+    if (src.params && !src.params->empty()) {
+        // Например, используем первый элемент массива как source
+        imageSrc = Converter::Convert<std::string>((*src.params)[0]);
+    }
+
+    auto resourceId = Converter::OptConvert<InternalResource::ResourceId>(src.id);
+
+    dst = ImageSourceInfo(
+        imageSrc,
+        bundleName,
+        moduleName,
+        Dimension(-1),  // width
+        Dimension(-1),  // height
+        resourceId.value_or(InternalResource::ResourceId(InternalResource::ResourceId::NO_ID))
+    );
 }
 
 template<>
