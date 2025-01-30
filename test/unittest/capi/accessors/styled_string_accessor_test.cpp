@@ -779,7 +779,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Lev
         auto outString = mSpanString->GetString();
         EXPECT_EQ(outString, baseString);
 
-        EXPECT_EQ(IsSpanItemSame(mSpanString->GetSpanItems(), peer_->spanString->GetSpanItems()), true);
+        EXPECT_TRUE(IsSpanItemSame(mSpanString->GetSpanItems(), peer_->spanString->GetSpanItems()));
     }
 }
 
