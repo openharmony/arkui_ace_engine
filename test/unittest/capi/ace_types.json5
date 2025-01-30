@@ -1827,6 +1827,16 @@
                     ],
                 },
                 {
+                    "name": "minFontScale",
+                    "default": "0.000000",
+                    "fixtures": ["MinFontScaleNum", "MinFontScaleRes"],
+                },
+                {
+                    "name": "maxFontScale",
+                    "default": "1.000000",
+                    "fixtures": ["MaxFontScaleNum", "MaxFontScaleRes"],
+                },
+                {
                     "name": "fontFeature",
                     "default": "",
                     "fixtures": ["FontFeature"]
@@ -1976,6 +1986,18 @@
                 {
                     "name": "heightAdaptivePolicy",
                     "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST"
+                },
+                {
+                    "name": "halfLeading",
+                    "default": "false",
+                },
+                {
+                    "name": "ellipsisMode",
+                    "default": "EllipsisMode.END",
+                },
+                {
+                    "name": "stopBackPress",
+                    "default": "true",
                 },
                 {
                     "name": "enableAutoFill",
@@ -2159,23 +2181,6 @@
                 "setLetterSpacingTestLetterSpacingInvalidValues",
                 "setLineHeightTestDefaultValues",
                 "setLineHeightTestLineHeightInvalidValues",
-
-                // New API 111
-                "setMinFontScaleTestDefaultValues",
-                "setMinFontScaleTestMinFontScaleValidValues",
-                "setMinFontScaleTestMinFontScaleInvalidValues",
-                "setMaxFontScaleTestDefaultValues",
-                "setMaxFontScaleTestMaxFontScaleValidValues",
-                "setMaxFontScaleTestMaxFontScaleInvalidValues",
-                "setHalfLeadingTestDefaultValues",
-                "setHalfLeadingTestHalfLeadingValidValues",
-                "setHalfLeadingTestHalfLeadingInvalidValues",
-                "setEllipsisModeTestDefaultValues",
-                "setEllipsisModeTestEllipsisModeValidValues",
-                "setEllipsisModeTestEllipsisModeInvalidValues",
-                "setStopBackPressTestDefaultValues",
-                "setStopBackPressTestStopBackPressValidValues",
-                "setStopBackPressTestStopBackPressInvalidValues",
             ]
         },
         {
