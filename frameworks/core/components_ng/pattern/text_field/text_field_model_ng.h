@@ -301,7 +301,7 @@ public:
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static bool GetEnablePreviewText(FrameNode* frameNode);
     static void SetEllipsisMode(FrameNode* frameNode, const std::optional<EllipsisMode>& modal);
-    static void SetStopBackPress(FrameNode* frameNode,const std::optional<bool>& isStopBackPress);
+    static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
 
 private:
     void AddDragFrameNodeToManager() const;
