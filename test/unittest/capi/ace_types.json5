@@ -2545,27 +2545,9 @@
             ],
             "remove":[
 //1
-"setMotionBlur1TestDefaultValues",
-"setMotionBlur1TestMotionBlurRadiusValidValues",
-"setMotionBlur1TestMotionBlurAnchorXValidValues",
-"setMotionBlur1TestMotionBlurAnchorYValidValues",
-"setRotate1TestRotateXValidValues",
-"setRotate1TestRotateXInvalidValues",
-"setRotate1TestRotateYValidValues",
-"setRotate1TestRotateYInvalidValues",
-"setRotate1TestRotateZValidValues",
-"setRotate1TestRotateZInvalidValues",
-"setRotate1TestRotateCenterXValidValues",
-"setRotate1TestRotateCenterYValidValues",
-"setRotate1TestRotatePerspectiveValidValues",
-"setRotate1TestRotatePerspectiveInvalidValues",
-"setRotate1TestRotateAngleInvalidValues",
 "setClip2TestDefaultValues",
 "setClip2TestClipValidValues",
 "setClip2TestClipInvalidValues",
-"setRenderFit1TestDefaultValues",
-"setRenderFit1TestRenderFitValidValues",
-"setRenderFit1TestRenderFitInvalidValues",
 "setBackgroundBlurStyle1TestBackgroundBlurStyleStyleValidValues",
 "setBackgroundBlurStyle1TestBackgroundBlurStyleStyleInvalidValues",
 "setForegroundBlurStyle1TestForegroundBlurStyleStyleValidValues",
@@ -2578,22 +2560,16 @@
 "setAccessibilityRoleTestAccessibilityRoleInvalidValues",
                 "setBlendMode1TestBlendModeModeValidValues",
                 "setBlendMode1TestBlendModeModeInvalidValues",
-
 //1
                 "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanValidValues",
                 "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanOffsetValidValues",
-                "setRotate0TestDefaultValues",
-                "setRotate0TestRotateCenterXInvalidValues",
-                "setRotate0TestRotateCenterYInvalidValues",
+// above need check later
+                "setRotate0TestRotateAngleValidValues",
+                "setRotate1TestRotateAngleValidValues",
                 "setRotate0TestRotateCenterZValidValues",
                 "setRotate0TestRotateCenterZInvalidValues",
-                "setRotate0TestRotateAngleValidValues", // above need check later
-                "setRotate1TestDefaultValues",
-                "setRotate1TestRotateCenterXInvalidValues",
-                "setRotate1TestRotateCenterYInvalidValues",
                 "setRotate1TestRotateCenterZValidValues",
                 "setRotate1TestRotateCenterZInvalidValues",
-                "setRotate1TestRotateAngleValidValues", // above need check later
                 "setObscuredTestDefaultValues",
                 "setObscuredTestValidValues",
                 "setTransition0TestTransitionTransitionOptionsTypeValidValues",
@@ -2652,9 +2628,9 @@
                 "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanInvalidValues",
                 "setAlignRules0TestDefaultValues",
                 "setAlignRules1TestDefaultValues",
-                "setMarkAnchorTestValidValues", //above tests replaced by manual UT
                 "setSafeAreaPaddingTestDefaultValues",
                 "setSafeAreaPaddingTestValidValues",
+                "setMarkAnchorTestValidValues", //above tests replaced by manual UT
                 "setTabStopTestDefaultValues",
                 "setTabStopTestTabStopValidValues",
                 "setUseEffect0TestDefaultValues",
@@ -3190,8 +3166,6 @@
                 "setUseShadowBatching1TestDefaultValues",
                 "setUseShadowBatching1TestUseShadowBatchingValidValues",
                 "setUseShadowBatching1TestUseShadowBatchingInvalidValues",
-//                "setUseEffectTestDefaultValues",
-//                "setUseEffectTestUseEffectValidValues",
                 "setRenderGroup0TestDefaultValues",
                 "setRenderGroup0TestRenderGroupValidValues",
                 "setRenderGroup1TestDefaultValues",
@@ -3730,7 +3704,7 @@
                         },
                         {
                             "name": "z",
-                            "default": "1.000000",
+                            "default": "0.000000",
                             "fixtures": ["NumberFloatAnything"],
                         },
                         {
@@ -3756,7 +3730,7 @@
                         {
                             "name": "centerZ",
                             "default": "0.00px",
-                           // "fixtures": ["DimensionsNumAny"],
+                            //"fixtures": ["DimensionsNumAny","DimensionsStrNonPerc"],
                         },
                     ]
                 },
