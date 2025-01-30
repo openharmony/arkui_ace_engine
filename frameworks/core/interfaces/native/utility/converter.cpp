@@ -1948,6 +1948,22 @@ KeyboardOptions Convert(const Ark_KeyboardOptions& src)
 }
 
 template<>
+EventTarget Convert(const Ark_EventTarget& src)
+{
+    static const Dimension Zero = Dimension(0.f);
+    auto width = Converter::Convert<Dimension>(src.area.width);
+    auto height = Converter::Convert<Dimension>(src.area.height);
+    auto offsetX = Converter::OptConvert<Dimension>(src.area.position.x);
+    auto offsetY = Converter::OptConvert<Dimension>(src.area.position.y);
+    DimensionRect area(width, height,
+        DimensionOffset(offsetX.value_or(Zero), offsetY.value_or(Zero)));
+    auto globX = Converter::OptConvert<Dimension>(src.area.globalPosition.x);
+    auto globY = Converter::OptConvert<Dimension>(src.area.globalPosition.y);
+    return EventTarget { "", "", area,
+        DimensionOffset(globX.value_or(Zero), globY.value_or(Zero)) };
+}
+
+template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
     SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};

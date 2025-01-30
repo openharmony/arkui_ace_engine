@@ -13,12 +13,89 @@
  * limitations under the License.
  */
 
+#include <vector>
+
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/ace_events.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+
+namespace OHOS::Ace::NG {
+
+namespace Converter {
+template<>
+void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src)
+{
+    switch (src) {
+        case ARK_SOURCE_TYPE_UNKNOWN: dst = SourceType::NONE; break;
+        case ARK_SOURCE_TYPE_MOUSE: dst = SourceType::MOUSE; break;
+        case ARK_SOURCE_TYPE_TOUCH_SCREEN: dst = SourceType::TOUCH; break;
+        default: LOGE("Unexpected enum value in Ark_SourceType: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
+{
+    switch (src) {
+        case ARK_SOURCE_TOOL_UNKNOWN: dst = SourceTool::UNKNOWN; break;
+        case ARK_SOURCE_TOOL_FINGER: dst = SourceTool::FINGER; break;
+        case ARK_SOURCE_TOOL_PEN: dst = SourceTool::PEN; break;
+        case ARK_SOURCE_TOOL_MOUSE: dst = SourceTool::MOUSE; break;
+        case ARK_SOURCE_TOOL_TOUCHPAD: dst = SourceTool::TOUCHPAD; break;
+        case ARK_SOURCE_TOOL_JOYSTICK: dst = SourceTool::JOYSTICK; break;
+        default: LOGE("Unexpected enum value in Ark_SourceTool: %{public}d", src);
+    }
+}
+} // namespace Converter
+
+namespace GeneratedModifier {
 namespace BaseEventAccessor {
+
+namespace {
+bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vector<KeyCode>& keysCodes)
+{
+    auto contains = [](const std::vector<KeyCode>& values, const KeyCode& value) -> bool {
+        auto it = std::find(values.begin(), values.end(), value);
+        return it != values.end();
+    };
+    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    for (const auto& str : keysStrs) {
+        std::string code;
+        std::transform(str.begin(), str.end(), std::back_inserter(code),
+            [](const char& c) { return std::tolower(c); });
+        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code);
+        if (it == validKeyCodes.end()) {
+            return false;
+        }
+        if (code == "ctrl") {
+            if (!contains(keysCodes, KeyCode::KEY_CTRL_LEFT) &&
+                    !contains(keysCodes, KeyCode::KEY_CTRL_RIGHT)) {
+                return false;
+            }
+        } else if (code == "shift") {
+            if (!contains(keysCodes, KeyCode::KEY_SHIFT_LEFT) &&
+                    !contains(keysCodes, KeyCode::KEY_SHIFT_RIGHT)) {
+                return false;
+            }
+        } else if (code == "alt") {
+            if (!contains(keysCodes, KeyCode::KEY_ALT_LEFT) &&
+                    !contains(keysCodes, KeyCode::KEY_ALT_RIGHT)) {
+                return false;
+            }
+        } else if (code == "fn") {
+            if (!contains(keysCodes, KeyCode::KEY_FN)) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+}  // namespace
+
 void DestroyPeerImpl(BaseEventPeer* peer)
 {
     delete peer;
@@ -34,19 +111,34 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Boolean GetModifierKeyStateImpl(BaseEventPeer* peer,
                                     const Array_String* keys)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    CHECK_NULL_RETURN(keys, 0);
+    auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
+    auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
+    return Converter::ArkValue<Ark_Boolean>(CheckKeysPressed(keysStr, eventKeys));
 }
 void SetTargetImpl(BaseEventPeer* peer,
                    const Ark_EventTarget* target)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(target);
+    peer->GetBaseInfo()->SetTarget(Converter::Convert<EventTarget>(*target));
 }
 Ark_Int32 GetTimestampImpl(BaseEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    auto tstamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(tstamp));
 }
 void SetTimestampImpl(BaseEventPeer* peer,
                       const Ark_Number* timestamp)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(timestamp);
+    int value = Converter::Convert<int>(*timestamp);
+    auto clock = std::chrono::system_clock::from_time_t(value);
+    peer->GetBaseInfo()->SetTimeStamp(clock);
 }
 Ark_NativePointer GetSourceImpl(BaseEventPeer* peer)
 {
@@ -55,6 +147,11 @@ Ark_NativePointer GetSourceImpl(BaseEventPeer* peer)
 void SetSourceImpl(BaseEventPeer* peer,
                    Ark_SourceType source)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    auto value = Converter::OptConvert<SourceType>(source);
+    if (value) {
+        peer->GetBaseInfo()->SetSourceDevice(*value);
+    }
 }
 Ark_Int32 GetAxisHorizontalImpl(BaseEventPeer* peer)
 {
@@ -74,27 +171,41 @@ void SetAxisVerticalImpl(BaseEventPeer* peer,
 }
 Ark_Int32 GetPressureImpl(BaseEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->GetBaseInfo()->GetForce()));
 }
 void SetPressureImpl(BaseEventPeer* peer,
                      const Ark_Number* pressure)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(pressure);
+    peer->GetBaseInfo()->SetForce(Converter::Convert<float>(*pressure));
 }
 Ark_Int32 GetTiltXImpl(BaseEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    auto value = peer->GetBaseInfo()->GetTiltX();
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value.value_or(0)));
 }
 void SetTiltXImpl(BaseEventPeer* peer,
                   const Ark_Number* tiltX)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(tiltX);
+    peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(*tiltX));
 }
 Ark_Int32 GetTiltYImpl(BaseEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    auto value = peer->GetBaseInfo()->GetTiltY();
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value.value_or(0)));
 }
 void SetTiltYImpl(BaseEventPeer* peer,
                   const Ark_Number* tiltY)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(tiltY);
+    peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(*tiltY));
 }
 Ark_NativePointer GetSourceToolImpl(BaseEventPeer* peer)
 {
@@ -103,16 +214,26 @@ Ark_NativePointer GetSourceToolImpl(BaseEventPeer* peer)
 void SetSourceToolImpl(BaseEventPeer* peer,
                        Ark_SourceTool sourceTool)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    auto value = Converter::OptConvert<SourceTool>(sourceTool);
+    if (value) {
+        peer->GetBaseInfo()->SetSourceTool(*value);
+    }
 }
 Ark_Int32 GetDeviceIdImpl(BaseEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), 0);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId()));
 }
 void SetDeviceIdImpl(BaseEventPeer* peer,
                      const Ark_Number* deviceId)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(deviceId);
+    peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(*deviceId));
 }
 } // BaseEventAccessor
+
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
 {
     static const GENERATED_ArkUIBaseEventAccessor BaseEventAccessorImpl {
@@ -141,5 +262,6 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetDeviceIdImpl,
     };
     return &BaseEventAccessorImpl;
+}
 }
 }
