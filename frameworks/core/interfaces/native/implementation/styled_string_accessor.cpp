@@ -494,11 +494,11 @@ void FromHtmlImpl(const Ark_String* html,
             callback(peer, errors);
             return;
         }
-        taskExecutor->PostTask([callback, peer, errors]() mutable { callback(peer, errors); },
-            TaskExecutor::TaskType::UI,
-            "FromHtmlReturn", PriorityType::VIP);
-        }, TaskExecutor::TaskType::BACKGROUND,
-        "FromHtml", PriorityType::IMMEDIATE);
+        taskExecutor->PostTask(
+            [callback, peer, errors]() mutable { callback(peer, errors); },
+            TaskExecutor::TaskType::UI, "FromHtmlReturn", PriorityType::VIP
+        );
+    }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
 }
 void ToHtmlImpl(const Ark_StyledString* styledString)
 {

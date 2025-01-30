@@ -321,7 +321,7 @@ public:
 
         auto container = Container::CurrentSafely();
         ASSERT_NE(container, nullptr);
-        auto mockContainer = reinterpret_cast<MockContainer*>(container.GetRawPtr());
+        auto mockContainer = AceType::DynamicCast<MockContainer>(container);
         auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(false);
         mockContainer->SetTaskExecutor(taskExecutor);
         mockContainer->UpdateCurrent(TEST_CONTAINER_ID);
@@ -344,23 +344,13 @@ public:
         return accessor_->ctor(value, styles);
     }
 
-    bool IsSpanItemSame(std::list<RefPtr<NG::SpanItem>> src, std::list<RefPtr<NG::SpanItem>> other)
+    bool IsSpanItemSame(const std::list<RefPtr<NG::SpanItem>>& src, const std::list<RefPtr<NG::SpanItem>>& other)
     {
-        if (src.size() != other.size()) {
-            return false;
-        }
-
-        while (src.size() != 0) {
-            auto it = src.front();
-            auto otherIt = other.front();
-            if (it->interval.first != otherIt->interval.first || it->interval.second != otherIt->interval.second ||
-                it->content != otherIt->content) {
-                return false;
-            }
-            src.pop_front();
-            other.pop_front();
-        }
-        return true;
+        return std::equal(src.begin(), src.end(), other.begin(), other.end(),
+            [](const RefPtr<NG::SpanItem>& lhs, const RefPtr<NG::SpanItem>& rhs) -> bool {
+                return lhs->interval.first == rhs->interval.first && lhs->interval.second == rhs->interval.second &&
+                    lhs->content == rhs->content;
+            });
     }
 
 private:
