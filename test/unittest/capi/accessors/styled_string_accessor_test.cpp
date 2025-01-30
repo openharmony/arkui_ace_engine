@@ -750,20 +750,14 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Lev
         };
     };
 
-    Callback_Opt_StyledString_Opt_Array_String_Void arkCallback {
-        .resource = Ark_CallbackResource {
-            .resourceId = TEST_HTML_NODE_ID,
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onFromHtmlFunc
-    };
+    auto arkCallback = Converter::ArkValue<Callback_Opt_StyledString_Opt_Array_String_Void>(
+        onFromHtmlFunc, TEST_HTML_NODE_ID);
 
     auto arkStr = Converter::ArkValue<Ark_String>(htmlFromSpan);
 
-    EXPECT_TRUE(!checkEvent.has_value());
+    EXPECT_FALSE(checkEvent.has_value());
     accessor_->fromHtml(&arkStr, &arkCallback);
-    EXPECT_TRUE(checkEvent.has_value());
+    ASSERT_TRUE(checkEvent.has_value());
 
     EXPECT_EQ(checkEvent->nodeId, TEST_HTML_NODE_ID);
     ASSERT_TRUE(checkEvent->errors.has_value());
@@ -780,6 +774,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Lev
 
         HtmlToSpan hts;
         auto styledString = hts.ToSpanString(htmlFromSpan);
+        ASSERT_NE(styledString, nullptr);
         auto baseString = styledString->GetString();
         auto outString = mSpanString->GetString();
         EXPECT_EQ(outString, baseString);
