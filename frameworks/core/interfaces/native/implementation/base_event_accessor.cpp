@@ -70,7 +70,7 @@ bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vecto
         }
         return found;
     };
-    std::unordered_map<std::string, std::vector<KeyCode>> validKeyCodes = { 
+    std::unordered_map<std::string, std::vector<KeyCode>> validKeyCodes = {
         { "ctrl", { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT } },
         { "shift", { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT } },
         { "alt", { KeyCode::KEY_ALT_LEFT, KeyCode::KEY_ALT_RIGHT } },
