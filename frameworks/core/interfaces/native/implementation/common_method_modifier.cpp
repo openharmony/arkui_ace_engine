@@ -2004,14 +2004,8 @@ void OnKeyEventImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
         PipelineContext::SetCallBackNode(node);
-        auto stopPropagationHandler = [&info]() {
-            info.SetStopPropagation(true);
-        };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
-            std::move(stopPropagationHandler));
         auto event = Converter::ArkValue<Ark_KeyEvent>(info);
         arkCallback.Invoke(event);
-        stopPropagation.resource.release(stopPropagation.resource.resourceId);
         return false;
     };
     ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
