@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "unified_data_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
@@ -42,40 +43,44 @@ Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
 }
 Ark_Int32 GetWindowXImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_Int32>(peer->dragInfo->GetScreenX());
+    return 0;
 }
 Ark_Int32 GetWindowYImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_Int32>(peer->dragInfo->GetScreenY());
+    return 0;
 }
 Ark_Int32 GetXImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_Int32>(peer->dragInfo->GetX());
+    return 0;
 }
 Ark_Int32 GetYImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_Int32>(peer->dragInfo->GetY());
+    return 0;
 }
+
+namespace Converter {
+    template<>
+    RefPtr<UnifiedData> Convert(const Ark_UnifiedData& data)
+    {
+        auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(data.ptr);
+        return unifiedDataPeer ? unifiedDataPeer->unifiedData : nullptr;
+    }
+} // namespace Converter
+
+
 void SetDataImpl(DragEventPeer* peer,
                  const Ark_UnifiedData* unifiedData)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    peer->dragInfo->SetData(Convert<UnifiedData>(*unifiedData)); // RefPtr<UnifiedData>
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->dragInfo);//const RefPtr<UnifiedData>& unifiedData
+    peer->dragInfo->SetData(Convert<RefPtr<UnifiedData>>(*unifiedData)); // RefPtr<UnifiedData>
 }
 Ark_NativePointer GetDataImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_NativePointer>(peer->dragInfo->GetData());
+    // CHECK_NULL_RETURN(peer, 0);
+// CHECK_NULL_RETURN(peer->dragInfo, 0);
+    // return ArkValue<Ark_NativePointer>(peer->dragInfo->GetData());
+    return nullptr;
 }
 Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 {
@@ -84,21 +89,23 @@ Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 void SetResultImpl(DragEventPeer* peer,
                    Ark_DragResult dragResult)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    peer->dragInfo->SetResult(Convert<UnifiedData>(dragResult)); // DragRet
+    // CHECK_NULL_RETURN(peer, 0);
+    // CHECK_NULL_RETURN(peer->dragInfo, 0);
+    // peer->dragInfo->SetResult(Convert<UnifiedData>(dragResult)); // DragRet
 }
 Ark_NativePointer GetResultImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_NativePointer>(peer->dragInfo->GetResult()); // fix it
+    // CHECK_NULL_RETURN(peer, 0);
+    // CHECK_NULL_RETURN(peer->dragInfo, 0);
+    // return ArkValue<Ark_NativePointer>(peer->dragInfo->GetResult()); // fix it
+    return nullptr;
 }
 Ark_NativePointer GetPreviewRectImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_NativePointer>(peer->dragInfo->GetPreviewRect()); // fix it
+    // CHECK_NULL_RETURN(peer, 0);
+    // CHECK_NULL_RETURN(peer->dragInfo, 0);
+    // return ArkValue<Ark_NativePointer>(peer->dragInfo->GetPreviewRect()); // fix it
+    return nullptr;
 }
 Ark_Int32 GetVelocityXImpl(DragEventPeer* peer)
 {
@@ -127,16 +134,11 @@ void SetDragBehaviorImpl(DragEventPeer* peer,
 }
 Ark_Boolean GetUseCustomDropAnimationImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    return ArkValue<Ark_Boolean>(peer->dragInfo->IsUseCustomAnimation()); // fix it
+    return false;
 }
 void SetUseCustomDropAnimationImpl(DragEventPeer* peer,
                                    Ark_Boolean useCustomDropAnimation)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    peer->dragInfo->SetResult(Convert<bool>(useCustomDropAnimation)); // DragRet
 }
 } // DragEventAccessor
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
