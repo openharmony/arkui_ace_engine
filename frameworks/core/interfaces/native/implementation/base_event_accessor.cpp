@@ -133,7 +133,7 @@ void SetTimestampImpl(BaseEventPeer* peer,
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
     int value = Converter::Convert<int>(*timestamp);
-    auto clock = std::chrono::high_resolution_clock::from_time_t(value);
+    auto clock = std::chrono::steady_clock::from_time_t(value);
     peer->GetBaseInfo()->SetTimeStamp(clock);
 }
 Ark_NativePointer GetSourceImpl(BaseEventPeer* peer)
