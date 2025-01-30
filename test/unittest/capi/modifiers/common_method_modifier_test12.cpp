@@ -66,6 +66,30 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreviewTestDefaultValues, TestSize.L
 }
 
 /*
+ * @tc.name: setDragPreview_CustomBuilderTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest12, setDragPreview_CustomBuilderTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    int callsCount = 0;
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+
+    auto unionValue = Converter::ArkUnion<Ark_Union_CustomBuilder_DragItemInfo_String,
+        CustomNodeBuilder>(builder);
+    modifier_->setDragPreview(node_, &unionValue);
+    const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
+
+    EXPECT_EQ(builderHelper.GetCustomNode(), reinterpret_cast<FrameNode*>(resultDragPreview.customNode.GetRawPtr()));
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+}
+
+/*
  * @tc.name: setDragPreview_DragItemInfoTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -76,7 +100,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_DragItemInfoTest, TestSize.L
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     // CustomNodeBuilder
-    int callsCount(0);
+    int callsCount = 0;
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     // PixelMap
@@ -137,7 +161,7 @@ HWTEST_F(CommonMethodModifierTest12, AccessibilityVirtualNodeTest, TestSize.Leve
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    int callsCount(0);
+    int callsCount = 0;
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setAccessibilityVirtualNode(node_, &builder);
@@ -211,7 +235,7 @@ HWTEST_F(CommonMethodModifierTest12, OverlayTest_Union_String_CustomNodeBuilder_
     }
 
     // test CustomNodeBuilder
-    int callsCount(0);
+    int callsCount = 0;
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     auto unionCustomNodeBuilderValue = Converter::ArkUnion<Ark_Union_String_CustomBuilder_ComponentContent,
