@@ -202,46 +202,64 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setOnItemDragStartTest
+ * @tc.name: setOnItemDragStartTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
+HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
 {
-    // test is disabled because onItemDragStart should return value
-    Callback_ItemDragInfo_Number_CustomBuilder func{};
+    using namespace Converter;
+    static const int32_t expectedX = 357;
+    static const int32_t expectedY = 468;
+    static const int32_t expectedIdx = 7;
+    static const int32_t expectedResourceId = 123;
+
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    auto dragInfo = ItemDragInfo();
+    ASSERT_NE(frameNode, nullptr);
+    static const auto expectedParentNode = frameNode;
+    static auto expectedCustomNode = CreateNode();
+    ASSERT_NE(expectedCustomNode, nullptr);
 
-    struct CheckEvent {
-        int32_t nodeId;
-        ItemDragInfo dragInfo;
-        int32_t itemIndex;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridEventsReceiver.onItemDragStart = [](Ark_Int32 nodeId,
-        const Ark_ItemDragInfo event, const Ark_Number itemIndex)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .dragInfo = Converter::Convert<ItemDragInfo>(event),
-            .itemIndex = Converter::Convert<int32_t>(itemIndex)
+    // set callback to model
+    auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_ItemDragInfo event, const Ark_Number itemIndex,
+        const Callback_CustomBuilder_Void continuation
+    ) {
+        // check input values
+        EXPECT_EQ(resourceId, expectedResourceId);
+        auto dragInfo = Convert<ItemDragInfo>(event);
+        EXPECT_EQ(dragInfo.GetX(), expectedX);
+        EXPECT_EQ(dragInfo.GetY(), expectedY);
+        auto index = Convert<int32_t>(itemIndex);
+        EXPECT_EQ(index, expectedIdx);
+
+        // construct the result CustomBuilder
+        auto builderSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
+            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
+            CallbackHelper(continuation).Invoke(expectedCustomNode);
         };
+        auto builder = ArkValue<CustomNodeBuilder>(nullptr, builderSyncFunc);
+
+        // return result
+        CallbackHelper(continuation).Invoke(builder);
     };
+    auto arkCallback =
+        ArkValue<Callback_ItemDragInfo_Number_CustomBuilder>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+    modifier_->setOnItemDragStart(node_, &arkCallback);
 
-    modifier_->setOnItemDragStart(node_, &func);
+    // imitate the test case
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(expectedX);
+    dragInfo.SetY(expectedY);
+    auto resultNode = eventHub->FireOnItemDragStart(dragInfo, expectedIdx);
 
-    dragInfo.SetX(357);
-    dragInfo.SetY(468);
+    // check result
+    EXPECT_EQ(resultNode.GetRawPtr(), reinterpret_cast<void *>(expectedCustomNode));
 
-    EXPECT_FALSE(checkEvent.has_value());
-    eventHub->FireOnItemDragStart(dragInfo, 7);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->dragInfo.GetX(), 357);
-    EXPECT_EQ(checkEvent->dragInfo.GetY(), 468);
-    EXPECT_EQ(checkEvent->itemIndex, 7);
+    DisposeNode(expectedCustomNode);
 }
 
 /*
