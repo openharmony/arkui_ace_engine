@@ -560,6 +560,17 @@ void ValidateByRange(std::optional<InvertVariant>& value, const float& left, con
 } // namespace Validator
 
 namespace Converter {
+DragDropInfo Ark_DragItemInfoToDragDropInfo(const Ark_DragItemInfo& src, Ark_NativePointer node)
+{
+    DragDropInfo dst = {};
+    dst.extraInfo = Converter::OptConvert<std::string>(src.extraInfo).value_or(std::string());
+    dst.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(src.pixelMap).value_or(nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(src.builder);
+    dst.customNode = optBuilder.has_value() ? CallbackHelper(optBuilder.value(), frameNode).BuildSync(node) : nullptr;
+    return dst;
+}
+
 template<>
 void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_Color& src)
 {
@@ -1489,11 +1500,6 @@ void AssignCast(std::optional<ClickEffectLevel>& dst, const Ark_ClickEffectLevel
     auto arkVal = Convert<ClickEffectLevel>(src);
     dst = arkVal == ClickEffectLevel::UNDEFINED ? std::nullopt :
         std::optional<ClickEffectLevel>(arkVal);
-}
-template<>
-void AssignCast(std::optional<DragDropInfo>& dst, const Ark_DragItemInfo& src)
-{
-    LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
 }
 template<>
 void AssignCast(std::optional<DragDropInfo>& dst, const Ark_String& src)
@@ -3805,23 +3811,27 @@ void DragPreviewImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::optional<DragDropInfo> convValue = {};
+    if (!value) {
+        ViewAbstract::SetDragPreview(frameNode, std::nullopt);
+        return;
+    }
+    std::optional<DragDropInfo> optConvValue;
     Converter::VisitUnion(*value,
-        [&convValue](const Ark_String& val) {
-            convValue->extraInfo = Converter::Convert<std::string>(val);
+        [&optConvValue](const Ark_String& val) {
+            DragDropInfo convValue = {.extraInfo = Converter::OptConvert<std::string>(val).value_or(std::string())};
+            optConvValue = std::optional<DragDropInfo>(convValue);
         },
-        [node, frameNode, &convValue](const CustomNodeBuilder& val) {
-            convValue->customNode = CallbackHelper(val, frameNode).BuildSync(node);
+        [node, frameNode, &optConvValue](const CustomNodeBuilder& val) {
+            DragDropInfo convValue = {.customNode = CallbackHelper(val, frameNode).BuildSync(node)};
+            optConvValue = std::optional<DragDropInfo>(convValue);
         },
-        [frameNode, &convValue](const Ark_DragItemInfo& value) {
-            LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
-            convValue = std::nullopt;
+        [node, &optConvValue](const Ark_DragItemInfo& val) {
+            optConvValue = Converter::Ark_DragItemInfoToDragDropInfo(val, node);
         },
         []() {
             LOGE("DragPreviewImpl(): Invalid union argument");
         });
-    ViewAbstract::SetDragPreview(frameNode, convValue);
+    ViewAbstract::SetDragPreview(frameNode, optConvValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
