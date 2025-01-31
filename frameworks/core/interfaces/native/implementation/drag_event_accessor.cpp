@@ -31,6 +31,11 @@ namespace OHOS::Ace::NG::Converter {
         return unifiedDataPeer && unifiedDataPeer->unifiedData ? unifiedDataPeer->unifiedData : nullptr;
     }
 
+    void AssignArkValue(UnifiedDataPeer& arkData, const RefPtr<UnifiedData>& data)
+    {
+        arkData.unifiedData = data;
+    }
+
     template<>
     void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
     {
@@ -95,8 +100,13 @@ void SetDataImpl(DragEventPeer* peer,
 }
 Ark_NativePointer GetDataImpl(DragEventPeer* peer)
 {
-    LOGE("DragEventAccessor::GetDataImpl wrong return data");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer->dragInfo, nullptr);
+    auto data = peer->dragInfo->GetData();
+    CHECK_NULL_RETURN(data, nullptr);
+    const auto unifiedPeer = reinterpret_cast<UnifiedDataPeer*>(GeneratedModifier::GetUnifiedDataAccessor()->ctor());
+    unifiedPeer->unifiedData = data;
+    return reinterpret_cast<Ark_NativePointer>(unifiedPeer);
 }
 Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 {

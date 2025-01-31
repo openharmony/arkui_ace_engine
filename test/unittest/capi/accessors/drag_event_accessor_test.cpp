@@ -38,7 +38,7 @@ namespace Converter {
     void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
     {
         const auto peer = reinterpret_cast<UnifiedDataPeer*>(GeneratedModifier::GetUnifiedDataAccessor()->ctor());
-        peer->unifiedData = RefPtr<UnifiedData>(data);
+        peer->unifiedData = data;
         arkData.ptr = peer;
     }
 }
@@ -73,18 +73,10 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        ASSERT_NE(peer_, nullptr);
         dragEvent_ = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         ASSERT_NE(dragEvent_, nullptr);
         peer_->dragInfo = dragEvent_;
     }
-
-    void TearDown() override
-    {
-        AccessorTestBaseParent::TearDown();
-        dragEvent_ = nullptr;
-    }
-
     RefPtr<OHOS::Ace::DragEvent> dragEvent_ = nullptr;
 };
 
@@ -110,12 +102,30 @@ HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 HWTEST_F(DragEventAccessorTest, setDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
-    ASSERT_NE(unifiedData, nullptr);
     auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
     auto arkUnifiedData = ArkValue<Ark_UnifiedData>(data);
     accessor_->setData(peer_, &arkUnifiedData);
     ASSERT_NE(dragEvent_->GetData(), nullptr);
     EXPECT_EQ(dragEvent_->GetData()->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: setData";
+}
+
+/**
+ * @tc.name: setDataTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
+{
+    auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
+    auto arkUnifiedData = ArkValue<Ark_UnifiedData>(data);
+    accessor_->setData(peer_, &arkUnifiedData);
+    auto getData = accessor_->getData(peer_);
+    ASSERT_NE(getData, nullptr);
+    auto dataPeer = reinterpret_cast<UnifiedDataPeer*>(getData);
+    ASSERT_NE(dataPeer->unifiedData, nullptr);
+    EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
+        "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
 }
 } // namespace OHOS::Ace::NG
