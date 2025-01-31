@@ -195,7 +195,11 @@ template<>
 UserMouseOptions Convert(const ::OnHoverCallback& src)
 {
     UserMouseOptions result;
-    LOGE("ARKOALA Convert OnHoverCallback Convert is not implemented yet.");
+    result.onHover = [callback = CallbackHelper(src)](bool isHover, HoverInfo& info) {
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        auto event = Converter::ArkValue<Ark_HoverEvent>(info);
+        callback.Invoke(arkIsHover, event);
+    };
     return result;
 }
 
@@ -349,6 +353,7 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
             locOptions->bundleName = info->GetBundleName();
             locOptions->moduleName = info->GetModuleName();
             locOptions->imagePixelMap = info->GetPixmap();
+            locOptions->isUriPureNumber = info->GetIsUriPureNumber();
         }
     }
     if (locOptions) {

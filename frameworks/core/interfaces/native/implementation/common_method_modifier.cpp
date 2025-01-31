@@ -2564,27 +2564,8 @@ void OnHoverImpl(Ark_NativePointer node,
     auto onHover = [arkCallback = CallbackHelper(*value), node = weakNode](bool isHover, HoverInfo& hoverInfo) {
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-        Ark_HoverEvent event;
-        auto stopPropagationHandler = [&hoverInfo]() {
-            hoverInfo.SetStopPropagation(true);
-        };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
-            std::move(stopPropagationHandler));
-#ifdef WRONG_TYPE
-        event.stopPropagation = stopPropagation;
-        event.timestamp = Converter::ArkValue<Ark_Number>(static_cast<double>(
-            hoverInfo.GetTimeStamp().time_since_epoch().count()));
-        event.source = Converter::ArkValue<Ark_SourceType>(hoverInfo.GetSourceDevice());
-        event.target.area = Converter::ArkValue<Ark_Area>(hoverInfo);
-        event.sourceTool = Converter::ArkValue<Ark_SourceTool>(hoverInfo.GetSourceTool());
-        event.axisVertical = Converter::ArkValue<Opt_Number>(0.0f);
-        event.axisHorizontal = Converter::ArkValue<Opt_Number>(0.0f);
-        event.tiltX = Converter::ArkValue<Ark_Number>(hoverInfo.GetTiltX().value_or(0.0f));
-        event.tiltY = Converter::ArkValue<Ark_Number>(hoverInfo.GetTiltY().value_or(0.0f));
-        event.deviceId = Converter::ArkValue<Opt_Number>(hoverInfo.GetDeviceId());
-#endif
+        auto event = Converter::ArkValue<Ark_HoverEvent>(hoverInfo);
         arkCallback.Invoke(arkIsHover, event);
-        stopPropagation.resource.release(stopPropagation.resource.resourceId);
     };
     ViewAbstract::SetOnHover(frameNode, std::move(onHover));
 }
