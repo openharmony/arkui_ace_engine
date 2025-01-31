@@ -1653,20 +1653,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStartValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsStartValidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1695,20 +1695,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStartVali
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStepValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsStepValidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1727,7 +1727,7 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStepValid
             "Input value is: " << input << ", method: setMarqueeOptions, attribute: marqueeOptions.step";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextMarqueeStepValidValues) {
         checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
@@ -1737,20 +1737,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStepValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStepInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsStepInvalidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1769,6 +1769,9 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStepInval
             "Input value is: " << input << ", method: setMarqueeOptions, attribute: marqueeOptions.step";
     };
 
+    for (auto& [input, value] : Fixtures::testFixtureTextMarqueeStepInvalidValues) {
+        checkValue(input, ArkValue<Opt_Number>(value));
+    }
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
@@ -1778,20 +1781,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsStepInval
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsLoopValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsLoopValidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1810,7 +1813,7 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsLoopValid
             "Input value is: " << input << ", method: setMarqueeOptions, attribute: marqueeOptions.loop";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextMarqueeLoopValidValues) {
         checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
@@ -1820,20 +1823,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsLoopValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsLoopInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsLoopInvalidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1868,13 +1871,13 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsFromStart
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1910,13 +1913,13 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsFromStart
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1944,20 +1947,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsFromStart
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsDelayValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsDelayValidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -1976,7 +1979,7 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsDelayVali
             "Input value is: " << input << ", method: setMarqueeOptions, attribute: marqueeOptions.delay";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
         checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
@@ -1986,20 +1989,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsDelayVali
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsDelayInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsDelayInvalidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -2018,6 +2021,9 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsDelayInva
             "Input value is: " << input << ", method: setMarqueeOptions, attribute: marqueeOptions.delay";
     };
 
+    for (auto& [input, value] : Fixtures::testFixtureNumberNonNegIntFloorInvalidValues) {
+        checkValue(input, ArkValue<Opt_Number>(value));
+    }
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
@@ -2027,20 +2033,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsDelayInva
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsFadeoutValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsFadeoutValidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -2069,20 +2075,20 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsFadeoutVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsFadeoutInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsFadeoutInvalidValues, TestSize.Level1)
 {
     Opt_TextMarqueeOptions initValueMarqueeOptions;
 
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -2117,13 +2123,13 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsMarqueeSt
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
@@ -2161,13 +2167,13 @@ HWTEST_F(TextModifierTest, DISABLED_setMarqueeOptionsTestMarqueeOptionsMarqueeSt
     // Initial setup
     WriteTo(initValueMarqueeOptions).start = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueMarqueeOptions).step =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeStepValidValues[0]));
     WriteTo(initValueMarqueeOptions).loop =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureTextMarqueeLoopValidValues[0]));
     WriteTo(initValueMarqueeOptions).fromStart =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).delay =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
     WriteTo(initValueMarqueeOptions).fadeout =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueMarqueeOptions).marqueeStartPolicy =
