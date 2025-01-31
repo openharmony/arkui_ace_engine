@@ -2742,34 +2742,16 @@ void OnKeyEvent0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (!value) {
         ViewAbstract::DisableOnKeyEvent(frameNode);
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
-        PipelineContext::SetCallBackNode(node);
-        auto stopPropagationHandler = [&info]() {
-            info.SetStopPropagation(true);
+    } else {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
+            PipelineContext::SetCallBackNode(node);
+            auto event = Converter::ArkValue<Ark_KeyEvent>(info);
+            arkCallback.Invoke(event);
+            return false;
         };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
-            std::move(stopPropagationHandler));
-        Ark_KeyEvent event;
-#ifdef WRONG_TYPE
-        event.type = Converter::ArkValue<Ark_KeyType>(info.GetKeyType());
-        event.keyCode = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(info.GetKeyCode()));
-        event.keyText = Converter::ArkValue<Ark_String>(info.GetKeyText());
-        event.keySource = Converter::ArkValue<Ark_KeySource>(info.GetKeySource());
-        event.deviceId = Converter::ArkValue<Ark_Number>(info.GetDeviceId());
-        event.metaKey = Converter::ArkValue<Ark_Number>(info.GetMetaKey());
-        event.unicode = Converter::ArkValue<Opt_Number>(info.GetUnicode());
-        event.timestamp = Converter::ArkValue<Ark_Number>(
-        static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
-        event.stopPropagation = stopPropagation;
-#endif
-        LOGE("CommonMethodModifier::OnKeyEventImpl IntentionCode supporting is not implemented yet");
-        arkCallback.Invoke(event);
-        stopPropagation.resource.release(stopPropagation.resource.resourceId);
-        return false;
-    };
-    ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+    }
 }
 void OnKeyEvent1Impl(Ark_NativePointer node,
                      const Callback_KeyEvent_Boolean* value)
@@ -2795,34 +2777,17 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (!value) {
         ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](KeyEventInfo& info)
-        -> bool {
-        PipelineContext::SetCallBackNode(node);
-        Ark_KeyEvent event;
-#ifdef WRONG_TYPE
-        event.type = Converter::ArkValue<Ark_KeyType>(info.GetKeyType());
-        event.keyCode = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(info.GetKeyCode()));
-        event.keyText = Converter::ArkValue<Ark_String>(info.GetKeyText());
-        event.keySource = Converter::ArkValue<Ark_KeySource>(info.GetKeySource());
-        event.deviceId = Converter::ArkValue<Ark_Number>(info.GetDeviceId());
-        event.metaKey = Converter::ArkValue<Ark_Number>(info.GetMetaKey());
-        event.unicode = Converter::ArkValue<Opt_Number>(info.GetUnicode());
-        event.timestamp = Converter::ArkValue<Ark_Number>(
-            static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
-        auto stopPropagationHandler = [&info]() {
-            info.SetStopPropagation(true);
+    } else {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](KeyEventInfo& info)
+            -> bool {
+            PipelineContext::SetCallBackNode(node);
+            auto event = Converter::ArkValue<Ark_KeyEvent>(info);
+            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
+            return Converter::Convert<bool>(arkResult);
         };
-        const auto keeper = CallbackKeeper::Claim(std::move(stopPropagationHandler));
-        event.stopPropagation = keeper.ArkValue();
-#endif
-        LOGE("CommonMethodModifier::OnKeyPreImeImpl IntentionCode supporting is not implemented yet");
-
-        auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
-        return Converter::Convert<bool>(arkResult);
-    };
-    ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
+        ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
+    }
 }
 void OnKeyEventDispatchImpl(Ark_NativePointer node,
                             const Callback_KeyEvent_Boolean* value)
