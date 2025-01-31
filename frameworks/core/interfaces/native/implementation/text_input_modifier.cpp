@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MIN_THRESHOLD_PERCENTAGE = 1;
 constexpr int32_t MAX_THRESHOLD_PERCENTAGE = 100;
+constexpr float SCALE_LIMIT = 1.f;
 
 struct InputCounterOptions {
     std::optional<int> thresholdPercentage;
@@ -594,8 +595,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidatePositive(convValue);
-    const auto maxValue = 1.f;
-    Validator::ValidateLessOrEqual(convValue, maxValue);
+    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
     TextFieldModelNG::SetMinFontScale(frameNode, convValue);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
@@ -604,8 +604,8 @@ void MaxFontScaleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
-    const auto minValue = 1.f;
-    Validator::ValidateGreatOrEqual(convValue, minValue);
+    Validator::ValidatePositive(convValue);
+    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
     TextFieldModelNG::SetMaxFontScale(frameNode, convValue);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
