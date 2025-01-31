@@ -4383,14 +4383,12 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onTouchIntercept = [arkCallback = CallbackHelper(*value), node = weakNode](
+    auto onTouchIntercept = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](
         TouchEventInfo& info) -> HitTestMode {
-        PipelineContext::SetCallBackNode(node);
         Ark_TouchEvent event = Converter::ArkValue<Ark_TouchEvent>(info);
-        Callback_HitTestMode_Void continuation;
-        arkCallback.Invoke(event, continuation);
-        LOGE("CommonMethodModifier::OnTouchInterceptImpl return value can be incorrect");
-        return HitTestMode::HTMDEFAULT;
+        auto resultOpt =
+            arkCallback.InvokeWithOptConvertResult<HitTestMode, Ark_HitTestMode, Callback_HitTestMode_Void>(event);
+        return resultOpt.value_or(HitTestMode::HTMDEFAULT);
     };
     ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
 }

@@ -1794,4 +1794,18 @@ void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState
         }
     }
 }
+
+template<>
+void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
+{
+    switch (src) {
+        case ARK_HIT_TEST_MODE_DEFAULT: dst = HitTestMode::HTMDEFAULT; break;
+        case ARK_HIT_TEST_MODE_BLOCK: dst = HitTestMode::HTMBLOCK; break;
+        case ARK_HIT_TEST_MODE_TRANSPARENT: dst = HitTestMode::HTMTRANSPARENT; break;
+        case ARK_HIT_TEST_MODE_NONE: dst = HitTestMode::HTMNONE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_HitTestMode: %{public}d", src);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

@@ -538,43 +538,38 @@ HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
 {
+    static const int expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
-        int32_t nodeId;
+        int nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onTouchInterceptFunc = [](const Ark_Int32 resourceId,
+    auto onTouchInterceptFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
                                 const Ark_TouchEvent parameter,
                                 const Callback_HitTestMode_Void continuation) {
         checkEvent = { .nodeId = resourceId };
+        Ark_HitTestMode retVal = Ark_HitTestMode::ARK_HIT_TEST_MODE_BLOCK;
+        CallbackHelper(continuation).Invoke(retVal);
     };
 
-    Callback_TouchEvent_HitTestMode callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr
-        },
-        .call = onTouchInterceptFunc
-    };
+    auto callbackValue =
+        Converter::ArkValue<Callback_TouchEvent_HitTestMode>(nullptr, onTouchInterceptFunc, expectedResId);
 
-    auto test = [this, &callBackValue, eventHub, frameNode]() {
-        checkEvent = std::nullopt;
-        modifier_->setOnTouchIntercept(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        ASSERT_NE(gestureEventHub, nullptr);
-        auto func = gestureEventHub->GetOnTouchIntercept();
-        TouchEventInfo* info = new TouchEventInfo("");
-        func(*info);
-        EXPECT_TRUE(checkEvent.has_value());
-        delete info;
-    };
-    test();
+    checkEvent = std::nullopt;
+    modifier_->setOnTouchIntercept(node_, &callbackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto fireTouchEvent = gestureEventHub->GetOnTouchIntercept();
+    TouchEventInfo info("");
+    auto retValue = fireTouchEvent(info);
+    EXPECT_EQ(retValue, NG::HitTestMode::HTMBLOCK);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent.value().nodeId, expectedResId);
 }
 
 /*
