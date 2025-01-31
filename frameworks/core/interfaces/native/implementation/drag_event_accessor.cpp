@@ -84,7 +84,6 @@ Ark_Int32 GetYImpl(DragEventPeer* peer)
 {
     return 0;
 }
-
 void SetDataImpl(DragEventPeer* peer,
                  const Ark_UnifiedData* unifiedData)
 {
@@ -150,7 +149,7 @@ void SetDragBehaviorImpl(DragEventPeer* peer,
 }
 Ark_Boolean GetUseCustomDropAnimationImpl(DragEventPeer* peer)
 {
-    return false;
+    return 0;
 }
 void SetUseCustomDropAnimationImpl(DragEventPeer* peer,
                                    Ark_Boolean useCustomDropAnimation)
