@@ -694,28 +694,15 @@ void OnWindowExit(const Callback_Void* value,
 bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo)
 {
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_RETURN(refNode, false);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    Ark_KeyEvent parameter;
-#ifdef WRONG_TYPE
-    parameter.type = Converter::ArkValue<Ark_KeyType>(keyEventInfo.GetKeyType());
-    parameter.keyCode = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(keyEventInfo.GetKeyCode()));
-    parameter.keyText = Converter::ArkValue<Ark_String>(keyEventInfo.GetKeyText());
-    parameter.keySource = Converter::ArkValue<Ark_KeySource>(keyEventInfo.GetKeySource());
-    parameter.deviceId = Converter::ArkValue<Ark_Number>(keyEventInfo.GetDeviceId());
-    parameter.metaKey = Converter::ArkValue<Ark_Number>(keyEventInfo.GetMetaKey());
-    parameter.timestamp = Converter::ArkValue<Ark_Number>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            keyEventInfo.GetTimeStamp().time_since_epoch()).count());
-    LOGE("WebAttributeModifier::OnInterceptKeyEventImpl IntentionCode supporting is not implemented yet");
-    parameter.unicode = Converter::ArkValue<Opt_Number>(keyEventInfo.GetUnicode());
-#endif
-    Callback_Boolean_Void continuation;
-    auto arkCallback = CallbackHelper(*value);
-    arkCallback.Invoke(parameter, continuation);
-    LOGE("WebAttributeModifier::OnInterceptKeyEventImpl return value can be incorrect");
-    return false;
+    auto parameter = Converter::ArkValue<Ark_KeyEvent>(keyEventInfo);
+    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
+    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    return result.value_or(false);
 }
 
 void OnTouchIconUrlReceived(const Callback_OnTouchIconUrlReceivedEvent_Void* value,

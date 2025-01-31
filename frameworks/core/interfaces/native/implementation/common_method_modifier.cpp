@@ -35,7 +35,9 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
 using namespace OHOS::Ace::NG::Converter;
@@ -1996,18 +1998,37 @@ void OnKeyEventImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnKeyEvent(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnKeyEvent(frameNode);
+    } else {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
+            PipelineContext::SetCallBackNode(node);
+            auto event = Converter::ArkValue<Ark_KeyEvent>(info);
+            arkCallback.Invoke(event);
+            return false;
+        };
+        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+    }
 }
 void OnKeyPreImeImpl(Ark_NativePointer node,
                      const Callback_KeyEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnKeyPreIme(frameNode, convValue);
+    if (!value) {
+        ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+    } else {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](KeyEventInfo& info)
+            -> bool {
+            PipelineContext::SetCallBackNode(node);
+            auto event = Converter::ArkValue<Ark_KeyEvent>(info);
+            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
+            return Converter::Convert<bool>(arkResult);
+        };
+        ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
+    }
 }
 void FocusableImpl(Ark_NativePointer node,
                    Ark_Boolean value)

@@ -19,9 +19,18 @@
 #pragma once
 
 #include <type_traits>
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_keeper.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG {
+
+namespace GeneratedApiImpl {
+    ExtensionCompanionNode* GetCompanion(Ark_NodeHandle nodePtr);
+}
+
 template<typename CallbackType,
     std::enable_if_t<std::is_same_v<decltype(CallbackType().resource), Ark_CallbackResource>, bool> = true,
     std::enable_if_t<std::is_function_v<std::remove_pointer_t<decltype(CallbackType().call)>>, bool> = true
@@ -30,18 +39,21 @@ class CallbackHelper {
 public:
     CallbackHelper() = default;
 
-    CallbackHelper(const CallbackType &callback): callback_(callback)
+    CallbackHelper(const CallbackType &callback, Ark_VMContext vmcontext)
+        : callback_(callback), vmContext_(vmcontext)
     {
         if (callback_.resource.hold) {
             (*callback_.resource.hold)(callback_.resource.resourceId);
         }
     }
-    CallbackHelper(const CallbackHelper &other): callback_(other.callback_)
+    CallbackHelper(const CallbackHelper &other): callback_(other.callback_), vmContext_(other.vmContext_)
     {
         if (callback_.resource.hold) {
             (*callback_.resource.hold)(callback_.resource.resourceId);
         }
     }
+    CallbackHelper(const CallbackType &callback, const FrameNode* frameNode = nullptr)
+        : CallbackHelper<CallbackType>(callback, GetVMContext(frameNode)) {}
     ~CallbackHelper()
     {
         if (callback_.resource.release) {
@@ -57,15 +69,78 @@ public:
         }
     }
 
-    bool IsValid()
+    template <typename... Params>
+    void InvokeSync(Params&&... args) const
+    {
+        if (callback_.callSync) {
+            (*callback_.callSync)(vmContext_, callback_.resource.resourceId, std::forward<Params>(args)...);
+        }
+    }
+
+    // this works for primitive ArkResultType types only - enum/Ark_NativePtr/structs_without_any_pointers
+    template <typename ArkResultType, typename ContinuationType, typename... Params>
+    ArkResultType InvokeWithObtainResult(Params&&... args) const
+    {
+        ArkResultType retValue {};
+        auto handler = [&retValue](const void *valuePtr) {
+            retValue = *(reinterpret_cast<const ArkResultType *>(valuePtr));
+        };
+        CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
+            handler, *this, std::forward<Params>(args)...
+        );
+        return retValue;
+    }
+
+    template <typename ResultType, typename ArkResultType, typename ContinuationType, typename... Params>
+    std::optional<ResultType> InvokeWithOptConvertResult(Params&&... args) const
+    {
+        std::optional<ResultType> retValueOpt = std::nullopt;
+        auto handler = [&retValueOpt](const void *valuePtr) {
+            retValueOpt = Converter::OptConvert<ResultType>(*(reinterpret_cast<const ArkResultType *>(valuePtr)));
+        };
+        CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
+            handler, *this, std::forward<Params>(args)...
+        );
+        return retValueOpt;
+    }
+
+    template<typename... Params>
+    RefPtr<UINode> BuildSync(Params&&... args) const
+    {
+        return Referenced::Claim(reinterpret_cast<UINode*>(
+            InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(std::forward<Params>(args)...)));
+    }
+
+    bool IsValid() const
     {
         return callback_.call != nullptr;
+    }
+
+    bool operator == (const CallbackHelper<CallbackType> &other) const
+    {
+        return callback_.call == other.callback_.call &&
+            callback_.resource.resourceId == other.callback_.resource.resourceId;
+    }
+
+    static Ark_VMContext GetVMContext(const FrameNode *frameNode)
+    {
+        if (frameNode) {
+            if (auto pipeline = frameNode->GetContext(); pipeline) {
+                auto rootPtr = reinterpret_cast<Ark_NodeHandle>(pipeline->GetRootElement().GetRawPtr());
+                if (auto companionNode = GeneratedApiImpl::GetCompanion(rootPtr); companionNode) {
+                    return companionNode->GetVMContext();
+                }
+            }
+        }
+        return nullptr;
     }
 protected:
     CallbackType callback_  = {
         .resource = {.hold = nullptr, .release = nullptr},
-        .call = nullptr
+        .call = nullptr,
+        .callSync = nullptr
     };
+    Ark_VMContext vmContext_;
 };
 } // namespace OHOS::Ace::NG
 
