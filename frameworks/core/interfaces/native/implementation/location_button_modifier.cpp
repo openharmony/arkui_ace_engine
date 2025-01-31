@@ -130,7 +130,7 @@ void OnClickImpl(Ark_NativePointer node,
             }
         }
 #endif
-        Ark_ClickEvent arkClickEvent = Converter::ArkValue<Ark_ClickEvent>(info);
+        Ark_ClickEvent arkClickEvent = Converter::ArkValue<Converter::Ark_ClickEventInfo>(info).result;
         Ark_LocationButtonOnClickResult arkResult = Converter::ArkValue<Ark_LocationButtonOnClickResult>(res);
         GetFullAPI()->getEventsAPI()->getLocationButtonEventsReceiver()->onClick(frameNode->GetId(),
             arkClickEvent, arkResult);

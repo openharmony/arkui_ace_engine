@@ -127,7 +127,6 @@ struct SpanOptionBase {
 };
 
 struct ImageSpanOptions : SpanOptionBase {
-    std::optional<int32_t> offset;
     std::optional<std::string> image;
     std::optional<std::string> bundleName;
     std::optional<std::string> moduleName;

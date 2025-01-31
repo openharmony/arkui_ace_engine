@@ -1761,25 +1761,6 @@ ArkArrayHolder<Array_FingerInfo>::ArkArrayHolder(const std::list<FingerInfo>& da
         return OHOS::Ace::NG::Converter::ArkValue<Ark_FingerInfo>(src);
     });
 }
-
-void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
-{
-#ifdef WRONG_TYPE
-    dst.tiltX = ArkValue<Ark_Number>(src.GetTiltX().value_or(0.0f));
-    dst.tiltY = ArkValue<Ark_Number>(src.GetTiltY().value_or(0.0f));
-    dst.deviceId = ArkValue<Opt_Number>(src.GetDeviceId());
-    dst.target = ArkValue<Ark_EventTarget>(src.GetTarget());
-    dst.source = ArkValue<Ark_SourceType>(src.GetSourceDevice());
-    dst.sourceTool = ArkValue<Ark_SourceTool>(src.GetSourceTool());
-    dst.axisHorizontal = ArkValue<Opt_Number>();
-    dst.axisVertical = ArkValue<Opt_Number>();
-    auto tstamp = std::chrono::duration_cast<std::chrono::milliseconds>(src.GetTimeStamp().time_since_epoch()).count();
-    dst.timestamp = ArkValue<Ark_Number>(tstamp);
-    dst.pressure = ArkValue<Ark_Number>(src.GetForce());
-    ArkArrayHolder<Array_FingerInfo> holder(src.GetFingerList());
-    dst.fingerList = holder.ArkValue();
-#endif
-}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -2602,7 +2583,7 @@ void OnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
-        callback.Invoke(Converter::ArkValue<Ark_ClickEvent>(info));
+        callback.Invoke(Converter::ArkValue<Converter::Ark_ClickEventInfo>(info).result);
     };
     NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
@@ -2615,7 +2596,7 @@ void OnClick1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(distanceThreshold);
     auto onEvent = [callback = CallbackHelper(*event)](GestureEvent& info) {
-        callback.Invoke(Converter::ArkValue<Ark_ClickEvent>(info));
+        callback.Invoke(Converter::ArkValue<Converter::Ark_ClickEventInfo>(info).result);
     };
     auto convValue = Converter::Convert<float>(*distanceThreshold);
 
