@@ -30,54 +30,15 @@ using namespace OHOS::Ace::NG::PointLight;
 
 namespace OHOS::Ace::NG {
 namespace Converter {
-template<>
-LoadImageFailEvent Convert(const Ark_ImageError& info)
-{
-    auto width = Convert<float>(info.componentWidth);
-    auto height = Convert<float>(info.componentHeight);
-    auto error = Convert<std::string>(info.message);
-    LoadImageFailEvent event(width, height, error);
-    return event;
-}
 
-template<>
-LoadImageSuccessEvent Convert(const Ark_Type_ImageAttribute_onComplete_callback_event& event)
-{
-    LoadImageSuccessEvent info(
-        Convert<float>(event.width),
-        Convert<float>(event.height),
-        Convert<float>(event.componentWidth),
-        Convert<float>(event.componentHeight),
-        Convert<int>(event.loadingStatus),
-        Convert<float>(event.contentOffsetX),
-        Convert<float>(event.contentOffsetY),
-        Convert<float>(event.contentWidth),
-        Convert<float>(event.contentHeight)
-    );
-    return info;
 }
 } // OHOS::Ace::NG::Converter
 
 namespace  {
     
-    const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor"; 
-    const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
+    // const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor"; 
+    // const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
 
-    // Valid values for boolean values
-    const std::vector<std::tuple<std::string, Ark_Boolean, std::string>> validBoolean = {
-        {"true", ArkValue<Ark_Boolean>(true), "true"},
-        {"false", ArkValue<Ark_Boolean>(false), "false"},
-    };
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUIImageEventsReceiver getImageEventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getImageEventsReceiver = [] () -> const GENERATED_ArkUIImageEventsReceiver* {
-                return &getImageEventsReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
