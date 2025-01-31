@@ -126,6 +126,7 @@ ace_unittest("capi_all_modifiers_test") {
     "text_clock_modifier_test.cpp",
     "text_input_modifier_test.cpp",
     "text_modifier_test.cpp",
+    "text_modifier_test2.cpp",
     "text_picker_modifier_test.cpp",
     "text_timer_modifier_test.cpp",
     "time_picker_modifier_test.cpp",
@@ -134,6 +135,7 @@ ace_unittest("capi_all_modifiers_test") {
     "water_flow_modifier_test.cpp",
     "web_modifier_test.cpp",
     "web_modifier_test2.cpp",
+    "web_modifier_test3.cpp",
     "windowscene_modifier_test.cpp",
   ]
   sources += [

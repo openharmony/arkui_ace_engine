@@ -973,6 +973,32 @@ TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
 }
 
 template<>
+void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
+{
+    switch (src) {
+        case ARK_TEXT_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
+        case ARK_TEXT_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
+        case ARK_TEXT_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
+        default:
+            LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src);
+            dst = std::nullopt;
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
+{
+    switch (src) {
+        case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
+        case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
+        case ARK_TEXT_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        default:
+            LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src);
+            dst = std::nullopt;
+    }
+}
+
+template<>
 void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
 {
     CHECK_NULL_VOID(src.array);

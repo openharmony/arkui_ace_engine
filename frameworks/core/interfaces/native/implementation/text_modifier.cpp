@@ -68,27 +68,6 @@ void AssignCast(std::optional<TextSelectableMode>& dst, const Ark_TextSelectable
 }
 
 template<>
-void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
-{
-    switch (src) {
-        case ARK_TEXT_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
-        case ARK_TEXT_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
-        case ARK_TEXT_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
-        default: LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
-{
-    switch (src) {
-        case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
-        case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
-        case ARK_TEXT_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
-        default: LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src);
-    }
-}
-template<>
 TextOptions Convert(const Ark_TextOptions& src)
 {
     TextOptions options;
