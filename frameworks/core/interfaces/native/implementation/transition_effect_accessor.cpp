@@ -154,14 +154,16 @@ Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    LOGE("TransitionEffectAccessor::AnimationImpl Return value must be TransitionEffect here.");
-    return nullptr;
+    AnimationOption option = Converter::Convert<AnimationOption>(*value);
+    auto refOpt = std::make_shared<AnimationOption>(option);
+    peer->handler->SetAnimationOption(refOpt);
+    return peer;
 }
 Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
                               const Ark_TransitionEffect* transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
+    //LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
     return nullptr;
 }
 } // TransitionEffectAccessor
