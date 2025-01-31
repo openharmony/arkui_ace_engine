@@ -19,6 +19,6 @@
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
 struct HoverEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::HoverInfo> {
+    : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::HoverInfo> {
     ~HoverEventPeer() override = default;
 };

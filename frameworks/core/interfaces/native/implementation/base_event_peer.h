@@ -26,9 +26,9 @@ struct BaseEventPeer {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 template<typename AceInfo>
-class EventPeer : public BaseEventPeer {
+class SomeEventPeer : public BaseEventPeer {
 public:
-    ~EventPeer() override = default;
+    ~SomeEventPeer() override = default;
 
     BaseEventInfo* GetBaseInfo() override
     {
@@ -50,5 +50,5 @@ private:
     std::optional<AceInfo> eventInfo;
 };
 
-using BaseEventPeerImpl = EventPeer<BaseEventInfo>;
+using BaseEventPeerImpl = SomeEventPeer<BaseEventInfo>;
 } // namespace OHOS::Ace::NG::GeneratedModifier

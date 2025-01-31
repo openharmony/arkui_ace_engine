@@ -14,16 +14,20 @@
  */
 
 #include "reverse_converter.h"
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
     const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
+    const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
     const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
     const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
@@ -47,10 +51,10 @@ Ark_String ConvContext::Store(const std::string_view& src)
     return result;
 }
 
-void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src)
+void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
 {
-    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
-    peer->SetGestureInfo(src);
+    const auto peer = reinterpret_cast<BaseGestureEventPeer*>(GeneratedModifier::GetBaseGestureEventAccessor()->ctor());
+    peer->SetEventInfo(src);
     dst.ptr = peer;
 }
 
@@ -210,5 +214,19 @@ void AssignArkValue(Ark_Number& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.ConvertToVp());
     AssignArkValue(dst, value);
+}
+
+void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
+}
+
+void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
 }
 } // namespace OHOS::Ace::NG::Converter

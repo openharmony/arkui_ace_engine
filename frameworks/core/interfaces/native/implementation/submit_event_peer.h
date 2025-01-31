@@ -19,6 +19,6 @@
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
 struct SubmitEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::NG::TextFieldCommonEvent> {
+    : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::NG::TextFieldCommonEvent> {
     ~SubmitEventPeer() override = default;
 };

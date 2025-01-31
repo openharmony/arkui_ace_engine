@@ -130,7 +130,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
-    void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
+    void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -141,6 +141,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
+    void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
+    void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
+    void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
@@ -228,6 +231,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
+    void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src);
+    void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src);
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 
@@ -426,6 +431,15 @@ namespace OHOS::Ace::NG::Converter {
             .value11 = ArkValue<Which>(src, ctx),
         };
     }
+    template<typename To, typename Which, typename From,
+        std::enable_if_t<std::is_same_v<Which, decltype(To().value12)>, int> = SELECTOR_ID_12>
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
+    {
+        return {
+            .selector = SELECTOR_ID_12,
+            .value12 = ArkValue<Which>(src, ctx),
+        };
+    }
     template<typename To, typename Which,
         std::enable_if_t<std::is_same_v<Which, Ark_Empty> && std::is_same_v<Ark_Int32, decltype(To().selector)>,
             int> = -1>
@@ -529,6 +543,8 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
+        template<typename P>
+        explicit ArkArrayHolder(const std::list<P>& data) {}
 
         T ArkValue() &
         {
@@ -561,21 +577,30 @@ namespace OHOS::Ace::NG::Converter {
         {
             static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
         }
+
+        void Release(std::function<void(Val&)> finalizer)
+        {
+            std::for_each(data_.begin(), data_.end(), finalizer);
+        }
     };
 
     // Create Ark_CallbackResource
     template <typename T, typename F,
-        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true
-    >
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
     T ArkValue(F callbackFunc, Ark_Int32 resId = 0)
     {
-        return T {
-            .resource = {
-                .resourceId = resId,
-                .hold = nullptr,
-                .release = nullptr
-            },
-            .call = callbackFunc
+        return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
+            .call = callbackFunc, .callSync = nullptr
+        };
+    }
+
+    // Create Ark_CallbackResource
+    template <typename T,
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
+    T ArkValue(decltype(T().call) callback = nullptr, decltype(T().callSync) callbackSync = nullptr, Ark_Int32 id = 0)
+    {
+        return T { .resource = { .resourceId = id, .hold = nullptr, .release = nullptr },
+            .call = callback, .callSync = callbackSync
         };
     }
 } // namespace OHOS::Ace::NG::Converter
