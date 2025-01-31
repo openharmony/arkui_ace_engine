@@ -1993,8 +1993,18 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnAccessibilityHover(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnAccessibilityHover(frameNode);
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onAccessibilityHover = [arkCallback = CallbackHelper(*value), node = weakNode](
+        bool isHover, AccessibilityHoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        auto event = Converter::ArkValue<Ark_AccessibilityHoverEvent>(hoverInfo);
+        arkCallback.Invoke(arkIsHover, event);
+    };
+    ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      Ark_HoverEffect value)

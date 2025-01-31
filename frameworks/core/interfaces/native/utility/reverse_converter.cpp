@@ -14,6 +14,7 @@
  */
 
 #include "reverse_converter.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -24,6 +25,7 @@
 
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
     const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
     const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
@@ -49,6 +51,14 @@ Ark_String ConvContext::Store(const std::string_view& src)
     result.chars = ptr;
     result.length = src.length();
     return result;
+}
+
+void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src)
+{
+    const auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(
+        GeneratedModifier::GetAccessibilityHoverEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
