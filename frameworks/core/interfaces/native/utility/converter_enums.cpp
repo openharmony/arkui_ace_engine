@@ -55,6 +55,18 @@ void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
 }
 
 template<>
+void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
+{
+    switch (src) {
+        case ARK_DISMISS_REASON_PRESS_BACK : dst = BindSheetDismissReason::BACK_PRESSED; break;
+        case ARK_DISMISS_REASON_TOUCH_OUTSIDE: dst = BindSheetDismissReason::TOUCH_OUTSIDE; break;
+        case ARK_DISMISS_REASON_CLOSE_BUTTON: dst = BindSheetDismissReason::CLOSE_BUTTON; break;
+        case ARK_DISMISS_REASON_SLIDE_DOWN: dst = BindSheetDismissReason::SLIDE_DOWN; break;
+        default: LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src); break;
+    }
+}
+
+template<>
 void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
     switch (src) {

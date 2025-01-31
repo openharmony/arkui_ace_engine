@@ -5243,7 +5243,7 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
         return;
     }
     auto keysOptVect = Converter::Convert<std::vector<std::optional<ModifierKey>>>(*keys);
-    std::vector<ModifierKey> keysVect(keysOptVect.size());
+    std::vector<ModifierKey> keysVect;
     for (auto item : keysOptVect) {
         if (item.has_value()) {
             keysVect.emplace_back(item.value());
