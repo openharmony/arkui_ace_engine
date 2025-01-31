@@ -28,14 +28,8 @@ namespace OHOS::Ace::NG::Converter {
     RefPtr<UnifiedData> Convert(const Ark_UnifiedData& data)
     {
         auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(data.ptr);
-        return unifiedDataPeer && unifiedDataPeer->unifiedData ? unifiedDataPeer->unifiedData : nullptr;
+        return (unifiedDataPeer && unifiedDataPeer->unifiedData) ? unifiedDataPeer->unifiedData : nullptr;
     }
-
-    void AssignArkValue(UnifiedDataPeer& arkData, const RefPtr<UnifiedData>& data)
-    {
-        arkData.unifiedData = data;
-    }
-
     template<>
     void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
     {
