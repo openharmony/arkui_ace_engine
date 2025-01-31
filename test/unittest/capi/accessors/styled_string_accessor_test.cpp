@@ -322,6 +322,7 @@ public:
         auto container = Container::CurrentSafely();
         ASSERT_NE(container, nullptr);
         auto mockContainer = AceType::DynamicCast<MockContainer>(container);
+        ASSERT_NE(mockContainer, nullptr);
         auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(false);
         mockContainer->SetTaskExecutor(taskExecutor);
         mockContainer->UpdateCurrent(TEST_CONTAINER_ID);
