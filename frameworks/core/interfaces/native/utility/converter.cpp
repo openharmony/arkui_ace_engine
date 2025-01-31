@@ -18,6 +18,7 @@
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -1006,6 +1007,13 @@ RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
     int32_t fRRExpected = Converter::Convert<int32_t>(src.expected);
 
     return AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+}
+
+template<>
+RefPtr<PixelMap> Convert(const Ark_PixelMap& src)
+{
+    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(src.ptr);
+    return pixelMapPeer ? pixelMapPeer->pixelMap : nullptr;
 }
 
 template<>
