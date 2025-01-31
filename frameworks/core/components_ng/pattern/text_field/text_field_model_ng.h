@@ -134,7 +134,7 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<TextDecorationStyle>& valueOpt);
     static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
-    static void SetHalfLeading(FrameNode* frameNode, const bool& value);
+    static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetLineSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
@@ -144,8 +144,8 @@ public:
         const std::optional<std::u16string>& value, bool isTextArea);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
-    static void SetMinFontScale(FrameNode* frameNode, const float value);
-    static void SetMaxFontScale(FrameNode* frameNode, const float value);
+    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& valueOpt);
     static void SetInputStyle(FrameNode* frameNode, const std::optional<InputStyle>& valueOpt);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
@@ -300,8 +300,8 @@ public:
     static void SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static bool GetEnablePreviewText(FrameNode* frameNode);
-    static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode modal);
-    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetEllipsisMode(FrameNode* frameNode, const std::optional<EllipsisMode>& modal);
+    static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
 
 private:
     void AddDragFrameNodeToManager() const;

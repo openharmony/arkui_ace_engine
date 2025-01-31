@@ -459,14 +459,24 @@ void TextFieldModelNG::SetMaxFontScale(const float value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value);
 }
 
-void TextFieldModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+void TextFieldModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+void TextFieldModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetInputFilter(const std::string& value,
@@ -1937,9 +1947,14 @@ void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const std::optional<D
     }
 }
 
-void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
+void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& valueOpt)
@@ -2421,10 +2436,14 @@ void TextFieldModelNG::SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UI
     pattern->SetUnitNode(unitNode);
 }
 
-void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
+void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, const std::optional<EllipsisMode>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
@@ -2432,8 +2451,13 @@ void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress);
 }
 
-void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (isStopBackPress) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1531,7 +1531,7 @@ HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeInvalidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1545,13 +1545,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestMinFontScaleValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMinFontScaleTestMinFontScaleValidValues, TestSize.Level1)
 {
     Opt_Union_Number_Resource initValueMinFontScale;
 
     // Initial setup
-    initValueMinFontScale =
-        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    initValueMinFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureMinFontScaleNumValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Number_Resource& value) {
@@ -1565,10 +1565,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestMinFontScaleValidVal
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureMinFontScaleNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value, expected] : Fixtures::testFixtureMinFontScaleResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(value));
+    }
 }
 
 /*
@@ -1576,13 +1578,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestMinFontScaleValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestMinFontScaleInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMinFontScaleTestMinFontScaleInvalidValues, TestSize.Level1)
 {
     Opt_Union_Number_Resource initValueMinFontScale;
 
     // Initial setup
-    initValueMinFontScale =
-        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    initValueMinFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureMinFontScaleNumValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Opt_Union_Number_Resource& value) {
         Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
@@ -1596,7 +1598,6 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestMinFontScaleInvalidV
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
     // Check empty optional
@@ -1608,7 +1609,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontScaleTestMinFontScaleInvalidV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontScaleTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1622,13 +1623,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontScaleTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMaxFontScaleTestMaxFontScaleValidValues, TestSize.Level1)
 {
     Opt_Union_Number_Resource initValueMaxFontScale;
 
     // Initial setup
-    initValueMaxFontScale =
-        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    initValueMaxFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureMaxFontScaleNumValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Number_Resource& value) {
@@ -1642,10 +1643,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleValidVal
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureMaxFontScaleNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value, expected] : Fixtures::testFixtureMaxFontScaleResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(value));
+    }
 }
 
 /*
@@ -1653,13 +1656,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMaxFontScaleTestMaxFontScaleInvalidValues, TestSize.Level1)
 {
     Opt_Union_Number_Resource initValueMaxFontScale;
 
     // Initial setup
-    initValueMaxFontScale =
-        ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    initValueMaxFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureMaxFontScaleNumValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Opt_Union_Number_Resource& value) {
         Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
@@ -1673,7 +1676,6 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleInvalidV
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
     // Check empty optional
