@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG::Converter {
     RefPtr<UnifiedData> Convert(const Ark_UnifiedData& data)
     {
         auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(data.ptr);
-        return unifiedDataPeer ? unifiedDataPeer->unifiedData : nullptr;
+        return unifiedDataPeer && unifiedDataPeer->unifiedData ? unifiedDataPeer->unifiedData : nullptr;
     }
 
     template<>
@@ -90,7 +90,8 @@ void SetDataImpl(DragEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->dragInfo);
-    std::cout << unifiedData->ptr << std::endl;
+    CHECK_NULL_VOID(unifiedData);
+    CHECK_NULL_VOID(unifiedData->ptr);
     peer->dragInfo->SetData(Convert<RefPtr<UnifiedData>>(*unifiedData));
 }
 Ark_NativePointer GetDataImpl(DragEventPeer* peer)

@@ -38,7 +38,7 @@ namespace Converter {
     void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
     {
         const auto peer = reinterpret_cast<UnifiedDataPeer*>(GeneratedModifier::GetUnifiedDataAccessor()->ctor());
-        peer->unifiedData = data;
+        peer->unifiedData = RefPtr<UnifiedData>(data);
         arkData.ptr = peer;
     }
 }
@@ -73,11 +73,10 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
+        ASSERT_NE(peer_, nullptr);
         dragEvent_ = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         ASSERT_NE(dragEvent_, nullptr);
-        auto peerImpl = reinterpret_cast<DragEventPeer*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->dragInfo = dragEvent_;
+        peer_->dragInfo = dragEvent_;
     }
 
     void TearDown() override
@@ -90,33 +89,33 @@ public:
 };
 
 /**
- * @tc.name: ArcTest
+ * @tc.name: SetResultTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, SetResult, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureEnumDragResultValues) {
         accessor_->setResult(peer_, value);
         EXPECT_EQ(dragEvent_->GetResult(), expected) <<
             "Input value is: " << input << ", method: SetResult";
     }
-       
 }
 
 /**
- * @tc.name: ArcTest
+ * @tc.name: setDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, setData, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, setDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    ASSERT_NE(unifiedData, nullptr);
     auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
     auto arkUnifiedData = ArkValue<Ark_UnifiedData>(data);
     accessor_->setData(peer_, &arkUnifiedData);
-    std::cout << dragEvent_->GetData() << std::endl;
-    // EXPECT_EQ(, expected) <<
-    //     "Input value is: " << input << ", method: setData";
+    ASSERT_NE(dragEvent_->GetData(), nullptr);
+    EXPECT_EQ(dragEvent_->GetData()->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
+        "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: setData";
 }
 } // namespace OHOS::Ace::NG
