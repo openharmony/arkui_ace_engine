@@ -2583,7 +2583,7 @@ void OnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
-        callback.Invoke(Converter::ArkValue<Converter::Ark_ClickEventInfo>(info).result);
+        callback.Invoke(Converter::ArkValue<Converter::ClickEventInfo>(info).result);
     };
     NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
@@ -2596,7 +2596,7 @@ void OnClick1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(distanceThreshold);
     auto onEvent = [callback = CallbackHelper(*event)](GestureEvent& info) {
-        callback.Invoke(Converter::ArkValue<Converter::Ark_ClickEventInfo>(info).result);
+        callback.Invoke(Converter::ArkValue<Converter::ClickEventInfo>(info).result);
     };
     auto convValue = Converter::Convert<float>(*distanceThreshold);
 

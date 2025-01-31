@@ -97,14 +97,14 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
     dst.ptr = peer;
 }
 
-void AssignArkValue(Ark_ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+void AssignArkValue(ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
 {
     const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
     peer->SetEventInfo(src);
     dst.result.ptr = peer;
 }
 
-void AssignArkValue(Ark_GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+void AssignArkValue(GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
 {
     const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
     peer->SetEventInfo(src);

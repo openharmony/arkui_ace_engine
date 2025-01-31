@@ -126,17 +126,6 @@ namespace OHOS::Ace::NG::Converter {
         dst = src;
     }
 
-    struct Ark_ClickEventInfo {
-        Ark_ClickEvent result {
-            .ptr = nullptr
-        };
-    };
-    struct Ark_GestureEventInfo {
-        Ark_GestureEvent result {
-            .ptr = nullptr
-        };
-    };
-
     // SORTED_SECTION
     void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src);
     void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src);
@@ -148,7 +137,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
-    void AssignArkValue(Ark_ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src);
+    void AssignArkValue(ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
     void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
@@ -164,7 +153,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
-    void AssignArkValue(Ark_GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src);
+    void AssignArkValue(GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
