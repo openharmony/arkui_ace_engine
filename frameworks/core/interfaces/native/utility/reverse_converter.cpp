@@ -15,9 +15,10 @@
 
 #include "reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
-#include "core/interfaces/native/implementation/drag_event_peer.h"
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();

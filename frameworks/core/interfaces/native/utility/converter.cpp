@@ -18,9 +18,9 @@
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
 
 namespace {
     constexpr int32_t NUM_0 = 0;
