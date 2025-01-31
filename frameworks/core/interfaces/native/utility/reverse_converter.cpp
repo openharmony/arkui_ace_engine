@@ -16,6 +16,7 @@
 #include "reverse_converter.h"
 
 #include "base/utils/string_utils.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
@@ -33,6 +34,7 @@ const int32_t SEC_TO_MILLISEC = 1000;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
     const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
     const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
@@ -60,6 +62,14 @@ Ark_String ConvContext::Store(const std::string_view& src)
 void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx)
 {
     AssignArkValue(dst, StringUtils::Str16ToStr8(src), ctx);
+}
+
+void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src)
+{
+    const auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(
+        GeneratedModifier::GetAccessibilityHoverEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)

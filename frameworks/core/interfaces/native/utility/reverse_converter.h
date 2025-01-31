@@ -127,6 +127,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // SORTED_SECTION
+    void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src);
     void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src);
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
