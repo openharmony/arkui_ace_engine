@@ -1978,9 +1978,15 @@ void OnMouseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnMouse(frameNode, convValue);
+    if (!value) {
+        return ViewAbstract::DisableOnMouse(frameNode);
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onMouse = [arkCallback = CallbackHelper(*value), node = weakNode](MouseInfo& mouseInfo) {
+        PipelineContext::SetCallBackNode(node);
+        arkCallback.Invoke(Converter::ArkValue<Ark_MouseEvent>(mouseInfo));
+    };
+    ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
 }
 void OnTouchImpl(Ark_NativePointer node,
                  const Callback_TouchEvent_Void* value)
