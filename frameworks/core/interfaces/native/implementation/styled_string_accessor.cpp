@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
+#include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -320,8 +323,23 @@ void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
 } // namespace
 
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
+const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 
 namespace StyledStringAccessor {
+RefPtr<TaskExecutor> CreateTaskExecutor(StringArray& errors)
+{
+    auto container = Container::CurrentSafely();
+    if (!container) {
+        errors.emplace_back("FromHtml container is null");
+        return nullptr;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (taskExecutor == nullptr) {
+        errors.emplace_back("FromHtml taskExecutor is null");
+        return nullptr;
+    }
+    return taskExecutor;
+}
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
     delete peer;
@@ -434,11 +452,52 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
 void FromHtmlImpl(const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(html);
-    auto htmlStr = Converter::Convert<std::string>(*html);
-    CHECK_NULL_VOID(!htmlStr.empty());
-    // StyledString need to be returned
-    LOGE("StyledStringAccessor::FromHtmlImpl - return value need to be supported");
+    ContainerScope scope(Container::CurrentIdSafely());
+    StringArray errorsStr;
+    auto peer = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
+
+    auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
+        (MutableStyledStringPeer* peer, const StringArray& errors) {
+        Converter::ArkArrayHolder<Array_String> errorHolder(errors);
+        arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(*peer), errorHolder.OptValue<Opt_Array_String>());
+    };
+
+    auto htmlStr = html ? Converter::Convert<std::string>(*html) : std::string();
+    if (htmlStr.empty()) {
+        errorsStr.emplace_back("html is empty");
+        callback(peer, errorsStr);
+        return;
+    }
+    auto taskExecutor = CreateTaskExecutor(errorsStr);
+    if (taskExecutor == nullptr) {
+        callback(peer, errorsStr);
+        return;
+    }
+
+    auto instanceId = Container::CurrentIdSafely();
+    taskExecutor->PostTask([callback, peer, htmlStr, errors = errorsStr, instanceId]() mutable {
+        ContainerScope scope(instanceId);
+        if (auto styledString = OHOS::Ace::HtmlUtils::FromHtml(htmlStr); styledString) {
+            peer->spanString = styledString;
+        } else {
+            errors.emplace_back("Convert html to styledString fails");
+        }
+        auto container = OHOS::Ace::AceEngine::Get().GetContainer(instanceId);
+        if (!container) {
+            errors.emplace_back("FromHtmlReturn container is null");
+            callback(peer, errors);
+            return;
+        }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            errors.emplace_back("FromHtmlReturn taskExecutor is null");
+            callback(peer, errors);
+            return;
+        }
+        taskExecutor->PostTask(
+            [callback, peer, errors]() mutable { callback(peer, errors); },
+            TaskExecutor::TaskType::UI, "FromHtmlReturn", PriorityType::VIP);
+        }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
 }
 void ToHtmlImpl(const Ark_StyledString* styledString)
 {

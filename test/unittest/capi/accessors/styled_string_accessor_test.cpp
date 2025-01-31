@@ -14,10 +14,16 @@
  */
 #include "accessor_test_base.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
+#include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "adapter/ohos/capability/html/span_to_html.h"
+#include "adapter/ohos/capability/html/html_to_span.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/common/ace_engine.h"
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
@@ -33,7 +39,7 @@ constexpr int TEST_START_BGCL = TEST_START_LNHT + TEST_LENGTH + 1;
 constexpr int TEST_START_URL = TEST_START_BGCL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSST = TEST_START_URL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSPM = TEST_START_PSST + TEST_LENGTH + 1;
-constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.";
+constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.\n";
 
 
 PixelMapPeer* CreatePixelMap()
@@ -116,6 +122,8 @@ const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
     .pixelMap = TEST_PIXELMAP,
     .size = std::get<1>(TEST_TUPLE_DIMENSION_DIMENSION)
 };
+const int TEST_HTML_NODE_ID = 777;
+const int TEST_CONTAINER_ID = 888;
 
 const std::vector<Ace::SpanType> SPAN_TYPE_TEST_VALUES = {
     Ace::SpanType::Font,
@@ -307,11 +315,43 @@ public:
         AccessorTestCtorBase::SetUp();
     }
 
+    static void SetUpTestCase()
+    {
+        AccessorTestCtorBase::SetUpTestCase();
+
+        auto container = Container::CurrentSafely();
+        ASSERT_NE(container, nullptr);
+        auto mockContainer = AceType::DynamicCast<MockContainer>(container);
+        ASSERT_NE(mockContainer, nullptr);
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(false);
+        mockContainer->SetTaskExecutor(taskExecutor);
+        mockContainer->UpdateCurrent(TEST_CONTAINER_ID);
+        AceEngine& aceEngine = AceEngine::Get();
+        aceEngine.AddContainer(TEST_CONTAINER_ID, container);
+    }
+
+    static void TearDownTestCase()
+    {
+        AccessorTestCtorBase::TearDownTestCase();
+
+        AceEngine& aceEngine = AceEngine::Get();
+        aceEngine.RemoveContainer(TEST_CONTAINER_ID);
+    }
+
     void* CreatePeerInstance() override
     {
         auto value = settings.Union();
         auto styles = settings.Styles();
         return accessor_->ctor(value, styles);
+    }
+
+    bool IsSpanItemSame(const std::list<RefPtr<NG::SpanItem>>& src, const std::list<RefPtr<NG::SpanItem>>& other)
+    {
+        return std::equal(src.begin(), src.end(), other.begin(), other.end(),
+            [](const RefPtr<NG::SpanItem>& lhs, const RefPtr<NG::SpanItem>& rhs) -> bool {
+                return lhs->interval.first == rhs->interval.first && lhs->interval.second == rhs->interval.second &&
+                    lhs->content == rhs->content;
+            });
     }
 
 private:
@@ -687,13 +727,61 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringSubStyledStri
 }
 
 /**
- * @tc.name:DISABLED_styledStringFromHtml
- * @tc.desc:
+ * @tc.name: styledStringFromHtml
+ * @tc.desc: converting html to StyledString
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringFromHtml, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Level1)
 {
-    // not implement
+    ASSERT_NE(accessor_->fromHtml, nullptr);
+    SpanToHtml toHtml;
+    auto htmlFromSpan = toHtml.ToHtml(*peer_->spanString);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<MutableStyledStringPeer*> value;
+        std::optional<StringArray> errors;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onFromHtmlFunc = [](const Ark_Int32 resourceId, const Opt_StyledString value, const Opt_Array_String error) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = reinterpret_cast<MutableStyledStringPeer*>(value.value.ptr),
+            .errors = Converter::OptConvert<StringArray>(error)
+        };
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_Opt_StyledString_Opt_Array_String_Void>(
+        onFromHtmlFunc, TEST_HTML_NODE_ID);
+
+    auto arkStr = Converter::ArkValue<Ark_String>(htmlFromSpan);
+
+    EXPECT_FALSE(checkEvent.has_value());
+    accessor_->fromHtml(&arkStr, &arkCallback);
+    ASSERT_TRUE(checkEvent.has_value());
+
+    EXPECT_EQ(checkEvent->nodeId, TEST_HTML_NODE_ID);
+    ASSERT_TRUE(checkEvent->errors.has_value());
+    StringArray errors = checkEvent->errors.value();
+    if (errors.size() > 0) {
+        for (const auto& error : errors) { EXPECT_EQ(error, ""); }
+    } else {
+        EXPECT_EQ(checkEvent->errors.value().size(), 0);
+        ASSERT_TRUE(checkEvent->value.has_value());
+        MutableStyledStringPeer* mss = checkEvent->value.value();
+        ASSERT_NE(mss, nullptr);
+        auto mSpanString = mss->GetMutableString();
+        ASSERT_NE(mSpanString, nullptr);
+
+        HtmlToSpan hts;
+        auto styledString = hts.ToSpanString(htmlFromSpan);
+        ASSERT_NE(styledString, nullptr);
+        auto baseString = styledString->GetString();
+        auto outString = mSpanString->GetString();
+        EXPECT_EQ(outString, baseString);
+
+        EXPECT_TRUE(IsSpanItemSame(mSpanString->GetSpanItems(), peer_->spanString->GetSpanItems()));
+    }
 }
 
 /**
