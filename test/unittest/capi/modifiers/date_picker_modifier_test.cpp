@@ -1116,4 +1116,33 @@ HWTEST_F(DatePickerModifierTest, setLunar1Test, TestSize.Level1)
         EXPECT_EQ(result, expected);
     }
 }
+
+/*
+ * @tc.name: setLunar1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setLunar1Test2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setLunar1, nullptr);
+    auto initialValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
+    EXPECT_EQ(initialValue, ATTRIBUTE_LUNAR_DEFAULT_VALUE);
+
+    auto fullJson = GetJsonValue(node_);
+    auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CONSTRUCTOR_NAME);
+    std::printf("datePicker: constructor %s\n", constructor->ToString().c_str());
+
+
+}
+
+/*
+ * @tc.name: setLunar1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setLunar1Test3, TestSize.Level1)
+{
+    int *p = nullptr;
+    *p = 0;
+}
 } // namespace OHOS::Ace::NG

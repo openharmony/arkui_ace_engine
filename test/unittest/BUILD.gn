@@ -67,6 +67,9 @@ config("ace_circle_config") {
   if (ace_engine_enable_circle_feature) {
     cflags_cc = [ "-DARKUI_CIRCLE_FEATURE" ]
   }
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags_cc += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
 }
 
 config("ace_coverage_config") {

@@ -187,7 +187,18 @@ void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
         default: LOGE("Unexpected enum value in Ark_Color: %{public}d", src);
     }
 }
-
+#ifdef SUPPORT_DIGITAL_CROWN
+template<>
+void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src)
+{
+    switch (src) {
+        case ARK_CROWN_SENSITIVITY_LOW: dst = CrownSensitivity::LOW; break;
+        case ARK_CROWN_SENSITIVITY_MEDIUM: dst = CrownSensitivity::MEDIUM; break;
+        case ARK_CROWN_SENSITIVITY_HIGH: dst = CrownSensitivity::HIGH; break;
+        default: LOGE("Unexpected enum value in Ark_CrownSensitivity: %{public}d", src);
+    }
+}
+#endif
 template<>
 void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
 {

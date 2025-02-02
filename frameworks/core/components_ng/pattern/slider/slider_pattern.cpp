@@ -57,9 +57,9 @@ const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValue
 constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
-constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
-constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
+// constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
+// constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
+// constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
 #endif
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
@@ -1580,37 +1580,37 @@ void SliderPattern::HandleCrownAction(double mainDelta)
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
-    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
-    crownMovingLength_ += mainDelta;
-    crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
-    valueRatio_ = crownMovingLength_ / sliderLength_;
-    CHECK_NULL_VOID(stepRatio_ != 0);
-    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
-    float oldValue = value_;
-    value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
-    sliderPaintProperty->UpdateValue(value_);
-    valueChangeFlag_ = !NearEqual(oldValue, value_);
-    UpdateCircleCenterOffset();
-    reachBoundary_ = NearEqual(value_, min) || NearEqual(value_, max);
-    if (showTips_) {
-        bubbleFlag_ = true;
-        UpdateBubble();
-    }
+    // float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    // float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    // crownMovingLength_ += mainDelta;
+    // crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
+    // valueRatio_ = crownMovingLength_ / sliderLength_;
+    // CHECK_NULL_VOID(stepRatio_ != 0);
+    // valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    // float oldValue = value_;
+    // value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
+    // sliderPaintProperty->UpdateValue(value_);
+    // valueChangeFlag_ = !NearEqual(oldValue, value_);
+    // UpdateCircleCenterOffset();
+    // reachBoundary_ = NearEqual(value_, min) || NearEqual(value_, max);
+    // if (showTips_) {
+    //     bubbleFlag_ = true;
+    //     UpdateBubble();
+    // }
 }
 
 void SliderPattern::StartVibrateFeedback()
 {
-    crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
-    if (valueChangeFlag_ && reachBoundary_) {
-        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_STRONG, state);
-    } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_WEAK, state);
-    }
+    // crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
+    // if (valueChangeFlag_ && reachBoundary_) {
+    //     bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+    //     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
+    //         CROWN_VIBRATOR_STRONG, state);
+    // } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
+    //     bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+    //     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
+    //         CROWN_VIBRATOR_WEAK, state);
+    // }
 }
 #endif
 

@@ -34,6 +34,9 @@
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -719,7 +722,13 @@ public:
     {
         curOpacity_ = opacity;
     }
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
+    CrownSensitivity GetDigitalCrownSensitivity() const
+    {
+        return crownSensitivity_;
+    }
+#endif
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -834,6 +843,9 @@ private:
     double curOpacity_ = 1.0;
     DatePickerMode datePickerMode_ = DatePickerMode::DATE;
     bool isFocus_ = true;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };
