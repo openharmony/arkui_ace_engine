@@ -7148,7 +7148,12 @@ void WebPattern::DumpInfo()
 
 float WebPattern::DumpGpuInfo()
 {
-    float totalSize = delegate_->GetNweb()->DumpGpuInfo();
-    return totalSize;
+    if (delegate_ != nullptr) {
+        if (delegate_->GetNweb() != nullptr) {
+            float totalSize = delegate_->GetNweb()->DumpGpuInfo();
+            return totalSize;
+        }
+    }
+    return 0;
 }
 } // namespace OHOS::Ace::NG
