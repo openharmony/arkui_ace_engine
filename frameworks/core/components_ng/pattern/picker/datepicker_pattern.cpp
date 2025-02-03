@@ -2576,7 +2576,6 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         jsonConstructor->Put("end", GetDateString(endDateSolar_).c_str());
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
     }
-    jsonConstructor->Put("testCrown", "before support");
 #ifdef SUPPORT_DIGITAL_CROWN
     std::string sensitivity = "CrownSensitivity.MEDIUM";
     if (crownSensitivity_ == CrownSensitivity::LOW) {
@@ -2588,7 +2587,6 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     }
     jsonConstructor->Put("digitalCrownSensitivity", sensitivity.c_str());
 #endif
-    jsonConstructor->Put("testCrown", "after support");
     json->PutExtAttr("constructor", jsonConstructor, filter);
 }
 

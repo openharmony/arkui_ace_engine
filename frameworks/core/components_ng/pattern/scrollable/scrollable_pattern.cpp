@@ -759,7 +759,7 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         child->StopScrollAnimation();
     }
 #ifdef SUPPORT_DIGITAL_CROWN
-    // scrollable->ListenDigitalCrownEvent(host);
+    scrollable->ListenDigitalCrownEvent(host);
 #endif
 }
 

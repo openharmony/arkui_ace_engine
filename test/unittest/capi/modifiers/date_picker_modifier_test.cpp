@@ -53,7 +53,6 @@ const auto ATTRIBUTE_CONSTRUCTOR_NAME = "constructor";
 const auto ATTRIBUTE_DATE_START_NAME = "start";
 const auto ATTRIBUTE_DATE_END_NAME = "end";
 const auto ATTRIBUTE_DATE_SELECT_NAME = "selected";
-const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
 
 // Expected values
 static const std::string EXPECTED_TRUE("true");
@@ -71,7 +70,6 @@ const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_DATE_START_DEFAULT_VALUE = PickerDate(1970, 1, 1);
 const auto ATTRIBUTE_DATE_END_DEFAULT_VALUE = PickerDate(2100, 12, 31);
 const auto ATTRIBUTE_DATE_SELECTED_DEFAULT_VALUE = PickerDate::Current();
-const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "CrownSensitivity.MEDIUM";
 const auto ATTRIBUTE_FONT_SIZE_DISAPPEAR_DEFAULT_VALUE = "14.00fp";
 const auto ATTRIBUTE_FONT_SIZE_NORMAL_DEFAULT_VALUE = "16.00fp";
 const auto ATTRIBUTE_FONT_SIZE_SELECTED_DEFAULT_VALUE = "20.00fp";
@@ -81,6 +79,10 @@ const auto ATTRIBUTE_FONT_WEIGHT_SELECTED_DEFAULT_VALUE = "FontWeight.Medium";
 const auto ATTRIBUTE_TEXT_COLOR_DISAPPEAR_DEFAULT_VALUE = "#FF182431";
 const auto ATTRIBUTE_TEXT_COLOR_NORMAL_DEFAULT_VALUE = "#FF182431";
 const auto ATTRIBUTE_TEXT_COLOR_SELECTED_DEFAULT_VALUE = "#FF007DFF";
+#ifdef SUPPORT_DIGITAL_CROWN
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "CrownSensitivity.MEDIUM";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
+#endif
 
 // Test plans
 // size
@@ -271,6 +273,7 @@ const std::vector<PickerDateOptionsStepTest> PICKER_DATE_OPTIONS_TEST_PLAN = {
         { "1970-1-1", "1970-1-1", "1970-1-1" } }
 };
 
+#ifdef SUPPORT_DIGITAL_CROWN
 std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> testFixtureEnumCrownSensitivityTestPlan = {
     { "CrownSensitivity.LOW", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_LOW),
         "CrownSensitivity.LOW" },
@@ -285,6 +288,7 @@ std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> testFixt
     { "Ark_Empty", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
         ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
 };
+#endif
 
 std::string ToJsonString(const PickerDate& pickerDate)
 {
@@ -1934,6 +1938,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
     };
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN 
 /*
  * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
  * @tc.desc:
@@ -1975,4 +1980,18 @@ HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.
         checkValue(input, expected, value);
     }
 }
+#else
+/*
+ * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1) {}
+/*
+ * @tc.name: setDigitalCrownSensitivityValidValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, TestSize.Level1) {}
+#endif
 } // namespace OHOS::Ace::NG
