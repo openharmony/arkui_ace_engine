@@ -19,6 +19,6 @@
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
 struct TouchEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::TouchEventInfo> {
+    : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::TouchEventInfo> {
     ~TouchEventPeer() override = default;
 };

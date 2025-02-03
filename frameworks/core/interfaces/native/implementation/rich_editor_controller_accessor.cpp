@@ -17,6 +17,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "rich_editor_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG::Converter {
 
@@ -184,12 +186,34 @@ ImageSpanAttribute Convert(const Ark_RichEditorImageSpanStyle& src)
 }
 
 template<>
+UserGestureOptions Convert(const Ark_RichEditorGesture& src)
+{
+    UserGestureOptions result;
+    const auto arkOnClickOpt = Converter::OptConvert<Callback_ClickEvent_Void>(src.onClick);
+    if (arkOnClickOpt) {
+        result.onClick = [callback = CallbackHelper(arkOnClickOpt.value())](OHOS::Ace::GestureEvent& info) {
+            callback.Invoke(Converter::ArkValue<ClickEventInfo>(info).result);
+        };
+    }
+    const auto arkOnLongPressOpt = Converter::OptConvert<Callback_GestureEvent_Void>(src.onLongPress);
+    if (arkOnLongPressOpt) {
+        result.onLongPress = [callback = CallbackHelper(arkOnLongPressOpt.value())](OHOS::Ace::GestureEvent& info) {
+            callback.Invoke(Converter::ArkValue<GestureEventInfo>(info).result);
+        };
+    }
+    return result;
+}
+
+template<>
 ImageSpanOptions Convert(const Ark_RichEditorImageSpanOptions& src)
 {
-    ImageSpanOptions ret;
-    ret.offset = Converter::OptConvert<int32_t>(src.offset);
-    ret.imageAttribute = Converter::OptConvert<ImageSpanAttribute>(src.imageStyle);
-    return ret;
+    return {
+        {
+            .offset = Converter::OptConvert<int32_t>(src.offset),
+            .userGestureOption = Converter::OptConvert<UserGestureOptions>(src.gesture).value_or(UserGestureOptions {}),
+        },
+        .imageAttribute = Converter::OptConvert<ImageSpanAttribute>(src.imageStyle),
+    };
 }
 
 template<>
@@ -469,8 +493,4 @@ const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccess
     };
     return &RichEditorControllerAccessorImpl;
 }
-
-struct RichEditorControllerPeer {
-    virtual ~RichEditorControllerPeer() = default;
-};
 }
