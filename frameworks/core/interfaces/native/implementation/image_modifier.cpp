@@ -64,6 +64,26 @@ void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotat
         default: LOGE("Unexpected enum value in Ark_ImageRotateOrientation: %{public}d", src);
     }
 }
+template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Resource_PixelMap& src)
+{
+    Converter::VisitUnion(src,
+        [&dst](const Ark_String& val) {
+            dst = Converter::OptConvert<ImageSourceInfo>(val);
+        },
+        [&dst](const Ark_Resource& val) {
+            dst = Converter::OptConvert<ImageSourceInfo>(val);
+        },
+        [&dst](const Ark_PixelMap& val) {
+            dst = std::nullopt;
+            auto pixMapRefPtr = Converter::OptConvert<RefPtr<PixelMap>>(val).value_or(nullptr);
+            if (pixMapRefPtr) {
+                dst = ImageSourceInfo(pixMapRefPtr);
+            }
+        },
+        []() {}
+    );
+}
 } // Converter
 } // OHOS::Ace::NG
 
@@ -124,10 +144,11 @@ void AltImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
-    LOGE("Arkoala: GENERATED_ArkUIImageModifier.AltImpl - method doesn't support PixelMap");
-    ImageModelNG::SetAlt(frameNode, info);
+    if (value) {
+        ImageModelNG::SetAlt(frameNode, Converter::OptConvert<ImageSourceInfo>(*value));
+        return;
+    }
+    ImageModelNG::SetAlt(frameNode, std::nullopt);
 }
 void MatchTextDirectionImpl(Ark_NativePointer node,
                             Ark_Boolean value)
