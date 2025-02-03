@@ -26,21 +26,18 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-const auto DEFAULT_DISAPPEAR_TEXT_STYLE  = PickerTextStyle {
-        .textColor = Color(0xFF182431),
-        .fontSize = Dimension(14, DimensionUnit::FP),
-        .fontWeight = FontWeight::REGULAR
-};
-const auto DEFAULT_TEXT_STYLE  = PickerTextStyle {
-        .textColor = Color(0xFF182431),
-        .fontSize = Dimension(16, DimensionUnit::FP),
-        .fontWeight = FontWeight::REGULAR
-};
-const auto DEFAULT_SELECTED_TEXT_STYLE  = PickerTextStyle {
-        .textColor = Color(0xFF007DFF),
-        .fontSize = Dimension(20, DimensionUnit::FP),
-        .fontWeight = FontWeight::MEDIUM
-};
+#ifdef SUPPORT_DIGITAL_CROWN
+const auto DIGITAL_CROWN_SENSITIVITY_DEFAULT = CrownSensitivity::MEDIUM;
+#endif
+const auto DEFAULT_DISAPPEAR_TEXT_STYLE = PickerTextStyle { .textColor = Color(0xFF182431),
+    .fontSize = Dimension(14, DimensionUnit::FP),
+    .fontWeight = FontWeight::REGULAR };
+const auto DEFAULT_TEXT_STYLE = PickerTextStyle { .textColor = Color(0xFF182431),
+    .fontSize = Dimension(16, DimensionUnit::FP),
+    .fontWeight = FontWeight::REGULAR };
+const auto DEFAULT_SELECTED_TEXT_STYLE = PickerTextStyle { .textColor = Color(0xFF007DFF),
+    .fontSize = Dimension(20, DimensionUnit::FP),
+    .fontWeight = FontWeight::MEDIUM };
 struct DatePickerOptions {
     PickerDate start;
     PickerDate end;
@@ -127,7 +124,7 @@ void DisappearTextStyle0Impl(Ark_NativePointer node,
 void DisappearTextStyle1Impl(Ark_NativePointer node,
                              const Opt_PickerTextStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto context = frameNode->GetContext();
@@ -155,7 +152,7 @@ void TextStyle0Impl(Ark_NativePointer node,
 void TextStyle1Impl(Ark_NativePointer node,
                     const Opt_PickerTextStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto context = frameNode->GetContext();
@@ -183,7 +180,7 @@ void SelectedTextStyle0Impl(Ark_NativePointer node,
 void SelectedTextStyle1Impl(Ark_NativePointer node,
                             const Opt_PickerTextStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto context = frameNode->GetContext();
@@ -215,7 +212,7 @@ void OnChangeImpl(Ark_NativePointer node,
 void OnDateChange0Impl(Ark_NativePointer node,
                        const Callback_Date_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
@@ -253,10 +250,8 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
-    auto sensitivity = Converter::OptConvert<CrownSensitivity>(*value);
-    CHECK_NULL_VOID(sensitivity);
-    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, *sensitivity);
+    auto sensitivity = Converter::OptConvert<CrownSensitivity>(*value).value_or(DIGITAL_CROWN_SENSITIVITY_DEFAULT);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, sensitivity);
 #endif
 }
 } // DatePickerAttributeModifier

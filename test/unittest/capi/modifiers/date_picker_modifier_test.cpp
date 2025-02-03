@@ -1186,18 +1186,16 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1TestDefaultValues, TestSi
 HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
@@ -1210,7 +1208,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontStyle, TestSize.Level
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1227,18 +1225,16 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontStyle, TestSize.Level
 HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
@@ -1251,7 +1247,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontWeight, TestSize.Leve
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1269,7 +1265,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontWeight, TestSize.Leve
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1286,18 +1282,16 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontWeight, TestSize.Leve
 HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto family : FONT_FAMILY_TEST_PLAN) {
@@ -1310,7 +1304,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontFamily, TestSize.Leve
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, family.second);
@@ -1327,18 +1321,16 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontFamily, TestSize.Leve
 HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1TextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto size : FONT_SIZE_TEST_PLAN) {
@@ -1351,7 +1343,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1TextFontSize, TestSize.Le
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1414,21 +1406,21 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1InvalidValue, TestSize.Le
  */
 HWTEST_F(DatePickerModifierTest, setTextStyle1TestDefaultValues, TestSize.Level1)
 {
-        auto fullJson = GetJsonValue(node_);
+    auto fullJson = GetJsonValue(node_);
 
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
-        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
-        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
-        auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+    auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+    auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+    auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+    auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+    auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+    auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
 
-        EXPECT_EQ(checkSize, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
-        EXPECT_EQ(checkWeight, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
-        EXPECT_EQ(checkStyle, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
-        EXPECT_EQ(checkFamily, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
-        EXPECT_EQ(checkColor, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_EQ(checkSize, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+    EXPECT_EQ(checkWeight, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+    EXPECT_EQ(checkStyle, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+    EXPECT_EQ(checkFamily, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
+    EXPECT_EQ(checkColor, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
 }
 
 /*
@@ -1439,18 +1431,16 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1TestDefaultValues, TestSize.Level1
 HWTEST_F(DatePickerModifierTest, setTextStyle1FontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
@@ -1463,7 +1453,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontStyle, TestSize.Level1)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1480,18 +1470,16 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontStyle, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, setTextStyle1FontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
@@ -1504,7 +1492,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontWeight, TestSize.Level1)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1522,7 +1510,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontWeight, TestSize.Level1)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1539,18 +1527,16 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontWeight, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, setTextStyle1FontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto family : FONT_FAMILY_TEST_PLAN) {
@@ -1563,7 +1549,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontFamily, TestSize.Level1)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, family.second);
@@ -1580,18 +1566,16 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontFamily, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, setTextStyle1FontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto size : FONT_SIZE_TEST_PLAN) {
@@ -1604,7 +1588,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1FontSize, TestSize.Level1)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1667,21 +1651,21 @@ HWTEST_F(DatePickerModifierTest, setTextStyle1InvalidValue, TestSize.Level1)
  */
 HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1TestDefaultValues, TestSize.Level1)
 {
-        auto fullJson = GetJsonValue(node_);
+    auto fullJson = GetJsonValue(node_);
 
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
-        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
-        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
-        auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+    auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+    auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+    auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+    auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+    auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+    auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
 
-        EXPECT_EQ(checkSize, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
-        EXPECT_EQ(checkWeight, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
-        EXPECT_EQ(checkStyle, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
-        EXPECT_EQ(checkFamily, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
-        EXPECT_EQ(checkColor, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_EQ(checkSize, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+    EXPECT_EQ(checkWeight, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+    EXPECT_EQ(checkStyle, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+    EXPECT_EQ(checkFamily, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
+    EXPECT_EQ(checkColor, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
 }
 
 /*
@@ -1692,18 +1676,16 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1TestDefaultValues, TestSiz
 HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
@@ -1716,7 +1698,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontStyle, TestSize.Level1
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1733,18 +1715,16 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontStyle, TestSize.Level1
 HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
@@ -1757,7 +1737,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontWeight, TestSize.Level
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1775,7 +1755,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontWeight, TestSize.Level
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1792,18 +1772,16 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontWeight, TestSize.Level
 HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto family : FONT_FAMILY_TEST_PLAN) {
@@ -1816,7 +1794,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontFamily, TestSize.Level
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, family.second);
@@ -1833,18 +1811,16 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontFamily, TestSize.Level
 HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle1, nullptr);
-    Ark_Font font = {
-        .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first };
     Ark_PickerTextStyle pickerStyle;
     auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     for (auto size : FONT_SIZE_TEST_PLAN) {
@@ -1857,7 +1833,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontSize, TestSize.Level1)
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkStyle = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1930,14 +1906,13 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
     auto onDateChange = [](const Ark_Int32 resourceId, const Ark_Date parameter) {
         selectedDate = Converter::OptConvert<PickerDate>(parameter);
     };
-    Callback_Date_Void func = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onDateChange
-    };
+    Callback_Date_Void func = { .resource =
+                                    Ark_CallbackResource {
+                                        .resourceId = frameNode->GetId(),
+                                        .hold = nullptr,
+                                        .release = nullptr,
+                                    },
+        .call = onDateChange };
     auto optFunc = Converter::ArkValue<Opt_Callback_Date_Void>(Ark_Empty());
     modifier_->setOnDateChange1(node_, &optFunc);
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
@@ -1945,7 +1920,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
         DatePickerChangeEvent event(testValue.first.ToString(true));
         eventHub->FireChangeEvent(&event);
         EXPECT_FALSE(selectedDate.has_value());
-    };    
+    };
     optFunc = Converter::ArkValue<Opt_Callback_Date_Void>(func);
     modifier_->setOnDateChange1(node_, &optFunc);
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
@@ -1959,21 +1934,19 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
     };
 }
 
-
 /*
  * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
     auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
-        "Default value for attribute 'digitalCrownSensitivity'";
+    resultStr = GetAttrValue<std::string>(constructor, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)
+        << "Default value for attribute 'digitalCrownSensitivity'";
 }
 
 /*
@@ -1981,18 +1954,15 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityDefaultValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     Opt_CrownSensitivity initValueDigitalCrownSensitivity;
-
     // Initial setup
     initValueDigitalCrownSensitivity = std::get<1>(testFixtureEnumCrownSensitivityTestPlan[0]);
-
     auto checkValue = [this, &initValueDigitalCrownSensitivity](
                           const std::string& input, const std::string& expectedStr, const Opt_CrownSensitivity& value) {
         Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
-
         inputValueDigitalCrownSensitivity = value;
         modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
         auto jsonValue = GetJsonValue(node_);
@@ -2001,22 +1971,8 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, 
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
                                           << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
     };
-
     for (auto& [input, value, expected] : testFixtureEnumCrownSensitivityTestPlan) {
         checkValue(input, expected, value);
     }
-}
-
-
-
-/*
- * @tc.name: setLunar1Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerModifierTest, setLunar1Test3, TestSize.Level1)
-{
-    int *p = nullptr;
-    *p = 0;
 }
 } // namespace OHOS::Ace::NG
