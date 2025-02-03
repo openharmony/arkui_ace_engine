@@ -323,6 +323,15 @@ void AlignStyleImpl(Ark_NativePointer node,
         IndexerModelNG::SetPopupHorizontalSpace(frameNode, offsetDimension.value());
     }
 }
+void __onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                  const Callback_Number_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //AlphabetIndexerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+}
 } // AlphabetIndexerAttributeModifier
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -356,6 +365,7 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupTitleBackgroundImpl,
         AlphabetIndexerAttributeModifier::EnableHapticFeedbackImpl,
         AlphabetIndexerAttributeModifier::AlignStyleImpl,
+        AlphabetIndexerAttributeModifier::__onChangeEvent_selectedImpl,
     };
     return &ArkUIAlphabetIndexerModifierImpl;
 }

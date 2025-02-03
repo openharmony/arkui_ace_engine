@@ -378,6 +378,24 @@ void MenuAlignImpl(Ark_NativePointer node,
     }
     SelectModelNG::SetMenuAlign(frameNode, menuAlign);
 }
+void __onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                  const Callback_Union_Number_Resource_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //SelectModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+}
+void __onChangeEvent_valueImpl(Ark_NativePointer node,
+                               const Callback_ResourceStr_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //SelectModelNG::Set__onChangeEvent_value(frameNode, convValue);
+}
 } // SelectAttributeModifier
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
 {
@@ -405,6 +423,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::MenuItemContentModifierImpl,
         SelectAttributeModifier::DividerImpl,
         SelectAttributeModifier::MenuAlignImpl,
+        SelectAttributeModifier::__onChangeEvent_selectedImpl,
+        SelectAttributeModifier::__onChangeEvent_valueImpl,
     };
     return &ArkUISelectModifierImpl;
 }

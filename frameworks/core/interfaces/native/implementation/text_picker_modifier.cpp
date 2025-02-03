@@ -522,6 +522,24 @@ void GradientHeightImpl(Ark_NativePointer node,
     }
     TextPickerModelNG::SetGradientHeight(frameNode, heightDimension);
 }
+void __onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                  const Callback_Union_Number_Array_Number_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //TextPickerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+}
+void __onChangeEvent_valueImpl(Ark_NativePointer node,
+                               const Callback_Union_String_Array_String_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //TextPickerModelNG::Set__onChangeEvent_value(frameNode, convValue);
+}
 } // TextPickerAttributeModifier
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
 {
@@ -539,6 +557,8 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
         TextPickerAttributeModifier::SelectedIndexImpl,
         TextPickerAttributeModifier::DividerImpl,
         TextPickerAttributeModifier::GradientHeightImpl,
+        TextPickerAttributeModifier::__onChangeEvent_selectedImpl,
+        TextPickerAttributeModifier::__onChangeEvent_valueImpl,
     };
     return &ArkUITextPickerModifierImpl;
 }

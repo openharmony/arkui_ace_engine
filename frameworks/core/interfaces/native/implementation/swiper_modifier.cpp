@@ -638,6 +638,15 @@ void NextMarginImpl(Ark_NativePointer node,
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
     SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
 }
+void __onChangeEvent_indexImpl(Ark_NativePointer node,
+                               const Callback_Number_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //SwiperModelNG::Set__onChangeEvent_index(frameNode, convValue);
+}
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
 {
@@ -671,6 +680,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::DisplayCountImpl,
         SwiperAttributeModifier::PrevMarginImpl,
         SwiperAttributeModifier::NextMarginImpl,
+        SwiperAttributeModifier::__onChangeEvent_indexImpl,
     };
     return &ArkUISwiperModifierImpl;
 }
