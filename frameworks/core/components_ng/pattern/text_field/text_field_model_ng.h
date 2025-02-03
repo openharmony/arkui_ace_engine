@@ -302,6 +302,7 @@ public:
     static bool GetEnablePreviewText(FrameNode* frameNode);
     static void SetEllipsisMode(FrameNode* frameNode, const std::optional<EllipsisMode>& modal);
     static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;

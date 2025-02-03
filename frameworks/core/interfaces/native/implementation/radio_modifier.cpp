@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/common/container.h"
@@ -146,8 +147,12 @@ void __onChangeEvent_checkedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //RadioModelNG::Set__onChangeEvent_checked(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool check) {
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(check));
+    };
+    RadioModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // RadioAttributeModifier
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()

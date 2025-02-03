@@ -71,6 +71,7 @@ public:
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
     static void SetEnableCascade(FrameNode* frameNode, bool isEnableCascade);
+    static void SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 private:
     static RefPtr<FrameNode> CreateStackNode();

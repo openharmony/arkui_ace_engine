@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -165,8 +166,13 @@ void __onChangeEvent_ratingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //RatingModelNG::Set__onChangeEvent_rating(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& value) {
+        Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(nValue);
+    };
+    RatingModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // RatingAttributeModifier
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()

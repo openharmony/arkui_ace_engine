@@ -154,6 +154,8 @@ public:
     static bool GetIndicatorInteractive(FrameNode* frameNode);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static int32_t GetPageFlipMode(FrameNode* frameNode);
+    static void SetOnChangeEvent(FrameNode* frameNode,
+        std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
 };
 
 } // namespace OHOS::Ace::NG

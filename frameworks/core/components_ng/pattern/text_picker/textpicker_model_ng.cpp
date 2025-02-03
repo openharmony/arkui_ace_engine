@@ -1418,4 +1418,21 @@ void TextPickerModelNG::HasUserDefinedOpacity()
     textPickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
 
+void TextPickerModelNG::SetOnValueChangeEvent(FrameNode* frameNode, TextCascadeValueChangeEvent&& onValueChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnValueChangeEvent(std::move(onValueChangeEvent));
+}
+
+void TextPickerModelNG::SetOnSelectedChangeEvent(FrameNode* frameNode,
+    TextCascadeSelectedChangeEvent&& onSelectedChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectedChangeEvent(std::move(onSelectedChangeEvent));
+}
+
 } // namespace OHOS::Ace::NG

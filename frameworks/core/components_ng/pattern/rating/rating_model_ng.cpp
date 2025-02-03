@@ -112,6 +112,14 @@ void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void RatingModelNG::SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChange));
+}
+
 RefPtr<FrameNode> RatingModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(

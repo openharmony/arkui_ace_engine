@@ -1895,4 +1895,224 @@ HWTEST_F(TextPickerModifierTest, setGradientHeight, TestSize.Level1)
         EXPECT_EQ(checkVal, expected);
     }
 }
+
+/*
+ * @tc.name: setOnChangeEventSelected1Impl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected1Impl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<float> value;
+        std::optional<std::vector<float>> valueVct;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number parameter) {
+        checkEvent = {
+            .nodeId = resourceId
+        };
+        Converter::VisitUnion(parameter,
+            [](const Ark_Number& value) {
+                checkEvent->value = Converter::OptConvert<float>(value);
+            },
+            [](const Array_Number& value) {
+                checkEvent->valueVct = Converter::OptConvert<std::vector<float>>(value);
+            },
+            []() {});
+    };
+
+    Callback_Union_Number_Array_Number_Void arkCallback =
+        Converter::ArkValue<Callback_Union_Number_Array_Number_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+
+    std::vector<std::string> value;
+    std::vector<double> index;
+
+    value.emplace_back("value");
+    index.emplace_back(56.33);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireChangeEvent(value, index);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->valueVct.has_value(), false);
+    EXPECT_NEAR(checkEvent->value.value(), 56.33f, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setOnChangeEventSelected2Impl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected2Impl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<float> value;
+        std::optional<std::vector<float>> valueVct;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number parameter) {
+        checkEvent = {
+            .nodeId = resourceId
+        };
+        Converter::VisitUnion(parameter,
+            [](const Ark_Number& value) {
+                checkEvent->value = Converter::OptConvert<float>(value);
+            },
+            [](const Array_Number& value) {
+                checkEvent->valueVct = Converter::OptConvert<std::vector<float>>(value);
+            },
+            []() {});
+    };
+
+    Callback_Union_Number_Array_Number_Void arkCallback =
+        Converter::ArkValue<Callback_Union_Number_Array_Number_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+
+    std::vector<std::string> value;
+    std::vector<double> index;
+
+    value.emplace_back("value_1");
+    value.emplace_back("value_2");
+    index.emplace_back(56.33);
+    index.emplace_back(89.435);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireChangeEvent(value, index);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), false);
+    EXPECT_EQ(checkEvent->valueVct.has_value(), true);
+    EXPECT_EQ(checkEvent->valueVct.value().size(), 2);
+    EXPECT_NEAR(checkEvent->valueVct.value()[0], 56.33f, FLT_EPSILON);
+    EXPECT_NEAR(checkEvent->valueVct.value()[1], 89.435f, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setOnChangeEventValue1Impl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setOnChangeEventValue1Impl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<std::string> value;
+        std::optional<std::vector<std::string>> valueVct;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String parameter) {
+        checkEvent = {
+            .nodeId = resourceId
+        };
+        Converter::VisitUnion(parameter,
+            [](const Ark_String& value) {
+                checkEvent->value = Converter::OptConvert<std::string>(value);
+            },
+            [](const Array_String& value) {
+                checkEvent->valueVct = Converter::OptConvert<std::vector<std::string>>(value);
+            },
+            []() {});
+    };
+
+    Callback_Union_String_Array_String_Void arkCallback =
+        Converter::ArkValue<Callback_Union_String_Array_String_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+
+    std::vector<std::string> value;
+    std::vector<double> index;
+
+    value.emplace_back("value");
+    index.emplace_back(56.33);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireChangeEvent(value, index);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->valueVct.has_value(), false);
+    EXPECT_EQ(checkEvent->value.value(), "value");
+}
+
+/*
+ * @tc.name: setOnChangeEventValue2Impl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<std::string> value;
+        std::optional<std::vector<std::string>> valueVct;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String parameter) {
+        checkEvent = {
+            .nodeId = resourceId
+        };
+        Converter::VisitUnion(parameter,
+            [](const Ark_String& value) {
+                checkEvent->value = Converter::OptConvert<std::string>(value);
+            },
+            [](const Array_String& value) {
+                checkEvent->valueVct = Converter::OptConvert<std::vector<std::string>>(value);
+            },
+            []() {});
+    };
+
+    Callback_Union_String_Array_String_Void arkCallback =
+        Converter::ArkValue<Callback_Union_String_Array_String_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+
+    std::vector<std::string> value;
+    std::vector<double> index;
+
+    value.emplace_back("value_1");
+    value.emplace_back("value_2");
+    index.emplace_back(56.33);
+    index.emplace_back(89.435);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireChangeEvent(value, index);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), false);
+    EXPECT_EQ(checkEvent->valueVct.has_value(), true);
+    EXPECT_EQ(checkEvent->valueVct.value().size(), 2);
+    EXPECT_EQ(checkEvent->valueVct.value()[0], "value_1");
+    EXPECT_EQ(checkEvent->valueVct.value()[1], "value_2");
+}
 } // namespace OHOS::Ace::NG

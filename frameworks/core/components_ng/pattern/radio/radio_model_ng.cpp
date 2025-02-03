@@ -102,6 +102,14 @@ void RadioModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void RadioModelNG::SetOnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void RadioModelNG::SetWidth(const Dimension& width)
 {
     NG::ViewAbstract::SetWidth(NG::CalcLength(width));

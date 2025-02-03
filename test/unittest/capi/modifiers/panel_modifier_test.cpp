@@ -765,4 +765,46 @@ HWTEST_F(PanelModifierTest, DISABLED_setOnHeightChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->index, 123);
 }
+
+/*
+ * @tc.name: setOnChangeEventModeImpl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelModifierTest, setOnChangeEventModeImpl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<PanelMode> value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_PanelMode parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::OptConvert<PanelMode>(parameter)
+        };
+    };
+
+    Callback_PanelMode_Void arkCallback = Converter::ArkValue<Callback_PanelMode_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_mode(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireSizeChangeEvent(PanelMode::FULL, 100.f, 200.f);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), PanelMode::FULL);
+    eventHub->FireSizeChangeEvent(PanelMode::HALF, 200.f, 300.f);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), PanelMode::HALF);
+}
 } // namespace OHOS::Ace::NG

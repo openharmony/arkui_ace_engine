@@ -285,4 +285,11 @@ void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onCha
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void CheckBoxGroupModelNG::SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent)
+{
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
 } // namespace OHOS::Ace::NG

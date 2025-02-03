@@ -1385,4 +1385,92 @@ HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
     EXPECT_EQ(colorCheckValue, "#11223344");
 }
 
+/*
+ * @tc.name: setOnChangeEventSelectedImpl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<SelectEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<int32_t> value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_Number_Resource parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::OptConvert<int32_t>(parameter)
+        };
+    };
+
+    Callback_Union_Number_Resource_Void arkCallback =
+        Converter::ArkValue<Callback_Union_Number_Resource_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    auto changeEvent = eventHub->GetSelectChangeEvent();
+    changeEvent(5);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), 5);
+    changeEvent(10);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), 10);
+}
+
+/*
+ * @tc.name: setOnChangeEventValueImpl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<SelectEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<std::string> value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_ResourceStr parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::OptConvert<std::string>(parameter)
+        };
+    };
+
+    Callback_ResourceStr_Void arkCallback =
+        Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    auto changeEvent = eventHub->GetValueChangeEvent();
+    changeEvent("test_1");
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), "test_1");
+    changeEvent("test_2");
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), "test_2");
+}
+
 } // namespace OHOS::Ace::NG

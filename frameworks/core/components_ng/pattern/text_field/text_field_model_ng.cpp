@@ -2460,4 +2460,12 @@ void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, const std::optiona
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, frameNode);
     }
 }
+
+void TextFieldModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(func));
+}
 } // namespace OHOS::Ace::NG

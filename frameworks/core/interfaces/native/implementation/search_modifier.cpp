@@ -679,8 +679,12 @@ void __onChangeEvent_valueImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SearchModelNG::Set__onChangeEvent_value(frameNode, convValue);
+    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
+        arkCallback.Invoke(arkContent);
+    };
+    SearchModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
