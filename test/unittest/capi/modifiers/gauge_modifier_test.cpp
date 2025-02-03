@@ -21,6 +21,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -642,6 +643,24 @@ HWTEST_F(GaugeModifierTest, setDescriptionTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DESCRIPTION_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setDescriptionTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeModifierTest, setDescriptionTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDescription, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    int callsCount = 0;
+    CustomNodeBuilderTestHelper<GaugeModifierTest> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    modifier_->setDescription(node_, &builder);
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }
 
 /*
