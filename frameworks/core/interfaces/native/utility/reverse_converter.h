@@ -137,7 +137,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
-    void AssignArkValue(ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
     void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
@@ -153,7 +152,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
-    void AssignArkValue(GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
@@ -252,6 +250,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
+    void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src);
+    void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src);
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 

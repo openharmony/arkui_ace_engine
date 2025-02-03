@@ -97,20 +97,6 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
     dst.ptr = peer;
 }
 
-void AssignArkValue(ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
-{
-    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.result.ptr = peer;
-}
-
-void AssignArkValue(GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
-{
-    const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.result.ptr = peer;
-}
-
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 {
     auto data = JsonUtil::ParseJsonString(src);
@@ -331,5 +317,19 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
+}
+
+void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
+}
+
+void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
 }
 } // namespace OHOS::Ace::NG::Converter
