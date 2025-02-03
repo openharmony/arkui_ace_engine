@@ -568,7 +568,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
     TouchEventInfo info("");
     auto retValue = fireTouchEvent(info);
     EXPECT_EQ(retValue, NG::HitTestMode::HTMBLOCK);
-    EXPECT_TRUE(checkEvent.has_value());
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().nodeId, expectedResId);
 }
 
