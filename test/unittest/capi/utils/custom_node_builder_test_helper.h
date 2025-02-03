@@ -116,7 +116,7 @@ public:
         return syncCallbackCounter_;
     }
 
-    CustomNodeBuilder GetBuilder()
+    CustomNodeBuilder GetBuilder() const
     {
         CustomNodeBuilder builder = {
             .resource = {.resourceId = uniqueId_, .hold = nullptr, .release = nullptr},
