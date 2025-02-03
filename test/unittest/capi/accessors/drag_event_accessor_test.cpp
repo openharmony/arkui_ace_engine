@@ -17,6 +17,7 @@
 #include <tuple>
 
 #include "accessor_test_base.h"
+#include "accessor_test_fixtures.h"
 #include "node_api.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -29,6 +30,7 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace AccessorTestFixtures;
 
 namespace GeneratedModifier {
     const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
@@ -85,6 +87,66 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
+HWTEST_F(DragEventAccessorTest, GetWindowXTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetX(expected);
+        auto windowX = accessor_->getWindowX(peer_);
+        EXPECT_EQ(Convert<int32_t>(windowX), expected) <<
+            "Input value is: " << input << ", method: GetWindowXTest";
+    }
+}
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetY(expected);
+        auto windowY = accessor_->getWindowY(peer_);
+        EXPECT_EQ(Convert<int32_t>(windowY), expected) <<
+            "Input value is: " << input << ", method: GetWindowYTest";
+    }
+}
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetXTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetX(expected);
+        auto x = accessor_->getX(peer_);
+        EXPECT_EQ(Convert<int32_t>(x), expected) <<
+            "Input value is: " << input << ", method: GetXTest";
+    }
+}
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetYTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetY(expected);
+        auto y = accessor_->getY(peer_);
+        EXPECT_EQ(Convert<int32_t>(y), expected) <<
+            "Input value is: " << input << ", method: GetYTest";
+    }
+}
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
 HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureEnumDragResultValues) {
@@ -128,4 +190,34 @@ HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
 }
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetUseCustomDropAnimationTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureBooleanValues) {
+        dragEvent_->UseCustomAnimation(expected);
+        auto useCustomDropAnimation = accessor_->getUseCustomDropAnimation(peer_);
+        EXPECT_EQ(Convert<bool>(useCustomDropAnimation), expected) <<
+            "Input value is: " << input << ", method: GetYTest";
+    }
+}
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureBooleanValues) {
+        accessor_->setUseCustomDropAnimation(peer_, value);
+        EXPECT_EQ(dragEvent_->IsUseCustomAnimation(), expected) <<
+            "Input value is: " << input << ", method: GetYTest";
+    }
+}
+
 } // namespace OHOS::Ace::NG
