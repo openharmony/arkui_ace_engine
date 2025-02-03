@@ -528,8 +528,21 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //TextPickerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::vector<double>& index) {
+        if (index.size() == 1) {
+            auto result = Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(index[0]);
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke(result);
+        } else {
+            Converter::ArkArrayHolder<Array_Number> arrayHolder(index);
+            Array_Number array = arrayHolder.ArkValue();
+            auto result = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(array);
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke(result);
+        }
+    };
+    TextPickerModelNG::SetOnSelectedChangeEvent(frameNode, std::move(onEvent));
 }
 void __onChangeEvent_valueImpl(Ark_NativePointer node,
                                const Callback_Union_String_Array_String_Void* callback)
@@ -537,8 +550,21 @@ void __onChangeEvent_valueImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //TextPickerModelNG::Set__onChangeEvent_value(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::vector<std::string>& value) {
+        if (value.size() == 1) {
+            auto result = Converter::ArkUnion<Ark_Union_String_Array_String, Ark_String>(value[0]);
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke(result);
+        } else {
+            Converter::ArkArrayHolder<Array_String> arrayHolder(value);
+            Array_String array = arrayHolder.ArkValue();
+            auto result = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(array);
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke(result);
+        }
+    };
+    TextPickerModelNG::SetOnValueChangeEvent(frameNode, std::move(onEvent));
 }
 } // TextPickerAttributeModifier
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()

@@ -17,6 +17,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -147,8 +148,17 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //TimePickerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(result);
+    };
+    TimePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()

@@ -2337,4 +2337,12 @@ void TextFieldModelNG::SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UI
     RefPtr<UINode> unitNode = builder();
     pattern->SetUnitNode(unitNode);
 }
+
+void TextFieldModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(func));
+}
 } // namespace OHOS::Ace::NG

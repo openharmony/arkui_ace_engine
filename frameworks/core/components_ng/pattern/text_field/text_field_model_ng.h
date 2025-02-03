@@ -292,6 +292,7 @@ public:
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;

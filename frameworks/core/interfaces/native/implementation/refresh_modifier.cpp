@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -158,8 +159,15 @@ void __onChangeEvent_refreshingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //RefreshModelNG::Set__onChangeEvent_refreshing(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& param) {
+        if (param != "true" && param != "false") {
+            return;
+        }
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(Framework::StringToBool(param)));
+    };
+    RefreshModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // RefreshAttributeModifier
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()

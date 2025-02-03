@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
@@ -41,16 +42,6 @@ void AssignCast(std::optional<PanelType>& dst, const Ark_PanelType& src)
         case Ark_PanelType::ARK_PANEL_TYPE_TEMPORARY: dst = PanelType::TEMP_DISPLAY; break;
         case Ark_PanelType::ARK_PANEL_TYPE_CUSTOM: dst = PanelType::CUSTOM; break;
         default: LOGE("Unexpected enum value in Ark_PanelType: %{public}d", src);
-    }
-}
-template<>
-void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src)
-{
-    switch (src) {
-        case Ark_PanelMode::ARK_PANEL_MODE_MINI: dst = PanelMode::MINI; break;
-        case Ark_PanelMode::ARK_PANEL_MODE_HALF: dst = PanelMode::HALF; break;
-        case Ark_PanelMode::ARK_PANEL_MODE_FULL: dst = PanelMode::FULL; break;
-        default: LOGE("Unexpected enum value in Ark_PanelMode: %{public}d", src);
     }
 }
 template<>
@@ -209,8 +200,17 @@ void __onChangeEvent_modeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //PanelModelNG::Set__onChangeEvent_mode(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* baseEventInfo) {
+        auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(baseEventInfo);
+        if (!eventInfo) {
+            return;
+        }
+        auto mode = Converter::ArkValue<Ark_PanelMode>(eventInfo->GetMode());
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(mode);
+    };
+    SlidingPanelModelNG::SetModeChangeEvent(frameNode, std::move(onEvent));
 }
 } // PanelAttributeModifier
 const GENERATED_ArkUIPanelModifier* GetPanelModifier()

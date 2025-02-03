@@ -648,4 +648,47 @@ HWTEST_F(TextInputModifierTest, setInputFilterTest, TestSize.Level1)
     EXPECT_EQ(attrValue, STR_TEST_TEXT2);
 }
 
+/*
+ * @tc.name: setOnChangeEventTextImpl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<std::string> value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_ResourceStr parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::OptConvert<std::string>(parameter)
+        };
+    };
+
+    Callback_ResourceStr_Void arkCallback = Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_text(node_, &arkCallback);
+
+    PreviewText previewText {.offset = -1, .value = ""};
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireOnChange("test", previewText);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), "test");
+    eventHub->FireOnChange("test_2", previewText);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value.has_value(), true);
+    EXPECT_EQ(checkEvent->value.value(), "test_2");
+}
+
 } // namespace OHOS::Ace::NG
