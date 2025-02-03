@@ -646,11 +646,11 @@ HWTEST_F(GaugeModifierTest, setDescriptionTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setDescriptionTestValidValues
+ * @tc.name: setDescriptionTest_CustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setDescriptionTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDescription, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
