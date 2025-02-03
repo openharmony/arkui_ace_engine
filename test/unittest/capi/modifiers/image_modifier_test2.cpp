@@ -112,7 +112,7 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
         .moduleName = Converter::ArkValue<Ark_String>("testModule"),
         .id = Converter::ArkValue<Ark_Number>(IMAGE_RES_ID),
         .params = Converter::ArkValue<Opt_Array_String>(paramsArkArrayValues),
-        .type = Converter::ArkValue<Opt_Number>(10003/*ResourceType::STRING*/)
+        .type = Converter::ArkValue<Opt_Number>(10003) // ResourceType::STRING = 10003
     };
     auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(expectedArkResource);
     modifier_->setAlt(frameNode, &inputArkResource);
