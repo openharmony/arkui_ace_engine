@@ -374,4 +374,12 @@ void SlidingPanelModelNG::SetOnHeightChange(FrameNode* frameNode, HeightChangeEv
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnHeightChange(std::move(onHeightChange));
 }
+
+void SlidingPanelModelNG::SetModeChangeEvent(FrameNode* frameNode, ChangeEvent&& modeChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
+}
 } // namespace OHOS::Ace::NG

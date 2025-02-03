@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -638,8 +639,12 @@ void __onChangeEvent_valueImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SearchModelNG::Set__onChangeEvent_value(frameNode, convValue);
+    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::string& content) {
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
+        arkCallback.Invoke(arkContent);
+    };
+    SearchModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()

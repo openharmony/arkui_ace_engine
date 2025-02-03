@@ -16,7 +16,9 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -118,8 +120,15 @@ void __onChangeEvent_selectAllImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //CheckboxGroupModelNG::Set__onChangeEvent_selectAll(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* info) {
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        if (eventInfo) {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(eventInfo->GetStatus() == 0));
+        }
+    };
+    CheckBoxGroupModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // CheckboxGroupAttributeModifier
 const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()

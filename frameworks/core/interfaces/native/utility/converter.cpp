@@ -1624,10 +1624,19 @@ PickerTextStyle Convert(const Ark_PickerTextStyle& src)
 template<>
 PickerTime Convert(const Ark_Date& src)
 {
-    auto hours = src / 3600000;
-    auto minutes = (src % 3600000) / 60000 ;
-    auto seconds = (src % 3600000 % 60000) / 1000;
-    return PickerTime(hours, minutes, seconds);
+    auto milliseconds = reinterpret_cast<int64_t>(src);
+    const auto SEC_TO_MILLISEC = 1000L;
+    auto seconds = milliseconds / SEC_TO_MILLISEC;
+    struct std::tm time_info;
+#ifdef WINDOWS_PLATFORM
+    errno_t err = localtime_s(&time_info, &seconds);
+    if (err) {
+        LOGE("Invalid argument to localtime_s.");
+    }
+#else
+    localtime_r(&seconds, &time_info);
+#endif
+    return PickerTime(time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
 }
 
 template<>

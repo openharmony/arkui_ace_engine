@@ -1410,6 +1410,17 @@ void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& sr
 }
 
 template<>
+void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src)
+{
+    switch (src) {
+        case ARK_PANEL_MODE_MINI: dst = PanelMode::MINI; break;
+        case ARK_PANEL_MODE_HALF: dst = PanelMode::HALF; break;
+        case ARK_PANEL_MODE_FULL: dst = PanelMode::FULL; break;
+        default: LOGE("Unexpected enum value in Ark_PanelMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)
 {
     switch (src) {

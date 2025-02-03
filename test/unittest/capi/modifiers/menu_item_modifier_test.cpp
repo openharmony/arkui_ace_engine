@@ -766,4 +766,45 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_FALSE(checkEvent->selected);
 }
+
+/*
+ * @tc.name: setOnChangeEventSelectedImpl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        bool value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::Convert<bool>(parameter)
+        };
+    };
+
+    Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    auto changeEvent = eventHub->GetSelectedChangeEvent();
+    changeEvent(true);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, true);
+    changeEvent(false);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, false);
+}
 } // namespace OHOS::Ace::NG
