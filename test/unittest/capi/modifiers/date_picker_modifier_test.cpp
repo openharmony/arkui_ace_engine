@@ -1938,7 +1938,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
     };
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN 
+#ifdef SUPPORT_DIGITAL_CROWN
 /*
  * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
  * @tc.desc:
