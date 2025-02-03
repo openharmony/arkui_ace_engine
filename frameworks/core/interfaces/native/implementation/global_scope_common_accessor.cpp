@@ -97,13 +97,10 @@ bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext
 // check whether this container needs to perform animateTo
 bool CheckContainer(const RefPtr<Container>& container)
 {
+    CHECK_NULL_RETURN(container, false);
     auto context = container->GetPipelineContext();
-    if (!context) {
-        return false;
-    }
-    if (!container->GetSettings().usingSharedRuntime) {
-        return false;
-    }
+    CHECK_NULL_RETURN(context, false);
+    CHECK_NULL_RETURN(container->GetSettings().usingSharedRuntime, false);
     if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
         return false;
     }
@@ -138,10 +135,8 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
     int32_t flushCount = 0;
     bool isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
     bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
-    while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            break;
-        }
+    while ((!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) &&
+       flushCount < MAX_FLUSH_COUNT && option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
         if (!isDirtyNodesEmpty) {
             pipelineContext->FlushBuild();
             isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
@@ -157,6 +152,7 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
     const Callback_Void* event, int32_t triggerId, const std::optional<int32_t>& count)
 {
+    CHECK_NULL_VOID(event);
     pipelineContext->StartImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent(), count);
     auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
