@@ -25,6 +25,8 @@
 #include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+constexpr float SCALE_LIMIT = 1.f;
+
 namespace TextAreaModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -385,16 +387,20 @@ void MinFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextAreaModelNG::SetMinFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidatePositive(convValue);
+    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
+    TextFieldModelNG::SetMinFontScale(frameNode, convValue);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextAreaModelNG::SetMaxFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidatePositive(convValue);
+    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
+    TextFieldModelNG::SetMaxFontScale(frameNode, convValue);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
                               Ark_TextHeightAdaptivePolicy value)
@@ -603,24 +609,22 @@ void HalfLeadingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextAreaModelNG::SetHalfLeading(frameNode, convValue);
+    TextFieldModelNG::SetHalfLeading(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 void EllipsisModeImpl(Ark_NativePointer node,
                       const Opt_EllipsisMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextAreaModelNG::SetEllipsisMode(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<EllipsisMode>(*value) : std::nullopt;
+    TextFieldModelNG::SetEllipsisMode(frameNode, convValue);
 }
 void StopBackPressImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextAreaModelNG::SetStopBackPress(frameNode, convValue);
+    TextFieldModelNG::SetStopBackPress(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,

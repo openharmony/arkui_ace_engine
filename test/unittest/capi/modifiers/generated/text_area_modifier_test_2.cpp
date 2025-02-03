@@ -1125,7 +1125,7 @@ HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setHalfLeadingTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1139,7 +1139,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestHalfLeadingValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setHalfLeadingTestHalfLeadingValidValues, TestSize.Level1)
 {
     Opt_Boolean initValueHalfLeading;
 
@@ -1168,7 +1168,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestHalfLeadingValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestHalfLeadingInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setHalfLeadingTestHalfLeadingInvalidValues, TestSize.Level1)
 {
     Opt_Boolean initValueHalfLeading;
 
@@ -1196,7 +1196,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestHalfLeadingInvalidValu
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setEllipsisModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1210,7 +1210,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestDefaultValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestEllipsisModeValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setEllipsisModeTestEllipsisModeValidValues, TestSize.Level1)
 {
     Opt_EllipsisMode initValueEllipsisMode;
 
@@ -1240,7 +1240,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestEllipsisModeValidValu
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestEllipsisModeInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setEllipsisModeTestEllipsisModeInvalidValues, TestSize.Level1)
 {
     Opt_EllipsisMode initValueEllipsisMode;
 
@@ -1270,7 +1270,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestEllipsisModeInvalidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setStopBackPressTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1284,7 +1284,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestStopBackPressValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setStopBackPressTestStopBackPressValidValues, TestSize.Level1)
 {
     Opt_Boolean initValueStopBackPress;
 
@@ -1313,7 +1313,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestStopBackPressValidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestStopBackPressInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setStopBackPressTestStopBackPressInvalidValues, TestSize.Level1)
 {
     Opt_Boolean initValueStopBackPress;
 
