@@ -53,6 +53,7 @@ const auto ATTRIBUTE_CONSTRUCTOR_NAME = "constructor";
 const auto ATTRIBUTE_DATE_START_NAME = "start";
 const auto ATTRIBUTE_DATE_END_NAME = "end";
 const auto ATTRIBUTE_DATE_SELECT_NAME = "selected";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
 
 // Expected values
 static const std::string EXPECTED_TRUE("true");
@@ -70,6 +71,7 @@ const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_DATE_START_DEFAULT_VALUE = PickerDate(1970, 1, 1);
 const auto ATTRIBUTE_DATE_END_DEFAULT_VALUE = PickerDate(2100, 12, 31);
 const auto ATTRIBUTE_DATE_SELECTED_DEFAULT_VALUE = PickerDate::Current();
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "CrownSensitivity.MEDIUM";
 
 // Test plans
 // size
@@ -190,6 +192,15 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
         "800" },
     { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("900")),
         "900" }
+};
+
+std::vector<std::pair<Opt_CrownSensitivity, std::string>> testFixtureEnumCrownSensitivityPlan = {
+    { Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_LOW), "CrownSensitivity.LOW" },
+    { Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM), "CrownSensitivity.MEDIUM" },
+    { Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_HIGH), "CrownSensitivity.HIGH" },
+    { Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(-1)), "CrownSensitivity.MEDIUM" },
+    { Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
+        "CrownSensitivity.MEDIUM" },
 };
 
 // color
@@ -1118,22 +1129,768 @@ HWTEST_F(DatePickerModifierTest, setLunar1Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLunar1Test
+ * @tc.name: setDisappearTextStyle1TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setLunar1Test2, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1TestDefaultValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLunar1, nullptr);
-    auto initialValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
-    EXPECT_EQ(initialValue, ATTRIBUTE_LUNAR_DEFAULT_VALUE);
+        auto fullJson = GetJsonValue(node_);
 
-    auto fullJson = GetJsonValue(node_);
-    auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CONSTRUCTOR_NAME);
-    std::printf("datePicker: constructor %s\n", constructor->ToString().c_str());
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
 
-
+        EXPECT_EQ(checkSize, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+        EXPECT_EQ(checkWeight, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+        EXPECT_EQ(checkStyle, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+        EXPECT_EQ(checkFamily, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
+        EXPECT_EQ(checkColor, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
 }
+
+/*
+ * @tc.name: setDisappearTextStyle1FontStyle
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto style : FONT_STYLE_TEST_PLAN) {
+        font.style = style.first;
+        pickerStyle.font.value = font;
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, style.second);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setDisappearTextStyle1FontWeight
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+}
+
+/*
+ * @tc.name: setDisappearTextStyle1FontFamily
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1FontFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto family : FONT_FAMILY_TEST_PLAN) {
+        font.family = family.first;
+        pickerStyle.font.value = font;
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, family.second);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setDisappearTextStyle1TextFontSize
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1TextFontSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto size : FONT_SIZE_TEST_PLAN) {
+        font.size = size.first;
+        pickerStyle.font.value = font;
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, size.second);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setDisappearTextColor
+ * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDisappearTextStyle1TextColor, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+    auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    Ark_PickerTextStyle pickerStyle;
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+        pickerStyle.color = { .value = value };
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/*
+ * @tc.name: setTextStyle1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setTextStyle1TestDefaultValues, TestSize.Level1)
+{
+        auto fullJson = GetJsonValue(node_);
+
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+
+        EXPECT_EQ(checkSize, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+        EXPECT_EQ(checkWeight, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+        EXPECT_EQ(checkStyle, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+        EXPECT_EQ(checkFamily, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
+        EXPECT_EQ(checkColor, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setTextStyle1FontStyle
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setTextStyle1FontStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto style : FONT_STYLE_TEST_PLAN) {
+        font.style = style.first;
+        pickerStyle.font.value = font;
+        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, style.second);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setTextStyle1FontWeight
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setTextStyle1FontWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+}
+
+/*
+ * @tc.name: setTextStyle1FontFamily
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setTextStyle1FontFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto family : FONT_FAMILY_TEST_PLAN) {
+        font.family = family.first;
+        pickerStyle.font.value = font;
+        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, family.second);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setTextStyle1FontSize
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setTextStyle1FontSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto size : FONT_SIZE_TEST_PLAN) {
+        font.size = size.first;
+        pickerStyle.font.value = font;
+        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, size.second);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setTextStyle1TextColor
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setTextStyle1TextColor, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+    auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    Ark_PickerTextStyle pickerStyle;
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+        pickerStyle.color = { .value = value };
+        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/*
+ * @tc.name: setSelectedTextStyle1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1TestDefaultValues, TestSize.Level1)
+{
+        auto fullJson = GetJsonValue(node_);
+
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+
+        EXPECT_EQ(checkSize, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+        EXPECT_EQ(checkWeight, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+        EXPECT_EQ(checkStyle, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+        EXPECT_EQ(checkFamily, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
+        EXPECT_EQ(checkColor, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setSelectedTextStyle1FontStyle
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto style : FONT_STYLE_TEST_PLAN) {
+        font.style = style.first;
+        pickerStyle.font.value = font;
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, style.second);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setSelectedTextStyle1FontWeight
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+}
+
+/*
+ * @tc.name: setSelectedTextStyle1FontFamily
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto family : FONT_FAMILY_TEST_PLAN) {
+        font.family = family.first;
+        pickerStyle.font.value = font;
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, sizeStr);
+        EXPECT_EQ(checkFamily, family.second);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setSelectedTextStyle1FontSize
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1FontSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    Ark_Font font = {
+        .family = FONT_FAMILY_TEST_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_PickerTextStyle pickerStyle;
+    auto familyStr = FONT_FAMILY_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto size : FONT_SIZE_TEST_PLAN) {
+        font.size = size.first;
+        pickerStyle.font.value = font;
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(checkSize, size.second);
+        EXPECT_EQ(checkFamily, familyStr);
+        EXPECT_EQ(checkStyle, styleStr);
+        EXPECT_EQ(checkWeight, weightStr);
+    }
+}
+
+/*
+ * @tc.name: setSelectedTextStyle1TextColor
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setSelectedTextStyle1TextColor, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+    auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    Ark_PickerTextStyle pickerStyle;
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+        pickerStyle.color = { .value = value };
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/*
+ * @tc.name: setOnDateChange1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnDateChange0, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<PickerDate> selectedDate = std::nullopt;
+    auto onDateChange = [](const Ark_Int32 resourceId, const Ark_Date parameter) {
+        selectedDate = Converter::OptConvert<PickerDate>(parameter);
+    };
+    Callback_Date_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDateChange
+    };
+
+    modifier_->setOnDateChange0(node_, &func);
+
+    for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
+        DatePickerChangeEvent event(testValue.first.ToString(true));
+        eventHub->FireChangeEvent(&event);
+
+        EXPECT_TRUE(selectedDate.has_value());
+        EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
+        EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
+        EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
+    };
+}
+
+
+/*
+ * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+        "Default value for attribute 'digitalCrownSensitivity'";
+}
+
+/*
+ * @tc.name: setDigitalCrownSensitivityValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
+    Opt_CrownSensitivity initValueDigitalCrownSensitivity;
+
+    // Initial setup
+    initValueDigitalCrownSensitivity = testFixtureEnumCrownSensitivityPlan[0].first;
+
+    auto checkValue = [this, &initValueDigitalCrownSensitivity](
+                          const std::string& expectedStr, const Opt_CrownSensitivity& value) {
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
+
+        inputValueDigitalCrownSensitivity = value;
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        auto jsonValue = GetJsonValue(node_);
+        auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
+        auto resultStr = GetAttrValue<std::string>(constructor, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        EXPECT_EQ(resultStr, expectedStr);
+    };
+
+    for (auto& [value, expected] : testFixtureEnumCrownSensitivityPlan) {
+        checkValue( expected, ArkValue<Opt_CrownSensitivity>(value));
+    }
+}
+
+
 
 /*
  * @tc.name: setLunar1Test
