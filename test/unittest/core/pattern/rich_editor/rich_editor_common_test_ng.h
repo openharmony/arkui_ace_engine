@@ -99,7 +99,9 @@ const ImageSpanAttribute IMAGE_SPAN_ATTRIBUTE_1 = {
     .paddingProp = std::nullopt
 };
 const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
-    .offset = std::nullopt,
+    {
+        .offset = std::nullopt,
+    },
     .image = "app.media.icon",
     .bundleName = std::nullopt,
     .moduleName = std::nullopt,

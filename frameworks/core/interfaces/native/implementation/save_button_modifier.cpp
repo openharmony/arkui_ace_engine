@@ -109,7 +109,7 @@ void OnClickImpl(Ark_NativePointer node,
             }
         }
 #endif
-        Ark_ClickEvent arkClickEvent = Converter::ArkValue<Ark_ClickEvent>(info);
+        Ark_ClickEvent arkClickEvent = Converter::ArkValue<Converter::ClickEventInfo>(info).result;
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
         GetFullAPI()->getEventsAPI()->getSaveButtonEventsReceiver()->onClick(frameNode->GetId(),
             arkClickEvent, arkResult);

@@ -96,7 +96,7 @@ void OnClickImpl(Ark_NativePointer node,
             }
         }
 #endif
-        Ark_ClickEvent arkClickEvent = Converter::ArkValue<Ark_ClickEvent>(info);
+        Ark_ClickEvent arkClickEvent = Converter::ArkValue<Converter::ClickEventInfo>(info).result;
         Ark_PasteButtonOnClickResult arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
         GetFullAPI()->getEventsAPI()->getPasteButtonEventsReceiver()->onClick(frameNode->GetId(),
             arkClickEvent, arkResult);

@@ -17,7 +17,9 @@
 
 #include "base/utils/string_utils.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
@@ -35,7 +37,9 @@ const int32_t SEC_TO_MILLISEC = 1000;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
+    const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+    const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
     const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
     const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
@@ -86,10 +90,10 @@ void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
     dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
 }
 
-void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src)
+void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
 {
-    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
-    peer->SetGestureInfo(src);
+    const auto peer = reinterpret_cast<BaseGestureEventPeer*>(GeneratedModifier::GetBaseGestureEventAccessor()->ctor());
+    peer->SetEventInfo(src);
     dst.ptr = peer;
 }
 
@@ -313,5 +317,19 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
+}
+
+void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
+}
+
+void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
 }
 } // namespace OHOS::Ace::NG::Converter
