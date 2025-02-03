@@ -417,6 +417,7 @@ namespace Converter {
     // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
     template<> ActionSheetInfo Convert(const Ark_SheetInfo& src);
     template<> AnimateParam Convert(const Ark_AnimateParam& src);
+    template<> AnimationOption Convert(const Ark_AnimateParam& src);
     template<> BlurOption Convert(const Ark_BlurOptions& src);
     template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);

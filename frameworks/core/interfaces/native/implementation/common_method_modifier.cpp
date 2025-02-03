@@ -492,29 +492,6 @@ auto g_bindSheetParams = [](SheetStyle sheetStyle, const Ark_SheetOptions& sheet
 };
 
 namespace Validator {
-void ValidateAnimationOption(AnimationOption& opt, bool isForm)
-{
-    // limit animation for ArkTS Form
-    if (isForm) {
-        auto duration = opt.GetDuration();
-        auto delay = opt.GetDelay();
-        auto iterations = opt.GetIteration();
-        auto tempo = opt.GetTempo();
-
-        if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
-            duration = static_cast<int32_t>(DEFAULT_DURATION);
-        }
-        if (delay != 0) {
-            delay = 0;
-        }
-        if (SystemProperties::IsFormAnimationLimited() && iterations != 1) {
-            iterations = 1;
-        }
-        if (!NearEqual(tempo, 1.0)) {
-            tempo = 1.0;
-        }
-    }
-}
 void ValidateNonNegative(std::optional<InvertVariant>& value)
 {
     if (!value.has_value()) {
@@ -814,37 +791,6 @@ TranslateOpt Convert(const Ark_TranslateOptions& src)
     translateOptions.y = OptConvert<Dimension>(src.y);
     translateOptions.z = OptConvert<Dimension>(src.z);
     return translateOptions;
-}
-
-template<>
-AnimationOption Convert(const Ark_AnimateParam& src)
-{
-    AnimationOption option;
-    // If the attribute does not exist, the default value is used.
-    auto duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_DURATION);
-    auto delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);
-    auto iterations = Converter::OptConvert<int32_t>(src.iterations).value_or(1);
-    auto tempo = static_cast<double>(Converter::OptConvert<float>(src.tempo).value_or(1.0f));
-    if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
-        // set duration to 0 to disable animation.
-        duration = 0;
-    }
-    auto direction = Converter::OptConvert<AnimationDirection>(src.playMode).value_or(AnimationDirection::NORMAL);
-    auto finishCallbackType = Converter::OptConvert<FinishCallbackType>(src.finishCallbackType)
-        .value_or(FinishCallbackType::REMOVED);
-    auto curve = Converter::OptConvert<RefPtr<Curve>>(src.curve).value_or(Curves::EASE_IN_OUT);
-    auto frameRateRange = Converter::OptConvert<RefPtr<FrameRateRange>>(src.expectedFrameRateRange)
-        .value_or(AceType::MakeRefPtr<FrameRateRange>(0, 0, 0));
-
-    option.SetDuration(duration);
-    option.SetDelay(delay);
-    option.SetIteration(iterations);
-    option.SetTempo(tempo);
-    option.SetAnimationDirection(direction);
-    option.SetFinishCallbackType(finishCallbackType);
-    option.SetCurve(curve);
-    option.SetFrameRateRange(frameRateRange);
-    return option;
 }
 
 template<>
