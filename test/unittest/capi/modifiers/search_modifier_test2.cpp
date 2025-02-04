@@ -73,4 +73,31 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Leve
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }
 
+/*
+ * @tc.name: setCustomKeyboard_CustomNodeBuilder_KeyboardOptions
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOptions, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+   KeyboardOptions keyboardOptions = {.supportAvoidance = true};
+   auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+
+    int callsCount = 0;
+    CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
+
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    EXPECT_TRUE(textFieldPattern->HasCustomKeyboard());
+    EXPECT_TRUE(textFieldPattern->RequestCustomKeyboard());
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+}
+
 } // namespace OHOS::Ace::NG
