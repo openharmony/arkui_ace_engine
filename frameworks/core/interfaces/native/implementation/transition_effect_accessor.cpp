@@ -55,7 +55,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto centerX = Converter::OptConvert<CalcDimension>(effect->rotate.centerX.value);
         auto centerY = Converter::OptConvert<CalcDimension>(effect->rotate.centerY.value);
         auto centerZ = Converter::OptConvert<CalcDimension>(effect->rotate.centerZ.value);
-        auto perspective = Converter::Convert<float>(effect->rotate.centerZ.value);
+        auto perspective = Converter::Convert<float>(effect->rotate.perspective.value);
         auto angle = Converter::OptConvert<float>(effect->rotate.angle);
         RotateOptions rotate(x, y, z, angle.value_or(0),
             centerX.value_or(emptyDimension),
