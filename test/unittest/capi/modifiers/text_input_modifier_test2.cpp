@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,11 +37,10 @@ const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor
 
 namespace {
     const auto CHECK_TEXT(u"test_text");
-    
+
     PreviewText g_PreviewText = { .offset = 1234, .value = u"test_offset" };
     std::u16string g_EventTestString(u"");
     int32_t g_EventTestOffset(0);
-    
 
     struct EventsTracker {
         static inline GENERATED_ArkUITextInputEventsReceiver eventsReceiver {};
@@ -52,7 +51,6 @@ namespace {
             }
         };
     }; // EventsTracker
-
 } // namespace
 
 namespace Converter {
@@ -176,8 +174,8 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-   KeyboardOptions keyboardOptions = {.supportAvoidance = true};
-   auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+    KeyboardOptions keyboardOptions = {.supportAvoidance = true};
+    auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<TextInputModifierTest2> builderHelper(this, frameNode);

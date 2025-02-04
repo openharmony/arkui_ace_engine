@@ -347,4 +347,9 @@ void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEv
     peer->SetEventInfo(src);
     dst.result.ptr = peer;
 }
+
+void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)
+{
+    dst.supportAvoidance = Converter::ArkValue<Opt_Boolean>(src.supportAvoidance);
+}
 } // namespace OHOS::Ace::NG::Converter
