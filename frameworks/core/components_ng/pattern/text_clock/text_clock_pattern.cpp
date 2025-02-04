@@ -346,6 +346,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     char buffer[SIZE_OF_TIME_TEXT] = {};
     std::string dateTimeFormat = is24H_ ? FORMAT_24H : FORMAT_12H;
     std::strftime(buffer, sizeof(buffer), dateTimeFormat.c_str(), timeZoneTime);
+    CHECK_NULL_RETURN(buffer, "");
     auto duration_cast_to_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     auto timeValue = duration_cast_to_millis.count();
     auto millis = std::to_string(timeValue % 1000);
