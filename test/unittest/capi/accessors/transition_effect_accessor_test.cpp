@@ -146,9 +146,9 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
  */
 HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
 {
-    const int TEST_VALUE = 330;
+    const int testValue = 330;
     ASSERT_NE(accessor_->opacity, nullptr);
-    Ark_Number value = Converter::ArkValue<Ark_Number>(TEST_VALUE);
+    Ark_Number value = Converter::ArkValue<Ark_Number>(testValue);
 
     auto ptr = accessor_->opacity(&value);
     auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -156,7 +156,7 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
 
     auto effect = AceType::DynamicCast<ChainedOpacityEffect>(peer->handler);
     CHECK_NULL_VOID(effect);
-    ASSERT_EQ(effect->GetEffect(), TEST_VALUE);
+    ASSERT_EQ(effect->GetEffect(), testValue);
 
     ptr = accessor_->opacity(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -211,10 +211,10 @@ HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
  */
 HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
 {
-    const int TEST_VALUE = 333;
+    const int testValue = 333;
     ASSERT_NE(accessor_->animation, nullptr);
     Ark_AnimateParam animParam;
-    animParam.duration = Converter::ArkValue<Opt_Number>(TEST_VALUE);
+    animParam.duration = Converter::ArkValue<Opt_Number>(testValue);
     animParam.tempo =  Converter::ArkValue<Opt_Number>(0.5);
     TransitionEffectPeer peer;
     peer.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(33);
@@ -222,7 +222,7 @@ HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
     auto ptr = accessor_->animation(reinterpret_cast<TransitionEffectPeer*>(&peer), &animParam);
     auto peer2 = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_NE(peer2, nullptr);
-    ASSERT_EQ(peer2->handler->GetAnimationOption()->GetDuration(), TEST_VALUE);
+    ASSERT_EQ(peer2->handler->GetAnimationOption()->GetDuration(), testValue);
 }
 
 /**
@@ -252,7 +252,6 @@ HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
 
     auto effect2 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler->GetNext());
     ASSERT_EQ(effect2->GetEffect(), opacity2);
-
 }
 
 } // namespace OHOS::Ace::NG
