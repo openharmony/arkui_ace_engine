@@ -32,4 +32,4 @@ const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32W
     { "-1", ArkValue<Ark_Int32>(-1), -1 },
     { "INT32_MAX", ArkValue<Ark_Int32>(INT32_MAX), INT32_MAX },
 };
-}
+} // namespace OHOS::Ace::NG::AccessorTestFixtures
