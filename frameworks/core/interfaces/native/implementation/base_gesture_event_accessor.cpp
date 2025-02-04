@@ -36,8 +36,10 @@ void SetFingerListImpl(BaseGestureEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(fingerList);
-    std::list<FingerInfo> fingerInfoList = Converter::Convert<std::list<FingerInfo>>(*fingerList);
-    std::printf("fingerInfo: size: %zu\n", fingerInfoList.size());
+    std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
+    auto peerImpl = reinterpret_cast<SomeGestureEventPeer<bool>*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->SetFingerList(list);
 }
 } // BaseGestureEventAccessor
 const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()

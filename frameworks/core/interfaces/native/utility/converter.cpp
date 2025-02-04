@@ -1895,8 +1895,8 @@ FingerInfo Convert(const Ark_FingerInfo& src)
 template<>
 std::list<FingerInfo> Convert(const Array_FingerInfo& src)
 {
-    std::vector<FingerInfo> fingerInfoVector = Converter::Convert<std::vector<FingerInfo>>(src);
-    std::list<FingerInfo> dst(fingerInfoVector.begin(), fingerInfoVector.end());
+    std::vector<FingerInfo> vec = Converter::Convert<std::vector<FingerInfo>>(src);
+    std::list<FingerInfo> dst(vec.begin(), vec.end());
     return dst;
 }
 
