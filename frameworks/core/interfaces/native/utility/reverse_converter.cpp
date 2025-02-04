@@ -20,6 +20,7 @@
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
+#include "core/interfaces/native/implementation/hover_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
@@ -40,6 +41,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
     const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
+    const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
     const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
     const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
@@ -108,6 +110,13 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
         .minute = ArkValue<Ark_Number>(minute),
         .second = ArkValue<Ark_Number>(second),
     };
+}
+
+void AssignArkValue(Ark_HoverEvent& dst, const HoverInfo& src)
+{
+    const auto peer = reinterpret_cast<HoverEventPeer*>(GeneratedModifier::GetHoverEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_MouseEvent& dst, const MouseInfo& src)
@@ -257,6 +266,12 @@ void AssignArkValue(Ark_Number& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.ConvertToVp());
     AssignArkValue(dst, value);
+}
+
+void AssignArkValue(Ark_Buffer& dst, const std::string& src)
+{
+    dst.data = const_cast<char*>(src.data());
+    dst.length = src.size();
 }
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
