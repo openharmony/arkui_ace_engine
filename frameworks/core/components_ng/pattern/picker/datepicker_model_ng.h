@@ -73,6 +73,9 @@ public:
     static uint32_t getBackgroundColor(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
+#endif
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
