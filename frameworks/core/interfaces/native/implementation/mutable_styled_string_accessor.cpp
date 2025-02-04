@@ -41,7 +41,7 @@ void DestroyPeerImpl(MutableStyledStringPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new MutableStyledStringPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

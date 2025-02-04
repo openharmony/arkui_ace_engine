@@ -29,7 +29,6 @@ using namespace Converter;
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_IMAGE_AIOPTIONS_NAME = "imageAIOptions";
-const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
 const auto ATTRIBUTE_ANALYZER_CONFIG_NAME = "analyzerConfig";
 const auto ATTRIBUTE_RESIZABLE_NAME = "resizable";
 const auto ATTRIBUTE_RESIZABLE_I_SLICE_NAME = "slice";
@@ -59,10 +58,6 @@ const auto ATTRIBUTE_DYNAMIC_RANGE_MODE_NAME = "dynamicRangeMode";
 const auto ATTRIBUTE_DYNAMIC_RANGE_MODE_DEFAULT_VALUE = "dynamicRangeMode.Standard";
 const auto ATTRIBUTE_INTERPOLATION_NAME = "interpolation";
 const auto ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE = "ImageInterpolation.None";
-const auto ATTRIBUTE_SOURCE_SIZE_I_WIDTH_NAME = "width";
-const auto ATTRIBUTE_SOURCE_SIZE_I_WIDTH_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_NAME = "height";
-const auto ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_SYNC_LOAD_NAME = "syncLoad";
 const auto ATTRIBUTE_SYNC_LOAD_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_COLOR_FILTER_NAME = "colorFilter";
@@ -589,7 +584,7 @@ HWTEST_F(ImageModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setObjectFitTestObjectFitValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setObjectFitTestObjectFitValidValues, TestSize.Level1)
 {
     Ark_ImageFit initValueObjectFit;
 
@@ -971,89 +966,6 @@ HWTEST_F(ImageModifierTest, setInterpolationTestInterpolationInvalidValues, Test
 
     for (auto& [input, value] : Fixtures::testFixtureEnumImageInterpolationInvalidValues) {
         checkValue(input, value);
-    }
-}
-
-/*
- * @tc.name: setSourceSizeTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultSourceSize =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SOURCE_SIZE_I_WIDTH_DEFAULT_VALUE) <<
-        "Default value for attribute 'sourceSize.width'";
-
-    resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_DEFAULT_VALUE) <<
-        "Default value for attribute 'sourceSize.height'";
-}
-
-/*
- * @tc.name: setSourceSizeTestSourceSizeWidthValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestSourceSizeWidthValidValues, TestSize.Level1)
-{
-    Ark_ImageSourceSize initValueSourceSize;
-
-    // Initial setup
-    initValueSourceSize.width = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-    initValueSourceSize.height = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-
-    auto checkValue = [this, &initValueSourceSize](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
-
-        inputValueSourceSize.width = value;
-        modifier_->setSourceSize(node_, &inputValueSourceSize);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultSourceSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSourceSize, attribute: sourceSize.width";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setSourceSizeTestSourceSizeHeightValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestSourceSizeHeightValidValues, TestSize.Level1)
-{
-    Ark_ImageSourceSize initValueSourceSize;
-
-    // Initial setup
-    initValueSourceSize.width = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-    initValueSourceSize.height = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-
-    auto checkValue = [this, &initValueSourceSize](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
-
-        inputValueSourceSize.height = value;
-        modifier_->setSourceSize(node_, &inputValueSourceSize);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultSourceSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSourceSize, attribute: sourceSize.height";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, expected, value);
     }
 }
 

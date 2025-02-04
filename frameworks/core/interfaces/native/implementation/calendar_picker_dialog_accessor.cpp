@@ -32,7 +32,7 @@ void DestroyPeerImpl(CalendarPickerDialogPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new CalendarPickerDialogPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

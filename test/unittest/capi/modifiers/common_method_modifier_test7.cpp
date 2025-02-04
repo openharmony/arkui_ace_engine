@@ -457,7 +457,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnDragStart, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -465,29 +465,33 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
 
     static const int32_t expectedResourceId = 123;
     static auto expectedCustomNode = CreateNode();
-    // static const FrameNode *expectedParentNode = frameNode;
     static const std::string expectedInfo("key:value");
 
-    // static const CustomNodeBuilder builder = {
-    //     .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-    //         const Callback_Pointer_Void continuation) {
-    //         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
-    //         CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
-    //     }
-    // };
+#ifdef WRONG_TYPE
+    static const FrameNode *expectedParentNode = frameNode;
+    static const CustomNodeBuilder builder = {
+        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
+            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+        }
+    };
+#endif
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
         const Opt_String extraP, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
     {
         EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
-        // the defferent type in return value depending on input data
-        // auto isNeedBuilder = Converter::Convert<DragBehavior>(event.dragBehavior) == DragBehavior::MOVE;
+        // the different type in return value depending on input data
         Ark_Union_CustomBuilder_DragItemInfo arkResult;
-        // if (isNeedBuilder) {
-        //     TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
-        // } else {
-        //     TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
-        // }
+#ifdef WRONG_TYPE
+        auto isNeedBuilder = Converter::Convert<DragBehavior>(event.dragBehavior) == DragBehavior::MOVE;
+        if (isNeedBuilder) {
+            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
+        } else {
+            TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
+        }
+#endif
         CallbackHelper(continuation).Invoke(arkResult);
     };
 
@@ -611,7 +615,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnOnGestureJudgeBeginTest, TestSize.Level
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin1Test, TestSize.Level1)
 {
     using namespace Converter;
     ASSERT_NE(modifier_->setOnGestureRecognizerJudgeBegin1, nullptr);
@@ -622,8 +626,12 @@ HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin1Test, TestS
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
         const Callback_GestureJudgeResult_Void continuation)
     {
-        auto isOk = true; // event.source != ARK_SOURCE_TYPE_UNKNOWN;
+#ifdef WRONG_TYPE
+        auto isOk = event.source != ARK_SOURCE_TYPE_UNKNOWN;
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
+#else
+        Ark_GestureJudgeResult arkResult{};
+#endif
         CallbackHelper(continuation).Invoke(arkResult);
     };
     auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);

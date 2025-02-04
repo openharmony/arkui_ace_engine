@@ -65,7 +65,7 @@ void DestroyPeerImpl(ActionSheetPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new ActionSheetPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

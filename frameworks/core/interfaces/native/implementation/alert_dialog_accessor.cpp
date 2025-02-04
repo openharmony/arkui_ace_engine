@@ -128,7 +128,7 @@ void DestroyPeerImpl(AlertDialogPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return nullptr;
+    return new AlertDialogPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

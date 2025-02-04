@@ -381,7 +381,9 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
         checkEvent = {
             .nodeId = resourceId,
             .isHover = isHover,
-            .pressure = 0 //Converter::Convert<int32_t>(event.pressure)
+#ifdef WRONG_TYPE
+            .pressure = Converter::Convert<int32_t>(event.pressure)
+#endif
         };
     };
 
@@ -407,8 +409,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
         for (const auto& resultData : result) {
             auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
             ASSERT_NE(hoverResult, nullptr);
-            // MouseEvent me;
-            // hoverResult->HandleHoverEvent(isHover, me);
+            MouseEvent me;
+            hoverResult->HandleHoverEvent(isHover, me);
         }
         ASSERT_TRUE(checkEvent.has_value());
         EXPECT_EQ(checkEvent->isHover, isHover);
@@ -441,7 +443,9 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         checkEvent = {
             .nodeId = resourceId,
             .isHover = isHover,
-            .pressure = 0 //Converter::Convert<int32_t>(event.pressure)
+#ifdef WRONG_TYPE
+            .pressure = Converter::Convert<int32_t>(event.pressure)
+#endif
         };
     };
 
@@ -467,8 +471,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         for (const auto& resultData : result) {
             auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
             ASSERT_NE(hoverResult, nullptr);
-            // TouchEvent me;
-            // hoverResult->HandleAccessibilityHoverEvent(isHover, me);
+            TouchEvent me;
+            hoverResult->HandleAccessibilityHoverEvent(isHover, me);
         }
         ASSERT_TRUE(checkEvent.has_value());
         EXPECT_EQ(checkEvent->isHover, isHover);

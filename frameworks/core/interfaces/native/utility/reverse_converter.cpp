@@ -80,14 +80,6 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
     dst.ptr = peer;
 }
 
-void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src)
-{
-    const auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(
-        GeneratedModifier::GetAccessibilityHoverEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.ptr = peer;
-}
-
 void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
 {
     const auto& localOffset = src.GetTarget().area.GetOffset();

@@ -1766,7 +1766,8 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     MenuParam menuParam;
     auto arkOptions = options ? Converter::OptConvert<Ark_SelectionMenuOptionsExt>(*options) : std::nullopt;
     auto menuType = arkOptions ? Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType) : std::nullopt;
-    std::function<void()> contentNodeBuilder = nullptr, previewNodeBuilder = nullptr;
+    std::function<void()> contentNodeBuilder = nullptr;
+    std::function<void()> previewNodeBuilder = nullptr;
     if (arkOptions) {
         InitCallbackParams_(frameNode, menuParam, arkOptions.value().onAppear, arkOptions.value().onDisappear);
     }
