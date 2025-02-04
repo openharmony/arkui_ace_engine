@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG::AccessorTestFixtures {
 // Fixture 'Boolean' for type 'Ark_Boolean'
-extern std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues;
-extern std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues;
+extern const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues;
+extern const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues;
 }
 #endif

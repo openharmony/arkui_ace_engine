@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,12 @@
 namespace OHOS::Ace::NG::AccessorTestFixtures {
 using namespace Converter;
 // Fixture 'Boolean' for type 'Ark_Boolean'
-std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues = {
+const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues = {
     { "true", ArkValue<Ark_Boolean>(true), true },
     { "false", ArkValue<Ark_Boolean>(false), false },
 };
 
-std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues = {
+const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues = {
     { "0", ArkValue<Ark_Int32>(0), 0 },
     { "INT32_MIN", ArkValue<Ark_Int32>(INT32_MIN), INT32_MIN },
     { "32", ArkValue<Ark_Int32>(32), 32 },
