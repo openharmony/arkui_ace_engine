@@ -48,14 +48,11 @@ std::vector<std::pair<Ark_Number, int32_t>> arkNumberIntTestPlan = {
     { Converter::ArkValue<Ark_Number>(12), 12 },
     { Converter::ArkValue<Ark_Number>(-56), -56 },
 };
-std::vector<int32_t> sizeArrayTestPlan = {
-    0,1,2,3,4,5
-};
+std::vector<int32_t> sizeArrayTestPlan = { 0, 1, 2, 3, 4, 5 };
 } // namespace
 
 class BaseGestureEventAccessorTest : public AccessorTestBase<GENERATED_ArkUIBaseGestureEventAccessor,
-                                         &GENERATED_ArkUIAccessors::getBaseGestureEventAccessor,
-                                         GeneratedModifier::SomeGestureEventPeer<bool>> {
+    &GENERATED_ArkUIAccessors::getBaseGestureEventAccessor, GeneratedModifier::SomeGestureEventPeer<bool>> {
 public:
     void SetUp(void) override
     {
@@ -95,11 +92,6 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListIdTest, TestSize.Level1)
         Converter::ArkArrayHolder<Array_FingerInfo> vectorHolder(vectorData);
         Array_FingerInfo fingerArray = vectorHolder.ArkValue();
         peer_->SetFingerList(fingerList);
-
-
-        std::printf("fingerList: const actual: %zu  list: %zu\n", vectorData.size(), peer_->GetFingerList().size());
-
-
         EXPECT_TRUE(peer_->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         EXPECT_EQ(peer_->GetFingerList().empty(), size == 0);
@@ -109,11 +101,6 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListIdTest, TestSize.Level1)
             auto result = vec[index].fingerId_;
             auto expected = arkNumberIntTestPlan[index].second;
             EXPECT_EQ(result, expected);
-
-
-            std::printf("fingerList: holder id: %d == %d\n", vec[index].fingerId_, arkNumberIntTestPlan[index].second);
-
-
         }
     }
 }
@@ -148,11 +135,6 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListGlobalXYTest, TestSize.Level
         Converter::ArkArrayHolder<Array_FingerInfo> vectorHolder(vectorData);
         Array_FingerInfo fingerArray = vectorHolder.ArkValue();
         peer_->SetFingerList(fingerList);
-
-
-        std::printf("fingerList: const actual: %zu  list: %zu\n", vectorData.size(), peer_->GetFingerList().size());
-
-
         EXPECT_TRUE(peer_->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         EXPECT_EQ(peer_->GetFingerList().empty(), size == 0);
@@ -165,11 +147,6 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListGlobalXYTest, TestSize.Level
             auto expectedY = arkNumberFloatYTestPlan[index].second;
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualX, expectedX));
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualY, expectedY));
-
-
-            std::printf("fingerList: holder global: %.2f==%.2f %.2f==%.2f\n", actualX, expectedX, actualY, expectedY);
-
-
         }
     }
 }
@@ -204,11 +181,6 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListLocalXYTest, TestSize.Level1
         Converter::ArkArrayHolder<Array_FingerInfo> vectorHolder(vectorData);
         Array_FingerInfo fingerArray = vectorHolder.ArkValue();
         peer_->SetFingerList(fingerList);
-
-
-        std::printf("fingerList: const actual: %zu  list: %zu\n", vectorData.size(), peer_->GetFingerList().size());
-
-
         EXPECT_TRUE(peer_->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         EXPECT_EQ(peer_->GetFingerList().empty(), size == 0);
@@ -221,11 +193,6 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListLocalXYTest, TestSize.Level1
             auto expectedY = arkNumberFloatYTestPlan[index].second;
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualX, expectedX));
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualY, expectedY));
-
-
-            std::printf("fingerList: holder local: %.2f==%.2f %.2f==%.2f\n", actualX, expectedX, actualY, expectedY);
-
-
         }
     }
 }
@@ -260,11 +227,6 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListDisplayXYTest, TestSize.Leve
         Converter::ArkArrayHolder<Array_FingerInfo> vectorHolder(vectorData);
         Array_FingerInfo fingerArray = vectorHolder.ArkValue();
         peer_->SetFingerList(fingerList);
-
-
-        std::printf("fingerList: const actual: %zu  list: %zu\n", vectorData.size(), peer_->GetFingerList().size());
-
-
         EXPECT_TRUE(peer_->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         EXPECT_EQ(peer_->GetFingerList().empty(), size == 0);
@@ -277,20 +239,7 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListDisplayXYTest, TestSize.Leve
             auto expectedY = arkNumberFloatYTestPlan[index].second;
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualX, expectedX));
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualY, expectedY));
-
-
-            std::printf("fingerList: holder display: %.2f==%.2f %.2f==%.2f\n", actualX, expectedX, actualY, expectedY);
-
-
         }
     }
 }
-
-HWTEST_F(BaseGestureEventAccessorTest, setFingerListTest2, TestSize.Level1)
-{
-    int* p = nullptr;
-    *p = 0;
-}
-
-
 } // namespace OHOS::Ace::NG
