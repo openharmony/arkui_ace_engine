@@ -204,11 +204,13 @@ const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier();
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
+const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
@@ -443,11 +445,13 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
+        GetAnimationExtenderAccessor,
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetDrawingCanvasAccessor,
         GetFrameNodeAccessor,
         GetPixelMapAccessor,
+        GetNavExtenderAccessor,
         GetEventEmulatorAccessor,
         GetActionSheetAccessor,
         GetAlertDialogAccessor,

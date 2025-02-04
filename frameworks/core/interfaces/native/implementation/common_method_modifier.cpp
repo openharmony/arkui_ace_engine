@@ -4567,7 +4567,7 @@ void FocusScopePriorityImpl(Ark_NativePointer node,
     ViewAbstract::SetFocusScopePriority(frameNode, convIdValue, optPriority);
 }
 void GestureImpl(Ark_NativePointer node,
-                 Ark_GestureControl_GestureType gesture,
+                 const Ark_GestureType* gesture,
                  const Opt_GestureMask* mask)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -4577,7 +4577,7 @@ void GestureImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetGesture(frameNode, convValue);
 }
 void PriorityGestureImpl(Ark_NativePointer node,
-                         Ark_GestureControl_GestureType gesture,
+                         const Ark_GestureType* gesture,
                          const Opt_GestureMask* mask)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -4587,7 +4587,7 @@ void PriorityGestureImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetPriorityGesture(frameNode, convValue);
 }
 void ParallelGestureImpl(Ark_NativePointer node,
-                         Ark_GestureControl_GestureType gesture,
+                         const Ark_GestureType* gesture,
                          const Opt_GestureMask* mask)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

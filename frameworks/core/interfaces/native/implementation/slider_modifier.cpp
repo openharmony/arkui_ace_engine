@@ -368,6 +368,15 @@ void ShowTipsImpl(Ark_NativePointer node,
     auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
     SliderModelNG::SetShowTips(frameNode, convValue, convContent);
 }
+void __onChangeEvent_valueImpl(Ark_NativePointer node,
+                               const Callback_Number_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //SliderModelNG::Set__onChangeEvent_value(frameNode, convValue);
+}
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
 {
@@ -395,6 +404,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
         SliderAttributeModifier::ShowTipsImpl,
+        SliderAttributeModifier::__onChangeEvent_valueImpl,
     };
     return &ArkUISliderModifierImpl;
 }

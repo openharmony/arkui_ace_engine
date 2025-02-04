@@ -687,6 +687,15 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     TextFieldModelNG::SetCustomKeyboard(
         frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
 }
+void __onChangeEvent_textImpl(Ark_NativePointer node,
+                              const Callback_ResourceStr_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //TextAreaModelNG::Set__onChangeEvent_text(frameNode, convValue);
+}
 } // TextAreaAttributeModifier
 
 const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
@@ -752,6 +761,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::InputFilterImpl,
         TextAreaAttributeModifier::ShowCounterImpl,
         TextAreaAttributeModifier::CustomKeyboardImpl,
+        TextAreaAttributeModifier::__onChangeEvent_textImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }
