@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 
 using namespace testing;
-using namespace testing::ext; 
+using namespace testing::ext;
 
 namespace {
     std::vector<std::pair<Ark_AccessibilityHoverType, AccessibilityHoverAction>> accessibilityHoverTypeTestPlan = {

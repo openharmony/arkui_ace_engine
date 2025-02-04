@@ -46,8 +46,11 @@ copy("copy_libxml2") {
   external_deps = [ "libxml2:libxml2" ]
 }
 copy("copy_libxml2_unstripped") {
-  sources = [ root_out_dir + "/lib.unstripped/clang_x64/thirdparty/libxml2/libxml2.so" ]
-  outputs = [ root_out_dir + "/exe.unstripped/clang_x64/tests/unittest/ace_engine/capi/libxml2.so" ]
+  sources = [ root_out_dir +
+              "/lib.unstripped/clang_x64/thirdparty/libxml2/libxml2.so" ]
+  outputs =
+      [ root_out_dir +
+        "/exe.unstripped/clang_x64/tests/unittest/ace_engine/capi/libxml2.so" ]
   external_deps = [ "libxml2:libxml2" ]
 }
 
