@@ -46,8 +46,6 @@ namespace OHOS::Ace::NG::Converter {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
-Ark_Int32 GetXImpl(DragEventPeer* peer);
-Ark_Int32 GetYImpl(DragEventPeer* peer);
 using namespace Converter;
 void DestroyPeerImpl(DragEventPeer* peer)
 {
@@ -71,25 +69,25 @@ Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
 }
 Ark_Int32 GetWindowXImpl(DragEventPeer* peer)
 {
-    return GetXImpl(peer);
+    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer->dragInfo, 0);
+    LOGE("Arkoala method DragEventAccessor.GetWindowXImpl return int32_t value");
+    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetX()));
 }
 Ark_Int32 GetWindowYImpl(DragEventPeer* peer)
 {
-    return GetYImpl(peer);
+    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer->dragInfo, 0);
+    LOGE("Arkoala method DragEventAccessor.GetWindowYImpl return int32_t value");
+    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetY()));
 }
 Ark_Int32 GetXImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    LOGE("Arkoala method DragEventAccessor.GetX return int32_t value");
-    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetX()));
+    return GetWindowXImpl(peer);
 }
 Ark_Int32 GetYImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    LOGE("Arkoala method DragEventAccessor.GetY return int32_t value");
-    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetY()));
+    return GetWindowYImpl(peer);
 }
 void SetDataImpl(DragEventPeer* peer,
                  const Ark_UnifiedData* unifiedData)
