@@ -273,6 +273,15 @@ void MinContentWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(width);
     SideBarContainerModelNG::SetMinContentWidth(frameNode, width);
 }
+void __onChangeEvent_showSideBarImpl(Ark_NativePointer node,
+                                     const Callback_Boolean_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //SideBarContainerModelNG::Set__onChangeEvent_showSideBar(frameNode, convValue);
+}
 } // SideBarContainerAttributeModifier
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
@@ -293,6 +302,7 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         SideBarContainerAttributeModifier::SideBarPositionImpl,
         SideBarContainerAttributeModifier::DividerImpl,
         SideBarContainerAttributeModifier::MinContentWidthImpl,
+        SideBarContainerAttributeModifier::__onChangeEvent_showSideBarImpl,
     };
     return &ArkUISideBarContainerModifierImpl;
 }

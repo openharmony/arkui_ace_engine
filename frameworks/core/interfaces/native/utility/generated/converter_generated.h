@@ -1266,6 +1266,26 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_GestureType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
+        case SELECTOR_ID_5: AssignTo(dst, src.value5); break;
+        case SELECTOR_ID_6: AssignTo(dst, src.value6); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Number_Literal_Number_offset_span& src)
 {
     switch (src.selector) {
@@ -3095,6 +3115,13 @@ ASSIGN_OPT(Opt_Union_DragPreviewMode_Array_DragPreviewMode)
 ASSIGN_OPT(Opt_SharedTransitionEffectType)
 ASSIGN_OPT(Opt_MotionPathOptions)
 ASSIGN_OPT(Opt_Array_FractionStop)
+ASSIGN_OPT(Opt_GestureGroupInterface)
+ASSIGN_OPT(Opt_RotationGestureInterface)
+ASSIGN_OPT(Opt_SwipeGestureInterface)
+ASSIGN_OPT(Opt_PinchGestureInterface)
+ASSIGN_OPT(Opt_PanGestureInterface)
+ASSIGN_OPT(Opt_LongPressGestureInterface)
+ASSIGN_OPT(Opt_TapGestureInterface)
 ASSIGN_OPT(Opt_Tuple_Length_Length)
 ASSIGN_OPT(Opt_ClickEffectLevel)
 ASSIGN_OPT(Opt_HorizontalAlign)
@@ -3125,6 +3152,8 @@ ASSIGN_OPT(Opt_AlertDialogButtonBaseOptions)
 ASSIGN_OPT(Opt_ActionSheetOffset)
 ASSIGN_OPT(Opt_Array_SheetInfo)
 ASSIGN_OPT(Opt_ActionSheetButtonOptions)
+ASSIGN_OPT(Opt_Callback_Extender_OnFinish)
+ASSIGN_OPT(Opt_Callback_Extender_OnProgress)
 ASSIGN_OPT(Opt_CustomTheme)
 ASSIGN_OPT(Opt_RestrictedWorker)
 ASSIGN_OPT(Opt_Want)
@@ -3207,9 +3236,12 @@ ASSIGN_OPT(Opt_CrownSensitivity)
 ASSIGN_OPT(Opt_OnTimePickerChangeCallback)
 ASSIGN_OPT(Opt_TextTimerController)
 ASSIGN_OPT(Opt_TextPickerDialogOptions)
+ASSIGN_OPT(Opt_Callback_Union_String_Array_String_Void)
+ASSIGN_OPT(Opt_Callback_Union_Number_Array_Number_Void)
 ASSIGN_OPT(Opt_DividerOptions)
 ASSIGN_OPT(Opt_TextPickerScrollStopCallback)
 ASSIGN_OPT(Opt_OnTextPickerChangeCallback)
+ASSIGN_OPT(Opt_Callback_ResourceStr_Void)
 ASSIGN_OPT(Opt_InputCounterOptions)
 ASSIGN_OPT(Opt_KeyboardOptions)
 ASSIGN_OPT(Opt_EllipsisMode)
@@ -3252,6 +3284,7 @@ ASSIGN_OPT(Opt_DotIndicator)
 ASSIGN_OPT(Opt_Type_SliderBlockStyle_shape)
 ASSIGN_OPT(Opt_SliderBlockType)
 ASSIGN_OPT(Opt_SliderStyle)
+ASSIGN_OPT(Opt_Callback_Union_Number_Resource_Void)
 ASSIGN_OPT(Opt_MenuAlignType)
 ASSIGN_OPT(Opt_ControlSize)
 ASSIGN_OPT(Opt_OptionWidthMode)
@@ -3327,6 +3360,7 @@ ASSIGN_OPT(Opt_CircleStyleOptions)
 ASSIGN_OPT(Opt_PatternLockChallengeResult)
 ASSIGN_OPT(Opt_PasteDescription)
 ASSIGN_OPT(Opt_PasteIconStyle)
+ASSIGN_OPT(Opt_Callback_PanelMode_Void)
 ASSIGN_OPT(Opt_PanelHeight)
 ASSIGN_OPT(Opt_NavigationType)
 ASSIGN_OPT(Opt_NavDestinationContext)
@@ -3431,12 +3465,13 @@ ASSIGN_OPT(Opt_sharedTransitionOptions)
 ASSIGN_OPT(Opt_EffectType)
 ASSIGN_OPT(Opt_LinearGradientBlurOptions)
 ASSIGN_OPT(Opt_GestureMask)
-ASSIGN_OPT(Opt_GestureControl_GestureType)
+ASSIGN_OPT(Opt_GestureType)
 ASSIGN_OPT(Opt_TransitionFinishCallback)
 ASSIGN_OPT(Opt_FocusPriority)
 ASSIGN_OPT(Opt_ForegroundBlurStyleOptions)
 ASSIGN_OPT(Opt_ImageRepeat)
 ASSIGN_OPT(Opt_Literal_Alignment_align)
+ASSIGN_OPT(Opt_GestureControl_GestureType)
 ASSIGN_OPT(Opt_BackgroundBrightnessOptions)
 ASSIGN_OPT(Opt_RenderFit)
 ASSIGN_OPT(Opt_ReuseIdCallback)
@@ -3522,7 +3557,9 @@ ASSIGN_OPT(Opt_AlertDialogParamWithButtons)
 ASSIGN_OPT(Opt_AlertDialogParamWithConfirm)
 ASSIGN_OPT(Opt_ActionSheetOptions)
 ASSIGN_OPT(Opt_ClickEvent)
+ASSIGN_OPT(Opt_NavExtender_OnUpdateStack)
 ASSIGN_OPT(Opt_Callback_RangeUpdate)
+ASSIGN_OPT(Opt_DoubleAnimationParam)
 ASSIGN_OPT(Opt_WithThemeOptions)
 ASSIGN_OPT(Opt_WithThemeInterface)
 ASSIGN_OPT(Opt_Type_NavigationAttribute_customNavContentTransition_delegate)
@@ -4178,6 +4215,7 @@ ASSIGN_OPT(Opt_Type_AlertDialog_show_value)
 ASSIGN_OPT(Opt_DismissDialogAction)
 ASSIGN_OPT(Opt_SheetInfo)
 ASSIGN_OPT(Opt_Literal_Want_want)
+ASSIGN_OPT(Opt_Float32)
 ASSIGN_OPT(Opt_NativePointer)
 #undef ASSIGN_OPT
 }

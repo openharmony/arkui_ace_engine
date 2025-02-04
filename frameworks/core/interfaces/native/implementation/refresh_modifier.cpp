@@ -152,6 +152,15 @@ void PullDownRatioImpl(Ark_NativePointer node,
     Validator::ClampByRange(convValue, PULLDOWNRATIO_MIN, PULLDOWNRATIO_MAX);
     RefreshModelNG::SetPullDownRatio(frameNode, convValue);
 }
+void __onChangeEvent_refreshingImpl(Ark_NativePointer node,
+                                    const Callback_Boolean_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //RefreshModelNG::Set__onChangeEvent_refreshing(frameNode, convValue);
+}
 } // RefreshAttributeModifier
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
 {
@@ -164,6 +173,7 @@ const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
         RefreshAttributeModifier::PullToRefreshImpl,
         RefreshAttributeModifier::OnOffsetChangeImpl,
         RefreshAttributeModifier::PullDownRatioImpl,
+        RefreshAttributeModifier::__onChangeEvent_refreshingImpl,
     };
     return &ArkUIRefreshModifierImpl;
 }
