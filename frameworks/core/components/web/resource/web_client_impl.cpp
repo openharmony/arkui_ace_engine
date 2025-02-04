@@ -1263,4 +1263,12 @@ bool WebClientImpl::CloseImageOverlaySelection()
     ContainerScope scope(delegate->GetInstanceId());
     return delegate->CloseImageOverlaySelection();
 }
+
+void WebClientImpl::OnScrollStart(const float x, const float y)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnScrollStart(x, y);
+}
 } // namespace OHOS::Ace
