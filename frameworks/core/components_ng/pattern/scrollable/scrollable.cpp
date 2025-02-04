@@ -80,30 +80,10 @@ constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 #endif
 } // namespace
 
-// Static Functions.
-std::optional<double> Scrollable::sFriction_ = std::nullopt;
-std::optional<double> Scrollable::sVelocityScale_ = std::nullopt;
-
-void Scrollable::SetVelocityScale(double sVelocityScale)
-{
-    if (LessOrEqual(sVelocityScale, 0.0)) {
-        return;
-    }
-    sVelocityScale_ = sVelocityScale;
-}
-
 double Scrollable::GetVelocityScale()
 {
     return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE
                                                                                     : VELOCITY_SCALE;
-}
-
-void Scrollable::SetFriction(double sFriction)
-{
-    if (LessOrEqual(sFriction, 0.0)) {
-        return;
-    }
-    sFriction_ = sFriction;
 }
 
 Scrollable::~Scrollable()
@@ -733,11 +713,11 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
 {
     double ret = SystemProperties::GetSrollableVelocityScale();
     velocityScale = !NearZero(ret) ? ret : velocityScale;
-    sVelocityScale_ = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
+    velocityScale = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
     if (isReverseCallback_ && isReverseCallback_()) {
-        currentVelocity_ = -gestureVelocity * sVelocityScale_.value_or(velocityScale) * GetGain(GetDragOffset());
+        currentVelocity_ = -gestureVelocity * velocityScale * GetGain(GetDragOffset());
     } else {
-        currentVelocity_ = gestureVelocity * sVelocityScale_.value_or(velocityScale) * GetGain(GetDragOffset());
+        currentVelocity_ = gestureVelocity * velocityScale * GetGain(GetDragOffset());
     }
     // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
     currentVelocity_ = std::clamp(currentVelocity_, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
@@ -842,7 +822,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         double ret = SystemProperties::GetSrollableFriction();
         frictionTmp = !NearZero(ret) ? ret : defaultFriction_;
     }
-    float friction = sFriction_.value_or(frictionTmp);
+    float friction = frictionTmp;
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
     if (fixScrollParamCallback_) {
@@ -1028,7 +1008,7 @@ void Scrollable::FixScrollMotion(float position, float initVelocity)
     if (frictionOffsetProperty_ && needCenterFix_ && watchFixCallback_) {
         float finalPosition = watchFixCallback_(GetFinalPosition(), position);
         if (!NearEqual(finalPosition, GetFinalPosition(), DISTANCE_EPSILON)) {
-            float friction = sFriction_.value_or(friction_);
+            float friction = friction_;
             float velocity = GetFrictionVelocityByFinalPosition(finalPosition, position, friction, signum);
 
             // fix again when velocity is less than velocity threshold
