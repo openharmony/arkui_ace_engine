@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "generated/type_helpers.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
