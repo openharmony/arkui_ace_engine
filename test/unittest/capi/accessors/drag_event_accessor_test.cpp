@@ -170,6 +170,8 @@ HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
     ASSERT_NE(dragEvent_->GetData(), nullptr);
     EXPECT_EQ(dragEvent_->GetData()->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: setData";
+    auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(arkUnifiedData.ptr);
+    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
 }
 
 /**
@@ -189,6 +191,9 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
     ASSERT_NE(dataPeer->unifiedData, nullptr);
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
+    auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(arkUnifiedData.ptr);
+    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
+    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(dataPeer);
 }
 
 /**
@@ -219,5 +224,4 @@ HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
             "Input value is: " << input << ", method: GetYTest";
     }
 }
-
 } // namespace OHOS::Ace::NG

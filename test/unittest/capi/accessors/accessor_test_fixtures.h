@@ -25,5 +25,5 @@ namespace OHOS::Ace::NG::AccessorTestFixtures {
 // Fixture 'Boolean' for type 'Ark_Boolean'
 extern const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues;
 extern const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues;
-}
+} // namespace OHOS::Ace::NG::AccessorTestFixtures
 #endif
