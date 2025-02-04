@@ -121,6 +121,15 @@ void ContentModifierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     LOGE("ARKOALA RatingInterfaceModifier::ContentModifier is not implemented.");
 }
+void __onChangeEvent_ratingImpl(Ark_NativePointer node,
+                                const Callback_Number_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //RatingModelNG::Set__onChangeEvent_rating(frameNode, convValue);
+}
 } // RatingAttributeModifier
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()
 {
@@ -132,6 +141,7 @@ const GENERATED_ArkUIRatingModifier* GetRatingModifier()
         RatingAttributeModifier::StarStyleImpl,
         RatingAttributeModifier::OnChangeImpl,
         RatingAttributeModifier::ContentModifierImpl,
+        RatingAttributeModifier::__onChangeEvent_ratingImpl,
     };
     return &ArkUIRatingModifierImpl;
 }

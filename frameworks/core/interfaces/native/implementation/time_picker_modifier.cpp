@@ -139,6 +139,15 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
 }
+void __onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                  const Callback_Date_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //TimePickerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+}
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
 {
@@ -153,6 +162,7 @@ const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
         TimePickerAttributeModifier::DateTimeOptionsImpl,
         TimePickerAttributeModifier::OnChangeImpl,
         TimePickerAttributeModifier::EnableHapticFeedbackImpl,
+        TimePickerAttributeModifier::__onChangeEvent_selectedImpl,
     };
     return &ArkUITimePickerModifierImpl;
 }

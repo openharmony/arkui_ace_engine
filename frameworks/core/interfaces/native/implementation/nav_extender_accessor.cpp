@@ -37,7 +37,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetUpdateStackCallbackImpl(const Ark_NavPathStack* peer,
-                                const Callback_String_Void* callback)
+                                const NavExtender_OnUpdateStack* callback)
 {
     auto stack = reinterpret_cast<NavPathStackPeer *>(peer->ptr);
     CHECK_NULL_VOID(stack);
