@@ -144,10 +144,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const bool value) {
-        GetFullAPI()->getEventsAPI()->getCheckboxEventsReceiver()->onChange(frameNode->GetId(), value);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const bool value) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
     };
-
     CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
 void ContentModifierImpl(Ark_NativePointer node,
