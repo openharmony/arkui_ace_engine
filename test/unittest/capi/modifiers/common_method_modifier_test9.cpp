@@ -18,6 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -55,6 +56,10 @@ namespace Converter {
         dst.bundleName = Converter::ArkValue<Ark_String>(src);
         LOGE("this converter is disabled");
     }
+}
+
+namespace GeneratedModifier {
+    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
 }
 
 class CommonMethodModifierTest9 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -539,19 +544,25 @@ HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
 {
     static const int expectedResId = 123;
+    static const std::string expectedType = "xxx";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
-        int nodeId;
+        int resId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onTouchInterceptFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
                                 const Ark_TouchEvent parameter,
                                 const Callback_HitTestMode_Void continuation) {
-        checkEvent = { .nodeId = resourceId };
+        ASSERT_NE(parameter.ptr, nullptr);
+        auto peer = reinterpret_cast<TouchEventPeer*>(parameter.ptr);
+        auto touchEventInfo = peer->GetEventInfo();
+        EXPECT_EQ(touchEventInfo->GetType(), expectedType);
+        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
+        checkEvent = { .resId = resourceId };
         Ark_HitTestMode retVal = Ark_HitTestMode::ARK_HIT_TEST_MODE_BLOCK;
         CallbackHelper(continuation).Invoke(retVal);
     };
@@ -565,11 +576,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
     auto gestureEventHub = eventHub->GetGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
     auto fireTouchEvent = gestureEventHub->GetOnTouchIntercept();
-    TouchEventInfo info("");
+    TouchEventInfo info(expectedType);
     auto retValue = fireTouchEvent(info);
     EXPECT_EQ(retValue, NG::HitTestMode::HTMBLOCK);
     ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value().nodeId, expectedResId);
+    EXPECT_EQ(checkEvent.value().resId, expectedResId);
 }
 
 /*
