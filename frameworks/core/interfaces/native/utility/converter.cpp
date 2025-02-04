@@ -1980,5 +1980,4 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     }
     return selectMenuParam;
 }
-
 } // namespace OHOS::Ace::NG::Converter
