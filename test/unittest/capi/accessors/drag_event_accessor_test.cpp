@@ -137,7 +137,6 @@ HWTEST_F(DragEventAccessorTest, GetYTest, TestSize.Level1)
     for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
         dragEvent_->SetY(Convert<int32_t>(value));
         auto y = accessor_->getY(peer_);
-        std::cout << y << "\t" << expected << std::endl;
         EXPECT_EQ(Convert<int32_t>(y), expected) <<
             "Input value is: " << input << ", method: GetYTest";
     }
