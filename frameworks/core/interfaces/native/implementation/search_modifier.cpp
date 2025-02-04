@@ -434,6 +434,15 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SearchModelNG::SetCustomKeyboard(frameNode, convValue);
 }
+void __onChangeEvent_valueImpl(Ark_NativePointer node,
+                               const Callback_String_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //SearchModelNG::Set__onChangeEvent_value(frameNode, convValue);
+}
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
 {
@@ -485,6 +494,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,
+        SearchAttributeModifier::__onChangeEvent_valueImpl,
     };
     return &ArkUISearchModifierImpl;
 }

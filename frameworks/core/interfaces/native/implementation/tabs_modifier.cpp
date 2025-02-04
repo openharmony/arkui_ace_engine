@@ -273,6 +273,15 @@ void BarModeScrollableImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*options);
     //TabsModelNG::SetBarModeScrollable(frameNode, convValue);
 }
+void __onChangeEvent_indexImpl(Ark_NativePointer node,
+                               const Callback_Number_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //TabsModelNG::Set__onChangeEvent_index(frameNode, convValue);
+}
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
@@ -306,6 +315,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::PageFlipModeImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
         TabsAttributeModifier::BarModeScrollableImpl,
+        TabsAttributeModifier::__onChangeEvent_indexImpl,
     };
     return &ArkUITabsModifierImpl;
 }

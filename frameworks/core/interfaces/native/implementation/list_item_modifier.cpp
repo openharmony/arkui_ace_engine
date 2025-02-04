@@ -96,6 +96,15 @@ void OnSelectImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ListItemModelNG::SetOnSelect(frameNode, convValue);
 }
+void __onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                  const Callback_Boolean_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //ListItemModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+}
 } // ListItemAttributeModifier
 const GENERATED_ArkUIListItemModifier* GetListItemModifier()
 {
@@ -109,6 +118,7 @@ const GENERATED_ArkUIListItemModifier* GetListItemModifier()
         ListItemAttributeModifier::SelectedImpl,
         ListItemAttributeModifier::SwipeActionImpl,
         ListItemAttributeModifier::OnSelectImpl,
+        ListItemAttributeModifier::__onChangeEvent_selectedImpl,
     };
     return &ArkUIListItemModifierImpl;
 }

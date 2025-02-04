@@ -24,7 +24,7 @@ void DestroyPeerImpl(GlobalScope_commonPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new GlobalScope_commonPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

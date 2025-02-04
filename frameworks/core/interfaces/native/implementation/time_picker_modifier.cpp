@@ -185,6 +185,15 @@ void EnableCascadeImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //TimePickerModelNG::SetEnableCascade(frameNode, convValue);
 }
+void __onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                  const Callback_Date_Void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //TimePickerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+}
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
 {
@@ -209,6 +218,7 @@ const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
         TimePickerAttributeModifier::EnableHapticFeedback1Impl,
         TimePickerAttributeModifier::DigitalCrownSensitivityImpl,
         TimePickerAttributeModifier::EnableCascadeImpl,
+        TimePickerAttributeModifier::__onChangeEvent_selectedImpl,
     };
     return &ArkUITimePickerModifierImpl;
 }
