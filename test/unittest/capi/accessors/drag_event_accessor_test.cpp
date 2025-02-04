@@ -83,14 +83,14 @@ public:
 };
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: GetWindowXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(DragEventAccessorTest, GetWindowXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetX(expected);
+        dragEvent_->SetX(Convert<int32_t>(value));
         auto windowX = accessor_->getWindowX(peer_);
         EXPECT_EQ(Convert<int32_t>(windowX), expected) <<
             "Input value is: " << input << ", method: GetWindowXTest";
@@ -98,14 +98,14 @@ HWTEST_F(DragEventAccessorTest, GetWindowXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: GetWindowYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetY(expected);
+        dragEvent_->SetY(Convert<int32_t>(value));
         auto windowY = accessor_->getWindowY(peer_);
         EXPECT_EQ(Convert<int32_t>(windowY), expected) <<
             "Input value is: " << input << ", method: GetWindowYTest";
@@ -113,14 +113,14 @@ HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: GetXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(DragEventAccessorTest, GetXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetX(expected);
+        dragEvent_->SetX(Convert<int32_t>(value));
         auto x = accessor_->getX(peer_);
         EXPECT_EQ(Convert<int32_t>(x), expected) <<
             "Input value is: " << input << ", method: GetXTest";
@@ -128,15 +128,16 @@ HWTEST_F(DragEventAccessorTest, GetXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: GetYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(DragEventAccessorTest, GetYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetY(expected);
+        dragEvent_->SetY(Convert<int32_t>(value));
         auto y = accessor_->getY(peer_);
+        std::cout << y << "\t" << expected << std::endl;
         EXPECT_EQ(Convert<int32_t>(y), expected) <<
             "Input value is: " << input << ", method: GetYTest";
     }
@@ -157,11 +158,11 @@ HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDataTest
+ * @tc.name: SetDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, setDataTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
@@ -173,11 +174,11 @@ HWTEST_F(DragEventAccessorTest, setDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDataTest
+ * @tc.name: GetDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
@@ -192,7 +193,7 @@ HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: GetUseCustomDropAnimationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -207,7 +208,7 @@ HWTEST_F(DragEventAccessorTest, GetUseCustomDropAnimationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: SetUseCustomDropAnimationTest
  * @tc.desc:
  * @tc.type: FUNC
  */

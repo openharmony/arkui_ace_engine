@@ -46,6 +46,8 @@ namespace OHOS::Ace::NG::Converter {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
+Ark_Int32 GetXImpl(DragEventPeer* peer);
+Ark_Int32 GetYImpl(DragEventPeer* peer);
 using namespace Converter;
 void DestroyPeerImpl(DragEventPeer* peer)
 {
@@ -69,17 +71,11 @@ Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
 }
 Ark_Int32 GetWindowXImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    LOGE("Arkoala method DragEventAccessor.GetWindowX return int32_t value");
-    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetX()));
+    return GetXImpl(peer);
 }
 Ark_Int32 GetWindowYImpl(DragEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->dragInfo, 0);
-    LOGE("Arkoala method DragEventAccessor.GetWindowY return int32_t value");
-    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetY()));
+    return GetYImpl(peer);
 }
 Ark_Int32 GetXImpl(DragEventPeer* peer)
 {
