@@ -45,6 +45,11 @@ copy("copy_libxml2") {
   outputs = [ root_out_dir + "/tests/unittest/ace_engine/capi/libxml2.so" ]
   external_deps = [ "libxml2:libxml2" ]
 }
+copy("copy_libxml2_unstripped") {
+  sources = [ root_out_dir + "/lib.unstripped/clang_x64/thirdparty/libxml2/libxml2.so" ]
+  outputs = [ root_out_dir + "/exe.unstripped/clang_x64/tests/unittest/ace_engine/capi/libxml2.so" ]
+  external_deps = [ "libxml2:libxml2" ]
+}
 
 ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   testonly = true
@@ -90,7 +95,10 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
 
   external_deps = [ "libxml2:libxml2" ]
 
-  deps += [ ":copy_libxml2" ]
+  deps += [
+    ":copy_libxml2",
+    ":copy_libxml2_unstripped",
+  ]
 
   if (defined(web_components_support_for_test) &&
       web_components_support_for_test) {
