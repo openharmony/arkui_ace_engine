@@ -1879,6 +1879,28 @@ PickerRangeType Convert(const Array_Array_String& src)
 }
 
 template<>
+FingerInfo Convert(const Ark_FingerInfo& src)
+{
+    FingerInfo dst;
+    dst.fingerId_ = Converter::Convert<int32_t>(src.id);
+    dst.globalLocation_.SetX(Converter::Convert<float>(src.globalX));
+    dst.globalLocation_.SetY(Converter::Convert<float>(src.globalY));
+    dst.localLocation_.SetX(Converter::Convert<float>(src.localX));
+    dst.localLocation_.SetY(Converter::Convert<float>(src.localY));
+    dst.screenLocation_.SetX(Converter::Convert<float>(src.displayX));
+    dst.screenLocation_.SetY(Converter::Convert<float>(src.displayY));
+    return dst;
+}
+
+template<>
+std::list<FingerInfo> Convert(const Array_FingerInfo& src)
+{
+    std::vector<FingerInfo> fingerInfoVector = Converter::Convert<std::vector<FingerInfo>>(src);
+    std::list<FingerInfo> dst(fingerInfoVector.begin(), fingerInfoVector.end());
+    return dst;
+}
+
+template<>
 PickerRangeType Convert(const Ark_Resource& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;

@@ -40,7 +40,13 @@ public:
         eventInfo = info;
     }
 
+    void SetFingerList(const std::list<FingerInfo>& fingerList)
+    {
+        fingerList_ = fingerList;
+    }
+
 private:
     std::optional<AceGestureInfo> eventInfo;
+    std::list<FingerInfo> fingerList_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
