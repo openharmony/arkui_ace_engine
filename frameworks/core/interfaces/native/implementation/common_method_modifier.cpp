@@ -18,6 +18,7 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
+#include "common_method_modifier_impl.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components_ng/base/frame_node.h"
@@ -4568,9 +4569,12 @@ void GestureImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(gesture);
-    //auto convValue = Converter::OptConvert<type>(gesture); // for enums
-    //CommonMethodModelNG::SetGesture(frameNode, convValue);
+    CHECK_NULL_VOID(gesture);
+    std::optional<GestureMask> maskOpt;
+    if (mask) {
+        maskOpt = Converter::OptConvert<GestureMask>(*mask);
+    }
+    CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::Low);
 }
 void PriorityGestureImpl(Ark_NativePointer node,
                          const Ark_GestureType* gesture,
@@ -4578,9 +4582,12 @@ void PriorityGestureImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(gesture);
-    //auto convValue = Converter::OptConvert<type>(gesture); // for enums
-    //CommonMethodModelNG::SetPriorityGesture(frameNode, convValue);
+    CHECK_NULL_VOID(gesture);
+    std::optional<GestureMask> maskOpt;
+    if (mask) {
+        maskOpt = Converter::OptConvert<GestureMask>(*mask);
+    }
+    CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::High);
 }
 void ParallelGestureImpl(Ark_NativePointer node,
                          const Ark_GestureType* gesture,
@@ -4588,9 +4595,12 @@ void ParallelGestureImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(gesture);
-    //auto convValue = Converter::OptConvert<type>(gesture); // for enums
-    //CommonMethodModelNG::SetParallelGesture(frameNode, convValue);
+    CHECK_NULL_VOID(gesture);
+    std::optional<GestureMask> maskOpt;
+    if (mask) {
+        maskOpt = Converter::OptConvert<GestureMask>(*mask);
+    }
+    CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::Parallel);
 }
 void Blur0Impl(Ark_NativePointer node,
                const Ark_Number* value,

@@ -252,6 +252,16 @@ void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringS
 }
 
 template<>
+void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src)
+{
+    switch (src) {
+        case ARK_GESTURE_MASK_NORMAL: dst = GestureMask::Normal; break;
+        case ARK_GESTURE_MASK_IGNORE_INTERNAL: dst = GestureMask::IgnoreInternal; break;
+        default: LOGE("Unexpected enum value in Ark_GestureMask: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
 {
     switch (src) {
