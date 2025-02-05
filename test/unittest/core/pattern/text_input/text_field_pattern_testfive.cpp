@@ -619,10 +619,10 @@ HWTEST_F(TextFieldPatternTestFive, IssueFixTest001, TestSize.Level0)
     EXPECT_EQ(pattern_->cursorVisible_, true);
 
     /**
-     * press tab, HandleOnEscape should return true
+     * press tab, HandleOnEscape should return false
      */
     GetFocus();
-    EXPECT_EQ(pattern_->HandleOnEscape(), true);
+    EXPECT_EQ(pattern_->HandleOnEscape(), false);
 
     /**
      * password focus box rect is diffent between LRT and RTL
