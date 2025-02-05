@@ -84,7 +84,7 @@ declare_args() {
   ace_engine_enable_circle_feature = true
 
   # Enable wearable product update wait time
-  ace_engine_wearable_watch_wait_time_update = false
+  ace_engine_wearable_wait_time_update = false
 }
 
 enable_dump_drawcmd = false
