@@ -2713,8 +2713,8 @@ void OnFocusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onFocus(frameNode->GetId());
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
@@ -2724,8 +2724,8 @@ void OnBlurImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onBlur(frameNode->GetId());
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
@@ -3213,8 +3213,8 @@ void OnAppearImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onAppear(frameNode->GetId());
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
@@ -3224,8 +3224,8 @@ void OnDisAppearImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onDisAppear(frameNode->GetId());
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
@@ -3262,7 +3262,7 @@ void OnAreaChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [frameNode, node = weakNode](
+    auto onEvent = [arkCallback = CallbackHelper(*value), node = weakNode](
         const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         PipelineContext::SetCallBackNode(node);
 
@@ -3292,9 +3292,9 @@ void OnAreaChangeImpl(Ark_NativePointer node,
         current.globalPosition.y = Converter::ArkValue<Opt_Length>(
             PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()));
 
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onAreaChange(
-            frameNode->GetId(), previous, current);
+        arkCallback.Invoke(previous, current);
     };
+
     auto areaChangeCallback = [areaChangeFunc = std::move(onEvent)](const RectF& oldRect,
                                   const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
         areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
@@ -5066,14 +5066,13 @@ void OnVisibleAreaChangeImpl(Ark_NativePointer node,
         ratioVec.push_back(ratio);
     }
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaChange = [frameNode, node = weakNode](bool visible, double ratio) {
-        Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-        Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
-        PipelineContext::SetCallBackNode(node);
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onVisibleAreaChange(
-            frameNode->GetId(), isExpanding, currentRatio);
-    };
-
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*event), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.Invoke(isExpanding, currentRatio);
+        };
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void KeyboardShortcutImpl(Ark_NativePointer node,

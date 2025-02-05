@@ -110,10 +110,7 @@ void OnReadyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getCanvasEventsReceiver()->onReady(frameNode->GetId());
-    };
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() { arkCallback.Invoke(); };
     CanvasModelNG::SetOnReady(frameNode, std::move(onEvent));
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,

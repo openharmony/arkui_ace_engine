@@ -51,10 +51,8 @@ void OnSelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](const int32_t value) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(value);
-        GetFullAPI()->getEventsAPI()->getAlphabetIndexerEventsReceiver()->onSelected(
-            frameNode->GetId(), arkIndex);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const int32_t value) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
     };
     IndexerModelNG::SetOnSelected(frameNode, std::move(onEvent));
 }
@@ -193,10 +191,8 @@ void OnSelectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](const int32_t value) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(value);
-        GetFullAPI()->getEventsAPI()->getAlphabetIndexerEventsReceiver()->onSelect(
-            frameNode->GetId(), arkIndex);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const int32_t value) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
     };
     IndexerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
@@ -226,10 +222,8 @@ void OnPopupSelectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const int32_t value) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(value);
-        GetFullAPI()->getEventsAPI()->getAlphabetIndexerEventsReceiver()->onPopupSelect(
-            frameNode->GetId(), arkIndex);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const int32_t value) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
     };
     IndexerModelNG::SetOnPopupSelected(frameNode, std::move(onEvent));
 }

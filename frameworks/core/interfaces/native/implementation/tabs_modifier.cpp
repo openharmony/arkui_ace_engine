@@ -260,14 +260,14 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const BaseEventInfo* info) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         int32_t indexInt = -1;
         if (tabsInfo) {
             indexInt = tabsInfo->GetIndex();
         }
         auto index = Converter::ArkValue<Ark_Number>(indexInt);
-        GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->onChange(frameNode->GetId(), index);
+        arkCallback.Invoke(index);
     };
     TabsModelNG::SetOnChange(frameNode, std::move(onChange));
 }
@@ -277,14 +277,14 @@ void OnTabBarClickImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onTabBarClick = [frameNode](const BaseEventInfo* info) {
+    auto onTabBarClick = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         int32_t indexInt = -1;
         if (tabsInfo) {
             indexInt = tabsInfo->GetIndex();
         }
         auto index = Converter::ArkValue<Ark_Number>(indexInt);
-        GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->onTabBarClick(frameNode->GetId(), index);
+        arkCallback.Invoke(index);
     };
     TabsModelNG::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
 }
@@ -294,16 +294,15 @@ void OnAnimationStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onAnimationStart = [frameNode](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+    auto onAnimationStart = [arkCallback = CallbackHelper(*value)](
+        int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         auto arkTargetIndex = Converter::ArkValue<Ark_Number>(targetIndex);
         Ark_TabsAnimationEvent tabsAnimationEvent;
         tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.00f));
         tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.00f));
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
-
-        GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->onAnimationStart(frameNode->GetId(),
-            arkIndex, arkTargetIndex, tabsAnimationEvent);
+        arkCallback.Invoke(arkIndex, arkTargetIndex, tabsAnimationEvent);
     };
     TabsModelNG::SetOnAnimationStart(frameNode, std::move(onAnimationStart));
 }
@@ -313,15 +312,13 @@ void OnAnimationEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onAnimationEnd = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
+    auto onAnimationEnd = [arkCallback = CallbackHelper(*value)](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         Ark_TabsAnimationEvent tabsAnimationEvent;
         tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.00f));
         tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.00f));
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
-
-        GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->onAnimationEnd(frameNode->GetId(),
-            arkIndex, tabsAnimationEvent);
+        arkCallback.Invoke(arkIndex, tabsAnimationEvent);
     };
     TabsModelNG::SetOnAnimationEnd(frameNode, std::move(onAnimationEnd));
 }
@@ -331,15 +328,13 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onGestureSwipe = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
+    auto onGestureSwipe = [arkCallback = CallbackHelper(*value)](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         Ark_TabsAnimationEvent tabsAnimationEvent;
         tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.00f));
         tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.00f));
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
-
-        GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->onGestureSwipe(frameNode->GetId(),
-            arkIndex, tabsAnimationEvent);
+        arkCallback.Invoke(arkIndex, tabsAnimationEvent);
     };
     TabsModelNG::SetOnGestureSwipe(frameNode, std::move(onGestureSwipe));
 }

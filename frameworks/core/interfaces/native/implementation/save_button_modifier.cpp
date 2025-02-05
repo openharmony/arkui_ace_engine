@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components/common/layout/constants.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -97,7 +98,7 @@ void OnClickImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](GestureEvent& info) {
+    auto onEvent = [arkCallback = CallbackHelper(*value)](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
 #ifdef SECURITY_COMPONENT_ENABLE
         auto secEventValue = info.GetSecCompHandleEvent();
@@ -111,8 +112,7 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        GetFullAPI()->getEventsAPI()->getSaveButtonEventsReceiver()->onClick(frameNode->GetId(),
-            event.ArkValue(), arkResult);
+        arkCallback.Invoke(event.ArkValue(), arkResult);
     };
 
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));

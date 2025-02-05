@@ -220,8 +220,8 @@ void OnSelectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSelect = [frameNode](bool isSelected) {
-        GetFullAPI()->getEventsAPI()->getListItemEventsReceiver()->onSelect(frameNode->GetId(), isSelected);
+    auto onSelect = [arkCallback = CallbackHelper(*value)](bool param) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(param));
     };
     ListItemModelNG::SetSelectCallback(frameNode, onSelect);
 }
