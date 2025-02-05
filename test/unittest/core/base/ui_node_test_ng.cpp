@@ -2524,4 +2524,35 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
      */
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
+
+/**
+ * @tc.name: IsAutoFillContainerNode001
+ * @tc.desc: Test ui node method IsAutoFillContainerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, IsAutoFillContainerNode001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode1->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode2->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode3->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 4, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode4->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 5, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode5->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode6 =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, 6, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode6->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode7 =
+        FrameNode::CreateFrameNode("OTHER_TAG", 7, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_FALSE(testNode7->IsAutoFillContainerNode());
+}
+
 } // namespace OHOS::Ace::NG
