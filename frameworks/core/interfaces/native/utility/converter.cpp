@@ -1366,6 +1366,20 @@ EffectOption Convert(const Ark_BackgroundEffectOptions& src)
 }
 
 template<>
+FingerInfo Convert(const Ark_FingerInfo& src)
+{
+    FingerInfo dst;
+    dst.fingerId_ = Converter::Convert<int32_t>(src.id);
+    dst.globalLocation_.SetX(Converter::Convert<float>(src.globalX));
+    dst.globalLocation_.SetY(Converter::Convert<float>(src.globalY));
+    dst.localLocation_.SetX(Converter::Convert<float>(src.localX));
+    dst.localLocation_.SetY(Converter::Convert<float>(src.localY));
+    dst.screenLocation_.SetX(Converter::Convert<float>(src.displayX));
+    dst.screenLocation_.SetY(Converter::Convert<float>(src.displayY));
+    return dst;
+}
+
+template<>
 PaddingProperty Convert(const Ark_Padding& src)
 {
     PaddingProperty padding;
@@ -1884,20 +1898,6 @@ PickerRangeType Convert(const Array_Array_String& src)
         dst.second.push_back(value);
     }
     dst.first = false;
-    return dst;
-}
-
-template<>
-FingerInfo Convert(const Ark_FingerInfo& src)
-{
-    FingerInfo dst;
-    dst.fingerId_ = Converter::Convert<int32_t>(src.id);
-    dst.globalLocation_.SetX(Converter::Convert<float>(src.globalX));
-    dst.globalLocation_.SetY(Converter::Convert<float>(src.globalY));
-    dst.localLocation_.SetX(Converter::Convert<float>(src.localX));
-    dst.localLocation_.SetY(Converter::Convert<float>(src.localY));
-    dst.screenLocation_.SetX(Converter::Convert<float>(src.displayX));
-    dst.screenLocation_.SetY(Converter::Convert<float>(src.displayY));
     return dst;
 }
 
