@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/unittest/capi/modifiers/generated/text_input_modifier_test.h"
-
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/interfaces/native/implementation/text_input_controller_peer.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -28,30 +23,10 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 using namespace Converter;
-using namespace TypeHelper;
-using namespace TestConst::TextInput;
 
 namespace GeneratedModifier {
 const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor();
 }
-
-namespace {
-    const auto CHECK_TEXT(u"test_text");
-
-    PreviewText g_PreviewText = { .offset = 1234, .value = u"test_offset" };
-    std::u16string g_EventTestString(u"");
-    int32_t g_EventTestOffset(0);
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUITextInputEventsReceiver eventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getTextInputEventsReceiver = [] () -> const GENERATED_ArkUITextInputEventsReceiver* {
-                return &eventsReceiver;
-            }
-        };
-    }; // EventsTracker
-} // namespace
 
 namespace Converter {
     template<>
@@ -69,13 +44,7 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
         SetupTheme<TextFieldTheme>();
-        for (auto& [id, strid, res]: Fixtures::resourceInitTable) {
-            AddResource(id, res);
-            AddResource(strid, res);
-        }
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -92,26 +61,27 @@ HWTEST_F(TextInputModifierTest2, setOnChangeTest, TestSize.Level1)
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
 
-    g_EventTestString.clear();
-    g_EventTestOffset = 0;
+    std::u16string expectedText = u"test_text";
+    PreviewText expectedPreviewText = { .offset = 1234, .value = u"test_preview_text" };
+    
+    static std::u16string resultText = u"";
+    static std::u16string resultPreviewText = u"";
+    static int32_t resultOffset = 0;
 
-    auto arkCallback = [](Ark_Int32 nodeId,
-        const Ark_String value,
-        const Opt_PreviewText previewText) {
-        auto value2 = Converter::OptConvert<std::u16string>(value).value_or(u"");
-        auto previewText2 = Converter::OptConvert<PreviewText>(previewText).value_or(PreviewText{});
-        g_EventTestOffset = previewText2.offset;
-        g_EventTestString.append(value2).append(previewText2.value);
+    auto arkCallback = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+        auto convPreviewText = Converter::OptConvert<PreviewText>(previewText).value_or(PreviewText{});
+        resultOffset = convPreviewText.offset;
+        resultPreviewText.append(convPreviewText.value);
+        resultText.append(Converter::OptConvert<std::u16string>(value).value_or(u""));
     };
 
     auto onChange = Converter::ArkValue<EditableTextOnChangeCallback>(arkCallback, frameNode->GetId());
 
     modifier_->setOnChange(node_, &onChange);
-    textFieldEventHub->FireOnChange(CHECK_TEXT, g_PreviewText);
-    std::u16string checkString = CHECK_TEXT;
-    checkString.append(g_PreviewText.value);
-    EXPECT_EQ(g_EventTestString, checkString);
-    EXPECT_EQ(g_EventTestOffset, g_PreviewText.offset);
+    textFieldEventHub->FireOnChange(expectedText, expectedPreviewText);
+    EXPECT_EQ(resultText, expectedText);
+    EXPECT_EQ(resultPreviewText, expectedPreviewText.value);
+    EXPECT_EQ(resultOffset, expectedPreviewText.offset);
 }
 
 /**
@@ -127,18 +97,17 @@ HWTEST_F(TextInputModifierTest2, setOnPasteTest, TestSize.Level1)
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
 
-    g_EventTestString.clear();
-    g_EventTestOffset = 0;
+    std::u16string expectedText = u"test_text";
+    static std::u16string resultText = u"";
 
     auto arkCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
-        g_EventTestString = Converter::OptConvert<std::u16string>(content).value_or(u"");
+        resultText = Converter::OptConvert<std::u16string>(content).value_or(u"");
     };
 
     auto onPaste = Converter::ArkValue<OnPasteCallback>(arkCallback, frameNode->GetId());
     modifier_->setOnPaste(node_, &onPaste);
-    textFieldEventHub->FireOnPaste(CHECK_TEXT);
-    std::u16string checkString = CHECK_TEXT;
-    EXPECT_EQ(g_EventTestString, checkString);
+    textFieldEventHub->FireOnPaste(expectedText);
+    EXPECT_EQ(resultText, expectedText);
 }
 
 /*

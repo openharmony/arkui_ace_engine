@@ -16,12 +16,11 @@
 #include <gtest/gtest.h>
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -32,17 +31,12 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
-namespace {
-
-} // namespace
-
 class SearchModifierTest2 : public ModifierTestBase<GENERATED_ArkUISearchModifier,
                                &GENERATED_ArkUINodeModifiers::getSearchModifier, GENERATED_ARKUI_SEARCH> {
 public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
         SetupTheme<SearchTheme>();
         SetupTheme<TextFieldTheme>();
         SetupTheme<IconTheme>();
@@ -63,11 +57,12 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Leve
     int callsCount = 0;
     CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    modifier_->setCustomKeyboard(node_, &builder, nullptr);
+    modifier_->setCustomKeyboard(frameNode, &builder, nullptr);
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
     EXPECT_TRUE(textFieldPattern->HasCustomKeyboard());
     EXPECT_TRUE(textFieldPattern->RequestCustomKeyboard());
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
@@ -95,6 +90,7 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOption
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
     EXPECT_TRUE(textFieldPattern->HasCustomKeyboard());
     EXPECT_TRUE(textFieldPattern->RequestCustomKeyboard());
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
