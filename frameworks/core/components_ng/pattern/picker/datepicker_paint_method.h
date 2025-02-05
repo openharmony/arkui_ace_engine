@@ -24,29 +24,27 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
-#ifdef ARKUI_WEARABLE
 #include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
-#ifdef ARKUI_WEARABLE
-class ACE_EXPORT DatePickerPaintMethod : public PickerPaintMethodCircleUtils, public NodePaintMethod {
-#else
 class ACE_EXPORT DatePickerPaintMethod : public NodePaintMethod {
-#endif
     DECLARE_ACE_TYPE(DatePickerPaintMethod, NodePaintMethod)
 public:
     DatePickerPaintMethod() = default;
-    ~DatePickerPaintMethod() override = default;
+    ~DatePickerPaintMethod() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     DatePickerPaintMethod(const WeakPtr<Pattern>& pattern)
     {
         pattern_ = pattern;
     }
-#ifdef ARKUI_WEARABLE
+
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
-#endif
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
     void SetEnabled(bool enabled)
@@ -64,6 +62,7 @@ private:
     Color backgroundColor_ = Color::WHITE;
 
     WeakPtr<Pattern> pattern_;
+    PickerPaintMethodCircleUtils *circleUtils_ = NULL;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATEPICKER_DATEPICKER_PAINT_METHOD_H

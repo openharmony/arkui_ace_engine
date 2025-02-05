@@ -568,7 +568,7 @@ bool TextPickerPattern::OnCrownEvent(const CrownEvent& event)
             if (!pickerColumnPattern) {
                 continue;
             }
-            auto columnID =  pickerColumnPattern->GetselectedColumnId();
+            auto columnID =  pickerColumnPattern->GetSelectedColumnId();
             if (!pickerColumnPattern->IsCrownEventEnded()) {
                 crownPickerColumnPattern = pickerColumnPattern;
                 break;

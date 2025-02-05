@@ -251,7 +251,7 @@ bool TimePickerRowPattern::OnCrownEvent(const CrownEvent& event)
             }
             auto pickerColumnPattern = column->GetPattern<TimePickerColumnPattern>();
             CHECK_NULL_RETURN(pickerColumnPattern, false);
-            auto columnID =  pickerColumnPattern->GetselectedColumnId();
+            auto columnID =  pickerColumnPattern->GetSelectedColumnId();
             if (!pickerColumnPattern->IsCrownEventEnded()) {
                 crownPickerColumnPattern = pickerColumnPattern;
                 break;

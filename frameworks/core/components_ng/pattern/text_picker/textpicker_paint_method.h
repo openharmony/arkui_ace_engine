@@ -26,21 +26,20 @@
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
-#ifdef ARKUI_WEARABLE
 #include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
-#ifdef ARKUI_WEARABLE
-class ACE_EXPORT TextPickerPaintMethod : public PickerPaintMethodCircleUtils, public NodePaintMethod {
-#else
 class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
-#endif
     DECLARE_ACE_TYPE(TextPickerPaintMethod, NodePaintMethod)
 public:
     TextPickerPaintMethod() = default;
-    ~TextPickerPaintMethod() override = default;
+    ~TextPickerPaintMethod() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     TextPickerPaintMethod(const WeakPtr<Pattern>& pattern)
     {
@@ -61,9 +60,8 @@ public:
     {
         enabled_ = enabled;
     }
-#ifdef ARKUI_WEARABLE
+
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
-#endif
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintDividerLines(RSCanvas& canvas, const RectF& contentRect, const DividerInfo &info,
         bool isDefaultLine = true);
@@ -81,6 +79,7 @@ private:
         const ItemDivider &divider, double dividerHeight);
     void PaintLine(const OffsetF& offset, const DividerInfo &info, RSCanvas& canvas);
     bool SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info);
+    PickerPaintMethodCircleUtils *circleUtils_ = NULL;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H
