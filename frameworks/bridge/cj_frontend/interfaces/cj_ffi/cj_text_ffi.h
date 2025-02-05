@@ -71,7 +71,7 @@ public:
     OHOS::Ace::Framework::CPositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
     {
         auto value = layout_->GetGlyphPositionAtCoordinate(x, y);
-        OHOS::Ace::Framework::CPositionWithAffinity  cPositionWithAffinity = 
+        OHOS::Ace::Framework::CPositionWithAffinity  cPositionWithAffinity =
             {static_cast<int32_t>(value.position_), static_cast<int32_t>(value.affinity_)};
         return cPositionWithAffinity;
     }
