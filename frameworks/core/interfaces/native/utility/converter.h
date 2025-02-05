@@ -421,6 +421,7 @@ namespace Converter {
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
+    template<> FingerInfo Convert(const Ark_FingerInfo& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
     template<> Gradient Convert(const Ark_LinearGradient_common& value);

@@ -36,6 +36,7 @@ ace_unittest("capi_all_accessors_test") {
     "file_selector_param_accessor_test.cpp",
     "file_selector_result_accessor_test.cpp",
     "full_screen_exit_handler_accessor_test.cpp",
+    "gesture_event_accessor_test.cpp",
     "gesture_recognizer_accessor_test.cpp",
     "http_auth_handler_accessor_test.cpp",
     "i_curve_accessor_test.cpp",

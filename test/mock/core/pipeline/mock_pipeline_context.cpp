@@ -170,6 +170,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
     rootHeight_ = rootHeight;
 }
 
+void MockPipelineContext::SetDensity(double density)
+{
+    density_ = density;
+}
+
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
 {
     pipeline_->instanceId_ = instanceId;
