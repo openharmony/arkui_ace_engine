@@ -31,6 +31,12 @@
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#ifdef ARKUI_WEARABLE
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
@@ -79,11 +85,19 @@ enum class OptionIndex {
     COLUMN_INDEX_6
 };
 
+#ifdef ARKUI_WEARABLE
+class TextPickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<int32_t> {
+#else
 class TextPickerColumnPattern : public LinearLayoutPattern {
+#endif
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
 
 public:
+#ifdef ARKUI_WEARABLE
+    TextPickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils(-1) {};
+#else
     TextPickerColumnPattern() : LinearLayoutPattern(true) {};
+#endif
 
     ~TextPickerColumnPattern() override = default;
 
@@ -405,6 +419,11 @@ public:
     }
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void StopHapticController();
+#ifndef ARKUI_WEARABLE
+    void SetSelectedMarkListener(std::function<void(int& focusId)>& listener);
+    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const int strColumnId);
+#endif
 
 private:
     void OnModifyDone() override;
@@ -419,6 +438,17 @@ private:
 
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void SetSelectedMarkFocus();
+#ifdef ARKUI_WEARABLE
+    void SetSelectedMarkPaint(bool paint) override;
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
+#endif
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
@@ -467,6 +497,8 @@ private:
     void UpdateTextPropertiesLinear(bool isDown, double scale);
     void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
         uint32_t showCount, bool isDown, double scale);
+    void SetSelectColor(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const Color& startColor, const Color& endColor, const float& percent, bool isEqual);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
@@ -583,6 +615,7 @@ private:
     bool isDisableTextStyleAnimation_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     uint32_t currentEnterIndex_ = 0;

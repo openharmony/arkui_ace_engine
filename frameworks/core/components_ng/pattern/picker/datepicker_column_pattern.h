@@ -32,6 +32,12 @@
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#ifdef ARKUI_WEARABLE
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -81,11 +87,19 @@ enum class DatePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
+#ifdef ARKUI_WEARABLE
+class DatePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<std::string> {
+#else
 class DatePickerColumnPattern : public LinearLayoutPattern {
+#endif
     DECLARE_ACE_TYPE(DatePickerColumnPattern, LinearLayoutPattern);
 
 public:
+#ifdef ARKUI_WEARABLE
+    DatePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils("") {};
+#else
     DatePickerColumnPattern() : LinearLayoutPattern(true) {};
+#endif
 
     ~DatePickerColumnPattern() override = default;
 
@@ -276,6 +290,12 @@ public:
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController();
 
+#ifndef ARKUI_WEARABLE
+    void SetSelectedMarkListener(std::function<void(std::string& focusId)>& listener);
+    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const std::string &strColumnId);
+#endif
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -313,6 +333,17 @@ private:
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
+    void SetSelectedMarkFocus();
+#ifdef ARKUI_WEARABLE
+    void SetSelectedMarkPaint(bool paint) override;
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
+#endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);
     void ScrollOption(double delta, bool isJump = false);
@@ -403,6 +434,7 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);

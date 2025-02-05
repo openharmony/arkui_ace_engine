@@ -199,6 +199,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
     JSClass<JSTextPicker>::StaticMethod("canLoop", &JSTextPicker::SetCanLoop);
+    JSClass<JSTextPicker>::StaticMethod("digitalCrownSensitivity", &JSTextPicker::SetDigitalCrownSensitivity);
     JSClass<JSTextPicker>::StaticMethod("disappearTextStyle", &JSTextPicker::SetDisappearTextStyle);
     JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
@@ -1079,6 +1080,15 @@ void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
         value = info[0]->ToBoolean();
     }
     TextPickerModel::GetInstance()->SetCanLoop(value);
+}
+
+void JSTextPicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+    TextPickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
 }
 
 void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
