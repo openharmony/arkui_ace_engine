@@ -40,19 +40,6 @@ public:
         eventInfo = info;
     }
 
-    const std::list<FingerInfo>& GetFingerList() const
-    {
-        return fingerList_;
-    }
-
-    void SetFingerList(const std::list<FingerInfo>& fingerList)
-    {
-        fingerList_ = fingerList;
-    }
-
-protected:
-    std::list<FingerInfo> fingerList_;
-
 private:
     std::optional<AceGestureInfo> eventInfo;
 };
