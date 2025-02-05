@@ -20,7 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.h"
 
 namespace OHOS::Ace::NG {
 class SecurityUIExtensionProxy;

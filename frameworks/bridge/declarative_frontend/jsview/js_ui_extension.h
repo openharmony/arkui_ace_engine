@@ -18,8 +18,8 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 
 namespace OHOS::Ace::Framework {
 class JSUIExtension : public JSViewAbstract, public JSInteractableView {
