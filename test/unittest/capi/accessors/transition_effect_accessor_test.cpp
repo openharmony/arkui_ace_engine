@@ -31,6 +31,10 @@ const std::string g_message = "message";
 
 } // namespace
 
+namespace GeneratedModifier {
+    const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
+}
+
 class TransitionEffectAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITransitionEffectAccessor,
     &GENERATED_ArkUIAccessors::getTransitionEffectAccessor, TransitionEffectPeer> {
 public:
@@ -75,7 +79,7 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect().centerZ.ToString(), "3.00vp");
     ASSERT_EQ(effect->GetEffect().perspective, 6);
     ASSERT_EQ(effect->GetEffect().angle, 45);
-    delete peer;
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
     ptr = accessor_->rotate(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -103,7 +107,7 @@ HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect().x.ToString(), "2.00vp");
     ASSERT_EQ(effect->GetEffect().y.ToString(), "3.00vp");
     ASSERT_EQ(effect->GetEffect().z.ToString(), "4.00vp");
-    delete peer;
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
     ptr = accessor_->translate(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -135,7 +139,7 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect().zScale, 4);
     ASSERT_EQ(effect->GetEffect().centerX.ToString(), "3.00vp");
     ASSERT_EQ(effect->GetEffect().centerY.ToString(), "3.00vp");
-    delete peer;
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
     ptr = accessor_->scale(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -160,7 +164,7 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
     auto effect = AceType::DynamicCast<ChainedOpacityEffect>(peer->handler);
     ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect(), testValue);
-    delete peer;
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
     ptr = accessor_->opacity(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -184,7 +188,7 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
     auto effect = AceType::DynamicCast<ChainedMoveEffect>(peer->handler);
     ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect(), NG::TransitionEdge::END);
-    delete peer;
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 }
 
 /**
