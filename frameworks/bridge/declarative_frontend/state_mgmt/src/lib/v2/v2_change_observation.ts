@@ -803,7 +803,7 @@ class ObserveV2 {
       decoratorInfo += `(${decorator.aliasName})`;
     }
     if ('deco2' in decorator) {
-      decoratorInfo = decorator.deco2;
+      decoratorInfo += decorator.deco2;
     }
     return decoratorInfo;
   }
