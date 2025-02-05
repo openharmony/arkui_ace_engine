@@ -817,7 +817,7 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     if (!onlySymbolColorAnimation_) {
         UpdateSymbolColorMeasureFlag(flag);
         flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-     }
+    }
     return flag;
 }
 
