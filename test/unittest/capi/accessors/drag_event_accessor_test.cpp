@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include <tuple>
 
 #include "accessor_test_base.h"
+#include "accessor_test_fixtures.h"
 #include "node_api.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -29,6 +30,7 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace AccessorTestFixtures;
 
 namespace GeneratedModifier {
     const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
@@ -81,6 +83,66 @@ public:
 };
 
 /**
+ * @tc.name: GetWindowXTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetWindowXTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetX(Convert<int32_t>(value));
+        auto windowX = accessor_->getWindowX(peer_);
+        EXPECT_EQ(Convert<int32_t>(windowX), expected) <<
+            "Input value is: " << input << ", method: GetWindowXTest";
+    }
+}
+
+/**
+ * @tc.name: GetWindowYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetY(Convert<int32_t>(value));
+        auto windowY = accessor_->getWindowY(peer_);
+        EXPECT_EQ(Convert<int32_t>(windowY), expected) <<
+            "Input value is: " << input << ", method: GetWindowYTest";
+    }
+}
+
+/**
+ * @tc.name: GetXTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetXTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetX(Convert<int32_t>(value));
+        auto x = accessor_->getX(peer_);
+        EXPECT_EQ(Convert<int32_t>(x), expected) <<
+            "Input value is: " << input << ", method: GetXTest";
+    }
+}
+
+/**
+ * @tc.name: GetYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetYTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
+        dragEvent_->SetY(Convert<int32_t>(value));
+        auto y = accessor_->getY(peer_);
+        EXPECT_EQ(Convert<int32_t>(y), expected) <<
+            "Input value is: " << input << ", method: GetYTest";
+    }
+}
+
+/**
  * @tc.name: SetResultTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -95,11 +157,11 @@ HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDataTest
+ * @tc.name: SetDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, setDataTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
@@ -108,14 +170,16 @@ HWTEST_F(DragEventAccessorTest, setDataTest, TestSize.Level1)
     ASSERT_NE(dragEvent_->GetData(), nullptr);
     EXPECT_EQ(dragEvent_->GetData()->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: setData";
+    auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(arkUnifiedData.ptr);
+    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
 }
 
 /**
- * @tc.name: setDataTest
+ * @tc.name: GetDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
@@ -127,5 +191,37 @@ HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
     ASSERT_NE(dataPeer->unifiedData, nullptr);
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
+    auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(arkUnifiedData.ptr);
+    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
+    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(dataPeer);
+}
+
+/**
+ * @tc.name: GetUseCustomDropAnimationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetUseCustomDropAnimationTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureBooleanValues) {
+        dragEvent_->UseCustomAnimation(expected);
+        auto useCustomDropAnimation = accessor_->getUseCustomDropAnimation(peer_);
+        EXPECT_EQ(Convert<bool>(useCustomDropAnimation), expected) <<
+            "Input value is: " << input << ", method: GetYTest";
+    }
+}
+
+/**
+ * @tc.name: SetUseCustomDropAnimationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureBooleanValues) {
+        accessor_->setUseCustomDropAnimation(peer_, value);
+        EXPECT_EQ(dragEvent_->IsUseCustomAnimation(), expected) <<
+            "Input value is: " << input << ", method: GetYTest";
+    }
 }
 } // namespace OHOS::Ace::NG

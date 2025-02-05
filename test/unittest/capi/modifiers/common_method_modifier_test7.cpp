@@ -17,11 +17,18 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "generated/type_helpers.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
+}
 
 namespace OHOS::Ace::NG {
 namespace Converter {
@@ -68,6 +75,13 @@ namespace Converter {
                 break;
         }
         return dst;
+    }
+
+    template<>
+    RefPtr<OHOS::Ace::DragEvent> Convert(const Ark_DragEvent& dragEvent)
+    {
+        auto dragEventPeer = reinterpret_cast<DragEventPeer*>(dragEvent.ptr);
+        return (dragEventPeer && dragEventPeer->dragInfo) ? dragEventPeer->dragInfo : nullptr;
     }
 }
 
@@ -152,7 +166,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnPreDragTest, TestSize.Level1)
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEnterTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDragEnterTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -161,53 +175,35 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEnterTest, TestSize.Level1
 
     struct CheckEvent {
         int32_t nodeId;
-        DragBehavior dragBehavior;
-        bool useCustomDropAnimation;
+        RefPtr<OHOS::Ace::DragEvent> dragEvent;
         std::optional<std::string> extraParams;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
+    const auto extraParamsString = "The test string";
 
-    auto onDragEnterFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
+    auto onDragFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
         checkEvent = {
             .nodeId = resourceId,
-#ifdef WRONG_TYPE
-            .dragBehavior = Converter::Convert<DragBehavior>(event.dragBehavior),
-            .useCustomDropAnimation = Converter::Convert<bool>(event.useCustomDropAnimation),
-#endif
+            .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
+        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
     };
 
-    Callback_DragEvent_String_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onDragEnterFunc,
-    };
+    auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
 
-    auto test = [this, &callBackValue, eventHub, frameNode](DragBehavior dragBehavior, bool useCustomDropAnimation,
-                                                            const std::string& extraParams) {
-        checkEvent = std::nullopt;
-        modifier_->setOnDragEnter(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
+    checkEvent = std::nullopt;
+    modifier_->setOnDragEnter(node_, &callBackValue);
+    EXPECT_FALSE(checkEvent.has_value());
 
-        RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        dragEventPtr->SetDragBehavior(dragBehavior);
-        dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
-        eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, dragEventPtr, extraParams);
+    RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, dragEventPtr, extraParamsString);
 
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->dragBehavior, dragBehavior);
-        EXPECT_EQ(checkEvent->useCustomDropAnimation, useCustomDropAnimation);
-        EXPECT_EQ(checkEvent->extraParams, extraParams);
-    };
-    test(DragBehavior::COPY, true, "The test string 1");
-    test(DragBehavior::MOVE, true, "The test string 2");
-    test(DragBehavior::COPY, false, "The test string 3");
-    test(DragBehavior::MOVE, false, "The test string 4");
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
 /*
@@ -215,7 +211,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEnterTest, TestSize.Level1
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragMoveTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDragMoveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -224,53 +220,35 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragMoveTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        DragBehavior dragBehavior;
-        bool useCustomDropAnimation;
+        RefPtr<OHOS::Ace::DragEvent> dragEvent;
         std::optional<std::string> extraParams;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
+    const auto extraParamsString = "The test string";
 
-    auto onDragMoveFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
+    auto onDragFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
         checkEvent = {
             .nodeId = resourceId,
-#ifdef WRONG_TYPE
-            .dragBehavior = Converter::Convert<DragBehavior>(event.dragBehavior),
-            .useCustomDropAnimation = Converter::Convert<bool>(event.useCustomDropAnimation),
-#endif
+            .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
+        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
     };
 
-    Callback_DragEvent_String_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onDragMoveFunc,
-    };
+    auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
 
-    auto test = [this, &callBackValue, eventHub, frameNode](DragBehavior dragBehavior, bool useCustomDropAnimation,
-                                                            const std::string& extraParams) {
-        checkEvent = std::nullopt;
-        modifier_->setOnDragMove(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
+    checkEvent = std::nullopt;
+    modifier_->setOnDragMove(node_, &callBackValue);
+    EXPECT_FALSE(checkEvent.has_value());
 
-        RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        dragEventPtr->SetDragBehavior(dragBehavior);
-        dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
-        eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_MOVE, dragEventPtr, extraParams);
+    RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_MOVE, dragEventPtr, extraParamsString);
 
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->dragBehavior, dragBehavior);
-        EXPECT_EQ(checkEvent->useCustomDropAnimation, useCustomDropAnimation);
-        EXPECT_EQ(checkEvent->extraParams, extraParams);
-    };
-    test(DragBehavior::COPY, true, "The test string 1");
-    test(DragBehavior::MOVE, true, "The test string 2");
-    test(DragBehavior::COPY, false, "The test string 3");
-    test(DragBehavior::MOVE, false, "The test string 4");
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
 /*
@@ -278,7 +256,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragMoveTest, TestSize.Level1)
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragLeaveTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDragLeaveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -287,53 +265,35 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragLeaveTest, TestSize.Level1
 
     struct CheckEvent {
         int32_t nodeId;
-        DragBehavior dragBehavior;
-        bool useCustomDropAnimation;
+        RefPtr<OHOS::Ace::DragEvent> dragEvent;
         std::optional<std::string> extraParams;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
+    const auto extraParamsString = "The test string";
 
-    auto onDragLeaveFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
+    auto onDragFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
         checkEvent = {
             .nodeId = resourceId,
-#ifdef WRONG_TYPE
-            .dragBehavior = Converter::Convert<DragBehavior>(event.dragBehavior),
-            .useCustomDropAnimation = Converter::Convert<bool>(event.useCustomDropAnimation),
-#endif
+            .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
+        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
     };
 
-    Callback_DragEvent_String_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onDragLeaveFunc,
-    };
+    auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
 
-    auto test = [this, &callBackValue, eventHub, frameNode](DragBehavior dragBehavior, bool useCustomDropAnimation,
-                                                            const std::string& extraParams) {
-        checkEvent = std::nullopt;
-        modifier_->setOnDragLeave(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
+    checkEvent = std::nullopt;
+    modifier_->setOnDragLeave(node_, &callBackValue);
+    EXPECT_FALSE(checkEvent.has_value());
 
-        RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        dragEventPtr->SetDragBehavior(dragBehavior);
-        dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
-        eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, dragEventPtr, extraParams);
+    RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, dragEventPtr, extraParamsString);
 
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->dragBehavior, dragBehavior);
-        EXPECT_EQ(checkEvent->useCustomDropAnimation, useCustomDropAnimation);
-        EXPECT_EQ(checkEvent->extraParams, extraParams);
-    };
-    test(DragBehavior::COPY, true, "The test string 1");
-    test(DragBehavior::MOVE, true, "The test string 2");
-    test(DragBehavior::COPY, false, "The test string 3");
-    test(DragBehavior::MOVE, false, "The test string 4");
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
 /*
@@ -341,7 +301,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragLeaveTest, TestSize.Level1
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDropTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDropTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -350,53 +310,35 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDropTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        DragBehavior dragBehavior;
-        bool useCustomDropAnimation;
+        RefPtr<OHOS::Ace::DragEvent> dragEvent;
         std::optional<std::string> extraParams;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
+    const auto extraParamsString = "The test string";
 
-    auto onDropFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
+    auto onDragFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
         checkEvent = {
             .nodeId = resourceId,
-#ifdef WRONG_TYPE
-            .dragBehavior = Converter::Convert<DragBehavior>(event.dragBehavior),
-            .useCustomDropAnimation = Converter::Convert<bool>(event.useCustomDropAnimation),
-#endif
+            .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
+        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
     };
 
-    Callback_DragEvent_String_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onDropFunc,
-    };
+    auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
 
-    auto test = [this, &callBackValue, eventHub, frameNode](DragBehavior dragBehavior, bool useCustomDropAnimation,
-                                                            const std::string& extraParams) {
-        checkEvent = std::nullopt;
-        modifier_->setOnDrop(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
+    checkEvent = std::nullopt;
+    modifier_->setOnDrop(node_, &callBackValue);
+    EXPECT_FALSE(checkEvent.has_value());
 
-        RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        dragEventPtr->SetDragBehavior(dragBehavior);
-        dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
-        eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, dragEventPtr, extraParams);
+    RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, dragEventPtr, extraParamsString);
 
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->dragBehavior, dragBehavior);
-        EXPECT_EQ(checkEvent->useCustomDropAnimation, useCustomDropAnimation);
-        EXPECT_EQ(checkEvent->extraParams, extraParams);
-    };
-    test(DragBehavior::COPY, true, "The test string 1");
-    test(DragBehavior::MOVE, true, "The test string 2");
-    test(DragBehavior::COPY, false, "The test string 3");
-    test(DragBehavior::MOVE, false, "The test string 4");
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
 /*
@@ -404,7 +346,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDropTest, TestSize.Level1)
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEndTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDragEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -413,50 +355,99 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEndTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        DragBehavior dragBehavior;
-        bool useCustomDropAnimation;
+        RefPtr<OHOS::Ace::DragEvent> dragEvent;
         std::optional<std::string> extraParams;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onDragEndFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
+    auto onDragFunc = [](const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams) {
         checkEvent = {
             .nodeId = resourceId,
-#ifdef WRONG_TYPE
-            .dragBehavior = Converter::Convert<DragBehavior>(event.dragBehavior),
-            .useCustomDropAnimation = Converter::Convert<bool>(event.useCustomDropAnimation),
-#endif
+            .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
+        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
     };
 
-    Callback_DragEvent_String_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onDragEndFunc,
+    auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
+
+    checkEvent = std::nullopt;
+    modifier_->setOnDragEnd(node_, &callBackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+
+    RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEventPtr);
+
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->extraParams, "");
+}
+
+/*
+ * @tc.name: SetOnDragStart
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnDragStart, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto callsCount = 0;
+    static const int32_t expectedResourceId = 123;
+    static const std::string expectedInfo("key:value");
+    static const CustomNodeBuilderTestHelper<CommonMethodModifierTest7> builderHelper(this, frameNode);
+
+    static const CustomNodeBuilder builder = builderHelper.GetBuilder();
+
+    struct CheckEvent {
+        int32_t nodeId;
+        RefPtr<OHOS::Ace::DragEvent> dragEvent;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
+        const Opt_String extraP, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
+    {
+        EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
+        // the different type in return value depending on input data
+        Ark_Union_CustomBuilder_DragItemInfo arkResult;
+        checkEvent->dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event);
+        checkEvent->nodeId = resourceId;
+        auto isNeedBuilder = checkEvent->dragEvent->GetDragBehavior() == DragBehavior::MOVE;
+        if (isNeedBuilder) {
+            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
+        } else {
+            TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
+        }
+        CallbackHelper(continuation).Invoke(arkResult);
+        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
     };
 
-    auto test = [this, &callBackValue, eventHub, frameNode](DragBehavior dragBehavior, bool useCustomDropAnimation) {
-        checkEvent = std::nullopt;
-        modifier_->setOnDragEnd(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
+    auto arkCallback = Converter::ArkValue<Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(nullptr,
+        callSyncFunc, expectedResourceId);
+    modifier_->setOnDragStart(node_, &arkCallback);
 
-        RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        dragEventPtr->SetDragBehavior(dragBehavior);
-        dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
-        eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEventPtr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto fireOnDragStart = eventHub->GetOnDragStart();
+    ASSERT_NE(fireOnDragStart, nullptr);
 
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->dragBehavior, dragBehavior);
-        EXPECT_EQ(checkEvent->useCustomDropAnimation, useCustomDropAnimation);
-    };
-    test(DragBehavior::COPY, true);
-    test(DragBehavior::MOVE, true);
-    test(DragBehavior::COPY, false);
-    test(DragBehavior::MOVE, false);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    dragEvent->SetDragBehavior(DragBehavior::MOVE);
+    DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
+    const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(ddInfo.extraInfo, std::string());
+
+    dragEvent->SetDragBehavior(DragBehavior::COPY);
+    ddInfo = fireOnDragStart(dragEvent, expectedInfo);
+    EXPECT_EQ(ddInfo.customNode, nullptr);
+    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEvent.GetRawPtr());
+    EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
 }
 }

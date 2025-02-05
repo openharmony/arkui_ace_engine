@@ -69,19 +69,25 @@ Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
 }
 Ark_Int32 GetWindowXImpl(DragEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer->dragInfo, 0);
+    LOGE("Arkoala method DragEventAccessor.GetWindowXImpl return int32_t value");
+    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetX()));
 }
 Ark_Int32 GetWindowYImpl(DragEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer->dragInfo, 0);
+    LOGE("Arkoala method DragEventAccessor.GetWindowYImpl return int32_t value");
+    return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetY()));
 }
 Ark_Int32 GetXImpl(DragEventPeer* peer)
 {
-    return 0;
+    return GetWindowXImpl(peer);
 }
 Ark_Int32 GetYImpl(DragEventPeer* peer)
 {
-    return 0;
+    return GetWindowYImpl(peer);
 }
 void SetDataImpl(DragEventPeer* peer,
                  const Ark_UnifiedData* unifiedData)
@@ -153,11 +159,17 @@ void SetDragBehaviorImpl(DragEventPeer* peer,
 }
 Ark_Boolean GetUseCustomDropAnimationImpl(DragEventPeer* peer)
 {
-    return 0;
+    auto invalid = ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->dragInfo, invalid);
+    return ArkValue<Ark_Boolean>(peer->dragInfo->IsUseCustomAnimation());
 }
 void SetUseCustomDropAnimationImpl(DragEventPeer* peer,
                                    Ark_Boolean useCustomDropAnimation)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->dragInfo);
+    peer->dragInfo->UseCustomAnimation(Convert<bool>(useCustomDropAnimation));
 }
 } // DragEventAccessor
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
