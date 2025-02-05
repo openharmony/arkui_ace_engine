@@ -2628,18 +2628,11 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
       getUINativeModule().common.resetDragPreviewOptions(node);
     }
     else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll,
-        this.value.enableHapticFeedback);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value);
     }
   }
   checkObjectDiff() {
-    return !(this.value.mode === this.stageValue.mode
-      && this.value.numberBadge === this.stageValue.numberBadge
-      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting
-      && this.value.enableEdgeAutoScroll === this.stageValue.enableEdgeAutoScroll
-      && this.value.enableHapticFeedback === this.stageValue.enableHapticFeedback);
+    return !this.value.isEqual(this.stageValue);
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
@@ -2651,12 +2644,12 @@ class DragPreviewModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetDragPreview(node);
     } else {
-      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+      getUINativeModule().common.setDragPreview(node, this.value);
     }
   }
 
   checkObjectDiff() {
-    return this.value.inspetorId !== this.stageValue.inspetorId;
+    return !this.value.isEqual(this.stageValue);
   }
 }
 DragPreviewModifier.identity = Symbol('dragPreview');
@@ -3469,6 +3462,7 @@ class ArkComponent {
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
       arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
       arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
+      arkDragPreviewOptions.isLiftingDisabled = options.isLiftingDisabled;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
@@ -4314,14 +4308,25 @@ class ArkComponent {
     }
     return this;
   }
-  dragPreview(value) {
-    if (typeof value === 'string') {
-      let arkDragPreview = new ArkDragPreview();
-      arkDragPreview.inspetorId = value;
-      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
-      return this;
+  dragPreview(preview, config) {
+    let arkDragPreview = new ArkDragPreview();
+    if (typeof config === 'object') {
+      arkDragPreview.onlyForLifting = config.onlyForLifting;
     }
-    throw new Error('Method not implemented.');
+    if (typeof preview === 'string') {
+      arkDragPreview.inspetorId = preview;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'object') {
+      arkDragPreview.pixelMap = preview.pixelMap;
+      arkDragPreview.extraInfo = preview.extraInfo;
+      if (preview.builder) {
+        throw new Error('Builder is not supported.');
+      }
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'function') {
+      throw new Error('Builder is not supported.');
+    }
+    return this;
   }
   overlay(value, options) {
     if (typeof value === 'undefined') {
@@ -17830,6 +17835,7 @@ class ArkDragPreviewOptions {
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
     this.enableHapticFeedback = undefined;
+    this.isLiftingDisabled = undefined;
   }
 
   isEqual(another) {
@@ -17839,7 +17845,8 @@ class ArkDragPreviewOptions {
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting &&
       this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&
-      this.enableHapticFeedback === another.enableHapticFeedback
+      this.enableHapticFeedback === another.enableHapticFeedback &&
+      this.isLiftingDisabled === another.isLiftingDisabled
     );
   }
 }
@@ -17847,10 +17854,18 @@ class ArkDragPreviewOptions {
 class ArkDragPreview {
   constructor() {
     this.inspectorId = undefined;
+    this.onlyForLifting = false;
+    this.pixelMap = undefined;
+    this.extraInfo = undefined;
   }
 
   isEqual(another) {
-    return this.inspectorId === another.inspectorId;
+    return (
+      this.inspectorId === another.inspectorId &&
+      this.onlyForLifting === another.onlyForLifting &&
+      this.pixelMap === another.pixelMap &&
+      this.extraInfo === another.extraInfo
+    );
   }
 }
 

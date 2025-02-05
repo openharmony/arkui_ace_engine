@@ -2802,18 +2802,12 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
     if (reset) {
       getUINativeModule().common.resetDragPreviewOptions(node);
     } else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll, this.value.enableHapticFeedback);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.mode === this.stageValue.mode
-      && this.value.numberBadge === this.stageValue.numberBadge
-      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting
-      && this.value.enableEdgeAutoScroll === this.value.enableEdgeAutoScroll
-      && this.value.enableHapticFeedback === this.stageValue.enableHapticFeedback);
+    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -2826,12 +2820,12 @@ class DragPreviewModifier extends ModifierWithKey<ArkDragPreview> {
     if (reset) {
       getUINativeModule().common.resetDragPreview(node);
     } else {
-      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+      getUINativeModule().common.setDragPreview(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return this.value.inspetorId !== this.stageValue.inspetorId;
+    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -3608,6 +3602,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
       arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
       arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
+      arkDragPreviewOptions.isLiftingDisabled = options.isLiftingDisabled;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
@@ -4535,14 +4530,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  dragPreview(value: CustomBuilder | DragItemInfo | string): this {
-    if (typeof value === 'string') {
-      let arkDragPreview = new ArkDragPreview();
-      arkDragPreview.inspetorId = value;
-      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
-      return this;
+  dragPreview(preview: CustomBuilder | DragItemInfo | string, config: PreviewConfiguration): this {
+    let arkDragPreview = new ArkDragPreview();
+    if (typeof config === 'object') {
+      arkDragPreview.onlyForLifting = config.onlyForLifting;
     }
-    throw new Error('Method not implemented.');
+    if (typeof preview === 'string') {
+      arkDragPreview.inspetorId = preview;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'object') {
+      arkDragPreview.pixelMap = preview.pixelMap;
+      arkDragPreview.extraInfo = preview.extraInfo;
+      if (preview.builder) {
+        throw new Error('Builder is not supported.');
+      }
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'function') {
+      throw new Error('Method not implemented.');
+    }
+    return this;
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {

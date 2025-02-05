@@ -1563,6 +1563,9 @@ struct ArkUIDragPreViewOptions {
 
 struct ArkUIDragPreview {
     ArkUI_CharPtr inspectorId;
+    ArkUI_Bool onlyForLifting;
+    void* pixelMap;
+    ArkUI_CharPtr extraInfo;
 };
 
 struct ArkUIDragInteractionOptions {
@@ -1570,6 +1573,7 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool defaultAnimationBeforeLifting;
     ArkUI_Bool enableEdgeAutoScroll;
     ArkUI_Bool enableHapticFeedback;
+    ArkUI_Bool isLiftingDisabled;
 };
 
 struct ArkUIDragPreViewAndInteractionOptions {
