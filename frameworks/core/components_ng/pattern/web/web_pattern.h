@@ -1252,6 +1252,7 @@ private:
     int64_t lastHeight_ = 0L;
     int64_t lastWidth_ = 0L;
     bool dragWindowFlag_ = false;
+    bool isSetMouseDragMonitorState = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
 

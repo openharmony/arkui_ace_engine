@@ -1990,6 +1990,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetMouseDragMonitorState(true);
+        isSetMouseDragMonitorState = true;
     }
 }
 
@@ -2166,6 +2167,14 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_END);
     } else {
         delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    }
+    if (isSetMouseDragMonitorState) {
+        auto eventHub = host->GetEventHub<WebEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetMouseDragMonitorState(false);
+        isSetMouseDragMonitorState = false;
     }
 }
 
