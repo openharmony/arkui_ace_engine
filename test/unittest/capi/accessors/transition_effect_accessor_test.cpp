@@ -66,7 +66,7 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedRotateEffect>(peer->handler);
-    CHECK_NULL_VOID(effect);
+    ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect().xDirection, 2);
     ASSERT_EQ(effect->GetEffect().yDirection, 3);
     ASSERT_EQ(effect->GetEffect().zDirection, 4);
@@ -75,6 +75,7 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect().centerZ.ToString(), "3.00vp");
     ASSERT_EQ(effect->GetEffect().perspective, 6);
     ASSERT_EQ(effect->GetEffect().angle, 45);
+    delete peer;
 
     ptr = accessor_->rotate(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -98,10 +99,11 @@ HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedTranslateEffect>(peer->handler);
-    CHECK_NULL_VOID(effect);
+    ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect().x.ToString(), "2.00vp");
     ASSERT_EQ(effect->GetEffect().y.ToString(), "3.00vp");
     ASSERT_EQ(effect->GetEffect().z.ToString(), "4.00vp");
+    delete peer;
 
     ptr = accessor_->translate(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -127,12 +129,13 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedScaleEffect>(peer->handler);
-    CHECK_NULL_VOID(effect);
+    ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect().xScale, 2);
     ASSERT_EQ(effect->GetEffect().yScale, 3);
     ASSERT_EQ(effect->GetEffect().zScale, 4);
     ASSERT_EQ(effect->GetEffect().centerX.ToString(), "3.00vp");
     ASSERT_EQ(effect->GetEffect().centerY.ToString(), "3.00vp");
+    delete peer;
 
     ptr = accessor_->scale(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -155,8 +158,9 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedOpacityEffect>(peer->handler);
-    CHECK_NULL_VOID(effect);
+    ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect(), testValue);
+    delete peer;
 
     ptr = accessor_->opacity(nullptr);
     peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
@@ -178,8 +182,9 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedMoveEffect>(peer->handler);
-    CHECK_NULL_VOID(effect);
+    ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect(), NG::TransitionEdge::END);
+    delete peer;
 }
 
 /**
@@ -248,10 +253,12 @@ HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
     auto ret_peer1 = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_NE(ret_peer1, nullptr);
     auto effect1 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler);
+    ASSERT_NE(effect1, nullptr);
     ASSERT_EQ(effect1->GetEffect(), opacity1);
 
     auto effect2 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler->GetNext());
+    ASSERT_NE(effect2, nullptr);
     ASSERT_EQ(effect2->GetEffect(), opacity2);
-}
+ }
 
 } // namespace OHOS::Ace::NG

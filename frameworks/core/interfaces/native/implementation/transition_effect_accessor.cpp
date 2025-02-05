@@ -154,6 +154,7 @@ Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(value, nullptr);
     AnimationOption option = Converter::Convert<AnimationOption>(*value);
     auto refOpt = std::make_shared<AnimationOption>(option);
     peer->handler->SetAnimationOption(refOpt);
