@@ -1480,6 +1480,7 @@ private:
     void SetMagnifierLocalOffset(Offset localOffset);
     void SetMagnifierOffsetWithAnimation(Offset offset);
     void UpdateSelectionAndHandleVisibility();
+    void SetIsEnableSubWindowMenu();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
