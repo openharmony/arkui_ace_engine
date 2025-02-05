@@ -298,6 +298,7 @@ public:
     void UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show);
     void UpdateActiveChildRange(bool show);
     void SyncItemsToCachedItemPosition();
+    bool IsVisible() const;
     void SetRecache(bool value)
     {
         reCache_ = value;
