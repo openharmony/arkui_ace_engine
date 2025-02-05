@@ -6656,7 +6656,7 @@ void OverlayManager::MarkDirtyOverlay()
             sheet->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
-    if (overlayNode->GetTag() == V2::DIALOG_ETS_TAG) {
+    if (EMBEDDED_DIALOG_NODE_TAG.find(overlayNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end()) {
         overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
