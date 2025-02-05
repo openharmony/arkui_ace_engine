@@ -602,8 +602,8 @@ void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(
     auto self = FFIData::GetData<NativeLayoutManager>(selfID);
     if (self != nullptr) {
         CPositionWithAffinity positionWithAffinity = self->GetGlyphPositionAtCoordinate(x, y);
-        retPtr.position_ = positionWithAffinity.position_;
-        retPtr.affinity_ = positionWithAffinity.affinity_;
+        retPtr->position_ = positionWithAffinity.position_;
+        retPtr->affinity_ = positionWithAffinity.affinity_;
     } else {
         LOGE("FfiText: invalid LayoutManagerId");
     }
