@@ -77,9 +77,13 @@ ohos_shared_library("movingphotoview") {
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
-    "media_library:media_library_manager",
     "napi:ace_napi",
   ]
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.multimedia_media_library)) {
+    external_deps += [ "media_library:media_library_manager" ]
+  }
 
   ldflags = [ "-Wl,--gc-sections" ]
 
