@@ -51,7 +51,7 @@ struct CPositionWithAffinity {
     int32_t affinity_;
 };
 
-class ACE_EXPORT NativeLayoutManager: public OHOS::FFI::FFIData{
+class ACE_EXPORT NativeLayoutManager: public OHOS::FFI::FFIData {
     DECL_TYPE(NativeLayoutManager, OHOS::FFI::FFIData)
 
 public:
@@ -71,7 +71,8 @@ public:
     OHOS::Ace::Framework::CPositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
     {
         auto value = layout_->GetGlyphPositionAtCoordinate(x, y);
-        OHOS::Ace::Framework::CPositionWithAffinity  cPositionWithAffinity = {static_cast<int32_t>(value.position_), static_cast<int32_t>(value.affinity_)};
+        OHOS::Ace::Framework::CPositionWithAffinity  cPositionWithAffinity = 
+            {static_cast<int32_t>(value.position_), static_cast<int32_t>(value.affinity_)};
         return cPositionWithAffinity;
     }
 
@@ -157,7 +158,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextControllerCloseSelectionMenu(int64_t selfI
 CJ_EXPORT void FfiOHOSAceFrameworkTextControllerGetLayoutManager(int64_t selfID, int64_t layoutID);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkLayoutManager();
 CJ_EXPORT int32_t FfiOHOSAceFrameworkLayoutManagerGetLineCount(int64_t selfID);
-CJ_EXPORT void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(int64_t selfID, int32_t x, int32_t y, OHOS::Ace::Framework::CPositionWithAffinity& retPtr);
+CJ_EXPORT void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(
+    int64_t selfID, int32_t x, int32_t y, OHOS::Ace::Framework::CPositionWithAffinity& retPtr);
 #ifdef __cplusplus
 }
 #endif

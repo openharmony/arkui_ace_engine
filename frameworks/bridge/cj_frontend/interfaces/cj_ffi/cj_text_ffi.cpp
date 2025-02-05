@@ -78,7 +78,7 @@ void NGNativeTextController::CloseSelectionMenu()
 void NGNativeTextController::GetLayoutManager(int64_t layoutId)
 {
     auto layout = FFIData::GetData<NativeLayoutManager>(layoutId);
-    if (layout == nullptr){
+    if (layout == nullptr) {
         LOGE("FFIText invalid layoutId");
         return;
     }
@@ -596,14 +596,14 @@ int32_t FfiOHOSAceFrameworkLayoutManagerGetLineCount(int64_t selfID)
     }
 }
 
-void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(int64_t selfID, int32_t x, int32_t y, CPositionWithAffinity& retPtr)
+void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(
+    int64_t selfID, int32_t x, int32_t y, CPositionWithAffinity& retPtr)
 {
     auto self = FFIData::GetData<NativeLayoutManager>(selfID);
     if (self != nullptr) {
-       CPositionWithAffinity positionWithAffinity = self->GetGlyphPositionAtCoordinate(x, y);
-       retPtr.position_ = positionWithAffinity.position_;
-       retPtr.affinity_ = positionWithAffinity.affinity_;
-
+        CPositionWithAffinity positionWithAffinity = self->GetGlyphPositionAtCoordinate(x, y);
+        retPtr.position_ = positionWithAffinity.position_;
+        retPtr.affinity_ = positionWithAffinity.affinity_;
     } else {
         LOGE("FfiText: invalid LayoutManagerId");
     }
