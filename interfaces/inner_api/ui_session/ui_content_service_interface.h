@@ -39,6 +39,14 @@ public:
         UNREGISTER_ROUTER_CHANGE_EVENT,
         UNREGISTER_COMPONENT_EVENT,
         UNREGISTER_WEB_UNFOCUS_EVENT,
+        RESET_ALL_TEXT,
+        RESET_TEXT_BY_ID,
+        GET_WEB_VIEW_LANGUAGE,
+        GET_WEB_TRANSLATE_TEXT,
+        CONTINUE_GET_WEB_TEXT,
+        SEND_TRANSLATE_RESULT,
+        SEND_TRANSLATE_RESULT_STR,
+        END_WEB_TRANSLATE,
     };
 
     /**
@@ -114,7 +122,60 @@ public:
      */
     virtual int32_t UnregisterWebUnfocusEventCallback() = 0;
 
+    /**
+     * @description:get web need translate text
+     * @return: result number
+     */
+    virtual int32_t GetWebViewTranslateText(
+        const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) = 0;
+
+    /**
+     * @description:send translate result by cloud service
+     * @return: result number
+     */
+    virtual int32_t SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) = 0;
+
+    /**
+     * @description:send translate result by cloud service
+     * @return: result number
+     */
+    virtual int32_t SendTranslateResult(int32_t nodeId, std::string result) = 0;
+
+    /**
+     * @description:start continuity translate
+     * @return: result number
+     */
+    virtual int32_t StartWebViewTranslate(
+        const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) = 0;
+
+    /**
+     * @description:end continuity translate
+     * @return: result number
+     */
+    virtual int32_t EndWebViewTranslate() = 0;
+
+    /**
+     * @description:reset all components with translate
+     * @return: result number
+     */
+    virtual int32_t ResetTranslateTextAll() = 0;
+
+    /**
+     * @description:reset one component with translate by id
+     * @return: result number
+     */
+    virtual int32_t ResetTranslateText(int32_t nodeId) = 0;
+
+    /**
+     * @description:get web component current language
+     * @return: result number
+     */
+    virtual int32_t GetWebViewCurrentLanguage(const EventCallback& eventCallback) = 0;
+
     /* Not Used Ipc Interface*/
+    /**
+     * AI to judge if connect
+     */
     virtual bool IsConnect() = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
@@ -131,6 +192,9 @@ public:
         REPORT_INSPECTOR_VALUE,
         REPORT_WEB_UNFOCUS_EVENT,
         SEND_BASE_INFO,
+        SEND_CURRENT_LANGUAGE,
+        SEND_TEXT,
+
     };
 
     /**
@@ -167,6 +231,16 @@ public:
      * @description: define send base info value to the proxy interface
      */
     virtual void SendBaseInfo(const std::string& data) = 0;
+
+    /**
+     * @description: define ui send text for cloud service interface
+     */
+    virtual void SendWebText(int32_t nodeId, std::string res) = 0;
+
+    /**
+     * @description: define ui send web component language for cloud service interface
+     */
+    virtual void SendCurrentLanguage(const std::string& data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

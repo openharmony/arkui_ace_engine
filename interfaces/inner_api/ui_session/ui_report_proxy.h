@@ -62,6 +62,8 @@ public:
      */
     void SendBaseInfo(const std::string& data) override;
     void OnComponentChange(const std::string& key, const std::string& value);
+    void SendCurrentLanguage(const std::string& data) override;
+    void SendWebText(int32_t nodeId, std::string res) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;
