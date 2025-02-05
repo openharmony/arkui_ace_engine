@@ -4938,6 +4938,23 @@ void TextPattern::UpdateFontColor(const Color& value)
     textLayoutProperty->OnPropertyChangeMeasure();
 }
 
+void TextPattern::UpdateSymbolColor(const std::vector<Color>& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    if (children.empty() && spans_.empty() && contentMod_ && !NeedShowAIDetect()) {
+        contentMod_->SymbolColorModifier(value);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->OnPropertyChangeMeasure();
+}
+
+
 void TextPattern::MarkDirtyNodeRender()
 {
     auto host = GetHost();

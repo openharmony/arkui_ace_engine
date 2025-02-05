@@ -127,6 +127,7 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
     SetDefaultAdaptMaxFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
+    SetDefaultSymbolColor(textStyle);
     SetDefaultTextShadow(textStyle);
     SetDefaultTextDecoration(textStyle);
     SetDefaultBaselineOffset(textStyle);
@@ -178,6 +179,22 @@ void TextContentModifier::SetDefaultTextColor(const TextStyle& textStyle)
 {
     animatableTextColor_ = MakeRefPtr<AnimatablePropertyColor>(LinearColor(textStyle.GetTextColor()));
     AttachProperty(animatableTextColor_);
+}
+
+void TextContentModifier::SetDefaultSymbolColor(const TextStyle &textStyle)
+{
+    animatableSymbolColor_ =
+        MakeRefPtr<AnimatablePropertyVectorLinearVector>(Convert2VectorLinearColor(textStyle.GetSymbolColorList()));
+    AttachProperty(animatableSymbolColor_);
+}
+
+LinearVector<LinearColor> TextContentModifier::Convert2VectorLinearColor(const std::vector<Color> &colorList)
+{
+    LinearVector<LinearColor> colors;
+    for (auto color : colorList) {
+        colors.emplace_back(LinearColor(color));
+    }
+    return colors;
 }
 
 void TextContentModifier::SetDefaultTextShadow(const TextStyle& textStyle)
@@ -583,6 +600,25 @@ void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
     }
 }
 
+void TextContentModifier::ModifySymbolColorInTextStyle(TextStyle& textStyle)
+{
+    if (symbolColors_.has_value() && animatableSymbolColor_) {
+        LOGI("tyty TextContentModifier::ModifySymbolColorInTextStyle");
+        lastSymbolColors_= animatableSymbolColor_->Get();
+        textStyle.SetSymbolColorList(Convert2VectorColor(animatableSymbolColor_->Get()));
+    }
+}
+
+std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<LinearColor> &colorList)
+{
+    std::vector<Color> colors;
+    for (auto color : colorList) {
+        LOGI("tyty ModifySymbolColorInTextStyle Convert2VectorColor %{public}d", color.GetValue());
+        colors.emplace_back(Color(color.GetValue()));
+    }
+    return colors;
+}
+
 void TextContentModifier::ModifyTextShadowsInTextStyle(TextStyle& textStyle)
 {
     std::vector<Shadow> shadows;
@@ -642,6 +678,7 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
     ModifyAdaptMaxFontSizeInTextStyle(textStyle);
     ModifyFontWeightInTextStyle(textStyle);
     ModifyTextColorInTextStyle(textStyle);
+    ModifySymbolColorInTextStyle(textStyle);
     ModifyTextShadowsInTextStyle(textStyle);
     ModifyDecorationInTextStyle(textStyle);
     ModifyBaselineOffsetInTextStyle(textStyle);
@@ -697,6 +734,15 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
             lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
+    }
+}
+
+void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (symbolColors_.has_value() && animatableSymbolColor_ &&
+        (symbolColors_ != animatableSymbolColor_->Get() || lastSymbolColors_ != animatableSymbolColor_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE_SELF;
+        lastSymbolColors_ = animatableSymbolColor_->Get();
     }
 }
 
@@ -764,11 +810,16 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     if (flag) {
         onlyTextColorAnimation_ = false;
+        onlySymbolColorAnimation_ = false;
     }
     if (!onlyTextColorAnimation_) {
         UpdateTextColorMeasureFlag(flag);
         flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
+    if (!onlySymbolColorAnimation_) {
+        UpdateSymbolColorMeasureFlag(flag);
+        flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+     }
     return flag;
 }
 
@@ -838,6 +889,24 @@ void TextContentModifier::TextColorModifier(const Color& value)
 {
     SetTextColor(value);
     onlyTextColorAnimation_ = true;
+}
+
+void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool isReset)
+{
+    onlySymbolColorAnimation_ = false;
+    if (!isReset) {
+        symbolColors_ = Convert2VectorLinearColor(value);
+    } else {
+        symbolColors_ = std::nullopt;
+    }
+    CHECK_NULL_VOID(animatableSymbolColor_);
+    animatableSymbolColor_->Set(Convert2VectorLinearColor(value));
+}
+
+void TextContentModifier::SymbolColorModifier(const std::vector<Color>& value)
+{
+    SetSymbolColor(value);
+    onlySymbolColorAnimation_ = true;
 }
 
 void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
