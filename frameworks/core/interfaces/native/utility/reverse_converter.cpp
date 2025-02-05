@@ -307,4 +307,9 @@ void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>&
     }
     dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
 }
+
+void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)
+{
+    dst.supportAvoidance = Converter::ArkValue<Opt_Boolean>(src.supportAvoidance);
+}
 } // namespace OHOS::Ace::NG::Converter

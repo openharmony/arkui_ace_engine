@@ -84,12 +84,7 @@ const std::vector<ArkNumberFloatTest> FLOAT_NUMBER_TEST_PLAN = {
 
 namespace Converter {
     template<>
-    PreviewText Convert(const Ark_PreviewText& src)
-    {
-        PreviewText previewText = {.value = Convert<std::string>(src.value),
-                                   .offset = Convert<int32_t>(src.offset)};
-        return previewText;
-    }
+    PreviewText Convert(const Ark_PreviewText& value);
 }
 
 class SearchModifierCallbackTest : public ModifierTestBase<GENERATED_ArkUISearchModifier,

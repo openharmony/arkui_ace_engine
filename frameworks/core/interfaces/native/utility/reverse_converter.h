@@ -169,6 +169,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
+    void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
+    void AssignArkValue(Ark_KeyEvent& dst, const OHOS::Ace::KeyEventInfo& src);
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
