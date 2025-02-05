@@ -1735,11 +1735,11 @@ HWTEST_F(SearchModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SearchModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
 {
-   std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "1.5", Converter::ArkValue<Ark_Number>(1.5), "1.500000" },
-    { "1.99", Converter::ArkValue<Ark_Number>(1.99), "1.990000" },
-};
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
+        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+        { "1.5", Converter::ArkValue<Ark_Number>(1.5), "1.500000" },
+        { "1.99", Converter::ArkValue<Ark_Number>(1.99), "1.990000" },
+    };
     Opt_Union_Number_Resource initValueMaxFontScale;
     // Initial setup
     initValueMaxFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(

@@ -2202,7 +2202,8 @@ void SearchModelNG::SetStopBackPress(FrameNode* frameNode, const std::optional<b
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);
     if (isStopBackPress) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress.value(), textFieldChild);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
+                                        StopBackPress, isStopBackPress.value(), textFieldChild);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, textFieldChild);
     }
