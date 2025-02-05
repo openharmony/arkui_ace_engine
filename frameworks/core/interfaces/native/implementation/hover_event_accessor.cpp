@@ -34,6 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 void SetStopPropagationImpl(HoverEventPeer* peer,
                             const Callback_Void* stopPropagation)
 {
+    LOGE("HoverEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
 }
 } // HoverEventAccessor
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()

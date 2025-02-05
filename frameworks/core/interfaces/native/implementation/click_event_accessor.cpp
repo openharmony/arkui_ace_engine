@@ -98,6 +98,7 @@ void SetYImpl(ClickEventPeer* peer,
 void SetPreventDefaultImpl(ClickEventPeer* peer,
                            const Callback_Void* preventDefault)
 {
+    LOGE("ClickEventAccessor::SetPreventDefaultImpl wen can only GET preventDefault callback");
 }
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
