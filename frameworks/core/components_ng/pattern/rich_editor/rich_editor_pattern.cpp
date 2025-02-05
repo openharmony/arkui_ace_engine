@@ -585,6 +585,7 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    SetIsEnableSubWindowMenu();
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -3154,6 +3155,7 @@ void RichEditorPattern::HandleFocusEvent()
         isOnlyRequestFocus_ = false;
         return;
     }
+    SetIsEnableSubWindowMenu();
     if (textSelector_.SelectNothing()) {
         StartTwinkling();
     }
@@ -7518,6 +7520,11 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
     CHECK_NULL_VOID(!IsPreviewTextInputting());
     textResponseType_ = responseType;
     selectOverlay_->ProcessOverlay({.animation = true});
+}
+
+void RichEditorPattern::SetIsEnableSubWindowMenu()
+{
+    selectOverlay_->SetIsHostNodeEnableSubWindowMenu(true);
 }
 
 void RichEditorPattern::CheckEditorTypeChange()
