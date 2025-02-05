@@ -19,6 +19,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "accessibility_session_adapter_isolated_component.cpp",
     "accessibility_session_adapter_ui_extension.cpp",
     "dynamic_component/dynamic_component_manager.cpp",
+    "dynamic_component/dynamic_model.cpp",
     "dynamic_component/dynamic_node.cpp",
     "dynamic_component/dynamic_pattern.cpp",
     "isolated_component/isolated_pattern.cpp",
