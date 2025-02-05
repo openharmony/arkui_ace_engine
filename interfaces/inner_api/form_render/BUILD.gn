@@ -78,7 +78,7 @@ ohos_shared_library("ace_form_render") {
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
 
-  defines = [];
+  defines = []
   if (ace_engine_watch_wait_time_update) {
     defines += [ "WATCH_REFRESH_WAIT_ENABLE" ]
   }
