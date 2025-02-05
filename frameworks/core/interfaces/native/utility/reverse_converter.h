@@ -138,6 +138,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
+    void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
@@ -241,6 +242,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src);
+    void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data);
     void AssignArkValue(Ark_ViewportFit& dst, const ViewportFit& src);
     void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src);
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);

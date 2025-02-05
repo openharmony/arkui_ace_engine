@@ -21,6 +21,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
