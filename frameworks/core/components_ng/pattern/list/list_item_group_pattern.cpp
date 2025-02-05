@@ -439,7 +439,7 @@ void ListItemGroupPattern::UpdateActiveChildRange(bool show)
     } else if (headerIndex_ >= 0 || footerIndex_ >= 0) {
         host->SetActiveChildRange(-1, itemStartIndex_ - 1);
     } else {
-        host->RemoveAllChildInRenderTree();
+        host->SetActiveChildRange(-1, -1);
     }
     if (headerIndex_ >= 0) {
         host->GetOrCreateChildByIndex(headerIndex_);
