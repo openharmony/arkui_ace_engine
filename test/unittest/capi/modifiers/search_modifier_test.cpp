@@ -84,6 +84,15 @@ const auto TEXT_FONT_STYLE_ATTR("fontStyle");
 const auto TEXT_INDENT_ATTR("textIndent");
 const auto TYPE_ATTR("type");
 const auto ENABLE_HAPTIC_FEEDBACK_ATTR("enableHapticFeedback");
+const auto MIN_FONT_SCALE_ATTR("minFontScale");
+const auto MAX_FONT_SCALE_ATTR("maxFontScale");
+const auto HALF_LEADING_ATTR("halfLeading");
+const auto STOP_BACK_PRESS_ATTR("stopBackPress");
+
+const auto MIN_FONT_SCALE_DEFAULT_VALUE = "0.000000";
+const auto MAX_FONT_SCALE_DEFAULT_VALUE = "2.000000";
+const auto HALF_LEADING_DEFAULT_VALUE = "false";
+const auto STOP_BACK_PRESS_DEFAULT_VALUE = "true";
 
 // custom colors
 const auto CUSTOM_COLOR_STRING("#FF123456");
@@ -150,6 +159,13 @@ const std::string CHECK_RESOURCE_STR("testString");
 
 // check styles
 const std::string BUTTON_STYLE_INPUT("CancelButtonStyle.INPUT");
+
+const uint32_t FLOAT_RES_0_ID = 1001;
+const uint32_t FLOAT_RES_1_ID = 1002;
+const double FLOAT_RES_0_VALUE = 0.705f;
+const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, Converter::ResourceType::FLOAT);
+const double FLOAT_RES_1_VALUE = 1.2f;
+const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, Converter::ResourceType::FLOAT);
 
 // test types
 typedef std::pair<Ark_Length, std::string> LengthTest;
@@ -417,6 +433,12 @@ const std::vector<EnterKeyTypeTest> ENTER_KEY_TYPE_TEST_PLAN = {
     { static_cast<Ark_EnterKeyType>(3), "EnterKeyType.Search" },
     { static_cast<Ark_EnterKeyType>(100), "EnterKeyType.Search" },
 };
+
+std::vector<std::tuple<std::string, Ark_Boolean, std::string>> testFixtureBooleanValidValues = {
+    { "true", Converter::ArkValue<Ark_Boolean>(true), "true" },
+    { "false", Converter::ArkValue<Ark_Boolean>(false), "false" },
+};
+
 } // namespace
 
 class SearchModifierTest : public ModifierTestBase<GENERATED_ArkUISearchModifier,
@@ -429,6 +451,8 @@ public:
         SetupTheme<SearchTheme>();
         SetupTheme<TextFieldTheme>();
         SetupTheme<IconTheme>();
+        AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_VALUE);
+        AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_VALUE);
     }
 };
 
@@ -1607,5 +1631,306 @@ HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, "test_2");
+}
+
+/*
+ * @tc.name: setMinFontScaleDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, MIN_FONT_SCALE_ATTR);
+    EXPECT_EQ(resultStr, MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
+}
+
+/*
+ * @tc.name: setMinFontScaleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
+{
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumValidValues = {
+        { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.100000" },
+        { "0.89", Converter::ArkValue<Ark_Number>(0.89), "0.890000" },
+        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+    };
+    Opt_Union_Number_Resource initValueMinFontScale;
+    // Initial setup
+    initValueMinFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(testFixtureMinFontScaleNumValidValues[0]));
+
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, MIN_FONT_SCALE_ATTR);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMinFontScaleNumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+    }
+
+    const auto scaleRes = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(FLOAT_RES_0);
+    modifier_->setMinFontScale(node_, &scaleRes);
+    auto checkVal2 = GetStringAttribute(node_, MIN_FONT_SCALE_ATTR);
+    EXPECT_EQ(checkVal2, "0.705000");
+}
+
+/*
+ * @tc.name: setMinFontScaleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
+{
+    Opt_Union_Number_Resource initValueMinFontScale;
+
+    // Initial setup
+    initValueMinFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, MIN_FONT_SCALE_ATTR);
+        EXPECT_EQ(resultStr, MIN_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_Resource>());
+}
+
+/*
+ * @tc.name: setMaxFontScaleDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, MAX_FONT_SCALE_ATTR);
+    EXPECT_EQ(resultStr, MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
+{
+   std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
+    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+    { "1.5", Converter::ArkValue<Ark_Number>(1.5), "1.500000" },
+    { "1.99", Converter::ArkValue<Ark_Number>(1.99), "1.990000" },
+};
+    Opt_Union_Number_Resource initValueMaxFontScale;
+    // Initial setup
+    initValueMaxFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(testFixtureMaxFontScaleNumValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, MAX_FONT_SCALE_ATTR);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMaxFontScaleNumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+    }
+
+    const auto scaleRes = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(FLOAT_RES_1);
+
+    modifier_->setMaxFontScale(node_, &scaleRes);
+    auto checkVal2 = GetStringAttribute(node_, MAX_FONT_SCALE_ATTR);
+    EXPECT_EQ(checkVal2, "1.200000");
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
+{
+    Opt_Union_Number_Resource initValueMaxFontScale;
+
+    // Initial setup
+    initValueMaxFontScale = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, MAX_FONT_SCALE_ATTR);
+        EXPECT_EQ(resultStr, MAX_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_Resource>());
+}
+
+/*
+ * @tc.name: setHalfLeadingTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setHalfLeadingTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, HALF_LEADING_ATTR);
+    EXPECT_EQ(resultStr, HALF_LEADING_DEFAULT_VALUE) << "Default value for attribute 'halfLeading'";
+}
+
+/*
+ * @tc.name: setHalfLeadingTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setHalfLeadingTestValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueHalfLeading;
+    // Initial setup
+    initValueHalfLeading = ArkValue<Opt_Boolean>(std::get<1>(testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueHalfLeading](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueHalfLeading = initValueHalfLeading;
+
+        inputValueHalfLeading = value;
+        modifier_->setHalfLeading(node_, &inputValueHalfLeading);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, HALF_LEADING_ATTR);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
+    };
+
+    for (auto& [input, value, expected] : testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setHalfLeadingTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setHalfLeadingTestInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueHalfLeading;
+
+    // Initial setup
+    initValueHalfLeading = ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false));
+
+    auto checkValue = [this, &initValueHalfLeading](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueHalfLeading = initValueHalfLeading;
+
+        modifier_->setHalfLeading(node_, &inputValueHalfLeading);
+        inputValueHalfLeading = value;
+        modifier_->setHalfLeading(node_, &inputValueHalfLeading);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, HALF_LEADING_ATTR);
+        EXPECT_EQ(resultStr, HALF_LEADING_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
+    };
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setStopBackPressTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setStopBackPressTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, STOP_BACK_PRESS_ATTR);
+    EXPECT_EQ(resultStr, STOP_BACK_PRESS_DEFAULT_VALUE) << "Default value for attribute 'stopBackPress'";
+}
+
+/*
+ * @tc.name: setStopBackPressTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setStopBackPressTestValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueHalfLeading;
+    // Initial setup
+    initValueHalfLeading = ArkValue<Opt_Boolean>(std::get<1>(testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueHalfLeading](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueHalfLeading = initValueHalfLeading;
+
+        inputValueHalfLeading = value;
+        modifier_->setStopBackPress(node_, &inputValueHalfLeading);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, STOP_BACK_PRESS_ATTR);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
+    };
+
+    for (auto& [input, value, expected] : testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setStopBackPressTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setStopBackPressTestInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueHalfLeading;
+
+    // Initial setup
+    initValueHalfLeading = ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true));
+
+    auto checkValue = [this, &initValueHalfLeading](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueHalfLeading = initValueHalfLeading;
+
+        modifier_->setStopBackPress(node_, &inputValueHalfLeading);
+        inputValueHalfLeading = value;
+        modifier_->setStopBackPress(node_, &inputValueHalfLeading);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, STOP_BACK_PRESS_ATTR);
+        EXPECT_EQ(resultStr, STOP_BACK_PRESS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
+    };
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 } // namespace OHOS::Ace::NG

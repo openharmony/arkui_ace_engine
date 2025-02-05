@@ -127,8 +127,8 @@ public:
     static void SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
-    static void SetMinFontScale(FrameNode* frameNode, const float value);
-    static void SetMaxFontScale(FrameNode* frameNode, const float value);
+    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetRightIconSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
@@ -142,7 +142,7 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<Ace::TextDecorationStyle>& valueOpt);
     static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
-    static void SetHalfLeading(FrameNode* frameNode, const bool& value);
+    static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetOnSubmit(FrameNode* frameNode,
@@ -173,7 +173,7 @@ public:
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
-    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);
