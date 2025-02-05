@@ -1020,8 +1020,7 @@ struct CustomDialogContentComponent {
   @Local titleHeight: number = 0;
   @Local buttonHeight: number = 0;
   @Local contentMaxHeight: Length = '100%';
-  @Param fontSizeScale: number = -1;
-  @Param onFontSizeScaleChange?: (val: number) => void = undefined;
+  @Consumer() fontSizeScale: number = -1;
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
@@ -1078,7 +1077,7 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.onFontSizeScaleChange?.(this.updateFontScale());
+    this.fontSizeScale = this.updateFontScale();
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     let height: number = 0;
@@ -1105,7 +1104,7 @@ struct CustomDialogContentComponent {
     let uiContext: UIContext = this.getUIContext();
     this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
     this.appMaxFontScale = uiContext.getMaxFontScale();
-    this.onFontSizeScaleChange?.(this.updateFontScale());
+    this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }
 
