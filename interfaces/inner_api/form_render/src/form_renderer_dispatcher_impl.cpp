@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Ace {
-#ifdef WATCH_REFRESH_WAIT_ENABLE
+#ifdef ARKUI_WEARABLE
 constexpr int32_t PROCESS_WAIT_TIME = 50;
 #else
 constexpr int32_t PROCESS_WAIT_TIME = 20;
