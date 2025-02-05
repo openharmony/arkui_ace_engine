@@ -409,6 +409,7 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage010, TestSize
     /**
      * @tc.steps: step1. create gestureEventHub, gestureEvent and pixelMap.
      */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
@@ -423,21 +424,21 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage010, TestSize
     /**
      * @tc.steps: step2. test default mouse scale.
      */
-    auto defaultScale = gestureEventHub->GetDefaultPixelMapScale(gestureEvent, false, pixelMap);
+    auto defaultScale = gestureEventHub->GetDefaultPixelMapScale(frameNode, gestureEvent, false, pixelMap);
     EXPECT_EQ(defaultScale, 1.0f);
 
     /**
      * @tc.steps: step3. test default touch scale.
      */
     gestureEvent.SetInputEventType(InputEventType::TOUCH_SCREEN);
-    defaultScale = gestureEventHub->GetDefaultPixelMapScale(gestureEvent, false, pixelMap);
+    defaultScale = gestureEventHub->GetDefaultPixelMapScale(frameNode, gestureEvent, false, pixelMap);
     EXPECT_EQ(defaultScale, 1.05f);
 
     /**
      * @tc.steps: step4. test menu scale.
      */
     gestureEventHub->menuPreviewScale_ = 2.0f;
-    defaultScale = gestureEventHub->GetDefaultPixelMapScale(gestureEvent, true, pixelMap);
+    defaultScale = gestureEventHub->GetDefaultPixelMapScale(frameNode, gestureEvent, true, pixelMap);
     EXPECT_EQ(defaultScale, 2.0f);
 }
 } // namespace OHOS::Ace::NG

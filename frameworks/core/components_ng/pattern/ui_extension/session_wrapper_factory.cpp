@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 
-#include "core/components_ng/pattern/ui_extension/security_session_wrapper_impl.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType sessionType,

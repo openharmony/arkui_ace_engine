@@ -71,7 +71,26 @@ void ResetTextPickerCanLoop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetCanLoop(frameNode, true);
+}
+
+void SetTextPickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetTextPickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
 }
 
 void GetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size)
@@ -666,6 +685,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .getTextPickerEnableHapticFeedback = GetTextPickerEnableHapticFeedback,
         .setTextPickerEnableHapticFeedback = SetTextPickerEnableHapticFeedback,
         .resetTextPickerEnableHapticFeedback = ResetTextPickerEnableHapticFeedback,
+        .setTextPickerDigitalCrownSensitivity = SetTextPickerDigitalCrownSensitivity,
+        .resetTextPickerDigitalCrownSensitivity = ResetTextPickerDigitalCrownSensitivity,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

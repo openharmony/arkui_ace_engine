@@ -636,7 +636,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign005, TestSize.Level1)
      */
     DragAction(frameNode_, Offset(), 100, 800);
     EXPECT_TRUE(TickPosition(-250.0f));
-    EXPECT_TRUE(TickPosition(-175.0f));
+    EXPECT_TRUE(TickPosition(0.0f));
 }
 
 /**

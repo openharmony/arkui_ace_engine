@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 

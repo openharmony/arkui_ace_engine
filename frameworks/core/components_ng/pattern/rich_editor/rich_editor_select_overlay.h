@@ -65,6 +65,10 @@ public:
     {
         return isHandleMoving_;
     }
+    bool GetIsHandleHidden()
+    {
+        return handleIsHidden_;
+    }
     bool IsSingleHandleMoving()
     {
         return isHandleMoving_ && IsSingleHandle();

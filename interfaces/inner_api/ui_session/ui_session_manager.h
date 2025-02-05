@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
 #define FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
+#include <atomic>
 #include <cstdint>
 #include <iremote_object.h>
 #include <map>
@@ -109,16 +110,16 @@ private:
     static std::shared_mutex reportObjectMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
     std::map<std::string, int32_t> processMap_;
-    int32_t clickEventRegisterProcesses_ = 0;
-    int32_t searchEventRegisterProcesses_ = 0;
-    int32_t routerChangeEventRegisterProcesses_ = 0;
-    int32_t componentChangeEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
     bool webFocusEventRegistered = false;
     InspectorFunction inspectorFunction_ = 0;
     NotifyAllWebFunction notifyWebFunction_ = 0;
     GetWebViewCurrentLanguageFunction getWebLanguageFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
-    int32_t webTaskNums = 0;
+    std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
     std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
 };

@@ -24,10 +24,19 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
+#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#ifdef ARKUI_WEARABLE
+#include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
+#ifdef ARKUI_WEARABLE
+class ACE_EXPORT TextPickerPaintMethod : public PickerPaintMethodCircleUtils, public NodePaintMethod {
+#else
 class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
+#endif
     DECLARE_ACE_TYPE(TextPickerPaintMethod, NodePaintMethod)
 public:
     TextPickerPaintMethod() = default;
@@ -52,7 +61,9 @@ public:
     {
         enabled_ = enabled;
     }
-
+#ifdef ARKUI_WEARABLE
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+#endif
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintDividerLines(RSCanvas& canvas, const RectF& contentRect, const DividerInfo &info,
         bool isDefaultLine = true);

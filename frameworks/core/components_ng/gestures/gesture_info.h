@@ -86,9 +86,10 @@ struct DragPreviewOption {
     bool enableEdgeAutoScroll = true;
     bool enableHapticFeedback = false;
     bool isMultiTiled = false;
+    bool isLiftingDisabled = false;
     union {
         int32_t badgeNumber;
-        bool isShowBadge;
+        bool isShowBadge = true;
     };
     std::optional<int32_t> GetCustomerBadgeNumber()
     {

@@ -1350,8 +1350,12 @@ void DragDropFuncWrapper::GetThumbnailPixelMap(
         gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
         gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
         pixelMapCallback(dragPreviewInfo.pixelMap, false);
-    } else if (dragPreviewInfo.customNode != nullptr) {
+    } else if (dragPreviewInfo.customNode || (dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc)) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
+        if (!dragPreviewInfo.customNode && dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc) {
+            dragPreviewInfo.customNode = dragPreviewInfo.buildFunc();
+        }
+        frameNode->SetDragPreview(dragPreviewInfo);
         if (isSync) {
             GetThumbnailPixelMapForCustomNodeSync(gestureHub, pixelMapCallback);
         } else {

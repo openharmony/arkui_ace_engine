@@ -32,7 +32,7 @@ constexpr float PERCENT_HALF = 0.5f;
 }
 void GaugeModifier::onDraw(DrawingContext& context)
 {
-    if (useContentModifier_->Get()) {
+    if (useContentModifier_ && useContentModifier_->Get()) {
         return;
     }
     RSCanvas& canvas = context.canvas;

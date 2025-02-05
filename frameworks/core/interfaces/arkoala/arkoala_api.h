@@ -1563,6 +1563,9 @@ struct ArkUIDragPreViewOptions {
 
 struct ArkUIDragPreview {
     ArkUI_CharPtr inspectorId;
+    ArkUI_Bool onlyForLifting;
+    void* pixelMap;
+    ArkUI_CharPtr extraInfo;
 };
 
 struct ArkUIDragInteractionOptions {
@@ -1570,6 +1573,7 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool defaultAnimationBeforeLifting;
     ArkUI_Bool enableEdgeAutoScroll;
     ArkUI_Bool enableHapticFeedback;
+    ArkUI_Bool isLiftingDisabled;
 };
 
 struct ArkUIDragPreViewAndInteractionOptions {
@@ -2930,6 +2934,8 @@ struct ArkUITimepickerModifier {
     ArkUI_Int32 (*getTimepickerEnableCascade)(ArkUINodeHandle node);
     void (*setTimepickerEnableCascade)(ArkUINodeHandle node, ArkUI_Bool isEnableCascade);
     void (*resetTimepickerEnableCascade)(ArkUINodeHandle node);
+    void (*setTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -4672,6 +4678,8 @@ struct ArkUITextPickerModifier {
     ArkUI_Bool (*getTextPickerEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setTextPickerEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool isEnableHapticFeedback);
     void (*resetTextPickerEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -4797,6 +4805,8 @@ struct ArkUIDatePickerModifier {
     ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
     void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {

@@ -52,6 +52,7 @@ public:
         value->propDisableTextStyleAnimation_ = CloneDisableTextStyleAnimation();
         value->propDefaultTextStyle_ = CloneDefaultTextStyle();
         value->propDefaultTextOverflow_ = CloneDefaultTextOverflow();
+        value->propDigitalCrownSensitivity_ = CloneDigitalCrownSensitivity();
         return value;
     }
 
@@ -73,6 +74,7 @@ public:
         ResetDisableTextStyleAnimation();
         ResetDefaultTextStyle();
         ResetDefaultTextOverflow();
+        ResetDigitalCrownSensitivity();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -179,11 +181,15 @@ public:
             V2::ConvertWrapTextOverflowToString(GetDefaultTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         defaultTextStyle->Put("font", defaultFont);
         json->PutExtAttr("defaultTextStyle", defaultTextStyle, filter);
+        auto crownSensitivity = GetDigitalCrownSensitivity();
+        json->PutExtAttr("digitalCrownSensitivity",
+            std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CanLoop, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DigitalCrownSensitivity, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selecteds, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
@@ -240,7 +246,7 @@ public:
         DefaultTextStyle, AdaptMinFontSize, DefaultMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DefaultTextStyle, AdaptMaxFontSize, DefaultMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultTextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutProperty);

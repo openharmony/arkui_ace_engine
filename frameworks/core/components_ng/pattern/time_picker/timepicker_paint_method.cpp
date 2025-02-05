@@ -28,13 +28,36 @@ namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
 } // namespace
 
+#ifdef ARKUI_WEARABLE
+CanvasDrawFunction TimePickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    CanvasDrawFunction drawFun = GetContentDrawFunctionL<TimePickerLayoutProperty>(paintWrapper, pipeline);
+    if (!drawFun) {
+        return nullptr;
+    }
+
+    return [weak = WeakClaim(this), drawFun](RSCanvas& canvas) {
+        auto picker = weak.Upgrade();
+        CHECK_NULL_VOID(picker);
+        drawFun(canvas);
+    };
+}
+#endif
+
 CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
-    auto dividerColor = theme->GetDividerColor();
+    CHECK_NULL_RETURN(theme, nullptr);
 
+    if (theme->IsCircleDial()) {
+        return nullptr;
+    }
+
+    auto dividerColor = theme->GetDividerColor();
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();

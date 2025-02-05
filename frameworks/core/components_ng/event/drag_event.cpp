@@ -221,8 +221,10 @@ void DragEventActuator::GetThumbnailPixelMap(bool isSync)
         dragEventActuator->PrepareFinalPixelMapForDragThroughTouch(pixelMap, immediately);
     };
     DragDropFuncWrapper::GetThumbnailPixelMap(gestureHub, getPixelMapFinishCallback, isSync);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
     CHECK_NULL_VOID(longPressRecognizer_);
-    if (longPressRecognizer_ && longPressRecognizer_->GetGestureDisposal() != GestureDisposal::REJECT) {
+    if (longPressRecognizer_ && longPressRecognizer_->GetGestureDisposal() != GestureDisposal::REJECT &&
+        !dragPreviewOption.isLiftingDisabled) {
         if (!CreateGatherNode(actuator)) {
             isOnBeforeLiftingAnimation_ = false;
             return;
@@ -668,7 +670,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        if (!frameNode->GetDragPreviewOption().isDragPreviewEnabled) {
+        auto dragPreviewOption = frameNode->GetDragPreviewOption();
+        if (!dragPreviewOption.isDragPreviewEnabled || dragPreviewOption.isLiftingDisabled) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because disable drag preview");
             return;
         }

@@ -132,79 +132,78 @@ void UiSessionManager::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t pr
 
 void UiSessionManager::SetClickEventRegistered(bool status)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (status) {
-        clickEventRegisterProcesses_++;
+        clickEventRegisterProcesses_.fetch_add(1);
     } else {
-        clickEventRegisterProcesses_--;
+        clickEventRegisterProcesses_.fetch_sub(1);
     }
 }
 
 void UiSessionManager::SetSearchEventRegistered(bool status)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (status) {
-        searchEventRegisterProcesses_++;
+        searchEventRegisterProcesses_.fetch_add(1);
     } else {
-        searchEventRegisterProcesses_--;
+        searchEventRegisterProcesses_.fetch_sub(1);
     }
 }
 
 void UiSessionManager::SetRouterChangeEventRegistered(bool status)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (status) {
-        routerChangeEventRegisterProcesses_++;
+        routerChangeEventRegisterProcesses_.fetch_add(1);
     } else {
-        routerChangeEventRegisterProcesses_--;
+        routerChangeEventRegisterProcesses_.fetch_sub(1);
     }
 }
 
 void UiSessionManager::SetComponentChangeEventRegistered(bool status)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (status) {
-        componentChangeEventRegisterProcesses_++;
+        componentChangeEventRegisterProcesses_.fetch_add(1);
     } else {
-        componentChangeEventRegisterProcesses_--;
+        componentChangeEventRegisterProcesses_.fetch_sub(1);
     }
 }
 
 bool UiSessionManager::GetClickEventRegistered()
 {
-    return clickEventRegisterProcesses_ > 0 ? true : false;
+    return clickEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
 bool UiSessionManager::GetSearchEventRegistered()
 {
-    return searchEventRegisterProcesses_ > 0 ? true : false;
+    return searchEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
 bool UiSessionManager::GetRouterChangeEventRegistered()
 {
-    return routerChangeEventRegisterProcesses_ > 0 ? true : false;
+    return routerChangeEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
 bool UiSessionManager::GetComponentChangeEventRegistered()
 {
-    return componentChangeEventRegisterProcesses_ > 0 ? true : false;
+    return componentChangeEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
 void UiSessionManager::GetInspectorTree()
 {
-    jsonValue_ = InspectorJsonUtil::Create(true);
-    webTaskNums = 0;
     WebTaskNumsChange(1);
+    std::unique_lock<std::mutex> lock(mutex_);
+    jsonValue_ = InspectorJsonUtil::Create(true);
+    webTaskNums_.store(0);
     inspectorFunction_();
 }
 
 void UiSessionManager::SaveInspectorTreeFunction(InspectorFunction&& function)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     inspectorFunction_ = std::move(function);
 }
 
 void UiSessionManager::AddValueForTree(int32_t id, const std::string& value)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     std::string key = std::to_string(id);
     if (jsonValue_->Contains(key)) {
         jsonValue_->Replace(key.c_str(), value.c_str());
@@ -215,9 +214,11 @@ void UiSessionManager::AddValueForTree(int32_t id, const std::string& value)
 
 void UiSessionManager::WebTaskNumsChange(int32_t num)
 {
-    webTaskNums += num;
-    if (webTaskNums == 0) {
+    webTaskNums_.fetch_add(num);
+    if (webTaskNums_.load() == 0) {
+        std::unique_lock<std::mutex> lock(mutex_);
         std::string data = jsonValue_->ToString();
+        lock.unlock();
         ReportInspectorTreeValue(data);
     }
 }
@@ -245,17 +246,20 @@ void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
 
 void UiSessionManager::NotifyAllWebPattern(bool isRegister)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     webFocusEventRegistered = isRegister;
     notifyWebFunction_(isRegister);
 }
 
 void UiSessionManager::SaveRegisterForWebFunction(NotifyAllWebFunction&& function)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     notifyWebFunction_ = std::move(function);
 }
 
 bool UiSessionManager::GetWebFocusRegistered()
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     return webFocusEventRegistered;
 }
 
@@ -271,14 +275,17 @@ void UiSessionManager::OnRouterChange(const std::string& path, const std::string
 
 void UiSessionManager::SaveBaseInfo(const std::string& info)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     baseInfo_ = info;
 }
 
 void UiSessionManager::SendBaseInfo(int32_t processId)
 {
-    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     auto reportService = iface_cast<ReportService>(reportObjectMap_[processId]);
+    reportLock.unlock();
     if (reportService != nullptr) {
+        std::unique_lock<std::mutex> lock(mutex_);
         reportService->SendBaseInfo(baseInfo_);
     }
 }
