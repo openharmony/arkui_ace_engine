@@ -181,14 +181,14 @@ void TextContentModifier::SetDefaultTextColor(const TextStyle& textStyle)
     AttachProperty(animatableTextColor_);
 }
 
-void TextContentModifier::SetDefaultSymbolColor(const TextStyle &textStyle)
+void TextContentModifier::SetDefaultSymbolColor(const TextStyle& textStyle)
 {
     animatableSymbolColor_ =
         MakeRefPtr<AnimatablePropertyVectorLinearVector>(Convert2VectorLinearColor(textStyle.GetSymbolColorList()));
     AttachProperty(animatableSymbolColor_);
 }
 
-LinearVector<LinearColor> TextContentModifier::Convert2VectorLinearColor(const std::vector<Color> &colorList)
+LinearVector<LinearColor> TextContentModifier::Convert2VectorLinearColor(const std::vector<Color>& colorList)
 {
     LinearVector<LinearColor> colors;
     for (auto color : colorList) {
@@ -603,17 +603,15 @@ void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifySymbolColorInTextStyle(TextStyle& textStyle)
 {
     if (symbolColors_.has_value() && animatableSymbolColor_) {
-        LOGI("tyty TextContentModifier::ModifySymbolColorInTextStyle");
         lastSymbolColors_= animatableSymbolColor_->Get();
         textStyle.SetSymbolColorList(Convert2VectorColor(animatableSymbolColor_->Get()));
     }
 }
 
-std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<LinearColor> &colorList)
+std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<LinearColor>& colorList)
 {
     std::vector<Color> colors;
     for (auto color : colorList) {
-        LOGI("tyty ModifySymbolColorInTextStyle Convert2VectorColor %{public}d", color.GetValue());
         colors.emplace_back(Color(color.GetValue()));
     }
     return colors;
