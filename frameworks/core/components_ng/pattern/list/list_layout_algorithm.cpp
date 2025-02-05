@@ -2522,7 +2522,7 @@ int32_t ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t oldCacheCoun
     if (itemCount <= 0) {
         return oldCacheCount;
     }
-    static float pageCount = SystemProperties::GetPageCount();
+    thread_local float pageCount = SystemProperties::GetPageCount();
     if (pageCount <= 0.0f) {
         return oldCacheCount;
     }

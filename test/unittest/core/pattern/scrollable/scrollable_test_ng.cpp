@@ -1233,7 +1233,7 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
