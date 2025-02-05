@@ -259,6 +259,6 @@ HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
     auto effect2 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler->GetNext());
     ASSERT_NE(effect2, nullptr);
     ASSERT_EQ(effect2->GetEffect(), opacity2);
- }
+}
 
 } // namespace OHOS::Ace::NG
