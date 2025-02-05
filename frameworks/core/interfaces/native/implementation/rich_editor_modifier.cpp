@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
@@ -25,8 +26,10 @@
 #include "rich_editor_controller_peer_impl.h"
 #include "rich_editor_styled_string_controller_peer_impl.h"
 
+namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
+}
 namespace OHOS::Ace::NG::Converter {
-
 void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src)
 {
     if (src.GetType() == "SelectionInfo") {

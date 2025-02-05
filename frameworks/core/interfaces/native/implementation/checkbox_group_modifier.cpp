@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <utility>
+
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "arkoala_api_generated.h"
@@ -31,13 +33,6 @@ void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
         default: dst = static_cast<Ark_SelectStatus>(-1);
             LOGE("Unexpected enum value in SelectStatus: %{public}d", src);
     }
-}
-
-void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src)
-{
-    Converter::ArkArrayHolder<Array_String> vecHolder(src.GetNameList());
-    dst.name = vecHolder.ArkValue();
-    dst.status = Converter::ArkValue<Ark_SelectStatus>(src.GetStatus());
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -121,8 +116,13 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onEvent = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* info) {
         CHECK_NULL_VOID(info);
-        const auto* eventInfo = reinterpret_cast<const CheckboxGroupResult*>(info);
-        arkCallback.Invoke(Converter::ArkValue<Ark_CheckboxGroupResult>(*eventInfo));
+        auto eventInfo = reinterpret_cast<const CheckboxGroupResult*>(info);
+        Converter::ArkArrayHolder<Array_String> vecHolder(eventInfo->GetNameList());
+        Ark_CheckboxGroupResult result {
+            .name = vecHolder.ArkValue(),
+            .status = Converter::ArkValue<Ark_SelectStatus>(eventInfo->GetStatus())
+        };
+        arkCallback.Invoke(result);
     };
     CheckBoxGroupModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
