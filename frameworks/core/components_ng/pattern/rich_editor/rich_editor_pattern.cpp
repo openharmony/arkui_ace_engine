@@ -8412,12 +8412,9 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
     std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
-    TextPattern::BindSelectionMenu(
-        richEditorType, type, menuBuilder, menuParam);
-    if (!selectOverlay_->SelectOverlayIsCreating() && SelectOverlayIsOn()) {
-        selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
-            .requestCode = REQUEST_RECREATE });
-    }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "BindSelectionMenu spanType = %{public}d, responseType = %{public}d",
+        richEditorType, type);
+    TextPattern::BindSelectionMenu(richEditorType, type, menuBuilder, menuParam);
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
