@@ -597,7 +597,7 @@ int32_t FfiOHOSAceFrameworkLayoutManagerGetLineCount(int64_t selfID)
 }
 
 void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(
-    int64_t selfID, int32_t x, int32_t y, CPositionWithAffinity& retPtr)
+    int64_t selfID, int32_t x, int32_t y, CPositionWithAffinity* retPtr)
 {
     auto self = FFIData::GetData<NativeLayoutManager>(selfID);
     if (self != nullptr) {

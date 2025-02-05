@@ -159,7 +159,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextControllerGetLayoutManager(int64_t selfID,
 CJ_EXPORT int64_t FfiOHOSAceFrameworkLayoutManager();
 CJ_EXPORT int32_t FfiOHOSAceFrameworkLayoutManagerGetLineCount(int64_t selfID);
 CJ_EXPORT void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(
-    int64_t selfID, int32_t x, int32_t y, OHOS::Ace::Framework::CPositionWithAffinity& retPtr);
+    int64_t selfID, int32_t x, int32_t y, OHOS::Ace::Framework::CPositionWithAffinity* retPtr);
 #ifdef __cplusplus
 }
 #endif
