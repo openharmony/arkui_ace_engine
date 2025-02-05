@@ -730,4 +730,30 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragEndScrollBar001, TestSize.Level1)
     DragScrollBarAction(Offset(239, 398), 0.f, -1000.f);
     EXPECT_LE(GetChildX(frameNode_, 0), 60.f);
 }
+
+/**
+ * @tc.name: ScrollBarSetOpacity001
+ * @tc.desc: Test scrollBar SetOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollBarSetOpacity001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
+
+    AnimationOption option;
+    option.SetCurve(Curves::SHARP);
+    option.SetDuration(300);
+    auto propertyCallback = [this]() {
+        EXPECT_TRUE(MockAnimationManager::GetInstance().IsAnimationOpen());
+        pattern_->scrollBarOverlayModifier_->SetOpacity(0);
+        EXPECT_FALSE(MockAnimationManager::GetInstance().IsAnimationOpen());
+    };
+    auto finishCallback = []() {};
+    auto animation = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), 0);
+}
 } // namespace OHOS::Ace::NG
