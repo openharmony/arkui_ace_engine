@@ -46,7 +46,8 @@ namespace {
 constexpr float ARC_LIST_FRICTION = 0.8f;
 constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_FIX_OFFSET_RATIO = 0.85f;
-constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
+constexpr float ARC_LIST_DRAG_OVER_RATES = 0.6f;
+constexpr float ARC_LIST_DRAG_OVER_KVALUE = 0.84f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -536,7 +537,14 @@ float ArcListPattern::FixScrollOffset(float offset, int32_t source)
 
 float ArcListPattern::GetScrollUpdateFriction(float overScroll)
 {
-    return ARC_LIST_DRAG_OVER_FRICTION;
+    float contentMoveSize = contentMainSize_ / FLOAT_TWO * ARC_LIST_DRAG_OVER_RATES;
+    float scale = (contentMoveSize - overScroll) / contentMoveSize;
+    if (LessOrEqual(scale, 0.0f)) {
+        return 0.0f;
+    } else if (GreatOrEqual(scale, 1.0f)) {
+        return ARC_LIST_DRAG_OVER_RATES;
+    }
+    return -exp(-ARC_LIST_DRAG_OVER_KVALUE * scale) + 1;
 }
 
 void ArcListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
