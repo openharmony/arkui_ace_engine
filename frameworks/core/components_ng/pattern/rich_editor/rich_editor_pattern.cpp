@@ -10037,7 +10037,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
         GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
         CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, offsetInSpan + insertValue.length(),
             textTemp, spanTextStyle, spanParaStyle);
-        innerPosition += insertValue.length();
+        innerPosition += static_cast<int32_t>(insertValue.length());
     }
 
     if (spanItem) {
