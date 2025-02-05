@@ -447,21 +447,14 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
                           const Ark_Boolean isHover,
                           const Ark_AccessibilityHoverEvent event) {
         auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(event.ptr);
-        ASSERT_NE(peer, nullptr);
-        auto info = peer->GetEventInfo();
+        auto info = peer ? peer->GetEventInfo() : nullptr;
         ASSERT_NE(info, nullptr);
-        checkEvent = {
-            .nodeId = resourceId,
-            .isHover = isHover,
-            .type = info->GetActionType()
-        };
+        checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
     };
 
     AccessibilityCallback callBackValue = {
         .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
+            .resourceId = frameNode->GetId(), .hold = nullptr, .release = nullptr,
         },
         .call = onAccessibilityHoverFunc
     };
