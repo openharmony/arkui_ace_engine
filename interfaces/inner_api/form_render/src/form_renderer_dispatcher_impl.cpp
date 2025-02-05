@@ -23,7 +23,11 @@
 
 namespace OHOS {
 namespace Ace {
+#ifdef WATCH_REFRESH_WAIT_ENABLE
+constexpr int32_t PROCESS_WAIT_TIME = 50;
+#else
 constexpr int32_t PROCESS_WAIT_TIME = 20;
+#endif
 constexpr float DOUBLE = 2.0;
 constexpr int32_t DEFAULT_FORM_ROTATION_ANIM_DURATION = 600;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
