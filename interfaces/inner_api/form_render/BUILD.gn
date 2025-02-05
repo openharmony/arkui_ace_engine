@@ -77,9 +77,4 @@ ohos_shared_library("ace_form_render") {
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
-
-  defines = []
-  if (ace_engine_wearable_wait_time_update) {
-    defines += [ "ARKUI_WEARABLE" ]
-  }
 }
