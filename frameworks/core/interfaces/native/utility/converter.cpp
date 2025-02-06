@@ -1892,14 +1892,6 @@ FingerInfo Convert(const Ark_FingerInfo& src)
     return dst;
 }
 
-// template<>
-// std::list<FingerInfo> Convert(const Array_FingerInfo& src)
-// {
-//     std::vector<FingerInfo> vec = Converter::Convert<std::vector<FingerInfo>>(src);
-//     std::list<FingerInfo> dst(vec.begin(), vec.end());
-//     return dst;
-// }
-
 template<>
 PickerRangeType Convert(const Ark_Resource& src)
 {
