@@ -584,7 +584,9 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager013, TestSize.Level1)
      */
     AccessibilityEvent accessibilityEvent;
     auto context = NG::PipelineContext::GetCurrentContext();
+    EXPECT_EQ(jsAccessibilityManager->context_.Upgrade(), nullptr);
     jsAccessibilityManager->SetPipelineContext(context);
+    EXPECT_NE(jsAccessibilityManager->context_.Upgrade(), nullptr);
     jsAccessibilityManager->SendEventToAccessibilityWithNode(accessibilityEvent, frameNode, context);
 
     /**
