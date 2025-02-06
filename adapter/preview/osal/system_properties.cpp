@@ -339,6 +339,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
 std::string SystemProperties::GetDebugInspectorId()
 {
     return UNDEFINED_PARAM;

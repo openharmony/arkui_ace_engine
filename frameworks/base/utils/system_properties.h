@@ -621,6 +621,8 @@ public:
 
     static bool IsSmallFoldProduct();
 
+    static bool IsBigFoldProduct();
+
     static std::string GetWebDebugRenderMode();
 
     static std::string GetDebugInspectorId();
