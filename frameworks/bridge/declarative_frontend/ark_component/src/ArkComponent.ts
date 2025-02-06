@@ -260,6 +260,20 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class BindMenuModifier extends ModifierWithKey<ArkBindMenu> {
+  constructor(value: ArkBindMenu) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('bindMenu');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBindMenu(node);
+    } else {
+      getUINativeModule().common.setBindMenu(node, this.value.content, this.value.options);
+    }
+  }
+}
+
 class WidthModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
@@ -4706,7 +4720,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
-    throw new Error('Method not implemented.');
+    let arkBindMenu = new ArkBindMenu();
+    arkBindMenu.content = content;
+    arkBindMenu.options = options;
+    modifierWithKey(this._modifiersWithKeys, BindMenuModifier.identity, BindMenuModifier, arkBindMenu);
+    return this;
   }
 
   bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this {
