@@ -685,9 +685,8 @@ void PerfMonitor::SetVsyncLazyMode()
     }
 
     lastExcusion = needExcusion;
-    ACE_VSYNC_MODE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
-        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
-    ACE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
+    ACE_VSYNC_MODE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) "
+        "isExcAni(%d)",
         isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
     OHOS::AppExecFwk::EventHandler::SetVsyncLazyMode(needExcusion);
 #endif
