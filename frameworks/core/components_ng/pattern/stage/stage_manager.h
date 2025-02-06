@@ -140,7 +140,6 @@ protected:
     RefPtr<StagePattern> stagePattern_;
     WeakPtr<FrameNode> destPageNode_;
     WeakPtr<FrameNode> srcPageNode_;
-    WeakPtr<FrameNode> animationSrcPage_;
     int32_t animationId_ = -1;
     bool stageInTrasition_ = false;
 #if defined(ENABLE_SPLIT_MODE)
