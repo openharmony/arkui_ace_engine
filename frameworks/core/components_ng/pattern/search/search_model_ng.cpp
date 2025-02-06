@@ -1656,8 +1656,10 @@ void SearchModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<fl
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (valueOpt) {
         textFieldLayoutProperty->UpdateMinFontScale(valueOpt.value());
-        textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        textFieldLayoutProperty->ResetMinFontScale();
     }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& valueOpt)
@@ -1669,8 +1671,10 @@ void SearchModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<fl
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (valueOpt) {
         textFieldLayoutProperty->UpdateMaxFontScale(std::min(valueOpt.value(), MAX_FONT_SCALE));
-        textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        textFieldLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchModelNG::SetLineHeight(const Dimension& value)
@@ -1763,8 +1767,10 @@ void SearchModelNG::SetHalfLeading(FrameNode* frameNode, const std::optional<boo
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (valueOpt) {
         textFieldLayoutProperty->UpdateHalfLeading(valueOpt.value());
-        textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        textFieldLayoutProperty->ResetHalfLeading();
     }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchModelNG::SetTextDecoration(Ace::TextDecoration value)

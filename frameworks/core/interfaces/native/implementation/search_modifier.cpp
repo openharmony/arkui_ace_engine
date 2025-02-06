@@ -460,7 +460,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
-    Validator::ValidatePositive(convValue);
+    Validator::ValidateNonNegative(convValue);
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
     SearchModelNG::SetMinFontScale(frameNode, convValue);
 }
