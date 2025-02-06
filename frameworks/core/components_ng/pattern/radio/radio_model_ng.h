@@ -66,6 +66,7 @@ public:
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newArgs);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
+    static void SetBuilder(FrameNode* frameNode, std::function<void()>&& builder);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
     static void SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator);

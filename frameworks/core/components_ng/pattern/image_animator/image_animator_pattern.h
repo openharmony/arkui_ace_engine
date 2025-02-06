@@ -141,6 +141,11 @@ public:
         return static_cast<int32_t>(images_.size());
     }
 
+    const ImageProperties& GetImage(int32_t index)
+    {
+        return images_[index];
+    }
+
 private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();

@@ -333,4 +333,25 @@ HWTEST_F(ChildrenMainSizeTest, GetChildDefaultSizeTest, TestSize.Level1)
     retValue = accessor_->getChildDefaultSize(peer_);
     EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE * 2);
 }
+
+/**
+ * @tc.name: SetChildDefaultSizeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildrenMainSizeTest, SetChildDefaultSizeTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setChildDefaultSize, nullptr);
+    // valid value
+    auto defSize = Converter::ArkValue<Ark_Number>(CHILDREN_DEFAULT_SIZE);
+    accessor_->setChildDefaultSize(peer_, &defSize);
+    auto retValue = accessor_->getChildDefaultSize(peer_);
+    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+
+    // invalid value
+    defSize = Converter::ArkValue<Ark_Number>(-CHILDREN_DEFAULT_SIZE);
+    accessor_->setChildDefaultSize(peer_, &defSize);
+    retValue = accessor_->getChildDefaultSize(peer_);
+    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+}
 } // namespace OHOS::Ace::NG

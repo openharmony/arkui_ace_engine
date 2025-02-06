@@ -74,16 +74,16 @@ public:
         placement_ = placement;
     }
 
-    void SetMaskColor(const Color& maskColor)
+    void SetMaskColor(const std::optional<Color>& maskColor)
     {
-        maskColor_ = maskColor;
-        isMaskColorSetted_ = true;
+        maskColor_ = maskColor.value_or(Color());
+        isMaskColorSetted_ = maskColor.has_value();
     }
 
-    void SetBackgroundColor(const Color& backgroundColor)
+    void SetBackgroundColor(const std::optional<Color>& backgroundColor)
     {
-        backgroundColor_ = backgroundColor;
-        isBackgroundColorSetted_ = true;
+        backgroundColor_ = backgroundColor.value_or(Color());
+        isBackgroundColorSetted_ = backgroundColor.has_value();
     }
 
     void SetOnVisibilityChange(const EventMarker& onVisibilityChange)
@@ -231,12 +231,12 @@ public:
         return childwidth_;
     }
 
-    void SetTargetSpace(const Dimension& targetSpace)
+    void SetTargetSpace(const std::optional<Dimension>& targetSpace)
     {
         targetSpace_ = targetSpace;
     }
 
-    void SetChildWidth(const Dimension& childWidth)
+    void SetChildWidth(const std::optional<Dimension>& childWidth)
     {
         childwidth_ = childWidth;
     }
@@ -311,7 +311,7 @@ public:
         return targetOffset_;
     }
 
-    void SetTextColor(const Color& textColor)
+    void SetTextColor(const std::optional<Color>& textColor)
     {
         textColor_ = textColor;
     }
@@ -321,7 +321,7 @@ public:
         return textColor_;
     }
 
-    void SetFontSize(const Dimension& fontSize)
+    void SetFontSize(const std::optional<Dimension>& fontSize)
     {
         fontSize_ = fontSize;
     }
@@ -331,7 +331,7 @@ public:
         return fontSize_;
     }
 
-    void SetFontWeight(const FontWeight& fontWeight)
+    void SetFontWeight(const std::optional<FontWeight>& fontWeight)
     {
         fontWeight_ = fontWeight;
     }
@@ -341,7 +341,7 @@ public:
         return fontWeight_;
     }
 
-    void SetFontStyle(const FontStyle& fontStyle)
+    void SetFontStyle(const std::optional<FontStyle>& fontStyle)
     {
         fontStyle_ = fontStyle;
     }
@@ -356,9 +356,10 @@ public:
         return arrowWidth_;
     }
 
-    void SetArrowWidth(const Dimension& arrowWidth)
+    void SetArrowWidth(const std::optional<Dimension>& arrowWidth)
     {
         arrowWidth_ = arrowWidth;
+        SetErrorArrowWidth(!arrowWidth.has_value());
     }
 
     const std::optional<Dimension>& GetArrowHeight() const
@@ -366,9 +367,10 @@ public:
         return arrowHeight_;
     }
 
-    void SetArrowHeight(const Dimension& arrowHeight)
+    void SetArrowHeight(const std::optional<Dimension>& arrowHeight)
     {
         arrowHeight_ = arrowHeight;
+        SetErrorArrowHeight(!arrowHeight.has_value());
     }
 
     const std::optional<Dimension>& GetRadius() const
@@ -376,12 +378,13 @@ public:
         return radius_;
     }
 
-    void SetRadius(const Dimension& radius)
+    void SetRadius(const std::optional<Dimension>& radius)
     {
         radius_ = radius;
+        SetErrorRadius(!radius.has_value());
     }
 
-    void SetShadow(const Shadow& shadow)
+    void SetShadow(const std::optional<Shadow>& shadow)
     {
         shadow_ = shadow;
     }
@@ -431,9 +434,9 @@ public:
         return focusable_;
     }
 
-    void SetBlurStyle(const BlurStyle& blurStyle)
+    void SetBlurStyle(const std::optional<BlurStyle>& blurStyle)
     {
-        blurStyle_ = blurStyle;
+        blurStyle_ = blurStyle.value_or(BlurStyle::COMPONENT_ULTRA_THICK);
     }
 
     BlurStyle GetBlurStyle() const
@@ -470,9 +473,10 @@ public:
         return hasTransition_;
     }
 
-    void SetTransitionEffects(const RefPtr<NG::ChainedTransitionEffect>& transitionEffects)
+    void SetTransitionEffects(const std::optional<RefPtr<NG::ChainedTransitionEffect>>& transitionEffects)
     {
-        transitionEffects_ = transitionEffects;
+        transitionEffects_ = transitionEffects.value_or(nullptr);
+        SetHasTransition(transitionEffects.has_value());
     }
 
     const RefPtr<NG::ChainedTransitionEffect> GetTransitionEffects() const

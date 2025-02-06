@@ -16,9 +16,13 @@
 #include "converter.h"
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -39,6 +43,12 @@ std::optional<double> FloatToDouble(const std::optional<float>& src)
 }
 
 namespace OHOS::Ace::NG::Converter {
+struct DecorationStyleInterface {
+    std::optional<TextDecoration> type;
+    std::optional<Color> color;
+    std::optional<TextDecorationStyle> style;
+};
+
 RefPtr<ThemeConstants> GetThemeConstants(Ark_NodeHandle node, Ark_CharPtr bundleName, Ark_CharPtr moduleName)
 {
     auto cardId = CardScope::CurrentId();
@@ -443,6 +453,15 @@ std::optional<Color> ResourceConverter::ToColor()
     return result;
 }
 
+std::optional<bool> ResourceConverter::ToBoolean()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == ResourceType::BOOLEAN) {
+        return themeConstants_->GetBoolean(id_);
+    }
+    return std::nullopt;
+}
+
 template<>
 ScaleOpt Convert(const Ark_ScaleOptions& src)
 {
@@ -510,6 +529,43 @@ Shadow Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+SheetHeight Convert(const Ark_SheetSize& src)
+{
+    SheetHeight detent;
+    detent.sheetMode = OptConvert<SheetMode>(src);
+    detent.height.reset();
+    return detent;
+}
+
+template<>
+SheetHeight Convert(const Ark_Length& src)
+{
+    SheetHeight detent;
+    detent.sheetMode.reset();
+    detent.height = Convert<Dimension>(src);
+    Validator::ValidateNonNegative(detent.height);
+    if (!detent.height.has_value()) {
+        detent.sheetMode = NG::SheetMode::LARGE;
+        detent.height.reset();
+    }
+    return detent;
+}
+
+template<>
+std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
+{
+    std::vector<ImageAnalyzerType> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto opt = Converter::OptConvert<ImageAnalyzerType>(*(src.array + i));
+        if (opt) {
+            dst.push_back(*opt);
+        }
+    }
+    return dst;
+}
+
+template<>
 std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 {
     return { Convert<Shadow>(src) };
@@ -557,12 +613,6 @@ template<>
 Dimension Convert(const Ark_Number& src)
 {
     return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
-}
-
-template<>
-int Convert(const Ark_IlluminatedType& src)
-{
-    return static_cast<int>(src);
 }
 
 template<>
@@ -673,8 +723,34 @@ RadioStyle Convert(const Ark_RadioStyle& src)
 template<>
 BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
 {
-    LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
     BorderRadiusProperty property;
+    CalcDimension topStart;
+    auto topStartOpt = Converter::OptConvert<Dimension>(src.topStart);
+    if (topStartOpt) {
+        topStart = topStartOpt.value();
+    }
+    CalcDimension topEnd;
+    auto topEndOpt = Converter::OptConvert<Dimension>(src.topEnd);
+    if (topEndOpt) {
+        topEnd = topEndOpt.value();
+    }
+    CalcDimension bottomStart;
+    auto bottomStartOpt = Converter::OptConvert<Dimension>(src.bottomStart);
+    if (bottomStartOpt) {
+        bottomStart = bottomStartOpt.value();
+    }
+    CalcDimension bottomEnd;
+    auto bottomEndOpt = Converter::OptConvert<Dimension>(src.bottomEnd);
+    if (bottomEndOpt) {
+        bottomEnd = bottomEndOpt.value();
+    }
+    bool hasSetBorderRadius = topStartOpt || topEndOpt || bottomStartOpt || bottomEndOpt;
+    auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+    property.radiusTopLeft = isRtl ? topEnd : topStart;
+    property.radiusTopRight = isRtl ? topStart : topEnd;
+    property.radiusBottomLeft = isRtl ? bottomEnd : bottomStart;
+    property.radiusBottomRight = isRtl ? bottomStart : bottomEnd;
+    property.multiValued = true;
     return property;
 }
 
@@ -750,7 +826,7 @@ Font Convert(const Ark_Font& src)
     }
     auto fontSize = OptConvert<Dimension>(src.size);
     if (fontSize) {
-        Validator::ValidatePositive(fontSize);
+        Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);
         font.fontSize = fontSize;
     }
@@ -884,6 +960,24 @@ CaretStyle Convert(const Ark_CaretStyle& src)
 }
 
 template<>
+CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src)
+{
+    CheckboxSettingData data;
+    data.selectedColor = OptConvert<Color>(src.selectedColor);
+    data.unselectedColor = OptConvert<Color>(src.unselectedColor);
+    data.strokeColor = OptConvert<Color>(src.strokeColor);
+    return data;
+}
+
+template<>
+DateTimeType Convert(const Ark_DateTimeOptions& src)
+{
+    DateTimeType type;
+    LOGE("Convert [Ark_DateTimeOptions] to [DateTimeType] is not implemented yet");
+    return type;
+}
+
+template<>
 TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
 {
     TextDecorationOptions options;
@@ -891,6 +985,82 @@ TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
     return options;
+}
+
+template<>
+void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
+{
+    CHECK_NULL_VOID(src.array);
+    std::string ret;
+    for (int idx = 0; idx < src.length; idx++) {
+        Ark_TextDataDetectorType type = src.array[idx];
+        switch (type) {
+            case ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER:
+                ret += "phoneNum";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_URL:
+                ret += "url";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_EMAIL:
+                ret += "email";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS:
+                ret += "location";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_DATE_TIME:
+                ret += "datetime";
+                break;
+            default:
+                break;
+        }
+        bool isLast = idx == (src.length - 1);
+        if (!isLast) {
+            ret += ",";
+        }
+    }
+    dst = ret;
+}
+
+template<>
+DecorationStyleInterface Convert(const Ark_DecorationStyleInterface& src)
+{
+    DecorationStyleInterface ret;
+    ret.type = OptConvert<TextDecoration>(src.type);
+    ret.color = OptConvert<Color>(src.color);
+    ret.style = OptConvert<TextDecorationStyle>(src.style);
+    return ret;
+}
+
+template<>
+TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
+{
+    TextDetectConfig ret;
+    ret.types = OptConvert<std::string>(src.types).value_or("");
+    auto onDetectResultUpdate = OptConvert<Callback_String_Void>(src.onDetectResultUpdate);
+    if (onDetectResultUpdate) {
+        auto callback = [arkCallback = CallbackHelper(*onDetectResultUpdate)](const std::string& arg) -> void {
+            ConvContext ctx;
+            auto arkArg = ArkValue<Ark_String>(arg, &ctx);
+            arkCallback.Invoke(arkArg);
+        };
+        ret.onResult = callback;
+    }
+    if (auto color = OptConvert<Color>(src.color); color) {
+        ret.entityColor = color.value();
+    }
+    auto decoration = OptConvert<DecorationStyleInterface>(src.decoration);
+    if (decoration) {
+        if (auto type = decoration->type) {
+            ret.entityDecorationType = type.value();
+        }
+        if (auto color = decoration->color) {
+            ret.entityDecorationColor = color.value();
+        }
+        if (auto style = decoration->style) {
+            ret.entityDecorationStyle = style.value();
+        }
+    }
+    return ret;
 }
 
 template<>
@@ -944,6 +1114,20 @@ NestedScrollOptions Convert(const Ark_NestedScrollOptions& src)
 }
 
 template<>
+OptionParam Convert(const Ark_MenuElement& src)
+{
+    OptionParam param;
+    param.value = Converter::OptConvert<std::string>(src.value).value_or(param.value);
+    param.action = [arkCallback = CallbackHelper(src.action)]() {
+        arkCallback.Invoke();
+    };
+    param.icon = Converter::OptConvert<std::string>(src.icon).value_or(param.icon);
+    LOGE("Ark_MenuElement Converter: SymbolGlyphModifier is not supported yet");
+    param.enabled = Converter::OptConvert<bool>(src.enabled).value_or(param.enabled);
+    return param;
+}
+
+template<>
 std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src)
 {
     auto minLength = Convert<Dimension>(src.minLength);
@@ -981,6 +1165,18 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
 }
 
 template<>
+RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
+{
+    OHOS::Ace::RefPtr<ChainedTransitionEffect> effect;
+    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(src.ptr);
+    if (effectPeer) {
+        return effectPeer->handler;
+    } else {
+        return nullptr;
+    }
+}
+
+template<>
 RefPtr<Curve> Convert(const Ark_String& src)
 {
     return Framework::CreateCurve(Converter::Convert<std::string>(src), false);
@@ -997,6 +1193,53 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
     auto peer = reinterpret_cast<ICurvePeer*>(src.ptr);
     return peer ? peer->handler : nullptr;
+}
+
+template<>
+DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
+{
+    DragPreviewOption previewOption;
+    auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {
+        switch (mode) {
+            case DragPreviewMode::AUTO: previewOption.ResetDragPreviewMode(); return true;
+            case DragPreviewMode::DISABLE_SCALE: previewOption.isScaleEnabled = false; break;
+            case DragPreviewMode::ENABLE_DEFAULT_SHADOW: previewOption.isDefaultShadowEnabled = true; break;
+            case DragPreviewMode::ENABLE_DEFAULT_RADIUS: previewOption.isDefaultRadiusEnabled = true; break;
+            default: break;
+        }
+        return false;
+    };
+    Converter::VisitUnion(src.mode,
+        [previewModeHandler](const Ark_DragPreviewMode& mode) {
+            auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
+            if (previewMode) {
+                previewModeHandler(previewMode.value());
+            }
+        },
+        [previewModeHandler](const Array_DragPreviewMode& modeArray) {
+            auto previewModeArray = Converter::Convert<std::vector<Ark_DragPreviewMode>>(modeArray);
+            for (auto mode : previewModeArray) {
+                auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
+                if (previewMode && previewModeHandler(previewMode.value())) {
+                    break;
+                }
+            }
+        },
+        []() {});
+    Converter::VisitUnion(src.numberBadge,
+        [&previewOption](const Ark_Number& value) {
+            previewOption.isNumber = true;
+            previewOption.badgeNumber = Converter::Convert<int32_t>(value);
+        },
+        [&previewOption](const Ark_Boolean& value) {
+            previewOption.isNumber = false;
+            previewOption.isShowBadge = Converter::Convert<bool>(value);
+        },
+        [&previewOption]() {
+            previewOption.isNumber = false;
+            previewOption.isShowBadge = true;
+        });
+    return previewOption;
 }
 
 template<>
@@ -1186,6 +1429,22 @@ BorderColorProperty Convert(const Ark_EdgeColors& src)
 }
 
 template<>
+BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
+{
+    BorderColorProperty dst;
+    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
+        " handles invalid structure"
+    );
+    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
+    dst.leftColor = OptConvert<Color>(src.start);
+    dst.topColor = OptConvert<Color>(src.top);
+    dst.rightColor = OptConvert<Color>(src.end);
+    dst.bottomColor = OptConvert<Color>(src.bottom);
+    dst.multiValued = true;
+    return dst;
+}
+
+template<>
 BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 {
     BorderRadiusProperty borderRadius;
@@ -1255,6 +1514,14 @@ BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderWidthProperty dst;
     LOGE("Convert [Ark_LengthMetrics] to [BorderWidthProperty] is not implemented yet");
+    return dst;
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
+{
+    BorderWidthProperty dst;
+    LOGE("ARKOALA: Convert to [BorderWidthProperty] from [Ark_LocalizedEdgeWidths] is not supported\n");
     return dst;
 }
 
@@ -1614,5 +1881,35 @@ TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src)
     std::vector<TextCascadePickerOptions> empty;
     dst.children = optionsOpt.value_or(empty);
     return dst;
+}
+
+template<>
+KeyboardOptions Convert(const Ark_KeyboardOptions& src)
+{
+    KeyboardOptions keyboardOptions;
+    auto supportAvoidance = Converter::OptConvert<bool>(src.supportAvoidance);
+    keyboardOptions.supportAvoidance = supportAvoidance.has_value() ? supportAvoidance.value() : false;
+    return keyboardOptions;
+}
+
+template<>
+SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
+{
+    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
+    auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
+    if (optOnAppear.has_value()) {
+        selectMenuParam.onAppear =
+            [arkCallback = CallbackHelper(optOnAppear.value())](int32_t start, int32_t end) {
+                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        };
+    }
+    auto optOnDisappear = Converter::OptConvert<Callback_Void>(src.onDisappear);
+    if (optOnDisappear.has_value()) {
+        selectMenuParam.onDisappear =
+            [arkCallback = CallbackHelper(optOnDisappear.value())]() {
+                arkCallback.Invoke();
+        };
+    }
+    return selectMenuParam;
 }
 } // namespace OHOS::Ace::NG::Converter

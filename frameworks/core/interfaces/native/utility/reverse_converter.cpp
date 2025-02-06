@@ -16,17 +16,29 @@
 #include "reverse_converter.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+
+#include "base/utils/string_utils.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
-
+#include "validators.h"
+namespace OHOS::Ace {
+namespace {
+const std::string YEAR = "year";
+const std::string MONTH = "month";
+const std::string DAY = "day";
+const int32_t STD_TM_START_YEAR = 1900;
+const int32_t SEC_TO_MILLISEC = 1000;
+} // namespace
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
     const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
+    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
     const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
     const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
@@ -66,6 +78,20 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
     const auto peer = reinterpret_cast<BaseGestureEventPeer*>(GeneratedModifier::GetBaseGestureEventAccessor()->ctor());
     peer->SetEventInfo(src);
     dst.ptr = peer;
+}
+
+void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
+{
+    const auto& localOffset = src.GetTarget().area.GetOffset();
+    const auto& origin = src.GetTarget().origin;
+    dst.position.x = Converter::ArkValue<Opt_Length>(localOffset.GetX().ConvertToVp());
+    dst.position.y = Converter::ArkValue<Opt_Length>(localOffset.GetY().ConvertToVp());
+    dst.globalPosition.x = Converter::ArkValue<Opt_Length>(
+        origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp());
+    dst.globalPosition.y = Converter::ArkValue<Opt_Length>(
+        origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp());
+    dst.width = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetWidth().ConvertToVp());
+    dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -155,6 +181,18 @@ void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
     dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
 }
 
+void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src)
+{
+    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<TextAreaControllerPeer&>(src));
+}
+
+void AssignArkValue(Ark_Length& dst, const double& src)
+{
+    dst.type = INTEROP_RUNTIME_NUMBER;
+    dst.value = src;
+    dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
+}
+
 void AssignArkValue(Ark_Length& dst, const Dimension& src)
 {
     dst.type = INTEROP_RUNTIME_NUMBER;
@@ -224,6 +262,54 @@ void AssignArkValue(Ark_Number& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.ConvertToVp());
     AssignArkValue(dst, value);
+}
+
+void AssignArkValue(Ark_Date& dst, const std::string& src)
+{
+    auto json = JsonUtil::ParseJsonString(src);
+    PickerDate date(
+        json->GetValue(YEAR)->GetInt(),
+        json->GetValue(MONTH)->GetInt(),
+        json->GetValue(DAY)->GetInt());
+    Validator::ValidatePickerDate(date);
+    
+    std::tm tm {};
+    tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
+    tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
+    tm.tm_mday = date.GetDay();
+    time_t time = std::mktime(&tm);
+    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
+}
+
+void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
+{
+    auto json = JsonUtil::ParseJsonString(src);
+    PickerDate date(
+        json->GetValue(YEAR)->GetInt(),
+        json->GetValue(MONTH)->GetInt(),
+        json->GetValue(DAY)->GetInt());
+    Validator::ValidatePickerDate(date);
+    dst = {
+        .year = Converter::ArkValue<Opt_Number>(date.GetYear()),
+        .month = Converter::ArkValue<Opt_Number>(date.GetMonth()),
+        .day = Converter::ArkValue<Opt_Number>(date.GetDay())
+    };
+}
+
+void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
+{
+    Ark_Area area;
+    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth());
+    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight());
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX());
+    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY());
+    area.position = Converter::ArkValue<Ark_Position>(position);
+    Ark_Position globPosition;
+    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX());
+    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
+    area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
+    dst.area = area;
 }
 
 void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)

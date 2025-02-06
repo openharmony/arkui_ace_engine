@@ -69,6 +69,16 @@ public:
         imageData = nullptr;
         pixelMap = nullptr;
         param = nullptr;
+        lineDash = nullptr;
+        lineCap = std::nullopt;
+        lineJoin = std::nullopt;
+        canvasImage = std::nullopt;
+        fillRule = std::nullopt;
+        direction = std::nullopt;
+        textAlign = std::nullopt;
+        baseline = std::nullopt;
+        type = std::nullopt;
+        quality = std::nullopt;
     }
 
     void TearDown()
@@ -80,6 +90,16 @@ public:
         imageData = nullptr;
         pixelMap = nullptr;
         param = nullptr;
+        lineDash = nullptr;
+        lineCap = std::nullopt;
+        lineJoin = std::nullopt;
+        canvasImage = std::nullopt;
+        fillRule = std::nullopt;
+        direction = std::nullopt;
+        textAlign = std::nullopt;
+        baseline = std::nullopt;
+        type = std::nullopt;
+        quality = std::nullopt;
     }
 
     void* config = nullptr;
@@ -118,6 +138,16 @@ public:
     std::shared_ptr<OHOS::Ace::ImageData> imageData = nullptr;
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap = nullptr;
     std::shared_ptr<OHOS::Ace::TransformParam> param = nullptr;
+    std::shared_ptr<OHOS::Ace::LineDashParam> lineDash = nullptr;
+    std::optional<OHOS::Ace::LineCapStyle> lineCap = std::nullopt;
+    std::optional<OHOS::Ace::LineJoinStyle> lineJoin = std::nullopt;
+    std::optional<Ace::CanvasImage> canvasImage = std::nullopt;
+    std::optional<Ace::CanvasFillRule> fillRule = std::nullopt;
+    std::optional<Ace::TextDirection> direction = std::nullopt;
+    std::optional<Ace::TextAlign> textAlign = std::nullopt;
+    std::optional<Ace::TextBaseline> baseline = std::nullopt;
+    std::optional<std::string> type = std::nullopt;
+    std::optional<double> quality = std::nullopt;
 };
 
 } // namespace OHOS::Ace::NG

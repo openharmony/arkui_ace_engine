@@ -89,28 +89,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
 
     auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& selectedStr) {
-        auto json = JsonUtil::ParseJsonString(selectedStr);
-
-        Ark_Date result {0};
-        if (json && !json->IsNull()) {
-            uint32_t year = 0;
-            auto yearJson = json->GetValue("year");
-            if (yearJson && yearJson->IsNumber()) {
-                year = yearJson->GetUInt();
-            }
-            uint32_t month = 0;
-            auto monthJson = json->GetValue("month");
-            if (monthJson && monthJson->IsNumber()) {
-                month = monthJson->GetUInt();
-            }
-            uint32_t day = 0;
-            auto dayJson = json->GetValue("day");
-            if (dayJson && dayJson->IsNumber()) {
-                day = dayJson->GetUInt();
-            }
-            auto pickerDate = PickerDate(year, month, day);
-            result = Converter::ArkValue<Ark_Date>(pickerDate);
-        }
+        Ark_Date result = Converter::ArkValue<Ark_Date>(selectedStr);
         arkCallback.Invoke(result);
     };
     CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(onChange));

@@ -19,7 +19,14 @@ namespace OHOS::Ace::NG {
 ModelPattern::ModelPattern(uint32_t key, const ModelViewContext& context) : key_(key)
 {
 }
+ModelPattern::ModelPattern(uint32_t key) : key_(key)
+{
+}
 ModelPattern::~ModelPattern()
+{
+}
+
+void ModelPattern::SetModelViewContext(const ModelViewContext& context)
 {
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,6 +76,20 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
+    { DIMENSIONS_RES_NON_PCT_0_ID, DIMENSIONS_RES_NON_PCT_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_PCT_1_ID, DIMENSIONS_RES_NON_PCT_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_PCT_2_ID, DIMENSIONS_RES_NON_PCT_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_PCT_3_ID, DIMENSIONS_RES_NON_PCT_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_PCT_4_ID, DIMENSIONS_RES_NON_PCT_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_PCT_5_ID, DIMENSIONS_RES_NON_PCT_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_PCT_6_ID, DIMENSIONS_RES_NON_PCT_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_PCT_7_ID, DIMENSIONS_RES_NON_PCT_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_PCT_8_ID, DIMENSIONS_RES_NON_PCT_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_PCT_9_ID, DIMENSIONS_RES_NON_PCT_9_STR, -123._vp },
+    { DIMENSIONS_RES_NON_PCT_10_ID, DIMENSIONS_RES_NON_PCT_10_STR, -123._fp },
+    { DIMENSIONS_RES_NON_PCT_11_ID, DIMENSIONS_RES_NON_PCT_11_STR, -123._px },
+    { DIMENSIONS_RES_NON_PCT_12_ID, DIMENSIONS_RES_NON_PCT_12_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_PCT_13_ID, DIMENSIONS_RES_NON_PCT_13_STR, -0.2_pct },
     { MAX_FONT_SCALE_RES_0_ID, MAX_FONT_SCALE_RES_0_STR, 1.0f },
     { MAX_FONT_SCALE_RES_1_ID, MAX_FONT_SCALE_RES_1_STR, 3.41f },
     { MAX_FONT_SCALE_RES_2_ID, MAX_FONT_SCALE_RES_2_STR, 50.f },
@@ -1093,6 +1107,69 @@ std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNe
         CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, Converter::ResourceType::FLOAT) },
 };
 
+// Fixture 'DimensionsResNonPct' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonPctValidValues = {
+    { "ResId:DIMENSIONS_RES_NON_PCT_0_ID", CreateResource(DIMENSIONS_RES_NON_PCT_0_ID, Converter::ResourceType::FLOAT),
+        "123.00vp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_0_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_0_STR, Converter::ResourceType::FLOAT), "123.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_1_ID", CreateResource(DIMENSIONS_RES_NON_PCT_1_ID, Converter::ResourceType::FLOAT),
+        "0.00vp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_1_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_1_STR, Converter::ResourceType::FLOAT), "0.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_2_ID", CreateResource(DIMENSIONS_RES_NON_PCT_2_ID, Converter::ResourceType::FLOAT),
+        "1.23vp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_2_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_2_STR, Converter::ResourceType::FLOAT), "1.23vp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_3_ID", CreateResource(DIMENSIONS_RES_NON_PCT_3_ID, Converter::ResourceType::FLOAT),
+        "123.00fp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_3_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_3_STR, Converter::ResourceType::FLOAT), "123.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_4_ID", CreateResource(DIMENSIONS_RES_NON_PCT_4_ID, Converter::ResourceType::FLOAT),
+        "0.00fp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_4_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_4_STR, Converter::ResourceType::FLOAT), "0.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_5_ID", CreateResource(DIMENSIONS_RES_NON_PCT_5_ID, Converter::ResourceType::FLOAT),
+        "1.23fp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_5_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_5_STR, Converter::ResourceType::FLOAT), "1.23fp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_6_ID", CreateResource(DIMENSIONS_RES_NON_PCT_6_ID, Converter::ResourceType::FLOAT),
+        "123.00px" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_6_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_6_STR, Converter::ResourceType::FLOAT), "123.00px" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_7_ID", CreateResource(DIMENSIONS_RES_NON_PCT_7_ID, Converter::ResourceType::FLOAT),
+        "0.00px" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_7_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_7_STR, Converter::ResourceType::FLOAT), "0.00px" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_8_ID", CreateResource(DIMENSIONS_RES_NON_PCT_8_ID, Converter::ResourceType::FLOAT),
+        "1.23px" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_8_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_8_STR, Converter::ResourceType::FLOAT), "1.23px" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_9_ID", CreateResource(DIMENSIONS_RES_NON_PCT_9_ID, Converter::ResourceType::FLOAT),
+        "-123.00vp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_9_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_9_STR, Converter::ResourceType::FLOAT), "-123.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_10_ID",
+        CreateResource(DIMENSIONS_RES_NON_PCT_10_ID, Converter::ResourceType::FLOAT), "-123.00fp" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_10_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_10_STR, Converter::ResourceType::FLOAT), "-123.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_PCT_11_ID",
+        CreateResource(DIMENSIONS_RES_NON_PCT_11_ID, Converter::ResourceType::FLOAT), "-123.00px" },
+    { "ResName:DIMENSIONS_RES_NON_PCT_11_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_11_STR, Converter::ResourceType::FLOAT), "-123.00px" },
+};
+
+std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonPctInvalidValues = {
+    { "ResId:DIMENSIONS_RES_NON_PCT_12_ID",
+        CreateResource(DIMENSIONS_RES_NON_PCT_12_ID, Converter::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_PCT_12_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_12_STR, Converter::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_PCT_13_ID",
+        CreateResource(DIMENSIONS_RES_NON_PCT_13_ID, Converter::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_PCT_13_STR",
+        CreateResource(DIMENSIONS_RES_NON_PCT_13_STR, Converter::ResourceType::FLOAT) },
+};
+
 // Fixture 'MaxFontScaleNum' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
     { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
@@ -1146,6 +1223,32 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberA
     { "-100", Converter::ArkValue<Ark_Number>(-100), "-100" },
     { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.34" },
     { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "-56.78" },
+};
+
+// Fixture 'MotionBlurRadiusNumber' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurRadiusNumberValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.340000152587891" },
+    { "10", Converter::ArkValue<Ark_Number>(10), "10" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+    { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.10000000149011612" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "-0.1", Converter::ArkValue<Ark_Number>(-0.1), "0" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "0" },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "0" },
+};
+
+// Fixture 'MotionBlurAnchorNumber' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurAnchorNumberValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "1" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "1" },
+    { "10", Converter::ArkValue<Ark_Number>(10), "1" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+    { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.10000000149011612" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "-0.1", Converter::ArkValue<Ark_Number>(-0.1), "0" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "0" },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "0" },
 };
 
 // Fixture 'NumberFloatAnything' for type 'Ark_Number'

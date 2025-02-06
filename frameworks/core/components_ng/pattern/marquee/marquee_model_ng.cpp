@@ -289,8 +289,16 @@ void MarqueeModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& o
 
 void MarqueeModelNG::SetValue(FrameNode* frameNode, const std::optional<std::string>& srcValue)
 {
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
     if (srcValue.has_value()) {
+        textLayoutProperty->UpdateContent(srcValue.value());
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, srcValue.value(), frameNode);
+    } else {
+        textLayoutProperty->ResetContent();
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, frameNode);
     }
 }
 

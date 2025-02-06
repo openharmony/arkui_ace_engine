@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <string>
+#include "base/json/json_util.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -194,6 +195,39 @@ struct SafeAreaExpandOpts {
             default:
                 return "SAFE_AREA_EDGE_OTHERS_" + std::to_string(edges);;
         }
+    }
+
+    static void TypeToJsonArray(std::unique_ptr<JsonValue>& json, uint32_t type)
+    {
+        auto jsonArray = JsonUtil::CreateArray(true);
+        if (type & SAFE_AREA_TYPE_SYSTEM) {
+            jsonArray->Put(std::to_string(SAFE_AREA_TYPE_SYSTEM).c_str(), "SafeAreaType.SYSTEM");
+        }
+        if (type & SAFE_AREA_TYPE_CUTOUT) {
+            jsonArray->Put(std::to_string(SAFE_AREA_TYPE_CUTOUT).c_str(), "SafeAreaType.CUTOUT");
+        }
+        if (type & SAFE_AREA_TYPE_KEYBOARD) {
+            jsonArray->Put(std::to_string(SAFE_AREA_TYPE_KEYBOARD).c_str(), "SafeAreaType.KEYBOARD");
+        }
+        json->Put("types", jsonArray);
+    }
+
+    static void EdgeToJsonArray(std::unique_ptr<JsonValue>& json, uint32_t edge)
+    {
+        auto jsonArray = JsonUtil::CreateArray(true);
+        if (edge & SAFE_AREA_EDGE_TOP) {
+            jsonArray->Put(std::to_string(SAFE_AREA_EDGE_TOP).c_str(), "SafeAreaEdge.TOP");
+        }
+        if (edge & SAFE_AREA_EDGE_BOTTOM) {
+            jsonArray->Put(std::to_string(SAFE_AREA_EDGE_BOTTOM).c_str(), "SafeAreaEdge.BOTTOM");
+        }
+        if (edge & SAFE_AREA_EDGE_START) {
+            jsonArray->Put(std::to_string(SAFE_AREA_EDGE_START).c_str(), "SafeAreaEdge.START");
+        }
+        if (edge & SAFE_AREA_EDGE_END) {
+            jsonArray->Put(std::to_string(SAFE_AREA_EDGE_END).c_str(), "SafeAreaEdge.END");
+        }
+        json->Put("edges", jsonArray);
     }
 };
 } // namespace OHOS::Ace::NG

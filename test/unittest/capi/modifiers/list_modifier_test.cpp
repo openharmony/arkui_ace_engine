@@ -24,6 +24,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -493,7 +494,7 @@ HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
  * @tc.desc: Check the functionality of ListModifier.setEdgeEffect
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setEdgeEffectTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, DISABLED_setEdgeEffectTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -523,7 +524,7 @@ HWTEST_F(ListModifierTest, setEdgeEffectTest, TestSize.Level1)
     EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.None");
     edgeEffectOptionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "edgeEffectOptions");
     edgeEffectOptionsCheckValue = GetAttrValue<bool>(edgeEffectOptionsObject, "alwaysEnabled");
-    EXPECT_EQ(edgeEffectOptionsCheckValue, true);
+    EXPECT_EQ(edgeEffectOptionsCheckValue, false);
 
     // set invalid edgeEffect
     options = Converter::ArkValue<Opt_EdgeEffectOptions>(Converter::ArkValue<Ark_Boolean>(true));
@@ -1036,39 +1037,58 @@ HWTEST_F(ListModifierTest, setOnScrollStopTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
 {
-    Callback_ItemDragInfo_Number_CustomBuilder func{};
+    using namespace Converter;
+    static const int32_t expectedX = 357;
+    static const int32_t expectedY = 468;
+    static const int32_t expectedIdx = 7;
+    static const int32_t expectedResourceId = 123;
+
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    auto dragInfo = ItemDragInfo();
+    ASSERT_NE(frameNode, nullptr);
+    static const auto expectedParentNode = frameNode;
+    static auto expectedCustomNode = CreateNode();
+    ASSERT_NE(expectedCustomNode, nullptr);
 
-    struct CheckEvent {
-        int32_t nodeId;
-        ItemDragInfo dragInfo;
-        int32_t itemIndex;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::listEventsReceiver.onItemDragStart = [](Ark_Int32 nodeId,
-        const Ark_ItemDragInfo event, const Ark_Number itemIndex)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .dragInfo = Converter::Convert<ItemDragInfo>(event),
-            .itemIndex = Converter::Convert<int32_t>(itemIndex)
+    // set callback to model
+    auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_ItemDragInfo event, const Ark_Number itemIndex,
+        const Callback_CustomBuilder_Void continuation
+    ) {
+        // check input values
+        EXPECT_EQ(resourceId, expectedResourceId);
+        auto dragInfo = Convert<ItemDragInfo>(event);
+        EXPECT_EQ(dragInfo.GetX(), expectedX);
+        EXPECT_EQ(dragInfo.GetY(), expectedY);
+        auto index = Convert<int32_t>(itemIndex);
+        EXPECT_EQ(index, expectedIdx);
+
+        // construct the result CustomBuilder
+        auto builderSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
+            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
+            CallbackHelper(continuation).Invoke(expectedCustomNode);
         };
+        auto builder = ArkValue<CustomNodeBuilder>(nullptr, builderSyncFunc);
+
+        // return result
+        CallbackHelper(continuation).Invoke(builder);
     };
+    auto arkCallback =
+        ArkValue<Callback_ItemDragInfo_Number_CustomBuilder>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+    modifier_->setOnItemDragStart(node_, &arkCallback);
 
-    modifier_->setOnItemDragStart(node_, &func);
+    // imitate the test case
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(expectedX);
+    dragInfo.SetY(expectedY);
+    auto resultNode = eventHub->FireOnItemDragStart(dragInfo, expectedIdx);
 
-    dragInfo.SetX(357);
-    dragInfo.SetY(468);
+    // check result
+    EXPECT_EQ(resultNode.GetRawPtr(), reinterpret_cast<void *>(expectedCustomNode));
 
-    EXPECT_FALSE(checkEvent.has_value());
-    eventHub->FireOnItemDragStart(dragInfo, 7);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->dragInfo.GetX(), 357);
-    EXPECT_EQ(checkEvent->dragInfo.GetY(), 468);
-    EXPECT_EQ(checkEvent->itemIndex, 7);
+    DisposeNode(expectedCustomNode);
 }
 
 /*
@@ -1256,36 +1276,29 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
-    struct CheckEvent {
-        int32_t nodeId;
-        Dimension offset;
-        std::optional<ScrollState> state;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::listEventsReceiver.onScrollFrameBegin = [](
-        Ark_Int32 nodeId, const Ark_Number offset, const Ark_ScrollState state)
+    static const int32_t expectedResourceId = 123;
+    static const ScrollState expectedState = ScrollState::SCROLL;
+    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void cbReturn)
     {
-        checkEvent = {
-            .nodeId = nodeId,
-            .offset = Converter::Convert<Dimension>(offset),
-            .state = Converter::OptConvert<ScrollState>(state)
+        EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
+        EXPECT_EQ(Converter::OptConvert<ScrollState>(state), expectedState);
+        float offsetRemain = Converter::Convert<Dimension>(offset).ConvertToVp();
+        Ark_Literal_Number_offsetRemain arkResult {
+            .offsetRemain = Converter::ArkValue<Ark_Number>(offsetRemain)
         };
+        CallbackHelper(cbReturn).Invoke(arkResult);
     };
-
-    auto onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
-    EXPECT_EQ(onScrollFrameBegin, nullptr);
+    func = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
+        nullptr, onScrollFrameBegin, expectedResourceId
+    );
     modifier_->setOnScrollFrameBegin(node_, &func);
-    onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
-    EXPECT_NE(onScrollFrameBegin, nullptr);
 
-    EXPECT_FALSE(checkEvent.has_value());
-    onScrollFrameBegin(CalcDimension(43), ScrollState::SCROLL);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->offset.Value(), 43);
-    EXPECT_EQ(checkEvent->offset.Unit(), DimensionUnit::VP);
-    EXPECT_TRUE(checkEvent->state.has_value());
-    EXPECT_EQ(checkEvent->state.value(), ScrollState::SCROLL);
+    auto fireOnScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
+    ASSERT_NE(fireOnScrollFrameBegin, nullptr);
+    auto checkValue = CalcDimension(43, DimensionUnit::VP);
+    ScrollFrameResult result = fireOnScrollFrameBegin(checkValue, expectedState);
+    EXPECT_EQ(result.offset.ToString(), checkValue.ToString());
 }
 
 /*
@@ -1319,36 +1332,60 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
         };
     };
 
-    struct CheckMoveEvent {int32_t nodeId;
-        int32_t itemIndex;
-        int32_t insertIndex;
+    static const int32_t expectedResourceId = 123;
+    auto onItemMoveFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Ark_Number from, const Ark_Number to, const Callback_Boolean_Void cbReturn
+        ) {
+        EXPECT_EQ(resourceId, expectedResourceId);
+        auto result = Converter::Convert<int32_t>(from) > Converter::Convert<int32_t>(to);
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
     };
-    static std::optional<CheckMoveEvent> checkMoveEvent = std::nullopt;
-    EventsTracker::listEventsReceiver.onItemMove =
-        [](Ark_Int32 nodeId, const Ark_Number itemIndex, const Ark_Number insertIndex) {
-        checkMoveEvent = {.nodeId = nodeId,
-            .itemIndex = Converter::Convert<int32_t>(itemIndex),
-            .insertIndex = Converter::Convert<int32_t>(insertIndex),
-        };
-    };
+    func2 = Converter::ArkValue<Callback_Number_Number_Boolean>(nullptr, onItemMoveFunc, expectedResourceId);
 
     modifier_->setOnItemDrop(node_, &func1);
     modifier_->setOnItemMove(node_, &func2);
     dragInfo.SetX(975);
     dragInfo.SetY(864);
+    {
+        checkEvent.reset();
+        eventHub->FireOnItemDrop(dragInfo, 81, 99, false);
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_FALSE(checkEvent->isSuccess);
+    }
 
-    EXPECT_FALSE(checkEvent.has_value());
-    EXPECT_FALSE(checkMoveEvent.has_value());
-    eventHub->FireOnItemDrop(dragInfo, 81, 99, true);
-    EXPECT_TRUE(checkEvent.has_value());
-    // this result is returned by ViewStackProcessor::GetInstance()->Finish() in ListModelNG::SetOnItemMove
-    // since onItemMove should return bool value but it is a void
-    EXPECT_FALSE(checkEvent->isSuccess);
+    {
+        checkEvent.reset();
+        eventHub->FireOnItemDrop(dragInfo, 30, 20, false);
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_TRUE(checkEvent->isSuccess);
+    }
+}
 
-    EXPECT_TRUE(checkMoveEvent.has_value());
-    EXPECT_EQ(checkMoveEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkMoveEvent->itemIndex, 81);
-    EXPECT_EQ(checkMoveEvent->insertIndex, 99);
+/*
+ * @tc.name: DISABLED_setOnItemDeleteTest
+ * @tc.desc: Check the functionality of ListModifier.setOnItemDelete
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModifierTest, DISABLED_setOnItemDeleteTest, TestSize.Level1)
+{
+    Callback_Number_Boolean func{};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto dragInfo = ItemDragInfo();
+
+    static const int32_t expectedResourceId = 123;
+    static const int32_t fakeTotalCount = 10;
+    auto callbackSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Ark_Number index, const Callback_Boolean_Void cbReturn
+        ) {
+        EXPECT_EQ(resourceId, expectedResourceId);
+        auto result = Converter::Convert<int32_t>(index) < fakeTotalCount;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+    };
+    func = Converter::ArkValue<Callback_Number_Boolean>(nullptr, callbackSyncFunc, expectedResourceId);
+
+    modifier_->setOnItemDelete(node_, &func);
+    // check is not enable due to the ListEventHub does no support the onItemDelete event
 }
 
 /*

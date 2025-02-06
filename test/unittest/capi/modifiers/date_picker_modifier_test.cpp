@@ -1097,5 +1097,4 @@ HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
     };
 }
-
 } // namespace OHOS::Ace::NG

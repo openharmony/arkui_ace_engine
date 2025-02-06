@@ -27,4 +27,10 @@ void EffectComponentModelNG::Create()
         V2::EFFECT_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<EffectComponentPattern>(); });
     stack->Push(frameNode);
 }
+
+RefPtr<FrameNode> EffectComponentModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<EffectComponentPattern>());
+}
 } // namespace OHOS::Ace::NG

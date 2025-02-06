@@ -16,8 +16,13 @@
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 
 #include "accessor_test_base.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/event_target_info_peer.h"
+#include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 
 #include "gmock/gmock.h"
 
@@ -27,7 +32,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-class MockGestureRecognizer : public NGGestureRecognizer {
+class MockGestureRecognizer : public ClickRecognizer {
 public:
     MockGestureRecognizer() = default;
     ~MockGestureRecognizer() override = default;
@@ -36,18 +41,6 @@ public:
     MOCK_METHOD(bool, IsEnabled, (), (const));
     MOCK_METHOD(bool, IsInResponseLinkRecognizers, ());
     MOCK_METHOD(RefereeState, GetGestureState, (), (const));
-
-    void OnAccepted() {}
-    void OnRejected() {}
-    bool CheckTouchId(int32_t touchId)
-    {
-        return true;
-    }
-    void HandleTouchDownEvent(const TouchEvent& event) {}
-    void HandleTouchUpEvent(const TouchEvent& event) {}
-    void HandleTouchMoveEvent(const TouchEvent& event) {}
-    void HandleTouchCancelEvent(const TouchEvent& event) {}
-    void OnResetStatus() {}
 };
 } // namespace
 
@@ -57,24 +50,18 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        mockGestureRecognizer_ = new MockGestureRecognizer();
-        mockGestureRecognizerKeeper_ = AceType::Claim(mockGestureRecognizer_);
-        ASSERT_NE(mockGestureRecognizerKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GestureRecognizerPeer*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetRecognizer(mockGestureRecognizerKeeper_);
+        mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
         ASSERT_NE(mockGestureRecognizer_, nullptr);
+        peer_->SetRecognizer(mockGestureRecognizer_);
     }
 
     void TearDown() override
     {
         AccessorTestBase::TearDown();
-        mockGestureRecognizerKeeper_ = nullptr;
         mockGestureRecognizer_ = nullptr;
     }
 
-    MockGestureRecognizer *mockGestureRecognizer_ = nullptr;
-    RefPtr<MockGestureRecognizer> mockGestureRecognizerKeeper_ = nullptr;
+    RefPtr<MockGestureRecognizer> mockGestureRecognizer_ = nullptr;
 };
 
 /**
@@ -145,6 +132,58 @@ HWTEST_F(GestureRecognizerAccessorTest, GetTypeTest, TestSize.Level1)
     accessor_->getType(peer_);
     accessor_->getType(nullptr);
     accessor_->getType(peer_);
+}
+
+/**
+ * @tc.name: GetEventTargetInfo
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerAccessorTest, GetEventTargetInfo, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getEventTargetInfo, nullptr);
+    auto info = accessor_->getEventTargetInfo(peer_);
+    ASSERT_NE(info, nullptr);
+    auto eventTargetInfo = reinterpret_cast<EventTargetInfoPeer*>(info);
+    EXPECT_EQ(AceType::DynamicCast<ScrollableTargetInfoPeer>(eventTargetInfo), nullptr);
+    eventTargetInfo->DecRefCount();
+
+    mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
+    peer_->SetRecognizer(mockGestureRecognizer_);
+    const auto swiperNode = SwiperModelNG::CreateFrameNode(0);
+    mockGestureRecognizer_->AttachFrameNode(swiperNode);
+    info = accessor_->getEventTargetInfo(peer_);
+    ASSERT_NE(info, nullptr);
+    auto scrollableTargetInfo = AceType::DynamicCast<ScrollableTargetInfoPeer>(
+        reinterpret_cast<EventTargetInfoPeer*>(info));
+    ASSERT_NE(scrollableTargetInfo, nullptr);
+    EXPECT_EQ(scrollableTargetInfo->id, "");
+    EXPECT_EQ(scrollableTargetInfo->GetPattern(), swiperNode->GetPattern());
+    scrollableTargetInfo->DecRefCount();
+
+    mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
+    peer_->SetRecognizer(mockGestureRecognizer_);
+    const auto buttonNode = ButtonModelNG::CreateFrameNode(0);
+    mockGestureRecognizer_->AttachFrameNode(buttonNode);
+    info = accessor_->getEventTargetInfo(peer_);
+    ASSERT_NE(info, nullptr);
+    eventTargetInfo = reinterpret_cast<EventTargetInfoPeer*>(info);
+    EXPECT_EQ(AceType::DynamicCast<ScrollableTargetInfoPeer>(eventTargetInfo), nullptr);
+    EXPECT_EQ(eventTargetInfo->id, "");
+    eventTargetInfo->DecRefCount();
+
+    mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
+    peer_->SetRecognizer(mockGestureRecognizer_);
+    const auto scrollNode = ScrollModelNG::CreateFrameNode(0);
+    mockGestureRecognizer_->AttachFrameNode(scrollNode);
+    info = accessor_->getEventTargetInfo(peer_);
+    ASSERT_NE(info, nullptr);
+    scrollableTargetInfo = AceType::DynamicCast<ScrollableTargetInfoPeer>(
+        reinterpret_cast<EventTargetInfoPeer*>(info));
+    ASSERT_NE(scrollableTargetInfo, nullptr);
+    EXPECT_EQ(scrollableTargetInfo->id, "");
+    EXPECT_EQ(scrollableTargetInfo->GetPattern(), scrollNode->GetPattern());
+    scrollableTargetInfo->DecRefCount();
 }
 
 /**

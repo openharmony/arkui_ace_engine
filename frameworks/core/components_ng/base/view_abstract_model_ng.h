@@ -56,6 +56,15 @@ public:
             ViewAbstract::SetWidth(NG::CalcLength(width));
         }
     }
+    
+    static void SetWidth(FrameNode* frameNode, const CalcDimension& width)
+    {
+        if (width.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
+        } else {
+            ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+        }
+    }
 
     void SetHeight(const CalcDimension& height) override
     {
@@ -63,6 +72,15 @@ public:
             ViewAbstract::SetHeight(NG::CalcLength(height.CalcValue()));
         } else {
             ViewAbstract::SetHeight(NG::CalcLength(height));
+        }
+    }
+
+    static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
+    {
+        if (height.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
+        } else {
+            ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
     }
 
@@ -88,12 +106,30 @@ public:
         }
     }
 
+    static void SetMinWidth(FrameNode* frameNode, const CalcDimension& minWidth)
+    {
+        if (minWidth.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMinWidth(frameNode, NG::CalcLength(minWidth.CalcValue()));
+        } else {
+            ViewAbstract::SetMinWidth(frameNode, NG::CalcLength(minWidth));
+        }
+    }
+
     void SetMinHeight(const CalcDimension& minHeight) override
     {
         if (minHeight.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetMinHeight(NG::CalcLength(minHeight.CalcValue()));
         } else {
             ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
+        }
+    }
+
+    static void SetMinHeight(FrameNode* frameNode, const CalcDimension& minHeight)
+    {
+        if (minHeight.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMinHeight(frameNode, NG::CalcLength(minHeight.CalcValue()));
+        } else {
+            ViewAbstract::SetMinHeight(frameNode, NG::CalcLength(minHeight));
         }
     }
 
@@ -960,6 +996,7 @@ public:
 
     static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
     {
+        CHECK_NULL_VOID(frameNode);
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
@@ -1286,10 +1323,13 @@ public:
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override;
-    RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
+    static RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
+    static void DismissSheetStatic();
     void DismissContentCover() override;
+    static void DismissContentCoverStatic();
     void SheetSpringBack() override;
+    static void SheetSpringBackStatic();
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -1340,6 +1380,7 @@ public:
 
     static void DisableOnKeyPreIme(FrameNode* frameNode)
     {
+        CHECK_NULL_VOID(frameNode);
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->ClearOnKeyPreIme();
@@ -1501,11 +1542,51 @@ public:
     {
         ViewAbstract::SetChainStyle(frameNode, chainInfo);
     }
+    static void SetLayoutWeight(FrameNode* frameNode, const LayoutWeightPair& value)
+    {
+        ViewAbstract::SetLayoutWeight(frameNode, value);
+    }
 
+    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+    {
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+    }
+    static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
+    static void BindMenu(FrameNode* frameNode,
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    static void BindMenuGesture(FrameNode* frameNode,
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
+        std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
+
+    static void BindContentCover(FrameNode* targetNode, bool isShow,
+        std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
+        NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        const NG::ContentCoverParam& contentCoverParam);
+
+    static void BindSheet(FrameNode* frameNode, bool isShow,
+        std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc,
+        std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack);
 
 private:
-    void RegisterContextMenuKeyEvent(
+    static bool CheckMenuIsShow(const MenuParam& menuParam, const RefPtr<FrameNode>& targetNode);
+    static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
+    static void CreateCustomMenuWithPreview(FrameNode* targetNode,
+        std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindContextMenuSingle(FrameNode* targetNode,
+        std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override

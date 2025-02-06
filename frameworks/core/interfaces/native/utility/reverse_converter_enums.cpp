@@ -23,6 +23,32 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src)
+{
+    switch (src) {
+        case AccessibilityHoverAction::HOVER_ENTER: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER; break;
+        case AccessibilityHoverAction::HOVER_MOVE: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE; break;
+        case AccessibilityHoverAction::HOVER_EXIT: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT; break;
+        case AccessibilityHoverAction::HOVER_CANCEL: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL; break;
+        default:
+            dst = static_cast<Ark_AccessibilityHoverType>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
+{
+    switch (src) {
+        case BindSheetDismissReason::BACK_PRESSED: dst = ARK_DISMISS_REASON_PRESS_BACK; break;
+        case BindSheetDismissReason::TOUCH_OUTSIDE: dst = ARK_DISMISS_REASON_TOUCH_OUTSIDE; break;
+        case BindSheetDismissReason::CLOSE_BUTTON: dst = ARK_DISMISS_REASON_CLOSE_BUTTON; break;
+        case BindSheetDismissReason::SLIDE_DOWN: dst = ARK_DISMISS_REASON_SLIDE_DOWN; break;
+        default: dst = static_cast<Ark_DismissReason>(-1);
+            LOGE("Unexpected enum value in BindSheetDismissReason: %{public}d", src); break;
+    }
+}
+
 void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src)
 {
     switch (src) {
@@ -265,6 +291,36 @@ void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponen
     }
 }
 
+void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
+{
+    switch (src) {
+        case MouseAction::PRESS: dst = ARK_MOUSE_ACTION_PRESS; break;
+        case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
+        case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
+        case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        default: {
+            dst = static_cast<Ark_MouseAction>(-1);
+            LOGE("Unexpected enum value in MouseAction: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src)
+{
+    switch (src) {
+        case MouseButton::LEFT_BUTTON: dst = ARK_MOUSE_BUTTON_LEFT; break;
+        case MouseButton::RIGHT_BUTTON: dst = ARK_MOUSE_BUTTON_RIGHT; break;
+        case MouseButton::MIDDLE_BUTTON: dst = ARK_MOUSE_BUTTON_MIDDLE; break;
+        case MouseButton::BACK_BUTTON: dst = ARK_MOUSE_BUTTON_BACK; break;
+        case MouseButton::FORWARD_BUTTON: dst = ARK_MOUSE_BUTTON_FORWARD; break;
+        case MouseButton::NONE_BUTTON: dst = ARK_MOUSE_BUTTON_NONE; break;
+        default: {
+            dst = static_cast<Ark_MouseButton>(-1);
+            LOGE("Unexpected enum value in MouseButton: %{public}d", src);
+        }
+    }
+}
+
 void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
 {
     switch (src) {
@@ -394,6 +450,17 @@ void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionE
     }
 }
 
+void AssignArkValue(Ark_SheetType& dst, const SheetType& src)
+{
+    switch (src) {
+        case SheetType::SHEET_BOTTOM: dst = ARK_SHEET_TYPE_BOTTOM; break;
+        case SheetType::SHEET_CENTER: dst = ARK_SHEET_TYPE_CENTER; break;
+        case SheetType::SHEET_POPUP: dst = ARK_SHEET_TYPE_POPUP; break;
+        default: dst = static_cast<Ark_SheetType>(-1);
+            LOGE("Unexpected enum value in SheetType: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
 {
     switch (src) {
@@ -413,6 +480,19 @@ void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
         case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
         default: dst = static_cast<Ark_StickyStyle>(-1);
             LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src)
+{
+    switch (src) {
+        case SwipeActionState::COLLAPSED: dst = ARK_SWIPE_ACTION_STATE_COLLAPSED; break;
+        case SwipeActionState::EXPANDED: dst = ARK_SWIPE_ACTION_STATE_EXPANDED; break;
+        case SwipeActionState::ACTIONING: dst = ARK_SWIPE_ACTION_STATE_ACTIONING; break;
+        default: {
+            dst = static_cast<Ark_SwipeActionState>(-1);
+            LOGE("Unexpected enum value in SwipeActionState: %{public}d", src);
+        }
     }
 }
 
@@ -633,6 +713,16 @@ void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src)
             Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_LEAVE_BFCACHE; break;
         default: dst = static_cast<Ark_NativeEmbedStatus>(-1);
             LOGE("Unexpected enum value in NativeEmbedStatus: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
+{
+    switch (src) {
+        case MenuPolicy::DEFAULT: dst = ARK_MENU_POLICY_DEFAULT; break;
+        case MenuPolicy::HIDE: dst = ARK_MENU_POLICY_HIDE; break;
+        case MenuPolicy::SHOW: dst = ARK_MENU_POLICY_SHOW; break;
+        default: dst = static_cast<Ark_MenuPolicy>(-1);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

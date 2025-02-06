@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 
@@ -30,7 +31,17 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+namespace Converter {
+inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
+    ConvContext *ctx)
+{
+    dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
+}
+} // Converter
+
 namespace {
+const float TEST_OFFSET = 10.0f;
+
 struct EventsTracker {
     static inline GENERATED_ArkUIScrollEventsReceiver eventsReceiver {};
 
@@ -1271,4 +1282,180 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSiz
     ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
 }
 
+/**
+ * @tc.name: setOnScrollFrameBeginTest
+ * @tc.desc: Test for setOnScrollFrameBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
+    modifier_->setOnScrollFrameBegin(node_, nullptr);
+
+    static const Ark_Int32 expectedResId = 123;
+    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number offset, Ark_ScrollState state,
+        const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
+        ScrollFrameResult result;
+        result.offset = Converter::Convert<Dimension>(offset);
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_OnScrollFrameBeginHandlerResult>(result));
+    };
+    auto arkFunc = Converter::ArkValue<OnScrollFrameBeginCallback>(
+        nullptr, onScrollFrameBegin, expectedResId);
+    modifier_->setOnScrollFrameBegin(node_, &arkFunc);
+
+    Dimension dimension(TEST_OFFSET);
+    ScrollState state = ScrollState::SCROLL;
+    ScrollFrameResult result = eventHub->GetOnScrollFrameBegin()(dimension, state);
+    EXPECT_EQ(result.offset.ConvertToPx(), dimension.ConvertToPx());
+}
+
+/**
+ * @tc.name: OnWillScroll_SetCallback
+ * @tc.desc: Test OnWillScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct ScrollData
+    {
+        Ark_ScrollState state;
+        Ark_ScrollSource source;
+        Ark_Int32 nodeId;
+    };
+    static std::optional<ScrollData> otherState;
+
+    auto callback = [](
+        Ark_VMContext context,
+        const Ark_Int32 resourceId,
+        const Ark_Number xOffset,
+        const Ark_Number yOffset,
+        Ark_ScrollState scrollState,
+        Ark_ScrollSource scrollSource,
+        const Callback_OffsetResult_Void continuation) {
+        otherState = {scrollState, scrollSource, resourceId};
+        Ark_OffsetResult retVal;
+        retVal.xOffset = xOffset;
+        retVal.yOffset = yOffset;
+        CallbackHelper(continuation).Invoke(retVal);
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<Opt_ScrollOnWillScrollCallback>(
+        Converter::ArkValue<ScrollOnWillScrollCallback>(nullptr, callback, id));
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+
+    ASSERT_NE(modifier_->setOnWillScroll, nullptr);
+    modifier_->setOnWillScroll(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetOnWillScrollEvent());
+    Dimension x(212);
+    Dimension y(984);
+    auto returnValue = eventHub->GetOnWillScrollEvent()(x, y, ScrollState::FLING, ScrollSource::SCROLL_BAR);
+    EXPECT_EQ(returnValue.xOffset.Value(), 212);
+    EXPECT_EQ(returnValue.yOffset.Value(), 984);
+    ASSERT_TRUE(otherState.has_value());
+    EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_FLING, otherState->state);
+    EXPECT_EQ(Ark_ScrollSource::ARK_SCROLL_SOURCE_SCROLL_BAR, otherState->source);
+    EXPECT_EQ(id, otherState->nodeId);
+}
+
+/**
+ * @tc.name: OnWillScroll_SetNullptrCallback
+ * @tc.desc: Test OnWillScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnWillScroll_SetNullptrCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
+    ASSERT_NE(modifier_->setOnWillScroll, nullptr);
+    modifier_->setOnWillScroll(node_, nullptr);
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
+}
+
+/*
+ * @tc.name: OnDidScroll_SetCallback
+ * @tc.desc: Test OnDidScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct resultData {
+        Ark_Int32 resourceId;
+        Ark_Number x;
+        Ark_Number y;
+        Ark_ScrollState state;
+    };
+    static std::optional<resultData> result;
+
+    auto callback = [](
+        const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState) {
+            result = {resourceId, xOffset, yOffset, scrollState};
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<Opt_ScrollOnScrollCallback>(
+        Converter::ArkValue<ScrollOnScrollCallback>(callback, id));
+    ASSERT_FALSE(eventHub->GetOnDidScrollEvent());
+
+    ASSERT_NE(modifier_->setOnDidScroll, nullptr);
+    modifier_->setOnDidScroll(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetOnDidScrollEvent());
+    int testValX = 12;
+    int testValY = 333;
+    Dimension x(testValX);
+    Dimension y(testValY);
+    eventHub->GetOnDidScrollEvent()(x, y, ScrollState::SCROLL);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_SCROLL, result.value().state);
+    auto resultValX = Converter::OptConvert<int>(result.value().x);
+    auto resultValY = Converter::OptConvert<int>(result.value().y);
+    ASSERT_TRUE(resultValX.has_value());
+    EXPECT_EQ(testValX, resultValX.value());
+    ASSERT_TRUE(resultValY.has_value());
+    EXPECT_EQ(testValY, resultValY.value());
+    EXPECT_EQ(id, result.value().resourceId);
+}
+
+/**
+ * @tc.name: OnDidScroll_SetNullCallback
+ * @tc.desc: Test OnScrollEdgeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnDidScroll_SetNullCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ASSERT_NE(modifier_->setOnDidScroll, nullptr);
+    modifier_->setOnDidScroll(node_, nullptr);
+    ASSERT_FALSE(eventHub->GetOnDidScrollEvent());
+}
 } // namespace OHOS::Ace::NG

@@ -231,9 +231,9 @@ void ListItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
     pattern->SetSelectable(selectable);
 }
 
-void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, OnDeleteEvent&& onDelete,
+void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, UINode* buildNode, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
+    OnStateChangedEvent&& onStateChange, const std::optional<Dimension>& length, bool isStartArea)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
@@ -248,7 +248,11 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
         eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
         eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetStartOnStateChange(std::move(onStateChange));
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, frameNode);
+        if (length) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, frameNode);
+        }
     } else {
         const auto endNode = AceType::Claim<UINode>(buildNode);
         pattern->SetEndNode(endNode);
@@ -257,7 +261,11 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
         eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
         eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetEndOnStateChange(std::move(onStateChange));
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, frameNode);
+        if (length) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, frameNode);
+        }
     }
 }
 

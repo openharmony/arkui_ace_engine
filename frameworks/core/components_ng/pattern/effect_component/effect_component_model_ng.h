@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT EffectComponentModelNG : public OHOS::Ace::EffectComponentModel {
 public:
     void Create() override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_NG_H

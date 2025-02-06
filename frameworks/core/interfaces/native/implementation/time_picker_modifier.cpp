@@ -112,9 +112,11 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TimePickerModelNG::SetDateTimeOptions(frameNode, convValue);
-    LOGE("TimePickerInterfaceModifier::DateTimeOptionsImpl - Ark_CustomObject isn't supported");
+    auto dateTimeOptions = Converter::OptConvert<DateTimeType>(*value);
+    if (dateTimeOptions) {
+        TimePickerModelNG::SetDateTimeOptions(frameNode, dateTimeOptions->hourType,
+            dateTimeOptions->minuteType, dateTimeOptions->secondType);
+    }
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Callback_TimePickerResult_Void* value)

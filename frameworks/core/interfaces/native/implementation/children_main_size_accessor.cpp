@@ -99,6 +99,11 @@ Ark_Int32 GetChildDefaultSizeImpl(ChildrenMainSizePeer* peer)
 void SetChildDefaultSizeImpl(ChildrenMainSizePeer* peer,
                              const Ark_Number* childDefaultSize)
 {
+    CHECK_NULL_VOID(peer && childDefaultSize);
+    float size = Converter::Convert<float>(*childDefaultSize);
+    if (NonNegative(size)) {
+        peer->SetDefaultSize(size);
+    }
 }
 } // ChildrenMainSizeAccessor
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()

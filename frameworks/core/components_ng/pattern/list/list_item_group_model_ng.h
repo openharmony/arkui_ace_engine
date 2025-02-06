@@ -44,6 +44,8 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
     static void SetFooter(FrameNode* frameNode, FrameNode* footerNode);
+    static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);

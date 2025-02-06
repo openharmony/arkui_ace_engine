@@ -15,20 +15,57 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
 
+#include "canvas_renderer_peer_impl.h"
 #include "core/components/common/properties/decoration.h"
 
 struct CanvasPatternPeer {
 public:
-    const std::shared_ptr<OHOS::Ace::Pattern>& GetPattern() const
+    using CanvasPatternPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>;
+    using TransformParamCls = OHOS::Ace::TransformParam;
+    using CanvasRendererCls = OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl;
+
+    CanvasPatternPeer() = default;
+    virtual ~CanvasPatternPeer() = default;
+    virtual void SetTransform(const TransformParamCls& param)
     {
-        return pattern_;
+        auto renderer = canvasRenderer_.Upgrade();
+        if (!renderer) {
+            LOGE("ARKOALA CanvasPatternPeer::SetTransform canvas renderer not bound to component.");
+            return;
+        }
+        auto pattern = renderer->GetCanvasPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTransform(param);
     }
-    void SetPattern(const std::shared_ptr<OHOS::Ace::Pattern>& pattern)
+    OHOS::Ace::RefPtr<CanvasRendererCls> GetCanvasRenderer()
     {
-        pattern_ = pattern;
+        return canvasRenderer_.Upgrade();
+    }
+    void SetCanvasRenderer(const OHOS::Ace::WeakPtr<CanvasRendererCls>& canvasRenderer)
+    {
+        canvasRenderer_ = canvasRenderer;
+    }
+    void SetId(int32_t id)
+    {
+        id_ = id;
+    }
+    int32_t GetId() const
+    {
+        return id_;
+    }
+    void SetUnit(OHOS::Ace::CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+    OHOS::Ace::CanvasUnit GetUnit()
+    {
+        return unit_;
     }
 
 private:
-    std::shared_ptr<OHOS::Ace::Pattern> pattern_ = nullptr;
+    int32_t id_ = 0;
+    OHOS::Ace::CanvasUnit unit_ = OHOS::Ace::CanvasUnit::DEFAULT;
+    OHOS::Ace::WeakPtr<CanvasRendererCls> canvasRenderer_ = nullptr;
 };
+
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
