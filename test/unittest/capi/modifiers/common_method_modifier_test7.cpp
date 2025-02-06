@@ -401,9 +401,9 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
     auto callsCount = 0;
     static const int32_t expectedResourceId = 123;
     static const std::string expectedInfo("key:value");
-    static const CustomNodeBuilderTestHelper<CommonMethodModifierTest7> builderHelper(this, frameNode);
-
-    static const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    const CustomNodeBuilderTestHelper<CommonMethodModifierTest7> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    static auto* arkBuilder = &builder;
 
     struct CheckEvent {
         int32_t nodeId;
@@ -421,7 +421,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
         checkEvent->nodeId = resourceId;
         auto isNeedBuilder = checkEvent->dragEvent->GetDragBehavior() == DragBehavior::MOVE;
         if (isNeedBuilder) {
-            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
+            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = *arkBuilder;
         } else {
             TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
         }
@@ -451,6 +451,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
     EXPECT_EQ(ddInfo.customNode, nullptr);
     EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEvent.GetRawPtr());
     EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
+    arkBuilder = nullptr;
 }
 
 /*
