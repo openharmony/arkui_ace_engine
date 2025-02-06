@@ -427,6 +427,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             overlayManager->RemovePixelMap();
             return;
         }
+        if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
+            actuator->FireCustomerOnDragEnd();
+        }
         CHECK_NULL_VOID(actuator->userCallback_);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -792,6 +795,21 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     result.emplace_back(SequencedRecognizer_);
     result.emplace_back(previewLongPressRecognizer_);
     result.emplace_back(preDragStatusPressRecognizer_);
+}
+
+void DragEventActuator::FireCustomerOnDragEnd()
+{
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode ->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetResult(DragRet::DRAG_FAIL);
+    dragEvent->SetDragBehavior(DragBehavior::UNKNOWN);
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
 }
 
 void DragEventActuator::ResetDragStatus()
