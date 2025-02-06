@@ -1994,4 +1994,44 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityDefaultValue
  */
 HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, TestSize.Level1) {}
 #endif
+
+/*
+ * @tc.name: setOnChangeEventSelectedTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->set__onChangeEvent_selected, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<PickerDate> selectedDate = std::nullopt;
+    auto onDateChange = [](const Ark_Int32 resourceId, const Ark_Date parameter) {
+        selectedDate = Converter::OptConvert<PickerDate>(parameter);
+    };
+    Callback_Date_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDateChange
+    };
+
+    modifier_->set__onChangeEvent_selected(node_, &func);
+
+    for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
+        DatePickerChangeEvent event(testValue.first.ToString(true));
+        eventHub->FireChangeEvent(&event);
+
+        ASSERT_TRUE(selectedDate.has_value());
+        EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
+        EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
+        EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
+    };
+}
 } // namespace OHOS::Ace::NG

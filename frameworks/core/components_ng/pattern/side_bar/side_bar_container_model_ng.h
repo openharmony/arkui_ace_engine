@@ -79,6 +79,7 @@ public:
     static void SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin);
     static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const bool)>&& onChangeEvent);
     static void ResetControlButtonLeft(FrameNode* frameNode);
     static void ResetControlButtonIconInfo(FrameNode* frameNode);
     static bool IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern);

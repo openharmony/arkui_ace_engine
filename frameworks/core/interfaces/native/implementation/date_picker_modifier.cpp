@@ -260,8 +260,17 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //DatePickerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(result);
+    };
+    DatePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()

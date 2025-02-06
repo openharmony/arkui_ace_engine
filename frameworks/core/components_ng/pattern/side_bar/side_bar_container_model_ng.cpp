@@ -484,6 +484,14 @@ void SideBarContainerModelNG::SetOnChange(FrameNode* frameNode, std::function<vo
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void SideBarContainerModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(const bool)>&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void SideBarContainerModelNG::ResetControlButtonLeft(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft,

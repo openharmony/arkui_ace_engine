@@ -400,6 +400,20 @@ void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* inf
     });
 }
 
+void SwiperModelNG::SetOnChangeEvent(FrameNode* frameNode,
+    std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -630,6 +630,14 @@ void SliderModelNG::SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& even
     eventHub->SetOnChange(std::move(eventOnChange));
 }
 
+void SliderModelNG::SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void SliderModelNG::SetSliderValue(FrameNode* frameNode, const std::optional<float>& value)
 {
     CHECK_NULL_VOID(frameNode);

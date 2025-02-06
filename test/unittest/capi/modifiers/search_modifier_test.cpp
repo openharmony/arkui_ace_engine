@@ -1565,4 +1565,47 @@ HWTEST_F(SearchModifierTest, setsetEnableHapticFeedbackTest, TestSize.Level1)
         EXPECT_EQ(checkVal, expectVal);
     }
 }
+
+/*
+ * @tc.name: setOnChangeEventValueImpl
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::string value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_String parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::Convert<std::string>(parameter)
+        };
+    };
+
+    Callback_String_Void arkCallback = Converter::ArkValue<Callback_String_Void>(checkCallback, contextId);
+
+    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+
+    PreviewText previewText {.offset = -1, .value = u""};
+    ASSERT_EQ(checkEvent.has_value(), false);
+    eventHub->FireOnChange(u"test", previewText);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, "test");
+    eventHub->FireOnChange(u"test_2", previewText);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, "test_2");
+}
 } // namespace OHOS::Ace::NG

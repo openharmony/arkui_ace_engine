@@ -354,6 +354,14 @@ void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void CheckBoxModelNG::SetChangeEvent(FrameNode* frameNode, ChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(onChange));
+}
+
 std::string CheckBoxModelNG::GetCheckboxName(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");

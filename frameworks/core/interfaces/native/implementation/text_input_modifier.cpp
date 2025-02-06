@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/text_input_controller_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -865,8 +866,12 @@ void __onChangeEvent_textImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //TextInputModelNG::Set__onChangeEvent_text(frameNode, convValue);
+    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
+        arkCallback.Invoke(arkContent);
+    };
+    TextFieldModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // TextInputAttributeModifier
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
