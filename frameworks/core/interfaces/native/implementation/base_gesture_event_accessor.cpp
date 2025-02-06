@@ -34,6 +34,12 @@ Ark_NativePointer GetFinalizerImpl()
 void SetFingerListImpl(BaseGestureEventPeer* peer,
                        const Array_FingerInfo* fingerList)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(fingerList);
+    auto eventInfo = peer->GetEventInfo();
+    CHECK_NULL_VOID(eventInfo);
+    std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
+    eventInfo->SetFingerList(list);
 }
 } // BaseGestureEventAccessor
 const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
