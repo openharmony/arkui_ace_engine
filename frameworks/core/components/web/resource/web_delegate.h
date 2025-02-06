@@ -1258,6 +1258,7 @@ private:
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
     void UnregisterAvoidAreaChangeListener(int32_t instanceId);
+    NG::SafeAreaInsets GetCombinedSafeArea();
     void OnSafeInsetsChange();
     void EnableHardware();
 #endif
