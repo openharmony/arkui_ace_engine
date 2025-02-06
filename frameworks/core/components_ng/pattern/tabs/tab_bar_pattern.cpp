@@ -1221,6 +1221,13 @@ void TabBarPattern::UpdateChildrenClipEdge()
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     bool clipEdge = tabBarRenderContext->GetClipEdgeValue(true);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    if (tabTheme->GetIsChangeFocusTextStyle()) {
+        clipEdge = false;
+    }
     if (clipEdge != clipEdge_) {
         int32_t totalCount = tabBarNode->TotalChildCount() - MASK_COUNT;
         for (int32_t index = 0; index < totalCount; index++) {
