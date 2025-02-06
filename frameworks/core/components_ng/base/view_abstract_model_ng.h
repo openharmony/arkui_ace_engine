@@ -1194,6 +1194,16 @@ public:
         ViewAbstract::SetTabIndex(index);
     }
 
+    void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) override
+    {
+        ViewAbstract::SetNextFocus(key, nextFocus);
+    }
+
+    void ResetNextFocus() override
+    {
+        ViewAbstract::ResetNextFocus();
+    }
+
     void SetFocusOnTouch(bool isSet) override
     {
         ViewAbstract::SetFocusOnTouch(isSet);

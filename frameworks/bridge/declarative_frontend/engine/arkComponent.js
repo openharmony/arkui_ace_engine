@@ -3139,6 +3139,21 @@ class FocusBoxModifier extends ModifierWithKey {
   }
 }
 FocusBoxModifier.identity = Symbol('focusBox');
+class NextFocusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetNextFocus(node);
+    }
+    else {
+      getUINativeModule().common.setNextFocus(node, this.value.forward, this.value.backward,
+        this.value.up, this.value.down, this.value.left, this.value.right);
+    }
+  }
+}
+NextFocusModifier.identity = Symbol('nextFocus');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -4597,6 +4612,10 @@ class ArkComponent {
   }
   focusBox(value) {
     modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
+    return this;
+  }
+  nextFocus(value) {
+    modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
     return this;
   }
 }

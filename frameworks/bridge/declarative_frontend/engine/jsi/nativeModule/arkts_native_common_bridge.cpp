@@ -8619,6 +8619,67 @@ ArkUINativeModuleValue CommonBridge::ResetFocusBox(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetNextFocus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    ArkUI_Uint32 hasValue = 0;
+    std::string nextFocusArray[NUM_6];
+    auto forward = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto backward = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto up = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto down = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto left = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto right = runtimeCallInfo->GetCallArgRef(NUM_6);
+    if (forward->IsString(vm)) {
+        nextFocusArray[NUM_0] = forward->ToString(vm)->ToString(vm);
+        hasValue = 1;
+    }
+    hasValue = hasValue << 1;
+    if (backward->IsString(vm)) {
+        nextFocusArray[NUM_1] = backward->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (up->IsString(vm)) {
+        nextFocusArray[NUM_2] = up->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (down->IsString(vm)) {
+        nextFocusArray[NUM_3] = down->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (left->IsString(vm)) {
+        nextFocusArray[NUM_4] = left->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (right->IsString(vm)) {
+        nextFocusArray[NUM_5] = right->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setNextFocus(nativeNode,
+        nextFocusArray[NUM_0].c_str(), nextFocusArray[NUM_1].c_str(),
+        nextFocusArray[NUM_2].c_str(), nextFocusArray[NUM_3].c_str(),
+        nextFocusArray[NUM_4].c_str(), nextFocusArray[NUM_5].c_str(), hasValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetNextFocus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetNextFocus(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info)
 {
     auto axisMap = panda::MapRef::New(vm);

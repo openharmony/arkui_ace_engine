@@ -429,6 +429,7 @@ public:
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsTabStop(const JSCallbackInfo& info);
+    static void JsNextFocus(const JSCallbackInfo& info);
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);

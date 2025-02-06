@@ -1904,6 +1904,17 @@ typedef enum {
      * @since 16
      */
     NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE = 100,
+    
+    /**
+     * @brief Sets the next focus node.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: focus movement direction, as defined in {@link ArkUI_FocusMove}.
+     * .object: next focus node. The parameter type is {@link ArkUI_NodeHandle}.\n
+     * \n
+     *
+     */
+    NODE_NEXT_FOCUS = 101,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.

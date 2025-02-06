@@ -34,6 +34,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
@@ -45,7 +46,6 @@
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
 
@@ -340,6 +340,8 @@ public:
     virtual void SetFocusOnTouch(bool isSet) = 0;
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
+    virtual void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) {}
+    virtual void ResetNextFocus() {}
     virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
     virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) {}
     virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}

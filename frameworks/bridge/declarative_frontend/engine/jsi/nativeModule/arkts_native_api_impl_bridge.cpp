@@ -1083,6 +1083,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFocusBox));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFocusBox"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFocusBox));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNextFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetNextFocus));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNextFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetNextFocus));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAdvancedBlendMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAdvancedBlendMode));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAdvancedBlendMode"),

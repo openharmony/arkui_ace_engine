@@ -120,6 +120,15 @@ enum class OverlayType {
     RESET = 3,
 };
 
+typedef enum {
+    FOCUS_MOVE_FORWARD = 0,
+    FOCUS_MOVE_BACKWARD,
+    FOCUS_MOVE_UP,
+    FOCUS_MOVE_DOWN,
+    FOCUS_MOVE_LEFT,
+    FOCUS_MOVE_RIGHT,
+} FocusMoveDirection;
+
 typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* effect);
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -303,6 +312,8 @@ public:
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
+    static void SetNextFocus(FocusIntension key, const std::string& nextFocus);
+    static void ResetNextFocus();
     static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
@@ -693,6 +704,9 @@ public:
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
     static void SetLayoutEvent(FrameNode* frameNode, std::function<void()>&& onLayout);
+    static void SetNextFocus(
+        FrameNode* frameNode, FocusIntension key, const std::variant<WeakPtr<AceType>, std::string> nextFocus);
+    static void ResetNextFocus(FrameNode* frameNode);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
