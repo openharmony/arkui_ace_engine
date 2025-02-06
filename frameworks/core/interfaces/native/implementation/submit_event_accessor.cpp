@@ -34,11 +34,13 @@ Ark_NativePointer GetFinalizerImpl()
 void KeepEditableStateImpl(SubmitEventPeer* peer)
 {
     CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->GetEventInfo());
     peer->GetEventInfo()->SetKeepEditable(true);
 }
 void GetTextImpl(SubmitEventPeer* peer)
 {
     CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->GetEventInfo());
     auto text = peer->GetEventInfo()->GetText();
     LOGE("Arkoala method SubmitEventAccessor.GetTextImpl has incorrect return type");
 }
@@ -46,6 +48,7 @@ void SetTextImpl(SubmitEventPeer* peer,
                  const Ark_String* text)
 {
     CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->GetEventInfo());
     auto string = Converter::Convert<std::u16string>(*text);
     peer->GetEventInfo()->SetText(string);
 }
