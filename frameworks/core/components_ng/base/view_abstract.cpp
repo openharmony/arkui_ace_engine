@@ -5498,7 +5498,8 @@ void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string
 
 void ViewAbstract::FreezeUINodeById(const std::string& id, bool isFreeze)
 {
-    auto targetNode = ElementRegister::GetInstance()->GetFrameNodeById(id);
+    auto targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(id, true);
+    CHECK_NULL_VOID(targetNode);
     targetNode->SetFreeze(isFreeze, true);
 }
 

@@ -8356,6 +8356,8 @@ ArkUINativeModuleValue CommonBridge::FreezeUINodeById(ArkUIRuntimeCallInfo* runt
     if (isFreezeArg->IsBoolean()) {
         isFreeze = isFreezeArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeById(id.c_str(), isFreeze);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeById(id.c_str(), false);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -8374,6 +8376,8 @@ ArkUINativeModuleValue CommonBridge::FreezeUINodeByUniqueId(ArkUIRuntimeCallInfo
     if (isFreezeArg->IsBoolean()) {
         isFreeze = isFreezeArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeByUniqueId(uniqueId, isFreeze);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeByUniqueId(uniqueId, false);
     }
     return panda::JSValueRef::Undefined(vm);
 }
