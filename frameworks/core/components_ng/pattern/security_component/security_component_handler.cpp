@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
+#include "ui/base/geometry/dimension.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
@@ -899,6 +901,33 @@ void SecurityComponentHandler::WriteButtonInfo(
     buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
     buttonInfo.bg_ = static_cast<SecCompBackground>(
         layoutProperty->GetBackgroundType().value());
+
+    RectF rect = node->GetTransformRectRelativeToWindow();
+    auto maxRadius = std::min(rect.Width(), rect.Height()) / HALF;
+    if (layoutProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE) ||
+        layoutProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CAPSULE)) {
+        buttonInfo.borderRadius_.leftBottom = maxRadius;
+        buttonInfo.borderRadius_.leftTop = maxRadius;
+        buttonInfo.borderRadius_.rightBottom = maxRadius;
+        buttonInfo.borderRadius_.rightTop = maxRadius;
+    } else {
+        RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+        CHECK_NULL_VOID(buttonNode);
+        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(bgProp);
+        const auto& borderRadius = bgProp->GetBorderRadius();
+        if (borderRadius.has_value()) {
+            buttonInfo.borderRadius_.leftBottom = borderRadius->radiusBottomLeft.value_or(Dimension(0.0)).ConvertToPx();
+            buttonInfo.borderRadius_.leftTop = borderRadius->radiusTopLeft.value_or(Dimension(0.0)).ConvertToPx();
+            buttonInfo.borderRadius_.rightBottom =
+                borderRadius->radiusBottomRight.value_or(Dimension(0.0)).ConvertToPx();
+            buttonInfo.borderRadius_.rightTop = borderRadius->radiusTopRight.value_or(Dimension(0.0)).ConvertToPx();
+        }
+    }
+
+    if (SystemProperties::GetDeviceType() == DeviceType::WEARABLE) {
+        buttonInfo.isWearableDevice_ = true;
+    }
 }
 
 bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node, SecCompType& scType,
