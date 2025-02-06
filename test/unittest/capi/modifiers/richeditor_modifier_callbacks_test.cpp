@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -290,13 +291,23 @@ public:
 HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Void func{};
-    modifier_->setOnReady(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onReady), false);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onChange = [](Ark_Int32 nodeId) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(nodeId),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onChange, frameNode->GetId());
+    modifier_->setOnReady(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
     eventHub->FireOnReady();
-    EXPECT_EQ(GetFlag(recv.onReady), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
 }
 
 /**
@@ -307,17 +318,37 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_RichEditorSelection_Void func{};
-    modifier_->setOnSelect(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onSelect), false);
+    struct CheckEvent {
+        int32_t resourceId;
+        SelectionInfo info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onChange = [](Ark_Int32 nodeId, Ark_RichEditorSelection data) {
+        auto start = Converter::OptConvert<int32_t>(data.selection.value0);
+        auto end = Converter::OptConvert<int32_t>(data.selection.value1);
+        SelectionInfo info;
+        if (start) {
+            info.SetSelectionStart(*start);
+        }
+        if (end) {
+            info.SetSelectionEnd(*end);
+        }
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(nodeId),
+            .info = info,
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_RichEditorSelection_Void>(onChange, frameNode->GetId());
+    modifier_->setOnSelect(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
     SelectionInfo value;
     value.SetSelectionStart(TEST_SELECTION_START);
     value.SetSelectionEnd(TEST_SELECTION_END);
     eventHub->FireOnSelect(&value);
-    EXPECT_EQ(GetFlag(recv.onSelect), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
 }
 
 /**
@@ -328,38 +359,85 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnSelectionChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_RichEditorRange_Void func{};
-    modifier_->setOnSelectionChange(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onSelectionChange), false);
+    struct CheckEvent {
+        int32_t resourceId;
+        SelectionInfo info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onSelect = [](Ark_Int32 nodeId, Ark_RichEditorRange data) {
+        auto start = Converter::OptConvert<int32_t>(data.start);
+        auto end = Converter::OptConvert<int32_t>(data.end);
+        SelectionInfo info;
+        if (start) {
+            info.SetSelectionStart(*start);
+        }
+        if (end) {
+            info.SetSelectionEnd(*end);
+        }
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(nodeId),
+            .info = info,
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_RichEditorRange_Void>(onSelect, frameNode->GetId());
+    modifier_->setOnSelectionChange(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
     SelectionInfo value;
     value.SetSelectionStart(TEST_SELECTION_START);
     value.SetSelectionEnd(TEST_SELECTION_END);
     eventHub->FireOnSelectionChange(&value);
-    EXPECT_EQ(GetFlag(recv.onSelectionChange), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->info.GetSelection().selection[0], TEST_SELECTION_START);
+    EXPECT_EQ(checkEvent->info.GetSelection().selection[1], TEST_SELECTION_END);
 }
 
 /**
- * @tc.name: OnAboutToInputCallbackTest
+ * @tc.name: AboutToIMEInputTest
  * @tc.desc: setAboutToIMEInput test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnAboutToInputCallbackTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
 {
+    static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_RichEditorInsertValue_Boolean func{};
+    struct CheckEvent {
+        int32_t resourceId;
+        RichEditorInsertValue info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId, const Ark_RichEditorInsertValue parameter, const Callback_Boolean_Void continuation) {
+        RichEditorInsertValue info;
+        info.SetInsertOffset(Converter::Convert<int32_t>(parameter.insertOffset));
+        info.SetInsertValue(Converter::Convert<std::string>(parameter.insertValue));
+        auto previewText = Converter::OptConvert<std::string>(parameter.previewText);
+        if (previewText) {
+            info.SetPreviewText(*previewText);
+        }
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = info,
+        };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto func = Converter::ArkValue<Callback_RichEditorInsertValue_Boolean>(nullptr, inputCallback, expectedResId);
     modifier_->setAboutToIMEInput(node_, &func);
-    EXPECT_EQ(GetFlag(recv.aboutToIMEInput), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorInsertValue info;
     info.SetInsertOffset(TEST_INSERT_OFFSET);
     info.SetInsertValue(TEST_INSERT_VALUE);
     info.SetPreviewText(TEST_PREVIEW_TEXT);
-    eventHub->FireAboutToIMEInput(info);
-    EXPECT_EQ(GetFlag(recv.aboutToIMEInput), true);
+    EXPECT_FALSE(checkEvent);
+    auto result = eventHub->FireAboutToIMEInput(info);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(checkEvent->info.GetInsertOffset(), info.GetInsertOffset());
+    EXPECT_EQ(checkEvent->info.GetInsertValue(), info.GetInsertValue());
+    EXPECT_EQ(checkEvent->info.GetPreviewText(), info.GetPreviewText());
 }
 
 /**
@@ -390,6 +468,51 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level
     symbolSpanStyle.fontSize = TEST_FONT_SIZE;
     symbolSpanStyle.fontWeight = TEST_FONT_WEIGHT;
     info.SetSymbolSpanStyle(symbolSpanStyle);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        RichEditorAbstractSpanResult info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onIMEIcomplete = [](const Ark_Int32 resourceId, const Ark_RichEditorTextSpanResult parameter) {
+        RichEditorAbstractSpanResult info;
+        info.SetValue(Converter::Convert<std::string>(data.value));
+        info.SetSpanIndex(Converter::Convert<int32_t>(data.spanPosition.spanIndex));
+        info.SetSpanRangeStart(Converter::Convert<int32_t>(data.spanPosition.spanRange.value0));
+        info.SetSpanRangeEnd(Converter::Convert<int32_t>(data.spanPosition.spanRange.value1));
+        info.SetFontFamily(Converter::Convert<std::string>(data.textStyle.fontFamily));
+        info.SetFontSize(Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontSize.value.value0));
+        info.SetFontColor(Converter::OptConvert<Color>(data.textStyle.fontColor).value());
+        info.SetPreviewText(TEST_PREVIEW_TEXT);
+
+        SymbolSpanStyle symbolSpanStyle;
+        symbolSpanStyle.fontSize = TEST_FONT_SIZE;
+        symbolSpanStyle.fontWeight = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontWeight.value.value0;
+        info.SetSymbolSpanStyle(symbolSpanStyle);
+        auto text = ;
+    auto spanIndex = ;
+    auto spanRangeStart = ;
+    auto spanRangeEnd = ;
+    auto fontSize = ;
+    auto fontStyleSize = ;
+    auto fontWeight = );
+    auto fontColor = ;
+    auto fontFamily = ;
+    auto previewText = ;
+    };
+    auto arkCallback = Converter::ArkValue<Callback_RichEditorRange_Void>(onSelect, frameNode->GetId());
+    modifier_->setOnSelectionChange(node_, &arkCallback);
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
+    SelectionInfo value;
+    value.SetSelectionStart(TEST_SELECTION_START);
+    value.SetSelectionEnd(TEST_SELECTION_END);
+    eventHub->FireOnSelectionChange(&value);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->info.GetSelection().selection[0], TEST_SELECTION_START);
+    EXPECT_EQ(checkEvent->info.GetSelection().selection[1], TEST_SELECTION_END);
 
     eventHub->FireOnIMEInputComplete(info);
     EXPECT_EQ(GetFlag(recv.onIMEInputComplete), true);

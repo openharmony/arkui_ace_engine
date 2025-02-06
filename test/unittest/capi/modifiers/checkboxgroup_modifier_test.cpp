@@ -177,7 +177,7 @@ HWTEST_F(CheckboxGroupModifierTest, SetOnChangeTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](const Ark_Int32 resourceId, const Ark_CheckboxGroupResult result) {
         checkEvent = {
-            .resourceId = resourceId,
+            .resourceId = Converter::Convert<int32_t>(resourceId),
             .result = Converter::Convert<CheckboxGroupResult>(result),
         };
     };

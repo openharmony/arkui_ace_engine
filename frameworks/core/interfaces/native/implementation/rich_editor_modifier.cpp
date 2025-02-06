@@ -40,6 +40,7 @@ void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src)
             dst.selection.value1 = Converter::ArkValue<Ark_Number>(selection.selection[1]);
         }
     }
+    LOGE("Arkkoala converter to Ark_RichEditorSelection not fully implemented");
 }
 
 void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
