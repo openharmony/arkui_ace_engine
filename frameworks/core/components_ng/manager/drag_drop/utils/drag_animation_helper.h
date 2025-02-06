@@ -85,6 +85,8 @@ public:
     static void HideDragNodeCopy(const RefPtr<OverlayManager>& overlayManager);
     static void PreLayout(const RefPtr<FrameNode>& imageNode);
     static void SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible);
+    static void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
+        const OffsetF& gatherNodeCenter, Point point, int32_t containerId);
 };
 } // namespace OHOS::Ace::NG
 #endif
