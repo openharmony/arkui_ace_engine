@@ -453,24 +453,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
         GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(peer);
     };
-
     auto callBackValue = Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId());
-
-    // AccessibilityCallback callBackValue = {
-    //     .resource = Ark_CallbackResource {
-    //         .resourceId = frameNode->GetId(),
-    //         .hold = nullptr,
-    //         .release = nullptr,
-    //     },
-    //     .call = onAccessibilityHoverFunc
-    // };
-
-    // auto onAppearCallback = [](Ark_Int32 nodeId) {
-    //     checkEventAppear = {
-    //         .nodeId = nodeId,
-    //     };
-    // };
-    // auto arkOnAppearCalback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
 
     auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
         checkEvent = std::nullopt;
