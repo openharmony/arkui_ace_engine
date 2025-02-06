@@ -388,29 +388,28 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEndTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetOnDragStart
+ * @tc.name: SetOnDragStartTestCOPY
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTestCOPY, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnDragStart, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    auto callsCount = 0;
     static const int32_t expectedResourceId = 123;
     static const std::string expectedInfo("key:value");
-    static const CustomNodeBuilderTestHelper<CommonMethodModifierTest7> builderHelper(this, frameNode);
-
-    static const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    const CustomNodeBuilderTestHelper<CommonMethodModifierTest7> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    static auto* arkBuilder = &builder;
 
     struct CheckEvent {
         int32_t nodeId;
         RefPtr<OHOS::Ace::DragEvent> dragEvent;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    
+
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
         const Opt_String extraP, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
     {
@@ -421,7 +420,67 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
         checkEvent->nodeId = resourceId;
         auto isNeedBuilder = checkEvent->dragEvent->GetDragBehavior() == DragBehavior::MOVE;
         if (isNeedBuilder) {
-            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
+            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = *arkBuilder;
+        } else {
+            TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
+        }
+        CallbackHelper(continuation).Invoke(arkResult);
+        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(nullptr,
+        callSyncFunc, expectedResourceId);
+    modifier_->setOnDragStart(node_, &arkCallback);
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto fireOnDragStart = eventHub->GetOnDragStart();
+    ASSERT_NE(fireOnDragStart, nullptr);
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    dragEvent->SetDragBehavior(DragBehavior::COPY);
+    DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
+    EXPECT_EQ(ddInfo.customNode, nullptr);
+    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEvent.GetRawPtr());
+    EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
+    arkBuilder = nullptr;
+}
+
+/*
+ * @tc.name: SetOnDragStartTestMOVE
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTestMOVE, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnDragStart, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto callsCount = 0;
+    static const int32_t expectedResourceId = 123;
+    static const std::string expectedInfo("key:value");
+    const CustomNodeBuilderTestHelper<CommonMethodModifierTest7> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    static auto* arkBuilder = &builder;
+
+    struct CheckEvent {
+        int32_t nodeId;
+        RefPtr<OHOS::Ace::DragEvent> dragEvent;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
+        const Opt_String extraP, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
+    {
+        EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
+        // the different type in return value depending on input data
+        Ark_Union_CustomBuilder_DragItemInfo arkResult;
+        checkEvent->dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event);
+        checkEvent->nodeId = resourceId;
+        auto isNeedBuilder = checkEvent->dragEvent->GetDragBehavior() == DragBehavior::MOVE;
+        if (isNeedBuilder) {
+            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = *arkBuilder;
         } else {
             TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
         }
@@ -445,12 +504,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
     EXPECT_EQ(ddInfo.extraInfo, std::string());
-
-    dragEvent->SetDragBehavior(DragBehavior::COPY);
-    ddInfo = fireOnDragStart(dragEvent, expectedInfo);
-    EXPECT_EQ(ddInfo.customNode, nullptr);
-    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEvent.GetRawPtr());
-    EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
+    arkBuilder = nullptr;
 }
 
 /*
