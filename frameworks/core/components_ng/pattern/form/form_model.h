@@ -42,7 +42,6 @@ public:
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,
         const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg) = 0;
-
 private:
     static std::unique_ptr<FormModel> instance_;
     static std::mutex mutex_;

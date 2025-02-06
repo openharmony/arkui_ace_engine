@@ -60,6 +60,7 @@
 #include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
+#include "bridge/declarative_frontend/jsview/js_form_button.h"
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
@@ -505,6 +506,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
+    { "FormButton", JSFormButton::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
@@ -618,6 +620,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
     { "FormLink", JSFormLink::JSBind },
+    { "FormButton", JSFormButton::JSBind },
     { "LocationButton", JSLocationButton::JSBind },
     { "PasteButton", JSPasteButton::JSBind },
     { "Particle", JSParticle::JSBind },

@@ -32,6 +32,8 @@ public:
     virtual int32_t RequestPublishFormEvent(const AAFwk::Want& want,
         const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg);
 
+    virtual int32_t RequestOpenFormManageViewEvent(const AAFwk::Want& want);
+
     virtual int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defualtbundleName);
 };

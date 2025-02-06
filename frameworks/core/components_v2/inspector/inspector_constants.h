@@ -355,6 +355,10 @@ ACE_EXPORT extern const char FORM_ETS_TAG[];
 ACE_EXPORT extern const char FORM_LINK_TAG[];
 ACE_EXPORT extern const char FORM_LINK_ETS_TAG[];
 
+// formButton
+ACE_EXPORT extern const char FORM_BUTTON_TAG[];
+ACE_EXPORT extern const char FORM_BUTTON_ETS_TAG[];
+
 // PluginComponent
 ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];
 ACE_EXPORT extern const char PLUGIN_ETS_TAG[];

@@ -57,6 +57,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
@@ -571,6 +572,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEffectComponent::JSBind(globalObj);
 #endif
     JSFormLink::JSBind(globalObj);
+    JSFormButton::JSBind(globalObj);
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
