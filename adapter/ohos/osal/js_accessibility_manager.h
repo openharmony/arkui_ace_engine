@@ -323,6 +323,11 @@ public:
 
     bool IsScreenReaderEnabled() override;
 
+    void SetFocusMoveResultWithNode(
+        const WeakPtr<NG::FrameNode>& hostNode,
+        AccessibilityElementOperatorCallback& callback,
+        const int32_t requestId);
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
