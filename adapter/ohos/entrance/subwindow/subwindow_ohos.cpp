@@ -172,6 +172,22 @@ void SetUIExtensionSubwindowFlag(OHOS::sptr<OHOS::Rosen::WindowOption>& windowOp
     }
 }
 
+void SetSubWindowCutout(const RefPtr<PipelineBase> parentPipeline, int32_t childContainerId)
+{
+    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipeline);
+    CHECK_NULL_VOID(parentPipelineContext);
+    auto parentSafeAreaManager = parentPipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(parentSafeAreaManager);
+    auto parentUseCutout = parentSafeAreaManager->GetUseCutout();
+
+    auto subPipelineContext = Platform::AceContainer::GetContainer(childContainerId)->GetPipelineContext();
+    auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(subPipelineContext);
+    CHECK_NULL_VOID(subPipelineContextNG);
+    auto subSafeAreaManager = subPipelineContextNG->GetSafeAreaManager();
+    CHECK_NULL_VOID(subSafeAreaManager);
+    subSafeAreaManager->SetUseCutout(parentUseCutout);
+}
+
 bool SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -334,6 +350,7 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
     subPipelineContext->SetFollowSystem(parentPipeline->IsFollowSystem());
     subPipelineContext->SetFontScale(parentPipeline->GetFontScale());
+    SetSubWindowCutout(parentPipeline, childContainerId_);
     return true;
 }
 
@@ -2024,7 +2041,7 @@ void SubwindowOhos::InitializeSafeArea()
     auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
     pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
 
-    auto safeAreaInsets = pipeline->GetScbSafeArea();
+    auto safeAreaInsets = pipeline->GetSafeAreaWithoutProcess();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "initializeSafeArea by windowRect: %{public}s, safeAreaInsets: %{public}s",
         windowRect.value_or(NG::RectF()).ToString().c_str(), safeAreaInsets.ToString().c_str());
 }

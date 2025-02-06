@@ -231,8 +231,6 @@ public:
 
     SafeAreaInsets GetSafeAreaWithoutProcess() const;
 
-    SafeAreaInsets GetScbSafeArea() const;
-
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
