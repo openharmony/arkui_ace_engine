@@ -1428,17 +1428,17 @@ HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_selected(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     auto changeEvent = eventHub->GetSelectChangeEvent();
     changeEvent(5);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), 5);
     changeEvent(10);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), 10);
 }
 
@@ -1472,17 +1472,17 @@ HWTEST_F(SelectModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_value(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     auto changeEvent = eventHub->GetValueChangeEvent();
     changeEvent("test_1");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), "test_1");
     changeEvent("test_2");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), "test_2");
 }
 

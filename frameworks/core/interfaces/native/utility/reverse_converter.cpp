@@ -292,7 +292,7 @@ void AssignArkValue(Ark_Date& dst, const std::string& src)
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
     auto duration = timestamp.time_since_epoch();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    dst = reinterpret_cast<Ark_Date>(milliseconds);
+    dst = static_cast<Ark_Date>(milliseconds);
 }
 
 void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)

@@ -2492,13 +2492,13 @@ HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_value(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(55.4f, 0);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_NEAR(checkEvent->value, 55.4f, FLT_EPSILON);
     eventHub->FireChangeEvent(10.2f, 3);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_NEAR(checkEvent->value, 10.2f, FLT_EPSILON);
 }

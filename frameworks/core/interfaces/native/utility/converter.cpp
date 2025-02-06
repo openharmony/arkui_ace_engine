@@ -1610,7 +1610,7 @@ PickerTextStyle Convert(const Ark_PickerTextStyle& src)
 template<>
 PickerTime Convert(const Ark_Date& src)
 {
-    auto milliseconds = reinterpret_cast<int64_t>(src);
+    auto milliseconds = static_cast<int64_t>(src);
     const auto SEC_TO_MILLISEC = 1000L;
     auto seconds = milliseconds / SEC_TO_MILLISEC;
     struct std::tm time_info;

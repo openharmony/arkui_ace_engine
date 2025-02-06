@@ -1852,16 +1852,16 @@ HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
     modifier_->set__onChangeEvent_text(node_, &arkCallback);
 
     PreviewText previewText {.offset = -1, .value = ""};
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnChange("test", previewText);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), "test");
     eventHub->FireOnChange("test_2", previewText);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), "test_2");
 }
 } // namespace OHOS::Ace::NG
