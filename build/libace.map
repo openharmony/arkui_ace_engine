@@ -274,6 +274,7 @@
       OHOS::Ace::AceScoringLog::*;
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
+      "OHOS::Ace::NG::ViewAdvancedRegister::GetInstance()";
       OHOS::Ace::ImageAnalyzerAdapterImpl::*;
       OHOS::Ace::ImageAnalyzerLoader::*;
       OHOS::Ace::ImageAnalyzerManager::ImageAnalyzerManager*;
