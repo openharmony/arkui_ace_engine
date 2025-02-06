@@ -118,6 +118,7 @@ public:
         const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback);
     static void GetThumbnailPixelMapForCustomNodeSync(
         const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback);
+    static float GetPixelMapScale(const RefPtr<FrameNode>& frameNode);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

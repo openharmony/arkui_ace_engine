@@ -1061,11 +1061,6 @@ void DragEventActuator::CreatePreviewNode(
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    auto context = imageNode->GetContext();
-    if (context) {
-        context->FlushUITaskWithSingleDirtyNode(imageNode);
-    }
-    FlushSyncGeometryNodeTasks();
 }
 
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)

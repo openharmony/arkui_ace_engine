@@ -1361,4 +1361,21 @@ void DragDropFuncWrapper::GetThumbnailPixelMap(
         GetThumbnailPixelMapAsync(gestureHub);
     }
 }
+
+float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
+{
+    float scale = 1.0f;
+    CHECK_NULL_RETURN(frameNode, scale);
+    auto pixelMap = frameNode->GetDragPixelMap();
+    CHECK_NULL_RETURN(pixelMap, scale);
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        return scale;
+    }
+    auto width = pixelMap->GetWidth();
+    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
+    if (frameNode->GetDragPreviewOption().isScaleEnabled && width != 0 && width > maxWidth) {
+        scale = maxWidth / width;
+    }
+    return scale;
+}
 } // namespace OHOS::Ace::NG

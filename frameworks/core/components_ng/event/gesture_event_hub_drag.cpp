@@ -818,7 +818,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         float previewScale =
             info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {
-            previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
+            previewScale = DragDropFuncWrapper::GetPixelMapScale(frameNode);
             scale = previewScale * windowScale;
         }
         data.previewScale = previewScale;
