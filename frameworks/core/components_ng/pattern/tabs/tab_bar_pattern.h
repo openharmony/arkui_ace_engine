@@ -269,6 +269,8 @@ public:
 
     void TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex);
 
+    RectF GetOriginalPaintRect(int32_t currentIndex);
+
     void HandleBottomTabBarChange(int32_t index);
 
     bool GetChangeByClick() const

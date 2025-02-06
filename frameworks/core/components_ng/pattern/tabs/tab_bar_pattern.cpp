@@ -886,6 +886,7 @@ RefPtr<FocusHub> TabBarPattern::GetCurrentFocusNode()
     if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE || tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
         focusIndicator_ = indicator;
     }
+    FocusCurrentOffset(indicator);
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(indicator));
     CHECK_NULL_RETURN(childNode, nullptr);
     auto childFocusHub = childNode->GetFocusHub();
@@ -1043,11 +1044,23 @@ void TabBarPattern::FocusCurrentOffset(int32_t index)
         auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
         auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
         if (index == visibleItemStartIndex) {
-            index == 0 ? UpdateCurrentOffset(scrollMargin_ - visibleItemStartPos) :
-                UpdateCurrentOffset(-visibleItemStartPos);
+            auto delta = -visibleItemStartPos;
+            if (index == 0) {
+                delta = scrollMargin_ - visibleItemStartPos;
+            }
+            if (isRTL_ && axis_ == Axis::HORIZONTAL) {
+                delta -= delta;
+            }
+            UpdateCurrentOffset(delta);
         } else if (index == visibleItemEndIndex) {
-            index == childCount - 1 ? UpdateCurrentOffset(mainSize - scrollMargin_ - visibleItemEndPos) :
-                UpdateCurrentOffset(mainSize - visibleItemEndPos);
+            auto delta = mainSize - visibleItemEndPos;
+            if (index == childCount - 1) {
+                delta = mainSize - scrollMargin_ - visibleItemEndPos;
+            }
+            if (isRTL_ && axis_ == Axis::HORIZONTAL) {
+                delta -= delta;
+            }
+            UpdateCurrentOffset(delta);
         } else if ((index >= 0  && index < visibleItemStartIndex) ||
             (index <= childCount - 1 && index > visibleItemEndIndex)) {
             focusIndex_ = index;
@@ -2599,15 +2612,45 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
         layoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
         return;
     }
-    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
-    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
     auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateIndicator(targetIndex);
     if (!changeByClick_) {
         return;
     }
+    auto originalPaintRect = GetOriginalPaintRect(currentIndex);
+    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
     PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, targetOffset);
+}
+
+RectF TabBarPattern::GetOriginalPaintRect(int32_t currentIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF());
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, RectF());
+    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
+    if (!visibleItemPosition_.empty()) {
+        auto mainSize = GetContentSize().MainSize(axis_);
+        if (currentIndex >= 0 && currentIndex < visibleItemPosition_.begin()->first) {
+            if (isRTL_) {
+                originalPaintRect.SetLeft(mainSize - visibleItemPosition_.begin()->second.startPos);
+            } else {
+                originalPaintRect.SetLeft(visibleItemPosition_.begin()->second.startPos - originalPaintRect.Width());
+            }
+            currentIndicatorOffset_ = originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH;
+        } else if (currentIndex < host->TotalChildCount() - MASK_COUNT &&
+            currentIndex > visibleItemPosition_.rbegin()->first) {
+            if (isRTL_) {
+                originalPaintRect.SetLeft(
+                    mainSize - visibleItemPosition_.rbegin()->second.endPos - originalPaintRect.Width());
+            } else {
+                originalPaintRect.SetLeft(visibleItemPosition_.rbegin()->second.endPos);
+            }
+            currentIndicatorOffset_ = originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH;
+        }
+    }
+    return originalPaintRect;
 }
 
 float TabBarPattern::CalculateTargetOffset(int32_t targetIndex)
@@ -3540,6 +3583,7 @@ void TabBarPattern::UpdateFocusToSelectedNode(bool isFocusActive)
     CHECK_NULL_VOID(tabTheme);
     if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE ||
         (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && !tabTheme->GetIsChangeFocusTextStyle())) {
+        FocusCurrentOffset(focusIndicator_);
         return;
     }
     auto childFocusNode = GetCurrentFocusNode();
