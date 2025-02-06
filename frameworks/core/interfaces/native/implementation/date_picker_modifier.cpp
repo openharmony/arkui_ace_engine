@@ -33,41 +33,6 @@ struct DatePickerOptions {
 };
 } // namespace
 namespace Converter {
-void AssignArkValue(Ark_DatePickerResult& dst, const DatePickerChangeEvent& src)
-{
-    auto selectedStr = src.GetSelectedStr();
-    auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
-
-    auto year = DATE_MIN.GetYear();
-    auto month = DATE_MIN.GetMonth();
-    auto day = DATE_MIN.GetDay();
-    if (g_checkValidDateValues(sourceJson)) {
-        year = sourceJson->GetValue(YEAR)->GetInt();
-        month = sourceJson->GetValue(MONTH)->GetInt();
-        day = sourceJson->GetValue(DAY)->GetInt();
-    }
-    dst.year = Converter::ArkValue<Opt_Number>(year);
-    dst.month = Converter::ArkValue<Opt_Number>(month);
-    dst.day = Converter::ArkValue<Opt_Number>(day);
-}
-
-void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src)
-{
-    auto selectedStr = src.GetSelectedStr();
-    auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
-
-    auto year = DATE_MIN.GetYear();
-    auto month = DATE_MIN.GetMonth();
-    auto day = DATE_MIN.GetDay();
-    if (g_checkValidDateValues(sourceJson)) {
-        year = sourceJson->GetValue(YEAR)->GetInt();
-        month = sourceJson->GetValue(MONTH)->GetInt();
-        day = sourceJson->GetValue(DAY)->GetInt();
-    }
-    auto pickerDate = PickerDate(year, month, day);
-    dst = Converter::ArkValue<Ark_Date>(pickerDate);
-}
-
 template<>
 void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptions& src)
 {
@@ -86,7 +51,6 @@ void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptio
     }
     dst = options;
 }
-
 } // namespace  OHOS::Ace:NG:Converter
 } // namespace  OHOS::Ace:NG
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -183,7 +147,9 @@ void OnChangeImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(event);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
         CHECK_NULL_VOID(eventInfo);
-        arkCallback.Invoke(Converter::ArkValue<Ark_DatePickerResult>(*eventInfo));
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_DatePickerResult>(selectedStr);
+        arkCallback.Invoke(result);
     };
     DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }
@@ -198,7 +164,8 @@ void OnDateChangeImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(event);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
         CHECK_NULL_VOID(eventInfo);
-        auto result = Converter::ArkValue<Ark_Date>(*eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
         arkCallback.Invoke(result);
     };
     DatePickerModelNG::SetOnDateChange(frameNode, std::move(onChange));

@@ -448,11 +448,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_RichEditorTextSpanResult_Void func{};
-    modifier_->setOnIMEInputComplete(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onIMEInputComplete), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    ASSERT_TRUE(eventHub);
 
     RichEditorAbstractSpanResult info;
     info.SetValue(TEST_TEXT);
@@ -474,7 +471,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level
         RichEditorAbstractSpanResult info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onIMEIcomplete = [](const Ark_Int32 resourceId, const Ark_RichEditorTextSpanResult parameter) {
+    auto onIMEIcomplete = [](const Ark_Int32 resourceId, const Ark_RichEditorTextSpanResult data) {
         RichEditorAbstractSpanResult info;
         info.SetValue(Converter::Convert<std::string>(data.value));
         info.SetSpanIndex(Converter::Convert<int32_t>(data.spanPosition.spanIndex));
@@ -482,40 +479,30 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level
         info.SetSpanRangeEnd(Converter::Convert<int32_t>(data.spanPosition.spanRange.value1));
         info.SetFontFamily(Converter::Convert<std::string>(data.textStyle.fontFamily));
         info.SetFontSize(Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontSize.value.value0));
-        info.SetFontColor(Converter::OptConvert<Color>(data.textStyle.fontColor).value());
-        info.SetPreviewText(TEST_PREVIEW_TEXT);
+        auto color = Converter::OptConvert<Color>(data.textStyle.fontColor);
+        if (color) {
+            info.SetFontColor(color->ToString());
+        }
+        auto previewText = Converter::OptConvert<std::string>(data.previewText);
+        if (previewText) {
+            info.SetPreviewText(*previewText);
+        }
 
         SymbolSpanStyle symbolSpanStyle;
-        symbolSpanStyle.fontSize = TEST_FONT_SIZE;
-        symbolSpanStyle.fontWeight = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontWeight.value.value0;
+        symbolSpanStyle.fontSize = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontSize.value.value0);
+        symbolSpanStyle.fontWeight = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontWeight.value.value0);
         info.SetSymbolSpanStyle(symbolSpanStyle);
-        auto text = ;
-    auto spanIndex = ;
-    auto spanRangeStart = ;
-    auto spanRangeEnd = ;
-    auto fontSize = ;
-    auto fontStyleSize = ;
-    auto fontWeight = );
-    auto fontColor = ;
-    auto fontFamily = ;
-    auto previewText = ;
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = info,
+        };
     };
-    auto arkCallback = Converter::ArkValue<Callback_RichEditorRange_Void>(onSelect, frameNode->GetId());
-    modifier_->setOnSelectionChange(node_, &arkCallback);
-    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_TRUE(eventHub);
+    auto arkCallback = Converter::ArkValue<Callback_RichEditorTextSpanResult_Void>(onIMEIcomplete, frameNode->GetId());
+    modifier_->setOnIMEInputComplete(node_, &arkCallback);
     EXPECT_FALSE(checkEvent);
-    SelectionInfo value;
-    value.SetSelectionStart(TEST_SELECTION_START);
-    value.SetSelectionEnd(TEST_SELECTION_END);
-    eventHub->FireOnSelectionChange(&value);
+    eventHub->FireOnIMEInputComplete(info);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->info.GetSelection().selection[0], TEST_SELECTION_START);
-    EXPECT_EQ(checkEvent->info.GetSelection().selection[1], TEST_SELECTION_END);
-
-    eventHub->FireOnIMEInputComplete(info);
-    EXPECT_EQ(GetFlag(recv.onIMEInputComplete), true);
 }
 
 /**
