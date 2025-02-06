@@ -148,10 +148,10 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerPadding(ArkUIRunti
         return panda::JSValueRef::Undefined(vm);
     }
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
 
     CalcDimension topDim(0, DimensionUnit::VP);
     CalcDimension rightDim(0, DimensionUnit::VP);
