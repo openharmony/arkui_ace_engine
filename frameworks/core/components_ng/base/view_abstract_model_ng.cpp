@@ -78,6 +78,40 @@ void ViewAbstractModelNG::BindMenuGesture(FrameNode* targetNode,
     gestureHub->BindMenu(std::move(showMenu));
 }
 
+bool ViewAbstractModelNG::CheckMenuIsShow(
+    const MenuParam& menuParam, const RefPtr<FrameNode>& targetNode)
+{
+    RefPtr<NG::PipelineContext> pipeline = nullptr;
+    if (menuParam.isShowInSubWindow) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        CHECK_NULL_RETURN(subwindow, false);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_RETURN(childContainer, false);
+        pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+    } else {
+        CHECK_NULL_RETURN(targetNode, false);
+        pipeline = targetNode->GetContextRefPtr();
+    }
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
+    CHECK_NULL_RETURN(menuNode, false);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(wrapperPattern, false);
+    if (menuParam.hasTransitionEffect) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        renderContext->UpdateChainedTransition(menuParam.transition);
+    }
+    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
+        overlayManager->HideMenu(menuNode, targetNode->GetId(), false);
+    }
+    return true;
+}
+
 void ViewAbstractModelNG::BindMenu(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
@@ -90,26 +124,10 @@ void ViewAbstractModelNG::BindMenu(FrameNode* frameNode,
 {
     auto targetNode = AceType::Claim(frameNode);
     CHECK_NULL_VOID(targetNode);
-    auto targetId = targetNode->GetId();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto menuNode = overlayManager->GetMenuNode(targetId);
-    if (menuNode) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
-        auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
-        if (menuParam.hasTransitionEffect) {
-            auto renderContext = menuNode->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateChainedTransition(menuParam.transition);
-        }
-        if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
-            overlayManager->HideMenu(menuNode, targetId, false);
-        }
+    if (CheckMenuIsShow(menuParam, targetNode)) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.",
+            menuParam.isShowInSubWindow, targetNode->GetId());
     } else if (menuParam.isShow) {
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);

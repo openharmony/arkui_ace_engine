@@ -1580,7 +1580,7 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack);
 
 private:
-    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
+    static bool CheckMenuIsShow(const MenuParam& menuParam, const RefPtr<FrameNode>& targetNode);
     static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
     static void CreateCustomMenuWithPreview(FrameNode* targetNode,
