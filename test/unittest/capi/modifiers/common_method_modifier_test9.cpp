@@ -61,6 +61,7 @@ namespace Converter {
 
 namespace GeneratedModifier {
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
 }
 
 class CommonMethodModifierTest9 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -450,14 +451,26 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         auto info = peer ? peer->GetEventInfo() : nullptr;
         ASSERT_NE(info, nullptr);
         checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
+        GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(peer);
     };
 
-    AccessibilityCallback callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(), .hold = nullptr, .release = nullptr,
-        },
-        .call = onAccessibilityHoverFunc
-    };
+    auto callBackValue = Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId());
+
+    // AccessibilityCallback callBackValue = {
+    //     .resource = Ark_CallbackResource {
+    //         .resourceId = frameNode->GetId(),
+    //         .hold = nullptr,
+    //         .release = nullptr,
+    //     },
+    //     .call = onAccessibilityHoverFunc
+    // };
+
+    // auto onAppearCallback = [](Ark_Int32 nodeId) {
+    //     checkEventAppear = {
+    //         .nodeId = nodeId,
+    //     };
+    // };
+    // auto arkOnAppearCalback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
 
     auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
         checkEvent = std::nullopt;

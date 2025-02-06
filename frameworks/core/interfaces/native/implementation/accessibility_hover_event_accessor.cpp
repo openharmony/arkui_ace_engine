@@ -54,32 +54,39 @@ void SetTypeImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetXImpl(AccessibilityHoverEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
+    CHECK_NULL_RETURN(peer, 0);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    auto px = PipelineBase::Vp2PxWithCurrentDensity(info->GetLocalLocation().GetX());
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetXImpl return int32_t value");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int>(px));
+    CHECK_NULL_RETURN(info, 0);
+    const auto& localLocation = info->GetLocalLocation();
+    LOGE("Arkoala method MouseEventAccessor.GetXImpl return int32_t value");
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 void SetXImpl(AccessibilityHoverEventPeer* peer,
               const Ark_Number* x)
 {
+
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(x);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto valueX = Converter::OptConvert<float>(*x);
-    Offset newLomation(valueX.value_or(0), info->GetLocalLocation().GetY());
-    info->SetLocalLocation(newLomation);
+    auto localLocation = info->GetLocalLocation();
+    const auto animation = localLocation.GetXAnimationOption();
+    auto value = Converter::Convert<float>(*x);
+    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    localLocation.SetX(xConvert, animation);
+    info->SetLocalLocation(localLocation);
 }
 Ark_Int32 GetYImpl(AccessibilityHoverEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
+
+    CHECK_NULL_RETURN(peer, 0);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    auto px = PipelineBase::Vp2PxWithCurrentDensity(info->GetLocalLocation().GetY());
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetYImpl return int32_t value");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int>(px));
+    CHECK_NULL_RETURN(info, 0);
+    const auto& localLocation = info->GetLocalLocation();
+    LOGE("Arkoala method MouseEventAccessor.GetYImpl return int32_t value");
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 void SetYImpl(AccessibilityHoverEventPeer* peer,
               const Ark_Number* y)
@@ -88,19 +95,22 @@ void SetYImpl(AccessibilityHoverEventPeer* peer,
     CHECK_NULL_VOID(y);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto valueY = Converter::OptConvert<float>(*y);
-    Offset newLomation(info->GetLocalLocation().GetX(), valueY.value_or(0));
-    info->SetLocalLocation(newLomation);
+    auto localLocation = info->GetLocalLocation();
+    const auto animation = localLocation.GetYAnimationOption();
+    auto value = Converter::Convert<float>(*y);
+    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    localLocation.SetY(yConvert, animation);
+    info->SetLocalLocation(localLocation);
 }
 Ark_Int32 GetDisplayXImpl(AccessibilityHoverEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
+    CHECK_NULL_RETURN(peer, 0);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    auto screenLocation = info->GetScreenLocation();
-    auto vp = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayXImpl return int32_t value");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int>(vp));
+    CHECK_NULL_RETURN(info, 0);
+    const auto& screenLocation = info->GetScreenLocation();
+    LOGE("Arkoala method MouseEventAccessor.GetDisplayXImpl return int32_t value");
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 void SetDisplayXImpl(AccessibilityHoverEventPeer* peer,
                      const Ark_Number* displayX)
@@ -109,18 +119,22 @@ void SetDisplayXImpl(AccessibilityHoverEventPeer* peer,
     CHECK_NULL_VOID(displayX);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto valueX = Converter::Convert<double>(*displayX);
-    Offset newLomation(valueX, info->GetScreenLocation().GetY());
-    info->SetScreenLocation(newLomation);
+    auto screenLocation = info->GetScreenLocation();
+    const auto animation = screenLocation.GetXAnimationOption();
+    auto value = Converter::Convert<float>(*displayX);
+    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    screenLocation.SetX(xConvert, animation);
+    info->SetScreenLocation(screenLocation);
 }
 Ark_Int32 GetDisplayYImpl(AccessibilityHoverEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
+    CHECK_NULL_RETURN(peer, 0);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    auto vp = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenLocation().GetY());
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayYImpl return int32_t value");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int>(vp));
+    CHECK_NULL_RETURN(info, 0);
+    const auto& screenLocation = info->GetScreenLocation();
+    LOGE("Arkoala method MouseEventAccessor.GetDisplayYImpl return int32_t value");
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 void SetDisplayYImpl(AccessibilityHoverEventPeer* peer,
                      const Ark_Number* displayY)
@@ -129,18 +143,22 @@ void SetDisplayYImpl(AccessibilityHoverEventPeer* peer,
     CHECK_NULL_VOID(displayY);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto valueY = Converter::Convert<double>(*displayY);
-    Offset newLomation(info->GetScreenLocation().GetX(), valueY);
-    info->SetScreenLocation(newLomation);
+    auto screenLocation = info->GetScreenLocation();
+    const auto animation = screenLocation.GetYAnimationOption();
+    auto value = Converter::Convert<float>(*displayY);
+    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    screenLocation.SetY(yConvert, animation);
+    info->SetScreenLocation(screenLocation);
 }
 Ark_Int32 GetWindowXImpl(AccessibilityHoverEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
+    CHECK_NULL_RETURN(peer, 0);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    auto vp = PipelineBase::Px2VpWithCurrentDensity(info->GetGlobalLocation().GetX());
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowXImpl return int32_t value");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int>(vp));
+    CHECK_NULL_RETURN(info, 0);
+    const auto& globalLocation = info->GetGlobalLocation();
+    LOGE("Arkoala method MouseEventAccessor.GetWindowXImpl return int32_t value");
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 void SetWindowXImpl(AccessibilityHoverEventPeer* peer,
                     const Ark_Number* windowX)
@@ -149,18 +167,22 @@ void SetWindowXImpl(AccessibilityHoverEventPeer* peer,
     CHECK_NULL_VOID(windowX);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto valueX = Converter::Convert<double>(*windowX);
-    Offset newLomation(valueX, info->GetGlobalLocation().GetY());
-    info->SetGlobalLocation(newLomation);
+    auto globalLocation = info->GetGlobalLocation();
+    const auto animation = globalLocation.GetXAnimationOption();
+    auto value = Converter::Convert<float>(*windowX);
+    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    globalLocation.SetX(xConvert, animation);
+    info->SetGlobalLocation(globalLocation);
 }
 Ark_Int32 GetWindowYImpl(AccessibilityHoverEventPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
+    CHECK_NULL_RETURN(peer, 0);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    auto vp = PipelineBase::Px2VpWithCurrentDensity(info->GetGlobalLocation().GetY());
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowYImpl return int32_t value");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int>(vp));
+    CHECK_NULL_RETURN(info, 0);
+    const auto& globalLocation = info->GetGlobalLocation();
+    LOGE("Arkoala method MouseEventAccessor.GetWindowYImpl return int32_t value");
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 void SetWindowYImpl(AccessibilityHoverEventPeer* peer,
                     const Ark_Number* windowY)
@@ -169,9 +191,12 @@ void SetWindowYImpl(AccessibilityHoverEventPeer* peer,
     CHECK_NULL_VOID(windowY);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto valueY = Converter::Convert<double>(*windowY);
-    Offset newLomation(info->GetGlobalLocation().GetX(), valueY);
-    info->SetGlobalLocation(newLomation);
+    auto globalLocation = info->GetGlobalLocation();
+    const auto animation = globalLocation.GetYAnimationOption();
+    auto value = Converter::Convert<float>(*windowY);
+    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    globalLocation.SetY(yConvert, animation);
+    info->SetGlobalLocation(globalLocation);
 }
 } // AccessibilityHoverEventAccessor
 const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor()

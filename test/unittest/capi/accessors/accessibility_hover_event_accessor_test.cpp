@@ -26,13 +26,13 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-    std::vector<std::pair<Ark_AccessibilityHoverType, AccessibilityHoverAction>> accessibilityHoverTypeTestPlan = {
+    const std::vector<std::pair<Ark_AccessibilityHoverType, AccessibilityHoverAction>> accessibilityHoverTypeTestPlan = {
         { ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER, AccessibilityHoverAction::HOVER_ENTER },
         { ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE, AccessibilityHoverAction::HOVER_MOVE },
         { ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT, AccessibilityHoverAction::HOVER_EXIT },
         { ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL, AccessibilityHoverAction::HOVER_CANCEL },
     };
-    std::vector<std::pair<Ark_Number, int>> accessibilityHoverLocationTestPlan = {
+    const std::vector<std::pair<Ark_Number, int>> accessibilityHoverLocationTestPlan = {
         { Converter::ArkValue<Ark_Number>(5), 5 },
         { Converter::ArkValue<Ark_Number>(2.4), 2 },
         { Converter::ArkValue<Ark_Number>(1), 1 },

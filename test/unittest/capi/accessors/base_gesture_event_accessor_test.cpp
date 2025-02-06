@@ -100,10 +100,18 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListIdTest, TestSize.Level1)
         EXPECT_TRUE(peer_->GetEventInfo()->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         auto result = peer_->GetEventInfo()->GetFingerList();
+<<<<<<< HEAD
         ASSERT_EQ(result.size(), size);
         auto resultIt = result.begin();
         for (int index = 0; index < size; ++index, ++resultIt) {
             auto result = resultIt->fingerId_;
+=======
+        
+        std::vector<FingerInfo> vec(result.begin(), result.end());
+        for (int index = 0; index < size; index++) {
+            ASSERT_NE(result.size(), size);
+            auto result = vec[index].fingerId_;
+>>>>>>> 6749921dc8 (s_accesibility_hover_event init)
             auto expected = arkNumberIntTestPlan[index].second;
             EXPECT_EQ(result, expected);
         }
@@ -142,11 +150,19 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListGlobalXYTest, TestSize.Level
         EXPECT_TRUE(peer_->GetEventInfo()->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         auto result = peer_->GetEventInfo()->GetFingerList();
+<<<<<<< HEAD
         ASSERT_EQ(result.size(), size);
         auto resultIt = result.begin();
         for (int index = 0; index < size; ++index, ++resultIt) {
             auto actualX = resultIt->globalLocation_.GetX();
             auto actualY = resultIt->globalLocation_.GetY();
+=======
+        std::vector<FingerInfo> vec(result.begin(), result.end());
+        for (int index = 0; index < size; index++) {
+            ASSERT_NE(result.size(), size);
+            auto actualX = vec[index].globalLocation_.GetX();
+            auto actualY = vec[index].globalLocation_.GetY();
+>>>>>>> 6749921dc8 (s_accesibility_hover_event init)
             auto expectedX = arkNumberFloatXTestPlan[index].second;
             auto expectedY = arkNumberFloatYTestPlan[index].second;
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualX, expectedX));
@@ -187,11 +203,19 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListLocalXYTest, TestSize.Level1
         EXPECT_TRUE(peer_->GetEventInfo()->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         auto result = peer_->GetEventInfo()->GetFingerList();
+<<<<<<< HEAD
         ASSERT_EQ(result.size(), size);
         auto resultIt = result.begin();
         for (int index = 0; index < size; ++index, ++resultIt) {
             auto actualX = resultIt->localLocation_.GetX();
             auto actualY = resultIt->localLocation_.GetY();
+=======
+        EXPECT_EQ(result.size(), size);
+        std::vector<FingerInfo> vec(result.begin(), result.end());
+        for (int index = 0; index < size; index++) {
+            auto actualX = vec[index].localLocation_.GetX();
+            auto actualY = vec[index].localLocation_.GetY();
+>>>>>>> 6749921dc8 (s_accesibility_hover_event init)
             auto expectedX = arkNumberFloatXTestPlan[index].second;
             auto expectedY = arkNumberFloatYTestPlan[index].second;
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualX, expectedX));
@@ -232,11 +256,19 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListDisplayXYTest, TestSize.Leve
         EXPECT_TRUE(peer_->GetEventInfo()->GetFingerList().empty());
         accessor_->setFingerList(peer_, &fingerArray);
         auto result = peer_->GetEventInfo()->GetFingerList();
+<<<<<<< HEAD
         ASSERT_EQ(result.size(), size);
         auto resultIt = result.begin();
         for (int index = 0; index < size; ++index, ++resultIt) {
             auto actualX = resultIt->screenLocation_.GetX();
             auto actualY = resultIt->screenLocation_.GetY();
+=======
+        EXPECT_EQ(result.size(), size);
+        std::vector<FingerInfo> vec(result.begin(), result.end());
+        for (int index = 0; index < size; index++) {
+            auto actualX = vec[index].screenLocation_.GetX();
+            auto actualY = vec[index].screenLocation_.GetY();
+>>>>>>> 6749921dc8 (s_accesibility_hover_event init)
             auto expectedX = arkNumberFloatXTestPlan[index].second;
             auto expectedY = arkNumberFloatYTestPlan[index].second;
             EXPECT_TRUE(LessOrEqualCustomPrecision(actualX, expectedX));
