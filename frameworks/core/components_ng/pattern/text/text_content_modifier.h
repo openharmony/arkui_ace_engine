@@ -212,7 +212,6 @@ private:
     std::optional<LinearVector<LinearColor>> symbolColors_;
     RefPtr<AnimatablePropertyVectorLinearVector> animatableSymbolColor_;
     LinearVector<LinearColor> lastSymbolColors_;
-    bool onlySymbolColorAnimation_ = false;
 
     struct ShadowProp {
         Shadow shadow; // final shadow configuration of the animation
