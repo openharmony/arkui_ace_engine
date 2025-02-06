@@ -84,7 +84,7 @@ bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vecto
         if (it == validKeyCodes.end()) {
             return false;
         }
-        if (intersects(keysCodes, it->second)) {
+        if (!intersects(keysCodes, it->second)) {
             return false;
         }
     }
@@ -125,6 +125,7 @@ Ark_Int32 GetTimestampImpl(BaseEventPeer* peer)
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
+    LOGE("BaseEventAccessor.GetTimestampImpl returns Ark_Int32");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(tstamp));
 }
 void SetTimestampImpl(BaseEventPeer* peer,
@@ -132,8 +133,10 @@ void SetTimestampImpl(BaseEventPeer* peer,
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
-    int value = Converter::Convert<int>(*timestamp);
-    auto duration = std::chrono::nanoseconds(value);
+    int64_t value = Converter::Convert<int64_t>(*timestamp);
+    std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
+    std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
+    peer->GetBaseInfo()->SetTimeStamp(time_point);
 }
 Ark_NativePointer GetSourceImpl(BaseEventPeer* peer)
 {
@@ -150,19 +153,23 @@ void SetSourceImpl(BaseEventPeer* peer,
 }
 Ark_Int32 GetAxisHorizontalImpl(BaseEventPeer* peer)
 {
+    LOGE("BaseEventAccessor.GetAxisHorizontalImpl does nothing");
     return 0;
 }
 void SetAxisHorizontalImpl(BaseEventPeer* peer,
                            const Ark_Number* axisHorizontal)
 {
+    LOGE("BaseEventAccessor.SetAxisHorizontalImpl does nothing");
 }
 Ark_Int32 GetAxisVerticalImpl(BaseEventPeer* peer)
 {
+    LOGE("BaseEventAccessor.GetAxisVerticalImpl does nothing");
     return 0;
 }
 void SetAxisVerticalImpl(BaseEventPeer* peer,
                          const Ark_Number* axisVertical)
 {
+    LOGE("BaseEventAccessor.SetAxisVerticalImpl does nothing");
 }
 Ark_Int32 GetPressureImpl(BaseEventPeer* peer)
 {
@@ -200,7 +207,7 @@ void SetTiltYImpl(BaseEventPeer* peer,
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(tiltY);
-    peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(*tiltY));
+    peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(*tiltY));
 }
 Ark_NativePointer GetSourceToolImpl(BaseEventPeer* peer)
 {
