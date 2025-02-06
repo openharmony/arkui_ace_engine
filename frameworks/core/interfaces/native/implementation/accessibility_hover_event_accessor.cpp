@@ -65,7 +65,6 @@ Ark_Int32 GetXImpl(AccessibilityHoverEventPeer* peer)
 void SetXImpl(AccessibilityHoverEventPeer* peer,
               const Ark_Number* x)
 {
-
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(x);
     auto info = peer->GetEventInfo();
@@ -79,7 +78,6 @@ void SetXImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetYImpl(AccessibilityHoverEventPeer* peer)
 {
-
     CHECK_NULL_RETURN(peer, 0);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, 0);
