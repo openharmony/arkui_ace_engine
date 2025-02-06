@@ -151,6 +151,25 @@ void ParseDialogCornerRadiusRect(DialogProperties& dialogProperties, ArkUIDialog
     dialogProperties.borderRadius = radius;
 }
 
+void ParseDialogKeyboardAvoidDistance(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!dialogProperties.keyboardAvoidDistance.has_value() &&
+        controllerHandler->keyboardAvoidDistanceValue.has_value()) {
+        auto unitEnum = controllerHandler->keyboardAvoidDistanceUnit;
+        if (controllerHandler->keyboardAvoidDistanceValue.value() < 0 || unitEnum < OHOS::Ace::DimensionUnit::NONE ||
+            unitEnum > OHOS::Ace::DimensionUnit::CALC || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+            dialogProperties.keyboardAvoidDistance = Dimension(DEFAULT_AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+        } else if (unitEnum == OHOS::Ace::DimensionUnit::NONE) {
+            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
+                OHOS::Ace::DimensionUnit::VP);
+        } else {
+            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
+                unitEnum);
+        }
+    }
+}
+
 void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -193,17 +212,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         dialogProperties.closeAnimation = animation;
     }
 
-    if (!dialogProperties.keyboardAvoidDistance.has_value() &&
-        controllerHandler->keyboardAvoidDistanceValue.has_value()) {
-        auto unitEnum = controllerHandler->keyboardAvoidDistanceUnit;
-        if (controllerHandler->keyboardAvoidDistanceValue.value() < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX ||
-            unitEnum > OHOS::Ace::DimensionUnit::CALC || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
-            dialogProperties.keyboardAvoidDistance = Dimension(DEFAULT_AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
-        } else {
-            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
-                unitEnum);
-        }
-    }
+    ParseDialogKeyboardAvoidDistance(dialogProperties, controllerHandler);
 }
 
 ArkUI_Int32 SetDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
