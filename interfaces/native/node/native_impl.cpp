@@ -140,6 +140,11 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     OHOS::Ace::GestureModel::CreateTapGestureWithDistanceThreshold,
 };
 
+ArkUI_NativeGestureAPI_2 gestureImpl_2 = {
+    &gestureImpl_1,
+    OHOS::Ace::GestureModel::SetGestureInterrupterToNodeWithUserData,  
+};
+
 ArkUI_NativeAnimateAPI_1 animateImpl_1 = {
     OHOS::Ace::AnimateModel::AnimateTo,
     OHOS::Ace::AnimateModel::KeyframeAnimateTo,
@@ -193,6 +198,8 @@ void* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t ver
                 case 0:
                 case 1:
                     return &gestureImpl_1;
+                case 2:
+                    return &gestureImpl_2;
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "fail to get gesture api family, version is incorrect: %{public}d", version);
@@ -237,6 +244,8 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
         case ARKUI_NATIVE_GESTURE:
             if (strcmp(structName, "ArkUI_NativeGestureAPI_1") == 0) {
                 return &gestureImpl_1;
+            } else if (strcmp(structName, "ArkUI_NativeGestureAPI_2") == 0) {
+                return &gestureImpl_2;
             }
             break;
         case ARKUI_NATIVE_ANIMATE:

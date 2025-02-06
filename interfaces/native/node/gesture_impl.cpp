@@ -348,6 +348,14 @@ void* OH_ArkUI_ParallelInnerGestureEvent_GetUserData(ArkUI_ParallelInnerGestureE
     return event->userData;
 }
 
+void* OH_ArkUI_GestureInterrupter_GetUserData(ArkUI_GestureInterruptInfo* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return event->interruptData.userData;
+}
+
 ArkUI_GestureRecognizer* OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(ArkUI_ParallelInnerGestureEvent* event)
 {
     return reinterpret_cast<ArkUI_GestureRecognizer*>(event->current);
@@ -590,6 +598,18 @@ int32_t SetGestureInterrupterToNode(
     auto callback = reinterpret_cast<int32_t (*)(ArkUIGestureInterruptInfo*)>(interrupter);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setGestureInterrupterToNode(
         node->uiNodeHandle, callback);
+    return 0;
+}
+
+int32_t SetGestureInterrupterToNodeWithUserData(ArkUI_NodeHandle node, void* userData,
+    ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info))
+{
+    auto callback = reinterpret_cast<int32_t (*)(ArkUIGestureInterruptInfo*)>(interrupter);
+    auto nodeModel = OHOS::Ace::NodeModel::GetFullImpl();
+    if (nodeModel) {
+        nodeModel->getNodeModifiers()->getGestureModifier()->setGestureInterrupterToNodeWithUserData(
+            node->uiNodeHandle, userData, callback);
+    }
     return 0;
 }
 
