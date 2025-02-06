@@ -112,6 +112,10 @@ constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
 constexpr char UIEXTENSION_TRANSPARENT_DETECTED[] = "UIEXTENSION_TRANSPARENT_DETECTED";
+constexpr char EVENT_KEY_SCROLLABLE_ERROR[] = "SCROLLABLE_ERROR";
+constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
+constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
+constexpr char EVENT_KEY_TARGET_API_VERSION[] = "TARGET_API_VERSION";
 
 void StrTrim(std::string& str)
 {
@@ -677,5 +681,25 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
         EVENT_KEY_VERSION_NAME, app_version_name,
         EVENT_KEY_BUNDLE_NAME, bundleName,
         EVENT_KEY_MODULE_NAME, moduleName);
+}
+
+void EventReport::ReportScrollableErrorEvent(
+    const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    auto target_api_version = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    StrTrim(packageName);
+    StrTrim(app_version_name);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_SCROLLABLE_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_NODE_TYPE, nodeType,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(errorType),
+        EVENT_KEY_SUB_ERROR_TYPE, subErrorType,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_TARGET_API_VERSION, target_api_version,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name);
 }
 } // namespace OHOS::Ace
