@@ -340,7 +340,7 @@ public:
         return accessTraceEnable_;
     }
 
-    static bool GetSyncModeTraceEnabled()
+    static bool GetVsyncModeTraceEnabled()
     {
         return vsyncModeTraceEnable_;
     }
