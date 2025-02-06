@@ -1796,6 +1796,10 @@ void GetPositionToWindowWithTransform(NG::OffsetF& offset, NG::OffsetF& offsetBo
         // if get the window boundary (window scene), not calculate transform
         if (!parent->IsWindowBoundary()) {
             auto parentRenderContext = parent->GetRenderContext();
+            if (!parentRenderContext) {
+                parent = parent->GetAncestorNodeOfFrame(true);
+                continue;
+            }
             auto parentOffset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
             NG::PointF leftTopPointAfterAddOffset(parentOffset.GetX() + leftTopPointNode.GetX(),
                                             parentOffset.GetY() + leftTopPointNode.GetY());
@@ -6874,6 +6878,7 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
     } else {
         ngPipeline = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext().Upgrade());
     }
+    CHECK_NULL_RETURN(ngPipeline, windowInfo);
     auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
     if (container && !container->IsSubWindow()) {
         // subwindow by subpipeline, donot use getParentRectHandler when it is registered in mainpipeline
@@ -6890,10 +6895,8 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
             return windowInfo;
         }
     }
-    CHECK_NULL_RETURN(ngPipeline, windowInfo);
     windowInfo.left = GetWindowLeft(ngPipeline->GetWindowId());
     windowInfo.top = GetWindowTop(ngPipeline->GetWindowId());
-    CHECK_NULL_RETURN(container, windowInfo);
     if (container) {
         auto windowScale = container->GetWindowScale();
         windowInfo.scaleX = windowScale;
@@ -7109,6 +7112,7 @@ void JsAccessibilityManager::FireAccessibilityEventCallback(uint32_t eventId, in
             event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
             event.type = AccessibilityEventType::CHANGE;
             SendAccessibilityAsyncEvent(event);
+            break;
         default:
             break;
     }
