@@ -4228,6 +4228,8 @@ struct ArkUINavigationModifier {
         void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset));
     void (*setOnCoordScrollEndAction)(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node));
     void (*setSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*setEnableToolBarAdaptation)(ArkUINodeHandle node, ArkUI_Bool enbale);
+    void (*resetEnableToolBarAdaptation)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {

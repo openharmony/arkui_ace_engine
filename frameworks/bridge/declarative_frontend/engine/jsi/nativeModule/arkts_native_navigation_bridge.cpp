@@ -599,4 +599,30 @@ ArkUINativeModuleValue NavigationBridge::ResetEnableDragBar(ArkUIRuntimeCallInfo
     GetArkUINodeModifiers()->getNavigationModifier()->resetEnableDragBar(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue NavigationBridge::SetEnableToolBarAdaptation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> enableArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (enableArg->IsNull() || enableArg->IsUndefined() || !enableArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getNavigationModifier()->resetEnableToolBarAdaptation(nativeNode);
+    } else {
+        bool enable = enableArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getNavigationModifier()->setEnableToolBarAdaptation(nativeNode, enable);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::ResetEnableToolBarAdaptation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetEnableToolBarAdaptation(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

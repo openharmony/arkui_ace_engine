@@ -23240,6 +23240,11 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
     return this;
   }
+
+  enableToolBarAdaptation(value) {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableToolBarAdaptationModifier.identity, NavigationEnableToolBarAdaptationModifier, value);
+    return this;
+  }
 }
 class BackButtonIconModifier extends ModifierWithKey {
   constructor(value) {
@@ -23528,6 +23533,21 @@ class NavigationEnableDragBarModifier extends ModifierWithKey {
   }
 }
 NavigationEnableDragBarModifier.identity = Symbol('enableDragBar');
+
+class NavigationEnableToolBarAdaptationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableToolBarAdaptation(node);
+    } else {
+      getUINativeModule().navigation.setEnableToolBarAdaptation(node, this.value);
+    }
+  }
+}
+NavigationEnableToolBarAdaptationModifier.identity = Symbol('enableToolBarAdaptation');
 
 class MenusModifier extends ModifierWithKey {
   constructor(value) {

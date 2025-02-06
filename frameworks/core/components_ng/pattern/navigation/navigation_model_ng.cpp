@@ -110,8 +110,9 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
 
 void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem)
 {
-    if (barItem.text.has_value() && !barItem.text.value().empty()) {
+    if (barItem.text.has_value() && !barItem.text.value().empty() && !barItemNode->IsHideText()) {
         auto textNode = CreateBarItemTextNode(barItem.text.value());
+        CHECK_NULL_VOID(textNode);
         barItemNode->SetTextNode(textNode);
         barItemNode->AddChild(textNode);
     }
@@ -727,6 +728,18 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
     SetHideNavBarInner(navigationGroupNode, hideNavBar);
 }
 
+void NavigationModelNG::SetEnableToolBarAdaptation(bool enable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->SetEnableToolBarAdaptation(enable);
+}
+
 void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
     const std::vector<std::string>& nameList)
@@ -823,6 +836,7 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
             V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+        barItemNode->SetIsHideItemText(toolBarNode->IsHideItemText());
         UpdateBarItemNodeWithItem(barItemNode, toolBarItem);
         toolBarNode->AddChild(barItemNode);
     }
@@ -1396,6 +1410,17 @@ void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBa
     pattern->SetEnableDragBar(enableDragBar);
 }
 
+void NavigationModelNG::SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->SetEnableToolBarAdaptation(enable);
+}
+
 void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1442,6 +1467,15 @@ void NavigationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavigationModelNG::SetHideItemText(bool isHideItemText)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    NavigationToolbarUtil::SetHideItemText(navBarNode, isHideItemText);
 }
 
 void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
