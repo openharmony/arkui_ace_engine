@@ -862,6 +862,14 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto* toNode = reinterpret_cast<UINode*>(target_parent);
     CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::STACK_ETS_TAG,
+        OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto pipeline = moveNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGF("MoveNodeTo doesn't run on UI thread");

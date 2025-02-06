@@ -413,15 +413,13 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
 
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
-    if (node == nullptr) {
+    if (node == nullptr || option == nullptr) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
     bool isCross = impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(node->uiNodeHandle);
-    option = new ArkUI_CrossLanguageOption {
-        .attributeSetting = isCross
-    };
+    option->attributeSetting = isCross;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
