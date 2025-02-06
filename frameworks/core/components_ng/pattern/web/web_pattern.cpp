@@ -822,6 +822,7 @@ void WebPattern::OnAttachToFrameNode()
         };
         RegisterTextBlurCallback(callback);
     }
+    pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
 #endif
 }
 
@@ -846,6 +847,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
         UnRegisterTextBlurCallback();
     }
+    pipeline->UnRegisterListenerForTranslate(id);
 #endif
 }
 

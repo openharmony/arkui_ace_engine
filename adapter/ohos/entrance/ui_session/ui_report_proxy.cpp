@@ -167,6 +167,46 @@ void UiReportProxy::SendBaseInfo(const std::string& data)
     }
 }
 
+void UiReportProxy::SendCurrentLanguage(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCurrentLanguage write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("SendCurrentLanguage write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_CURRENT_LANGUAGE, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendCurrentLanguage send request failed");
+    }
+}
+
+void UiReportProxy::SendWebText(int32_t nodeId, std::string res)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendWebText write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(res)) {
+        LOGW("SendWebText write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt32(nodeId)) {
+        LOGW("SendWebText write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_TEXT, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendWebText send request failed");
+    }
+}
+
 void UiReportProxyRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     LOGI("uiproxy death notice");
