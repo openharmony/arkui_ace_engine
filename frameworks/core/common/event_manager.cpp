@@ -985,13 +985,14 @@ bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<N
 {
     CHECK_NULL_RETURN(mainView, false);
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch tab index event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
-        event.action, mainView->GetTag().c_str(), mainView->GetId());
+        "Dispatch tab index event: code:" SEC_PLD(%{private}d) "/action:%{public}d on node: %{public}s/%{public}d.",
+        SEC_PARAM(event.code), event.action, mainView->GetTag().c_str(), mainView->GetId());
     auto mainViewFocusHub = mainView->GetFocusHub();
     CHECK_NULL_RETURN(mainViewFocusHub, false);
     if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event:code:%{private}d/action:%{public}d", event.code,
-            event.action);
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
+            "Tab index handled the key event: code:" SEC_PLD(%{private}d) "/action:%{public}d",
+            SEC_PARAM(event.code), event.action);
         return true;
     }
     return false;
@@ -1001,19 +1002,19 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
 {
     CHECK_NULL_RETURN(focusNode, false);
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch key event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
-        event.action, focusNode->GetTag().c_str(), focusNode->GetId());
+        "Dispatch key event: code:" SEC_PLD(%{private}d) "/action:%{public}d on node: %{public}s/%{public}d.",
+        SEC_PARAM(event.code), event.action, focusNode->GetTag().c_str(), focusNode->GetId());
     isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
     if (focusNodeHub->HandleKeyEvent(event)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:" SEC_PLD(%{private}d)
+            "/action:%{public}d", SEC_PARAM(event.code), event.action);
         return true;
     }
     if (!isKeyConsumed_) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:" SEC_PLD(%{private}d)
+            "/action:%{public}d", SEC_PARAM(event.code), event.action);
     }
     return isKeyConsumed_;
 }
