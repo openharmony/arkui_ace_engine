@@ -1678,28 +1678,30 @@ int32_t OH_ArkUI_AxisEvent_SetPropagation(const ArkUI_UIInputEvent* event, bool 
 
 int32_t OH_ArkUI_AxisEvent_GetScrollStep(const ArkUI_UIInputEvent* event)
 {
+    int32_t scroll_step_value = 0;
+
     if (!event) {
-        return 0;
+        return scroll_step_value;
     }
     switch (event->eventTypeId) {
         case AXIS_EVENT_ID: {
             const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
             if (axisEvent) {
-                return axisEvent->scrollStep;
+                scroll_step_value = axisEvent->scrollStep;
             }
             break;
         }
         case C_AXIS_EVENT_ID: {
             const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
-            if (!axisEvent) {
-                return 0;
+            if (axisEvent) {
+                scroll_step_value = axisEvent->scrollStep;
             }
-            return axisEvent->scrollStep;
+            break;
         }
         default:
             break;
     }
-    return 0;
+    return scroll_step_value;
 }
 
 #ifdef __cplusplus

@@ -865,7 +865,7 @@ enum ArkUIEventCategory {
     KEY_INPUT_EVENT = 13, // KEY_EVENT is already defined as a macro in wincon.h
     FOCUS_AXIS_EVENT = 14,
     TEXT_INPUT_CHANGE = 15,
-    AXIS_EVENT = 16,
+    AXIS_EVENT = 18,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
