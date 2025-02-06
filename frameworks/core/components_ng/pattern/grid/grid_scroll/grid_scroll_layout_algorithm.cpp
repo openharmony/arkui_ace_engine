@@ -657,7 +657,7 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
         cellAveLength_ = -1.0f;
         bool hasNormalItem = false;
         lastCross_ = 0;
-        for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
+        for (uint32_t i = mainIter->second.size(); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
@@ -1931,7 +1931,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
-            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_; i++) {
+            for (uint32_t i = line->second.size() ; i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
