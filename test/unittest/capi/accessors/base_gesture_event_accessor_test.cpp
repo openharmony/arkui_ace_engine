@@ -52,7 +52,7 @@ const std::vector<int32_t> sizeArrayTestPlan = { 0, 1, 2, 3, 4, 5 };
 } // namespace
 
 class BaseGestureEventAccessorTest : public AccessorTestBase<GENERATED_ArkUIBaseGestureEventAccessor,
-    &GENERATED_ArkUIAccessors::getBaseGestureEventAccessor, BaseGestureEventPeer> {
+    &GENERATED_ArkUIAccessors::getBaseGestureEventAccessor, GeneratedModifier::BaseGestureEventPeerImpl> {
 public:
     void SetUp(void) override
     {
@@ -60,7 +60,7 @@ public:
         ASSERT_NE(peer_, nullptr);
         eventInfo_ = std::make_shared<OHOS::Ace::BaseGestureEvent>();
         ASSERT_NE(eventInfo_, nullptr);
-        peer_->SetEventInfo(*eventInfo_);
+        peer_->SetEventInfo(eventInfo_);
     }
     void TearDown() override
     {

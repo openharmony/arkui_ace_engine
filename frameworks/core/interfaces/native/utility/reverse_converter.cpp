@@ -14,17 +14,9 @@
  */
 
 #include "reverse_converter.h"
-
 #include "base/utils/string_utils.h"
-#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/click_event_peer.h"
-#include "core/interfaces/native/implementation/drag_event_peer.h"
-#include "core/interfaces/native/implementation/gesture_event_peer.h"
-#include "core/interfaces/native/implementation/hover_event_peer.h"
-#include "core/interfaces/native/implementation/key_event_peer.h"
-#include "core/interfaces/native/implementation/mouse_event_peer.h"
-#include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 #include "validators.h"
 
 namespace OHOS::Ace {
@@ -39,19 +31,6 @@ const int32_t STD_TM_START_YEAR = 1900;
 const int32_t SEC_TO_MILLISEC = 1000;
 } // namespace
 } // namespace OHOS::Ace
-
-
-namespace OHOS::Ace::NG::GeneratedModifier {
-    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
-    const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
-    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
-    const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
-    const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
-    const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
-    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
-    const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
-    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
-}
 
 namespace OHOS::Ace::NG::Converter {
 void *ConvContext::Allocate(std::size_t size)
@@ -76,14 +55,6 @@ void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx
     AssignArkValue(dst, StringUtils::Str16ToStr8(src), ctx);
 }
 
-void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src)
-{
-    const auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(
-        GeneratedModifier::GetAccessibilityHoverEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.ptr = peer;
-}
-
 void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
 {
     const auto& localOffset = src.GetTarget().area.GetOffset();
@@ -98,11 +69,20 @@ void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
     dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
 }
 
-void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
+void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
 {
-    const auto peer = reinterpret_cast<BaseGestureEventPeer*>(GeneratedModifier::GetBaseGestureEventAccessor()->ctor());
+    const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
+        GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
     peer->SetEventInfo(src);
     dst.ptr = peer;
+}
+
+void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
+{
+    const auto peer = reinterpret_cast<DragEventPeer*>(
+        GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor());
+    peer->dragInfo = info;
+    dragEvent.ptr = peer;
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -118,27 +98,6 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
-void AssignArkValue(Ark_HoverEvent& dst, const HoverInfo& src)
-{
-    const auto peer = reinterpret_cast<HoverEventPeer*>(GeneratedModifier::GetHoverEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.ptr = peer;
-}
-
-void AssignArkValue(Ark_MouseEvent& dst, const MouseInfo& src)
-{
-    const auto peer = reinterpret_cast<MouseEventPeer*>(NG::GeneratedModifier::GetMouseEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.ptr = peer;
-}
-
-void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)
-{
-    const auto peer = reinterpret_cast<TouchEventPeer*>(GeneratedModifier::GetTouchEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.ptr = peer;
-}
-
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
     AssignArkValue(dst.value, src.Value());
@@ -152,13 +111,6 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
             AssignArkValue(dst.value, 0.0);
             dst.unit = ARK_LENGTH_UNIT_VP;
     }
-}
-
-void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
-{
-    const auto peer = reinterpret_cast<DragEventPeer*>(NG::GeneratedModifier::GetDragEventAccessor()->ctor());
-    peer->dragInfo = info;
-    dragEvent.ptr = peer;
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -180,13 +132,6 @@ void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 {
     dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
     dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
-}
-
-void AssignArkValue(Ark_KeyEvent& dst, const OHOS::Ace::KeyEventInfo& src)
-{
-    const auto peer = reinterpret_cast<KeyEventPeer*>(GeneratedModifier::GetKeyEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.ptr = peer;
 }
 
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
@@ -355,20 +300,6 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
-}
-
-void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
-{
-    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.result.ptr = peer;
-}
-
-void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
-{
-    const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.result.ptr = peer;
 }
 
 void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)

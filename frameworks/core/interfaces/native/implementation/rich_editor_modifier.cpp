@@ -148,13 +148,6 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
     dst.rangeBefore.end = Converter::ArkValue<Opt_Number>(rangeBefore.end);
 }
 
-void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src, ConvContext *ctx)
-{
-#ifdef WRONG_TYPE
-    dst.text = Converter::ArkValue<Ark_String>(src.GetText(), ctx);
-#endif
-}
-
 template<>
 void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderStyle& src)
 {
@@ -421,9 +414,9 @@ void OnSubmitImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onCallback = [frameNode](int32_t param1, NG::TextFieldCommonEvent& param2) {
         Ark_EnterKeyType enterKey = static_cast<Ark_EnterKeyType>(param1);
-        Converter::ConvContext ctx;
-        Ark_SubmitEvent event = Converter::ArkValue<Ark_SubmitEvent>(param2, &ctx);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onSubmit(frameNode->GetId(), enterKey, event);
+        const auto event = Converter::ArkSubmitEventSync(param2);
+        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onSubmit(frameNode->GetId(), enterKey,
+            event.ArkValue());
     };
     RichEditorModelNG::SetOnSubmit(frameNode, std::move(onCallback));
 }
