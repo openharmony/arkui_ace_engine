@@ -637,6 +637,9 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             parent = parent->GetParent();
             continue;
         }
+        if (parentNode->CheckTopWindowBoundary()) {
+            break;
+        }
         if (CheckRenderEffect(parentNode, message)) {
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
             return true;
