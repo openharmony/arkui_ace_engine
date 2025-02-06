@@ -53,6 +53,8 @@ ohos_shared_library("ui_session") {
     "ability_base:want",
     "cJSON:cjson",
     "c_utils:utils",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",

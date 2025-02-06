@@ -31,7 +31,7 @@ class ACE_FORCE_EXPORT UiSessionManager {
 public:
     using InspectorFunction = std::function<void()>;
     using NotifyAllWebFunction = std::function<void(bool isRegister)>;
-    using GetWebViewCurrentLanguageFunction = std::function<void()>;
+    using GetPixelMapFunction = std::function<void()>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -93,16 +93,18 @@ public:
     bool GetWebFocusRegistered();
     void SaveBaseInfo(const std::string& info);
     void SendBaseInfo(int32_t processId);
-    void SaveGetWebViewLanguage(GetWebViewCurrentLanguageFunction&& function);
+    void SaveGetPixelMapFunction(GetPixelMapFunction&& function);
     void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager);
     void GetWebViewLanguage();
     void SendCurrentLanguage(std::string result);
-    void SaveTranslateId(int32_t id);
+    void SaveProcessId(std::string key, int32_t id);
     void GetWebTranslateText(std::string extraData, bool isContinued);
     void SendWebTextToAI(int32_t nodeId, std::string res);
     void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids);
     void SendTranslateResult(int32_t nodeId, std::string result);
     void ResetTranslate(int32_t nodeId = -1);
+    void GetPixelMap();
+    void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps);
 
 private:
     static std::mutex mutex_;
@@ -116,7 +118,7 @@ private:
     bool webFocusEventRegistered = false;
     InspectorFunction inspectorFunction_ = 0;
     NotifyAllWebFunction notifyWebFunction_ = 0;
-    GetWebViewCurrentLanguageFunction getWebLanguageFunction_ = 0;
+    GetPixelMapFunction getPixelMapFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     int32_t webTaskNums = 0;
     std::string baseInfo_;

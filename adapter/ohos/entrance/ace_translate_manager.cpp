@@ -19,6 +19,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 
 namespace OHOS::Ace {
@@ -118,4 +119,37 @@ void UiTranslateManagerImpl::ClearMap()
     pixelMap_.clear();
 }
 
+void UiTranslateManagerImpl::SendPixelMap()
+{
+    UiSessionManager::GetInstance().SendPixelMap(pixelMap_);
+}
+
+void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
+{
+    CHECK_NULL_VOID(pixelMap);
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> value = { nodeId, pixelMap->GetPixelMapSharedPtr() };
+    pixelMap_.push_back(value);
+}
+
+void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
+{
+    TravelFindPixelMap(pageNode);
+    SendPixelMap();
+}
+
+void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
+{
+    for (const auto& item : currentNode->GetChildren()) {
+        auto node = AceType::DynamicCast<NG::FrameNode>(item);
+        if (node) {
+            if (node->GetTag() == V2::IMAGE_ETS_TAG) {
+                auto imagePattern = node->GetPattern<NG::ImagePattern>();
+                CHECK_NULL_VOID(imagePattern);
+                imagePattern->AddPixelMapToUiManager();
+            }
+        }
+
+        TravelFindPixelMap(item);
+    }
+}
 } // namespace OHOS::Ace

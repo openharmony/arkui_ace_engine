@@ -22,7 +22,7 @@
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "frameworks/core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
@@ -6460,5 +6460,4 @@ const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
 }
-
 } // namespace OHOS::Ace::NG

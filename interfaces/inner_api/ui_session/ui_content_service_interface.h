@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 #include <iremote_broker.h>
-
+#include <pixel_map.h>
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
@@ -47,6 +47,7 @@ public:
         SEND_TRANSLATE_RESULT,
         SEND_TRANSLATE_RESULT_STR,
         END_WEB_TRANSLATE,
+        GET_CURRENT_SHOWING_IMAGE,
     };
 
     /**
@@ -172,6 +173,14 @@ public:
      */
     virtual int32_t GetWebViewCurrentLanguage(const EventCallback& eventCallback) = 0;
 
+    /**
+     * @description:get all image with use imageComponents
+     * @return: result number
+     */
+    virtual int32_t GetCurrentImagesShowing(
+        const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>&
+            finishCallback) = 0;
+
     /* Not Used Ipc Interface*/
     /**
      * AI to judge if connect
@@ -194,7 +203,7 @@ public:
         SEND_BASE_INFO,
         SEND_CURRENT_LANGUAGE,
         SEND_TEXT,
-
+        SEND_IMAGES,
     };
 
     /**
@@ -241,6 +250,11 @@ public:
      * @description: define ui send web component language for cloud service interface
      */
     virtual void SendCurrentLanguage(const std::string& data) = 0;
+
+    /**
+     * @description: define ui collect all pixelMap for sa service
+     */
+    virtual void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

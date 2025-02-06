@@ -136,4 +136,11 @@ int32_t UIContentServiceStubImpl::SendTranslateResult(int32_t nodeId, std::strin
     UiSessionManager::GetInstance().SendTranslateResult(nodeId, result);
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::GetCurrentImagesShowing(
+    const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
+{
+    UiSessionManager::GetInstance().GetPixelMap();
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

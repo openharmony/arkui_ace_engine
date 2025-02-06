@@ -1107,6 +1107,11 @@ public:
     }
 
     void SetIsWindowSizeDragging(bool isDragging);
+    void GetAllPixelMap();
+    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
+    {
+        uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

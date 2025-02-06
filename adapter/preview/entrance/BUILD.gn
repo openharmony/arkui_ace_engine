@@ -44,6 +44,7 @@ ohos_source_set("preview_entrance_source") {
       "ace_container.cpp",
       "ace_preview_helper.cpp",
       "ace_resource_register.cpp",
+      "ace_translate_manager.cpp",
       "ace_view_preview.cpp",
       "clipboard/clipboard_impl.cpp",
       "clipboard/clipboard_proxy_impl.cpp",
