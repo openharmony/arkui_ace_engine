@@ -7977,7 +7977,7 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     SizeF secondHandlePaintSize;
     OffsetF firstHandleOffset;
     OffsetF secondHandleOffset;
-    auto isSingleHandle = selectOverlay_->GetIsHandleMoving() ? selectOverlay_->IsSingleHandle() : IsSingleHandle();
+    auto isSingleHandle = IsSingleHandle();
     selectOverlay_->SetIsSingleHandle(isSingleHandle);
     if (isSingleHandle) {
         auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
@@ -8030,6 +8030,7 @@ OffsetF RichEditorPattern::GetGlobalOffset() const
 
 bool RichEditorPattern::IsSingleHandle()
 {
+    CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), selectOverlay_->IsSingleHandle());
     return GetTextContentLength() == 0 || !IsSelected();
 }
 
