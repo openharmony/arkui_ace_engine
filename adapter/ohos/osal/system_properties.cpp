@@ -414,6 +414,12 @@ int32_t ReadDragDropFrameworkStatus()
     return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
 }
 
+bool IsAsyncInitializeEnabled()
+{
+    return system::GetBoolParameter("persist.ace.async.initialize", true);
+}
+
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(IsAsyncInitializeEnabled()); 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -603,7 +609,6 @@ void SystemProperties::InitDeviceInfo(
 {
     // SetDeviceOrientation should be earlier than deviceWidth/deviceHeight init.
     SetDeviceOrientation(orientation);
-
     isRound_ = isRound;
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
@@ -641,6 +646,7 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
+    asyncInitializeEnabled_.store(IsAsyncInitializeEnabled());
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
@@ -650,7 +656,6 @@ void SystemProperties::InitDeviceInfo(
     } else {
         screenShape_ = ScreenShape::NOT_ROUND;
     }
-
     InitDeviceTypeBySystemProperty();
 }
 
