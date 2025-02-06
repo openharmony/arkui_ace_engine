@@ -319,11 +319,12 @@ void SessionWrapperImpl::InitAllCallback()
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionBindModalCallback");
     };
     sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [instanceId = instanceId_](
-                                                          Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
+                                                          Rosen::AvoidAreaType type,
+                                                          int32_t apiVersion) -> Rosen::AvoidArea {
         Rosen::AvoidArea avoidArea;
         auto container = Platform::AceContainer::GetContainer(instanceId);
         CHECK_NULL_RETURN(container, avoidArea);
-        avoidArea = container->GetAvoidAreaByType(type);
+        avoidArea = container->GetAvoidAreaByType(type, apiVersion);
         return avoidArea;
     };
     sessionCallbacks->notifyExtensionEventFunc_ =
