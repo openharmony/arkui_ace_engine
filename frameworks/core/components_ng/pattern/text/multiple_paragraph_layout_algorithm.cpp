@@ -56,18 +56,25 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
-    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
-        return;
-    }
+    bool needRemain = false;
+    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+}
 
+bool MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle, bool& needRemain)
+{
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
+        needRemain = true;
+        return false;
+    }
     auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_RETURN(textLayoutProperty, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, false);
     auto contentModifier = pattern->GetContentModifier();
 
     textStyle = CreateTextStyleUsingTheme(
@@ -91,6 +98,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
+    auto oldTextStyle = pattern->GetTextStyle();
+    return oldTextStyle != textStyle;
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -224,6 +233,9 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);

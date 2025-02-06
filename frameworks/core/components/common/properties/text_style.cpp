@@ -41,7 +41,10 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            baselineOffset_ == rhs.baselineOffset_ && adaptHeight_ == rhs.adaptHeight_ &&
            textIndent_ == rhs.textIndent_ && verticalAlign_ == rhs.verticalAlign_ && wordSpacing_ == rhs.wordSpacing_ &&
            ellipsisMode_ == rhs.ellipsisMode_ && lineBreakStrategy_ == rhs.lineBreakStrategy_ &&
-           textShadows_== rhs.textShadows_;
+           lineSpacing_ == rhs.lineSpacing_ && hasHeightOverride_ == rhs.hasHeightOverride_ &&
+           halfLeading_ == rhs.halfLeading_ && variableFontWeight_ == rhs.variableFontWeight_ &&
+           enableVariableFontWeight_ == rhs.enableVariableFontWeight_ && minFontScale_ == rhs.minFontScale_ &&
+           maxFontScale_ == rhs.maxFontScale_ && ellipsis_ == rhs.ellipsis_;
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const

@@ -660,7 +660,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             }
         });
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 RefPtr<RenderContext> TextPattern::GetRenderContext()
@@ -1674,7 +1674,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
         AddUdmfData(event);
     }
     CloseOperate();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
     return itemInfo;
 }
 
@@ -1794,8 +1794,9 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
-    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                        : PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyWithOnProChange(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1
+                                       ? PROPERTY_UPDATE_MEASURE_SELF
+                                       : PROPERTY_UPDATE_MEASURE);
 
     CloseSelectOverlay();
     ResetSelection();
@@ -1878,7 +1879,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
             ShowSelectOverlay({ .menuIsShow = false });
         }
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
@@ -1901,7 +1902,7 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
             }
         }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 
@@ -2257,7 +2258,7 @@ void TextPattern::OnModifyDone()
     selectOverlay_->UpdateHandleColor();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
     }
     ProcessMarqueeVisibleAreaCallback();
 }
@@ -3012,18 +3013,6 @@ void TextPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("-----DumpAdvanceInfo-----"));
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasForegroundColor()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
-    }
-    if (renderContext->GetForegroundColorStrategy().has_value()) {
-        auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
-        DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
-    }
     DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
 }
 
@@ -3038,30 +3027,11 @@ void TextPattern::DumpInfo()
     if (!IsSetObscured()) {
         dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     }
-    dumpLog.AddDesc(std::string("FontColor: ")
-                        .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
-    dumpLog.AddDesc(
-        std::string("FontSize: ")
-            .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
-                        .ToString()));
-    if (textStyle_.has_value()) {
-        dumpLog.AddDesc(std::string("MaxFontSize: ").append(textStyle_->GetAdaptMaxFontSize().ToString()));
-        dumpLog.AddDesc(std::string("MinFontSize: ").append(textStyle_->GetAdaptMinFontSize().ToString()));
-        dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
-        dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
-        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
-        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
-        dumpLog.AddDesc(std::string("maxLines: ").append(std::to_string(textStyle_->GetMaxLines())));
-        dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
-        dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
-        dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
-        dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
-        dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
-        dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
-        dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
-        dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
-        dumpLog.AddDesc(
-            std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
+    dumpLog.AddDesc(std::string("isSpanStringMode: ").append(std::to_string(isSpanStringMode_)));
+    dumpLog.AddDesc(std::string("externalParagraph: ").append(std::to_string(externalParagraph_.has_value())));
+    DumpTextStyleInfo();
+    if (contentMod_) {
+        contentMod_->ContentModifierDump();
     }
     dumpLog.AddDesc(
         std::string("HeightAdaptivePolicy: ")
@@ -3076,6 +3046,147 @@ void TextPattern::DumpInfo()
     DumpTextEngineInfo();
     if (SystemProperties::GetDebugEnabled()) {
         DumpAdvanceInfo();
+    }
+    DumpSpanItem();
+}
+
+void TextPattern::DumpSpanItem()
+{
+    CHECK_NULL_VOID(isSpanStringMode_);
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----SpanDumpInfo-----"));
+    for (const auto& item : spans_) {
+        if (!item) {
+            continue;
+        }
+        item->SpanDumpInfo();
+    }
+}
+
+void TextPattern::DumpTextStyleInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    dumpLog.AddDesc(
+        std::string("FontColor: ")
+            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString())
+            .append(" pro: ")
+            .append(
+            textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString() : "Na")
+            .append(" ForegroundColor: ")
+            .append(
+            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na"));
+    if (renderContext->HasForegroundColorStrategy()) {
+        auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
+        DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
+    }
+    dumpLog.AddDesc(
+        std::string("FontSize: ")
+            .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
+                        .ToString())
+            .append(" pro: ")
+            .append(textLayoutProp->HasFontSize()
+                        ? textLayoutProp->GetFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                        : "Na"));
+    if (textStyle_.has_value()) {
+        dumpLog.AddDesc(
+            std::string("MaxFontSize: ")
+                .append(textStyle_->GetAdaptMaxFontSize().ToString())
+                .append(" pro: ")
+                .append(textLayoutProp->HasAdaptMaxFontSize()
+                            ? textLayoutProp->GetAdaptMaxFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+        dumpLog.AddDesc(
+            std::string("MinFontSize: ")
+                .append(textStyle_->GetAdaptMinFontSize().ToString())
+                .append(" pro: ")
+                .append(textLayoutProp->HasAdaptMinFontSize()
+                            ? textLayoutProp->GetAdaptMinFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+    }
+    DumpTextStyleInfo2();
+    DumpTextStyleInfo3();
+}
+
+void TextPattern::DumpTextStyleInfo2()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("FontWeight: ")
+                .append(StringUtils::ToString(textStyle_->GetFontWeight()))
+                .append(" pro: ")
+                .append(textLayoutProp->HasFontWeight()
+                            ? StringUtils::ToString(textLayoutProp->GetFontWeightValue(FontWeight::NORMAL))
+                            : "Na"));
+        dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
+        dumpLog.AddDesc(
+            std::string("LineHeight: ")
+                .append(textStyle_->GetLineHeight().ToString())
+                .append(" pro: ")
+                .append(textLayoutProp->HasLineHeight()
+                            ? textLayoutProp->GetLineHeightValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+        dumpLog.AddDesc(
+            std::string("LineSpacing: ")
+                .append(textStyle_->GetLineSpacing().ToString())
+                .append(" pro: ").append(textLayoutProp->HasLineSpacing()
+                            ? textLayoutProp->GetLineSpacingValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+        dumpLog.AddDesc(
+            std::string("maxLines: ")
+                .append(std::to_string(textStyle_->GetMaxLines()))
+                .append(" pro: ")
+                .append(textLayoutProp->HasMaxLines() ? std::to_string(textLayoutProp->GetMaxLinesValue(UINT32_MAX))
+                                                      : "Na"));
+        dumpLog.AddDesc(
+            std::string("BaselineOffset: ")
+                .append(textStyle_->GetBaselineOffset().ToString())
+                .append(" pro: ")
+                .append(textLayoutProp->HasBaselineOffset()
+                            ? textLayoutProp->GetBaselineOffsetValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+        dumpLog.AddDesc(
+            std::string("TextIndent: ")
+                .append(textStyle_->GetTextIndent().ToString())
+                .append(" pro: ")
+                .append(textLayoutProp->HasTextIndent()
+                            ? textLayoutProp->GetTextIndentValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+    }
+}
+
+void TextPattern::DumpTextStyleInfo3()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    if (textStyle_.has_value()) {
+        dumpLog.AddDesc(
+            std::string("LetterSpacing: ")
+                .append(textStyle_->GetLetterSpacing().ToString())
+                .append(" pro: ")
+                .append(textLayoutProp->HasLetterSpacing()
+                            ? textLayoutProp->GetLetterSpacingValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+        dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
+        dumpLog.AddDesc(std::string("TextAlign: ")
+                            .append(StringUtils::ToString(textStyle_->GetTextAlign()))
+                            .append(" pro: ")
+                            .append(textLayoutProp->HasTextAlign()
+                                        ? StringUtils::ToString(textLayoutProp->GetTextAlignValue(TextAlign::START))
+                                        : "Na"));
+        dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
+        dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
+        dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+        dumpLog.AddDesc(
+            std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
     }
 }
 
@@ -3123,6 +3234,29 @@ void TextPattern::DumpTextEngineInfo()
                             .append(std::to_string(pManager_->GetLongestLineWithIndent())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
+    if (!IsSetObscured()) {
+        DumpParagraphsInfo();
+    }
+}
+
+void TextPattern::DumpParagraphsInfo()
+{
+    CHECK_NULL_VOID(pManager_);
+    auto& dumpLog = DumpLog::GetInstance();
+    auto paragraphs = pManager_->GetParagraphs();
+    if (paragraphs.empty()) {
+        dumpLog.AddDesc(std::string("paragraphs is empty!"));
+        return;
+    }
+    dumpLog.AddDesc(std::string("paragraphs size:").append(std::to_string(paragraphs.size())));
+    for (auto&& info : paragraphs) {
+        auto paragraph = info.paragraph;
+        if (paragraph) {
+            auto text = StringUtils::Str16ToStr8(paragraph->GetParagraphText());
+            auto textStyle = paragraph->GetParagraphStyle();
+            dumpLog.AddDesc(std::string("paragraph: ").append(text));
+        }
+    }
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
@@ -3493,7 +3627,7 @@ void TextPattern::SetTextDetectEnable(bool enable)
     } else {
         dataDetectorAdapter_->CancelAITask();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
 bool TextPattern::CanStartAITask()
@@ -3534,7 +3668,7 @@ void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType resp
     selectionMenuMap_[key] = selectionMenuParams;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextPattern::CloseSelectionMenu()
@@ -3741,7 +3875,7 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     ProcessSpanString();
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
 TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
@@ -3899,7 +4033,7 @@ void TextPattern::OnSensitiveStyleChange(bool isSensitive)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isSensitive_ = isSensitive;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
 bool TextPattern::IsSensitiveEnalbe()

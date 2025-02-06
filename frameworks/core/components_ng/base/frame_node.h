@@ -1135,6 +1135,8 @@ public:
             visibleAreaChangeTriggerReason_ = triggerReason;
         }
     }
+    void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+    void OnPropertyChangeMeasure() const;
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
     void FireFrameNodeDestructorCallback();

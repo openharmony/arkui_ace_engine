@@ -83,6 +83,7 @@ public:
         bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
+    void MarkDirtyNode() const;
     bool GetCloseMenuForAISpanFlag()
     {
         return closeMenuForAISpanFlag_;

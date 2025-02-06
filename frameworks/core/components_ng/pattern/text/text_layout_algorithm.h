@@ -114,6 +114,9 @@ private:
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
     void UpdateSensitiveContent(std::string& content);
+    void CheckNeedReCreateParagraph(
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<TextPattern>& textPattern);
+    void ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty, bool needRemain);
 
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
