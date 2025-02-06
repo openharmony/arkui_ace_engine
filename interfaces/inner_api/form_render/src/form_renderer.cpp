@@ -241,6 +241,17 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         formJsInfo.imageDataMap.size());
 }
 
+void FormRenderer::RemoveFormDeathRecipient()
+{
+    if (!formRendererDelegate_) {
+        return;
+    }
+    auto renderDelegate = formRendererDelegate_->AsObject();
+    if (renderDelegate != nullptr) {
+        renderDelegate->RemoveDeathRecipient(renderDelegateDeathRecipient_);
+    }
+}
+
 void FormRenderer::Destroy()
 {
     HILOG_INFO("Destroy FormRenderer start.");
@@ -252,9 +263,7 @@ void FormRenderer::Destroy()
         }
     }
 
-    if (formRendererDelegate_ != nullptr && formRendererDelegate_->AsObject() != nullptr) {
-        formRendererDelegate_->AsObject()->RemoveDeathRecipient(renderDelegateDeathRecipient_);
-    }
+    RemoveFormDeathRecipient();
     renderDelegateDeathRecipient_ = nullptr;
     formRendererDelegate_ = nullptr;
     formRendererDispatcherImpl_ = nullptr;
@@ -415,6 +424,7 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
     if (!formRendererDelegate_) {
         formRendererDelegate_ = renderRemoteObj;
     } else {
+        RemoveFormDeathRecipient();
         auto formRendererDelegate = renderRemoteObj;
         bool checkFlag = true;
         formRendererDelegate->OnCheckManagerDelegate(checkFlag);
@@ -455,6 +465,8 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
 void FormRenderer::ResetRenderDelegate()
 {
     HILOG_INFO("ResetRenderDelegate.");
+    RemoveFormDeathRecipient();
+    renderDelegateDeathRecipient_ = nullptr;
     formRendererDelegate_ = nullptr;
 }
 
