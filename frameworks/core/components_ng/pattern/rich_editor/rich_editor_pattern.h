@@ -1222,6 +1222,7 @@ private:
     void HandleTouchUp();
     void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState();
+    void ResetTouchSelectState();
     void HandleTouchUpAfterLongPress();
     void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
@@ -1593,6 +1594,8 @@ private:
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
     bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
+    int32_t selectingFingerId_ = -1;
+    bool isTouchSelecting_ = false;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
     bool needMoveCaretToContentRect_ = false;

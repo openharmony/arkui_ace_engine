@@ -619,8 +619,7 @@ void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
 {
     CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
-        previewLongPress_ = false;
-        editingLongPress_ = false;
+        ResetTouchSelectState();
         ResetTouchAndMoveCaretState();
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -3113,8 +3112,7 @@ void RichEditorPattern::HandleBlurEvent()
     IF_PRESENT(multipleClickRecognizer_, Stop());
     CHECK_NULL_VOID(showSelect_ || !IsSelected());
     isLongPress_ = false;
-    previewLongPress_ = false;
-    editingLongPress_ = false;
+    ResetTouchSelectState();
     shiftFlag_ = false;
     moveCaretState_.Reset();
     floatingCaretState_.Reset();
@@ -6863,8 +6861,8 @@ std::optional<TouchLocationInfo> RichEditorPattern::GetAcceptedTouchLocationInfo
 {
     const auto& touchInfos = info.GetChangedTouches();
     CHECK_NULL_RETURN(!touchInfos.empty(), std::nullopt);
-    CHECK_NULL_RETURN(moveCaretState_.touchFingerId.has_value(), touchInfos.front());
-    const int32_t touchFingerId = moveCaretState_.touchFingerId.value();
+    CHECK_NULL_RETURN(isTouchSelecting_ || moveCaretState_.touchFingerId.has_value(), touchInfos.front());
+    const int32_t touchFingerId = isTouchSelecting_ ? selectingFingerId_ : moveCaretState_.touchFingerId.value();
     for (const auto& touchInfo : touchInfos) {
         if (touchInfo.GetFingerId() == touchFingerId) {
             return touchInfo;
@@ -6886,9 +6884,8 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
         previewLongPress_, editingLongPress_, sourceTool);
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
+    ResetTouchSelectState();
     isMoveCaretAnywhere_ = false;
-    previewLongPress_ = false;
-    editingLongPress_ = false;
     CHECK_NULL_VOID(HasFocus() && sourceTool == SourceTool::FINGER);
     auto touchDownOffset = info.GetLocalLocation();
     moveCaretState_.touchDownOffset = touchDownOffset;
@@ -6904,9 +6901,8 @@ void RichEditorPattern::HandleTouchUp()
 {
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
+    ResetTouchSelectState();
     isMoveCaretAnywhere_ = false;
-    editingLongPress_ = false;
-    previewLongPress_ = false;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -6934,6 +6930,14 @@ void RichEditorPattern::ResetTouchAndMoveCaretState()
     }
     moveCaretState_.Reset();
     StartFloatingCaretLand();
+}
+
+void RichEditorPattern::ResetTouchSelectState()
+{
+    selectingFingerId_ = -1;
+    isTouchSelecting_ = false;
+    previewLongPress_ = false;
+    editingLongPress_ = false;
 }
 
 void RichEditorPattern::HandleTouchUpAfterLongPress()
@@ -6971,6 +6975,11 @@ void RichEditorPattern::HandleTouchMove(const TouchLocationInfo& info)
     auto originalLocaloffset = info.GetLocalLocation();
     auto offset = AdjustLocalOffsetOnMoveEvent(originalLocaloffset);
     if (previewLongPress_ || editingLongPress_) {
+        if (!isTouchSelecting_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch selecting start id= %{public}d", info.GetFingerId());
+            isTouchSelecting_ = true;
+            selectingFingerId_ = info.GetFingerId();
+        }
         UpdateSelectionByTouchMove(offset);
         return;
     }
