@@ -30,8 +30,6 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-
-
 class BaseEventAccessorTest
     : public AccessorTestBaseParent<GENERATED_ArkUIBaseEventAccessor,
         &GENERATED_ArkUIAccessors::getBaseEventAccessor, BaseEventPeer> {
@@ -92,29 +90,29 @@ HWTEST_F(BaseEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
  */
 HWTEST_F(BaseEventAccessorTest, SetTargetTest, TestSize.Level1)
 {
-    constexpr double Height = 100;
-    constexpr double Width = 200;
-    constexpr double OffsetX = 150;
-    constexpr double OffsetY = 250;
-    constexpr double OriginX = 100;
-    constexpr double OriginY = 450;
+    constexpr double height = 100;
+    constexpr double width = 200;
+    constexpr double offsetX = 150;
+    constexpr double offsetY = 250;
+    constexpr double originX = 100;
+    constexpr double originY = 450;
 
-    Ark_Area area{Converter::ArkValue<Ark_Length>(Width),
-                  Converter::ArkValue<Ark_Length>(Height),
-                  Ark_Position {Converter::ArkValue<Opt_Length>(OffsetX), 
-                                Converter::ArkValue<Opt_Length>(OffsetY)},
-                  Ark_Position {Converter::ArkValue<Opt_Length>(OriginX), 
-                                Converter::ArkValue<Opt_Length>(OriginY)}};
+    Ark_Area area{Converter::ArkValue<Ark_Length>(width),
+                  Converter::ArkValue<Ark_Length>(height),
+                  Ark_Position {Converter::ArkValue<Opt_Length>(offsetX),
+                                Converter::ArkValue<Opt_Length>(offsetY)},
+                  Ark_Position {Converter::ArkValue<Opt_Length>(originX),
+                                Converter::ArkValue<Opt_Length>(originY)}};
 
     Ark_EventTarget value {area};
     accessor_->setTarget(peer_, &value);
     EventTarget result = baseEvent_->GetTarget();
-    EXPECT_EQ(result.area.GetHeight().Value(), Height);
-    EXPECT_EQ(result.area.GetWidth().Value(), Width);
-    EXPECT_EQ(result.area.GetOffset().GetX().Value(), OffsetX);
-    EXPECT_EQ(result.area.GetOffset().GetY().Value(), OffsetY);
-    EXPECT_EQ(result.origin.GetX().Value(), OriginX);
-    EXPECT_EQ(result.origin.GetY().Value(), OriginY);
+    EXPECT_EQ(result.area.GetHeight().Value(), height);
+    EXPECT_EQ(result.area.GetWidth().Value(), width);
+    EXPECT_EQ(result.area.GetOffset().GetX().Value(), offsetX);
+    EXPECT_EQ(result.area.GetOffset().GetY().Value(), offsetY);
+    EXPECT_EQ(result.origin.GetX().Value(), originX);
+    EXPECT_EQ(result.origin.GetY().Value(), originY);
 }
 
 /**
