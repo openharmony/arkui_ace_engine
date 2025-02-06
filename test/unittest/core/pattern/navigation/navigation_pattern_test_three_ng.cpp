@@ -670,11 +670,11 @@ HWTEST_F(NavigationPatternTestThreeNg, GenerateUINodeFromRecovery003, TestSize.L
     NavPathList navPathList;
     navPathList.emplace_back(std::make_pair("Page01", nullptr));
     int32_t lastStandardIndex = 0;
-    MockNavPathInfo page01Info("Page01");
-    page01Info.fromRecovery = true;
-    navigationStack->mockPathArray_.emplace_back(page01Info);
-    MockNavPathInfo page02Info("Page02");
-    navigationStack->mockPathArray_.emplace_back(page02Info);
+    auto page01Info = AceType::MakeRefPtr<MockNavPathInfo>("Page01");
+    page01Info->fromRecovery = true;
+    navigationStack->mockPathArray_.push_back(page01Info);
+    auto page02Info = AceType::MakeRefPtr<MockNavPathInfo>("page02");
+    navigationStack->mockPathArray_.push_back(page02Info);
     
     EXPECT_EQ(navPathList[lastStandardIndex].second, nullptr);
     EXPECT_TRUE(navigationStack->IsFromRecovery(lastStandardIndex));
@@ -700,11 +700,11 @@ HWTEST_F(NavigationPatternTestThreeNg, GenerateUINodeFromRecovery004, TestSize.L
     NavPathList navPathList;
     navPathList.emplace_back(std::make_pair("Page01", nullptr));
     int32_t lastStandardIndex = 0;
-    MockNavPathInfo page01Info("Page01");
-    page01Info.fromRecovery = true;
-    navigationStack->mockPathArray_.emplace_back(page01Info);
-    MockNavPathInfo page02Info("Page02");
-    navigationStack->mockPathArray_.emplace_back(page02Info);
+    auto page01Info = AceType::MakeRefPtr<MockNavPathInfo>("page01");
+    page01Info->fromRecovery = true;
+    navigationStack->mockPathArray_.push_back(page01Info);
+    auto page02Info = AceType::MakeRefPtr<MockNavPathInfo>("page02");
+    navigationStack->mockPathArray_.push_back(page02Info);
     auto route = AceType::MakeRefPtr<MockNavigationRoute>("");
     MockContainer::Current()->SetNavigationRoute(route);
     
