@@ -225,7 +225,7 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorPickerPropertyTes
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
     auto duration = timestamp.time_since_epoch();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    Ark_Date arkDate = reinterpret_cast<Ark_Date>(milliseconds);
+    Ark_Date arkDate = static_cast<Ark_Date>(milliseconds);
     Opt_Date testDate = Converter::ArkValue<Opt_Date>(arkDate);
 
     Ark_TimePickerDialogOptions arkOptions;

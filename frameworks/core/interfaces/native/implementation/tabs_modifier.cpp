@@ -486,9 +486,7 @@ void __onChangeEvent_indexImpl(Ark_NativePointer node,
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-        if (!tabsInfo) {
-            return;
-        }
+        CHECK_NULL_VOID(tabsInfo);
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex()));
     };

@@ -521,13 +521,13 @@ HWTEST_F(GridItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_selected(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireSelectChangeEvent(true);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, true);
     eventHub->FireSelectChangeEvent(false);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }

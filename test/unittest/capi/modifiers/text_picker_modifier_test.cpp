@@ -1945,12 +1945,12 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected1Impl, TestSize.Level1)
     value.emplace_back("value");
     index.emplace_back(56.33);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(value, index);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
-    EXPECT_EQ(checkEvent->valueVct.has_value(), false);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->valueVct.has_value(), false);
     EXPECT_NEAR(checkEvent->value.value(), 56.33f, FLT_EPSILON);
 }
 
@@ -2000,12 +2000,12 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected2Impl, TestSize.Level1)
     index.emplace_back(56.33);
     index.emplace_back(89.435);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(value, index);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), false);
-    EXPECT_EQ(checkEvent->valueVct.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), false);
+    ASSERT_EQ(checkEvent->valueVct.has_value(), true);
     EXPECT_EQ(checkEvent->valueVct.value().size(), 2);
     EXPECT_NEAR(checkEvent->valueVct.value()[0], 56.33f, FLT_EPSILON);
     EXPECT_NEAR(checkEvent->valueVct.value()[1], 89.435f, FLT_EPSILON);
@@ -2055,12 +2055,12 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue1Impl, TestSize.Level1)
     value.emplace_back("value");
     index.emplace_back(56.33);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(value, index);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), true);
-    EXPECT_EQ(checkEvent->valueVct.has_value(), false);
+    ASSERT_EQ(checkEvent->value.has_value(), true);
+    ASSERT_EQ(checkEvent->valueVct.has_value(), false);
     EXPECT_EQ(checkEvent->value.value(), "value");
 }
 
@@ -2110,12 +2110,12 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
     index.emplace_back(56.33);
     index.emplace_back(89.435);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(value, index);
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value.has_value(), false);
-    EXPECT_EQ(checkEvent->valueVct.has_value(), true);
+    ASSERT_EQ(checkEvent->value.has_value(), false);
+    ASSERT_EQ(checkEvent->valueVct.has_value(), true);
     EXPECT_EQ(checkEvent->valueVct.value().size(), 2);
     EXPECT_EQ(checkEvent->valueVct.value()[0], "value_1");
     EXPECT_EQ(checkEvent->valueVct.value()[1], "value_2");

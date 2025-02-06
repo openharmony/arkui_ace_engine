@@ -842,13 +842,13 @@ HWTEST_F(ToggleModifierTest, setOnChangeEventIsOnImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_isOn(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->UpdateChangeEvent(true);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, true);
     eventHub->UpdateChangeEvent(false);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }

@@ -1131,7 +1131,7 @@ HWTEST_F(DatePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
         DatePickerChangeEvent event(testValue.first.ToString(true));
         eventHub->FireChangeEvent(&event);
 
-        EXPECT_TRUE(selectedDate.has_value());
+        ASSERT_TRUE(selectedDate.has_value());
         EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
         EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
