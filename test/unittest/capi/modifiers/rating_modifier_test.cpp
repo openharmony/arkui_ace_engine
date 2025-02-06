@@ -557,9 +557,9 @@ HWTEST_F(RatingModifierTest, setOnChangeEventRatingImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_rating(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent("55.5");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_NEAR(checkEvent->value, 55.5f, FLT_EPSILON);
 }

@@ -932,14 +932,14 @@ HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
     for (const auto time : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(time.ToString(true, true));
         eventHub->FireChangeEvent(&event);
-        EXPECT_EQ(selectedTime.has_value(), true);
+        ASSERT_EQ(selectedTime.has_value(), true);
         EXPECT_EQ(selectedTime->GetHour(), time.GetHour());
         EXPECT_EQ(selectedTime->GetMinute(), time.GetMinute());
         EXPECT_EQ(selectedTime->GetSecond(), time.GetSecond());
 
         DatePickerChangeEvent eventWithoutSeconds(time.ToString(true, false));
         eventHub->FireChangeEvent(&eventWithoutSeconds);
-        EXPECT_EQ(selectedTime.has_value(), true);
+        ASSERT_EQ(selectedTime.has_value(), true);
         EXPECT_EQ(selectedTime->GetHour(), time.GetHour());
         EXPECT_EQ(selectedTime->GetMinute(), time.GetMinute());
         EXPECT_EQ(selectedTime->GetSecond(), 0);

@@ -1598,13 +1598,13 @@ HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
     modifier_->set__onChangeEvent_value(node_, &arkCallback);
 
     PreviewText previewText {.offset = -1, .value = u""};
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnChange(u"test", previewText);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, "test");
     eventHub->FireOnChange(u"test_2", previewText);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, "test_2");
 }

@@ -203,9 +203,7 @@ void __onChangeEvent_modeImpl(Ark_NativePointer node,
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* baseEventInfo) {
         auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(baseEventInfo);
-        if (!eventInfo) {
-            return;
-        }
+        CHECK_NULL_VOID(eventInfo);
         auto mode = Converter::ArkValue<Ark_PanelMode>(eventInfo->GetMode());
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(mode);

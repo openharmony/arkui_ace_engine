@@ -211,17 +211,17 @@ HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Leve
     CheckboxGroupResult groupResultPart(vec, int(CheckBoxGroupPaintProperty::SelectStatus::PART));
     CheckboxGroupResult groupResultNone(vec, int(CheckBoxGroupPaintProperty::SelectStatus::NONE));
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->UpdateChangeEvent(&groupResultAll);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, true);
     eventHub->UpdateChangeEvent(&groupResultPart);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
     eventHub->UpdateChangeEvent(&groupResultNone);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }

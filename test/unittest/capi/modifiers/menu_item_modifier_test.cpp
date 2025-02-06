@@ -792,14 +792,14 @@ HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_selected(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     auto changeEvent = eventHub->GetSelectedChangeEvent();
     changeEvent(true);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, true);
     changeEvent(false);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }

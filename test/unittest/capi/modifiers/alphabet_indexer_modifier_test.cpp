@@ -1610,14 +1610,14 @@ HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_selected(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     auto onChangeEvent = eventHub->GetCreatChangeEvent();
     onChangeEvent(5);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 5);
     onChangeEvent(10);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 10);
 }

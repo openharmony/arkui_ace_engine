@@ -1810,13 +1810,13 @@ HWTEST_F(SwiperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 
     modifier_->set__onChangeEvent_index(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(0, 1, false);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 1);
     eventHub->FireChangeEvent(1, 2, false);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 2);
 }

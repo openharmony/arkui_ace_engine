@@ -668,9 +668,7 @@ void __onChangeEvent_indexImpl(Ark_NativePointer node,
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* info) {
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        if (!swiperInfo) {
-            return;
-        }
+        CHECK_NULL_VOID(swiperInfo);
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
     };
