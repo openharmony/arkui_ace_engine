@@ -89,6 +89,13 @@ public:
     {
         auto formPattern_ = weakFormPattern_.Upgrade();
         CHECK_NULL_VOID(formPattern_);
+        auto subContainer = formPattern_->GetSubContainer();
+        if (subContainer != nullptr && pixelMap != nullptr) {
+            auto formId = subContainer->GetRunningCardId();
+            TAG_LOGI(AceLogTag::ACE_FORM,
+                "formImage height: %{public}d, width: %{public}d, size:%{public}d, formId: %{public}" PRId64,
+                pixelMap->GetHeight(), pixelMap->GetWidth(), pixelMap->GetByteCount(), formId);
+        }
         formPattern_->OnSnapshot(pixelMap);
     }
 
@@ -496,6 +503,12 @@ RefPtr<FrameNode> FormPattern::CreateImageNode()
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_RETURN(formNode, nullptr);
     auto imageId = formNode->GetImageId();
+    auto subContainer = GetSubContainer();
+    if (subContainer != nullptr) {
+        auto formId = subContainer->GetRunningCardId();
+        TAG_LOGI(AceLogTag::ACE_FORM, "CreateImageNode imageId: %{public}d, formId: %{public}" PRId64,
+            imageId, formId);
+    }
     RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId,
         AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
@@ -1952,6 +1965,17 @@ void FormPattern::RemoveFormChildNode(FormChildNodeType formChildNodeType)
         return;
     }
     renderContext->RemoveChild(childNode->GetRenderContext());
+    
+    if (formChildNodeType == FormChildNodeType::FORM_STATIC_IMAGE_NODE) {
+        auto formNode = DynamicCast<FormNode>(host);
+        auto subContainer = GetSubContainer();
+        if (subContainer != nullptr && formNode != nullptr) {
+            auto imageId = formNode->GetImageId();
+            auto formId = subContainer->GetRunningCardId();
+            TAG_LOGI(AceLogTag::ACE_FORM, "RemoveImageNode imageId: %{public}d, formId: %{public}" PRId64,
+                imageId, formId);
+        }
+    }
     host->RemoveChild(childNode);
     TAG_LOGI(AceLogTag::ACE_FORM, "Remove child node: %{public}d sucessfully.",
         formChildNodeType);
