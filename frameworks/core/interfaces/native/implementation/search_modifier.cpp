@@ -459,6 +459,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
@@ -469,6 +470,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
@@ -619,6 +621,7 @@ void HalfLeadingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     SearchModelNG::SetHalfLeading(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 void StopBackPressImpl(Ark_NativePointer node,
@@ -626,6 +629,7 @@ void StopBackPressImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     SearchModelNG::SetStopBackPress(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 void SearchButtonImpl(Ark_NativePointer node,
