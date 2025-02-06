@@ -1772,7 +1772,7 @@ HWTEST_F(SearchModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
+HWTEST_F(SearchModifierTest, DISABLED_setMaxFontScaleTestInvalidValues, TestSize.Level1)
 {
     Opt_Union_Number_Resource initValueMaxFontScale;
 

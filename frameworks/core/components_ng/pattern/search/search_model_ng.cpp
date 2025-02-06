@@ -1672,7 +1672,7 @@ void SearchModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<fl
     if (valueOpt) {
         textFieldLayoutProperty->UpdateMaxFontScale(std::min(valueOpt.value(), MAX_FONT_SCALE));
     } else {
-        textFieldLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+        textFieldLayoutProperty->ResetMaxFontScale();
     }
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
