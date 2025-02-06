@@ -178,7 +178,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto length = styledString_->GetLength();
     styledString_->ReplaceSpanString(0, length, subValue);
     SetCaretPosition(styledString_->GetLength());
-    MoveCaretToContentRect();
+    SetNeedMoveCaretToContentRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     styledString_->AddCustomSpan();
