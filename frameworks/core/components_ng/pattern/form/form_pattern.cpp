@@ -184,6 +184,7 @@ void FormPattern::InitClickEvent()
 
 void FormPattern::HandleTouchDownEvent(const TouchEventInfo& event)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "handle touch down.");
     touchDownTime_ = event.GetTimeStamp();
     shouldResponseClick_ = true;
     if (!event.GetTouches().empty()) {
@@ -204,6 +205,7 @@ void FormPattern::HandleTouchUpEvent(const TouchEventInfo& event)
     }
     auto distance = event.GetTouches().front().GetScreenLocation() - lastTouchLocation_;
     if (distance.GetDistance() > FORM_CLICK_OPEN_LIMIT_DISTANCE) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "reject click. distance exceeded the limit.");
         shouldResponseClick_ = false;
     }
 }
@@ -283,7 +285,16 @@ void FormPattern::HandleSnapshot(uint32_t delayTime)
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 {
-    if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
+    if (formLinkInfos_.empty()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formLinkInfos_ empty.");
+        return;
+    }
+    if (isDynamic_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dynamic form.");
+        return;
+    }
+    if (!shouldResponseClick_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "shouldResponseClick_ is false.");
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
@@ -319,6 +330,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
     
     if (isDynamic_) {
         formLinkInfos_.clear();
+        TAG_LOGI(AceLogTag::ACE_FORM, "formLinkInfos_ clear.");
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "Static-form take snapshot.");
     auto host = GetHost();
