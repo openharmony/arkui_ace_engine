@@ -8039,6 +8039,7 @@ OffsetF RichEditorPattern::GetGlobalOffset() const
 
 bool RichEditorPattern::IsSingleHandle()
 {
+    CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), selectOverlay_->IsSingleHandle());
     return GetTextContentLength() == 0 || !IsSelected();
 }
 
