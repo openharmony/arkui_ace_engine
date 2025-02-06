@@ -942,7 +942,8 @@ void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &node
         nodeLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
         nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+        nodeLayoutProperty->UpdateBorderWidth(
+            { borderWidth, borderWidth, borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
         nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
@@ -1236,8 +1237,8 @@ void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
     auto textPadding = Dimension(ARC_INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
-    letterLayoutProperty->UpdatePadding(
-        { CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding) });
+    letterLayoutProperty->UpdatePadding({ CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding),
+        CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding) });
 
     auto BubbleSize = Dimension(ARC_BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdateUserDefinedIdealSize(
