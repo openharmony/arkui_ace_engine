@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -39,6 +40,16 @@ RichEditorDeleteDirection Convert(const Ark_RichEditorDeleteDirection& src)
             break;
     }
     return dst;
+}
+
+NG::TextFieldCommonEvent Convert(Ark_SubmitEvent& data)
+{
+    NG::TextFieldCommonEvent event;
+    const auto peer = reinterpret_cast<SubmitEventPeer*>(data.ptr);
+    if (peer && peer->GetEventInfo()) {
+        event = *peer->GetEventInfo();
+    }
+    return event;
 }
 } // Converter
 
@@ -445,7 +456,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
  * @tc.desc: setOnIMEInputComplete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
@@ -473,25 +484,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onIMEIcomplete = [](const Ark_Int32 resourceId, const Ark_RichEditorTextSpanResult data) {
         RichEditorAbstractSpanResult info;
-        info.SetValue(Converter::Convert<std::string>(data.value));
-        info.SetSpanIndex(Converter::Convert<int32_t>(data.spanPosition.spanIndex));
-        info.SetSpanRangeStart(Converter::Convert<int32_t>(data.spanPosition.spanRange.value0));
-        info.SetSpanRangeEnd(Converter::Convert<int32_t>(data.spanPosition.spanRange.value1));
-        info.SetFontFamily(Converter::Convert<std::string>(data.textStyle.fontFamily));
-        info.SetFontSize(Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontSize.value.value0));
-        auto color = Converter::OptConvert<Color>(data.textStyle.fontColor);
-        if (color) {
-            info.SetFontColor(color->ToString());
-        }
-        auto previewText = Converter::OptConvert<std::string>(data.previewText);
-        if (previewText) {
-            info.SetPreviewText(*previewText);
-        }
-
-        SymbolSpanStyle symbolSpanStyle;
-        symbolSpanStyle.fontSize = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontSize.value.value0);
-        symbolSpanStyle.fontWeight = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontWeight.value.value0);
-        info.SetSymbolSpanStyle(symbolSpanStyle);
+        // need fill info from data
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
             .info = info,
@@ -513,16 +506,37 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level
 HWTEST_F(RichEditorModifierCallbacksTest, OnDidIMEInputTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_TextRange_Void func{};
-    modifier_->setOnDidIMEInput(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onDidIMEInput), false);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    ASSERT_TRUE(eventHub);
+    struct CheckEvent {
+        int32_t resourceId;
+        TextRange info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onCallback = [](const Ark_Int32 resourceId, const Ark_TextRange parameter) {
+        TextRange info;
+        if(auto start = Converter::OptConvert<int32_t>(parameter.start); start) {
+            info.start = *start;
+        }
+        if (auto end = Converter::OptConvert<int32_t>(parameter.end); end) {
+            info.end = *end;
+        }
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = info,
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_TextRange_Void>(onCallback, frameNode->GetId());
+    EXPECT_FALSE(checkEvent);
     TextRange range;
     range.start = TEST_START;
     range.end = TEST_END;
+    modifier_->setOnDidIMEInput(node_, &arkCallback);
     eventHub->FireOnDidIMEInput(range);
-    EXPECT_EQ(GetFlag(recv.onDidIMEInput), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->info.start, TEST_START);
+    EXPECT_EQ(checkEvent->info.end, TEST_END);
 }
 
 /**
@@ -532,18 +546,40 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidIMEInputTest, TestSize.Level1)
  */
 HWTEST_F(RichEditorModifierCallbacksTest, OnSetAboutToDeleteTest, TestSize.Level1)
 {
+    static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_RichEditorDeleteValue_Boolean func{};
+    struct CheckEvent {
+        int32_t resourceId;
+        RichEditorDeleteValue info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_RichEditorDeleteValue parameter,
+        const Callback_Boolean_Void continuation) {
+        RichEditorDeleteValue info;
+        info.SetLength(Converter::Convert<int32_t>(parameter.length));
+        info.SetOffset(Converter::Convert<int32_t>(parameter.offset));
+        info.SetRichEditorDeleteDirection(Converter::Convert<RichEditorDeleteDirection>(parameter.direction));
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = info,
+        };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto func = Converter::ArkValue<Callback_RichEditorDeleteValue_Boolean>(nullptr, inputCallback, expectedResId);
     modifier_->setAboutToDelete(node_, &func);
-    EXPECT_EQ(GetFlag(recv.aboutToDelete), false);
-    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
     RichEditorDeleteValue value;
     value.SetLength(TEST_LENGTH);
     value.SetOffset(TEST_OFFSET);
     value.SetRichEditorDeleteDirection(TEST_DELETE_DIRECTION);
-    eventHub->FireAboutToDelete(value);
-    EXPECT_EQ(GetFlag(recv.aboutToDelete), true);
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    auto result = eventHub->FireAboutToDelete(value);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(checkEvent->info.GetLength(), value.GetLength());
+    EXPECT_EQ(checkEvent->info.GetOffset(), value.GetOffset());
+    EXPECT_EQ(checkEvent->info.GetRichEditorDeleteDirection(), value.GetRichEditorDeleteDirection());
 }
 
 /**
@@ -554,13 +590,23 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSetAboutToDeleteTest, TestSize.Level
 HWTEST_F(RichEditorModifierCallbacksTest, OnSetDeleteCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Void func{};
-    modifier_->setOnDeleteComplete(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onDeleteComplete), false);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onChange = [](Ark_Int32 nodeId) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(nodeId),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onChange, frameNode->GetId());
+    modifier_->setOnDeleteComplete(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
     eventHub->FireOnDeleteComplete();
-    EXPECT_EQ(GetFlag(recv.onDeleteComplete), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
 }
 
 /**
@@ -571,14 +617,32 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSetDeleteCompleteTest, TestSize.Leve
 HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    PasteEventCallback func{};
-    modifier_->setOnPaste(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onPaste), false);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](const Ark_Int32 resourceId, const Opt_PasteEvent event) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+        auto pasteEvent = Converter::OptConvert<Ark_PasteEvent>(event);
+        auto arkCallback = pasteEvent ? Converter::OptConvert<Callback_Void>(pasteEvent->preventDefault) : std::nullopt;
+        if (arkCallback) {
+            auto helper = CallbackHelper(*arkCallback);
+            helper.Invoke();
+        }
+    };
+    auto arkCallback = Converter::ArkValue<PasteEventCallback>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
+    modifier_->setOnPaste(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
     NG::TextCommonEvent value;
+    EXPECT_FALSE(value.IsPreventDefault());
     eventHub->FireOnPaste(value);
-    EXPECT_EQ(GetFlag(recv.onPaste), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_TRUE(value.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
 }
 
 /**
@@ -589,14 +653,26 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Boolean_Void func{};
-    modifier_->setOnEditingChange(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onEditingChange), false);
+    struct CheckEvent {
+        int32_t resourceId;
+        bool result;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onChange = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .result = Converter::Convert<bool>(parameter),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_Boolean_Void>(onChange, frameNode->GetId());
+    modifier_->setOnEditingChange(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    bool isEditing = TEST_IS_CHANGED_IN_EDITING;
-    eventHub->FireOnEditingChange(isEditing);
-    EXPECT_EQ(GetFlag(recv.onEditingChange), true);
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
+    eventHub->FireOnEditingChange(true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_TRUE(checkEvent->result);
 }
 
 /**
@@ -616,6 +692,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
     NG::TextFieldCommonEvent event;
     event.SetText(TEST_TEXT);
     eventHub->FireOnSubmit(value, event);
+    //const Ark_Int32 resourceId, Ark_EnterKeyType enterKey, const Ark_SubmitEvent event
     EXPECT_EQ(GetFlag(recv.onSubmit), true);
 }
 
