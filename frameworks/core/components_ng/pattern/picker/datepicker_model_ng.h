@@ -86,7 +86,7 @@ private:
     std::string dateTimeOrder = "";
 };
 
-class ACE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
+class ACE_FORCE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
 public:
     void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,

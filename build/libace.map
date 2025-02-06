@@ -231,6 +231,8 @@
       OHOS::Ace::NG::Matrix2D::*;
       OHOS::Ace::NG::CanvasPattern::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
+      OHOS::Ace::DatePickerDialogModel::*;
+      OHOS::Ace::TimePickerModel::*;
       OHOS::Ace::DOM_ROOT_NODE_ID_BASE;
       OHOS::Ace::ComponentGroupElement::*;
       OHOS::Ace::ComposedComponent::*;
@@ -342,6 +344,8 @@
       vtable?for?OHOS::Ace::NG::XComponentControllerNG;
       vtable?for?OHOS::Ace::NG::ViewAbstractModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
+      vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
+      vtable?for?OHOS::Ace::NG::TimePickerModelNG;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -478,7 +482,7 @@
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
       vtable?for?OHOS::Ace::NG::ParallelPagePattern;
       vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
-      vtable?for?OHOS::Ace::NG::ContainerModalView;      
+      vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
