@@ -26,11 +26,15 @@
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "validators.h"
+
 namespace OHOS::Ace {
 namespace {
 const std::string YEAR = "year";
 const std::string MONTH = "month";
 const std::string DAY = "day";
+const std::string HOUR = "hour";
+const std::string MINUTE = "minute";
+const std::string SECOND = "second";
 const int32_t STD_TM_START_YEAR = 1900;
 const int32_t SEC_TO_MILLISEC = 1000;
 } // namespace
@@ -272,13 +276,23 @@ void AssignArkValue(Ark_Date& dst, const std::string& src)
         json->GetValue(MONTH)->GetInt(),
         json->GetValue(DAY)->GetInt());
     Validator::ValidatePickerDate(date);
-    
+
+    PickerTime time(
+        json->GetValue(HOUR)->GetInt(),
+        json->GetValue(MINUTE)->GetInt(),
+        json->GetValue(SECOND)->GetInt());
+
     std::tm tm {};
     tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
     tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
-    time_t time = std::mktime(&tm);
-    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
+    tm.tm_hour = time.GetHour();
+    tm.tm_min = time.GetMinute();
+    tm.tm_sec = time.GetSecond();
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+    auto duration = timestamp.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    dst = static_cast<Ark_Date>(milliseconds);
 }
 
 void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
