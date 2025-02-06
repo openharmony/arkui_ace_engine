@@ -44,11 +44,12 @@ public:
     BaseEventInfo* baseEvent_ = nullptr;
 };
 
-std::vector<std::pair<Ark_Number, int>> testFixtureInt32Values = {
+const std::vector<std::pair<Ark_Number, int>> testFixtureInt32Values = {
     { Converter::ArkValue<Ark_Number>(123), 123 },
     { Converter::ArkValue<Ark_Number>(0), 0 },
     { Converter::ArkValue<Ark_Number>(30), 30 },
     { Converter::ArkValue<Ark_Number>(55), 55 },
+    { Converter::ArkValue<Ark_Number>(65000), 65000 },
     { Converter::ArkValue<Ark_Number>(10), 10 },
 };
 
