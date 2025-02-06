@@ -626,7 +626,7 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
         }
         auto host = panel->GetHost();
         CHECK_NULL_VOID(host);
-        AceAsyncTraceEnd(
+        AceAsyncTraceEndCommercial(
             0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
                 .c_str());
         panel->OnAnimationStop();
@@ -667,7 +667,7 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
             auto host = panel->GetHost();
             CHECK_NULL_VOID(host);
             if (NearEqual(currentOffset, lastOffset, 1.0)) {
-                AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) +
+                AceAsyncTraceBeginCommercial(0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) +
                                           std::string(" ") + host->GetTag())
                                           .c_str());
             }

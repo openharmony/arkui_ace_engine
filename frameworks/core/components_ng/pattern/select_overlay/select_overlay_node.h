@@ -130,6 +130,7 @@ private:
     void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     bool IsShowOnTargetAPIVersion();
     std::function<void()> GetDefaultOptionCallback();
+    std::function<void(WeakPtr<NG::FrameNode>)> GetSymbolFunc(const std::string& symbolId);
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
     void GetFlexibleOptionsParams(
         const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params);

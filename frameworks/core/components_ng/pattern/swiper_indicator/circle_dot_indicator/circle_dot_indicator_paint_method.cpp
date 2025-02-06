@@ -691,8 +691,10 @@ void CircleDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWr
     float longAngleChangeValue = (displayAreaCount - 1) * itemChangeValue;
 
     if (touchBottomType_ == TouchBottomType::END) {
-        for (auto indexLeft = tempvector.size() - displayAreaCount; indexLeft < tempvector.size(); indexLeft++) {
-            tempvector[indexLeft] -= (indexLeft - (tempvector.size() - displayAreaCount)) * itemChangeValue;
+        for (auto indexLeft = static_cast<int32_t>(tempvector.size()) - displayAreaCount;
+             indexLeft < static_cast<int32_t>(tempvector.size()); indexLeft++) {
+            tempvector[indexLeft] -=
+                (indexLeft - (static_cast<int32_t>(tempvector.size()) - displayAreaCount)) * itemChangeValue;
         }
         longAngleChangeValue *= -1;
     }

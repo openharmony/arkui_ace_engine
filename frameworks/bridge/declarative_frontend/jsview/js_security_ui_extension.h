@@ -19,7 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.h"
 
 namespace OHOS::Ace::Framework {
 class JSSecurityUIExtension {

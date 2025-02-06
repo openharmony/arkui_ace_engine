@@ -97,6 +97,13 @@ void IndicatorPattern::FireChangeEvent() const
     indicatorEventHub->FireChangeEvent(GetLoopIndex(GetCurrentIndex()));
 }
 
+void IndicatorPattern::FireIndicatorIndexChangeEvent(int32_t index) const
+{
+    auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
+    CHECK_NULL_VOID(indicatorEventHub);
+    indicatorEventHub->FireChangeEvent(GetLoopIndex(index));
+}
+
 std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
 {
     if (swiperParameters_ == nullptr) {
@@ -171,6 +178,13 @@ void IndicatorPattern::SaveDigitIndicatorProperty()
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
     layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters->selectedFontWeight.value_or(
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    auto indicatorModifier = GetDotIndicatorModifier();
+    CHECK_NULL_VOID(indicatorModifier);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rsRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->RemoveContentModifier(indicatorModifier);
 }
 
 void IndicatorPattern::SaveDotIndicatorProperty()
@@ -231,13 +245,19 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(isCustomSize_);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void IndicatorPattern::OnModifyDone()
 {
     if (!hasSetInitialIndex_) {
         hasSetInitialIndex_ = true;
-        currentIndexInSingleMode_ = GetInitialIndexFromProperty();
+        auto initialIndex = GetInitialIndexFromProperty();
+        if ((initialIndex < 0) || (initialIndex >= RealTotalCount())) {
+            initialIndex = 0;
+        }
+        currentIndexInSingleMode_ = initialIndex;
     }
 
     auto indicatorNode = GetHost();
@@ -330,13 +350,21 @@ void IndicatorPattern::ShowPrevious()
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ShowPrevious();
     }
-    auto isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRtl) {
+
+    singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+        if (IsLoop() && GetCurrentIndex() == 0) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        }
     } else {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+        if (IsLoop() && GetCurrentIndex() == 0) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        }
     }
 
+    lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() - 1);
 }
 
@@ -345,7 +373,20 @@ void IndicatorPattern::ShowNext()
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ShowNext();
     }
-    singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+        if (IsLoop() && GetCurrentIndex() == (RealTotalCount() - 1)) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        }
+    } else {
+        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+        if (IsLoop() && GetCurrentIndex() == (RealTotalCount() - 1)) {
+            singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        }
+    }
+
+    lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() + 1);
 }
 
@@ -354,6 +395,10 @@ void IndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ChangeIndex(index, useAnimation);
     }
+    if ((index < 0) || (index >= RealTotalCount())) {
+        index = 0;
+    }
+
     if (useAnimation) {
         if (GetLoopIndex(GetCurrentIndex()) > GetLoopIndex(index)) {
             singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
@@ -484,5 +529,37 @@ void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         }
         SetDragStartPoint(dragPoint);
     }
+}
+
+int32_t IndicatorPattern::GetTouchCurrentIndex() const
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::GetTouchCurrentIndex();
+    }
+
+    auto currentIndex = GetCurrentIndex();
+    auto isRtl = IsHorizontalAndRightToLeft();
+    if (isRtl) {
+        currentIndex = RealTotalCount() - 1 - currentIndex;
+    }
+
+    return currentIndex;
+}
+
+std::pair<int32_t, int32_t> IndicatorPattern::CalMouseClickIndexStartAndEnd(
+    int32_t itemCount, int32_t currentIndex)
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::CalMouseClickIndexStartAndEnd(itemCount, currentIndex);
+    }
+
+    int32_t loopCount = SwiperIndicatorUtils::CalcLoopCount(currentIndex, itemCount);
+    int32_t start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
+    int32_t end = currentIndex >= 0 ? (loopCount + 1) * itemCount : -loopCount * itemCount;
+    if (IsHorizontalAndRightToLeft()) {
+        end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
+        start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
+    }
+    return { start, end };
 }
 } // namespace OHOS::Ace::NG

@@ -92,7 +92,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling001, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -103,7 +103,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling001, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -177,7 +177,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling002, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -188,7 +188,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling002, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -264,7 +264,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling003, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -275,7 +275,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling003, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -361,7 +361,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling004, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -372,7 +372,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling004, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -448,7 +448,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling005, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -459,7 +459,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling005, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -538,7 +538,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling006, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -549,7 +549,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling006, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -616,7 +616,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling007, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -627,7 +627,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling007, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -706,7 +706,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling008, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -717,7 +717,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling008, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -794,7 +794,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling009, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -805,7 +805,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling009, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -886,7 +886,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling010, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -897,7 +897,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling010, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable_ = scrollableEvent->GetScrollable();
-    scrollable_->SetFriction(friction);
+    scrollable_->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable_->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -971,7 +971,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling011, TestSize.Level1)
      * Set the friction is 0.9
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -982,7 +982,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling011, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1007,7 +1007,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling012, TestSize.Level1)
      * Set the friction is 0.9
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -1018,7 +1018,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling012, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1092,7 +1092,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling013, TestSize.Level1)
      * Set the friction is 0.9
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -1103,7 +1103,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling013, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1179,7 +1179,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling014, TestSize.Level1)
      * Set the friction is 0.9
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -1190,7 +1190,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling014, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1276,7 +1276,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling015, TestSize.Level1)
      * Set the friction is 0.9
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -1287,7 +1287,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling015, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1363,7 +1363,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling016, TestSize.Level1)
      * Set the friction is 0.9
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -1374,7 +1374,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling016, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1453,7 +1453,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling017, TestSize.Level1)
      * Set the friction is 0.9
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -1464,7 +1464,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling017, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1531,7 +1531,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling018, TestSize.Level1)
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
-     * Get object scrollable and Call the SetFriction method
+     * Get object scrollable and Call the SetUnstaticFriction method
      * Call the Fling method and pass the correctVelocity parameter
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
@@ -1542,7 +1542,7 @@ HWTEST_F(ScrollableFlingTestNg, Fling018, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);

@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_caches.h"
 
@@ -152,6 +153,18 @@ public:
         }
         isActive_ = active;
     }
+
+    void SetDestroying(bool isDestroying = true, bool cleanStatus = true) override
+    {
+        for (const auto& [key, child] : caches_.GetAllNodes()) {
+            if (child.item->GetTag() == "BuilderProxyNode") {
+                child.item->SetDestroying(isDestroying, false);
+            } else {
+                child.item->SetDestroying(isDestroying, cleanStatus);
+            }
+        }
+    }
+
     void PaintDebugBoundaryTreeAll(bool flag) override
     {
         const auto& children = caches_.GetAllNodes();

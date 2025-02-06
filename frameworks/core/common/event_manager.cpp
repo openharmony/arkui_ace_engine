@@ -361,7 +361,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
-        TouchEvent touchEvent;
+        TouchEvent touchEvent = ConvertAxisEventToTouchEvent(event);
         FalsifyCancelEventAndDispatch(touchEvent, event.sourceTool != lastSourceTool_);
         responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
@@ -728,7 +728,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     UpdateDragInfo(point);
-    ACE_SCOPED_TRACE(
+    ACE_SCOPED_TRACE_COMMERCIAL(
         "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
@@ -917,6 +917,7 @@ void EventManager::CleanHoverStatusForDragBegin()
         DispatchMouseHoverEventNG(falsifyEvent);
     }
     mouseTestResults_.clear();
+    pressMouseTestResultsMap_.clear();
 }
 
 void EventManager::RegisterDragTouchEventListener(
@@ -1041,7 +1042,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
         }
     }
 
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     for (const auto& entry : curResultIter->second) {
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (!recognizer && !sendOnTouch) {
@@ -1635,10 +1636,13 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
-    if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
-        !event.isRotationEvent) {
-        axisTestResults_.clear();
-        return false;
+    // when api >= 15, do not block this event.
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
+            !event.isRotationEvent) {
+            axisTestResults_.clear();
+            return false;
+        }
     }
     for (const auto& axisTarget : axisTestResults_) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {

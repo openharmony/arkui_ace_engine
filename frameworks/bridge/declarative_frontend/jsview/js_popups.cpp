@@ -968,6 +968,17 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
     }
 }
 
+void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG::MenuParam& menuParam)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    auto previewBorderRadiusValue = menuContentOptions->GetProperty("previewBorderRadius");
+    NG::BorderRadiusProperty previewBorderRadius;
+    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    menuParam.previewBorderRadius = previewBorderRadius;
+}
+
 void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
     std::function<void()>& previewBuildFunc)
 {
@@ -986,6 +997,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
             ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
+            ParsePreviewBorderRadiusParam(menuContentOptions, menuParam);
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
@@ -1000,6 +1012,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
+        ParsePreviewBorderRadiusParam(menuContentOptions, menuParam);
     }
 }
 

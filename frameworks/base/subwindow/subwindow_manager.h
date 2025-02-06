@@ -170,6 +170,16 @@ public:
     void SetRect(const NG::RectF& rect, int32_t instanceId);
     void FlushSubWindowUITasks(int32_t instanceId);
 
+    int32_t ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode);
+    void HideSelectOverlay(const int32_t instanceId);
+    const RefPtr<Subwindow> GetSelectOverlaySubwindow(int32_t instanceId);
+    void AddSelectOverlaySubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
+    RefPtr<Subwindow> GetOrCreateSelectOverlayWindow(
+        int32_t containerId, const ToastWindowType& windowType, uint32_t mainWindowId);
+    void SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId);
+    void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
+    bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
+
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
@@ -202,6 +212,8 @@ private:
     std::mutex systemToastMutex_;
     SubwindowMixMap systemToastWindowMap_;
     Rect uiExtensionWindowRect_;
+    std::mutex selectOverlayMutex_;
+    SubwindowMixMap selectOverlayWindowMap_;
 };
 
 } // namespace OHOS::Ace

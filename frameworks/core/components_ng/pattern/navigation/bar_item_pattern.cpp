@@ -56,7 +56,7 @@ void UpdateSymbolBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto iconSize = theme->GetToolbarIconSize();
+    auto iconSize = barItemNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
     if (symbol != nullptr) {
         // symbol -> symbol
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
@@ -89,7 +89,7 @@ void UpdateImageBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<F
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto iconSize = theme->GetToolbarIconSize();
+    auto iconSize = barItemNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
     if (symbol != nullptr) {
         // image -> symbol
         barItemNode->RemoveChild(iconNode);
@@ -133,32 +133,19 @@ void UpdateSymbolEffect(const RefPtr<FrameNode>& iconNode)
     iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void BarItemPattern::UpdateBarItemActiveStatusResource()
+void BarItemPattern::UpdateBarItemTextAndIconStatusResource(const RefPtr<BarItemNode>& barItemNode,
+    const RefPtr<FrameNode>& iconNode)
 {
+    CHECK_NULL_VOID(barItemNode);
+    CHECK_NULL_VOID(iconNode);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-
-    auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
-    CHECK_NULL_VOID(barItemNode);
-    auto status = GetToolbarItemStatus();
-    auto iconStatus = GetCurrentIconStatus();
-
-    auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
-    CHECK_NULL_VOID(iconNode);
-
-    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        UpdateSymbolEffect(iconNode);
-    }
-
-    auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-
     ImageSourceInfo info;
     ToolbarIconStatus barIconStatus;
     Color textColor;
     Color iconColor;
+    auto status = GetToolbarItemStatus();
+    auto iconStatus = GetCurrentIconStatus();
     std::function<void(WeakPtr<NG::FrameNode>)> symbol;
     if (iconStatus == ToolbarIconStatus::INITIAL) {
         info = GetActiveIconImageSourceInfo();
@@ -183,11 +170,34 @@ void BarItemPattern::UpdateBarItemActiveStatusResource()
         }
         barItemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         barItemNode->MarkDirtyNode();
-        textLayoutProperty->UpdateTextColor(textColor);
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode();
+        if (!barItemNode->IsHideText()) {
+            auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
+            CHECK_NULL_VOID(textNode);
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateTextColor(textColor);
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
+        } else {
+            if (barItemNode->GetTextNode()) {
+                barItemNode->RemoveChild(barItemNode->GetTextNode());
+            }
+        }
         SetCurrentIconStatus(barIconStatus);
     }
+}
+
+void BarItemPattern::UpdateBarItemActiveStatusResource()
+{
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
+    CHECK_NULL_VOID(barItemNode);
+    auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
+    CHECK_NULL_VOID(iconNode);
+
+    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        UpdateSymbolEffect(iconNode);
+    }
+    UpdateBarItemTextAndIconStatusResource(barItemNode, iconNode);
 }
 
 void BarItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

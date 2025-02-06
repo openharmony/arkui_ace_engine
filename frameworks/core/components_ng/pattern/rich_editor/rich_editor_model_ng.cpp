@@ -481,6 +481,13 @@ void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::T
     eventHub->SetOnCopy(std::move(func));
 }
 
+void RichEditorModelNG::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnShare(std::move(func));
+}
+
 void RichEditorModelNG::SetSelectionMenuOptions(
     const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick)
 {
@@ -610,5 +617,20 @@ void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPr
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetStopBackPress(isStopBackPress);
+}
+
+void RichEditorModelNG::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetKeyboardAppearance(value);
+}
+
+void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
 }
 } // namespace OHOS::Ace::NG

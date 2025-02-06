@@ -166,6 +166,11 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
     const int64_t elementId, const int32_t requestId,
     Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
+    uint32_t realMode = mode;
+    if (realMode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN_REDUCED)) {
+        realMode &= ~static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN_REDUCED);
+        realMode |= static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN);
+    }
     // 1. Get real elementId
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
@@ -175,7 +180,7 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
     // 2. FindAccessibilityNodeInfosById by provider
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
-        splitElementId, mode, requestId, infos);
+        splitElementId, realMode, requestId, infos);
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
             "SearchElementInfoByAccessibilityId failed.");
@@ -374,14 +379,27 @@ void JsThirdProviderInteractionOperation::FocusMoveSearch(
     Accessibility::AccessibilityElementInfo info;
     bool ret = FocusMoveSearchProvider(
         splitElementId, direction, requestId, info);
-    if (!ret) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
-            "FocusMoveSearch failed.");
-        info.SetValidElement(false);
-    }
-
     // 3. Return result
-    SetFocusMoveSearchResult(callback, info, requestId);
+    if (!ret) {
+        auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(context->GetTaskExecutor());
+        context->GetTaskExecutor()->PostTask(
+            [jsMgr = jsAccessibilityManager_, weakHost = host_, &callback, requestId] () {
+                auto jsAccessibilityManager = jsMgr.Upgrade();
+                if ((!jsAccessibilityManager) || (!jsAccessibilityManager->IsRegister())) {
+                    AccessibilityElementInfo nodeInfo;
+                    nodeInfo.SetValidElement(false);
+                    callback.SetFocusMoveSearchResult(nodeInfo, requestId);
+                    return;
+                }
+                jsAccessibilityManager->SetFocusMoveResultWithNode(weakHost, callback, requestId);
+            }, TaskExecutor::TaskType::UI, "AccessibilityThirdPartyFocusMoveSearchFail");
+    } else {
+        SetFocusMoveSearchResult(callback, info, requestId);
+    }
 }
 
 bool JsThirdProviderInteractionOperation::FocusMoveSearchProvider(

@@ -120,6 +120,15 @@ enum class OverlayType {
     RESET = 3,
 };
 
+typedef enum {
+    FOCUS_MOVE_FORWARD = 0,
+    FOCUS_MOVE_BACKWARD,
+    FOCUS_MOVE_UP,
+    FOCUS_MOVE_DOWN,
+    FOCUS_MOVE_LEFT,
+    FOCUS_MOVE_RIGHT,
+} FocusMoveDirection;
+
 typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* effect);
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -137,7 +146,7 @@ public:
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
     static void SetLayoutWeight(float value);
-    static void SetLayoutWeight(const NG::LayoutWeightPair& value);
+    static void SetChainWeight(const NG::ChainWeightPair& value);
     static void SetPixelRound(uint16_t value);
     static void SetLayoutDirection(TextDirection value);
 
@@ -303,6 +312,8 @@ public:
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
+    static void SetNextFocus(FocusIntension key, const std::string& nextFocus);
+    static void ResetNextFocus();
     static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
@@ -340,6 +351,9 @@ public:
         FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
+    static int32_t CancelDataLoading(const std::string& key);
+    static void SetDisableDataPrefetch(bool disableDataPrefetch);
+    static void SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
@@ -357,7 +371,6 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
-    static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t ClosePopup(const RefPtr<UINode>& customNode);
@@ -605,7 +618,7 @@ public:
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
     static void SetLayoutWeight(FrameNode* frameNode, float value);
-    static void SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value);
+    static void SetChainWeight(FrameNode* frameNode, const NG::ChainWeightPair& value);
     static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
     static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
     static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
@@ -691,6 +704,9 @@ public:
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
     static void SetLayoutEvent(FrameNode* frameNode, std::function<void()>&& onLayout);
+    static void SetNextFocus(
+        FrameNode* frameNode, FocusIntension key, const std::variant<WeakPtr<AceType>, std::string> nextFocus);
+    static void ResetNextFocus(FrameNode* frameNode);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
@@ -698,6 +714,7 @@ public:
     static void SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback);
 #endif
 
+    static ImageResizableSlice GetBackgroundImageResizableSlice(FrameNode* frameNode);
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
@@ -836,8 +853,9 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
-    static int32_t OpenBindPopup(
-        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
+    static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
+    static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

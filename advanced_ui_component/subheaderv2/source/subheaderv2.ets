@@ -158,32 +158,55 @@ export class SubHeaderV2OperationItem {
   }
 }
 
+@ObservedV2
 class ContentIconOption {
+  @Trace
   public content?: ResourceStr;
+  @Trace
   public subContent?: ResourceStr;
+  @Trace
   public iconOptions?: SubHeaderV2IconType;
+  @Trace
   public action?: () => void;
+  @Trace
   public accessibilityLevel?: string;
+  @Trace
   public accessibilityText?: ResourceStr;
+  @Trace
   public accessibilityDescription?: ResourceStr;
+  @Trace
   public defaultFocus?: boolean;
 }
 
+@ObservedV2
 class FontStyle {
+  @Trace
   public maxLines: number = 0;
+  @Trace
   public fontWeight: number = 0;
+  @Trace
   public fontColor?: ResourceColor;
+  @Trace
   public alignment?: Alignment;
 }
 
+@ObservedV2
 class SubHeaderTheme {
+  @Trace
   public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
+  @Trace
   public fontSecondaryColor: ResourceColor = $r('sys.color.font_secondary');
+  @Trace
   public fontButtonColor: ResourceColor = $r('sys.color.font_emphasize');
+  @Trace
   public iconArrowColor: ResourceColor = $r('sys.color.icon_tertiary');
+  @Trace
   public textArrowHoverBgColor: ResourceColor = $r('sys.color.interactive_hover');
+  @Trace
   public borderFocusColor: ResourceColor = $r('sys.color.interactive_focus');
+  @Trace
   public leftIconColor: ResourceColor = $r('sys.color.icon_secondary');
+  @Trace
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
@@ -381,7 +404,7 @@ export struct SubHeaderV2 {
       .width('auto')
       .selected(this.selectedIndex)
       .value(this.selectedContent)
-      .defaultFocus(selectParam.defaultFocus)
+      .defaultFocus(this.select?.defaultFocus)
       .onSelect((index: number, value?: string) => {
         this.selectedIndex = index;
         if (value) {
@@ -808,10 +831,10 @@ export struct SubHeaderV2 {
               item: {
                 iconOptions: this.operationItems?.[index].content,
                 action: this.operationItems?.[index].action,
-                defaultFocus: item.defaultFocus,
-                accessibilityLevel: item.accessibilityLevel,
-                accessibilityText: item.accessibilityText,
-                accessibilityDescription: item.accessibilityDescription,
+                defaultFocus: this.operationItems?.[index].defaultFocus,
+                accessibilityLevel: this.operationItems?.[index].accessibilityLevel,
+                accessibilityText: this.operationItems?.[index].accessibilityText,
+                accessibilityDescription: this.operationItems?.[index].accessibilityDescription,
               },
               isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
             })

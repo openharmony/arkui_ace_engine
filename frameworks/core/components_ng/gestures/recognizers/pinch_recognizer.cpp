@@ -28,8 +28,8 @@ constexpr double SCALE_PER_AXIS_EVENT = 0.1f;
 
 } // namespace
 
-PinchRecognizer::PinchRecognizer(int32_t fingers, double distance)
-    : MultiFingersRecognizer(fingers), distance_(distance)
+PinchRecognizer::PinchRecognizer(int32_t fingers, double distance, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), distance_(distance)
 {
     if (fingers_ > MAX_PINCH_FINGERS || fingers_ < DEFAULT_PINCH_FINGERS) {
         fingers_ = DEFAULT_PINCH_FINGERS;
@@ -237,6 +237,9 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
+            if (CheckLimitFinger()) {
+                return;
+            }
             if (!isLastPinchFinished_) {
                 OnAccepted();
             } else {
@@ -245,6 +248,9 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
+        if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
+            return;
+        }
         if (isFlushTouchEventsEnd_) {
             SendCallbackMsg(onActionUpdate_);
         }

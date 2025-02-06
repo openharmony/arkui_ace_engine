@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
-#include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 
-#include "core/components_ng/animation/animatable_arithmetic_proxy.h"
+#include "interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.h"
+#include "ui/view/draw/content_modifier.h"
+
 #include "core/animation/native_curve_helper.h"
+#include "core/components_ng/animation/animatable_arithmetic_proxy.h"
 
 namespace OHOS::Ace::NG {
 
@@ -25,9 +27,9 @@ std::mutex g_ModifiersMapLock;
 
 std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<Kit::Modifier>& modifier)
 {
-    CHECK_NULL_RETURN(modifier, nullptr);
-    auto modifierAdapter = std::make_shared<ContentModifierAdapter>(modifier);
-    return modifierAdapter;
+    auto kitModifier = AceType::DynamicCast<Kit::ContentModifier>(modifier);
+    CHECK_NULL_RETURN(kitModifier, nullptr);
+    return kitModifier->GetRSModifier();
 }
 
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier)
@@ -77,11 +79,6 @@ void ModifierAdapter::RemoveModifier(int32_t modifierId)
 
 void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
-    if (kitModifier_) {
-        Kit::DrawingContext drawingContext = { context.canvas, context.width, context.height };
-        kitModifier_->OnDraw(&drawingContext);
-        return;
-    }
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     CHECK_NULL_VOID(context.canvas);
     auto modifier = modifier_.Upgrade();
@@ -146,10 +143,8 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
         };
         castProp->SetUpCallbacks(getter, setter);
         if (castProp->GetUpdateCallback()) {
-            rsProp->SetUpdateCallback(
-                [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
-                    cb(value.GetObject());
-                });
+            rsProp->SetUpdateCallback([cb = castProp->GetUpdateCallback()](
+                                          const AnimatableArithmeticProxy& value) { cb(value.GetObject()); });
         }
         return rsProp;
     }
@@ -252,8 +247,8 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
 } // namespace
 
 template<>
-void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(const AnimationOption& option,
-    float value, float velocity, const FinishCallback& finishCallback)
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
+    const AnimationOption& option, float value, float velocity, const FinishCallback& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
     auto targetValue = std::make_shared<RSAnimatableProperty<float>>(value);

@@ -82,8 +82,8 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     return true;
 }
 
-ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold)
-    : MultiFingersRecognizer(fingers), count_(count), distanceThreshold_(distanceThreshold)
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
@@ -310,6 +310,10 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
         return;
     }
+    if (CheckLimitFinger()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
 }
 
@@ -344,6 +348,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         // Turn off the multi-finger lift deadline timer
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
+        if (CheckLimitFinger()) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
         if (tappedCount_ == count_) {
             TriggerClickAccepted(event);
             return;
@@ -517,14 +524,17 @@ void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto host = GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(host);
+        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
         Recorder::EventParamsBuilder builder;
-        builder.SetId(host->GetInspectorId().value_or(""))
+        builder.SetEventType(Recorder::EventType::CLICK)
+            .SetId(host->GetInspectorId().value_or(""))
             .SetType(host->GetTag())
-            .SetText(host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true))
+            .SetText(accessibilityProperty->GetGroupText(true))
             .SetDescription(host->GetAutoEventParamValue(""))
             .SetHost(host);
-        auto rectSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT);
-        if (rectSwitch) {
+        auto pointSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_POINT);
+        if (pointSwitch) {
             static const int32_t precision = 2;
             std::stringstream ss;
             ss << std::fixed << std::setprecision(precision) << info.GetGlobalPoint().GetX() << ","
@@ -606,7 +616,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
 
 RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 {
-    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_);
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_, isLimitFingerCount_);
 }
 
 void ClickRecognizer::CleanRecognizerState()

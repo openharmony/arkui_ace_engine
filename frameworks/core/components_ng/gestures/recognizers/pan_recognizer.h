@@ -28,7 +28,7 @@ class PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
 
 public:
-    PanRecognizer(int32_t fingers, const PanDirection& direction, double distance);
+    PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount = false);
 
     explicit PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption);
 

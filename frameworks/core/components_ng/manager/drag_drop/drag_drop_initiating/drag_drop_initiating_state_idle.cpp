@@ -138,6 +138,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
     auto frameNode = params.frameNode.Upgrade();
     CHECK_NULL_VOID(frameNode);
     ResetStateForHitTest(frameNode);
+    params.triggeredSourceType = touchEvent.sourceType;
     params.idleFingerId = touchEvent.id;
     params.isNeedGather = DragDropFuncWrapper::CheckIsNeedGather(frameNode);
     RegisterDragListener();

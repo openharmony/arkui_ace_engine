@@ -1901,6 +1901,77 @@ typedef enum {
     /** Standard address. The scenario-based autofill feature, when enabled, can automatically save and fill in standard
      *  addresses. */
     ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS,
+    /**
+     * Passport number. The scenario-based autofill feature, when enabled, can automatically save and fill in passport
+     * numbers.
+     * @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PASSPORT_NUMBER,
+    /**
+     *  Passport validity. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  passport validities.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_VALIDITY,
+    /**
+     *  Place of issue. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  place of issues.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ISSUE_AT,
+    /**
+     *  Tax organization. The scenario-based autofill feature, when enabled, can automatically save and fill in tax
+     *  organizations.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ORGANIZATION,
+    /**
+     *  Tax id. The scenario-based autofill feature, when enabled, can automatically save and fill in standard Tax ids.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_TAX_ID,
+    /**
+     *  City name and state name or state code. The scenario-based autofill feature, when enabled, can automatically
+     *  save and fill in city names and state names or state codes.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ADDRESS_CITY_AND_STATE,
+    /**
+     *  Flight number. The scenario-based autofill feature, when enabled, can automatically save and fill in flight
+     *  numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_FLIGHT_NUMBER,
+    /**
+     *  License number. The scenario-based autofill feature, when enabled, can automatically save and fill in license
+     *  numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_NUMBER,
+    /**
+     *  License file number. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  license file numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_FILE_NUMBER,
+    /**
+     *  License plate number. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  license plate numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_PLATE,
+    /**
+     *  Engine number. The scenario-based autofill feature, when enabled, can automatically save and fill in engine
+     *  numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ENGINE_NUMBER,
+    /**
+     *  License chassis number. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  license chassis numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_CHASSIS_NUMBER,
 }ArkUI_TextInputContentType;
 
 /**
@@ -1915,6 +1986,34 @@ typedef enum {
     /** Inline input style. The background height of the selected text is the same as the height of the text box. */
     ARKUI_TEXTINPUT_STYLE_INLINE
 } ArkUI_TextInputStyle;
+
+/**
+ * @brief Defines the keyboard style of input box
+ *
+ * @since 16
+ */
+typedef enum {
+    /**
+     * Default appearance mode, won't adopt immersive styles.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE = 0,
+    /**
+     * Immersive mode.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_IMMERSIVE = 1,
+    /**
+     * Light immersive style.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE = 2,
+    /**
+     * Dark immersive style.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_DARK_IMMERSIVE = 3,
+} ArkUI_KeyboardAppearance;
 
 /**
  * @brief Defines the state of the NavDestination component.
@@ -2135,6 +2234,11 @@ typedef enum {
     ARKUI_ERROR_CODE_UI_CONTEXT_INVALID = 190001,
     /** The callback function is invalid. */
     ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
+    /** 
+     * @error The gesture recognizer type is not supported. 
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
 } ArkUI_ErrorCode;
 
 /**
@@ -2184,6 +2288,40 @@ typedef enum {
     /** Tail area. */
     ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
 } ArkUI_SafeAreaEdge;
+
+/**
+ * @brief Enumerates the expand modes.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Expand. */
+    ARKUI_EXPAND = 0,
+    /** Not expand. */
+    ARKUI_NOT_EXPAND = 1,
+    /** Lazy expand. Expand the children of node if needed. */
+    ARKUI_LAZY_EXPAND = 2,
+} ArkUI_ExpandMode;
+
+/**
+ * @brief Define an enum for the focus movement directions.
+ *
+ * @since 16
+*/
+typedef enum {
+    /** Move focus forward. */
+    ARKUI_FOCUS_MOVE_FORWARD = 0,
+    /** Move focus backward. */
+    ARKUI_FOCUS_MOVE_BACKWARD,
+    /** Move focus up. */
+    ARKUI_FOCUS_MOVE_UP,
+    /** Move focus down. */
+    ARKUI_FOCUS_MOVE_DOWN,
+    /** Move focus left. */
+    ARKUI_FOCUS_MOVE_LEFT,
+    /** Move focus right. */
+    ARKUI_FOCUS_MOVE_RIGHT,
+} ArkUI_FocusMove;
 
 /**
  * @brief Defines parameter used by the system font style callback event.

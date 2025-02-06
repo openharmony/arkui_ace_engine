@@ -102,6 +102,7 @@ public:
         bool addToRenderTree = false) override;
     bool RenderCustomChild(int64_t deadline) override;
     void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false) override;
+    void OnDestroyingStateChange(bool isDestroying, bool cleanStatus) override;
 
     bool GetJsActive()
     {

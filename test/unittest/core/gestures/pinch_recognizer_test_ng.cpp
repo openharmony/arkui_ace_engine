@@ -1501,4 +1501,73 @@ HWTEST_F(PinchRecognizerTestNg, SetOnActionCancelTest003, TestSize.Level1)
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: PinchGestureLimitFingerTest001
+ * @tc.desc: Test PinchGesture CreateRecognizer function
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchGestureLimitFingerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchGesture.
+     */
+    auto pinchGesture = AceType::MakeRefPtr<PinchGesture>(FINGER_NUMBER, PINCH_GESTURE_DISTANCE, IS_LIMIT_FINGER_COUNT);
+    ASSERT_NE(pinchGesture, nullptr);
+    EXPECT_EQ(pinchGesture->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     * @tc.expect: pinchRecognizer create successfully without the OnActionCall.
+     */
+    pinchGesture->priority_ = GesturePriority::Low;
+    pinchGesture->gestureMask_ = GestureMask::Normal;
+    auto pinchRecognizer = AceType::DynamicCast<PinchRecognizer>(pinchGesture->CreateRecognizer());
+    ASSERT_NE(pinchRecognizer, nullptr);
+    EXPECT_EQ(pinchRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(pinchRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(pinchRecognizer->distance_, PINCH_GESTURE_DISTANCE);
+    EXPECT_EQ(pinchRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: PinchGestureLimitFingerTest002
+ * @tc.desc: Test PinchGesture CreateRecognizer function
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchGestureLimitFingerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchGesture.
+     */
+    auto pinchGesture = AceType::MakeRefPtr<PinchGesture>(
+        FINGER_NUMBER, PINCH_GESTURE_DISTANCE, IS_NOT_LIMIT_FINGER_COUNT);
+    ASSERT_NE(pinchGesture, nullptr);
+    EXPECT_EQ(pinchGesture->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId existed
+     * @tc.expect: pinchRecognizer create successfully with the OnActionCall.
+     */
+    pinchGesture->priority_ = GesturePriority::Low;
+    pinchGesture->gestureMask_ = GestureMask::Normal;
+    auto onActionStart = [](GestureEvent& info) { return true; };
+    auto onActionUpdate = [](GestureEvent& info) { return true; };
+    auto onActionEnd = [](GestureEvent& info) { return true; };
+    auto onActionCancel = [](GestureEvent& info) { return true; };
+    pinchGesture->SetOnActionStartId(onActionStart);
+    pinchGesture->SetOnActionUpdateId(onActionUpdate);
+    pinchGesture->SetOnActionEndId(onActionEnd);
+    pinchGesture->SetOnActionCancelId(onActionCancel);
+    EXPECT_TRUE(pinchGesture->onActionStartId_);
+    EXPECT_TRUE(pinchGesture->onActionUpdateId_);
+    EXPECT_TRUE(pinchGesture->onActionEndId_);
+    EXPECT_TRUE(pinchGesture->onActionCancelId_);
+    auto pinchRecognizer = AceType::DynamicCast<PinchRecognizer>(pinchGesture->CreateRecognizer());
+    ASSERT_NE(pinchRecognizer, nullptr);
+    EXPECT_EQ(pinchRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(pinchRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(pinchRecognizer->distance_, PINCH_GESTURE_DISTANCE);
+    EXPECT_EQ(pinchRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+}
 } // namespace OHOS::Ace::NG

@@ -675,10 +675,10 @@ HWTEST_F(ScrollEffectTestNg, ContentClip001, TestSize.Level1)
     auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
     ASSERT_TRUE(ctx);
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     paintProperty_->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 } // namespace OHOS::Ace::NG

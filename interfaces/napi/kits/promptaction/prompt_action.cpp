@@ -41,7 +41,7 @@ const int32_t PRESENT_CUSTOM_DIALOG_PARAM_MAND_COUNT = 1;
 const int32_t PRESENT_CUSTOM_DIALOG_PARAM_INDEX_CONTROLLER = 1;
 const int32_t PRESENT_CUSTOM_DIALOG_PARAM_INDEX_OPTIONS = 2;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
-constexpr float AVOID_DISTANCE = 16.0f;
+constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
@@ -50,8 +50,7 @@ const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
-const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = {
-    ImmersiveMode::DEFAULT, ImmersiveMode::PAGE, ImmersiveMode::FULL};
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -1229,7 +1228,7 @@ std::optional<CalcDimension> GetKeyboardAvoidDistanceProps(
                 Dimension dimension(avoidDistanceValue, avoidDistanceUnitValueType);
                 keyboardAvoidDistanceProperty = dimension;
             } else {
-                Dimension dimension(AVOID_DISTANCE, DimensionUnit::VP);
+                Dimension dimension(DEFAULT_AVOID_DISTANCE, DimensionUnit::VP);
                 keyboardAvoidDistanceProperty = dimension;
             }
         }
@@ -1286,7 +1285,7 @@ void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsy
         napi_get_value_int32(env, asyncContext->dialogImmersiveModeApi, &immersiveMode);
     }
     if (immersiveMode >= 0 && immersiveMode < static_cast<int32_t>(DIALOG_IMMERSIVE_MODE.size())) {
-        dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[mode];
+        dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[immersiveMode];
     }
 }
 
@@ -2295,6 +2294,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
 void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext,
     PromptDialogAttr& promptDialogAttr, std::function<void(int32_t)>& openCallback)
 {
+    promptDialogAttr.isUserCreatedDialog = true;
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -2415,12 +2415,16 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "transition", &asyncContext->transitionApi);
     napi_get_named_property(env, arg, "maskColor", &asyncContext->maskColorApi);
     napi_get_named_property(env, arg, "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
+    napi_get_named_property(env, arg, "keyboardAvoidDistance", &asyncContext->keyboardAvoidDistanceApi);
     napi_get_named_property(env, arg, "enableHoverMode", &asyncContext->enableHoverMode);
     napi_typeof(env, asyncContext->enableHoverMode, &valueType);
     if (valueType == napi_boolean) {
         napi_get_value_bool(env, asyncContext->enableHoverMode, &asyncContext->enableHoverModeBool);
     }
     napi_get_named_property(env, arg, "hoverModeArea", &asyncContext->hoverModeAreaApi);
+    napi_get_named_property(env, arg, "levelMode", &asyncContext->dialogLevelModeApi);
+    napi_get_named_property(env, arg, "levelUniqueId", &asyncContext->dialogLevelUniqueId);
+    napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);
 
     ParseBaseDialogOptionsEvent(env, arg, asyncContext);
 }

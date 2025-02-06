@@ -71,7 +71,7 @@ bool ExecuteCustomWindowMaskAbc()
     // read abc file
     std::ifstream readFile(filePath, std::ifstream::binary);
     bool isLoadSuccess = false;
-    if (readFile.is_open()) {
+    if (readFile && readFile.is_open()) {
         readFile.seekg(0, std::ios::end);
         binarySize = static_cast<int32_t>(readFile.tellg());
         readFile.seekg(0, std::ios::beg);
@@ -85,6 +85,9 @@ bool ExecuteCustomWindowMaskAbc()
             TAG_LOGE(AceLogTag::ACE_APPBAR, "open windowmask abc file failed!");
             return false;
         }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_APPBAR, "The abc file may not exist.");
+        return false;
     }
     // run abc file
     auto jsEngine = EngineHelper::GetCurrentEngine();

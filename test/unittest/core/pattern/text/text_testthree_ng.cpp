@@ -121,7 +121,7 @@ HWTEST_F(TextTestThreeNg, BetweenSelectedPosition001, TestSize.Level1)
     auto [host, pattern] = Init();
     pattern->copyOption_ = CopyOptions::Distributed;
     host->draggable_ = true;
-    host->eventHub_->SetOnDragStart(
+    host->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
@@ -445,7 +445,6 @@ HWTEST_F(TextTestThreeNg, OnColorConfigurationUpdate001, TestSize.Level1)
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateTextColorByRender(Color::BLACK);
-    textLayoutProperty->UpdateTextColorFlagByUser(true);
     textPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }

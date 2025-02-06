@@ -1165,4 +1165,109 @@ HWTEST_F(RotationRecognizerTestNg, SetOnActionCancelTest003, TestSize.Level1)
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: RotationGestureLimitFingerTest001
+ * @tc.desc: Test RotationGesture CreateRecognizer function
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationGestureLimitFingerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationGestureGesture.
+     */
+    RotationGestureModelNG rotationGestureModelNG;
+    rotationGestureModelNG.Create(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto rotationGestureNG = AceType::DynamicCast<NG::RotationGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(rotationGestureNG->angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGestureNG->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    RotationGesture rotationGesture = RotationGesture(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(rotationGesture.angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGesture.isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: functions are not existed
+     */
+    rotationGesture.priority_ = GesturePriority::Low;
+    rotationGesture.gestureMask_ = GestureMask::Normal;
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_NE(rotationRecognizer, nullptr);
+    EXPECT_EQ(rotationRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(rotationRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    // /**
+    //  * @tc.steps: step2. call CreateRecognizer function and compare result
+    //  * @tc.steps: case2: functions are existed
+    //  */
+    std::unique_ptr<GestureEventFunc> onActionStartId;
+    std::unique_ptr<GestureEventFunc> onActionUpdateId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    rotationGesture.onActionStartId_ = std::move(onActionStartId);
+    rotationGesture.onActionUpdateId_ = std::move(onActionUpdateId);
+    rotationGesture.onActionEndId_ = std::move(onActionEndId);
+    rotationGesture.onActionCancelId_ = std::move(onActionCancelId);
+    rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_EQ(rotationRecognizer->priority_, rotationGesture.priority_);
+    EXPECT_EQ(rotationRecognizer->priorityMask_, rotationGesture.gestureMask_);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: RotationGestureLimitFingerTest002
+ * @tc.desc: Test RotationGesture CreateRecognizer function
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationGestureLimitFingerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationGestureGesture.
+     */
+    RotationGestureModelNG rotationGestureModelNG;
+    rotationGestureModelNG.Create(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto rotationGestureNG = AceType::DynamicCast<NG::RotationGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(rotationGestureNG->angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGestureNG->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    RotationGesture rotationGesture = RotationGesture(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(rotationGesture.angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGesture.isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: functions are not existed
+     */
+    rotationGesture.priority_ = GesturePriority::Low;
+    rotationGesture.gestureMask_ = GestureMask::Normal;
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_NE(rotationRecognizer, nullptr);
+    EXPECT_EQ(rotationRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(rotationRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    // /**
+    //  * @tc.steps: step2. call CreateRecognizer function and compare result
+    //  * @tc.steps: case2: functions are existed
+    //  */
+    std::unique_ptr<GestureEventFunc> onActionStartId;
+    std::unique_ptr<GestureEventFunc> onActionUpdateId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    rotationGesture.onActionStartId_ = std::move(onActionStartId);
+    rotationGesture.onActionUpdateId_ = std::move(onActionUpdateId);
+    rotationGesture.onActionEndId_ = std::move(onActionEndId);
+    rotationGesture.onActionCancelId_ = std::move(onActionCancelId);
+    rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_EQ(rotationRecognizer->priority_, rotationGesture.priority_);
+    EXPECT_EQ(rotationRecognizer->priorityMask_, rotationGesture.gestureMask_);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+}
+
 } // namespace OHOS::Ace::NG

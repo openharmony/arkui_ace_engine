@@ -679,7 +679,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachRecordOutOfBoundaryNodesTest001, Te
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
 
+    EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), 0);
     lazyForEachBuilder->RecordOutOfBoundaryNodes(INDEX_0);
+    EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), 1);
 }
 
 /**
@@ -704,12 +706,15 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachRecycleItemsOutOfBoundaryTest001, T
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
 
     lazyForEachBuilder->outOfBoundaryNodes_ = LAZY_FOR_EACH_ITEMS;
+    EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), LAZY_FOR_EACH_ITEMS.size());
     lazyForEachBuilder->RecycleItemsOutOfBoundary();
+    EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), 0);
 }
 
 /**

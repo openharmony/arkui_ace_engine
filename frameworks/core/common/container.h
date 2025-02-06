@@ -84,6 +84,14 @@ public:
 
     virtual void Destroy() = 0;
 
+    virtual void SetAppRunningUniqueId(const std::string& uniqueId) {};
+
+    virtual const std::string& GetAppRunningUniqueId() const
+    {
+        static const std::string res;
+        return res;
+    }
+
     virtual bool IsKeyboard()
     {
         return false;
@@ -627,7 +635,10 @@ public:
     }
 
     virtual void TerminateUIExtension() {}
-
+    virtual bool UIExtensionIsHalfScreen()
+    {
+        return false;
+    }
     template<ContainerType type>
     static int32_t GenerateId();
     static void SetFontScale(int32_t instanceId, float fontScale);
@@ -683,6 +694,15 @@ public:
     }
 
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
+
+    void DestroySelectOverlaySubwindow(int32_t instanceId);
+
+    static bool IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node);
+
+    virtual bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+    {
+        return false;
+    }
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);

@@ -54,6 +54,7 @@ public:
     void SetCachedCount(int32_t cachedCount) override;
     void SetCachedIsShown(bool isShown) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
+    void SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
@@ -84,6 +85,7 @@ public:
     void SetBindIndicator(bool bind) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
+    void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
@@ -119,6 +121,7 @@ public:
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange);
+    static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
@@ -152,6 +155,7 @@ public:
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
     static void SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll);
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
+    static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
     static bool GetIndicatorInteractive(FrameNode* frameNode);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);

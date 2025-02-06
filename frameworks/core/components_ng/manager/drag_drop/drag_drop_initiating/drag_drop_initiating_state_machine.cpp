@@ -140,6 +140,12 @@ void DragDropInitiatingStateMachine::HandleDragStart()
         static_cast<int32_t>(DragDropInitiatingStatus::MOVING));
 }
 
+void DragDropInitiatingStateMachine::HandleDragEnd()
+{
+    RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
+        static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+}
+
 void DragDropInitiatingStateMachine::TransDragWindowToFwk()
 {
     RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
@@ -148,12 +154,16 @@ void DragDropInitiatingStateMachine::TransDragWindowToFwk()
 
 void DragDropInitiatingStateMachine::TransMenuShow(bool isMenuShow)
 {
+    if (currentState_ == 0) {
+        return;
+    }
     if (!isMenuShow) {
         RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
             static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
         return;
     }
-    currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::LIFTING);
+    RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
+        static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
 }
 
 void DragDropInitiatingStateMachine::SetThumbnailCallback(std::function<void(Offset)>&& callback)
@@ -165,6 +175,7 @@ void DragDropInitiatingStateMachine::RequestStatusTransition(
     RefPtr<DragDropInitiatingStateBase> currentState, int32_t nextStatus)
 {
     TAG_LOGD(AceLogTag::ACE_DRAG, "RequestStatusTransition from %{public}d to %{public}d.", currentState_, nextStatus);
+    CHECK_NULL_VOID(dragDropInitiatingState_[nextStatus]);
     if (currentState_ != nextStatus) {
         CHECK_NULL_VOID(dragDropInitiatingState_[nextStatus]);
         dragDropInitiatingState_[nextStatus]->Init(currentState_);

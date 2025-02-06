@@ -15,7 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/base/i18n/time_format.h"
-
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 namespace OHOS::Ace::NG {
 const std::string DEFAULT_ERR_CODE = "-1";
 const std::string FORMAT_FONT = "%s|%s|%s";
@@ -381,6 +381,36 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerEnableCascade(ArkUIRunti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerEnableCascade(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TimepickerBridge::SetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> crownSensitivityArg =
+        runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    int32_t crownSensitivity = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (crownSensitivityArg->IsNumber()) {
+        crownSensitivity = crownSensitivityArg->ToNumber(vm)->Value();
+    }
+    auto modifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
+    modifier->getTimepickerModifier()->setTimePickerDigitalCrownSensitivity(nativeNode, crownSensitivity);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TimepickerBridge::ResetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto modifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
+    modifier->getTimepickerModifier()->resetTimePickerDigitalCrownSensitivity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

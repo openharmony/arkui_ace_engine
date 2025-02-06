@@ -459,14 +459,21 @@ export struct PopupComponent {
   }
 
   private getWindowsPadding(): LocalizedPadding {
-    return {
-      top: this.theme.windows.padding.top,
-      bottom: LengthMetrics.vp(this.theme.windows.padding.bottom.value -
-        (this.theme.button.textMargin.bottom.value / 2)),
-      start: LengthMetrics.vp(this.theme.windows.padding.start.value -
-        (this.theme.button.margin.end.value / 2)),
-      end: this.theme.windows.padding.end
+    let top = this.theme.windows.padding.top;
+    let bottom = LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
+    let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
+    let end = this.theme.windows.padding.end;
+    let resolvedMaxWidth = this.toVp(this.maxWidth);
+    if (resolvedMaxWidth === 0) {
+      start = LengthMetrics.vp(0);
+      end = LengthMetrics.vp(0);
     }
+    return {
+      top: top,
+      bottom: bottom,
+      start: start,
+      end: end
+    };
   }
 
   onWillApplyTheme(theme: Theme): void {

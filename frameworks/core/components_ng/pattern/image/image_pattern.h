@@ -423,6 +423,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
 
     void OnModifyDone() override;
     void UpdateGestureAndDragWhenModify();
@@ -585,6 +586,7 @@ private:
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
+    bool isNeedReset_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

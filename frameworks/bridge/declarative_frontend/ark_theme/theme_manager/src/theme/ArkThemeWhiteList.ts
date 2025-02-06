@@ -27,7 +27,6 @@ class ArkThemeWhiteList {
         'CheckboxGroup',
         'Counter',
         'DataPanel',
-        'DatePicker',
         'LoadingProgress',
         'Menu',
         'MenuItem',
@@ -41,8 +40,6 @@ class ArkThemeWhiteList {
         'Swiper',
         'Text',
         'TextClock',
-        'TextPicker',
-        'TimePicker',
         'Toggle',
     ];
 

@@ -207,10 +207,6 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetCurrentWindowRect(Rect(0.f, 0.f, 3000.f, 3000.f));
     MockPipelineContext::GetCurrent()->SetRootSize(rootSize.Width(), rootSize.Height());
 
-    auto containerId = Container::CurrentId();
-    auto foldablewindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(containerId));
-    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
-
     RefPtr<FrameNode> rootNode;
     auto targetNode = InitTargetNodeEnv(rootNode, rootSize, rootOffset, targetSize, targetOffset);
     ASSERT_NE(targetNode, nullptr);
@@ -239,6 +235,9 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
      */
     auto sheetPageNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(sheetPageNode, nullptr);
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "popup";
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     ASSERT_NE(sheetWrapperNode, nullptr);
     RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;

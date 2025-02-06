@@ -18,8 +18,6 @@
 
 #include <cstdint>
 
-#include "foundation/graphic/graphic_utils_lite/interfaces/kits/gfx_utils/graphic_types.h"
-
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"

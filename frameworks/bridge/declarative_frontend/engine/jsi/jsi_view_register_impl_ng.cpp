@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
@@ -137,6 +138,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
@@ -197,6 +199,7 @@
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
+#include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
@@ -392,6 +395,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRichEditorStyledStringController::JSBind(globalObj);
     JSLayoutManager::JSBind(globalObj);
     JSContainerModal::JSBind(globalObj);
+    JSAppBar::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -568,6 +572,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #ifndef CROSS_PLATFORM
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
+    JSTextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);
 #endif
@@ -585,14 +590,17 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
-#endif
     JSGestureRecognizer::JSBind(globalObj);
     JSEventTargetInfo::JSBind(globalObj);
     JSScrollableTargetInfo::JSBind(globalObj);
     JSPanRecognizer::JSBind(globalObj);
+    JSTapRecognizer::JSBind(globalObj);
+    JSLongPressRecognizer::JSBind(globalObj);
+    JSSwipeRecognizer::JSBind(globalObj);
+    JSPinchRecognizer::JSBind(globalObj);
+    JSRotationRecognizer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

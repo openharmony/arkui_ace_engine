@@ -27,12 +27,25 @@ ohos_source_set("ace_kit") {
   configs = [ "$ace_root:ace_config" ]
 
   sources = [
+    "src/agingadapation/aging_adapation_dialog_util.cpp",
+    "src/animation/animation_utils.cpp",
+    "src/napi/napi_parser.cpp",
+    "src/properties/property.cpp",
     "src/resource/resource_parser.cpp",
+    "src/utils/measure_utils.cpp",
+    "src/view/components/column.cpp",
+    "src/view/components/menu_view.cpp",
+    "src/view/components/text.cpp",
+    "src/view/draw/content_modifier.cpp",
+    "src/view/draw/modifier_adapter.cpp",
     "src/view/extend_pattern.cpp",
     "src/view/frame_node_impl.cpp",
     "src/view/layout/box_layout_algorithm.cpp",
+    "src/view/overlay/overlay_manager_impl.cpp",
     "src/view/theme/theme_factory.cpp",
     "src/view/theme/theme_style_impl.cpp",
+    "src/view/ui_context_impl.cpp",
+    "src/view/view.cpp",
     "src/view_factory/abstract_view_factory.cpp",
     "src/view_stack/view_stack_processor.cpp",
   ]
@@ -43,5 +56,19 @@ ohos_source_set("ace_kit") {
     "$ace_root/interfaces/inner_api/ace_kit/src",
   ]
 
+  deps = []
   external_deps = [ "hilog:libhilog" ]
+
+  if (is_arkui_x) {
+    include_dirs += [
+      "//foundation/arkui/napi",
+      "//third_party/node/src",
+    ]
+    deps += [ "${ace_graphic}/rosen/modules/render_service_client:librender_service_client_static" ]
+  } else {
+    external_deps += [
+      "graphic_2d:librender_service_client",
+      "napi:ace_napi",
+    ]
+  }
 }

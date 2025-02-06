@@ -44,7 +44,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
-            ArkUIPerfMonitor::GetInstance().StartPerf();
+            ArkUIPerfMonitor::GetPerfMonitor(id)->StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
             }
@@ -56,7 +56,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
-            ArkUIPerfMonitor::GetInstance().FinishPerf();
+            ArkUIPerfMonitor::GetPerfMonitor(id)->FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);

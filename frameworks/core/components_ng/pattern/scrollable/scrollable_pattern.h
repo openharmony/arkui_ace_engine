@@ -47,6 +47,7 @@
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
+#include "core/event/statusbar/statusbar_event_proxy.h"
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
@@ -73,7 +74,7 @@ struct ScrollOffsetAbility {
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
-class ScrollablePattern : public NestableScrollContainer {
+class ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
@@ -393,6 +394,10 @@ public:
         float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual float GetTotalOffset() const
+    {
+        return 0.0f;
+    }
+    virtual float GetContentStartOffset() const
     {
         return 0.0f;
     }
@@ -815,6 +820,15 @@ public:
 
     void StopScrollableAndAnimate();
 
+    void SetBackToTop(bool backToTop);
+
+    bool GetBackToTop() const
+    {
+        return backToTop_;
+    }
+
+    void OnStatusBarClick() override;
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
     CrownSensitivity GetDigitalCrownSensitivity() const
@@ -1098,7 +1112,7 @@ private:
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<PanEvent> boxSelectPanEvent_;
 
-    RefPtr<NavBarPattern> navBarPattern_;
+    RefPtr<NavDestinationPatternBase> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
@@ -1113,6 +1127,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
+    bool isClickAnimationStop_ = false; // interrupt scrolling after click statubar.
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
@@ -1147,6 +1162,8 @@ private:
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
+
+    bool backToTop_ = false;
 };
 } // namespace OHOS::Ace::NG
 

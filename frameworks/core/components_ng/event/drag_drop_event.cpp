@@ -265,4 +265,11 @@ bool DragDropEventActuator::IsNeedGather() const
     }
     return false;
 }
+
+void DragDropEventActuator::NotifyDragEnd()
+{
+    if (dragDropInitiatingHandler_) {
+        dragDropInitiatingHandler_->NotifyDragEnd();
+    }
+}
 } // namespace OHOS::Ace::NG

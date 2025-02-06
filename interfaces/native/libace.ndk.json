@@ -192,6 +192,10 @@
         "name": "OH_ArkUI_SetGestureRecognizerEnabled"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SetGestureRecognizerLimitFingerCount"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetGestureRecognizerEnabled"
     },
@@ -474,6 +478,14 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetTiltY"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_PointerEvent_GetInteractionHand"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_PointerEvent_GetInteractionHandByIndex"
     },
     {
         "first_introduced": "12",
@@ -1524,6 +1536,18 @@
         "name": "OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_GetChildWithExpandMode"
+    },
+    {
         "first_introduced": "14",
         "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
     },
@@ -2548,6 +2572,10 @@
         "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
     },
     {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_AccessibilityProviderRegisterCallbackWithInstance"
+    },
+    {
         "first_introduced": "16",
         "name": "OH_ArkUI_KeyEvent_Dispatch"
     },
@@ -2678,5 +2706,65 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_GetNodeSnapshot"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_StartImageAnalyzer"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_StopImageAnalyzer"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_DragEvent_StartDataLoading"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CancelDataLoading"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_DisableDropDataPrefetchOnNode"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GestureInterrupter_GetUserData"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_DirectMask"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_FingerCount"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_limitFingerCount"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_repeat"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_distance"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_speed"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_duration"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_angle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GetGestureParam_distanceThreshold"
     }
 ]

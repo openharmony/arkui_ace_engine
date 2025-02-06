@@ -179,7 +179,7 @@ JSViewFullUpdate::~JSViewFullUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode)
+RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
 {
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
@@ -528,7 +528,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
+RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
 {
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string& viewId) {
         auto jsView = weak.Upgrade();
@@ -665,6 +665,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         jsView->jsViewFunction_->ExecuteSetActive(active, isReuse);
     };
 
@@ -782,6 +783,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         info.isCustomTitle = true;
     }
 
+    if (isCustomAppBar) {
+        info.isCustomAppBar = true;
+    }
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
     auto customMeasureLayoutNode = DynamicCast<NG::CustomMeasureLayoutNode>(node);
     if (customMeasureLayoutNode) {
@@ -957,7 +961,16 @@ void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)
 
 void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
 {
-    auto result = NG::UIObserverHandler::GetInstance().GetNavigationState(GetViewNode());
+    std::shared_ptr<OHOS::Ace::NG::NavDestinationInfo> result;
+    if (info[0]->IsBoolean()) {
+        if (info[0]->ToBoolean()) {
+            result = NG::UIObserverHandler::GetInstance().GetNavigationInnerState(GetViewNode());
+        } else {
+            result = NG::UIObserverHandler::GetInstance().GetNavigationOuterState(GetViewNode());
+        }
+    } else {
+        result = NG::UIObserverHandler::GetInstance().GetNavigationState(GetViewNode());
+    }
     if (result) {
         JSRef<JSObject> obj = JSRef<JSObject>::New();
         obj->SetProperty<std::string>("navigationId", result->navigationId);

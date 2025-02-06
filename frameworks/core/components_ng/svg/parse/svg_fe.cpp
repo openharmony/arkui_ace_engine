@@ -71,12 +71,10 @@ static const LinearMapNode<void (*)(const std::string&, SvgFeCommonAttribute&)> 
     { SVG_X,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.x = SvgAttributesParser::ParseDimension(val);
-            attr.isXValid = true;
         } },
     { SVG_Y,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.y = SvgAttributesParser::ParseDimension(val);
-            attr.isYValid = true;
         } },
 };
 }
@@ -147,7 +145,7 @@ Rect SvgFe::ResolvePrimitiveSubRegion()
 {
     auto filterAreaContext = GetFilterContext();
     // if dimension is invalid , just return filter effect area
-    if (!(feAttr_.isHeightValid && feAttr_.isWidthValid && feAttr_.isXValid && feAttr_.isYValid)) {
+    if (!(feAttr_.isHeightValid && feAttr_.isWidthValid)) {
         return filterAreaContext.GetFilterArea();
     }
     auto primitiveRule = filterAreaContext.GetPrimitiveRule();

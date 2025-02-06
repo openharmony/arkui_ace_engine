@@ -27,11 +27,13 @@
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
 
+namespace {
 const std::vector<ImageFit> IMAGE_FITS = { ImageFit::FILL, ImageFit::CONTAIN, ImageFit::COVER, ImageFit::NONE,
     ImageFit::SCALE_DOWN, ImageFit::FITWIDTH };
 
 const std::vector<VerticalAlign> VERTICAL_ALIGNS = { VerticalAlign::TOP, VerticalAlign::CENTER, VerticalAlign::BOTTOM,
     VerticalAlign::BASELINE };
+} // namespace
 
 TextBackgroundStyle ParseTextBackgroundStyle(uint32_t color, double radiusDouble, int32_t unit)
 {

@@ -28,13 +28,23 @@ class PinchRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PinchRecognizer, MultiFingersRecognizer);
 
 public:
-    PinchRecognizer(int32_t fingers, double distance);
+    PinchRecognizer(int32_t fingers, double distance, bool isLimitFingerCount = false);
     ~PinchRecognizer() override = default;
 
     void OnAccepted() override;
     void OnRejected() override;
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
+
+    void SetDistance(double distance)
+    {
+        distance_ = distance;
+    }
+
+    double GetDistance() const
+    {
+        return distance_;
+    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;

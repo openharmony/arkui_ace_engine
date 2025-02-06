@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -92,6 +92,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_badge_ffi.cpp",
       "interfaces/cj_ffi/cj_blank_ffi.cpp",
       "interfaces/cj_ffi/cj_button_ffi.cpp",
+      "interfaces/cj_ffi/cj_calendar_picker_ffi.cpp",
       "interfaces/cj_ffi/cj_canvas_ffi.cpp",
       "interfaces/cj_ffi/cj_checkbox_ffi.cpp",
       "interfaces/cj_ffi/cj_checkbox_group_ffi.cpp",
@@ -146,6 +147,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_polygon_ffi.cpp",
       "interfaces/cj_ffi/cj_polyline_ffi.cpp",
       "interfaces/cj_ffi/cj_progress_ffi.cpp",
+      "interfaces/cj_ffi/cj_progressmask_ffi.cpp",
       "interfaces/cj_ffi/cj_radio_ffi.cpp",
       "interfaces/cj_ffi/cj_rating_ffi.cpp",
       "interfaces/cj_ffi/cj_rect_ffi.cpp",
@@ -155,6 +157,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
       "interfaces/cj_ffi/cj_row_ffi.cpp",
       "interfaces/cj_ffi/cj_scroll_ffi.cpp",
+      "interfaces/cj_ffi/cj_scrollable_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
       "interfaces/cj_ffi/cj_shape_ffi.cpp",
@@ -189,6 +192,10 @@ template("cj_frontend") {
       "interfaces/cj_ffi/font/cj_font_ffi.cpp",
       "interfaces/cj_ffi/matrix4/cj_matrix4_ffi.cpp",
       "interfaces/cj_ffi/measure/cj_measure_ffi.cpp",
+      "interfaces/cj_ffi/observer/cj_observer.cpp",
+      "interfaces/cj_ffi/observer/observer.cpp",
+      "interfaces/cj_ffi/observer/observer_ffi.cpp",
+      "interfaces/cj_ffi/observer/observer_listener.cpp",
       "interfaces/cj_ffi/prompt/cj_prompt_ffi.cpp",
       "interfaces/cj_ffi/router/cj_router_ffi.cpp",
       "interfaces/cj_ffi/state_manage/cj_environment.cpp",

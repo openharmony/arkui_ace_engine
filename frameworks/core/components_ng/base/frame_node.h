@@ -242,6 +242,8 @@ public:
 
     void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
+        CreateEventHubInner();
+        CHECK_NULL_VOID(eventHub_);
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
@@ -251,6 +253,8 @@ public:
         bool isCalculateInnerClip = false)
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+        CreateEventHubInner();
+        CHECK_NULL_VOID(eventHub_);
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -266,6 +270,7 @@ public:
 
     void CleanVisibleAreaInnerCallback()
     {
+        CHECK_NULL_VOID(eventHub_);
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
@@ -331,26 +336,42 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetEventHub() const
+    RefPtr<T> GetEventHub()
+    {
+        CreateEventHubInner();
+        CHECK_NULL_RETURN(eventHub_, nullptr);
+        return DynamicCast<T>(eventHub_);
+    }
+
+    template<typename T>
+    RefPtr<T> GetEventHubOnly()
     {
         return DynamicCast<T>(eventHub_);
     }
 
-    RefPtr<GestureEventHub> GetOrCreateGestureEventHub() const
+    RefPtr<GestureEventHub> GetOrCreateGestureEventHub()
     {
+        CreateEventHubInner();
+        CHECK_NULL_RETURN(eventHub_, nullptr);
         return eventHub_->GetOrCreateGestureEventHub();
     }
 
-    RefPtr<InputEventHub> GetOrCreateInputEventHub() const
+    RefPtr<InputEventHub> GetOrCreateInputEventHub()
     {
+        CreateEventHubInner();
         return eventHub_->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetOrCreateFocusHub() const;
+    RefPtr<FocusHub> GetOrCreateFocusHub();
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
+        const std::unique_ptr<FocusPaintParam>& paintParamsPtr);
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
+
+    void CreateEventHubInner();
 
     const RefPtr<FocusHub>& GetFocusHub() const
     {
-        return eventHub_->GetFocusHub();
+        return focusHub_;
     }
 
     bool HasVirtualNodeAccessibilityProperty() override
@@ -567,7 +588,7 @@ public:
 
     bool MarkRemoving() override;
 
-    void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
+    void AddHotZoneRect(const DimensionRect& hotZoneRect);
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
@@ -810,6 +831,7 @@ public:
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
 
     FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false, bool isExpand = true);
+    FrameNode* GetFrameNodeChildByIndexWithoutBuild(uint32_t index);
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -885,7 +907,7 @@ public:
         for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
             auto& child = *iter;
             auto target = DynamicCast<FrameNode>(child->FindChildNodeOfClass<T>());
-            if (target) {
+            if (target && target->eventHub_) {
                 auto focusEvent = target->eventHub_->GetFocusHub();
                 if (focusEvent && focusEvent->IsCurrentFocus()) {
                     return AceType::DynamicCast<T>(target);
@@ -895,7 +917,7 @@ public:
 
         if (AceType::InstanceOf<T>(this)) {
             auto target = DynamicCast<FrameNode>(this);
-            if (target) {
+            if (target && target->eventHub_) {
                 auto focusEvent = target->eventHub_->GetFocusHub();
                 if (focusEvent && focusEvent->IsCurrentFocus()) {
                     return Claim(AceType::DynamicCast<T>(this));
@@ -1187,6 +1209,7 @@ public:
     void OnPropertyChangeMeasure() const;
 
     void SetKitNode(const RefPtr<Kit::FrameNode>& node);
+    const RefPtr<Kit::FrameNode>& GetKitNode() const;
 
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
@@ -1223,15 +1246,30 @@ public:
     {
         return lastHostParentOffsetToWindow_;
     }
+    void ResetRenderDirtyMarked(bool isRenderDirtyMarked)
+    {
+        isRenderDirtyMarked_ = isRenderDirtyMarked;
+    }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
     void FireFrameNodeDestructorCallback();
+
+    bool CheckTopWindowBoundary() const
+    {
+        return topWindowBoundary_;
+    }
+
+    void SetTopWindowBoundary(bool topWindowBoundary)
+    {
+        topWindowBoundary_ = topWindowBoundary;
+    }
 
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void OnCollectRemoved() override;
 
 private:
     void MarkDirtyNode(
@@ -1310,7 +1348,7 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
-    void ProcessThrottledVisibleCallback();
+    void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
@@ -1380,6 +1418,7 @@ private:
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
+    RefPtr<FocusHub> focusHub_;
 
     RefPtr<ExtensionHandler> extensionHandler_;
 
@@ -1468,8 +1507,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
-        false, true, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_;
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
@@ -1498,6 +1536,8 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+
+    bool topWindowBoundary_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2237,5 +2238,127 @@ HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level1)
     radioLayoutAlgorithm.Layout(&layoutWrapper);
     EXPECT_TRUE(IsEqual(childWrapper->GetGeometryNode()->GetMarginFrameOffset(), child_offset));
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: RadioPatternTest050
+ * @tc.desc: Test Radio OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest050, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto eventHub = frameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * test event.action != KeyAction::DOWN
+     */
+    KeyEvent keyEventOne(KeyCode::KEY_FUNCTION, KeyAction::UP);
+    EXPECT_FALSE(eventHub->ProcessOnKeyEventInternal(keyEventOne));
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_A
+     */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    EXPECT_FALSE(eventHub->ProcessOnKeyEventInternal(keyEventTwo));
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventThr(KeyCode::KEY_FUNCTION, KeyAction::DOWN);
+    EXPECT_TRUE(eventHub->ProcessOnKeyEventInternal(keyEventThr));
+}
+
+/**
+ * @tc.name: RadioPatternTest051
+ * @tc.desc: Test UpdateGroupCheckStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. MockContainer.apiTargetVersion_ = VERSION_TWELVE.
+     */
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
+
+    /**
+     * @tc.steps: Get Radio pattern object and get
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
+
+    /**
+     * @tc.expected: Function UpdateUncheckStatus is called.
+     */
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern->isFirstCreated_ = false;
+    pattern->UpdateGroupCheckStatus(frameNode, groupManager, true);
+    pattern->UpdateUncheckStatus(frameNode);
+    EXPECT_FALSE(radioPaintProperty->GetRadioCheckValue());
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: RadioPatternTest052
+ * @tc.desc: Test UpdateUncheckStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: MockContainer.apiTargetVersion_ = VERSION_TWELVE.
+     * @tc.steps: set radio theme
+     */
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
+        radioTheme->showCircleDial_ = true;
+        return radioTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps: Get Radio pattern object and get
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
+
+    /**
+     * @tc.expected: Function UpdateGroupCheckStatus is called.
+     */
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern->isFirstCreated_ = false;
+    pattern->UpdateGroupCheckStatus(frameNode, groupManager, true);
+    pattern->UpdateUncheckStatus(frameNode);
+    EXPECT_FALSE(radioPaintProperty->GetRadioCheckValue());
+    MockContainer::TearDown();
 }
 } // namespace OHOS::Ace::NG

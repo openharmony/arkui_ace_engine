@@ -640,6 +640,7 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
+    void HandleOnShare();
     void HandleDraggableFlag(bool isTouchSelectArea);
     void SetIsTextDraggable(bool isTextDraggable = true) override;
     bool JudgeContentDraggable();
@@ -856,6 +857,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowTranslate();
     bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
@@ -1100,6 +1102,17 @@ public:
         return isStopBackPress_;
     }
 
+    void SetKeyboardAppearance(KeyboardAppearance value)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
+        keyboardAppearance_ = value;
+    }
+
+    KeyboardAppearance GetKeyboardAppearance() const
+    {
+        return keyboardAppearance_;
+    }
+
     bool IsDragging() const override
     {
         return status_ == Status::DRAGGING || status_ == Status::FLOATING;
@@ -1209,7 +1222,9 @@ private:
     void HandleTouchUp();
     void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState();
+    void ResetTouchSelectState();
     void HandleTouchUpAfterLongPress();
+    void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const Offset& offset);
     void SetCaretTouchMoveOffset(const Offset& localOffset);
@@ -1381,7 +1396,8 @@ private:
     RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
-    RectF GetSelectArea();
+    void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
+    RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
@@ -1418,7 +1434,7 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
-    int32_t CalculateTruncationLength(const std::u16string& insertValue, int32_t index, int32_t allowInsertLength);
+    int32_t CalculateTruncationLength(const std::u16string& insertValue, int32_t start);
     bool ProcessTextTruncationOperation(std::u16string& text, bool calledByImf);
     void ProcessInsertValueMore(const std::u16string& text, OperationRecord record, OperationType operationType,
         RichEditorChangeValue changeValue, PreviewTextRecord preRecord);
@@ -1465,6 +1481,7 @@ private:
     void SetMagnifierLocalOffset(Offset localOffset);
     void SetMagnifierOffsetWithAnimation(Offset offset);
     void UpdateSelectionAndHandleVisibility();
+    void SetIsEnableSubWindowMenu();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1577,6 +1594,8 @@ private:
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
     bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
+    int32_t selectingFingerId_ = -1;
+    bool isTouchSelecting_ = false;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
     bool needMoveCaretToContentRect_ = false;
@@ -1597,6 +1616,7 @@ private:
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
+    KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
 };
 } // namespace OHOS::Ace::NG
 

@@ -393,7 +393,18 @@ abstract class ViewPU extends PUV2ViewBase
 
     // do not process an Element that has been marked to be deleted
     const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
-    const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+    if (!entry) {
+      stateMgmtProfiler.end();
+      return;
+    }
+    let updateFunc: UpdateFunc;
+    // if the element is pending, its updateFunc will not be executed during this function call, instead mark its UpdateFuncRecord as changed
+    // when the pending element is retaken and its UpdateFuncRecord is marked changed, then it will be inserted into dirtRetakenElementIds_
+    if (entry.isPending()) {
+      entry.setIsChanged(true);
+    } else {
+      updateFunc = entry.getUpdateFunc();
+    }
 
     if (typeof updateFunc !== 'function') {
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);
@@ -664,6 +675,12 @@ abstract class ViewPU extends PUV2ViewBase
       if (this.dirtDescendantElementIds_.size) {
         stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
       }
+
+      for (const dirtRetakenElementId of this.dirtRetakenElementIds_) {
+        this.dirtDescendantElementIds_.add(dirtRetakenElementId);
+      }
+      this.dirtRetakenElementIds_.clear();
+
     } while (this.dirtDescendantElementIds_.size);
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
     stateMgmtProfiler.end();

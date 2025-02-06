@@ -159,15 +159,57 @@ SubHeaderV2OperationItem = __decorate([
     ObservedV2
 ], SubHeaderV2OperationItem);
 export { SubHeaderV2OperationItem };
-class ContentIconOption {
-}
-class FontStyle {
+let ContentIconOption = class ContentIconOption {
+};
+__decorate([
+    Trace
+], ContentIconOption.prototype, "content", void 0);
+__decorate([
+    Trace
+], ContentIconOption.prototype, "subContent", void 0);
+__decorate([
+    Trace
+], ContentIconOption.prototype, "iconOptions", void 0);
+__decorate([
+    Trace
+], ContentIconOption.prototype, "action", void 0);
+__decorate([
+    Trace
+], ContentIconOption.prototype, "accessibilityLevel", void 0);
+__decorate([
+    Trace
+], ContentIconOption.prototype, "accessibilityText", void 0);
+__decorate([
+    Trace
+], ContentIconOption.prototype, "accessibilityDescription", void 0);
+__decorate([
+    Trace
+], ContentIconOption.prototype, "defaultFocus", void 0);
+ContentIconOption = __decorate([
+    ObservedV2
+], ContentIconOption);
+let FontStyle = class FontStyle {
     constructor() {
         this.maxLines = 0;
         this.fontWeight = 0;
     }
-}
-class SubHeaderTheme {
+};
+__decorate([
+    Trace
+], FontStyle.prototype, "maxLines", void 0);
+__decorate([
+    Trace
+], FontStyle.prototype, "fontWeight", void 0);
+__decorate([
+    Trace
+], FontStyle.prototype, "fontColor", void 0);
+__decorate([
+    Trace
+], FontStyle.prototype, "alignment", void 0);
+FontStyle = __decorate([
+    ObservedV2
+], FontStyle);
+let SubHeaderTheme = class SubHeaderTheme {
     constructor() {
         this.fontPrimaryColor = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         this.fontSecondaryColor = { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
@@ -178,7 +220,34 @@ class SubHeaderTheme {
         this.leftIconColor = { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         this.rightIconColor = { "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     }
-}
+};
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "fontPrimaryColor", void 0);
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "fontSecondaryColor", void 0);
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "fontButtonColor", void 0);
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "iconArrowColor", void 0);
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "textArrowHoverBgColor", void 0);
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "borderFocusColor", void 0);
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "leftIconColor", void 0);
+__decorate([
+    Trace
+], SubHeaderTheme.prototype, "rightIconColor", void 0);
+SubHeaderTheme = __decorate([
+    ObservedV2
+], SubHeaderTheme);
 function __Text__secondaryTitleStyles(a16) {
     Text.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
     Text.fontColor(a16?.fontColor ?? { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -374,7 +443,7 @@ export class SubHeaderV2 extends ViewV2 {
             Select.width('auto');
             Select.selected(this.selectedIndex);
             Select.value(this.selectedContent);
-            Select.defaultFocus(e14.defaultFocus);
+            Select.defaultFocus(this.select?.defaultFocus);
             Select.onSelect((k14, l14) => {
                 this.selectedIndex = k14;
                 if (l14) {
@@ -918,10 +987,10 @@ export class SubHeaderV2 extends ViewV2 {
                                                         item: {
                                                             iconOptions: this.operationItems?.[p8].content,
                                                             action: this.operationItems?.[p8].action,
-                                                            defaultFocus: q8.defaultFocus,
-                                                            accessibilityLevel: q8.accessibilityLevel,
-                                                            accessibilityText: q8.accessibilityText,
-                                                            accessibilityDescription: q8.accessibilityDescription,
+                                                            defaultFocus: this.operationItems?.[p8].defaultFocus,
+                                                            accessibilityLevel: this.operationItems?.[p8].accessibilityLevel,
+                                                            accessibilityText: this.operationItems?.[p8].accessibilityText,
+                                                            accessibilityDescription: this.operationItems?.[p8].accessibilityDescription,
                                                         },
                                                         isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
                                                     }, undefined, d9, () => { }, { page: "library/src/main/ets/components/subheaderv2.ets", line: 758 });
@@ -931,10 +1000,10 @@ export class SubHeaderV2 extends ViewV2 {
                                                             item: {
                                                                 iconOptions: this.operationItems?.[p8].content,
                                                                 action: this.operationItems?.[p8].action,
-                                                                defaultFocus: q8.defaultFocus,
-                                                                accessibilityLevel: q8.accessibilityLevel,
-                                                                accessibilityText: q8.accessibilityText,
-                                                                accessibilityDescription: q8.accessibilityDescription,
+                                                                defaultFocus: this.operationItems?.[p8].defaultFocus,
+                                                                accessibilityLevel: this.operationItems?.[p8].accessibilityLevel,
+                                                                accessibilityText: this.operationItems?.[p8].accessibilityText,
+                                                                accessibilityDescription: this.operationItems?.[p8].accessibilityDescription,
                                                             },
                                                             isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER
                                                         };
@@ -946,10 +1015,10 @@ export class SubHeaderV2 extends ViewV2 {
                                                         item: {
                                                             iconOptions: this.operationItems?.[p8].content,
                                                             action: this.operationItems?.[p8].action,
-                                                            defaultFocus: q8.defaultFocus,
-                                                            accessibilityLevel: q8.accessibilityLevel,
-                                                            accessibilityText: q8.accessibilityText,
-                                                            accessibilityDescription: q8.accessibilityDescription,
+                                                            defaultFocus: this.operationItems?.[p8].defaultFocus,
+                                                            accessibilityLevel: this.operationItems?.[p8].accessibilityLevel,
+                                                            accessibilityText: this.operationItems?.[p8].accessibilityText,
+                                                            accessibilityDescription: this.operationItems?.[p8].accessibilityDescription,
                                                         },
                                                         isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER
                                                     });

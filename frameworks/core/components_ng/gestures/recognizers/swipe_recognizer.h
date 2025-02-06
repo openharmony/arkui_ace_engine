@@ -30,8 +30,8 @@ class SwipeRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(SwipeRecognizer, MultiFingersRecognizer);
 
 public:
-    SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed)
-        : MultiFingersRecognizer(fingers), direction_(direction), speed_(speed)
+    SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed, bool isLimitFingerCount = false)
+        : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), speed_(speed)
     {}
     ~SwipeRecognizer() override = default;
 
@@ -53,6 +53,26 @@ public:
     }
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
+
+    void SetDirection(SwipeDirection direction)
+    {
+        direction_ = direction;
+    }
+
+    void SetSpeed(double speed)
+    {
+        speed_ = speed;
+    }
+
+    SwipeDirection GetDirection() const
+    {
+        return direction_;
+    }
+
+    double GetSpeed() const
+    {
+        return speed_;
+    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;

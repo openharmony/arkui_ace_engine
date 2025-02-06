@@ -141,7 +141,7 @@ void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
 
 OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper)
 {
-    auto menuOffset = info_->rightClickOffset;
+    auto menuOffset = info_->rightClickOffset + mainWindowOffset_ + containerModalOffset_;
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, menuOffset);
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
@@ -207,6 +207,7 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
         return;
     }
     menu->SetActive(true);
+    UpdateMainWindowOffset(layoutWrapper);
     OffsetF menuOffset = info_->isUsingMouse ? CalculateCustomMenuByMouseOffset(layoutWrapper)
                                              : ComputeSelectMenuPosition(layoutWrapper);
     auto menuGetGeometryNode = menu->GetGeometryNode();
@@ -327,22 +328,27 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     // paint rect is in global position, need to convert to local position
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    const auto firstHandleRect = info_->firstHandle.GetPaintRect() - offset;
-    const auto secondHandleRect = info_->secondHandle.GetPaintRect() - offset;
+    auto windowOffset = mainWindowOffset_ + containerModalOffset_;
+    const auto firstHandleRect = info_->firstHandle.GetPaintRect() + windowOffset - offset;
+    const auto secondHandleRect = info_->secondHandle.GetPaintRect() + windowOffset - offset;
 
     auto singleHandle = firstHandleRect;
     if (!info_->firstHandle.isShow) {
         singleHandle = secondHandleRect;
     }
     if (IsTextAreaSelectAll()) {
-        singleHandle = RectF(info_->menuInfo.menuOffset.value().GetX(), info_->menuInfo.menuOffset.value().GetY(),
-            singleHandle.Width(), singleHandle.Height());
+        singleHandle = RectF(info_->menuInfo.menuOffset.value().GetX() + windowOffset.GetX(),
+            info_->menuInfo.menuOffset.value().GetY() + windowOffset.GetY(), singleHandle.Width(),
+            singleHandle.Height());
+        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "ComputeSelectMenuPosition singleHandle : %{public}s",
+            singleHandle.ToString().c_str());
     }
-
     if (info_->isSingleHandle) {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
         menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
             static_cast<float>(singleHandle.Top() - menuSpacing - menuHeight));
+        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY,
+            "ComputeSelectMenuPosition single handle init menuPosition : %{public}s", menuPosition.ToString().c_str());
     } else {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
         menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
@@ -365,12 +371,18 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         if (info_->firstHandle.isShow && !info_->secondHandle.isShow) {
             menuPosition.SetX(firstHandleRect.Left() - menuWidth / 2.0f);
         }
+        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY,
+            "ComputeSelectMenuPosition double handle init menuPosition : %{public}s", menuPosition.ToString().c_str());
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
     auto overlayVP = viewPort;
     info_->GetCallerNodeAncestorViewPort(viewPort);
+    // viewPort rect is in main window position, need to convert to subwindow position
+    viewPort += windowOffset;
+    TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "ComputeSelectMenuPosition ancestor viewPort : %{public}s",
+        viewPort.ToString().c_str());
     // Adjust position of overlay.
     auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
         auto defaultMenuPositionX = theme->GetDefaultMenuPositionX();
@@ -443,8 +455,13 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     // back and more button layout is on the left side of the selectmenu when reverse layout.
     if (isExtension && !isReverse) {
-        return defaultMenuEndOffset_ - OffsetF(width, 0);
+        OffsetF position = defaultMenuEndOffset_ - OffsetF(width, 0);
+        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "ComputeSelectMenuPosition isExtension menuPosition : %{public}s",
+            position.ToString().c_str());
+        return position;
     }
+    TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "ComputeSelectMenuPosition final menuPosition : %{public}s",
+        menuPosition.ToString().c_str());
     return menuPosition;
 }
 
@@ -477,10 +494,11 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
-    AdjustMenuTooFarAway(menuOffset, menuRect);
+    AdjustMenuTooFarAway(layoutWrapper, menuOffset, menuRect);
     // menu cover up handle
-    auto upPaint = upHandle.GetPaintRect() - offset;
-    auto downPaint = downHandle.GetPaintRect() - offset;
+    auto windowOffset = mainWindowOffset_ + containerModalOffset_;
+    auto upPaint = upHandle.GetPaintRect() - offset + windowOffset;
+    auto downPaint = downHandle.GetPaintRect() - offset + windowOffset;
     if (!info_->isSingleHandle && upHandle.isShow && !downHandle.isShow) {
         auto circleOffset = OffsetF(
             upPaint.GetX() - (spaceBetweenHandle - upPaint.Width()) / 2.0f, upPaint.GetY() - spaceBetweenHandle);
@@ -546,6 +564,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffsetWhenHandlesUnshown(c
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
     auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto selectArea = info_->selectArea;
+    selectArea += mainWindowOffset_ + containerModalOffset_;
     if (topArea > menuOffset.GetY()) {
         menuOffset.SetY((selectArea.Top() + selectArea.Bottom() - menuRect.Height()) / 2.0f);
         return menuOffset;
@@ -570,7 +589,8 @@ bool SelectOverlayLayoutAlgorithm::IsMenuAreaSmallerHandleArea(RectF handleRect,
     return handleRect.Height() > menuHeight + menuDistance;
 }
 
-void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect)
+void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(
+    LayoutWrapper* layoutWrapper, OffsetF& menuOffset, const RectF& menuRect)
 {
     // the menu is too far away.
     auto hostFrameNode = info_->callerFrameNode.Upgrade();
@@ -579,10 +599,18 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, con
     CHECK_NULL_VOID(pipeline);
     auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
     auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset(false, true) - pipeline->GetRootRect().GetOffset();
+    bool isMenuShowInsubWindow = GetIsMenuShowInSubWindow(layoutWrapper);
+    if (isMenuShowInsubWindow) {
+        hostGlobalOffset = hostFrameNode->GetPaintRectOffset(false, true) + mainWindowOffset_;
+    }
     auto centerX = menuRect.Width() / 2.0f;
     if (info_->callerNodeInfo) {
         hostFrameRect = info_->callerNodeInfo->paintFrameRect;
         hostGlobalOffset = info_->callerNodeInfo->paintOffset;
+        if (isMenuShowInsubWindow) {
+            hostGlobalOffset =
+                info_->callerNodeInfo->paintOffset + pipeline->GetRootRect().GetOffset() + mainWindowOffset_;
+        }
     }
     if (GreatNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX() + hostFrameRect.Width())) {
         menuOffset.SetX(hostGlobalOffset.GetX() + hostFrameRect.Width() - centerX);
@@ -638,7 +666,8 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx() +
                                       theme->GetHandleDiameterStrokeWidth().ConvertToPx();
     double safeSpacing = theme->GetMenuSafeSpacing().ConvertToPx();
-    auto selectArea = info_->selectArea;
+    auto windowOffset = mainWindowOffset_ + containerModalOffset_;
+    auto selectArea = info_->selectArea + windowOffset;
     // 安全区域
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, OffsetF());
@@ -647,12 +676,13 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
-    auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandle.paintRect.Bottom(),
+    auto downHandlePaint = downHandle.paintRect + windowOffset;
+    auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandlePaint.Bottom(),
         (double)keyboardInsert.start)) ? true : false) : downHandle.isShow;
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    auto upPaint = upHandle.GetPaintRect() - offset;
-    auto downPaint = downHandle.GetPaintRect() - offset;
+    auto upPaint = upHandle.GetPaintRect() - offset + windowOffset;
+    auto downPaint = downHandle.GetPaintRect() - offset + windowOffset;
     auto viewPort = pipeline->GetRootRect();
     auto selectAndRootRectArea = selectArea.IntersectRectT(viewPort);
     auto safeAreaBottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.start;
@@ -756,5 +786,47 @@ void SelectOverlayLayoutAlgorithm::CheckHandleIsInClipViewPort()
         handleOnBottom.isShow = isInRegion(viewPort, handleOnBottom.paintRect.Left(), handleOnBottom.paintRect.Right(),
             handleOnBottom.paintRect.Bottom());
     }
+}
+
+void SelectOverlayLayoutAlgorithm::UpdateMainWindowOffset(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    bool isMenuShowInsubWindow = pattern->GetIsMenuShowInSubWindow();
+    if (!isMenuShowInsubWindow) {
+        mainWindowOffset_ = OffsetF(0.0, 0.0);
+        containerModalOffset_ = OffsetF(0.0, 0.0);
+        return;
+    }
+    auto containerId = pattern->GetContainerId();
+    if (containerId == -1) {
+        mainWindowOffset_ = OffsetF(0.0, 0.0);
+        containerModalOffset_ = OffsetF(0.0, 0.0);
+        TAG_LOGW(AceLogTag::ACE_SELECT_OVERLAY, "UpdateMainWindowOffset containerId is invalid.");
+        return;
+    }
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+    mainWindowOffset_ = OffsetF(displayWindowRect.Left(), displayWindowRect.Top());
+    containerModalOffset_ = info_->containerModalOffset;
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+        "UpdateMainWindowOffset mainWindowOffset : %{public}s containerModalOffset : %{public}s",
+        mainWindowOffset_.ToString().c_str(), containerModalOffset_.ToString().c_str());
+}
+
+bool SelectOverlayLayoutAlgorithm::GetIsMenuShowInSubWindow(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetIsMenuShowInSubWindow();
 }
 } // namespace OHOS::Ace::NG

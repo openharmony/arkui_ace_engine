@@ -121,6 +121,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, event);
     return this;
   }
+  onSelected(event: (index: number) => void): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnSelectedModifier.identity, SwiperOnSelectedModifier, event);
+    return this;
+  }
   indicatorStyle(value?: IndicatorStyle | undefined): this {
     throw new Error('Method not implemented.');
   }
@@ -146,6 +150,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   }
   onGestureSwipe(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this {
     modifierWithKey(this._modifiersWithKeys, SwiperOnGestureSwipeModifier.identity, SwiperOnGestureSwipeModifier, event);
+    return this;
+  }
+  onUnselected(event: (index: number) => void): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnUnselectedModifier.identity, SwiperOnUnselectedModifier, event);
     return this;
   }
   nestedScroll(value: SwiperNestedScrollMode): this {
@@ -566,6 +574,21 @@ class SwiperOnChangeModifier extends ModifierWithKey<Callback<number>> {
     }
   }
 }
+
+class SwiperOnSelectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnSelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnSelected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnSelected(node, this.value);
+    }
+  }
+}
+
 class SwiperDisableSwipeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperDisableSwipe');
   applyPeer(node: KNode, reset: boolean): void {
@@ -782,6 +805,19 @@ class SwiperOnGestureSwipeModifier extends ModifierWithKey<Callback<number, Swip
       getUINativeModule().swiper.resetSwiperOnGestureSwipe(node);
     } else {
       getUINativeModule().swiper.setSwiperOnGestureSwipe(node, this.value);
+    }
+  }
+}
+class SwiperOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnUnselected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnUnselected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnUnselected(node, this.value);
     }
   }
 }
