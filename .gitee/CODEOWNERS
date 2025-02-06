@@ -1119,6 +1119,8 @@ frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_layout_manager.cpp @zhuweifeng94
 frameworks/bridge/declarative_frontend/jsview/js_layout_manager.h @zhuweifeng94
+frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.cpp @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_component.h @arkuistatemgmt
