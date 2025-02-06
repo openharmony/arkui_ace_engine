@@ -459,6 +459,10 @@ public:
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
     void StopPreviewMenuAnimation();
+    void GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
+        RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext);
+    void AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext, RefPtr<RenderContext> previewScaleContext,
+        RefPtr<RenderContext> menuContext, RefPtr<RenderContext> previewDisappearContext);
 
     void SetAnimationPreviewScale(float scale)
     {
@@ -487,10 +491,10 @@ public:
 
     void SetAnimationBorderRadius(double rate, const BorderRadiusProperty& radius)
     {
-        animationInfo_.borderRadius.radiusTopLeft = Dimension(radius.radiusTopLeft->Value() * rate);
-        animationInfo_.borderRadius.radiusTopRight = Dimension(radius.radiusTopRight->Value() * rate);
-        animationInfo_.borderRadius.radiusBottomLeft = Dimension(radius.radiusBottomLeft->Value() * rate);
-        animationInfo_.borderRadius.radiusBottomRight = Dimension(radius.radiusBottomRight->Value() * rate);
+        animationInfo_.borderRadius.radiusTopLeft = Dimension(radius.radiusTopLeft->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusTopRight = Dimension(radius.radiusTopRight->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusBottomLeft = Dimension(radius.radiusBottomLeft->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusBottomRight = Dimension(radius.radiusBottomRight->ConvertToPx() * rate);
     }
 
     PreviewMenuAnimationInfo GetPreviewMenuAnimationInfo()

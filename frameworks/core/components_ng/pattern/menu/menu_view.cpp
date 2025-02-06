@@ -380,21 +380,29 @@ void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
     roundRectInstance.SetRect(RectF(OffsetF((1 - rate) * clipOffset.GetX(), (1 - rate) * clipOffset.GetY()),
         SizeF(curentClipAreaWidth, curentClipAreaHeight)));
     CHECK_NULL_VOID(radius.radiusTopLeft);
-    roundRectInstance.SetCornerRadius(
-        RoundRect::TOP_LEFT_POS, rate * radius.radiusTopLeft->Value(), rate * radius.radiusTopLeft->Value());
+    roundRectInstance.SetCornerRadius(RoundRect::TOP_LEFT_POS, rate * radius.radiusTopLeft->ConvertToPx(),
+        rate * radius.radiusTopLeft->ConvertToPx());
     CHECK_NULL_VOID(radius.radiusTopRight);
-    roundRectInstance.SetCornerRadius(
-        RoundRect::TOP_RIGHT_POS, rate * radius.radiusTopRight->Value(), rate * radius.radiusTopRight->Value());
+    roundRectInstance.SetCornerRadius(RoundRect::TOP_RIGHT_POS, rate * radius.radiusTopRight->ConvertToPx(),
+        rate * radius.radiusTopRight->ConvertToPx());
     CHECK_NULL_VOID(radius.radiusBottomLeft);
-    roundRectInstance.SetCornerRadius(
-        RoundRect::BOTTOM_LEFT_POS, rate * radius.radiusBottomLeft->Value(), rate * radius.radiusBottomLeft->Value());
+    roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_LEFT_POS, rate * radius.radiusBottomLeft->ConvertToPx(),
+        rate * radius.radiusBottomLeft->ConvertToPx());
     CHECK_NULL_VOID(radius.radiusBottomRight);
-    roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_RIGHT_POS, rate * radius.radiusBottomRight->Value(),
-        rate * radius.radiusBottomRight->Value());
+    roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_RIGHT_POS, rate * radius.radiusBottomRight->ConvertToPx(),
+        rate * radius.radiusBottomRight->ConvertToPx());
     clipContext->ClipWithRoundRect(roundRectInstance);
 }
 
-BorderRadiusProperty GetHoverPreviewBorderRadius(
+void ConvertPercentToPX(const RefPtr<MenuPreviewPattern>& previewPattern, Dimension& radius)
+{
+    if (radius.Unit() == DimensionUnit::PERCENT) {
+        auto previewWidth = previewPattern->GetCustomPreviewWidth();
+        radius = Dimension(radius.Value() * previewWidth, DimensionUnit::PX);
+    }
+}
+
+BorderRadiusProperty GetPreviewBorderRadiusFromPattern(
     const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<MenuTheme>& menuTheme)
 {
     CHECK_NULL_RETURN(previewPattern, {});
@@ -405,7 +413,6 @@ BorderRadiusProperty GetHoverPreviewBorderRadius(
     CHECK_NULL_RETURN(menuTheme, {});
     auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
     if (menuParam.previewBorderRadius.has_value() && !menuParam.previewBorderRadius->multiValued) {
         auto paramRadius = menuParam.previewBorderRadius->radiusTopLeft;
         radius = (paramRadius->Unit() == DimensionUnit::PERCENT)
@@ -415,6 +422,18 @@ BorderRadiusProperty GetHoverPreviewBorderRadius(
 
     if (menuParam.previewBorderRadius.has_value() && menuParam.previewBorderRadius->multiValued) {
         BorderRadiusProperty previewBorderRadius;
+        if (menuParam.previewBorderRadius->radiusTopLeft.has_value()) {
+            ConvertPercentToPX(previewPattern, menuParam.previewBorderRadius->radiusTopLeft.value());
+        }
+        if (menuParam.previewBorderRadius->radiusTopRight.has_value()) {
+            ConvertPercentToPX(previewPattern, menuParam.previewBorderRadius->radiusTopRight.value());
+        }
+        if (menuParam.previewBorderRadius->radiusBottomLeft.has_value()) {
+            ConvertPercentToPX(previewPattern, menuParam.previewBorderRadius->radiusBottomLeft.value());
+        }
+        if (menuParam.previewBorderRadius->radiusBottomRight.has_value()) {
+            ConvertPercentToPX(previewPattern, menuParam.previewBorderRadius->radiusBottomRight.value());
+        }
         previewBorderRadius.SetRadius(Dimension(radius));
         previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
         return previewBorderRadius;
@@ -454,7 +473,7 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    BorderRadiusProperty previewRadius = GetHoverPreviewBorderRadius(previewPattern, menuTheme);
+    BorderRadiusProperty previewRadius = GetPreviewBorderRadiusFromPattern(previewPattern, menuTheme);
 
     auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, previewRadius](float rate) {
         CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
@@ -747,7 +766,7 @@ void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameN
     });
 }
 
-BorderRadiusProperty GetPixelMapPreviewBorderRadius(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
+BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_RETURN(previewNode, {});
     auto pipelineContext = previewNode->GetContextWithCheck();
@@ -806,7 +825,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        BorderRadiusProperty borderRadius = GetPixelMapPreviewBorderRadius(previewNode, menuParam);
+        BorderRadiusProperty borderRadius = GetPreviewBorderRadiusFromNode(previewNode, menuParam);
         if (menuParam.previewBorderRadius) {
             imageContext->UpdateBorderRadius(borderRadius);
         }
