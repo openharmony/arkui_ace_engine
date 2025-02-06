@@ -31,20 +31,15 @@ using namespace testing;
 using namespace testing::ext;
 
 class BaseEventAccessorTest
-    : public AccessorTestBaseParent<GENERATED_ArkUIBaseEventAccessor,
-        &GENERATED_ArkUIAccessors::getBaseEventAccessor, BaseEventPeer> {
+    : public AccessorTestBase<GENERATED_ArkUIBaseEventAccessor,
+        &GENERATED_ArkUIAccessors::getBaseEventAccessor, GeneratedModifier::BaseEventPeerImpl> {
 public:
     void SetUp(void) override
     {
-        ASSERT_NE(accessor_->ctor, nullptr);
-        auto* peerImpl = static_cast<GeneratedModifier::BaseEventPeerImpl *>(accessor_->ctor());
-        peer_ = peerImpl;
-        ASSERT_NE(peer_, nullptr);
-        AccessorTestBaseParent<GENERATED_ArkUIBaseEventAccessor,
-            &GENERATED_ArkUIAccessors::getBaseEventAccessor, BaseEventPeer>::SetUp();
+        AccessorTestBase::SetUp();
         BaseEventInfo info("test");
-        peerImpl->SetEventInfo(info);
-        baseEvent_ = peerImpl->GetEventInfo();
+        peer_->SetEventInfo(info);
+        baseEvent_ = peer_->GetEventInfo();
     }
     BaseEventInfo* baseEvent_ = nullptr;
 };

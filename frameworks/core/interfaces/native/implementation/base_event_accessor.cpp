@@ -133,7 +133,8 @@ void SetTimestampImpl(BaseEventPeer* peer,
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
-    int64_t value = Converter::Convert<int64_t>(*timestamp);
+    LOGE("BaseEventAccessor.SetTimestampImpl uses Ark_Number");
+    int64_t value = Converter::Convert<int32_t>(*timestamp);
     std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
