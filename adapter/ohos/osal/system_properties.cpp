@@ -159,7 +159,7 @@ bool IsSafeAreaDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
 }
 
-bool IsSyncModeDebugTraceEnabled()
+bool IsVsyncModeDebugTraceEnabled()
 {
     return system::GetBoolParameter("persist.ace.trace.vsyncMode.debug.enabled", false);
 }
