@@ -1771,11 +1771,6 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
     return safeAreaManager_->GetSafeAreaWithoutProcess();
 }
 
-PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
-{
-    return safeAreaManager_->GetScbSafeArea();
-}
-
 float PipelineContext::GetPageAvoidOffset()
 {
     return safeAreaManager_->GetKeyboardOffset();

@@ -857,11 +857,6 @@ SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
 
-PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
-{
-    return SafeAreaInsets({}, { 0, 1 }, {}, {});
-}
-
 float PipelineContext::GetPageAvoidOffset()
 {
     return 0.0f;

@@ -425,8 +425,6 @@ public:
 
     virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
 
-    virtual SafeAreaInsets GetScbSafeArea() const;
-
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
