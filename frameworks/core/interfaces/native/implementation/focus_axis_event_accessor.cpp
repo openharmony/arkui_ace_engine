@@ -37,6 +37,7 @@ void SetAxisMapImpl(FocusAxisEventPeer* peer,
 void SetStopPropagationImpl(FocusAxisEventPeer* peer,
                             const Callback_Void* stopPropagation)
 {
+    LOGE("FocusAxisEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
 }
 } // FocusAxisEventAccessor
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()

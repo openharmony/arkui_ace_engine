@@ -94,6 +94,7 @@ void SetTimestampImpl(KeyEventPeer* peer,
 void SetStopPropagationImpl(KeyEventPeer* peer,
                             const Callback_Void* stopPropagation)
 {
+    LOGE("KeyEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
 }
 void SetIntentionCodeImpl(KeyEventPeer* peer,
                           const Ark_IntentionCode* intentionCode)
