@@ -59,8 +59,7 @@ void SetFingerListImpl(GestureEventPeer* peer,
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(fingerList);
 
-    auto fingerInfoVec = Converter::Convert<std::vector<FingerInfo>>(*fingerList);
-    std::list<FingerInfo> convValue(fingerInfoVec.begin(), fingerInfoVec.end());
+    auto convValue = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     event->SetFingerList(convValue);
 }
 Ark_Int32 GetOffsetXImpl(GestureEventPeer* peer)
