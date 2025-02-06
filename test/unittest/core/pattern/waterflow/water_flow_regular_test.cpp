@@ -983,6 +983,11 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 100.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 100.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
+    // In less-than fillViewport scene, offsetEnd_ has difference.
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_,
+        pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN ? false : true);
 
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { -100.0f, 0 }));
@@ -996,8 +1001,36 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_,
         pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN ? 0 : Infinity<int32_t>());
 
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -50.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, true);
+
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(20.0f), { 0, 20.0f }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { 0, -100.0f }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(400.0f), { 350.0f, 50.0f }));
+}
+
+/**
+ * @tc.name: Delete006
+ * @tc.desc: Delete all items, test footer position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete006, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    ScrollToIndex(10, false, ScrollAlign::START, 10.0f);
+    // delete all items.
+    for (int i = 1; i <= 30; ++i) {
+        frameNode_->RemoveChildAtIndex(1);
+        frameNode_->ChildrenUpdatedFrom(1);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 } // namespace OHOS::Ace::NG
