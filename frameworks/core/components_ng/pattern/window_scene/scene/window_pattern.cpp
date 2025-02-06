@@ -515,7 +515,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             sourceInfo = ImageSourceInfo(pixelMap);
             if (session_->GetSystemConfig().uiType_ != "pc" && !session_->GetSystemConfig().freeMultiWindowEnable_) {
                 snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
-                Rosen::SceneSessionManager::GetInstance().GetSnapshotFromCache(persistentId);
+                Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
                 TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CreateSnapshotWindow: %{public}d", persistentId);
             }
         } else {
