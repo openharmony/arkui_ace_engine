@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
@@ -593,6 +594,11 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEventTargetInfo::JSBind(globalObj);
     JSScrollableTargetInfo::JSBind(globalObj);
     JSPanRecognizer::JSBind(globalObj);
+    JSTapRecognizer::JSBind(globalObj);
+    JSLongPressRecognizer::JSBind(globalObj);
+    JSSwipeRecognizer::JSBind(globalObj);
+    JSPinchRecognizer::JSBind(globalObj);
+    JSRotationRecognizer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

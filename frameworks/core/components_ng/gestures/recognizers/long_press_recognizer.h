@@ -84,6 +84,16 @@ public:
         return duration_;
     }
 
+    void SetIsRepeat(bool repeat)
+    {
+        repeat_ = repeat;
+    }
+
+    bool GetIsRepeat() const
+    {
+        return repeat_;
+    }
+
     void SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
     {
         gestureHub_ = gestureHub;
