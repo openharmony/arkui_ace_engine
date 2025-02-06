@@ -1211,6 +1211,7 @@ private:
     int32_t zoomErrorCount_ = 0;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
     bool overlayCreating_ = false;
+    bool awaitingOnTextSelected_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
