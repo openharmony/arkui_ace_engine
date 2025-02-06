@@ -1095,7 +1095,7 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
 
     bool canChildBeFocused = false;
     canChildBeFocused = AnyChildFocusHub(
-        [this, isHead](const RefPtr<FocusHub>& node) {
+        [isHead](const RefPtr<FocusHub>& node) {
             if (GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL)) {
                 return true;
             }
