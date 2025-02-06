@@ -1834,7 +1834,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(eventHub_);
-    ProcessThrottledVisibleCallback();
+    ProcessThrottledVisibleCallback(forceDisappear);
     auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
     auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
     if (!hasInnerCallback && !hasUserCallback) {
@@ -2001,11 +2001,18 @@ void FrameNode::ThrottledVisibleTask()
     }
 }
 
-void FrameNode::ProcessThrottledVisibleCallback()
+void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
 {
     CHECK_NULL_VOID(eventHub_);
     auto& visibleAreaUserCallback = eventHub_->GetThrottledVisibleAreaCallback();
     CHECK_NULL_VOID(visibleAreaUserCallback.callback);
+
+    if (forceDisappear) {
+        auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
+        ProcessAllVisibleCallback(
+            userRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastThrottledVisibleCbRatio_, true);
+        return;
+    }
 
     auto task = [weak = WeakClaim(this)]() {
         auto node = weak.Upgrade();
