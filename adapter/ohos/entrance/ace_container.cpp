@@ -2664,7 +2664,7 @@ NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
     return {};
 }
 
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     CHECK_NULL_RETURN(uiWindow_, {});
     Rosen::AvoidArea avoidArea;
