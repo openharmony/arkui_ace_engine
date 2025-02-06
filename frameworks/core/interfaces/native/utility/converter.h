@@ -102,15 +102,6 @@ namespace Converter {
     }
 
     template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
-    void AssignTo(std::list<To>& dst, const From& src)
-    {
-        dst.clear();
-        for (Ark_Int32 i = 0; i < src.length; i++) {
-            dst.push_back(Convert<To>(src.array[i]));
-        }
-    }
-
-    template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
     void AssignTo(std::vector<To>& dst, const From& src)
     {
         dst.clear();
@@ -127,6 +118,15 @@ namespace Converter {
         dst.reserve(src.length);
         for (Ark_Int32 i = 0; i < src.length; i++) {
             dst.push_back(OptConvert<To>(src.array[i]));
+        }
+    }
+
+    template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
+    void AssignTo(std::list<To>& dst, const From& src)
+    {
+        dst.clear();
+        for (Ark_Int32 i = 0; i < src.length; i++) {
+            dst.push_back(Convert<To>(src.array[i]));
         }
     }
 

@@ -70,4 +70,46 @@ HWTEST_F(ConvertorTest, OptArrayConversion, TestSize.Level1)
     EXPECT_TRUE(optResult.has_value());
     EXPECT_EQ(optResult.value(), testArray);
 }
+
+/**
+ * @tc.name:
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConvertorTest, ListConversion, TestSize.Level1)
+{
+    std::vector<std::string> testArray = { "123", "abc", "%^&" };
+    Converter::ArkArrayHolder<Array_String> holder(testArray);
+
+    auto input = holder.ArkValue();
+    auto result = Converter::Convert<std::list<std::string>>(input);
+    EXPECT_EQ(result.size(), testArray.size());
+    auto iter = result.begin();
+    for (size_t i = 0; i < testArray.size(); ++i) {
+        EXPECT_EQ(testArray[i], *iter);
+        iter++;
+    }
+}
+
+/**
+ * @tc.name:
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConvertorTest, ListOptionalConversion, TestSize.Level1)
+{
+    std::vector<std::string> testArray = { "123", "abc", "%^&" };
+    Converter::ArkArrayHolder<Array_String> holder(testArray);
+
+    auto optInput = holder.OptValue<Opt_Array_String>();
+    auto optResult = Converter::OptConvert<std::list<std::string>>(optInput);
+    EXPECT_TRUE(optResult.has_value());
+    const auto& result = optResult.value();
+    EXPECT_EQ(result.size(), testArray.size());
+    auto iter = result.begin();
+    for (size_t i = 0; i < testArray.size(); ++i) {
+        EXPECT_EQ(testArray[i], *iter);
+        iter++;
+    }
+}
 } // namespace OHOS::Ace::NG
