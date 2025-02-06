@@ -33,13 +33,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void KeepEditableStateImpl(SubmitEventPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->GetEventInfo()->SetKeepEditable(true);
 }
 void GetTextImpl(SubmitEventPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    auto text = peer->GetEventInfo()->GetText();
+    LOGE("Arkoala method SubmitEventAccessor.GetTextImpl has incorrect return type");
 }
 void SetTextImpl(SubmitEventPeer* peer,
                  const Ark_String* text)
 {
+    CHECK_NULL_VOID(peer);
+    auto string = Converter::Convert<std::u16string>(*text);
+    peer->GetEventInfo()->SetText(string);
 }
 } // SubmitEventAccessor
 const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()
