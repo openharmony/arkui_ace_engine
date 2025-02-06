@@ -340,6 +340,11 @@ public:
         return accessTraceEnable_;
     }
 
+    static bool GetSyncModeTraceEnabled()
+    {
+        return vsyncModeTraceEnable_;
+    }
+
     static bool GetTraceInputEventEnabled()
     {
         return traceInputEventEnable_.load();
@@ -657,6 +662,7 @@ private:
     static bool textTraceEnable_;
     static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
+    static bool vsyncModeTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
     static bool isRound_;
