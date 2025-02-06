@@ -53,7 +53,7 @@
  *  C++ lambdas to call these TS functions
  *     onGetRid4Index: (forIndex: number) => [number, number],
  *     onRecycleItems: (fromIndex: number, toIndex: number) => void,
- *     onActiveRange: (fromIndex: number, toIndex: number) => void,
+ *     onActiveRange: (fromIndex: number, toIndex: number, isLoop: boolean) => void,
  *     onPurge: () => void;
  *     onMoveHandler: (from: number, to: number) => void;
  *
@@ -95,13 +95,13 @@ public:
     static RefPtr<RepeatVirtualScroll2Node> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)> onRecycleItems,
-        const std::function<void(int32_t, int32_t)> onActiveRange,
+        const std::function<void(int32_t, int32_t, bool)> onActiveRange,
         const std::function<void()> onPurge);
 
     RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)> onRecycleItems,
-        const std::function<void(int32_t, int32_t)> onActiveRange,
+        const std::function<void(int32_t, int32_t, bool)> onActiveRange,
         const std::function<void()> onPurge);
 
     ~RepeatVirtualScroll2Node() override = default;
@@ -273,7 +273,7 @@ private:
     bool forceRunDoSetActiveRange_ = false;
 
     std::function<void(IndexType, IndexType)> onRecycleItems_;
-    std::function<void(int32_t, int32_t)> onActiveRange_;
+    std::function<void(int32_t, int32_t, bool)> onActiveRange_;
     std::function<void()> onPurge_;
 
     // true in the time from requesting idle / predict task until exec predict tsk.

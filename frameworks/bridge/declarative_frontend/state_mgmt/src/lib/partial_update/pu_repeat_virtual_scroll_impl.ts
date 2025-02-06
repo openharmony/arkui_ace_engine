@@ -89,7 +89,7 @@ class __RepeatVirtualScrollImpl<T> {
             stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl. Error generating ttype at index: ${index}`,
                 e?.message);
         }
-        if (ttype in this.itemGenFuncs_ == false) {
+        if (ttype in this.itemGenFuncs_ === false) {
             stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl. No template found for ttype '${ttype}'`);
             ttype = RepeatEachFuncTtype;
         }

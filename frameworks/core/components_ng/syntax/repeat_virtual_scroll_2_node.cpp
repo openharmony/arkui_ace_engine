@@ -33,7 +33,7 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)> onRecycleItems,
-    const std::function<void(int32_t, int32_t)> onActiveRange,
+    const std::function<void(int32_t, int32_t, bool)> onActiveRange,
     const std::function<void()> onPurge)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
@@ -53,7 +53,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
 RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)> onRecycleItems,
-    const std::function<void(int32_t, int32_t)> onActiveRange,
+    const std::function<void(int32_t, int32_t, bool)> onActiveRange,
     const std::function<void()> onPurge)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount), caches_(onGetRid4Index),
       onRecycleItems_(onRecycleItems), onActiveRange_(onActiveRange), onPurge_(onPurge),
@@ -104,38 +104,83 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
         caches_.DumpUINodeCache().c_str(), caches_.DumpL1Rid4Index().c_str());
 }
 
+/**
+ * check whether the node is in L1 cache. called from ReBuildL1
+ *
+ * index: node index
+ * nStart: first return value of CheckActiveRange
+ * nEnd: second return value of CheckActiveRange
+ * cacheItem: repeat cache item of index
+ */
 bool RepeatVirtualScroll2Node::CheckNode4IndexInL1(int32_t index, int32_t nStart, int32_t nEnd, CacheItem& cacheItem)
 {
     auto totalCount = static_cast<int32_t>(totalCount_);
-    const bool remainInL1 = (nStart <= index && index <= nEnd) ||
-        (nStart > nEnd && ((index >= nStart && index < totalCount) || (index >= 0 && index <= nEnd)));
+    bool remainInL1 = (nStart <= index && index <= nEnd); // cover scenario 1 & 2 & 4
+    if (isLoop_) {
+        remainInL1 = remainInL1 ||
+            (nStart > nEnd && (nStart <= index || index <= nEnd)) || // cover scenario 3.2 & 3.4
+            (nStart < 0 && index >= nStart + totalCount) || // cover scenario 3.1
+            (nEnd >= totalCount && index <= nEnd - totalCount); // cover scenario 3.3
+    }
     cacheItem->isL1_ = remainInL1;
     cacheItem->isOnRenderTree_ = remainInL1;
     return remainInL1;
 }
 
+/**
+ * pre-process active range. called from DoSetActiveChildRange
+ *
+ * start: start index on the screen, may be negative or greater than totalCount
+ * end: end index on the screen, may be negative or greater than totalCount
+ * cacheStart: cachedCount above - depends on container
+ * cacheEnd: cachedCount below - depends on container
+ *
+ * possible scenarios (only one repeat in scroll container):
+ * - scenario 1: List/Swiper-no-Loop
+ *   - 1.1 screen: [0 1 2] 3 4 5.., DoSetActiveChildRange params: (0,2,0,2), nStart&nEnd: (0,4)
+ *   - 1.2 screen: ..1 2 [3 4 5] 6 7, DoSetActiveChildRange params: (3,5,2,2), nStart&nEnd: (1,7)
+ *   - 1.3 screen: ..5 6 [7 8 9], DoSetActiveChildRange params: (7,9,2,0), nStart&nEnd: (5,9)
+ * - scenario 2: Grid/WaterFlow
+ *   - 2.1 screen: [0 1 2] 3 4 5.., DoSetActiveChildRange params: (0,2,2,2), nStart&nEnd: (0,4)
+ *   - 2.2 screen: ..1 2 [3 4 5] 6 7, DoSetActiveChildRange params: (3,5,2,2), nStart&nEnd: (1,7)
+ *   - 2.3 screen: ..5 6 [7 8 9], DoSetActiveChildRange params: (7,9,2,2), nStart&nEnd: (5,9)
+ * - scenario 3: Swiper-Loop
+ *   - 3.1 screen: ..8 9 [0 1 2] 3 4.., DoSetActiveChildRange params: (0,2,2,2), nStart&nEnd: (-2,4)
+ *   - 3.2 screen: ..7 8 [9 0 1] 2 3.., DoSetActiveChildRange params: (9,1,2,2), nStart&nEnd: (7,3)
+ *   - 3.3 screen: ..5 6 [7 8 9] 0 1.., DoSetActiveChildRange params: (8,2,2,2), nStart&nEnd: (5,11)
+ *   - 3.4 screen(overlapped): 2 [3 0] 1, DoSetActiveChildRange params: (3,0,2,2), nStart&nEnd: (2,1)
+ *
+ * possible scenarios (multiple components in scroll container, X indicates a non-repeat child):
+ * - scenario 4: List/Grid/WaterFlow/Swiper-no-Loop
+ *   - 4.1 screen: ..[X X 0 1 2] 3 4.., DoSetActiveChildRange params: (-2,3,2,2), nStart&nEnd: (0,4)
+ *   - 4.2 screen: ..[X X X] 0 1 2.., DoSetActiveChildRange params: (-5,-1,2,2), nStart&nEnd: (0,1)
+ *   - 4.3 screen: ..[X X X] X X 0 1.., DoSetActiveChildRange params: (-5,-3,2,2), nStart&nEnd: (NaN)
+ *   - 4.4 screen: ..0 1 [2 3 4 X X].., DoSetActiveChildRange params: (2,6,2,2), nStart&nEnd: (0,4)
+ *   - 4.5 screen: ..0 1 [X X X].., DoSetActiveChildRange params: (2,5,2,2), nStart&nEnd: (0,1)
+ *   - 4.6 screen: ..0 1 X X [X X X].., DoSetActiveChildRange params: (4,6,2,2), nStart&nEnd: (NaN)
+ * - scenario 5: Swiper-Loop. Currently it isn't allowed to be used.
+ */
 ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     const int32_t signed_totalCount = static_cast<int32_t>(totalCount_);
     int32_t nStart = start - cacheStart;
     int32_t nEnd = end + cacheEnd;
-    const int32_t divider = 2;
 
-    if (start > end) { // swiper-loop scenario
-        nStart = std::min(nStart, signed_totalCount);
-        nEnd = std::max(nEnd, 0);
-        if (nStart <= nEnd) { // overlapped
-            nStart = signed_totalCount / divider + 1;
-            nEnd = signed_totalCount / divider;
-        }
-    } else {
-        if (nStart >= signed_totalCount || nEnd < 0) {
-            nStart = 0;
-            nEnd = 0;
-        } else {
+    if (start > end && nStart <= nEnd) { // cover scenario 3.4
+        // nStart & nEnd overlapped. must keep nStart > nEnd, otherwise CheckNode4IndexInL1
+        //      cannot determine swiper-loop scenario
+        const int32_t divider = 2;
+        nStart = signed_totalCount / divider + 1;
+        nEnd = signed_totalCount / divider;
+    }
+    if (!isLoop_) {
+        if (nStart >= signed_totalCount || nEnd < 0) { // no active node on screen
+            nStart = INT32_MAX;
+            nEnd = INT32_MAX;
+        } else { // cover scenario 1 & 2 & 4
+            // keep 0 <= nStart <= nEnd <= totalCount - 1
             nStart = std::max(nStart, 0);
-            // start <= end <= totalCount - 1
             nEnd = std::min(std::max(nEnd, nStart), signed_totalCount - 1);
         }
     }
@@ -168,7 +213,7 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
         start, end, cacheStart, cacheEnd, nStart, nEnd);
 
     // step 2. call TS side
-    onActiveRange_(nStart, nEnd);
+    onActiveRange_(nStart, nEnd, isLoop_);
 
     return {nStart, nEnd};
 }
