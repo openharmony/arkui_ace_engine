@@ -36,9 +36,9 @@ void SetFingerListImpl(BaseGestureEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(fingerList);
-    std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     auto eventInfo = peer->GetEventInfo();
     CHECK_NULL_VOID(eventInfo);
+    std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     eventInfo->SetFingerList(list);
 }
 } // BaseGestureEventAccessor

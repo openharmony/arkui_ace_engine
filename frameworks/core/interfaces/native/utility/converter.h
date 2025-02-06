@@ -102,6 +102,15 @@ namespace Converter {
     }
 
     template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
+    void AssignTo(std::list<To>& dst, const From& src)
+    {
+        dst.clear();
+        for (Ark_Int32 i = 0; i < src.length; i++) {
+            dst.push_back(Convert<To>(src.array[i]));
+        }
+    }
+
+    template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
     void AssignTo(std::vector<To>& dst, const From& src)
     {
         dst.clear();
@@ -530,7 +539,6 @@ namespace Converter {
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
-    template<> std::list<FingerInfo> Convert(const Array_FingerInfo& src);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);

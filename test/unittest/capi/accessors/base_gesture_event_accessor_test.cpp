@@ -27,28 +27,28 @@ using namespace testing::ext;
 using ::testing::NiceMock;
 
 namespace {
-std::vector<std::pair<Ark_Number, float>> arkNumberFloatXTestPlan = {
+const std::vector<std::pair<Ark_Number, float>> arkNumberFloatXTestPlan = {
     { Converter::ArkValue<Ark_Number>(100.00f), 100.00f },
     { Converter::ArkValue<Ark_Number>(0.00f), 0.00f },
     { Converter::ArkValue<Ark_Number>(-100.00f), -100.00f },
     { Converter::ArkValue<Ark_Number>(12.34f), 12.34f },
     { Converter::ArkValue<Ark_Number>(-56.73f), -56.73f },
 };
-std::vector<std::pair<Ark_Number, float>> arkNumberFloatYTestPlan = {
+const std::vector<std::pair<Ark_Number, float>> arkNumberFloatYTestPlan = {
     { Converter::ArkValue<Ark_Number>(-1.01f), -1.01f },
     { Converter::ArkValue<Ark_Number>(-0.54f), -0.54f },
     { Converter::ArkValue<Ark_Number>(0.00f), 0.00f },
     { Converter::ArkValue<Ark_Number>(0.98f), 0.98f },
     { Converter::ArkValue<Ark_Number>(1.00f), 1.00f },
 };
-std::vector<std::pair<Ark_Number, int32_t>> arkNumberIntTestPlan = {
+const std::vector<std::pair<Ark_Number, int32_t>> arkNumberIntTestPlan = {
     { Converter::ArkValue<Ark_Number>(100), 100 },
     { Converter::ArkValue<Ark_Number>(0), 0 },
     { Converter::ArkValue<Ark_Number>(-100), -100 },
     { Converter::ArkValue<Ark_Number>(12), 12 },
     { Converter::ArkValue<Ark_Number>(-56), -56 },
 };
-std::vector<int32_t> sizeArrayTestPlan = { 0, 1, 2, 3, 4, 5 };
+const std::vector<int32_t> sizeArrayTestPlan = { 0, 1, 2, 3, 4, 5 };
 } // namespace
 
 class BaseGestureEventAccessorTest : public AccessorTestBase<GENERATED_ArkUIBaseGestureEventAccessor,
@@ -88,7 +88,7 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListIdTest, TestSize.Level1)
         .displayX = arkNumberFloatXTestPlan[2].first,
         .displayY = arkNumberFloatYTestPlan[2].first,
     };
-    for (auto& size : sizeArrayTestPlan) {
+    for (const auto& size : sizeArrayTestPlan) {
         vectorData.clear();
         for (int index = 0; index < size; index++) {
             item.id = arkNumberIntTestPlan[index].first;
@@ -129,7 +129,7 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListGlobalXYTest, TestSize.Level
         .displayX = arkNumberFloatXTestPlan[2].first,
         .displayY = arkNumberFloatYTestPlan[2].first,
     };
-    for (auto& size : sizeArrayTestPlan) {
+    for (const auto& size : sizeArrayTestPlan) {
         vectorData.clear();
         for (int index = 0; index < size; index++) {
             item.globalX = arkNumberFloatXTestPlan[index].first;
@@ -174,7 +174,7 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListLocalXYTest, TestSize.Level1
         .displayX = arkNumberFloatXTestPlan[2].first,
         .displayY = arkNumberFloatYTestPlan[2].first,
     };
-    for (auto& size : sizeArrayTestPlan) {
+    for (const auto& size : sizeArrayTestPlan) {
         vectorData.clear();
         for (int index = 0; index < size; index++) {
             item.localX = arkNumberFloatXTestPlan[index].first;
@@ -219,7 +219,7 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListDisplayXYTest, TestSize.Leve
         .displayX = arkNumberFloatXTestPlan[2].first,
         .displayY = arkNumberFloatYTestPlan[2].first,
     };
-    for (auto& size : sizeArrayTestPlan) {
+    for (const auto& size : sizeArrayTestPlan) {
         vectorData.clear();
         for (int index = 0; index < size; index++) {
             item.displayX = arkNumberFloatXTestPlan[index].first;
