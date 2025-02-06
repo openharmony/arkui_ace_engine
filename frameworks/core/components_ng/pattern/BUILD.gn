@@ -615,7 +615,11 @@ build_component_ng("pattern_ng") {
     ]
   }
 
-  external_deps = []
+  external_deps = [
+    "ability_base:want",
+    "form_fwk:fmskit_native",
+    "form_fwk:form_manager",
+  ]
   deps = [ "container_modal/interfaces:customtitle" ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
@@ -627,6 +631,8 @@ build_component_ng("pattern_ng") {
   if (is_ohos_standard_system) {
     external_deps += [
       "ability_base:want",
+      "form_fwk:fmskit_native",
+      "form_fwk:form_manager",
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
