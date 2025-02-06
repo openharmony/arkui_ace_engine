@@ -111,7 +111,6 @@ public:
         imageNodeList_ = imageNodeList;
     }
     void TextColorModifier(const Color& value);
-    void SymbolColorModifier(const std::vector<Color>& value);
     void ContentModifierDump();
 
 protected:

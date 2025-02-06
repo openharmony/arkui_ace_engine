@@ -718,7 +718,6 @@ public:
     size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
 
     void UpdateFontColor(const Color& value);
-    void UpdateSymbolColor(const std::vector<Color>& value);
     void BeforeCreatePaintWrapper() override;
 
     void OnTextOverflowChanged();

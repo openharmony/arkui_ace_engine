@@ -56,13 +56,6 @@ void SymbolModelNG::SetSymbolRenderingStrategy(const std::uint32_t renderingStra
 
 void SymbolModelNG::SetFontColor(std::vector<Color>& symbolColor)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->UpdateSymbolColor(symbolColor);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor);
 }
 
@@ -100,11 +93,6 @@ void SymbolModelNG::SetMaxFontScale(const float value)
 
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
 {
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->UpdateSymbolColor(symbolColor);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
 }
 

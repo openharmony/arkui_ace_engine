@@ -737,6 +737,17 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
 
 void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
 {
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto symbolColors = layoutProperty->GetSymbolColorList();
+    CHECK_NULL_VOID(symbolColors);
+    if (!symbolColors.has_value()) {
+        return;
+    }
+    symbolColors_ = Convert2VectorLinearColor(symbolColors.value());
     if (symbolColors_.has_value() && animatableSymbolColor_ &&
         (symbolColors_ != animatableSymbolColor_->Get() || lastSymbolColors_ != animatableSymbolColor_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
@@ -808,16 +819,12 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     if (flag) {
         onlyTextColorAnimation_ = false;
-        onlySymbolColorAnimation_ = false;
     }
     if (!onlyTextColorAnimation_) {
         UpdateTextColorMeasureFlag(flag);
         flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
-    if (!onlySymbolColorAnimation_) {
-        UpdateSymbolColorMeasureFlag(flag);
-        flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    }
+    UpdateSymbolColorMeasureFlag(flag);
     return flag;
 }
 
@@ -891,7 +898,6 @@ void TextContentModifier::TextColorModifier(const Color& value)
 
 void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool isReset)
 {
-    onlySymbolColorAnimation_ = false;
     if (!isReset) {
         symbolColors_ = Convert2VectorLinearColor(value);
     } else {
@@ -899,12 +905,6 @@ void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool i
     }
     CHECK_NULL_VOID(animatableSymbolColor_);
     animatableSymbolColor_->Set(Convert2VectorLinearColor(value));
-}
-
-void TextContentModifier::SymbolColorModifier(const std::vector<Color>& value)
-{
-    SetSymbolColor(value);
-    onlySymbolColorAnimation_ = true;
 }
 
 void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
