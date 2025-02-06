@@ -122,8 +122,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
                 CHECK_NULL_VOID(eventHub);
                 eventHub->OnItemDragStart(info, dragDropInfo);
             },
-            TaskExecutor::TaskType::UI, "ArkUIListItemDragStart",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, "ArkUIListItemDragStart");
     };
     NG::ComponentSnapshot::Create(customNode, std::move(callback), true, SnapshotParam(CREATE_PIXELMAP_TIME));
 #else
