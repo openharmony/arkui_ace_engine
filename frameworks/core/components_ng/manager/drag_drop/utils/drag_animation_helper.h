@@ -59,6 +59,8 @@ public:
     static RefPtr<FrameNode> CreateImageNode(const RefPtr<PixelMap>& pixelMap);
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<FrameNode>& frameNode,
         std::vector<GatherNodeChildInfo>& gatherNodeInfo);
+    static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
+        const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& info);
     static RefPtr<FrameNode> CreateGatherImageNode(const RefPtr<FrameNode>& frameNode,
         GatherNodeChildInfo& gatherNodeChildInfo);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
@@ -74,6 +76,17 @@ public:
         const RefPtr<GestureEventHub>& gestureHub, const RefPtr<OverlayManager>& manager);
     static void SetImageNodeInitAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
     static void SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
+    static void AddDragNodeCopy(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
+        const RefPtr<FrameNode>& gatherNode);
+    static void ShowDragNodeCopyAnimation(const RefPtr<OverlayManager>& overlayManager,
+        const RefPtr<FrameNode>& frameNode);
+    static void HideDragNodeCopyWithAnimation(const RefPtr<OverlayManager>& overlayManager,
+        const RefPtr<FrameNode>& frameNode);
+    static void HideDragNodeCopy(const RefPtr<OverlayManager>& overlayManager);
+    static void PreLayout(const RefPtr<FrameNode>& imageNode);
+    static void SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible);
+    static void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
+        const OffsetF& gatherNodeCenter, Point point, int32_t containerId);
 };
 } // namespace OHOS::Ace::NG
 #endif

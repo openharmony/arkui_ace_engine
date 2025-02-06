@@ -19,7 +19,7 @@ import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import accessibility from '@ohos.accessibility';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
@@ -80,7 +80,7 @@ const ALERT_BUTTON_STYLE: number = getNumberByResourceId(125831085, 2, true);
 const ALERT_TITLE_ALIGNMENT: number = getEnumNumberByResourceId(125831126, 1);
 const SCROLL_BAR_OFFSET: number = 20;
 
-export type AdvancedDialogV2OnCheckedChange = (isChecked: boolean) => void;
+export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;
 
 export type AdvancedDialogV2ButtonAction = () => void;
 
@@ -100,7 +100,8 @@ export class AdvancedDialogV2Button {
   public role?: ButtonRole;
   @Trace
   public defaultFocus?: boolean;
-
+  @Trace
+  public enabled?: boolean;
   constructor(options: AdvancedDialogV2ButtonOptions) {
     this.content = options.content;
     this.action = options.action;
@@ -109,6 +110,7 @@ export class AdvancedDialogV2Button {
     this.buttonStyle = options.buttonStyle;
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
+    this.enabled = options.enabled;
   };
 }
 
@@ -120,22 +122,25 @@ export declare interface AdvancedDialogV2ButtonOptions {
   buttonStyle?: ButtonStyleMode;
   role?: ButtonRole;
   defaultFocus?: boolean;
+  enabled?: boolean;
 }
 
 @ComponentV2
 export struct TipsDialogV2 {
   @Require @Param imageRes: ResourceStr | PixelMap;
   @Param imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
+  @Param imageBorderColor?: ColorMetrics = undefined;
+  @Param imageBorderWidth?: LengthMetrics = undefined;
   @Param title?: ResourceStr | null = null;
   @Param content?: ResourceStr | null = null;
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   @Param checkTips?: ResourceStr | null = null;
-  @Param isChecked?: boolean = false;
-  @Local isCheckedInner?: boolean = false;
+  @Param checked?: boolean = false;
+  @Local checkedInner?: boolean = false;
 
-  @Monitor('isChecked')
-  isCheckedChangeMonitor(monitor: IMonitor) {
-    this.isCheckedInner = monitor.value<boolean>('isChecked')?.now;
+  @Monitor('checked')
+  checkedChangeMonitor(monitor: IMonitor) {
+    this.checkedInner = monitor.value<boolean>('checked')?.now;
   }
 
   @Computed
@@ -177,7 +182,10 @@ export struct TipsDialogV2 {
         this.contentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -208,10 +216,10 @@ export struct TipsDialogV2 {
   @Builder
   checkBoxPart(): void {
     Row() {
-      if (this.checkTips !== null) {
-        Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isCheckedInner)
+      if (this.checkTips !== null && this.checkTips !== undefined) {
+        Checkbox({ name: '', group: 'checkboxGroup' }).select(this.checkedInner)
           .onChange((checked: boolean) => {
-            this.isCheckedInner = checked;
+            this.checkedInner = checked;
             this.onCheckedChange?.(checked);
           })
           .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
@@ -226,17 +234,17 @@ export struct TipsDialogV2 {
       }
     }
     .accessibilityGroup(true)
-    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.isCheckedInner))
-    .accessibilityDescription(this.isCheckedInner ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
+    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.checkedInner))
+    .accessibilityDescription(this.checkedInner ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
-      this.isCheckedInner = !this.isCheckedInner;
+      this.checkedInner = !this.checkedInner;
       try {
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
@@ -261,6 +269,8 @@ export struct TipsDialogV2 {
           maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
           maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
         })
+        .borderColor(this.imageBorderColor?.color)
+        .borderWidth(toLengthString(this.imageBorderWidth))
     }
     .width('100%')
   }
@@ -313,7 +323,7 @@ export struct TipsDialogV2 {
   aboutToAppear(): void {
     let uiContext: UIContext = this.getUIContext();
     this.appMaxFontScale = uiContext.getMaxFontScale();
-    this.isCheckedInner = this.isChecked;
+    this.checkedInner = this.checked;
   }
 
   private getContentFontSize(): Length {
@@ -357,7 +367,7 @@ struct TipsDialogContentLayout {
     }
     let height: number = 0;
     let checkBoxHeight: number = 0;
-    if (this.checkTips !== null) {
+    if (this.checkTips !== null && this.checkTips !== undefined) {
       let checkboxChild: Measurable = children[this.checkBoxIndex];
       let checkboxConstraint: ConstraintSizeOptions = {
         maxWidth: constraint.maxWidth,
@@ -411,10 +421,12 @@ export struct SelectDialogV2 {
   @Require @Param radioContent: SheetInfo[] = [];
   @Param selectedIndex?: number = -1;
   @Local selectedIndexInner?: number = -1;
+
   @Monitor('selectedIndex')
   selectedIndexMonitor(monitor: IMonitor) {
     this.selectedIndexInner = monitor.value<number>('selectedIndex')?.now;
   }
+
   @Local isFocus: boolean = false;
   @Local currentFocusIndex?: number = -1;
   @Local radioHeight: number = 0;
@@ -426,6 +438,7 @@ export struct SelectDialogV2 {
   private contentScroller: Scroller = new Scroller();
   @Local fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
+
   @Computed
   get buttons(): AdvancedDialogV2Button[] | undefined {
     let buttons: AdvancedDialogV2Button[] = [];
@@ -588,7 +601,10 @@ export struct SelectDialogV2 {
       },
       buttons: this.buttons,
       contentAreaPadding: this.contentPadding,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -609,9 +625,11 @@ struct ConfirmDialogContentLayout {
   private checkboxIndex: number = 1;
   @Param minContentHeight: number = 0;
   @Event $minContentHeight?: (val: number) => void = undefined;
+
   @Builder
   doNothingBuilder() {
   };
+
   @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
 
   onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>,
@@ -664,23 +682,25 @@ export struct ConfirmDialogV2 {
   @Require @Param title: ResourceStr = '';
   @Param content?: ResourceStr = '';
   @Param checkTips?: ResourceStr = '';
-  @Param isChecked?: boolean = false;
-  @Local isCheckedInner?: boolean = this.isChecked;
-  @Monitor('isChecked')
-  isCheckedMonitor(monitor: IMonitor) {
-    this.isCheckedInner = monitor.value<boolean>('isChecked')?.now;
+  @Param checked?: boolean = false;
+  @Local checkedInner?: boolean = this.checked;
+
+  @Monitor('checked')
+  checkedMonitor(monitor: IMonitor) {
+    this.checkedInner = monitor.value<boolean>('checked')?.now;
   }
+
   @Param primaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
   @Param secondaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
-  @Local textAlign: TextAlign = TextAlign.Start;
   private marginOffset: number = 0 - PADDING_LEVEL_8;
   @Local fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   private textIndex: number = 0;
   private checkboxIndex: number = 1;
+
   @Computed
   get buttons(): AdvancedDialogV2Button[] | undefined {
     if (!this.primaryButton && !this.secondaryButton) {
@@ -710,7 +730,7 @@ export struct ConfirmDialogV2 {
             .fontSize(`${BODY_L}fp`)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.fontColorWithTheme)
-            .textAlign(this.textAlign)
+            .textAlign(TextAlign.Center)
             .onKeyEvent((event: KeyEvent) => {
               if (event) {
                 resolveKeyEvent(event, this.contentScroller);
@@ -729,11 +749,11 @@ export struct ConfirmDialogV2 {
   checkBoxBuilder(): void {
     Row() {
       Checkbox({ name: '', group: 'checkboxGroup' })
-        .select(this.isCheckedInner)
+        .select(this.checkedInner)
         .onChange((checked: boolean) => {
-          this.isCheckedInner = checked;
+          this.checkedInner = checked;
           if (this.onCheckedChange) {
-            this.onCheckedChange(this.isCheckedInner);
+            this.onCheckedChange(this.checkedInner);
           }
         })
         .hitTestBehavior(HitTestMode.Block)
@@ -749,17 +769,17 @@ export struct ConfirmDialogV2 {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
     }
     .accessibilityGroup(true)
-    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.isCheckedInner))
-    .accessibilityDescription(this.isCheckedInner ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
+    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.checkedInner))
+    .accessibilityDescription(this.checkedInner ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
-      this.isCheckedInner = !this.isCheckedInner;
+      this.checkedInner = !this.checkedInner;
       try {
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
@@ -794,7 +814,10 @@ export struct ConfirmDialogV2 {
       },
       minContentHeight: this.minContentHeight!!,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -810,12 +833,13 @@ export struct AlertDialogV2 {
   @Require @Param content: ResourceStr = '';
   @Param primaryButton?: AdvancedDialogV2Button | null = null;
   @Param secondaryButton?: AdvancedDialogV2Button | null = null;
-  private  textAlign: TextAlign = TextAlign.Center;
+  private textAlign: TextAlign = TextAlign.Center;
   // the controller of content area
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Local fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
+
   @Computed
   get buttons(): AdvancedDialogV2Button[] | undefined {
     if (!this.primaryButton && !this.secondaryButton) {
@@ -830,6 +854,7 @@ export struct AlertDialogV2 {
     }
     return buttons;
   }
+
   build() {
     CustomDialogContentComponent({
       primaryTitle: this.primaryTitle,
@@ -838,7 +863,10 @@ export struct AlertDialogV2 {
         this.AlertDialogContentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -904,7 +932,10 @@ export struct CustomContentDialogV2 {
       },
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -1010,7 +1041,7 @@ struct CustomDialogContentComponent {
   @Local buttonHeight: number = 0;
   @Local contentMaxHeight: Length = '100%';
   @Param fontSizeScale: number = -1;
-  @Event $fontSizeScale?: (val: number) => void = undefined;
+  @Param onFontSizeScaleChange?: (val: number) => void = undefined;
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
@@ -1067,7 +1098,7 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.$fontSizeScale?.(this.updateFontScale());
+    this.onFontSizeScaleChange?.(this.updateFontScale());
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     let height: number = 0;
@@ -1094,7 +1125,7 @@ struct CustomDialogContentComponent {
     let uiContext: UIContext = this.getUIContext();
     this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
     this.appMaxFontScale = uiContext.getMaxFontScale();
-    this.$fontSizeScale?.(this.updateFontScale());
+    this.onFontSizeScaleChange?.(this.updateFontScale());
     this.initTitleTextAlign();
   }
 
@@ -1303,30 +1334,30 @@ struct CustomDialogContentComponent {
   }
 
   @Builder
-  buildSingleButton(buttonOptions: AdvancedDialogV2Button): void {
-    if (this.isNewPropertiesHighPriority(buttonOptions)) {
-      Button(buttonOptions.content)
-        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
-        .role(buttonOptions.role ?? ButtonRole.NORMAL)
+  buildSingleButton(index: number): void {
+    if (this.isNewPropertiesHighPriority(index)) {
+      Button(this.buttons?.[index].content)
+        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .role(this.buttons?.[index].role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
-    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
-      Button(buttonOptions.content)
-        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
-        .backgroundColor(buttonOptions.background.color)
-        .fontColor(buttonOptions.fontColor.color)
+    } else if (this.buttons?.[index].background !== undefined && this.buttons?.[index].fontColor !== undefined) {
+      Button(this.buttons?.[index].content)
+        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .backgroundColor(this.buttons?.[index].background?.color)
+        .fontColor(this.buttons?.[index].fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
-    } else if (buttonOptions.background !== undefined) {
-      Button(buttonOptions.content)
-        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
-        .backgroundColor(buttonOptions.background.color)
+    } else if (this.buttons?.[index].background !== undefined) {
+      Button(this.buttons?.[index].content)
+        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .backgroundColor(this.buttons?.[index].background?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
-      Button(buttonOptions.content)
-        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
-        .fontColor(buttonOptions?.fontColor?.color)
+      Button(this.buttons?.[index].content)
+        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .fontColor(this.buttons?.[index]?.fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     }
@@ -1336,7 +1367,7 @@ struct CustomDialogContentComponent {
   buildHorizontalAlignButtons(): void {
     if (this.buttons && this.buttons.length > 0) {
       Row() {
-        this.buildSingleButton(this.buttons[0]);
+        this.buildSingleButton(0);
         if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
           Row() {
             Divider()
@@ -1348,7 +1379,7 @@ struct CustomDialogContentComponent {
           .width(BUTTON_HORIZONTAL_SPACE * 2)
           .justifyContent(FlexAlign.Center)
 
-          this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
+          this.buildSingleButton(HORIZON_BUTTON_MAX_COUNT - 1);
         }
       }
     }
@@ -1391,15 +1422,15 @@ struct CustomDialogContentComponent {
    * @param buttonOptions button properties
    * @returns check result
    */
-  private isNewPropertiesHighPriority(buttonOptions: AdvancedDialogV2Button): boolean {
-    if (buttonOptions.role === ButtonRole.ERROR) {
+  private isNewPropertiesHighPriority(index: number): boolean {
+    if (this.buttons?.[index].role === ButtonRole.ERROR) {
       return true;
     }
-    if (buttonOptions.buttonStyle !== undefined &&
-      buttonOptions.buttonStyle !== ALERT_BUTTON_STYLE) {
+    if (this.buttons?.[index].buttonStyle !== undefined &&
+      this.buttons?.[index].buttonStyle !== ALERT_BUTTON_STYLE) {
       return true;
     }
-    if (buttonOptions.background === undefined && buttonOptions.fontColor === undefined) {
+    if (this.buttons?.[index].background === undefined && this.buttons?.[index].fontColor === undefined) {
       return true;
     }
     return false;
@@ -1409,7 +1440,7 @@ struct CustomDialogContentComponent {
   buildButtonWithDivider(index: number): void {
     if (this.buttons && this.buttons[index]) {
       Row() {
-        this.buildSingleButton(this.buttons[index]);
+        this.buildSingleButton(index);
       }
 
       if ((this.buttons.length === HORIZON_BUTTON_MAX_COUNT ? HORIZON_BUTTON_MAX_COUNT - index - 1 : index) <
@@ -1449,7 +1480,7 @@ struct CustomDialogContentComponent {
 
 @Extend(Button)
 function setButtonProperties(
-  buttonOptions: AdvancedDialogV2Button,
+  buttonOptions?: AdvancedDialogV2Button,
   buttonList?: AdvancedDialogV2Button[],
   controller?: PromptActionDialogController) {
   .onKeyEvent((event: KeyEvent) => {
@@ -1458,7 +1489,7 @@ function setButtonProperties(
     }
     if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
       event.type === KeyType.Down) {
-      if (buttonOptions.action) {
+      if (buttonOptions?.action) {
         buttonOptions.action();
       }
       controller?.close();
@@ -1466,15 +1497,16 @@ function setButtonProperties(
     }
   })
   .onClick(() => {
-    if (buttonOptions.action) {
+    if (buttonOptions?.action) {
       buttonOptions.action();
     }
     controller?.close();
   })
-  .defaultFocus(buttonOptions.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
-  .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
+  .defaultFocus(buttonOptions?.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
+  .buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
+  .enabled(buttonOptions?.enabled ?? true)
 }
 
 /**
@@ -1641,7 +1673,10 @@ export struct LoadingDialogV2 {
         contentBuilder: () => {
           this.contentBuilder();
         },
-        fontSizeScale: this.fontSizeScale!!,
+        fontSizeScale: this.fontSizeScale,
+        onFontSizeScaleChange: (fontSizeScale: number) => {
+          this.fontSizeScale = fontSizeScale;
+        },
         minContentHeight: this.minContentHeight!!,
       }).constraintSize({ maxHeight: '100%' });
     }
@@ -1756,4 +1791,32 @@ export struct PopoverDialogV2 {
   }
 }
 
+function toLengthString(value?: LengthMetrics): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const length: number = value.value;
+  let lengthString: string = '';
+  switch (value.unit) {
+    case LengthUnit.PX:
+      lengthString = `${length}px`;
+      break;
+    case LengthUnit.FP:
+      lengthString = `${length}fp`;
+      break;
+    case LengthUnit.LPX:
+      lengthString = `${length}lpx`;
+      break;
+    case LengthUnit.PERCENT:
+      lengthString = `${length * 100}%`;
+      break;
+    case LengthUnit.VP:
+      lengthString = `${length}vp`;
+      break;
+    default:
+      lengthString = `${length}vp`;
+      break;
+  }
+  return lengthString;
+}
 export declare interface PopoverDialogV2Options extends CustomPopupOptions {}

@@ -519,7 +519,8 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
+    auto persistentId = session_->GetPersistentId();
+    ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", persistentId, host->GetId());
     session_->SetNeedSnapshot(false);
     isBlankForSnapshot_ = false;
 
@@ -550,6 +551,11 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             CHECK_NULL_VOID(snapshotPixelMap);
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
+            if (!session_->GetSystemConfig().IsPcWindow() && !session_->GetSystemConfig().freeMultiWindowEnable_) {
+                snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
+                Rosen::SceneSessionManager::GetInstance().GetSnapshotFromCache(persistentId);
+                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CreateSnapshotWindow: %{public}d", persistentId);
+            }
         } else {
             sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath());
         }

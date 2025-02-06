@@ -171,6 +171,7 @@ private:
     void HandleCrownActionCancel();
     double GetCrownRotatePx(const CrownEvent& event) const;
     void UpdateCrownVelocity(double degree, double mainDelta, bool isEnd = false);
+    void StartVibrator(bool isLeft);
 #endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -180,6 +181,7 @@ private:
     double crownVelocity_ = 0.0;
     double crownTurnVelocity_ = 0.0;
     bool isHandleCrownActionEnd_ = false;
+    int32_t oldCurrentIndex_ = -1;
 #endif
 };
 } // namespace OHOS::Ace::NG

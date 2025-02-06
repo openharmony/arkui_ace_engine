@@ -285,6 +285,9 @@ public:
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param) override;
 
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(
+        RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options) override;
+
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
         const NG::SnapshotOptions& options) override;
 
@@ -381,6 +384,8 @@ public:
         return manifestParser_;
     }
 
+    std::string GetPagePathByUrl(const std::string& url) const;
+
 protected:
     bool isCardDelegate_ = false;
 
@@ -426,8 +431,8 @@ private:
     uint64_t GetSystemRealTime();
 
     // Page lifecycle
-    void OnPageShow();
-    void OnPageHide();
+    void OnPageShow(bool isFromWindow = false);
+    void OnPageHide(bool isFromWindow = false);
     void OnPageDestroy(int32_t pageId);
 
     int32_t GetRunningPageId() const;

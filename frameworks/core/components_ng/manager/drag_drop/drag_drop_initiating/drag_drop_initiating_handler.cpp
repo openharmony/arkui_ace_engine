@@ -149,6 +149,12 @@ void DragDropInitiatingHandler::NotifyDragStart()
     return initiatingFlow_->HandleDragStart();
 }
 
+void DragDropInitiatingHandler::NotifyDragEnd()
+{
+    CHECK_NULL_VOID(initiatingFlow_);
+    return initiatingFlow_->HandleDragEnd();
+}
+
 void DragDropInitiatingHandler::NotifyTransDragWindowToFwk()
 {
     CHECK_NULL_VOID(initiatingFlow_);
@@ -165,5 +171,14 @@ void DragDropInitiatingHandler::SetThumbnailCallback(std::function<void(Offset)>
 {
     CHECK_NULL_VOID(initiatingFlow_);
     return initiatingFlow_->SetThumbnailCallback(std::move(callback));
+}
+
+bool DragDropInitiatingHandler::IsNeedGather()
+{
+    if (initiatingFlow_) {
+        auto params = initiatingFlow_->GetDragDropInitiatingParams();
+        return params.isNeedGather;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

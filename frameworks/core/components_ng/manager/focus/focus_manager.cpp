@@ -503,7 +503,7 @@ void FocusManager::WindowFocus(bool isFocus)
             SetFocusViewRootScope(curFocusView);
         } else {
             auto lastViewFocusNode = curFocusViewHub->GetFocusLeaf();
-            lastViewFocusNode->RequestFocusImmediatelyInner();
+            lastViewFocusNode->RequestFocusImmediatelyInner(FocusReason::WINDOW_FOCUS);
         }
     } else {
         auto container = Container::Current();
@@ -530,7 +530,7 @@ void FocusManager::WindowFocus(bool isFocus)
             rootFocusHub->GetFrameId());
         auto focusDepend = rootFocusHub->GetFocusDependence();
         rootFocusHub->SetFocusDependence(FocusDependence::SELF);
-        rootFocusHub->RequestFocusImmediatelyInner();
+        rootFocusHub->RequestFocusImmediatelyInner(FocusReason::WINDOW_FOCUS);
         rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();

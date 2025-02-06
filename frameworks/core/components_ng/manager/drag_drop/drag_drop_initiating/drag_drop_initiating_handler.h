@@ -55,6 +55,9 @@ public:
     void NotifyDragStart();
     void NotifyTransDragWindowToFwk();
     void NotifyMenuShow(bool isMenuShow);
+    void NotifyDragEnd();
+
+    bool IsNeedGather();
 
 private:
     RefPtr<DragDropInitiatingStateMachine> initiatingFlow_;

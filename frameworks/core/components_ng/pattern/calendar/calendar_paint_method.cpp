@@ -351,16 +351,26 @@ void CalendarPaintMethod::DrawFocusedArea(RSCanvas& canvas, const Offset& offset
 void CalendarPaintMethod::DrawCalendarPickerBackgroundArea(
     const CalendarDay& day, RSCanvas& canvas, double x, double y) const
 {
+    bool isToday = IsToday(day);
+    bool inRange = IsDateInRange(day);
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(Color::TRANSPARENT));
+    brush.SetColor(isToday && markToday_ ? backgroundDisabledMarkTodayColor_ : ToRSColor(Color::TRANSPARENT));
     if (day.month.year == obtainedMonth_.year && day.month.month == obtainedMonth_.month) {
         if (day.isSelected) {
-            brush.SetColor(IsToday(day) ? backgroundSelectedTodayColor_ : backgroundSelectedNotTodayColor_);
+            if (isToday) {
+                brush.SetColor(markToday_ && !inRange
+                                   ? backgroundDisabledMarkTodayColor_
+                                   : (inRange ? backgroundSelectedTodayColor_ : ToRSColor(Color::TRANSPARENT)));
+            } else {
+                brush.SetColor(inRange ? backgroundSelectedNotTodayColor_ : ToRSColor(Color::TRANSPARENT));
+            }
         } else if (day.isPressing) {
             brush.SetColor(backgroundPressColor_);
         } else if (day.isHovering) {
             brush.SetColor(backgroundHoverColor_);
+        } else if (markToday_ && isToday) {
+            brush.SetColor(inRange ? backgroundSelectedTodayColor_ : backgroundDisabledMarkTodayColor_);
         }
     }
 
@@ -455,12 +465,17 @@ void CalendarPaintMethod::SetDayTextStyle(
     }
 }
 
-bool CalendarPaintMethod::IsDateInRange(const CalendarDay& day)
+bool CalendarPaintMethod::IsDateInRange(const CalendarDay& day) const
 {
     PickerDate date;
     date.SetYear(day.month.year);
     date.SetMonth(day.month.month);
     date.SetDay(day.day);
+    for (const auto& range : disabledDateRange_) {
+        if (PickerDate::IsDateInRange(date, range.first, range.second)) {
+            return false;
+        }
+    }
     return PickerDate::IsDateInRange(date, startDate_, endDate_);
 }
 
@@ -468,16 +483,18 @@ void CalendarPaintMethod::SetCalendarPickerDayTextStyle(RSTextStyle& dateTextSty
 {
     if (day.month.month != currentMonth_.month || !IsDateInRange(day)) {
 #ifndef USE_GRAPHIC_TEXT_GINE
-        dateTextStyle.color_ = textNonCurrentMonthColor_;
+        dateTextStyle.color_ = IsToday(day) && markToday_ ? textNonCurrentMonthTodayColor_ : textNonCurrentMonthColor_;
 #else
-        dateTextStyle.color = textNonCurrentMonthColor_;
+        dateTextStyle.color = IsToday(day) && markToday_ ? textNonCurrentMonthTodayColor_ : textNonCurrentMonthColor_;
 #endif
     } else {
         if (IsToday(day)) {
 #ifndef USE_GRAPHIC_TEXT_GINE
-            dateTextStyle.color_ = day.isSelected ? textSelectedDayColor_ : textCurrentDayColor_;
+            dateTextStyle.color_ =
+                markToday_ ? textSelectedDayColor_ : day.isSelected ? textSelectedDayColor_ : textCurrentDayColor_;
 #else
-            dateTextStyle.color = day.isSelected ? textSelectedDayColor_ : textCurrentDayColor_;
+            dateTextStyle.color =
+                markToday_ ? textSelectedDayColor_ : day.isSelected ? textSelectedDayColor_ : textCurrentDayColor_;
 #endif
         } else {
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -745,12 +762,14 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
                                            .ConvertToPx();
     dayRadius_ = paintProperty->GetDayRadiusValue(theme->GetCalendarDayRadius()).ConvertToPx();
     textNonCurrentMonthColor_ = ToRSColor(theme->GetTextNonCurrentMonthColor());
+    textNonCurrentMonthTodayColor_ = ToRSColor(theme->GetTextNonCurrentMonthTodayColor());
     textSelectedDayColor_ = ToRSColor(theme->GetTextSelectedDayColor());
     textCurrentDayColor_ = ToRSColor(theme->GetTextCurrentDayColor());
     textCurrentMonthColor_ = ToRSColor(theme->GetTextCurrentMonthColor());
     backgroundKeyFocusedColor_ = ToRSColor(theme->GetBackgroundKeyFocusedColor());
     backgroundSelectedTodayColor_ = ToRSColor(theme->GetBackgroundSelectedTodayColor());
     backgroundSelectedNotTodayColor_ = ToRSColor(theme->GetBackgroundSelectedNotTodayColor());
+    backgroundDisabledMarkTodayColor_ = ToRSColor(theme->GetBackgroundDisabledMarkTodayColor());
     backgroundHoverColor_ = ToRSColor(theme->GetBackgroundHoverColor());
     backgroundPressColor_ = ToRSColor(theme->GetBackgroundPressColor());
 

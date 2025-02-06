@@ -74,6 +74,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowCreate(void (*footer)(), int32_t scro
     int32_t sectionID, bool sectionsIDHasValue, int32_t direction);
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetColumnsTemplate(const char* content);
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetRowsTemplate(const char* content);
+CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowScrollBar(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowScrollBarColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowScrollBarWidth(double value, int32_t valueUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowEdgeEffect(int32_t value, bool isEnabled);
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetItemConstraintSize(double minWidth, int32_t minWidthUnit, double maxWidth,
     int32_t maxWidthUnit, double minHeight, int32_t minHeightUnit, double maxHeight, int32_t maxHeightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetColumnsGap(double size, int32_t unit);
@@ -85,6 +89,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetScrollEnabled(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetNestedScroll(int32_t forward, int32_t backward);
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetOnReachStartCallback(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetOnReachEndCallback(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowOnScrollStart(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowOnScrollStop(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetOnScrollFrameBegin(double (*callback)(double offset, int32_t state));
 CJ_EXPORT void FfiOHOSAceFrameworkWaterFlowSetScrollIndexCallback(void (*callback)(int32_t first, int32_t last));
 

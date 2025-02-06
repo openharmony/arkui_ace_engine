@@ -58,6 +58,23 @@ void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
     }
 
+    const auto& calcLayoutConstraint = layoutPropertyConstraint->GetCalcLayoutConstraint();
+    if (isSingle_ && calcLayoutConstraint && calcLayoutConstraint->selfIdealSize) {
+        const auto& constraint = layoutPropertyConstraint->GetLayoutConstraint();
+        CHECK_NULL_VOID(constraint);
+        auto idealSize =
+            CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutPropertyConstraint->GetMeasureType(), true);
+        auto width = calcLayoutConstraint->selfIdealSize->Width();
+        auto height = calcLayoutConstraint->selfIdealSize->Height();
+        if (width) {
+            indicatorWidth = std::max(static_cast<float>(indicatorWidth), idealSize.Width());
+        }
+
+        if (height) {
+            indicatorHeight = std::max(static_cast<float>(indicatorHeight), idealSize.Height());
+        }
+    }
+
     SizeF frameSize = { indicatorWidth, indicatorHeight };
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);

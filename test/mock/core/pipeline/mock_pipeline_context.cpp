@@ -29,6 +29,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+
 namespace OHOS::Ace {
 
 static bool g_setBoolStatus = false;
@@ -273,6 +275,12 @@ void PipelineContext::SetupRootElement()
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     rootNode_->AddChild(stageNode);
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
@@ -306,6 +314,12 @@ void PipelineContext::SetupSubRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(nullptr);
     }
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
@@ -658,6 +672,8 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+void PipelineContext::AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node) {}
+
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -756,6 +772,24 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
+
+void PipelineContext::AddWindowSizeDragEndCallback(std::function<void()>&& callback)
+{
+    onWindowSizeDragEndCallbacks_.emplace_back(std::move(callback));
+}
+
+void PipelineContext::SetIsWindowSizeDragging(bool isDragging)
+{
+    isWindowSizeDragging_ = isDragging;
+    if (!isDragging) {
+        decltype(onWindowSizeDragEndCallbacks_) dragEndCallbacks(std::move(onWindowSizeDragEndCallbacks_));
+        for (const auto& func : dragEndCallbacks) {
+            if (func) {
+                func();
+            }
+        }
+    }
+}
 
 void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode) {}
 
@@ -1001,6 +1035,10 @@ bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF&
 
 // pipeline_base ===============================================================
 namespace OHOS::Ace {
+namespace {
+const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
+} // namespace
+
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
 };
@@ -1116,6 +1154,9 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
+    if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
+        return nullptr;
+    }
     return AceType::MakeRefPtr<MockAccessibilityManager>();
 }
 
@@ -1216,7 +1257,7 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
         node->Measure(std::nullopt);
         node->Layout();
     } else {
-        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(false);
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(true);
         node->Measure(layoutConstraint);
         node->Layout();
     }
@@ -1251,6 +1292,11 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 }
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+
+RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
+{
+    return nullptr;
+}
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}

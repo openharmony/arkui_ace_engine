@@ -133,6 +133,7 @@ private:
     void SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper, int32_t index);
     void UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t index);
     float GetCurrentOffset(RefPtr<TabBarLayoutProperty>& layoutProperty, ScrollableBarModeOptions& layoutStyle);
+    void CheckBorderAndPadding(SizeF& frameSize, const PaddingPropertyF& padding);
 
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;
@@ -145,6 +146,7 @@ private:
     float endMainPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float barGridMargin_ = 0.0f;
+    float verticalPadding_ = 0.0f;
     std::map<int32_t, float> visibleItemLength_;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     std::optional<int32_t> jumpIndex_;

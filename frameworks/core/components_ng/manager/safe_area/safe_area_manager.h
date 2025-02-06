@@ -111,6 +111,13 @@ public:
      */
     SafeAreaInsets GetCutoutSafeArea() const;
 
+    /**
+     * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
+     *
+     * @return The safe area insets that account for cutout areas on the screen without any judgement.
+     */
+    SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
+
     bool UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea);
 
     bool UpdateScbCutoutSafeArea(
@@ -230,19 +237,24 @@ public:
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
     bool SetKeyBoardAvoidMode(KeyBoardAvoidMode value);
+
     KeyBoardAvoidMode GetKeyBoardAvoidMode();
+
     bool IsIgnoreSafeArea()
     {
         return ignoreSafeArea_;
     }
+
     bool IsNeedAvoidWindow()
     {
         return isNeedAvoidWindow_;
     }
+
     bool IsFullScreen()
     {
         return isFullScreen_;
     }
+
     bool SetIsAtomicService(bool value);
     bool IsAtomicService() const;
 
@@ -283,6 +295,7 @@ public:
     {
         return keyboardHeightConsideringUIExtension_;
     }
+
     void SetkeyboardHeightConsideringUIExtension(uint32_t height)
     {
         if (keyboardHeightConsideringUIExtension_ != height) {
@@ -294,13 +307,25 @@ public:
             keyboardHeightConsideringUIExtension_ = height;
         }
     }
+
     void AddKeyboardChangeCallbackConsideringUIExt(int32_t nodeId, const std::function<void()>& callback)
     {
         keyboardChangeCbsConsideringUIExt_[nodeId] = callback;
     }
+
     void RemoveKeyboardChangeCallbackConsideringUIExt(int32_t nodeId)
     {
         keyboardChangeCbsConsideringUIExt_.erase(nodeId);
+    }
+
+    void SetUseCutout(bool useCutout)
+    {
+        useCutout_ = useCutout;
+    }
+
+    bool GetUseCutout()
+    {
+        return useCutout_;
     }
 
 private:
@@ -327,6 +352,8 @@ private:
      * [keyboardAvoidMode_] is NONE.
      */
     bool keyboardSafeAreaEnabled_ = false;
+
+    bool useCutout_ = false;
 
     KeyBoardAvoidMode keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
 

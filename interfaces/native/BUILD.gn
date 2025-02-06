@@ -79,6 +79,7 @@ ohos_shared_library("ace_ndk") {
     "node/native_node_napi.cpp",
     "node/node_adapter_impl.cpp",
     "node/node_animate.cpp",
+    "node/node_component_snapshot.cpp",
     "node/node_extened.cpp",
     "node/node_model.cpp",
     "node/node_node_relative_container.cpp",
@@ -109,6 +110,7 @@ ohos_shared_library("ace_ndk") {
       "image_framework:pixelmap",
       "napi:ace_napi",
       "resource_management:global_resmgr",
+      "udmf:libudmf",
       "udmf:udmf_client",
     ]
     version_script =

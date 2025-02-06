@@ -54,6 +54,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // Set of elmtIds that need re-render
   protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
+  // Set of elmtIds retaken by IF that need re-render
+  protected dirtRetakenElementIds_: Set<number> = new Set<number>();
+
   // Map elmtId -> Repeat instance in this ViewPU
   protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
 
@@ -443,7 +446,12 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     // ifElseNode stores the most recent branch, so we can compare
     // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
     let removedChildElmtIds = new Array<number>();
-    If.branchId(branchId, removedChildElmtIds);
+    let reservedChildElmtIds = new Array<number>();
+    If.branchId(branchId, removedChildElmtIds, reservedChildElmtIds);
+
+    for (const reservedChildElmtId of reservedChildElmtIds) {
+      this.updateFuncByElmtId.get(reservedChildElmtId)?.setPending(true);
+    }
 
     //un-registers the removed child elementIDs using proxy
     UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
@@ -453,6 +461,19 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     this.purgeDeletedElmtIds();
 
     branchfunc();
+
+    let retakenElmtIds = new Array<number>();
+    const res: boolean = If.getRetakenElmtIds(retakenElmtIds);
+    if (res) {
+      for (const retakenElmtId of retakenElmtIds) {
+        this.updateFuncByElmtId.get(retakenElmtId)?.setPending(false);
+        if (this.updateFuncByElmtId.get(retakenElmtId)?.isChanged() && !this.dirtDescendantElementIds_.has(retakenElmtId)) {
+          this.dirtRetakenElementIds_.add(retakenElmtId);
+        }
+        this.updateFuncByElmtId.get(retakenElmtId)?.setIsChanged(false);
+      }
+    }
+
     PUV2ViewBase.arkThemeScopeManager?.onIfElseBranchUpdateExit(removedChildElmtIds)
   }
 
@@ -795,9 +816,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       componentName: this.constructor.name, id: this.id__(), isV2: this.isViewV2,
       isCompFreezeAllowed_:this.isCompFreezeAllowed_, isViewActive_: this.isViewActive()
     };
-    stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
     let resInfo: string = '';
     try {
+      stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
       resInfo = JSON.stringify(dumpInfo);
     } catch (error) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);

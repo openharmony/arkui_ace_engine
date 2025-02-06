@@ -950,6 +950,12 @@ void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetMenuWrapperNode(menuWrapperNode);
+
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragMainDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragMainDropManager);
+    dragMainDropManager->SetMenuWrapperNode(menuWrapperNode);
 }
 
 RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByInspectorId(const std::string& inspectorId)
@@ -1127,6 +1133,113 @@ bool DragDropFuncWrapper::CheckIfNeedGetThumbnailPixelMap(const RefPtr<FrameNode
     return false;
 }
 
+RefPtr<PixelMap> DragDropFuncWrapper::CreateTiledPixelMap(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_RETURN(manager, nullptr);
+    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
+    CHECK_NULL_RETURN(fatherNode, nullptr);
+    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(scrollPattern, nullptr);
+    auto children = scrollPattern->GetVisibleSelectedItems();
+    auto pixelMapinfo = GetTiledPixelMapInfo(children);
+    RefPtr<PixelMap> tiledPixelMap = nullptr;
+#if defined(PIXEL_MAP_SUPPORTED)
+    CHECK_NULL_RETURN(pixelMapinfo, nullptr);
+    InitializationOptions opts;
+    opts.size.SetWidth(pixelMapinfo->pixelMapRect.GetSize().Width());
+    opts.size.SetHeight(pixelMapinfo->pixelMapRect.GetSize().Height());
+    opts.srcPixelFormat = pixelMapinfo->srcPixelFormat;
+    opts.pixelFormat = pixelMapinfo->pixelFormat;
+    opts.editable = true;
+    opts.alphaType = pixelMapinfo->alphaType;
+    tiledPixelMap = PixelMap::Create(opts);
+#endif
+    DrawTiledPixelMap(tiledPixelMap, children, pixelMapinfo->pixelMapRect);
+    CHECK_NULL_RETURN(tiledPixelMap, nullptr);
+    return tiledPixelMap;
+}
+
+std::shared_ptr<PixelMapInfo> DragDropFuncWrapper::GetTiledPixelMapInfo(const std::vector<RefPtr<FrameNode>>& children)
+{
+    CHECK_NULL_RETURN(children.size(), nullptr);
+    auto minX = std::numeric_limits<float>::max();
+    auto minY = std::numeric_limits<float>::max();
+    auto maxX = std::numeric_limits<float>::lowest();
+    auto maxY = std::numeric_limits<float>::lowest();
+
+    for (auto& node : children) {
+        auto context = node->GetRenderContext();
+        CHECK_NULL_RETURN(context, nullptr);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        auto gestureHub = node->GetOrCreateGestureEventHub();
+        gestureHub->SetDragPreviewPixelMap(pixelMap);
+        CHECK_NULL_RETURN(pixelMap, nullptr);
+        auto offset = DragDropFuncWrapper::GetPaintRectCenter(node, true);
+        minX = std::min(minX, offset.GetX());
+        minY = std::min(minY, offset.GetY());
+        maxX = std::max(maxX, offset.GetX() + pixelMap->GetWidth());
+        maxY = std::max(maxY, offset.GetY() + pixelMap->GetHeight());
+    }
+    auto gestureHub = children.front()->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    auto dragPreviewPixelMap = gestureHub->GetDragPreviewPixelMap();
+    CHECK_NULL_RETURN(dragPreviewPixelMap, nullptr);
+    std::shared_ptr<PixelMapInfo> pixelMapInfo = std::make_shared<PixelMapInfo>();
+    pixelMapInfo->srcPixelFormat = dragPreviewPixelMap->GetPixelFormat();
+    pixelMapInfo->pixelFormat = dragPreviewPixelMap->GetPixelFormat();
+    pixelMapInfo->alphaType = dragPreviewPixelMap->GetAlphaType();
+    pixelMapInfo->pixelMapRect.SetLeft(minX);
+    pixelMapInfo->pixelMapRect.SetTop(minY);
+    pixelMapInfo->pixelMapRect.SetHeight(maxY - minY);
+    pixelMapInfo->pixelMapRect.SetWidth(maxX - minX);
+    return pixelMapInfo;
+}
+
+void DragDropFuncWrapper::DrawTiledPixelMap(
+    const RefPtr<PixelMap>& tiledPixelMap, const std::vector<RefPtr<FrameNode>>& children, const Rect& pixelMapRect)
+{
+    CHECK_NULL_VOID(tiledPixelMap);
+    for (auto& node : children) {
+        auto gestureHub = node->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto pixelMap = gestureHub->GetDragPreviewPixelMap();
+        CHECK_NULL_VOID(pixelMap);
+        auto offsetX = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetX();
+        auto offsetY = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetY();
+        auto result =
+            tiledPixelMap->WritePixels({ pixelMap->GetPixels(), pixelMap->GetByteCount(), 0, pixelMap->GetRowStride(),
+                { offsetX - pixelMapRect.GetOffset().GetX(), offsetY - pixelMapRect.GetOffset().GetY(),
+                    pixelMap->GetWidth(), pixelMap->GetHeight() },
+                pixelMap->GetPixelFormat() });
+        if (result != 0) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Tiled pixelmap Write is failed, the result is %{public}d", result);
+            return;
+        }
+    }
+    return;
+}
+
+bool DragDropFuncWrapper::IsNeedCreateTiledPixelMap(
+    const RefPtr<FrameNode>& frameNode, const RefPtr<DragEventActuator> dragEventActuator, SourceType type)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    CHECK_NULL_RETURN(dragEventActuator, false);
+    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
+    CHECK_NULL_RETURN(fatherNode, false);
+    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(scrollPattern, false);
+    if (frameNode->GetDragPreviewOption().isMultiTiled && scrollPattern->GetVisibleSelectedItems().size() > 1 &&
+        DragDropFuncWrapper::IsSelectedItemNode(frameNode) && !dragEventActuator->GetRestartDrag() &&
+        type == SourceType::MOUSE) {
+        return true;
+    }
+    return false;
+}
+
 void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNodeSync(
     const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback)
 {
@@ -1237,8 +1350,12 @@ void DragDropFuncWrapper::GetThumbnailPixelMap(
         gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
         gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
         pixelMapCallback(dragPreviewInfo.pixelMap, false);
-    } else if (dragPreviewInfo.customNode != nullptr) {
+    } else if (dragPreviewInfo.customNode || (dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc)) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
+        if (!dragPreviewInfo.customNode && dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc) {
+            dragPreviewInfo.customNode = dragPreviewInfo.buildFunc();
+        }
+        frameNode->SetDragPreview(dragPreviewInfo);
         if (isSync) {
             GetThumbnailPixelMapForCustomNodeSync(gestureHub, pixelMapCallback);
         } else {

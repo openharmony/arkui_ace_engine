@@ -143,8 +143,12 @@ int32_t TextFieldController::AddText(std::u16string text, int32_t offset)
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, 0);
+    if (textFieldPattern->IsDragging()) {
+        return textFieldPattern->GetCaretIndex();
+    }
+    textFieldPattern->FinishTextPreviewOperation();
     int32_t length = textFieldPattern->GetTextUtf16Value().length();
-    if (offset == -1) {
+    if (offset == -1 || offset > length) {
         offset = length;
     }
     return textFieldPattern->InsertValueByController(text, offset);
@@ -154,6 +158,10 @@ void TextFieldController::DeleteText(int32_t start, int32_t end)
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->IsDragging()) {
+        return;
+    }
+    textFieldPattern->FinishTextPreviewOperation();
     int32_t length = textFieldPattern->GetTextUtf16Value().length();
     if (start == -1 && end == -1) {
         // delete all

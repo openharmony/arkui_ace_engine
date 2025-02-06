@@ -24,6 +24,7 @@
 constexpr float ARC_ROUND_RADIUS_TO_DIAMETER = 2.0;
 constexpr float HALF = 0.5;
 constexpr float SQUARE = 2.0;
+constexpr float ORG_HOTREGION = 24.0f;
 constexpr float HALF_CIRCULARITY = 180;
 constexpr float WHOLE_CIRCULARITY = 360;
 
@@ -46,7 +47,8 @@ public:
     Point GetEndPoint() const;
     void SetOuterRadius(float outerRadius);
     void SetWidth(float width);
-    bool IsInRegion(const Point& point) const;
+    double Get2PIRadians(double radian) const;
+    bool IsInRegion(const Point& point, float minHotRegion = ORG_HOTREGION) const;
 
     const Point& GetCenterPoint() const
     {

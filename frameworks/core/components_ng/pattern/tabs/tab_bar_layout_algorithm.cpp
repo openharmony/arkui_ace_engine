@@ -141,13 +141,14 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto frameSize = idealSize.ConvertToSizeT();
     auto padding = layoutProperty->CreatePaddingAndBorder();
+    verticalPadding_ = padding.Height();
     auto contentSize = frameSize;
     MinusPaddingToNonNegativeSize(padding, contentSize);
     contentMainSize_ = GetContentMainSize(layoutWrapper, contentSize);
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
-        MeasureFixedMode(layoutWrapper, frameSize);
+        MeasureFixedMode(layoutWrapper, contentSize);
     } else {
-        MeasureScrollableMode(layoutWrapper, frameSize);
+        MeasureScrollableMode(layoutWrapper, contentSize);
     }
     if (visibleItemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
@@ -155,9 +156,10 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->SetActiveChildRange(visibleItemPosition_.begin()->first, visibleItemPosition_.rbegin()->first);
     }
     if (defaultHeight_ || maxHeight_) {
-        auto frameHeight = std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f));
+        auto frameHeight = std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f) + verticalPadding_);
         frameSize.SetHeight(std::clamp(frameHeight, constraint->minSize.Height(), constraint->maxSize.Height()));
     }
+    CheckBorderAndPadding(frameSize, padding);
     geometryNode->SetFrameSize(frameSize);
     MeasureMask(layoutWrapper);
 }
@@ -310,11 +312,23 @@ float TabBarLayoutAlgorithm::GetCurrentOffset(
         alignment = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
     if (axis_ == Axis::HORIZONTAL) {
+        float margin = layoutStyle.margin.ConvertToPx();
         currentOffset = (1.0 + alignment.GetHorizontal()) * (contentMainSize_ - visibleChildrenMainSize_) / TWO;
+        currentOffset -= alignment.GetHorizontal() * margin;
     } else {
         currentOffset = (1.0 + alignment.GetVertical()) * (contentMainSize_ - visibleChildrenMainSize_) / TWO;
     }
     return currentOffset;
+}
+
+void TabBarLayoutAlgorithm::CheckBorderAndPadding(SizeF& frameSize, const PaddingPropertyF& padding)
+{
+    if (GreatNotEqual(padding.Width(), frameSize.Width())) {
+        frameSize.SetWidth(padding.Width());
+    }
+    if (GreatNotEqual(padding.Height(), frameSize.Height())) {
+        frameSize.SetHeight(padding.Height());
+    }
 }
 
 bool TabBarLayoutAlgorithm::NeedAdaptForAging(RefPtr<FrameNode> host)
@@ -373,7 +387,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
         } else if (!isBarAdaptiveHeight_) {
-            frameSize.SetHeight(defaultHeight_.value());
+            frameSize.SetHeight(defaultHeight_.value() - verticalPadding_);
             frameSize.MinusHeight(focusBoardPadding * FOCUS_BOARD);
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
@@ -678,7 +692,7 @@ void TabBarLayoutAlgorithm::MeasureItemSecond(LayoutWrapper* layoutWrapper, Layo
 
     visibleChildrenMainSize_ = scrollMargin_ * TWO;
     if (isBarAdaptiveHeight_) {
-        frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f)));
+        frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f) - verticalPadding_, maxHeight_.value_or(0.0f)));
         childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
         childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
     }

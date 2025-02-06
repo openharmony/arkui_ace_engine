@@ -42,7 +42,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
-#include "ui/rs_ext_node_operation.h"
+#include "feature/anco_manager/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 
@@ -59,6 +59,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+
 std::string XComponentTypeToString(XComponentType type)
 {
     switch (type) {
@@ -165,6 +167,22 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
     nativeKeyEvent.timestamp = event.timeStamp.time_since_epoch().count();
     return nativeKeyEvent;
 }
+
+ArkUI_XComponent_ImageAnalyzerState ConvertNativeXComponentAnalyzerStatus(const ImageAnalyzerState state)
+{
+    switch (state) {
+        case ImageAnalyzerState::UNSUPPORTED:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED;
+        case ImageAnalyzerState::ONGOING:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING;
+        case ImageAnalyzerState::STOPPED:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_STOPPED;
+        case ImageAnalyzerState::FINISHED:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_FINISHED;
+        default:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED;
+    }
+}
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -221,6 +239,7 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -294,6 +313,7 @@ void XComponentPattern::OnAttachToMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
+    isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
@@ -309,6 +329,7 @@ void XComponentPattern::OnDetachFromMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
+    isOnTree_ = false;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
@@ -2126,5 +2147,51 @@ RenderFit XComponentPattern::GetSurfaceRenderFit() const
 {
     CHECK_NULL_RETURN(handlingSurfaceRenderContext_, RenderFit::RESIZE_FILL);
     return handlingSurfaceRenderContext_->GetRenderFit().value_or(RenderFit::RESIZE_FILL);
+}
+
+bool XComponentPattern::GetEnableAnalyzer()
+{
+    return isEnableAnalyzer_;
+}
+
+void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& callback)
+{
+    CHECK_NULL_VOID(callback);
+    if (!isOnTree_ || !isEnableAnalyzer_) {
+        return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED);
+    }
+    if (!IsSupportImageAnalyzerFeature()) {
+        return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED);
+    }
+    if (isNativeImageAnalyzing_) {
+        return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING);
+    }
+    isNativeImageAnalyzing_ = true;
+
+    OnAnalyzedCallback nativeOnAnalyzed = [weak = WeakClaim(this),
+        callback](ImageAnalyzerState state) {
+        CHECK_NULL_VOID(callback);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto statusCode = ConvertNativeXComponentAnalyzerStatus(state);
+        callback(statusCode);
+        pattern->isNativeImageAnalyzing_ = false;
+    };
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAnalyzerCallback(nativeOnAnalyzed);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CreateAnalyzerOverlay();
+        },
+        "ArkUIXComponentCreateAnalyzerOverlay", PriorityType::VIP);
 }
 } // namespace OHOS::Ace::NG

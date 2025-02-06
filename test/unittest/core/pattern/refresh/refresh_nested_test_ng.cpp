@@ -599,7 +599,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshScrollNest003, TestSize.Level1)
     EXPECT_TRUE(Position(scrollNode_, 0));
     EXPECT_TRUE(Position(nestNode_, 0));
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(scrollNode_);
+    FlushUITasks();
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 1);
 }
@@ -832,7 +832,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshListNested003, TestSize.Level1)
      */
     pattern_->AddCustomBuilderNode(CreateCustomNode());
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(listNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE);
 }
@@ -901,7 +901,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
      */
     DragStart(secondListNode, Offset(0, 0));
     DragUpdate(10);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollOffset_, 10);
 }
 } // namespace OHOS::Ace::NG

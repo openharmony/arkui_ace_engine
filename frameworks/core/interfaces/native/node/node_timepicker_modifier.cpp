@@ -442,6 +442,20 @@ ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
     return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
 }
 
+void SetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -482,6 +496,8 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .getTimepickerEnableCascade = GetTimepickerEnableCascade,
         .setTimepickerEnableCascade = SetTimepickerEnableCascade,
         .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
+        .setTimePickerDigitalCrownSensitivity = SetTimePickerDigitalCrownSensitivity,
+        .resetTimePickerDigitalCrownSensitivity = ResetTimePickerDigitalCrownSensitivity
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

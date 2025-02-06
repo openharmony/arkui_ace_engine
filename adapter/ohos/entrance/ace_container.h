@@ -91,6 +91,17 @@ struct ParsedConfig {
     }
 };
 
+struct SingleHandTransform {
+    SingleHandTransform() = default;
+    SingleHandTransform(float x, float y, float scaleX, float scaleY)
+        : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
+ 
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
+};
+
 using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
 
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
@@ -326,6 +337,8 @@ public:
 
     bool DumpInfo(const std::vector<std::string>& params);
 
+    bool DumpRSNodeByStringID(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
@@ -543,6 +556,10 @@ public:
         isFormRender_ = isFormRender;
     }
 
+    void SetAppRunningUniqueId(const std::string& uniqueId) override;
+
+    const std::string& GetAppRunningUniqueId() const override;
+
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -677,7 +694,7 @@ public:
         int32_t eventType, int64_t timeMs);
 
     void TerminateUIExtension() override;
-
+    bool UIExtensionIsHalfScreen() override;
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {
         isUIExtensionSubWindow_ = isUIExtensionSubWindow;
@@ -782,6 +799,18 @@ public:
         return containerHandler_;
     }
 
+    void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
+    {
+        singleHandTransform_ = singleHandTransform;
+    }
+
+    const SingleHandTransform& GetSingleHandTransform() const
+    {
+        return singleHandTransform_;
+    }
+
+    bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -879,6 +908,8 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    std::string uniqueId_;
+
     // For custom drag event
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
@@ -893,6 +924,7 @@ private:
 
     // for common handler
     WeakPtr<ContainerHandler> containerHandler_;
+    SingleHandTransform singleHandTransform_;
 };
 
 } // namespace OHOS::Ace::Platform

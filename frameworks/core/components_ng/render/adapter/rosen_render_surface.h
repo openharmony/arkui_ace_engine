@@ -94,6 +94,16 @@ public:
         return patternType_;
     }
 
+    void SetBufferUsage(const std::string& usage) override
+    {
+        bufferUsage_ = usage;
+    }
+
+    std::string GetBufferUsage() const
+    {
+        return bufferUsage_;
+    }
+
     void SetWebSlideAxis(Axis axis) override
     {
         axis_ = axis;
@@ -179,6 +189,7 @@ private:
     RectF keyBoardAvoidRect_;
     OffsetF orgin_ { 0, 0 };
     std::string patternType_;
+    std::string bufferUsage_;
     int32_t queueSize_ = SURFACE_QUEUE_SIZE;
     Axis axis_ = Axis::NONE;
     float webOffset_ = 0.0;

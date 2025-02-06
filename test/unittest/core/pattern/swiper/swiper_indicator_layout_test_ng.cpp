@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
-class SwiperIndicatorLayoutTestNg : public SwiperTestNg {
-public:
-};
+class SwiperIndicatorLayoutTestNg : public SwiperTestNg {};
 
 /**
  * @tc.name: SwiperIndicatorLayoutAlgorithmGetValidEdgeLength001
@@ -68,7 +66,7 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorLayoutAlgorithmMeasure00
     CreateSwiperDone();
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(SWIPER_WIDTH));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SWIPER_HEIGHT));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -125,18 +123,18 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorFlushLayoutTask001, Test
     CreateSwiperDone();
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(SWIPER_WIDTH));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SWIPER_HEIGHT));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. call FlushLayoutTask.
      */
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameSize(), SizeF(SWIPER_WIDTH, SWIPER_HEIGHT)));
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(300.f, 500.f)));
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameSize(), SizeF(300.f, 500.f)));
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f)));
 }

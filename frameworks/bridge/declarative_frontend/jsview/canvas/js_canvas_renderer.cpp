@@ -1037,7 +1037,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
 {
     double limit = 0.0;
     if (info.GetDoubleArg(0, limit)) {
-        if (limit == 0 && apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
             return;
         }
         renderingContext2DModel_->SetMiterLimit(limit);
@@ -1580,7 +1580,17 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 {
     std::string text;
     double density = GetDensity();
-    if (Positive(density) && info.GetStringArg(0, text)) {
+    bool isGetStr = info.GetStringArg(0, text);
+    if (!isGetStr && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+        if (info[0]->IsUndefined()) {
+            text = "undefined";
+            isGetStr = true;
+        } else if (info[0]->IsNull()) {
+            text = "null";
+            isGetStr = true;
+        }
+    }
+    if (Positive(density) && isGetStr) {
         TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
         auto vm = info.GetVm();
         CHECK_NULL_VOID(vm);

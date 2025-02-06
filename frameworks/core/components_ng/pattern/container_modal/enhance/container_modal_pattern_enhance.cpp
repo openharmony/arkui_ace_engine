@@ -201,9 +201,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     renderContext->SetClipToBounds(true);
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     // only floating window show border
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
-    renderContext->UpdateBorderRadius(borderRadius);
     BorderColorProperty borderColor;
     borderColor.SetColor((isFloatingWindow && isShow) ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
     renderContext->UpdateBorderColor(borderColor);
@@ -248,6 +245,9 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         EventHubOnModifyDone(customTitleRow);
         EventHubOnModifyDone(gestureRow);
         EventHubOnModifyDone(floatingTitleRow);
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
     
     UpdateGestureRowVisible();
@@ -482,13 +482,13 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
     CHECK_NULL_VOID(tapGesture);
     WeakPtr<FrameNode> weakNode = frameNode_;
     tapGesture->SetOnActionId([weakNode](GestureEvent& info) mutable {
-        TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click.");
         auto containerNode = weakNode.Upgrade();
         CHECK_NULL_VOID(containerNode);
         auto windowManager = GetNotMovingWindowManager(containerNode);
         CHECK_NULL_VOID(windowManager);
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click. maximizeMode =  %{public}d", maximizeMode);
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -513,14 +513,13 @@ void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& conta
 
 void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
     auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     ResetHoverTimer();
     if (!windowManager) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd");
     auto mode = windowManager->GetWindowMode();
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd, mode = %{public}d", mode);
     auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
         mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {

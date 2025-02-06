@@ -36,6 +36,8 @@ public:
     static void ParseToolbarOptions(const JSCallbackInfo& info, NG::NavigationToolbarOptions& options);
     static void ParseBarItems(const WeakPtr<NG::FrameNode>& targetNode,
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
+    static std::optional<NG::NavDestinationTransition> ParseNavDestinationTransition(
+        const JSRef<JSObject>& jsTransition, const JsiExecutionContext& execCtx);
 };
 } // namespace OHOS::Ace::Framework
 

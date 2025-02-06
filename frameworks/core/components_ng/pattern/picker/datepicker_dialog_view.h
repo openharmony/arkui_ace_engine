@@ -38,6 +38,7 @@ public:
     static void SetStartDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetEndDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetSelectedDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
+    static void SetMode(const RefPtr<FrameNode>& frameNode, const DatePickerMode& mode);
     static void SetShowLunar(const RefPtr<FrameNode>& frameNode, bool lunar = false);
     static void SetDateTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
@@ -177,6 +178,8 @@ private:
     static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
     static void SwitchFocusStatus(
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);
+    static DialogEvent GetDateChangeEvent(const RefPtr<FrameNode>& frameNode,
+        const std::map<std::string, NG::DialogEvent>& dialogEvent);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;

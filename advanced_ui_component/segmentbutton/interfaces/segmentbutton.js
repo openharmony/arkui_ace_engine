@@ -2591,7 +2591,7 @@ export class SegmentButton extends ViewPU {
         }
         try {
             let c22 = I18n.System.getSystemLanguage();
-            if (c22 === 'ug' && this.options.direction != Direction.Ltr) {
+            if (I18n.isRTL(c22) && this.options.direction !== Direction.Ltr) {
                 return true;
             }
         } catch (b22) {

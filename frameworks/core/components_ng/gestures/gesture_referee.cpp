@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/gestures/gesture_referee.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
@@ -339,11 +340,14 @@ bool GestureReferee::QueryAllDone()
 
 bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
 {
-    bool ret = false;
-    if (!isAxis && lastIsAxis_ && (type == SourceType::TOUCH || type == SourceType::MOUSE)) {
-        ret = true;
+    if (!isAxis && lastIsAxis_) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            return (type == SourceType::TOUCH || type == SourceType::MOUSE);
+        } else {
+            return (type == SourceType::TOUCH);
+        }
     }
-    return ret;
+    return false;
 }
 
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)

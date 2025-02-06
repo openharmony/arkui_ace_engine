@@ -29,12 +29,30 @@ constexpr uint8_t DOUBLE = 2;
 const Dimension PICKER_DIALOG_DIVIDER_MARGIN = 24.0_vp;
 } // namespace
 
+#ifdef ARKUI_WEARABLE
+CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    CanvasDrawFunction drawFun = GetContentDrawFunctionL<TextPickerLayoutProperty>(paintWrapper, pipeline);
+    CHECK_NULL_RETURN(drawFun, nullptr);
+    return [weak = WeakClaim(this), drawFun](RSCanvas& canvas) {
+        auto picker = weak.Upgrade();
+        CHECK_NULL_VOID(picker);
+        drawFun(canvas);
+    };
+}
+#endif
+
 CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    CHECK_NULL_RETURN(theme->IsCircleDial(), nullptr);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     auto pickerNode = renderContext->GetHost();
@@ -93,11 +111,10 @@ void TextPickerPaintMethod::PaintDefaultDividerLines(RSCanvas& canvas, const Rec
     auto theme = pipeline->GetTheme<PickerTheme>();
     auto dividerColor = theme->GetDividerColor();
     auto dividerLineWidth = theme->GetDividerThickness().ConvertToPx();
-
+    auto dividerLength = contentRect.Width();
+    auto dividerMargin = contentRect.GetX();
     auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPickerPattern);
-    auto dividerLength = textPickerPattern->GetDividerLength().value_or(contentRect.Width());
-    auto dividerMargin = contentRect.GetX();
     if (textPickerPattern->GetIsShowInDialog()) {
         dividerLength -= PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx() * DOUBLE;
         dividerMargin += PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx();

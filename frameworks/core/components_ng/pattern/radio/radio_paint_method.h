@@ -103,6 +103,7 @@ public:
         float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         radioModifier_->SetBoundsRect(boundsRect);
+        radioModifier_->SetIsUserSetUncheckBorderColor(isUserSetUncheckBorderColor_);
     }
 
     void SetHotZoneOffset(const OffsetF& hotZoneOffset)
@@ -160,6 +161,11 @@ public:
         showHoverEffect_ = showHoverEffect;
     }
 
+    void SetIsUserSetUncheckBorderColor(const bool isUserSet)
+    {
+        isUserSetUncheckBorderColor_ = isUserSet;
+    }
+
 private:
     Color pointColor_;
     Color activeColor_;
@@ -177,6 +183,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<RadioModifier> radioModifier_;
+    bool isUserSetUncheckBorderColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 

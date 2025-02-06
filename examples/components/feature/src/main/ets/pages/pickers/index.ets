@@ -36,7 +36,7 @@ export const pickersRoute: RouteGroup = {
     { name: 'rating', label: '评分条/Rating' },
     { name: 'toggle', label: '切换按钮/Toggle' },
     { name: 'Slider', label: '滑动条/Slider' },
-    {name:'text-picker',label:'文本选择器/TextPicker'}
+    { name: 'text-picker', label: '文本选择器/TextPicker' },
     { name: 'Radio', label: '单选框/Radio' },
     { name: 'Timepicker', label: '时间选择器/Timepicker' },
   ]
@@ -56,15 +56,12 @@ export function PickersDestination(name: string, route: Route) {
     RatingBootcamp({ title: route.label })
   } else if (name === 'pickers/toggle') {
     ToggleBootcamp({ title: route.label })
+  } else if (name === 'pickers/Radio') {
+    RadioBootcamp({ title: route.label })
   } else if (name === 'pickers/Slider') {
     SliderBootcamp({ title: route.label })
-  }else if (name==='pickers/text-picker'){
+  } else if (name==='pickers/text-picker'){
     TextPickerBootcamp({title: route.label})
-  }
-}
-
-  } else if (name === 'pickers/radio') {
-    RadioBootcamp({ title: route.label })
   } else if (name === 'pickers/Timepicker') {
     TimePickerBootcamp({ title: route.label })
   }

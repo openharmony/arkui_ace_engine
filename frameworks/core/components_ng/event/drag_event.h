@@ -242,6 +242,21 @@ public:
     {
         return lastTouchFingerId_;
     }
+    
+    void SetRestartDrag(bool isRestartDrag)
+    {
+        isRestartDrag_ = isRestartDrag;
+    }
+
+    bool GetRestartDrag() const
+    {
+        return isRestartDrag_;
+    }
+
+    void SetIsForDragDrop(bool isForDragDrop)
+    {
+        isForDragDrop_ = isForDragDrop;
+    }
 
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
@@ -249,7 +264,7 @@ public:
     bool IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode);
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
     void FindItemParentNode(const RefPtr<FrameNode>& frameNode);
-    bool IsNeedGather() const;
+    virtual bool IsNeedGather() const;
     static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
         const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
@@ -290,6 +305,7 @@ public:
     virtual RefPtr<PixelMap> GetPreScaledPixelMapForDragThroughTouch(float& preScale);
     virtual void ResetPreScaledPixelMapForDragThroughTouch();
     virtual void NotifyDragStart() {};
+    virtual void NotifyDragEnd() {};
 
     void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
     {
@@ -353,6 +369,8 @@ private:
     bool isRedragStart_ = false;
     int32_t lastTouchFingerId_ = 0;
     bool isNewFwk_ = false;
+    bool isRestartDrag_ = false;
+    bool isForDragDrop_ = false;
 };
 
 } // namespace OHOS::Ace::NG

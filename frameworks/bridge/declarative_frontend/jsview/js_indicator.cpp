@@ -207,7 +207,7 @@ SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     bool parseSelectedItemHOk =
         ParseJsDimensionVpNG(selectedItemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
+    IndicatorModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
     SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
     return swiperParameters;
@@ -313,7 +313,6 @@ void JSIndicator::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            TAG_LOGW(AceLogTag::ACE_INDICATOR, "IndicatorComponent onChange callback execute failed.");
             return;
         }
         PipelineContext::SetCallBackNode(node);

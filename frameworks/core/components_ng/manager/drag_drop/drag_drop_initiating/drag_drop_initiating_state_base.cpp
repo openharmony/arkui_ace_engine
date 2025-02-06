@@ -18,6 +18,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -83,9 +84,12 @@ void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double 
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (!startDrag) {
-        manager->RemovePreviewBadgeNode();
-        manager->RemoveGatherNodeWithAnimation();
+    if (params.isNeedGather) {
+        if (!startDrag) {
+            manager->RemovePreviewBadgeNode();
+            manager->RemoveGatherNodeWithAnimation();
+        }
+        DragAnimationHelper::HideDragNodeCopyWithAnimation(manager, frameNode);
     }
 
     if (showAnimation) {
@@ -173,13 +177,6 @@ bool DragDropInitiatingStateBase::CheckStatusForPanActionBegin(
         DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::REPEAT_DRAG_FAIL);
         TAG_LOGI(AceLogTag::ACE_DRAG, "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
             dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
-        return false;
-    }
-    auto prepareDragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
-    if (DragDropGlobalController::GetInstance().GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
-        (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode &&
-            info.GetSourceDevice() != SourceType::MOUSE)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Drag preview is landing finished, stop dragging.");
         return false;
     }
     if (dragDropManager->IsDragNodeNeedClean()) {

@@ -18,8 +18,8 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -29,10 +29,11 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId);
-    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
-    wantWrap->SetWantParam(params);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
+    CHECK_NULL_RETURN(wantWrap, frameNode);
+    wantWrap->SetWantParam(params);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->UpdateWant(wantWrap);

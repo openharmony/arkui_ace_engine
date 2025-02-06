@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
@@ -278,7 +279,7 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
 
 OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
-    auto offsetToWindow = frameNode->GetPaintRectOffset();
+    auto offsetToWindow = frameNode->GetPaintRectOffset(false, true);
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
     return OffsetF(offsetX, offsetY);
@@ -362,7 +363,7 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
 }
 
 void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
-    const RefPtr<MenuPreviewPattern>& previewPattern, float radius, float rate)
+    const RefPtr<MenuPreviewPattern>& previewPattern, const BorderRadiusProperty& radius, float rate)
 {
     CHECK_NULL_VOID(previewPattern && clipContext);
     // clip area start by actual image size after contain stack container and squeezed by parent proc
@@ -379,8 +380,47 @@ void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
     RoundRect roundRectInstance;
     roundRectInstance.SetRect(RectF(OffsetF((1 - rate) * clipOffset.GetX(), (1 - rate) * clipOffset.GetY()),
         SizeF(curentClipAreaWidth, curentClipAreaHeight)));
-    roundRectInstance.SetCornerRadius(rate * radius);
+    CHECK_NULL_VOID(radius.radiusTopLeft);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::TOP_LEFT_POS, rate * radius.radiusTopLeft->Value(), rate * radius.radiusTopLeft->Value());
+    CHECK_NULL_VOID(radius.radiusTopRight);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::TOP_RIGHT_POS, rate * radius.radiusTopRight->Value(), rate * radius.radiusTopRight->Value());
+    CHECK_NULL_VOID(radius.radiusBottomLeft);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::BOTTOM_LEFT_POS, rate * radius.radiusBottomLeft->Value(), rate * radius.radiusBottomLeft->Value());
+    CHECK_NULL_VOID(radius.radiusBottomRight);
+    roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_RIGHT_POS, rate * radius.radiusBottomRight->Value(),
+        rate * radius.radiusBottomRight->Value());
     clipContext->ClipWithRoundRect(roundRectInstance);
+}
+
+BorderRadiusProperty GetHoverPreviewBorderRadius(
+    const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<MenuTheme>& menuTheme)
+{
+    CHECK_NULL_RETURN(previewPattern, {});
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, {});
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, {});
+    CHECK_NULL_RETURN(menuTheme, {});
+    auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
+    auto menuParam = menuWrapperPattern->GetMenuParam();
+    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    if (menuParam.previewBorderRadius.has_value() && !menuParam.previewBorderRadius->multiValued) {
+        auto paramRadius = menuParam.previewBorderRadius->radiusTopLeft;
+        radius = (paramRadius->Unit() == DimensionUnit::PERCENT)
+                     ? paramRadius->Value() * previewPattern->GetCustomPreviewWidth()
+                     : paramRadius->ConvertToPx();
+    }
+
+    if (menuParam.previewBorderRadius.has_value() && menuParam.previewBorderRadius->multiValued) {
+        BorderRadiusProperty previewBorderRadius;
+        previewBorderRadius.SetRadius(Dimension(radius));
+        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        return previewBorderRadius;
+    }
+    return BorderRadiusProperty(Dimension(radius));
 }
 
 void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
@@ -415,13 +455,14 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
-    auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, radius](float rate) {
+    BorderRadiusProperty previewRadius = GetHoverPreviewBorderRadius(previewPattern, menuTheme);
+
+    auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, previewRadius](float rate) {
         CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
         menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
         menuWrapperPattern->SetAnimationClipRate(rate);
-        menuWrapperPattern->SetAnimationBorderRadius(rate * radius);
-        UpdatePreviewVisibleAreaByFrame(stackContext, previewPattern, radius, rate);
+        menuWrapperPattern->SetAnimationBorderRadius(rate, previewRadius);
+        UpdatePreviewVisibleAreaByFrame(stackContext, previewPattern, previewRadius, rate);
     };
 
     auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
@@ -698,6 +739,25 @@ void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameN
     });
 }
 
+BorderRadiusProperty GetPixelMapPreviewBorderRadius(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_RETURN(previewNode, {});
+    auto pipelineContext = previewNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, {});
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(menuTheme, {});
+    auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
+
+    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    if (menuParam.previewBorderRadius.has_value()) {
+        BorderRadiusProperty previewBorderRadius;
+        previewBorderRadius.SetRadius(Dimension(previewBorderRadiusValue));
+        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        return previewBorderRadius;
+    }
+    return BorderRadiusProperty((Dimension(previewBorderRadiusValue)));
+}
+
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
@@ -738,8 +798,9 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
+        BorderRadiusProperty borderRadius = GetPixelMapPreviewBorderRadius(previewNode, menuParam);
         if (menuParam.previewBorderRadius) {
-            imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
+            imageContext->UpdateBorderRadius(borderRadius);
         }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
@@ -820,23 +881,24 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub) && !gestureEventHub->GetTextDraggable();
+    auto isLiftingDisabled = targetNode->GetDragPreviewOption().isLiftingDisabled;
     if (targetNode->GetTag() == V2::TEXT_ETS_TAG && targetNode->IsDraggable() && !targetNode->IsCustomerSet()) {
         auto textPattern = targetNode->GetPattern<TextPattern>();
         if (textPattern && textPattern->GetCopyOptions() == CopyOptions::None) {
             isAllowedDrag = false;
         }
     }
-    if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
+    if (menuParam.previewMode != MenuPreviewMode::NONE || (isAllowedDrag && !isLiftingDisabled)) {
         DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
         SetFilter(targetNode, wrapperNode);
     }
     if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
         (menuParam.previewMode == MenuPreviewMode::NONE && menuParam.menuBindType == MenuBindingType::LONG_PRESS &&
-            isAllowedDrag) ||
+            isAllowedDrag && !isLiftingDisabled) ||
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
+    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag && !isLiftingDisabled) {
         CHECK_NULL_VOID(wrapperNode);
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
         CHECK_NULL_VOID(pixelMapNode);
@@ -997,48 +1059,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    bool optionsHasIcon = GetHasIcon(params);
-    bool optionsHasSymbol = GetHasSymbol(params);
-    RefPtr<FrameNode> optionNode = nullptr;
-    // append options to menu
-    for (size_t i = 0; i < params.size(); ++i) {
-        if (params[i].symbol != nullptr) {
-            optionNode = CreateMenuOption(optionsHasSymbol, params, i);
-        } else {
-            optionNode = CreateMenuOption(
-                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
-            if (optionNode) {
-                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-                optionPattern->SetBlockClick(params[i].disableSystemClick);
-            }
-        }
-        if (!optionNode) {
-            continue;
-        }
-        NeedAgingUpdateNode(optionNode);
-        menuPattern->AddOptionNode(optionNode);
-        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
-        auto eventHub = optionNode->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        eventHub->SetEnabled(params[i].enabled);
-        auto focusHub = optionNode->GetFocusHub();
-        CHECK_NULL_RETURN(focusHub, nullptr);
-        focusHub->SetEnabled(params[i].enabled);
-
-        OptionKeepMenu(optionNode, menuWeak);
-        // first node never paints divider
-        auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
-        if (i == 0 && menuParam.title.empty()) {
-            props->UpdateNeedDivider(false);
-        }
-        if (optionsHasIcon) {
-            props->UpdateHasIcon(true);
-        }
-        optionNode->MountToParent(column);
-        optionNode->MarkModifyDone();
-    }
+    MountOptionToColumn(params, menuNode, menuParam, column);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
@@ -1153,11 +1177,9 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetMenuParam(menuParam);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    menuPattern->SetHoverMode(menuParam.enableHoverMode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
@@ -1483,6 +1505,53 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
     CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
 #endif
     return option;
+}
+
+void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+    const MenuParam& menuParam, RefPtr<FrameNode> column)
+{
+    bool optionsHasIcon = GetHasIcon(params);
+    bool optionsHasSymbol = GetHasSymbol(params);
+    RefPtr<FrameNode> optionNode = nullptr;
+    // append options to menu
+    for (size_t i = 0; i < params.size(); ++i) {
+        if (params[i].symbol != nullptr) {
+            optionNode = CreateMenuOption(optionsHasSymbol, params, i);
+        } else {
+            optionNode = CreateMenuOption(
+                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
+            if (optionNode) {
+                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
+                optionPattern->SetBlockClick(params[i].disableSystemClick);
+            }
+        }
+        if (!optionNode) {
+            continue;
+        }
+        NeedAgingUpdateNode(optionNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->AddOptionNode(optionNode);
+        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
+        auto eventHub = optionNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetEnabled(params[i].enabled);
+        auto focusHub = optionNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetEnabled(params[i].enabled);
+
+        OptionKeepMenu(optionNode, menuWeak);
+        // first node never paints divider
+        auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
+        if (i == 0 && menuParam.title.empty()) {
+            props->UpdateNeedDivider(false);
+        }
+        if (optionsHasIcon) {
+            props->UpdateHasIcon(true);
+        }
+        optionNode->MountToParent(column);
+        optionNode->MarkModifyDone();
+    }
 }
 
 void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,

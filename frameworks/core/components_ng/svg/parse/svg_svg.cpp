@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
@@ -21,6 +22,12 @@ namespace OHOS::Ace::NG {
 namespace {
 const char DOM_SVG_SRC_VIEW_BOX[] = "viewBox";
 constexpr float HALF = 0.5f;
+constexpr int32_t INDEX_VIEWBOX_X = 0;
+constexpr int32_t INDEX_VIEWBOX_Y = 1;
+constexpr int32_t INDEX_VIEWBOX_WIDTH = 2;
+constexpr int32_t INDEX_VIEWBOX_HEIGHT = 3;
+constexpr int32_t VIEWBOX_PARAM_COUNT = 4;
+constexpr int32_t PRESERVEASPECTRATIO_PARAM_COUNT_MAX = 2;
 }
 
 SvgSvg::SvgSvg() : SvgGroup() {}
@@ -51,16 +58,14 @@ RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
     return path;
 }
 
-void SvgSvg::AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort)
+SvgPreserveAspectRatio SvgSvg::GetPreserveAspectRatio() const
 {
-    auto svgSize = GetSize();
-    auto viewBox = GetViewBox();
-    if (LessOrEqual(viewBox.Width(), 0.0) || LessOrEqual(viewBox.Height(), 0.0)) {
-        RSRect clipRect(0.0f, 0.0f, LessNotEqual(svgSize.Width(), 0.0) ? viewPort.Width() : svgSize.Width(),
-            LessNotEqual(svgSize.Height(), 0.0) ? viewPort.Height() : svgSize.Height());
-        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-        return;
-    }
+    return svgAttr_.preserveAspectRatio;
+}
+
+void SvgSvg::AdjustContentAreaSvgSizeInvalid(RSCanvas& canvas, const Size& viewPort, const Size& svgSize,
+    const Rect& viewBox)
+{
     if (LessNotEqual(svgSize.Width(), 0.0) && LessNotEqual(svgSize.Height(), 0.0)) {
         RSRect clipRect(0.0f, 0.0f, viewPort.Width(), viewPort.Height());
         canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
@@ -88,14 +93,50 @@ void SvgSvg::AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort)
         canvas.Translate(-1 * viewBox.Left(), -1 * viewBox.Top());
         return;
     }
+}
+
+void SvgSvg::AdjustContentAreaSvgSizeValid(RSCanvas& canvas, const Size& viewPort, const Size& svgSize,
+    const Rect& viewBox)
+{
+    float scaleX = 0.0f;
+    float scaleY = 0.0f;
+    float translateX = 0.0f;
+    float translateY = 0.0f;
     RSRect clipRect(0.0f, 0.0f, svgSize.Width(), svgSize.Height());
     canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-    auto scale = std::min(svgSize.Width() / viewBox.Width(), svgSize.Height() / viewBox.Height());
-    auto translateX = (svgSize.Width() - viewBox.Width() * scale) * HALF;
-    auto translateY = (svgSize.Height() - viewBox.Height() * scale) * HALF;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        scaleX = std::min(svgSize.Width() / viewBox.Width(), svgSize.Height() / viewBox.Height());
+        scaleY = scaleX;
+        translateX = (svgSize.Width() - viewBox.Width() * scaleX) * HALF;
+        translateY = (svgSize.Height() - viewBox.Height() * scaleY) * HALF;
+    } else {
+        auto preserveAspectRatio = GetPreserveAspectRatio();
+        SvgAttributesParser::ComputeScale(viewBox.GetSize(), viewPort, preserveAspectRatio, scaleX, scaleY);
+        SvgAttributesParser::ComputeTranslate(viewBox.GetSize(), viewPort, scaleX, scaleY,
+            preserveAspectRatio.svgAlign, translateX, translateY);
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Scale: X=%{public}f Y=%{public}f,translate: X=%{public}f Y=%{public}f",
+            scaleX, scaleY, translateX, translateY);
+    }
     canvas.Translate(translateX, translateY);
-    canvas.Scale(scale, scale);
+    canvas.Scale(scaleX, scaleY);
     canvas.Translate(-1 * viewBox.Left(), -1 * viewBox.Top());
+}
+
+void SvgSvg::AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort)
+{
+    auto svgSize = GetSize();
+    auto viewBox = GetViewBox();
+    if (LessOrEqual(viewBox.Width(), 0.0) || LessOrEqual(viewBox.Height(), 0.0)) {
+        RSRect clipRect(0.0f, 0.0f, LessNotEqual(svgSize.Width(), 0.0) ? viewPort.Width() : svgSize.Width(),
+            LessNotEqual(svgSize.Height(), 0.0) ? viewPort.Height() : svgSize.Height());
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+        return;
+    }
+    if (svgSize.IsValid()) {
+        AdjustContentAreaSvgSizeValid(canvas, viewPort, svgSize, viewBox);
+    } else {
+        AdjustContentAreaSvgSizeInvalid(canvas, viewPort, svgSize, viewBox);
+    }
 }
 
 Size SvgSvg::GetSize() const
@@ -106,6 +147,42 @@ Size SvgSvg::GetSize() const
 Rect SvgSvg::GetViewBox() const
 {
     return svgAttr_.viewBox;
+}
+
+void ParsePreserveAspectRatio(const std::string& val, SvgAttributes& attr)
+{
+    if (val.empty()) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "ParsePreserveAspectRatio val empty");
+        return;
+    }
+    std::vector<std::string> tmpValue;
+    StringUtils::StringSplitter(val, ' ', tmpValue);
+    if (tmpValue.empty() || tmpValue.size() > PRESERVEASPECTRATIO_PARAM_COUNT_MAX) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "ParsePreserveAspectRatio parameter count error");
+        return;
+    }
+    attr.preserveAspectRatio.svgAlign = SvgAttributesParser::ParseSvgAlign(tmpValue[0]);
+    if (tmpValue.size() > 1) {
+        attr.preserveAspectRatio.meetOrSlice = SvgAttributesParser::ParseSvgMeetOrSlice(tmpValue[1]);
+    }
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "ParsePreserveAspectRatio, svgAlign=%{public}d meetOrSlice=%{public}d",
+        attr.preserveAspectRatio.svgAlign, attr.preserveAspectRatio.meetOrSlice);
+}
+
+void ParseViewBox(const std::string& val, SvgAttributes& attr)
+{
+    if (val.empty()) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "ParseViewBox val empty");
+        return;
+    }
+    std::vector<double> viewBox;
+    StringUtils::StringSplitter(val, ' ', viewBox);
+    if (viewBox.size() != VIEWBOX_PARAM_COUNT) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "ParseViewBox parameter count != 4");
+        return;
+    }
+    attr.viewBox = Rect(viewBox[INDEX_VIEWBOX_X], viewBox[INDEX_VIEWBOX_Y], viewBox[INDEX_VIEWBOX_WIDTH],
+        viewBox[INDEX_VIEWBOX_HEIGHT]);
 }
 
 bool SvgSvg::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
@@ -119,28 +196,9 @@ bool SvgSvg::ParseAndSetSpecializedAttr(const std::string& name, const std::stri
             [](const std::string& val, SvgAttributes& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_SRC_VIEW_BOX,
-            [](const std::string& val, SvgAttributes& attr) {
-                if (val.empty()) {
-                    return;
-                }
-                std::vector<double> viewBox;
-                StringUtils::StringSplitter(val, ' ', viewBox);
-                if (viewBox.size() == 4) {
-                    attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
-                }
-            } },
-        { SVG_VIEW_BOX,
-            [](const std::string& val, SvgAttributes& attr) {
-                if (val.empty()) {
-                    return;
-                }
-                std::vector<double> viewBox;
-                StringUtils::StringSplitter(val, ' ', viewBox);
-                if (viewBox.size() == 4) {
-                    attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
-                }
-            } },
+        { SVG_PRESERVE_ASPECT_RATIO, ParsePreserveAspectRatio},
+        { DOM_SVG_SRC_VIEW_BOX, ParseViewBox},
+        { SVG_VIEW_BOX, ParseViewBox},
         { SVG_WIDTH,
             [](const std::string& val, SvgAttributes& attr) {
                 attr.width = SvgAttributesParser::ParseDimension(val);

@@ -16,6 +16,7 @@
 
 #include "base/error/error_code.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -48,6 +49,16 @@ void DialogManager::ShowInEmbeddedOverlay(std::function<void(RefPtr<NG::OverlayM
         TaskExecutor::TaskType::UI, name);
 }
 
+RefPtr<OverlayManager> DialogManager::FindPageNodeOverlay(const RefPtr<FrameNode>& currentNode)
+{
+    if (currentNode == nullptr || !currentNode->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node does not exist or not on main tree.");
+    } else {
+        return SheetManager::FindPageNodeOverlay(currentNode, true, true);
+    }
+    return nullptr;
+}
+
 RefPtr<OverlayManager> DialogManager::GetEmbeddedOverlay(int32_t uniqueId, const RefPtr<PipelineContext>& context)
 {
     CHECK_NULL_RETURN(context, nullptr);
@@ -56,7 +67,7 @@ RefPtr<OverlayManager> DialogManager::GetEmbeddedOverlay(int32_t uniqueId, const
         if (currentNode == nullptr || !currentNode->IsOnMainTree()) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "Level uniqueId/%{public}d does not exist or not on main tree.", uniqueId);
         } else {
-            auto getOverlayManager = SheetManager::FindPageNodeOverlay(currentNode, true, true);
+            auto getOverlayManager = FindPageNodeOverlay(currentNode);
             if (getOverlayManager) {
                 return getOverlayManager;
             } else {
@@ -78,4 +89,34 @@ RefPtr<OverlayManager> DialogManager::GetEmbeddedOverlay(int32_t uniqueId, const
     return nullptr;
 }
 
+RefPtr<OverlayManager> DialogManager::GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode)
+{
+    CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto parent = dialogNode->GetParent();
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
+        auto pattern = parentNode->GetPattern<PagePattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    } else if (parentNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto pattern = parentNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    }
+    return nullptr;
+}
+
+RefPtr<UINode> DialogManager::GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode)
+{
+    RefPtr<UINode> parent = currentNode;
+    while (parent) {
+        if (parent->GetTag() == V2::DIALOG_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    return parent;
+}
 } // namespace OHOS::Ace::NG

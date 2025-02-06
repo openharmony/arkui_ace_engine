@@ -184,6 +184,21 @@ public:
     void WindowFocusMoveStart();
     void WindowFocusMoveEnd();
     void WindowFocus(bool isFocus);
+    std::optional<FocusEvent> GetCurrentFocusEvent()
+    {
+        return currentFocusEvent_;
+    }
+
+    void SetCurrentFocusEvent(const FocusEvent& event)
+    {
+        currentFocusEvent_.reset();
+        currentFocusEvent_.emplace(event);
+    }
+
+    void ResetCurrentFocusEvent()
+    {
+        currentFocusEvent_.reset();
+    }
 
     static RefPtr<FocusManager> GetFocusManager(RefPtr<FrameNode>& node);
 
@@ -222,7 +237,7 @@ private:
     FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
 
     int32_t requestFocusResult_ = ERROR_CODE_NO_ERROR;
-
+    std::optional<FocusEvent> currentFocusEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };
 } // namespace OHOS::Ace::NG

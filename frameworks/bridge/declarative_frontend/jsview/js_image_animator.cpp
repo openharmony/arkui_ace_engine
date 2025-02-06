@@ -65,8 +65,7 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSImageAnimator>::StaticMethod("fixedSize", &JSImageAnimator::SetFixedSize, opt);
     JSClass<JSImageAnimator>::StaticMethod("fillMode", &JSImageAnimator::SetFillMode, opt);
     JSClass<JSImageAnimator>::StaticMethod("preDecode", &JSImageAnimator::SetPreDecode, opt);
-    JSClass<JSImageAnimator>::StaticMethod(
-        "autoMonitorInvisibleArea", &JSImageAnimator::SetAutoMonitorInvisibleArea, opt);
+    JSClass<JSImageAnimator>::StaticMethod("monitorInvisibleArea", &JSImageAnimator::SetAutoMonitorInvisibleArea, opt);
 
     JSClass<JSImageAnimator>::StaticMethod("onStart", &JSImageAnimator::OnStart, opt);
     JSClass<JSImageAnimator>::StaticMethod("onPause", &JSImageAnimator::OnPause, opt);

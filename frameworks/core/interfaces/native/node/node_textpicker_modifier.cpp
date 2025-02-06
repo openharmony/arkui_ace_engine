@@ -71,7 +71,26 @@ void ResetTextPickerCanLoop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetCanLoop(frameNode, true);
+}
+
+void SetTextPickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetTextPickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
 }
 
 void GetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size)
@@ -343,7 +362,7 @@ void SetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values, ArkU
     std::vector<Dimension> widths;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    for (uint32_t i = 0; i < size; i++) {
+    for (ArkUI_Int32 i = 0; i < size; i++) {
         widths.emplace_back(Dimension(values[i] * MAX_PERCENT, DimensionUnit::PERCENT));
     }
     TextPickerModelNG::SetColumnWidths(frameNode, widths);
@@ -354,9 +373,9 @@ void ResetTextPickerColumnWidths(ArkUINodeHandle node)
     std::vector<Dimension> widths;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto childCount = static_cast<float>(frameNode->GetChildren().size());
-    for (uint32_t i = 0; i < childCount; i++) {
-        widths.emplace_back(Dimension(MAX_PERCENT / childCount, DimensionUnit::PERCENT));
+    auto childCount =  frameNode->GetChildren().size();
+    for (size_t i = 0; i < childCount; i++) {
+        widths.emplace_back(Dimension(MAX_PERCENT / static_cast<float>(childCount), DimensionUnit::PERCENT));
     }
     TextPickerModelNG::SetColumnWidths(frameNode, widths);
 }
@@ -666,6 +685,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .getTextPickerEnableHapticFeedback = GetTextPickerEnableHapticFeedback,
         .setTextPickerEnableHapticFeedback = SetTextPickerEnableHapticFeedback,
         .resetTextPickerEnableHapticFeedback = ResetTextPickerEnableHapticFeedback,
+        .setTextPickerDigitalCrownSensitivity = SetTextPickerDigitalCrownSensitivity,
+        .resetTextPickerDigitalCrownSensitivity = ResetTextPickerDigitalCrownSensitivity,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

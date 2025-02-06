@@ -259,6 +259,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleLayoutProperty);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
+    useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
@@ -267,7 +268,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");
         return;
     }
-    useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     // bubble size fit screen.
     layoutWrapper->GetGeometryNode()->SetFrameSize(layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
@@ -293,6 +293,9 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
     }
     // childSize_ and childOffset_ is used in Layout.
+    auto childProp = child->GetLayoutProperty();
+    CHECK_NULL_VOID(childProp);
+    childProp->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     child->Measure(childLayoutConstraint);
     measureChildSizeAfter_ = child->GetGeometryNode()->GetFrameSize();
     if (!NearEqual(measureChildSizeBefore_, measureChildSizeAfter_)) {
@@ -658,7 +661,9 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     maxColumns_ = popupTheme->GetMaxColumns();
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
     InitWrapperRect(layoutWrapper);
-    UpdateScrollHeight(layoutWrapper, showInSubWindow);
+    if (!useCustom_) {
+        UpdateScrollHeight(layoutWrapper, showInSubWindow);
+    }
 }
 
 void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
@@ -672,7 +677,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         return;
     }
     if (IsUIExtensionWindow()) {
-        HandleUIExtensionKeyboard(showInSubWindow);
+        HandleUIExtensionKeyboard(layoutWrapper, showInSubWindow);
         return;
     }
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
@@ -684,7 +689,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
         wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
     } else if (showInSubWindow) {
-        auto currentContext = PipelineContext::GetCurrentContext();
+        auto currentContext = bubbleNode->GetContextRefPtr();
         CHECK_NULL_VOID(currentContext);
         auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
         CHECK_NULL_VOID(currentSafeAreaManager);
@@ -696,7 +701,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     }
 }
 
-void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(bool showInSubWindow)
+void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -711,7 +716,9 @@ void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(bool showInSubWindow)
             wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
             marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
         } else {
-            auto currentContext = PipelineContext::GetCurrentContext();
+            auto bubbleNode = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(bubbleNode);
+            auto currentContext = bubbleNode->GetContextRefPtr();
             CHECK_NULL_VOID(currentContext);
             auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
             CHECK_NULL_VOID(currentSafeAreaManager);

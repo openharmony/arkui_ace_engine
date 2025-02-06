@@ -85,7 +85,7 @@ private:
     void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
         std::ostringstream& oss);
     void IsFrameNodeAbnormal(const RefPtr<FrameNode>& node);
-    std::unordered_map<uint64_t, RefPtr<FrameNode>> screenNodeMap_;
+    std::unordered_map<uint64_t, WeakPtr<FrameNode>> screenNodeMap_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     bool isCoreDebugEnable_ = false;
 };

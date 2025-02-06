@@ -90,20 +90,20 @@ HWTEST_F(WaterFlowTestNg, Clip002, TestSize.Level1)
     rect->SetHeight(Dimension(200.0f));
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CUSTOM, rect });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetPaddingSize(true), SizeF(470.0f, 790.0f));
     auto rect1 = frameNode_->GetGeometryNode()->GetPaddingRect();
     rect1.SetOffset(OffsetF(5.0f, 5.0f)); // padding offset
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect1))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto rect2 = frameNode_->GetGeometryNode()->GetFrameRect();
     rect2.SetOffset(OffsetF(0.0f, 0.0f));
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect2))).Times(1);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -132,12 +132,12 @@ HWTEST_F(WaterFlowTestNg, Clip003, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().ToString(), "RectT (2.00, 2.00) - [480.00 x 800.00]");
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(5, 5, 470.0f, 790.0f)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_TRUE(frameNode_->GetGeometryNode()->GetResolvedSingleSafeAreaPadding());
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(-2, -2, 484, 804)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -169,7 +169,7 @@ HWTEST_F(WaterFlowTestNg, Clip004, TestSize.Level1)
     ASSERT_TRUE(frameNode_->GetGeometryNode()->GetResolvedSingleSafeAreaPadding());
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(1, 1, 478, 798)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -201,7 +201,7 @@ HWTEST_F(WaterFlowTestNg, Clip005, TestSize.Level1)
     ASSERT_TRUE(frameNode_->GetGeometryNode()->GetResolvedSingleSafeAreaPadding());
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(0, 0, 480, 800)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**

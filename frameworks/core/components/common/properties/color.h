@@ -27,7 +27,6 @@
 
 namespace OHOS::Ace {
 
-
 enum class ForegroundColorStrategy : char {
     NONE,
     INVERT,

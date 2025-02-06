@@ -48,6 +48,7 @@ public:
         return pixmap_;
     }
     bool EncodeTlv(std::vector<uint8_t>& buff) override;
+    uint32_t WritePixels(const WritePixelsOptions& opts) override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;

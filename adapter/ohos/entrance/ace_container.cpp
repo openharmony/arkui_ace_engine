@@ -24,9 +24,13 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
+#include "ui/base/utils/utils.h"
 #include "ui_extension_context.h"
 #include "ui/rs_surface_node.h"
 #include "window_manager.h"
@@ -82,10 +86,12 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
@@ -115,7 +121,7 @@ const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.e
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
-
+constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -384,6 +390,7 @@ void AceContainer::Destroy()
         }
     }
     DestroyToastSubwindow(instanceId_);
+    DestroySelectOverlaySubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -1041,7 +1048,7 @@ void AceContainer::InitializeCallback()
                                     WindowSizeChangeReason type,
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
-        ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
+        ACE_SCOPED_TRACE_COMMERCIAL("ViewChangeCallback(%d, %d)", width, height);
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -1562,6 +1569,7 @@ private:
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
     uint32_t autoFillSessionId, bool isNative)
 {
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UpdatePopupUIExtension called");
     CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
@@ -1944,8 +1952,34 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
     if (OnDumpInfo(params)) {
         return true;
     }
+
+    if (DumpRSNodeByStringID(params)) {
+        return true;
+    }
     CHECK_NULL_RETURN(pipelineContext_, false);
     return pipelineContext_->Dump(params);
+}
+
+bool AceContainer::DumpRSNodeByStringID(const std::vector<std::string>& params)
+{
+    if (!params.empty() && params[0] == "-rsnodebyid" && (params.size() > 1)) {
+        DumpLog::GetInstance().Print("------------DumpRSNodeByStringID------------");
+        DumpLog::GetInstance().Print(1, "Query by stringid: " + params[1]);
+        auto frameNode = NG::Inspector::GetFrameNodeByKey(params[1], true, true);
+        if (!frameNode) {
+            DumpLog::GetInstance().Print(1, "RSNode Not Found.");
+            return true;
+        }
+        auto renderContext =
+            AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+        CHECK_NULL_RETURN(renderContext, true);
+        auto rsNode = renderContext->GetRSNode();
+        DumpLog::GetInstance().Print(1, "RSNode " + (rsNode ?
+            ("name: " + rsNode->GetNodeName() + ", nodeId: " + std::to_string(rsNode->GetId())) :
+            "Not Found."));
+        return true;
+    }
+    return false;
 }
 
 bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
@@ -2161,11 +2195,17 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
+    auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>();
 #ifndef NG_BUILD
     if (useNewPipeline_) {
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+        UiSessionManager::GetInstance().SaveTranslateManager(uiTranslateManager);
+        pipeline->SaveTranslateManager(uiTranslateManager);
+#endif
     } else {
         LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -2176,6 +2216,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    UiSessionManager::GetInstance().SaveTranslateManager(uiTranslateManager);
+    pipeline->SaveTranslateManager(uiTranslateManager);
+#endif
 #endif
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
@@ -2418,7 +2463,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         CHECK_NULL_VOID(ngPipeline);
         auto uiExtManager = ngPipeline->GetUIExtensionManager();
         CHECK_NULL_VOID(uiExtManager);
-        uiExtManager->SendPageModeToUEA(ngPipeline);
+        uiExtManager->SendPageModeRequestToHost(ngPipeline);
     }
 }
 
@@ -3269,7 +3314,8 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
         MMI::PointerEvent::PointerItem pointerItem;
-        if (!currentEvent->GetPointerItem(pointerId, pointerItem)) {
+        if (!currentEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed() ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             for (const auto& callback : callbacksIter->second) {
                 if (callback) {
                     callback();
@@ -3277,16 +3323,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
             callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
         } else {
-            if (!pointerItem.IsPressed() || pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-                for (const auto& callback : callbacksIter->second) {
-                    if (callback) {
-                        callback();
-                    }
-                }
-                callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
-            } else {
-                ++callbacksIter;
-            }
+            ++callbacksIter;
         }
     }
 }
@@ -3310,9 +3347,13 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
     dragPointerEvent.displayX = pointerItem.GetDisplayX();
     dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    dragPointerEvent.windowX = pointerItem.GetWindowX();
+    dragPointerEvent.windowY = pointerItem.GetWindowY();
+    dragPointerEvent.deviceId = pointerItem.GetDeviceId();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
     dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
+    dragPointerEvent.originId = pointerItem.GetOriginPointerId();
     RegisterStopDragCallback(dragPointerEvent.pointerId, std::move(stopDragCallback));
     return true;
 }
@@ -3336,6 +3377,25 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
         list.emplace_back(std::move(stopDragCallback));
         stopDragCallbackMap_.emplace(pointerId, list);
     }
+}
+
+bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    auto iter = currentEvents_.find(dragPointerEvent.originId);
+    if (iter == currentEvents_.end()) {
+        return false;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    auto currentPointerEvent = iter->second;
+    CHECK_NULL_RETURN(currentPointerEvent, false);
+    if (!currentPointerEvent->GetPointerItem(currentPointerEvent->GetPointerId(), pointerItem) ||
+        !pointerItem.IsPressed()) {
+        return false;
+    }
+    dragPointerEvent.displayX = pointerItem.GetDisplayX();
+    dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    return true;
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(
@@ -3514,6 +3574,27 @@ void AceContainer::TerminateUIExtension()
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelf();
+}
+
+bool AceContainer::UIExtensionIsHalfScreen()
+{
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_RETURN(uiExtensionContext, false);
+    return uiExtensionContext->GetScreenMode() == EXTENSION_HALF_SCREEN_MODE;
+}
+
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    uniqueId_ = uniqueId;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    return uniqueId_;
 }
 
 Rosen::WMError AceContainer::RegisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)

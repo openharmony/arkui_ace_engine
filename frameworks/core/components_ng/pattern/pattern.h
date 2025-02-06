@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "ui/properties/dirty_flag.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -32,7 +34,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
-#include "ui/base/dirty_flag.h"
+
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -662,6 +664,16 @@ public:
     }
 
     virtual void OnFocusNodeChange(FocusReason focusReason) {}
+    virtual void OnCollectRemoved() {}
+    virtual std::string GetCurrentLanguage()
+    {
+        return nullptr;
+    };
+    virtual void GetTranslateText(
+        std::string extraData, std::function<void(std::string)> callback, bool isContinued) {};
+    virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
+    virtual void EndTranslate() {};
+    virtual void SendTranslateResult(std::string results) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

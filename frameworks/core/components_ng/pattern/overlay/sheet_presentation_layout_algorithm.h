@@ -38,17 +38,8 @@ class ACE_EXPORT SheetPresentationLayoutAlgorithm : public LinearLayoutAlgorithm
 
 public:
     SheetPresentationLayoutAlgorithm() = default;
-    SheetPresentationLayoutAlgorithm(int32_t id, const std::string& tag, SheetType sheetType)
-        : targetNodeId_(id), targetTag_(tag), sheetType_(sheetType)
-    {
-        directionCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckDirectionBottom;
-        placementCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottom;
-        placementCheckFunc_[Placement::BOTTOM_LEFT] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft;
-        placementCheckFunc_[Placement::BOTTOM_RIGHT] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomRight;
-        getOffsetFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottom;
-        getOffsetFunc_[Placement::BOTTOM_LEFT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft;
-        getOffsetFunc_[Placement::BOTTOM_RIGHT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight;
-    }
+    SheetPresentationLayoutAlgorithm(SheetType sheetType, SheetPopupInfo popupInfo)
+        : sheetType_(sheetType), sheetPopupInfo_(popupInfo) {}
     ~SheetPresentationLayoutAlgorithm() override = default;
 
     void InitParameter();
@@ -80,45 +71,31 @@ public:
         return sheetOffsetY_;
     }
 
-    float GetArrowOffsetX() const
-    {
-        return arrowOffsetX_;
-    }
+    void UpdatePopupInfoAndRemeasure(LayoutWrapper* layoutWrapper, const SheetPopupInfo& sheetPopupInfo,
+        const float& sheetWidth, const float& sheetHeight);
 
     void CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper);
     void CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper);
 private:
-    int32_t targetNodeId_ = -1;
-    std::string targetTag_;
-    OffsetF GetPopupStyleSheetOffset();
-    OffsetF GetOffsetInAvoidanceRule(const SizeF& targetSize, const OffsetF& targetOffset);
-    Placement AvoidanceRuleOfPlacement(
-        const Placement& currentPlacement, const SizeF& targetSize, const OffsetF& targetOffset);
-    bool CheckDirectionBottom(const SizeF&, const OffsetF&);
-    bool CheckPlacementBottom(const SizeF&, const OffsetF&);
-    bool CheckPlacementBottomLeft(const SizeF&, const OffsetF&);
-    bool CheckPlacementBottomRight(const SizeF&, const OffsetF&);
-    OffsetF GetOffsetWithBottom(const SizeF&, const OffsetF&);
-    OffsetF GetOffsetWithBottomLeft(const SizeF&, const OffsetF&);
-    OffsetF GetOffsetWithBottomRight(const SizeF&, const OffsetF&);
-
     float GetWidthByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
     float GetHeightBySheetStyle(LayoutWrapper* layoutWrapper) const;
     bool SheetInSplitWindow() const;
     LayoutConstraintF CreateSheetChildConstraint(
         RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper);
-    float arrowOffsetX_ = 0.0f; // reletive to SheetOffsetX
+    void UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight);
+    void UpdateTranslateOffsetWithPlacement(OffsetF& translate);
+    void AddArrowHeightToSheetSize();
+    void RemeasureForPopup(const RefPtr<LayoutWrapper>& layoutWrapper);
+
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;
     float sheetMaxHeight_ = 0.0f;
     float sheetMaxWidth_ = 0.0f;
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;
-    float sheetRadius_ = 0.0f;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     SheetStyle sheetStyle_;
-    bool isRightAngleArrow_ = false;
     bool isKeyBoardShow_ = false;
     bool isHoverMode_ = false;
     HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
@@ -129,6 +106,7 @@ private:
     using OffsetGetFunc = OffsetF (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, OffsetGetFunc> getOffsetFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationLayoutAlgorithm);
+    SheetPopupInfo sheetPopupInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_SHEET_PRESENTATION_LAYOUT_ALGORITHM_H

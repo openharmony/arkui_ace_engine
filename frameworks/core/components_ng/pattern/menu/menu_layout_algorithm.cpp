@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -329,9 +330,9 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
     dumpInfo_.offset = positionOffset_;
     InitializePadding(layoutWrapper);
-    InitializeParam(menuPattern);
+    InitializeParam(layoutWrapper, menuPattern);
     if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu() &&
-        !menuPattern->IsSelectOverlayRightClickMenu()) {
+        !menuPattern->IsSelectOverlayDefaultModeRightClickMenu()) {
         position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
         TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
             position_.ToString().c_str());
@@ -355,22 +356,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewSize_ = previewRect.GetSize();
 }
 
-void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern)
+void MenuLayoutAlgorithm::InitializeSecurityPadding()
 {
-    auto pipelineContext = GetCurrentPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    CHECK_NULL_VOID(menuPattern);
-    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
-    auto top = safeAreaInsets.top_.Length();
-    auto props = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    auto bottom = GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern);
-    auto menuWindowRect = GetMenuWindowRectInfo(menuPattern);
-    float windowsOffsetX = static_cast<float>(menuWindowRect.GetOffset().GetX());
-    float windowsOffsetY = static_cast<float>(menuWindowRect.GetOffset().GetY());
-    SizeF windowGlobalSizeF(menuWindowRect.Width(), menuWindowRect.Height());
     float topSecurity = 0.0f;
     float bottomSecurity = 0.0f;
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
@@ -385,6 +372,27 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
         topSecurity = static_cast<float>(LANDSCAPE_TOP_SECURITY.ConvertToPx());
         bottomSecurity = static_cast<float>(LANDSCAPE_BOTTOM_SECURITY.ConvertToPx());
     }
+    param_.topSecurity = topSecurity;
+    param_.bottomSecurity = bottomSecurity;
+}
+
+void MenuLayoutAlgorithm::InitializeParam(LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern)
+{
+    auto pipelineContext = GetCurrentPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    CHECK_NULL_VOID(menuPattern);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
+    auto top = safeAreaInsets.top_.Length();
+    auto props = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto bottom = GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern);
+    InitializeSecurityPadding();
+    auto menuWindowRect = GetMenuWindowRectInfo(menuPattern);
+    float windowsOffsetX = static_cast<float>(menuWindowRect.GetOffset().GetX());
+    float windowsOffsetY = static_cast<float>(menuWindowRect.GetOffset().GetY());
+    SizeF windowGlobalSizeF(menuWindowRect.Width(), menuWindowRect.Height());
     if (canExpandCurrentWindow_) {
         param_.windowsOffsetX = windowsOffsetX;
         param_.windowsOffsetY = windowsOffsetY;
@@ -398,10 +406,11 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     param_.bottom = bottom;
     param_.left = safeAreaInsets.left_.Length();
     param_.right = safeAreaInsets.right_.Length();
-    param_.topSecurity = topSecurity;
-    param_.bottomSecurity = bottomSecurity;
     param_.previewMenuGap = targetSecurity_;
 
+    if (!targetTag_.empty()) {
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
+    }
     InitWrapperRect(props, menuPattern);
     InitializeLayoutRegionMargin(menuPattern);
 }
@@ -494,7 +503,11 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         }
     }
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
-    if (isHalfFoldHover_ && menuPattern->GetHoverMode()) {
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (isHalfFoldHover_ && menuWrapperPattern->GetHoverMode()) {
         UpdateWrapperRectForHoverMode(props, menuPattern);
     } else {
         wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
@@ -718,9 +731,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
     InitCanExpandCurrentWindow(isShowInSubWindow);
     Initialize(layoutWrapper);
-    if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
-    }
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
@@ -814,6 +824,45 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
     }
     childConstraint.minSize.SetWidth(minWidth);
     childConstraint.maxSize.SetWidth(maxWidth);
+}
+
+void MenuLayoutAlgorithm::UpdateSelectFocus(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsSelectMenu()) {
+        return;
+    }
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childHost = child->GetHostNode();
+        CHECK_NULL_VOID(childHost);
+        // when use contentModifier the origin scroll node should be hide.
+        auto needHide = pattern->UseContentModifier() && childHost->GetId() != pattern->GetBuilderId();
+        auto layoutProperty = childHost->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(needHide ? VisibleType::GONE : VisibleType::VISIBLE);
+        auto focusHub = childHost->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetShow(!needHide);
+        // when use contentModifier the default focus should change to the first custom node.
+        if (childHost->GetChildren().empty()) {
+            return;
+        }
+        auto columnChild = childHost->GetChildAtIndex(0);
+        CHECK_NULL_VOID(columnChild);
+        if (columnChild->GetChildren().empty()) {
+            return;
+        }
+        auto optionChild = columnChild->GetChildAtIndex(0);
+        CHECK_NULL_VOID(optionChild);
+        auto optionNode = AceType::DynamicCast<FrameNode>(optionChild);
+        CHECK_NULL_VOID(optionNode);
+        auto optionFocusHub = optionNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(optionFocusHub);
+        optionFocusHub->SetIsDefaultFocus(!needHide);
+    }
 }
 
 void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
@@ -1148,8 +1197,7 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(
         }
     }
 
-    auto heightLeftSpace = param_.windowGlobalSizeF.Height() - param_.top - param_.topSecurity - param_.bottom -
-                           param_.bottomSecurity - param_.previewMenuGap;
+    auto heightLeftSpace = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity - param_.previewMenuGap;
     auto delta = totalSize.Height() - heightLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         menuHeight = totalSize.Height() - previewSize.Height();
@@ -1186,8 +1234,8 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenu(const RefPtr<Geometry
     param_.menuItemTotalHeight = menuItemTotalHeight;
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (LessNotEqual(totalSize.Height() + targetSecurity_, param_.windowGlobalSizeF.Height() - param_.topSecurity -
-                                                               param_.bottomSecurity - param_.top - param_.bottom)) {
+    if (LessNotEqual(totalSize.Height() + targetSecurity_,
+        wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity)) {
         LayoutNormalBottomPreviewTopMenuLessThan(previewGeometryNode, menuGeometryNode, totalSize);
     } else {
         LayoutNormalBottomPreviewTopMenuGreateThan(previewGeometryNode, menuGeometryNode, totalSize);
@@ -1308,8 +1356,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
         targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
     targetCenterOffset_ = targetCenterOffset;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    auto heightLeftSpace =
-        param_.windowGlobalSizeF.Height() - param_.top - param_.topSecurity - param_.bottomSecurity - param_.bottom;
+    auto heightLeftSpace = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity;
     auto delta = previewSize.Height() - heightLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         auto unitSpace = delta / previewSize.Height();
@@ -1345,8 +1392,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
         targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
     targetCenterOffset_ = targetCenterOffset;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    auto widthLeftSpace = param_.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_ - param_.previewMenuGap -
-                          param_.left - param_.right;
+    auto widthLeftSpace = wrapperRect_.Width() - paddingStart_ - paddingEnd_ - param_.previewMenuGap;
     auto delta = totalSize.Width() - widthLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         auto unitSpace = delta / previewSize.Width();
@@ -1355,8 +1401,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
         totalSize = totalSize - SizeF(unitSpace * previewSize.Width(), unitSpace * previewSize.Height());
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    auto heightLeftSpace =
-        param_.windowGlobalSizeF.Height() - param_.topSecurity - param_.top - param_.bottomSecurity - param_.bottom;
+    auto heightLeftSpace = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity;
     delta = previewSize.Height() - heightLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         auto unitSpace = delta / previewSize.Height();
@@ -1387,9 +1432,8 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<Geo
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
     param_.menuItemTotalHeight = menuItemTotalHeight;
-    auto safeAreaWidth = param_.left + param_.right;
-    auto maxRectRight = param_.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_ - safeAreaWidth;
-    if (LessNotEqual(totalSize.Width() + targetSecurity_, maxRectRight)) {
+    auto widthLeftSpace = wrapperRect_.Width() - paddingStart_ - paddingEnd_;
+    if (LessNotEqual(totalSize.Width() + targetSecurity_, widthLeftSpace)) {
         LayoutOtherDeviceLeftPreviewRightMenuLessThan(previewGeometryNode, menuGeometryNode, totalSize);
     } else {
         LayoutOtherDeviceLeftPreviewRightMenuGreateThan(previewGeometryNode, menuGeometryNode, totalSize);
@@ -2153,7 +2197,9 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     auto optionConstraint = constraint;
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    if (!UpdateSelectOverlayMenuColumnInfo(menuPattern, columnInfo)) {
+        columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    }
     auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
     optionConstraint.minSize.SetWidth(minWidth - optionPadding_ * 2.0f);
@@ -2166,6 +2212,16 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
     }
     UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
+    if (textAlign == TextAlign::CENTER) {
+        for (const auto& optionWrapper : optionsLayoutWrapper) {
+            optionWrapper->Measure(optionConstraint);
+        }
+    }
     constraint.minSize.SetWidth(maxChildrenWidth + optionPadding_ * 2.0f);
 }
 
@@ -2301,7 +2357,7 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     CHECK_NULL_RETURN(menuNode, OffsetF());
     auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
     if (menuLayoutProperty && menuLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
-        return menuNode->GetPaintRectOffset(true);
+        return menuNode->GetPaintRectOffset(true, true);
     }
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
@@ -2343,7 +2399,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
             targetOffset_ = props->GetMenuOffsetValue(OffsetF());
         } else {
             targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
-            targetOffset_ = targetNode->GetPaintRectOffset();
+            targetOffset_ = targetNode->GetPaintRectOffset(false, true);
         }
     }
     dumpInfo_.targetSize = targetSize_;
@@ -3171,5 +3227,36 @@ void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
 {
     bool didNeedArrow = GetIfNeedArrow(layoutWrapper, childMarginFrameSize_);
     clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
+}
+
+bool MenuLayoutAlgorithm::UpdateSelectOverlayMenuColumnInfo(
+    const RefPtr<MenuPattern>& pattern, const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(pattern, false);
+    CHECK_NULL_RETURN(pattern->IsSelectOverlayExtensionMenu(), false);
+    auto menuWrapper = pattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    if (menuWrapper->GetTag() != V2::SELECT_OVERLAY_ETS_TAG) {
+        return false;
+    }
+    auto selectOverlayPattern = menuWrapper->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_RETURN(selectOverlayPattern, false);
+    CHECK_NULL_RETURN(selectOverlayPattern->GetIsMenuShowInSubWindow(), false);
+    auto mainWindowContainerId = selectOverlayPattern->GetContainerId();
+    auto container = Container::GetContainer(mainWindowContainerId);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto mainWindowWidth = displayWindowRect.Width();
+    if (Positive(mainWindowWidth)) {
+        auto parent = columnInfo->GetParent();
+        CHECK_NULL_RETURN(parent, false);
+        parent->BuildColumnWidth(mainWindowWidth);
+        TAG_LOGD(
+            AceLogTag::ACE_MENU, "Update select overlay extension menu min width with main window width constraint.");
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

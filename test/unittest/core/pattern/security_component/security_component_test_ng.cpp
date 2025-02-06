@@ -1627,13 +1627,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
 
     int32_t invalidId = -1;
     int32_t noExistId = 0;
+    std::string message;
     EXPECT_EQ(SecurityComponentHandler::RegisterSecurityComponent(invalidFrameNode, scId), -1);
     EXPECT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, noExistId), -1);
     EXPECT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(invalidId), -1);
-    EXPECT_EQ(
-        SecurityComponentHandler::ReportSecurityComponentClickEvent(invalidId, frameNode, info, [] (int32_t){}), -1);
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, invalidFrameNode, info, [] (int32_t) {}), -1);
+        invalidId, frameNode, info, [](int32_t) {}, message), -1);
+    EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, invalidFrameNode, info, [] (int32_t) {}, message), -1);
 
     KeyEvent key;
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
@@ -1657,11 +1658,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize
     GestureEvent info;
 
     int32_t noExistId = 0;
+    std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, frameNode, info, [] (int32_t) {}), -1);
+        noExistId, frameNode, info, [] (int32_t) {}, message), -1);
 }
 
 /**
@@ -1678,11 +1680,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize
     GestureEvent info;
 
     int32_t noExistId = 0;
+    std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, frameNode, info, [] (int32_t) {}), -1);
+        noExistId, frameNode, info, [] (int32_t) {}, message), -1);
 }
 
 /**
@@ -1699,11 +1702,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
     GestureEvent info;
 
     int32_t noExistId = 0;
+    std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, frameNode, info, [] (int32_t) {}), -1);
+        noExistId, frameNode, info, [] (int32_t) {}, message), -1);
 }
 
 /**
@@ -1716,8 +1720,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest005, TestSize
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
-
-    ASSERT_EQ(SecurityComponentHandler::CheckComponentCoveredStatus(frameNode->GetId()), false);
+    std::string message;
+    ASSERT_EQ(SecurityComponentHandler::CheckComponentCoveredStatus(frameNode->GetId(), message), false);
 }
 
 /**
@@ -1738,7 +1742,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 
     // security component is not completely displayed
     OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     RefPtr<RenderContext> parentRenderContext = parentFrameNode->GetRenderContext();
     auto parentFrameRect = parentRenderContext->GetPaintRectWithTransform();
     RefPtr<RenderContext> childRenderContext = childFrameNode->GetRenderContext();
@@ -1750,7 +1755,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdatePixelStretchEffect(pixelStretchEffectOption);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -1773,7 +1778,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateLightUpEffect(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
+    std::string message;
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -1796,9 +1802,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateSphericalEffect(0);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetSphericalEffect().value(), 0.0f);
     renderContext->UpdateSphericalEffect(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 } // namespace OHOS::Ace::NG

@@ -127,12 +127,19 @@ public:
      */
     void SendBaseInfo(const std::string& data) override;
 
+    void RegisterGetWebViewCurrentLanguage(const EventCallback& eventCallback);
+    void RegisterGetTranslateTextCallback(const std::function<void(int32_t, std::string)>& eventCallback);
+    void SendCurrentLanguage(const std::string& data) override;
+    void SendWebText(int32_t nodeId, std::string res) override;
+
 private:
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
     EventCallback sendBaseInfoCallback_;
+    EventCallback getWebViewCurrentLanguageCallback_;
+    std::function<void(int32_t, std::string)> getTranslateTextCallback_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
 };

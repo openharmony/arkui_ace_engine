@@ -163,6 +163,9 @@ void NavDestinationPattern::OnModifyDone()
     if (scrollableProcessor_) {
         scrollableProcessor_->UpdateBindingRelation();
     }
+    auto renderContext = hostNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    hostNode->UpdateUserSetOpacity(renderContext->GetOpacity().value_or(1.0f));
 }
 
 void NavDestinationPattern::OnLanguageConfigurationUpdate()
@@ -240,6 +243,13 @@ void NavDestinationPattern::MountTitleBar(
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
 
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    if (backButtonNode) {
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(
+            navDestinationLayoutProperty->GetHideBackButtonValue(false) ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
     if (navDestinationLayoutProperty->HasNoPixMap()) {
         if (navDestinationLayoutProperty->HasImageSource()) {
             titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
@@ -311,6 +321,9 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, customNode_, true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
+        showBackButton = false;
+    }
     if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
@@ -377,8 +390,10 @@ void NavDestinationPattern::DumpInfo()
 bool NavDestinationPattern::OverlayOnBackPressed()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true, false);
-    return overlayManager_->RemoveOverlay(true);
+    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
+        return overlayManager_->RemoveOverlay(true);
+    }
+    return false;
 }
 
 bool NavDestinationPattern::NeedIgnoreKeyboard()
@@ -800,5 +815,33 @@ RefPtr<FrameNode> NavDestinationPattern::GetBarNode(const RefPtr<NavDestinationN
     CHECK_NULL_RETURN(nodeBase, nullptr);
     return isTitle ? AceType::DynamicCast<FrameNode>(nodeBase->GetTitleBarNode())
                    : AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
+}
+
+void NavDestinationPattern::OnCoordScrollStart()
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->FireOnCoordScrollStartAction();
+}
+
+float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffset)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
+    navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
+    return 0.0f;
+}
+
+void NavDestinationPattern::OnCoordScrollEnd()
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->FireOnCoordScrollEndAction();
 }
 } // namespace OHOS::Ace::NG

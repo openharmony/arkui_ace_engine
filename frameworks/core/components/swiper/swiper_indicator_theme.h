@@ -146,6 +146,10 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
+            theme->preAccessibilityText_ =
+                swiperPattern->GetAttr<std::string>("prev_arrow_accessibility_text", "");
+            theme->nextAccessibilityText_ =
+                swiperPattern->GetAttr<std::string>("next_arrow_accessibility_text", "");
             ParsePattern2(themeConstants, theme, swiperPattern);
         }
 
@@ -574,6 +578,16 @@ public:
         return indicatorDragMaxAngle_;
     }
 
+    const std::string& GetPreAccessibilityText() const
+    {
+        return preAccessibilityText_;
+    }
+
+    const std::string& GetNextAccessibilityText() const
+    {
+        return nextAccessibilityText_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -653,6 +667,8 @@ private:
 #endif
     double indicatorDragMinAngle_ = INDICATOR_DRAG_MIN_ANGLE;
     double indicatorDragMaxAngle_ = INDICATOR_DRAG_MAX_ANGLE;
+    std::string preAccessibilityText_;
+    std::string nextAccessibilityText_;
 };
 
 } // namespace OHOS::Ace

@@ -20,7 +20,6 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_picker_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -200,6 +199,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
     JSClass<JSTextPicker>::StaticMethod("canLoop", &JSTextPicker::SetCanLoop);
+    JSClass<JSTextPicker>::StaticMethod("digitalCrownSensitivity", &JSTextPicker::SetDigitalCrownSensitivity);
     JSClass<JSTextPicker>::StaticMethod("disappearTextStyle", &JSTextPicker::SetDisappearTextStyle);
     JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
@@ -405,7 +405,6 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         if (param.selectedChangeEventVal->IsFunction()) {
             ParseTextPickerSelectedObject(info, param.selectedChangeEventVal);
         }
-        JSTextPickerTheme::ApplyTheme();
     }
 }
 
@@ -606,12 +605,10 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
 bool JSTextPickerParser::ParseMultiColumnWidths(const JsiRef<JsiValue>& jsColumnWidthsValue,
     ParseTextArrayParam& param)
 {
-    if (jsColumnWidthsValue->IsArray()) {
-        ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths);
+    if (jsColumnWidthsValue->IsArray() && ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths)) {
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void JSTextPickerParser::ParseMultiTextArrayValueInternal(
@@ -1085,12 +1082,20 @@ void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
     TextPickerModel::GetInstance()->SetCanLoop(value);
 }
 
+void JSTextPicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+    TextPickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
+}
+
 void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
@@ -1102,7 +1107,6 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
@@ -1114,7 +1118,6 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
@@ -1633,7 +1636,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             textPickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {

@@ -1,20 +1,20 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const hilog = requireNapi('hilog');
@@ -188,7 +188,7 @@ export class SelectTitleBar extends ViewPU {
                                     action: () => this.getUIContext()?.getRouter()?.back()
                                 }, index: -1 }, undefined, i8, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 105, col: 11 });
                                 ViewPU.create(k8);
-                                let l8 = () => {
+                                let l7 = () => {
                                     return {
                                         item: {
                                             value: '',
@@ -200,7 +200,7 @@ export class SelectTitleBar extends ViewPU {
                                         index: -1
                                     };
                                 };
-                                k8.paramsGenerator_ = l8;
+                                k8.paramsGenerator_ = l7;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(i8, {});
@@ -327,13 +327,13 @@ export class SelectTitleBar extends ViewPU {
                             if (j7) {
                                 let k7 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + SelectTitleBar.instanceCount++ }, undefined, i7, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 185, col: 9 });
                                 ViewPU.create(k7);
-                                let l7 = () => {
+                                let f7 = () => {
                                     return {
                                         menuItems: this.menuItems,
                                         index: 1 + SelectTitleBar.instanceCount++
                                     };
                                 };
-                                k7.paramsGenerator_ = l7;
+                                k7.paramsGenerator_ = f7;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(i7, {});
@@ -351,8 +351,16 @@ export class SelectTitleBar extends ViewPU {
         Flex.pop();
     }
     aboutToAppear() {
-        let f7 = getContext().resourceManager;
-        this.messageDesc = f7?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc', this.badgeValue);
+        try {
+            let o10 = getContext().resourceManager;
+            this.messageDesc =
+                o10?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new', this.badgeValue);
+        }
+        catch (l10) {
+            let m10 = l10.code;
+            let n10 = l10.message;
+            hilog.error(0x3900, 'Ace', `Faild to getPluralStringByNameSync,cause, code: ${m10}, message: ${n10}`);
+        }
     }
     rerender() {
         this.updateDirtyElements();
@@ -398,7 +406,7 @@ class CollapsibleMenuSection extends ViewPU {
                     selectTitleDialog: this.item,
                     selectTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 247, col: 14 });
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 254, col: 14 });
                 d7.setController(this.dialogController);
                 ViewPU.create(d7);
                 let e7 = () => {
@@ -593,7 +601,7 @@ class CollapsibleMenuSection extends ViewPU {
                             {
                                 this.observeComponentCreation2((z5, a6) => {
                                     if (a6) {
-                                        let b6 = new ImageMenuItem(this, { item: y5, index: this.index * 1000 + x5 + 1 }, undefined, z5, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 317, col: 13 });
+                                        let b6 = new ImageMenuItem(this, { item: y5, index: this.index * 1000 + x5 + 1 }, undefined, z5, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 324, col: 13 });
                                         ViewPU.create(b6);
                                         let c6 = () => {
                                             return {
@@ -623,7 +631,7 @@ class CollapsibleMenuSection extends ViewPU {
                             {
                                 this.observeComponentCreation2((p5, q5) => {
                                     if (q5) {
-                                        let r5 = new ImageMenuItem(this, { item: o5, index: this.index * 1000 + n5 + 1 }, undefined, p5, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 322, col: 15 });
+                                        let r5 = new ImageMenuItem(this, { item: o5, index: this.index * 1000 + n5 + 1 }, undefined, p5, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 329, col: 15 });
                                         ViewPU.create(r5);
                                         let s5 = () => {
                                             return {
@@ -741,7 +749,7 @@ class CollapsibleMenuSection extends ViewPU {
                     this.observeComponentCreation2((p4, q4) => {
                         if (q4) {
                             let r4 = new ImageMenuItem(this, { item: o4, index: this.index * 1000 +
-                            CollapsibleMenuSection.maxCountOfVisibleItems + n4, isPopup: false }, undefined, p4, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 413, col: 11 });
+                            CollapsibleMenuSection.maxCountOfVisibleItems + n4, isPopup: false }, undefined, p4, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 420, col: 11 });
                             ViewPU.create(r4);
                             let s4 = () => {
                                 return {
@@ -798,7 +806,7 @@ class ImageMenuItem extends ViewPU {
                     selectTitleDialog: this.item,
                     selectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 447, col: 14 });
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 454, col: 14 });
                 g4.setController(this.dialogController);
                 ViewPU.create(g4);
                 let h4 = () => {

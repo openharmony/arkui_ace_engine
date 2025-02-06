@@ -266,6 +266,14 @@ public:
     bool CloseRawFileDescription(const std::string& rawfileName) const;
 
     /*
+     * Get rawfile file description which will not be cached.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile.
+     * @return success or not to close file info.
+     */
+    bool GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const;
+
+    /*
      * Get resource media file path.
      * NOTE: false value will be returned if not found.
      * @param[in] resId Target resource id, mediaPath Target media path.

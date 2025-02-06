@@ -17,17 +17,17 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
-#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
-#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -328,34 +328,6 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEventProxyFlagCallbackTest001, T
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 0);
     pattern->RegisterEventProxyFlagCallback();
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 1);
-#endif
-}
-
-/**
- * @tc.name: UIExtensionComponentTestTwoNg
- * @tc.desc: Test the method of pattern RegisterTransformParamGetCallback
- * @tc.type: FUNC
- */
-HWTEST_F(UIExtensionComponentTestTwoNg, RegisterTransformParamGetCallbackTest001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    /**
-     * @tc.steps: step1. construct a UIExtensionComponent Node
-     */
-    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    ASSERT_NE(uiExtensionNode, nullptr);
-    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
-    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. test RegisterTransformParamGetCallback
-     */
-    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 0);
-    pattern->RegisterTransformParamGetCallback();
-    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 1);
 #endif
 }
 } // namespace OHOS::Ace::NG

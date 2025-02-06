@@ -1307,11 +1307,11 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowAIWrite006, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsShowSearch001
- * @tc.desc: test IsShowSearch
+ * @tc.name: IsMenuItemShow001
+ * @tc.desc: test IsMenuItemShow
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch001, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestOneNg, IsMenuItemShow001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1322,16 +1322,20 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch001, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     theme->searchIsSupport_ = true;
-    auto result = richEditorPattern->IsShowSearch();
-    EXPECT_TRUE(result);
+    theme->translateIsSupport_ = true;
+
+    auto showSearch = richEditorPattern->IsShowSearch();
+    EXPECT_TRUE(showSearch);
+    auto showTranslate = richEditorPattern->IsShowTranslate();
+    EXPECT_TRUE(showTranslate);
 }
 
 /**
- * @tc.name: IsShowSearch002
- * @tc.desc: test menu search
+ * @tc.name: IsMenuItemShow002
+ * @tc.desc: test menu search and translate item
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch002, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestOneNg, IsMenuItemShow002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1348,8 +1352,11 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch002, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     theme->searchIsSupport_ = true;
-    auto result = richEditorPattern->IsShowSearch();
-    EXPECT_TRUE(result);
+    auto showSearch = richEditorPattern->IsShowSearch();
+    EXPECT_TRUE(showSearch);
+    theme->translateIsSupport_ = true;
+    auto showTranslate = richEditorPattern->IsShowTranslate();
+    EXPECT_TRUE(showTranslate);
 
     auto selectOverlay = richEditorPattern->selectOverlay_;
     ASSERT_NE(selectOverlay, nullptr);
@@ -1371,6 +1378,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch002, TestSize.Level1)
     SelectMenuInfo menuInfo;
     selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     ASSERT_EQ(menuInfo.showSearch, true);
+    ASSERT_EQ(menuInfo.showTranslate, true);
 
     /**
      * @tc.steps: step4. select image.
@@ -1378,6 +1386,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch002, TestSize.Level1)
     richEditorPattern->textSelector_.Update(6, 7);
     selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     ASSERT_EQ(menuInfo.showSearch, false);
+    ASSERT_EQ(menuInfo.showTranslate, false);
 
     /**
      * @tc.steps: step5. select symbol.
@@ -1385,6 +1394,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch002, TestSize.Level1)
     richEditorPattern->textSelector_.Update(7, 8);
     selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     ASSERT_EQ(menuInfo.showSearch, false);
+    ASSERT_EQ(menuInfo.showTranslate, false);
 
     /**
      * @tc.steps: step6. mixed selection.
@@ -1392,6 +1402,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch002, TestSize.Level1)
     richEditorPattern->textSelector_.Update(0, 8);
     selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     ASSERT_EQ(menuInfo.showSearch, true);
+    ASSERT_EQ(menuInfo.showTranslate, true);
 }
 
 /**
@@ -1470,5 +1481,28 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleOnDeleteComb001, TestSize.Level1)
     richEditorPattern->caretPosition_ = 6;
     auto ret = richEditorPattern->HandleOnDeleteComb(true);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test rich_editor_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleOnShare001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    richEditorPattern->HandleOnShare();
+    auto value = richEditorPattern->selectOverlay_->GetSelectedText();
+    int32_t ret = value.length();
+    EXPECT_EQ(ret, 0);
 }
 } // namespace OHOS::Ace::NG

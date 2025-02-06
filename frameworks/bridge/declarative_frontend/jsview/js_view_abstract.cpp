@@ -310,6 +310,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
             previewOption.isDefaultDragItemGrayEffectEnabled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
         default:
             break;
     }
@@ -2832,14 +2835,14 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 
 void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t align)
 {
-    if (align > 8 || align < 0) {
+    if (align > 8 || align < 0) { // align ranges from [0, 8].
         return;
     }
     std::vector<std::pair<double, double>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
         { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
         { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
     SetBgImgPosition(
-                DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
+        DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
 }
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
@@ -2983,8 +2986,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
-    } else {
-        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -2999,8 +3000,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
-    } else {
-        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
@@ -5015,7 +5014,7 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
             }
             count = countJsVal->ToNumber<int>();
             auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
-            ReplaceHolder(pluralStr, params, 2);
+            ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
             result = pluralStr;
         } else {
             return false;
@@ -5567,6 +5566,38 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
     ViewAbstractModel::GetInstance()->SetDraggable(draggable);
 }
 
+void JSViewAbstract::ParseDragInteractionOptions(const JSCallbackInfo& info,
+    NG::DragPreviewOption& previewOption)
+{
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
+        auto multiSelection = interObj->GetProperty("isMultiSelectionEnabled");
+        if (multiSelection->IsBoolean()) {
+            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean();
+        }
+        auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
+        if (defaultAnimation->IsBoolean()) {
+            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
+        }
+        auto hapicFeedback = interObj->GetProperty("enableHapticFeedback");
+        if (hapicFeedback->IsBoolean()) {
+            previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
+        }
+        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
+        if (dragPreview->IsBoolean()) {
+            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
+        }
+        auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
+        if (enableEdgeAutoScroll->IsBoolean()) {
+            previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
+        }
+        auto isLiftingDisabled = interObj->GetProperty("isLiftingDisabled");
+        if (isLiftingDisabled->IsBoolean()) {
+            previewOption.isLiftingDisabled = isLiftingDisabled->ToBoolean();
+        }
+    }
+}
+
 NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackInfo& info)
 {
     NG::DragPreviewOption previewOption;
@@ -5593,29 +5624,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
 
     JSViewAbstract::SetDragNumberBadge(info, previewOption);
 
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
-        auto multiSelection = interObj->GetProperty("isMultiSelectionEnabled");
-        if (multiSelection->IsBoolean()) {
-            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean();
-        }
-        auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
-        if (defaultAnimation->IsBoolean()) {
-            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
-        }
-        auto hapicFeedback = interObj->GetProperty("enableHapticFeedback");
-        if (hapicFeedback->IsBoolean()) {
-            previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
-        }
-        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
-        if (dragPreview->IsBoolean()) {
-            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
-        }
-        auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
-        if (enableEdgeAutoScroll->IsBoolean()) {
-            previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
-        }
-    }
+    ParseDragInteractionOptions(info, previewOption);
 
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
 
@@ -5792,6 +5801,16 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnDrop(std::move(onDrop));
+
+    bool disableDataPrefetch = false;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
+        auto jsDisableDataPrefetch = interObj->GetProperty("disableDataPrefetch");
+        if (jsDisableDataPrefetch->IsBoolean()) {
+            disableDataPrefetch = jsDisableDataPrefetch->ToBoolean();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetDisableDataPrefetch(disableDataPrefetch);
 }
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
@@ -6530,9 +6549,8 @@ void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
-    JSRef<JSVal> arg = args[0];
     if (args[0]->IsFunction()) {
-        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(args[0]));
         WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
             GetMainFrameNode());
         auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
@@ -6575,7 +6593,8 @@ bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, N
         if (CheckLengthMetrics(object)) {
             std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
             std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
-            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart =
+                ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
             std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
             auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
             radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
@@ -6796,6 +6815,14 @@ void JSViewAbstract::JsNotifyDragStartRequest(const JSCallbackInfo& info)
         int32_t dragStatus = info[0]->ToNumber<int32_t>();
         ViewAbstractModel::GetInstance()->NotifyDragStartRequest(
             static_cast<DragStartRequestStatus>(dragStatus));
+    }
+}
+
+void JSViewAbstract::JsCancelDataLoading(const std::string& key)
+{
+    auto ret = ViewAbstractModel::GetInstance()->CancelDataLoading(key);
+    if (ret != 0) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Invalid input parameter.");
     }
 }
 
@@ -7024,6 +7051,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("notifyDragStartRequest", &JSViewAbstract::JsNotifyDragStartRequest);
     JSClass<JSViewAbstract>::StaticMethod(
         "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
+    JSClass<JSViewAbstract>::StaticMethod("cancelDataLoading", &JSViewAbstract::JsCancelDataLoading);
 
     JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
     JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);
@@ -7154,13 +7182,23 @@ void JSViewAbstract::JsOnPreDrag(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnPreDrag(onPreDrag);
 }
 
-void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
+void JSViewAbstract::ParseDragPreviewConfig(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo)
 {
-    auto jsVal = info[0];
-    if ((!jsVal->IsObject()) && (!jsVal->IsString())) {
+    if (info.Length() <= 1) {
         return;
     }
-    NG::DragDropInfo dragPreviewInfo;
+    auto jsVal = info[1];
+    if (!jsVal->IsObject()) {
+        return;
+    }
+    auto config = JSRef<JSObject>::Cast(jsVal);
+    ParseJsBool(config->GetProperty("onlyForLifting"), dragPreviewInfo.onlyForLifting);
+    ParseJsBool(config->GetProperty("delayCreating"), dragPreviewInfo.delayCreating);
+}
+
+void JSViewAbstract::ParseDragPreviewValue(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo)
+{
+    auto jsVal = info[0];
     JSRef<JSVal> builder;
     JSRef<JSVal> pixelMap;
     JSRef<JSVal> extraInfo;
@@ -7181,19 +7219,46 @@ void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
     } else {
         return;
     }
+    ParseDragPreviewBuilderNode(info, dragPreviewInfo, builder);
+}
 
-    if (builder->IsFunction()) {
-        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        if (builderFunc != nullptr) {
-            ViewStackModel::GetInstance()->NewScope();
-            {
-                ACE_SCORING_EVENT("dragPreview.builder");
-                builderFunc->Execute();
-            }
-            RefPtr<AceType> node = ViewStackModel::GetInstance()->Finish();
-            dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(node);
-        }
+void JSViewAbstract::ParseDragPreviewBuilderNode(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo,
+    const JSRef<JSVal>& builder)
+{
+    if (!builder->IsFunction()) {
+        return;
     }
+    RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                         node = frameNode]() -> RefPtr<NG::UINode> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        ACE_SCORING_EVENT("dragPreview.builder");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+        auto customNode = ViewStackModel::GetInstance()->Finish();
+        return AceType::DynamicCast<NG::UINode>(customNode);
+    };
+    if (!dragPreviewInfo.delayCreating) {
+        ViewStackModel::GetInstance()->NewScope();
+        {
+            dragPreviewInfo.customNode = buildFunc();
+        }
+    } else {
+        dragPreviewInfo.buildFunc = buildFunc;
+    }
+}
+
+void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
+{
+    auto jsVal = info[0];
+    if ((!jsVal->IsObject()) && (!jsVal->IsString())) {
+        return;
+    }
+    NG::DragDropInfo dragPreviewInfo;
+    ParseDragPreviewConfig(info, dragPreviewInfo);
+    ParseDragPreviewValue(info, dragPreviewInfo);
     ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
@@ -9208,9 +9273,9 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
         isGroup = info[1]->ToBoolean();
     }
     bool arrowKeyStepOut = true;
-    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() &&
-        info[2]->IsBoolean()) {
-        arrowKeyStepOut = info[2]->ToBoolean();
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() && // 2:args index.
+        info[2]->IsBoolean()) { // 2:args index.
+        arrowKeyStepOut = info[2]->ToBoolean(); // 2:args index.
     }
     ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }

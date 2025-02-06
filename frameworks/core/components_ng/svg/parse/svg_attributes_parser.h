@@ -28,6 +28,29 @@
 namespace OHOS::Ace::NG {
 struct TransformInfo;
 
+enum class SvgAlign {
+    ALIGN_XMIN_YMIN,
+    ALIGN_XMIN_YMID,
+    ALIGN_XMIN_YMAX,
+    ALIGN_XMID_YMIN,
+    ALIGN_XMID_YMID,
+    ALIGN_XMID_YMAX,
+    ALIGN_XMAX_YMIN,
+    ALIGN_XMAX_YMID,
+    ALIGN_XMAX_YMAX,
+    ALIGN_NONE,
+};
+
+enum class SvgMeetOrSlice {
+    MEET,
+    SLICE,
+};
+
+struct SvgPreserveAspectRatio {
+    SvgAlign svgAlign = SvgAlign::ALIGN_XMID_YMID;
+    SvgMeetOrSlice meetOrSlice = SvgMeetOrSlice::MEET;
+};
+
 class SvgAttributesParser {
 public:
     static Color GetColor(const std::string& str);
@@ -41,6 +64,12 @@ public:
     static bool CheckColorAlpha(const std::string& colorStr, Color& result);
     static std::pair<Dimension, Dimension> GetTransformOrigin(const std::string& transformOrigin);
     static std::vector<NG::TransformInfo> GetTransformInfo(const std::string& transform);
+    static SvgAlign ParseSvgAlign(const std::string& value);
+    static SvgMeetOrSlice ParseSvgMeetOrSlice(const std::string& value);
+    static void ComputeTranslate(const Size& viewBox, const Size& viewPort, const float scaleX, const float scaleY,
+        const SvgAlign& svgAlign, float& translateX, float& translateY);
+    static void ComputeScale(const Size& viewBox, const Size& viewPort,
+        const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY);
 };
 enum class SvgFeColorMatrixType {
     MATRIX,
@@ -101,6 +130,7 @@ struct SvgAttributes {
     Dimension width = -1.0_px;
     Dimension height = -1.0_px;
     bool autoMirror = false;
+    SvgPreserveAspectRatio preserveAspectRatio;
 };
 
 struct TransformInfo {
@@ -325,8 +355,6 @@ struct SvgFeCommonAttribute {
     std::string result;
     SvgFeIn in;
     SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
-    std::optional<bool> isXValid;
-    std::optional<bool> isYValid;
     std::optional<bool> isWidthValid;
     std::optional<bool> isHeightValid;
 };

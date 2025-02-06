@@ -59,8 +59,8 @@ constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
 constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
-constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
+constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 #endif
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
@@ -965,7 +965,7 @@ OffsetF SliderPattern::CalculateGlobalSafeOffset()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
-    auto overlayGlobalOffset = host->GetPaintRectOffset();
+    auto overlayGlobalOffset = host->GetPaintRectOffset(false, true);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto safeAreaManger = pipelineContext->GetSafeAreaManager();

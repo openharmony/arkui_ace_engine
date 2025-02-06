@@ -1,0 +1,40 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+es2abc_gen_abc("gen_custom_app_bar_abc") {
+  src_js = rebase_path("custom_app_bar.js")
+  dst_file = rebase_path(target_out_dir + "/custom_app_bar.abc")
+  in_puts = [ "custom_app_bar.js" ]
+  out_puts = [ target_out_dir + "/custom_app_bar.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_obj("custom_app_bar_abc") {
+  input = get_label_info(":gen_custom_app_bar_abc", "target_out_dir") +
+          "/custom_app_bar.abc"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    output = target_out_dir + "/custom_app_bar_abc.c"
+  } else {
+    output = target_out_dir + "/custom_app_bar_abc.o"
+  }
+  snapshot_dep = [ ":gen_custom_app_bar_abc" ]
+}
+
+source_set("custom_app_bar") {
+  deps = [ ":gen_obj_src_custom_app_bar_abc" ]
+}

@@ -345,7 +345,7 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
         CHECK_NULL_VOID(context);
         auto localMat = context->GetLocalTransformMatrix();
         vTrans.emplace_back(localMat);
-        host = host->GetAncestorNodeOfFrame(false);
+        host = host->GetAncestorNodeOfFrame(true);
     }
 
     Point temp(localPointF.GetX(), localPointF.GetY());
@@ -363,11 +363,11 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
     if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
         return true;
     }
-    auto parent = node->GetAncestorNodeOfFrame(false);
+    auto parent = node->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         if (!renderContext) {
-            parent = parent->GetAncestorNodeOfFrame(false);
+            parent = parent->GetAncestorNodeOfFrame(true);
             continue;
         }
         // If the parent node has a "clip" attribute, the press region should be re-evaluated.
@@ -375,7 +375,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
         if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
             return true;
         }
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return false;
 }

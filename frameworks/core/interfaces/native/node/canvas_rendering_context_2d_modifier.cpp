@@ -231,53 +231,57 @@ void SetCanvasFillText(ArkUINodeHandle node, const char* value, float x, float y
 namespace NodeModifier {
 const ArkUICanvasRenderingContext2DModifier* GetCanvasRenderingContext2DModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICanvasRenderingContext2DModifier modifier = {
-        nullptr,
-        SetCanvasBeginPath,
-        SetCanvasClosePath,
-        SetCanvasFill,
-        SetCanvasMoveTo,
-        SetCanvasArc,
-        SetCanvasLineTo,
-        SetCanvasStrokeStyle,
-        GetCanvasStrokeStyle,
-        SetCanvasLineWidth,
-        GetCanvasLineWidth,
-        SetCanvasStroke,
-        SetCanvasAntiAlias,
-        SetCanvasFillColor,
-        GetCanvasFillColor,
-        SetCanvasGlobalAlpha,
-        GetCanvasGlobalAlpha,
-        SetCanvasFillRect,
-        SetCanvasFillText,
+        .getCanvasRenderingContext2D = nullptr,
+        .setCanvasBeginPath = SetCanvasBeginPath,
+        .setCanvasClosePath = SetCanvasClosePath,
+        .setCanvasFill = SetCanvasFill,
+        .setCanvasMoveTo = SetCanvasMoveTo,
+        .setCanvasArc = SetCanvasArc,
+        .setCanvasLineTo = SetCanvasLineTo,
+        .setCanvasStrokeStyle = SetCanvasStrokeStyle,
+        .getCanvasStrokeStyle = GetCanvasStrokeStyle,
+        .setCanvasLineWidth = SetCanvasLineWidth,
+        .getCanvasLineWidth = GetCanvasLineWidth,
+        .setCanvasStroke = SetCanvasStroke,
+        .setCanvasAntiAlias = SetCanvasAntiAlias,
+        .setCanvasFillColor = SetCanvasFillColor,
+        .getCanvasFillColor = GetCanvasFillColor,
+        .setCanvasGlobalAlpha = SetCanvasGlobalAlpha,
+        .getCanvasGlobalAlpha = GetCanvasGlobalAlpha,
+        .setCanvasFillRect = SetCanvasFillRect,
+        .setCanvasFillText = SetCanvasFillText,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUICanvasRenderingContext2DModifier* GetCJUICanvasRenderingContext2DModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICanvasRenderingContext2DModifier modifier = {
-        nullptr,
-        SetCanvasBeginPath,
-        SetCanvasClosePath,
-        SetCanvasFill,
-        SetCanvasMoveTo,
-        SetCanvasArc,
-        SetCanvasLineTo,
-        SetCanvasStrokeStyle,
-        GetCanvasStrokeStyle,
-        SetCanvasLineWidth,
-        GetCanvasLineWidth,
-        SetCanvasStroke,
-        SetCanvasAntiAlias,
-        SetCanvasFillColor,
-        GetCanvasFillColor,
-        SetCanvasGlobalAlpha,
-        GetCanvasGlobalAlpha,
-        SetCanvasFillRect,
-        SetCanvasFillText,
+        .getCanvasRenderingContext2D = nullptr,
+        .setCanvasBeginPath = SetCanvasBeginPath,
+        .setCanvasClosePath = SetCanvasClosePath,
+        .setCanvasFill = SetCanvasFill,
+        .setCanvasMoveTo = SetCanvasMoveTo,
+        .setCanvasArc = SetCanvasArc,
+        .setCanvasLineTo = SetCanvasLineTo,
+        .setCanvasStrokeStyle = SetCanvasStrokeStyle,
+        .getCanvasStrokeStyle = GetCanvasStrokeStyle,
+        .setCanvasLineWidth = SetCanvasLineWidth,
+        .getCanvasLineWidth = GetCanvasLineWidth,
+        .setCanvasStroke = SetCanvasStroke,
+        .setCanvasAntiAlias = SetCanvasAntiAlias,
+        .setCanvasFillColor = SetCanvasFillColor,
+        .getCanvasFillColor = GetCanvasFillColor,
+        .setCanvasGlobalAlpha = SetCanvasGlobalAlpha,
+        .getCanvasGlobalAlpha = GetCanvasGlobalAlpha,
+        .setCanvasFillRect = SetCanvasFillRect,
+        .setCanvasFillText = SetCanvasFillText,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

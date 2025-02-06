@@ -53,11 +53,12 @@ public:
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
-        if (auto colors = theme.Colors(); colors) {
+        if (const auto& colors = theme.Colors(); colors) {
             textColor_ = colors->FontPrimary();
             placeholderColor_ = colors->FontSecondary();
             bgColor_ = colors->CompBackgroundTertiary();
             focusBgColor_ = colors->CompBackgroundTertiary();
+            inlineBgColor_ = colors->BackgroundPrimary();
             cursorColor_ =  colors->Brand();
             symbolColor_ = colors->IconPrimary();
             textColorDisable_ = colors->IconTertiary();

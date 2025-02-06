@@ -1922,8 +1922,8 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
 
 void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
 {
-    std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::BOTTOM, ResizableOption::LEFT,
-        ResizableOption::RIGHT };
+    std::vector<ResizableOption> directions = { ResizableOption::LEFT, ResizableOption::TOP, ResizableOption::RIGHT,
+        ResizableOption::BOTTOM };
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
         SetCalcDimension(optDimension, options, NUM_13, index);
@@ -1941,6 +1941,19 @@ void SetBackgroundImageResizable(ArkUINodeHandle node, ArkUIStringAndFloat* opti
     ImageResizableSlice resizable;
     SetResizableFromVec(resizable, options);
     ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
+}
+
+ArkUIImageResizableSlice GetBackgroundImageResizable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    ArkUIImageResizableSlice arkUISlice {};
+    CHECK_NULL_RETURN(frameNode, arkUISlice);
+    auto slice = ViewAbstract::GetBackgroundImageResizableSlice(frameNode);
+    arkUISlice.left = static_cast<ArkUI_Float32>(slice.left.ConvertToVp());
+    arkUISlice.top = static_cast<ArkUI_Float32>(slice.top.ConvertToVp());
+    arkUISlice.right = static_cast<ArkUI_Float32>(slice.right.ConvertToVp());
+    arkUISlice.bottom = static_cast<ArkUI_Float32>(slice.bottom.ConvertToVp());
+    return arkUISlice;
 }
 
 void ResetBackgroundImageResizable(ArkUINodeHandle node)
@@ -3683,6 +3696,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
             previewOption.isDefaultDragItemGrayEffectEnabled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
         default:
             break;
     }
@@ -3716,6 +3732,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
     option.enableEdgeAutoScroll = dragInteractionOptions.enableEdgeAutoScroll;
     option.enableHapticFeedback = dragInteractionOptions.enableHapticFeedback;
+    option.isLiftingDisabled = dragInteractionOptions.isLiftingDisabled;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3723,8 +3740,14 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(
-        frameNode, { true, false, false, false, false, false, true, false, true, false, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode, NG::DragPreviewOption());
+}
+
+void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisableDataPrefetch(frameNode, value);
 }
 
 void SetMouseResponseRegion(
@@ -6253,6 +6276,13 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
     CHECK_NULL_VOID(frameNode);
     NG::DragDropInfo dragPreviewInfo;
     dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    dragPreviewInfo.onlyForLifting = dragPreview.onlyForLifting;
+    if (dragPreview.extraInfo) {
+        dragPreviewInfo.extraInfo = dragPreview.extraInfo;
+    }
+    if (dragPreview.pixelMap) {
+        dragPreviewInfo.pixelMap = PixelMap::CreatePixelMap(dragPreview.pixelMap);
+    }
     ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
 }
 
@@ -6937,6 +6967,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetMask = ResetMask,
         .getAspectRatio = GetAspectRatio,
         .setBackgroundImageResizable = SetBackgroundImageResizable,
+        .getBackgroundImageResizable = GetBackgroundImageResizable,
         .resetBackgroundImageResizable = ResetBackgroundImageResizable,
         .setBackgroundImageSizeWithUnit = SetBackgroundImageSizeWithUnit,
         .getRenderFit = GetRenderFit,
@@ -7006,6 +7037,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
         .getNodeBackdropBlur = GetNodeBackdropBlur,
+        .setDisableDataPrefetch = SetDisableDataPrefetch,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7735,6 +7767,8 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
             pressKeyCodeList.push_back(static_cast<int32_t>(*it));
         }
         event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.focusAxisEvent.targetDisplayId = info.GetTargetDisplayId();
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
@@ -7782,7 +7816,8 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
-    touchPoint.pressedTime = locationInfo.GetTimeStamp().time_since_epoch().count();
+    touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
+    touchPoint.operatingHand = locationInfo.GetOperatingHand();
 }
 
 void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
@@ -7817,6 +7852,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
+        points[i].operatingHand = touchPoint.operatingHand;
         i++;
     }
 }
@@ -7855,6 +7891,8 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         }
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        event.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
             size_t index = 0;
@@ -7945,6 +7983,8 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         }
         touchEvent.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         touchEvent.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        touchEvent.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
             size_t index = 0;
@@ -8010,6 +8050,17 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        std::vector<int32_t> pressedButtonList;
+        auto pressedButtons = info.GetPressedButtons();
+        event.mouseEvent.pressedButtonsLength = static_cast<int32_t>(pressedButtons.size());
+        for (auto it = pressedButtons.begin(); it != pressedButtons.end(); it++) {
+            pressedButtonList.push_back(static_cast<int32_t>(*it));
+        }
+        event.mouseEvent.pressedButtons = pressedButtonList.data();
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);

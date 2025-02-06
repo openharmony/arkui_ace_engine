@@ -265,7 +265,7 @@ void GridPattern::FireOnScrollStart()
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -416,9 +416,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     float mainGap = GetMainGap();
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     if (info_.offsetEnd_) {
-        if (GetEffectEdge() == EffectEdge::START && NonPositive(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
             if (irregular) {
@@ -442,9 +439,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
-        if (GetEffectEdge() == EffectEdge::END && NonNegative(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
@@ -1614,14 +1608,15 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
     }
     return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS,
         [wp = WeakClaim(this)](
-            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
             auto grid = wp.Upgrade();
-            CHECK_NULL_VOID(grid);
+            CHECK_NULL_RETURN(grid, false);
             if (grid->UseIrregularLayout() && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
                 nextFocusNode = grid->focusHandler_.GetNextFocusSimplified(step, currFocusNode.Upgrade());
             } else {
                 nextFocusNode = grid->focusHandler_.GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
 

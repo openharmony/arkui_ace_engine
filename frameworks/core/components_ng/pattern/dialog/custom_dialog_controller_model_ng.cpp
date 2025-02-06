@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +54,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
             isShown = isShownStatus;
         }
     };
-
+    dialogProperties.isUserCreatedDialog = true;
     auto executor = context->GetTaskExecutor();
     if (!executor) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
@@ -136,6 +137,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
             overlayManager = embeddedOverlay;
         }
     }
+    dialogProperties.isUserCreatedDialog = true;
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
@@ -222,6 +224,10 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const Wea
             SubwindowManager::GetInstance()->CloseDialogNG(dialog);
             dialogs.pop_back();
         } else {
+            auto dialogPattern = dialog->GetPattern<DialogPattern>();
+            if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED && dialogPattern) {
+                overlayManager = dialogPattern->GetEmbeddedOverlay(overlayManager);
+            }
             overlayManager->CloseDialog(dialog);
         }
     };
@@ -244,6 +250,10 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
+        auto currentOverlay = DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogRef);
+        if (currentOverlay) {
+            overlayManager = currentOverlay;
+        }
         overlayManager->CloseDialog(dialogRef);
     } else {
         // close dialog when current container is not null, so we should get pipelineContext through dialogNode
@@ -251,6 +261,10 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
         CHECK_NULL_VOID(nodeContext);
         auto overlay = nodeContext->GetOverlayManager();
         CHECK_NULL_VOID(overlay);
+        auto currentOverlay = DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogRef);
+        if (currentOverlay) {
+            overlay = currentOverlay;
+        }
         overlay->CloseDialog(dialogRef);
     }
 }

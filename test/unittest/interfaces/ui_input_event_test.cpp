@@ -20,6 +20,7 @@
 #include "ui_input_event.h"
 
 #include "frameworks/core/event/ace_events.h"
+#include "frameworks/core/event/axis_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,6 +28,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr int32_t ARKUI_DEVICE_ID = 1;
 constexpr uint64_t ARKUI_TIME = 20;
+constexpr ArkUI_Int32 AXIS_UPDATE = 2;
 } // namespace
 class UIInputEventTest : public testing::Test {
 public:
@@ -132,5 +134,246 @@ HWTEST_F(UIInputEventTest, NativeTouchEventTest001, TestSize.Level1)
      */
     EXPECT_EQ(changed_PointerId, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(pointerIndex, 1);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest001
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<OHOS::Ace::AxisEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->action = AxisAction::BEGIN;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_BEGIN);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest002
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIAxisEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->action = AXIS_UPDATE;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = C_AXIS_EVENT_ID;
+
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_UPDATE);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest003
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisActionfunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest003, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIAxisEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->action = AXIS_UPDATE;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+
+    action = OH_ArkUI_AxisEvent_GetAxisAction(nullptr);
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest004
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest004, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+
+    uiInputEvent->eventTypeId = C_AXIS_EVENT_ID;
+    action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest001
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_InteractionHand *hand = nullptr;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(uiInputEvent.get(), hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest002
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(uiInputEvent.get(), &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest003
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest003, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.touchEvent.actionTouchPoint.operatingHand = ARKUI_EVENT_HAND_LEFT;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(&uiInputEvent, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_LEFT);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest004
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest004, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.touchEvent.actionTouchPoint.operatingHand = ARKUI_EVENT_HAND_RIGHT;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(&uiInputEvent, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_RIGHT);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest001
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand *hand = nullptr;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(uiInputEvent.get(), 0, hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest002
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(uiInputEvent.get(), 0, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest003
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest003, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(uiInputEvent.get(), 0, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest004
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest004, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    ArkUITouchPoint points[2]; // 2 points
+    points[0].operatingHand = ARKUI_EVENT_HAND_LEFT;
+    points[1].operatingHand = ARKUI_EVENT_HAND_RIGHT;
+    event.touchEvent.touchPointes = points;
+    event.touchEvent.touchPointSize = 2;  // 2 points
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    int32_t result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(&uiInputEvent, 0, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_LEFT);
+
+    hand = ARKUI_EVENT_HAND_NONE;
+    result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(&uiInputEvent, 1, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_RIGHT);
+
+    hand = ARKUI_EVENT_HAND_NONE;
+    // 2 is out of range
+    result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(&uiInputEvent, 2, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
 }
 } // namespace OHOS::Ace

@@ -98,6 +98,16 @@ public:
         endDate_ = endDate;
     }
 
+    void SetMarkToday(bool markToday)
+    {
+        markToday_ = markToday;
+    }
+
+    void SetDisabledDateRange(const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange)
+    {
+        disabledDateRange_ = disabledDateRange;
+    }
+
     void SetMoveDirection(NG::Direction moveDirection)
     {
         moveDirection_ = moveDirection;
@@ -190,6 +200,8 @@ private:
     uint8_t curMonthIndex_ = 1;
     PickerDate startDate_;
     PickerDate endDate_;
+    bool markToday_ = false;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange_;
 
     // Used to mark the jump action destination.
     // eg. 2023-1-1

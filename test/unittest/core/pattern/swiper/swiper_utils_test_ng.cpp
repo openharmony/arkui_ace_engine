@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,7 @@
 #include "swiper_test_ng.h"
 
 namespace OHOS::Ace::NG {
-class SwiperUtilsTestNg : public SwiperTestNg {
-public:
-};
+class SwiperUtilsTestNg : public SwiperTestNg {};
 
 /**
  * @tc.name: SwiperUtilsTest001
@@ -27,7 +25,9 @@ public:
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     LayoutConstraintF layoutConstraint;
     layoutConstraint.Reset();
     layoutConstraint.selfIdealSize = OptionalSize(SizeF(720.f, 1200.f));
@@ -57,7 +57,9 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest001, TestSize.Level1)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest002, TestSize.Level2)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateDisplayCount(-1);
     auto getAutoFill = pattern_->IsAutoFill();
     EXPECT_FALSE(getAutoFill);
@@ -92,7 +94,9 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest003, TestSize.Level2)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest004, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto getAutoFill = pattern_->IsAutoFill();
     EXPECT_FALSE(getAutoFill);
     layoutProperty_->UpdateIndex(1);
@@ -119,7 +123,9 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest004, TestSize.Level1)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest005, TestSize.Level2)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateIndex(1);
     layoutProperty_->UpdateItemSpace(Dimension(20));
     layoutProperty_->UpdateCachedCount(1);
@@ -142,7 +148,9 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest005, TestSize.Level2)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest006, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto getAutoFill = pattern_->IsAutoFill();
     EXPECT_FALSE(getAutoFill);
     layoutProperty_->UpdateIndex(1);
@@ -169,7 +177,9 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest006, TestSize.Level1)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest007, TestSize.Level2)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateIndex(1);
     layoutProperty_->UpdateItemSpace(Dimension(20));
     layoutProperty_->UpdateCachedCount(1);
@@ -192,7 +202,9 @@ HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest007, TestSize.Level2)
  */
 HWTEST_F(SwiperUtilsTestNg, SwiperUtilsTest008, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateIndex(1);
     layoutProperty_->UpdateItemSpace(Dimension(20));
     layoutProperty_->UpdateCachedCount(1);

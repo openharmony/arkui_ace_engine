@@ -59,6 +59,7 @@ public:
             theme->cameraInputSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.auto_camera");
             theme->aiWriteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.edit_badge_star");
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
+            theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -343,6 +344,11 @@ public:
         return searchSymbolId_;
     }
 
+    const uint32_t& GetTranslateSymbolId() const
+    {
+        return translateSymbolId_;
+    }
+
     const Dimension& GetSymbolSize() const
     {
         return symbolSize_;
@@ -398,6 +404,7 @@ private:
     uint32_t cameraInputSymbolId_ = 0;
     uint32_t aiWriteSymbolId_ = 0;
     uint32_t searchSymbolId_ = 0;
+    uint32_t translateSymbolId_ = 0;
 };
 
 } // namespace OHOS::Ace

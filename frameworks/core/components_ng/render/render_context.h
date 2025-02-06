@@ -387,6 +387,11 @@ public:
 
     virtual void GetPointTransformRotate(PointF& point) {}
 
+    virtual Matrix4 GetMatrixWithTransformRotate()
+    {
+        return {};
+    }
+
     virtual RectF GetPaintRectWithoutTransform()
     {
         return {};
@@ -758,6 +763,11 @@ public:
     }
     virtual void MarkUiFirstNode(bool isUiFirstNode) {}
 
+    virtual OffsetF GetRectOffsetWithPositionEdges(
+        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference)
+    {
+        return OffsetF();
+    }
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -770,7 +780,7 @@ protected:
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
-    virtual void OnBackgroundImageSyncModeUpdate(bool imageRepeat) {}
+    virtual void OnBackgroundImageSyncModeUpdate(bool syncMode) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
     virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}

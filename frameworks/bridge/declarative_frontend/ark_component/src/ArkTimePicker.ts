@@ -22,6 +22,10 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     modifierWithKey(this._modifiersWithKeys, TimepickerLoopModifier.identity, TimepickerLoopModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value: Optional<CrownSensitivity>): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDigitalCrownSensitivityModifier.identity, TimepickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   useMilitaryTime(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity,
       TimepickerUseMilitaryTimeModifier, value);
@@ -175,6 +179,20 @@ class TimepickerLoopModifier extends ModifierWithKey<boolean> {
       getUINativeModule().timepicker.resetTimepickerLoop(node);
     } else {
       getUINativeModule().timepicker.setTimepickerLoop(node, this.value);
+    }
+  }
+}
+
+class TimepickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerDigitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerDigitalCrownSensitivity(node, this.value);
     }
   }
 }
