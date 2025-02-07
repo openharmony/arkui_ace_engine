@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
+constexpr double DEFAULT_PROGRESS_TOTAL = 100;
 constexpr int32_t MIN_COLOR_STOPS_VALUE_INDEX = 0;
 constexpr int32_t MIN_COLOR_STOPS_HAS_DIMENSION_INDEX = 1;
 constexpr int32_t MIN_COLOR_STOPS_DIMENSION_INDEX = 2;
@@ -79,6 +80,7 @@ void ResetProgressValue(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
+    ProgressModelNG::SetTotal(frameNode, DEFAULT_PROGRESS_TOTAL);
 }
 
 
