@@ -2965,6 +2965,11 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
     }
     if (preTopNavDestination) {
         preTopNavDestination->SetIsOnAnimation(true);
+        if (!isPopPage) {
+            auto renderContext = preTopNavDestination->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, false);
+            renderContext->RemoveClipWithRRect();
+        }
     }
     if (newTopNavDestination) {
         newTopNavDestination->SetIsOnAnimation(true);

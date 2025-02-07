@@ -175,7 +175,7 @@ public:
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
     bool CheckTransitionPop(const int32_t animationId);
-    bool SystemTransitionPopCallback(const int32_t animationId);
+    bool SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent = true);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
