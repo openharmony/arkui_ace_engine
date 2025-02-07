@@ -121,7 +121,6 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange);
-    static void SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChangeEvent&& onChangeEvent);
     static void SetSliderValue(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMinLabel(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxLabel(FrameNode* frameNode, const std::optional<float>& value);

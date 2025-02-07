@@ -231,12 +231,8 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const bool value) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
-    };
-    ListItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //ListItemModelNG::Set__onChangeEvent_selected(frameNode, convValue);
 }
 } // ListItemAttributeModifier
 const GENERATED_ArkUIListItemModifier* GetListItemModifier()

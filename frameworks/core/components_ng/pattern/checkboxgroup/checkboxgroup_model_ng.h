@@ -46,7 +46,6 @@ public:
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
     static void SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxStyle checkboxGroupStyle);
     static void SetCheckboxGroupName(FrameNode* frameNode, const std::optional<std::string>& groupName);
-    static void SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_NG_H

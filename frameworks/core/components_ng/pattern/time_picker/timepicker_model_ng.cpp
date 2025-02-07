@@ -762,12 +762,4 @@ void TimePickerModelNG::HasUserDefinedOpacity()
     CHECK_NULL_VOID(renderContext);
     timePickerRowPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
-
-void TimePickerModelNG::SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetChangeEvent(std::move(onChange));
-}
 } // namespace OHOS::Ace::NG

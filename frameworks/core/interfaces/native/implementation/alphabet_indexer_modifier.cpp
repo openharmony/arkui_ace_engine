@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -339,11 +338,8 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    auto onEvent = [arkCallback = CallbackHelper(*callback)](const int32_t selected) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(selected));
-    };
-
-    IndexerModelNG::SetCreatChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //AlphabetIndexerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
 }
 } // AlphabetIndexerAttributeModifier
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()

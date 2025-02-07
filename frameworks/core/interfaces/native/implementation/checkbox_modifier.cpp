@@ -17,7 +17,6 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -165,12 +164,8 @@ void __onChangeEvent_selectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const bool value) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
-    };
-    CheckBoxModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //CheckboxModelNG::Set__onChangeEvent_select(frameNode, convValue);
 }
 } // CheckboxAttributeModifier
 const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()

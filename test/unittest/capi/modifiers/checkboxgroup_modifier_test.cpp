@@ -18,7 +18,6 @@
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -181,54 +180,5 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest006, TestSize.Level
     ASSERT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(&info);
     EXPECT_EQ(g_isCheckedTest, false);
-}
-
-/*
- * @tc.name: setOnChangeEventSelectAllImpl
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool value;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    static constexpr int32_t contextId = 123;
-
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .value = Converter::Convert<bool>(parameter)
-        };
-    };
-
-    Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
-
-    modifier_->set__onChangeEvent_selectAll(node_, &arkCallback);
-
-    std::vector<std::string> vec;
-    CheckboxGroupResult groupResultAll(vec, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
-    CheckboxGroupResult groupResultPart(vec, int(CheckBoxGroupPaintProperty::SelectStatus::PART));
-    CheckboxGroupResult groupResultNone(vec, int(CheckBoxGroupPaintProperty::SelectStatus::NONE));
-
-    ASSERT_EQ(checkEvent.has_value(), false);
-    eventHub->UpdateChangeEvent(&groupResultAll);
-    ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value, true);
-    eventHub->UpdateChangeEvent(&groupResultPart);
-    ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value, false);
-    eventHub->UpdateChangeEvent(&groupResultNone);
-    ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value, false);
 }
 } // namespace OHOS::Ace::NG

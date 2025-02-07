@@ -527,40 +527,4 @@ HWTEST_F(RatingModifierTest, DISABLED_setContentModifierTest, TestSize.Level1)
 {
     // CustomObjects is not implemented yet!
 }
-
-/*
- * @tc.name: setOnChangeEventRatingImpl
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RatingModifierTest, setOnChangeEventRatingImpl, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    struct CheckEvent {
-        int32_t nodeId;
-        float value;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    static constexpr int32_t contextId = 123;
-
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .value = Converter::Convert<float>(parameter)
-        };
-    };
-
-    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
-
-    modifier_->set__onChangeEvent_rating(node_, &arkCallback);
-
-    ASSERT_EQ(checkEvent.has_value(), false);
-    eventHub->FireChangeEvent("55.5");
-    ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_NEAR(checkEvent->value, 55.5f, FLT_EPSILON);
-}
 } // namespace OHOS::Ace::NG

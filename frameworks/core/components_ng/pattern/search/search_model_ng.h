@@ -146,7 +146,6 @@ public:
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
                                     std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
-    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::string&)>&& onChangeEvent);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
     static void SetType(FrameNode* frameNode, const std::optional<TextInputType>& valueOpt);;

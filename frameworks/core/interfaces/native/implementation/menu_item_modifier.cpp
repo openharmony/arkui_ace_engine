@@ -17,7 +17,6 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG {
@@ -221,12 +220,8 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool selected) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(selected));
-    };
-    MenuItemModelNG::SetSelectedChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //MenuItemModelNG::Set__onChangeEvent_selected(frameNode, convValue);
 }
 } // MenuItemAttributeModifier
 const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()

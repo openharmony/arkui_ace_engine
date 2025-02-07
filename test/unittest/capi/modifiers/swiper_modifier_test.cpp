@@ -1810,44 +1810,4 @@ HWTEST_F(SwiperModifierTest, setIndicatorInteractiveTest, TestSize.Level1)
     auto checkTrue = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkTrue, EXPECTED_TRUE);
 }
-
-/*
- * @tc.name: setOnChangeEventIndexImpl
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    struct CheckEvent {
-        int32_t nodeId;
-        int32_t value;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    static constexpr int32_t contextId = 123;
-
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .value = Converter::Convert<int32_t>(parameter)
-        };
-    };
-
-    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
-
-    modifier_->set__onChangeEvent_index(node_, &arkCallback);
-
-    ASSERT_EQ(checkEvent.has_value(), false);
-    eventHub->FireChangeEvent(0, 1, false);
-    ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value, 1);
-    eventHub->FireChangeEvent(1, 2, false);
-    ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
-    EXPECT_EQ(checkEvent->value, 2);
-}
 } // namespace OHOS::Ace::NG

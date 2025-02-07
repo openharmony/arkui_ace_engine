@@ -292,14 +292,6 @@ void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& sel
     eventHub->SetOnSelect(std::move(selectCallback));
 }
 
-void ListItemModelNG::SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetSelectChangeEvent(std::move(changeEvent));
-}
-
 void ListItemModelNG::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);

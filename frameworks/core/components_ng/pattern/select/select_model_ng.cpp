@@ -788,20 +788,4 @@ void SelectModelNG::SetLayoutDirection(TextDirection value)
     CHECK_NULL_VOID(pattern);
     pattern->SetLayoutDirection(value);
 }
-
-void SelectModelNG::SetSelectChangeEvent(FrameNode* frameNode, NG::SelectChangeEvent&& selectChangeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto hub = frameNode->GetEventHub<SelectEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetSelectChangeEvent(std::move(selectChangeEvent));
-}
-
-void SelectModelNG::SetValueChangeEvent(FrameNode* frameNode, NG::ValueChangeEvent&& valueChangeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto hub = frameNode->GetEventHub<SelectEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetValueChangeEvent(std::move(valueChangeEvent));
-}
 } // namespace OHOS::Ace::NG

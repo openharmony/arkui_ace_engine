@@ -218,14 +218,7 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorSettingDataTest, 
 HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorPickerPropertyTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
-    std::tm tm {};
-    tm.tm_hour = 3;
-    tm.tm_min = 25;
-    tm.tm_sec = 17;
-    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
-    auto duration = timestamp.time_since_epoch();
-    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    Ark_Date arkDate = static_cast<Ark_Date>(milliseconds);
+    Ark_Date arkDate = 12317000; // 03:25:17
     Opt_Date testDate = Converter::ArkValue<Opt_Date>(arkDate);
 
     Ark_TimePickerDialogOptions arkOptions;

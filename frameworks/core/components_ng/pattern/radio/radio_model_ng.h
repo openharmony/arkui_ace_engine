@@ -69,7 +69,6 @@ public:
     static void SetBuilder(FrameNode* frameNode, std::function<void()>&& builder);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
-    static void SetOnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent);
     static void SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator);
     static bool GetChecked(FrameNode* frameNode);
     static Color GetCheckedBackgroundColor(FrameNode* frameNode);
