@@ -6405,7 +6405,7 @@ void ResetListLanes(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetListLanes(ArkUI_NodeHandle node)
 {
     auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
-    g_numberValues[NUM_0].u32 = listModifier->getListLanes(node->uiNodeHandle);
+    g_numberValues[NUM_0].u32 = static_cast<uint32_t>(listModifier->getListLanes(node->uiNodeHandle));
     g_numberValues[NUM_1].f32 = listModifier->getlistLaneMinLength(node->uiNodeHandle);
     g_numberValues[NUM_2].f32 = listModifier->getListLaneMaxLength(node->uiNodeHandle);
     g_numberValues[NUM_3].f32 = listModifier->getListLaneGutter(node->uiNodeHandle);
