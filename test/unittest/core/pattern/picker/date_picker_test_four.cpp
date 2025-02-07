@@ -57,6 +57,20 @@ const std::string AM = "上午";
 const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
+
+RefPtr<UINode> FindNodeByTag(const RefPtr<UINode>& uiNode, const std::string& tag)
+{
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    for (int32_t index = 0; index < uiNode->TotalChildCount(); index++) {
+        auto childNode = uiNode->GetChildAtIndex(index);
+        CHECK_NULL_CONTINUE(childNode);
+        CHECK_EQUAL_RETURN(childNode->GetTag(), tag, childNode);
+        auto findNode = FindNodeByTag(childNode, tag);
+        CHECK_NULL_RETURN(!findNode, findNode);
+    }
+    return nullptr;
+}
+
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -1148,6 +1162,90 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
     std::string nodeInfo = "";
     auto cancel = Localization::GetInstance()->GetEntryLetters("common.cancel");
     EXPECT_EQ(cancel, nodeInfo);
+}
+
+/**
+ * @tc.name: GetDateChangeEvent001
+ * @tc.desc: Test Get DateChangeEvent Function for DatePickerDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, GetDateChangeEvent001, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto callback = DatePickerDialogView::GetDateChangeEvent(nullptr, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+
+    callback = DatePickerDialogView::GetDateChangeEvent(datePickerNode, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+
+    bool result = false;
+    auto dateChangeEvent = [&result](const std::string& info) {
+        result = true;
+    };
+    dialogEvent["dateChangeId"] = dateChangeEvent;
+
+    callback = DatePickerDialogView::GetDateChangeEvent(nullptr, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+
+    result = false;
+    callback = DatePickerDialogView::GetDateChangeEvent(datePickerNode, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportDateChangeEvent001
+ * @tc.desc: Test ReportDateChangeEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ReportDateChangeEvent001, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto ret = datePickerPattern->ReportDateChangeEvent("DatePicker", "onDateChange", "");
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ReportDateChangeEvent002
+ * @tc.desc: Test ReportDateChangeEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ReportDateChangeEvent002, TestSize.Level1)
+{
+    DialogProperties dialogProperties;
+    DatePickerSettingData settingData;
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto datePickerNode = FindNodeByTag(dialogNode, V2::DATE_PICKER_ETS_TAG);
+    ASSERT_NE(datePickerNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(datePickerNode);
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto ret = datePickerPattern->ReportDateChangeEvent("DatePickerDialog", "onDateChange", "");
+    EXPECT_FALSE(ret);
 }
 
 /**
