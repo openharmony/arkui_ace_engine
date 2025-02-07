@@ -354,4 +354,18 @@ std::string CheckBoxModelNG::GetCheckboxGroup(FrameNode* frameNode)
     return eventHub->GetGroupName();
 }
 
+void CheckBoxModelNG::ResetSelectedColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColor, PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxModelNG::ResetUnSelectedColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor, PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxModelNG::ResetCheckMarkColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColor, PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

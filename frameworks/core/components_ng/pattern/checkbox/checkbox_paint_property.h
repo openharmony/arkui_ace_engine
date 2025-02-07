@@ -29,27 +29,17 @@ class InspectorFilter;
 
 class CheckBoxPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxPaintProperty, PaintProperty)
-private:
-    WeakPtr<FrameNode> host_;
 
 public:
     CheckBoxPaintProperty() = default;
 
     ~CheckBoxPaintProperty() override = default;
 
-    void SetHost(const WeakPtr<FrameNode>& host)
-    {
-        host_ = host;
-    }
-
-    RefPtr<FrameNode> GetHost() const
-    {
-        return host_.Upgrade();
-    }
     RefPtr<PaintProperty> Clone() const override
     {
         auto paintProperty = MakeRefPtr<CheckBoxPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
+        paintProperty->UpdatePaintPropertyHost(this);
         paintProperty->propCheckBoxSelect_ = CloneCheckBoxSelect();
         paintProperty->propCheckBoxSelectedColor_ = CloneCheckBoxSelectedColor();
         paintProperty->propCheckBoxUnSelectedColor_ = CloneCheckBoxUnSelectedColor();
@@ -57,7 +47,6 @@ public:
         paintProperty->propCheckBoxCheckMarkSize_ = CloneCheckBoxCheckMarkSize();
         paintProperty->propCheckBoxCheckMarkWidth_ = CloneCheckBoxCheckMarkWidth();
         paintProperty->propCheckBoxSelectedStyle_ = CloneCheckBoxSelectedStyle();
-        paintProperty->SetHost(this->GetHost());
         return paintProperty;
     }
 

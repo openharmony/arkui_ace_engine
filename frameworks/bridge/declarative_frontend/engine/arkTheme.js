@@ -1077,8 +1077,6 @@ ArkThemeWhiteList.whiteList = [
     'AlphabetIndexer',
     'Badge',
     'Button',
-    'Checkbox',
-    'CheckboxGroup',
     'Counter',
     'DataPanel',
     'LoadingProgress',

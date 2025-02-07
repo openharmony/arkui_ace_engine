@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    InitializeParam();
+    InitializeParam(layoutWrapper->GetHostNode()->GetThemeScopeId());
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -57,11 +57,11 @@ std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
     return size;
 }
 
-void CheckBoxGroupLayoutAlgorithm::InitializeParam()
+void CheckBoxGroupLayoutAlgorithm::InitializeParam(uint32_t themeScopeId)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(themeScopeId);
     CHECK_NULL_VOID(checkBoxTheme);
     defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
     defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();

@@ -49,6 +49,9 @@ public:
     void SetChangeEvent(ChangeEvent&& changeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetCheckboxStyle(CheckBoxStyle checkboxStyle) override;
+    void ResetSelectedColor() override;
+    void ResetUnSelectedColor() override;
+    void ResetCheckMarkColor() override;
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelect(FrameNode* frameNode, bool isSelected);

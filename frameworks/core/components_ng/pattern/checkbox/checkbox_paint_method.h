@@ -91,8 +91,9 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(checkboxModifier_);
-        checkboxModifier_->InitializeParam();
         CHECK_NULL_VOID(paintWrapper);
+        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetUnsafeHost() : nullptr;
+        checkboxModifier_->InitializeParam(host ? host->GetThemeScopeId() : 0);
         auto size = paintWrapper->GetContentSize();
         float strokePaintSize = size.Width();
         auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
