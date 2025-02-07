@@ -5777,8 +5777,8 @@ void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
         DeleteValueInStyledString(length.value_or(INT_MAX), GetTextContentLength() - length.value_or(INT_MAX));
     } else {
         while (textContentLength > length.value_or(INT_MAX)) {
-            DeleteContent(CUSTOM_CONTENT_LENGTH);
             textContentLength -= CalculateDeleteLength(CUSTOM_CONTENT_LENGTH, true);
+            DeleteContent(CUSTOM_CONTENT_LENGTH);
         }
     }
 }
