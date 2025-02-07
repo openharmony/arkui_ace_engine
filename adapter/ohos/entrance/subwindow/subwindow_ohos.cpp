@@ -256,6 +256,7 @@ bool SubwindowOhos::InitContainer()
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
             return false;
         }
+        window_->SetExclusivelyHighlighted(false);
     }
     std::string url = "";
     auto subSurface = window_->GetSurfaceNode();

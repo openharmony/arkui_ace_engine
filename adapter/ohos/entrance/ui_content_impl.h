@@ -75,6 +75,8 @@ public:
     void Background() override;
     void Focus() override;
     void UnFocus() override;
+    void ActiveWindow() override;
+    void UnActiveWindow() override;
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
