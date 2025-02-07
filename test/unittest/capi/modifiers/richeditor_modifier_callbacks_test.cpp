@@ -221,7 +221,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
         RichEditorInsertValue info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId, const Ark_RichEditorInsertValue parameter, const Callback_Boolean_Void continuation) {
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_RichEditorInsertValue parameter, const Callback_Boolean_Void continuation) {
         RichEditorInsertValue info;
         info.SetInsertOffset(Converter::Convert<int32_t>(parameter.insertOffset));
         info.SetInsertValue(Converter::Convert<std::string>(parameter.insertValue));
@@ -317,7 +318,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidIMEInputTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onCallback = [](const Ark_Int32 resourceId, const Ark_TextRange parameter) {
         TextRange info;
-        if(auto start = Converter::OptConvert<int32_t>(parameter.start); start) {
+        if (auto start = Converter::OptConvert<int32_t>(parameter.start); start) {
             info.start = *start;
         }
         if (auto end = Converter::OptConvert<int32_t>(parameter.end); end) {
@@ -525,7 +526,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
         RichEditorChangeValue info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId, const Ark_RichEditorChangeValue parameter, const Callback_Boolean_Void continuation) {
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_RichEditorChangeValue parameter, const Callback_Boolean_Void continuation) {
         RichEditorChangeValue value;
         auto rangeStart = Converter::OptConvert<int32_t>(parameter.rangeBefore.start);
         auto rangeEnd = Converter::OptConvert<int32_t>(parameter.rangeBefore.end);
@@ -555,7 +557,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
     EXPECT_TRUE(result);
     EXPECT_EQ(checkEvent->info.GetRangeBefore().start, TEST_RANGE_START);
-    EXPECT_EQ(checkEvent->info.GetRangeBefore().end, TEST_RANGE_END);  
+    EXPECT_EQ(checkEvent->info.GetRangeBefore().end, TEST_RANGE_END);
 }
 
 /**
@@ -571,7 +573,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
         RichEditorChangeValue info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto inputCallback = [] (const Ark_Int32 resourceId, const Ark_TextRange rangeBefore, const Ark_TextRange rangeAfter) {
+    auto inputCallback = [] (const Ark_Int32 resourceId, const Ark_TextRange rangeBefore,
+        const Ark_TextRange rangeAfter) {
         RichEditorChangeValue changeValue;
         changeValue.SetRangeBefore({
             .start = Converter::OptConvert<int32_t>(rangeBefore.start).value_or(-1),

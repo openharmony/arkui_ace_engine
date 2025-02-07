@@ -430,7 +430,7 @@ void OnWillChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onCallback = [arkCallback = CallbackHelper(*value)](const RichEditorChangeValue& param) -> bool {
         auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param);
-         LOGW("OnWillChangeImpl :: Ark_RichEditorChangeValue don't fully filled from RichEditorChangeValue");
+        LOGW("OnWillChangeImpl :: Ark_RichEditorChangeValue don't fully filled from RichEditorChangeValue");
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };

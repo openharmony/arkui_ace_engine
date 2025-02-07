@@ -27,6 +27,9 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+static constexpr int SIZE1 = 111;
+static constexpr int SIZE2 = 222;
+
 namespace Converter {
     template<>
     void AssignCast(std::optional<int32_t>& dst, const Ark_SelectStatus& src)
@@ -43,13 +46,10 @@ namespace Converter {
     CheckboxGroupResult Convert(const Ark_CheckboxGroupResult& src)
     {
         CheckboxGroupResult result(Converter::Convert<std::vector<std::string>>(src.name),
-            Converter::OptConvert<int32_t>(src.status).value_or(2));
+            Converter::OptConvert<int32_t>(src.status).value_or(static_cast<int32_t>(ARK_SELECT_STATUS_NONE)));
         return result;
     }
 }
-
-static constexpr int SIZE1 = 111;
-static constexpr int SIZE2 = 222;
 
 class CheckboxGroupModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxGroupModifier,
     &GENERATED_ArkUINodeModifiers::getCheckboxGroupModifier, GENERATED_ARKUI_CHECKBOX_GROUP> {
@@ -185,7 +185,7 @@ HWTEST_F(CheckboxGroupModifierTest, SetOnChangeTest, TestSize.Level1)
     modifier_->setOnChange(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    CheckboxGroupResult info({"test1", "test2"}, 2);    
+    CheckboxGroupResult info({"test1", "test2"}, 2);
     eventHub->UpdateChangeEvent(&info);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());

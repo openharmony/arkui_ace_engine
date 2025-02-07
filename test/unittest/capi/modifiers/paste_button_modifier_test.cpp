@@ -301,7 +301,8 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event, Ark_PasteButtonOnClickResult result)
+    auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
+        Ark_PasteButtonOnClickResult result)
     {
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
@@ -357,7 +358,8 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event, Ark_PasteButtonOnClickResult result)
+    auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
+        Ark_PasteButtonOnClickResult result)
     {
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),

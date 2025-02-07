@@ -616,7 +616,7 @@ HWTEST_F(VideoModifierTest, setObjectFitTestInvalidValues, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
-{    
+{
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(eventHub);
