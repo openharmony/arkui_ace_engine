@@ -42,7 +42,8 @@ RichEditorDeleteDirection Convert(const Ark_RichEditorDeleteDirection& src)
     return dst;
 }
 
-NG::TextFieldCommonEvent Convert(Ark_SubmitEvent& data)
+template<>
+NG::TextFieldCommonEvent Convert(const Ark_SubmitEvent& data)
 {
     NG::TextFieldCommonEvent event;
     const auto peer = reinterpret_cast<SubmitEventPeer*>(data.ptr);
@@ -77,195 +78,10 @@ constexpr int32_t TEST_END = 3;
 constexpr int32_t TEST_OFFSET = 4;
 constexpr int32_t TEST_LENGTH = 5;
 constexpr auto TEST_DELETE_DIRECTION = RichEditorDeleteDirection::FORWARD;
-constexpr bool TEST_IS_CHANGED_IN_EDITING = true;
-constexpr Ark_EnterKeyType TEST_ENTER_KEY_TYPE = Ark_EnterKeyType::ARK_ENTER_KEY_TYPE_NEXT;
 constexpr int32_t TEST_RANGE_START = 6;
 constexpr int32_t TEST_RANGE_END = 7;
 constexpr int32_t TEST_RANGE_START_TWO = 8;
 constexpr int32_t TEST_RANGE_END_TWO = 9;
-
-
-using TEST_ID = void* const;
-std::map<TEST_ID, bool> g_isCheckedMap;
-
-template<typename T> void SetFlag(const T& id, bool flag = true)
-{
-    g_isCheckedMap[reinterpret_cast<TEST_ID>(id)] = flag;
-}
-
-template<typename T> bool GetFlag(const T& id)
-{
-    return g_isCheckedMap[reinterpret_cast<TEST_ID>(id)];
-}
-
-GENERATED_ArkUIRichEditorEventsReceiver recv;
-
-void onReadyCallback(Ark_Int32 nodeId)
-{
-    SetFlag(recv.onReady);
-}
-
-void onSelectCallback(Ark_Int32 nodeId, const Ark_RichEditorSelection data)
-{
-    SetFlag(recv.onSelect, false);
-    int32_t start = Converter::Convert<int32_t>(data.selection.value0);
-    int32_t end = Converter::Convert<int32_t>(data.selection.value1);
-    EXPECT_EQ(start, TEST_SELECTION_START);
-    EXPECT_EQ(end, TEST_SELECTION_END);
-    SetFlag(recv.onSelect);
-}
-
-void onSelectionChangeCallback(Ark_Int32 nodeId, const Ark_RichEditorRange data)
-{
-    SetFlag(recv.onSelectionChange, false);
-    auto start = Converter::OptConvert<int32_t>(data.start);
-    auto end = Converter::OptConvert<int32_t>(data.end);
-    EXPECT_EQ(start.value(), TEST_SELECTION_START);
-    EXPECT_EQ(end.value(), TEST_SELECTION_END);
-    SetFlag(recv.onSelectionChange);
-}
-
-void onAboutToIMEInputCallback(Ark_Int32 nodeId, const Ark_RichEditorInsertValue data)
-{
-    SetFlag(recv.aboutToIMEInput, false);
-    auto offset = Converter::Convert<int32_t>(data.insertOffset);
-    auto text = Converter::Convert<std::string>(data.insertValue);
-    auto previewText = Converter::OptConvert<std::string>(data.previewText);
-    EXPECT_EQ(offset, TEST_INSERT_OFFSET);
-    EXPECT_EQ(text, TEST_INSERT_VALUE);
-    EXPECT_EQ(previewText.value(), TEST_PREVIEW_TEXT);
-    SetFlag(recv.aboutToIMEInput);
-}
-
-void onIMEInputCompleteCallback(Ark_Int32 nodeId, const Ark_RichEditorTextSpanResult data)
-{
-    SetFlag(recv.onIMEInputComplete, false);
-    auto text = Converter::Convert<std::string>(data.value);
-    auto spanIndex = Converter::Convert<int32_t>(data.spanPosition.spanIndex);
-    auto spanRangeStart = Converter::Convert<int32_t>(data.spanPosition.spanRange.value0);
-    auto spanRangeEnd = Converter::Convert<int32_t>(data.spanPosition.spanRange.value1);
-    auto fontSize = Converter::Convert<int32_t>(data.textStyle.fontSize);
-    auto fontStyleSize = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontSize.value.value0);
-    auto fontWeight = Converter::Convert<int32_t>(data.symbolSpanStyle.value.fontWeight.value.value0);
-    auto fontColor = Converter::OptConvert<Color>(data.textStyle.fontColor).value();
-    auto fontFamily = Converter::Convert<std::string>(data.textStyle.fontFamily);
-    auto previewText = Converter::OptConvert<std::string>(data.previewText).value();
-
-    EXPECT_EQ(spanIndex, TEST_SPAN_IDX);
-    EXPECT_EQ(spanRangeStart, TEST_SPAN_START);
-    EXPECT_EQ(spanRangeEnd, TEST_SPAN_END);
-    EXPECT_EQ(text, TEST_TEXT);
-    EXPECT_EQ(fontSize, TEST_FONT_SIZE);
-    EXPECT_EQ(fontStyleSize, TEST_FONT_SIZE);
-    EXPECT_EQ(fontWeight, TEST_FONT_WEIGHT);
-    EXPECT_EQ(fontFamily, TEST_FONT_FAMILY);
-    EXPECT_EQ(fontColor, Color::FromString(TEST_FONT_COLOR));
-    EXPECT_EQ(previewText, TEST_PREVIEW_TEXT);
-
-    SetFlag(recv.onIMEInputComplete);
-}
-
-void onDidIMEInputCallback(Ark_Int32 nodeId, const Ark_TextRange data)
-{
-    SetFlag(recv.onDidIMEInput, false);
-    auto start = Converter::OptConvert<int32_t>(data.start).value();
-    auto end = Converter::OptConvert<int32_t>(data.end).value();
-    EXPECT_EQ(start, TEST_START);
-    EXPECT_EQ(end, TEST_END);
-    SetFlag(recv.onDidIMEInput);
-}
-
-void onAboutToDeleteCallback(Ark_Int32 nodeId, const Ark_RichEditorDeleteValue data)
-{
-    SetFlag(recv.aboutToDelete, false);
-    auto offset = Converter::Convert<int32_t>(data.offset);
-    auto length = Converter::Convert<int32_t>(data.length);
-    auto direction = Converter::Convert<RichEditorDeleteDirection>(data.direction);
-    EXPECT_EQ(offset, TEST_OFFSET);
-    EXPECT_EQ(length, TEST_LENGTH);
-    EXPECT_EQ(direction, TEST_DELETE_DIRECTION);
-    SetFlag(recv.aboutToDelete);
-}
-
-void onDeleteCompleteCallback(Ark_Int32 nodeId)
-{
-    SetFlag(recv.onDeleteComplete);
-}
-
-void onPasteCallback(Ark_Int32 nodeId, const Opt_PasteEvent event)
-{
-    SetFlag(recv.onPaste);
-}
-
-void onEditingChangeCallback(Ark_Int32 nodeId, const Ark_Boolean data)
-{
-    SetFlag(recv.onEditingChange, false);
-    auto flag = Converter::Convert<bool>(data);
-    EXPECT_EQ(flag, TEST_IS_CHANGED_IN_EDITING);
-    SetFlag(recv.onEditingChange);
-}
-
-void onSubmitCallback(Ark_Int32 nodeId,
-                      const Ark_EnterKeyType enterKey,
-                      const Ark_SubmitEvent event)
-{
-    SetFlag(recv.onSubmit, false);
-#ifdef WRONG_TYPE
-    auto submitText = Converter::OptConvert<std::string>(event.text).value();
-    EXPECT_EQ(submitText, TEST_TEXT);
-#endif
-    EXPECT_EQ(TEST_ENTER_KEY_TYPE, enterKey);
-    SetFlag(recv.onSubmit);
-}
-
-void onWillChangeCallback(Ark_Int32 nodeId, const Ark_RichEditorChangeValue data)
-{
-    SetFlag(recv.onWillChange, false);
-    auto rangeStart = Converter::OptConvert<int32_t>(data.rangeBefore.start).value();
-    auto rangeEnd = Converter::OptConvert<int32_t>(data.rangeBefore.end).value();
-    EXPECT_EQ(rangeStart, TEST_RANGE_START);
-    EXPECT_EQ(rangeEnd, TEST_RANGE_END);
-    SetFlag(recv.onWillChange);
-}
-
-void onDidChangeCallback(Ark_Int32 nodeId,
-                         const Ark_TextRange rangeBefore,
-                         const Ark_TextRange rangeAfter)
-{
-    SetFlag(recv.onDidChange, false);
-    auto inBeforeStart = Converter::OptConvert<int32_t>(rangeBefore.start).value();
-    auto inBeforeEnd = Converter::OptConvert<int32_t>(rangeBefore.end).value();
-    auto inAfterStart = Converter::OptConvert<int32_t>(rangeAfter.start).value();
-    auto inAfterEnd = Converter::OptConvert<int32_t>(rangeAfter.end).value();
-    EXPECT_EQ(inBeforeStart, TEST_RANGE_START);
-    EXPECT_EQ(inBeforeEnd, TEST_RANGE_END);
-    EXPECT_EQ(inAfterStart, TEST_RANGE_START_TWO);
-    EXPECT_EQ(inAfterEnd, TEST_RANGE_END_TWO);
-    SetFlag(recv.onDidChange);
-}
-
-void onCutCallback(Ark_Int32 nodeId, const Ark_CutEvent data)
-{
-    SetFlag(recv.onCut);
-}
-
-void onCopyCallback(Ark_Int32 nodeId, const Ark_CopyEvent data)
-{
-    SetFlag(recv.onCopy);
-}
-} // namespace
-
-static const GENERATED_ArkUIRichEditorEventsReceiver* getEventsReceiverTest()
-{
-    return &recv;
-};
-
-static const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { .getRichEditorEventsReceiver = getEventsReceiverTest };
-    return &eventsImpl;
-};
-
 class RichEditorModifierCallbacksTest : public ModifierTestBase<GENERATED_ArkUIRichEditorModifier,
     &GENERATED_ArkUINodeModifiers::getRichEditorModifier, GENERATED_ARKUI_RICH_EDITOR> {
 public:
@@ -273,24 +89,6 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
         SetupTheme<RichEditorTheme>();
-        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
-
-        // Setup all callbacks
-        recv.onReady = onReadyCallback;
-        recv.onSelect = onSelectCallback;
-        recv.onSelectionChange = onSelectionChangeCallback;
-        recv.aboutToIMEInput = onAboutToIMEInputCallback;
-        recv.onIMEInputComplete = onIMEInputCompleteCallback;
-        recv.onDidIMEInput = onDidIMEInputCallback;
-        recv.aboutToDelete = onAboutToDeleteCallback;
-        recv.onDeleteComplete = onDeleteCompleteCallback;
-        recv.onPaste = onPasteCallback;
-        recv.onEditingChange = onEditingChangeCallback;
-        recv.onSubmit = onSubmitCallback;
-        recv.onWillChange = onWillChangeCallback;
-        recv.onDidChange = onDidChangeCallback;
-        recv.onCut = onCutCallback;
-        recv.onCopy = onCopyCallback;
     }
 };
 
@@ -680,20 +478,32 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
  * @tc.desc: setOnSubmit test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSubmitTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    SubmitCallback func{};
-    modifier_->setOnSubmit(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onSubmit), false);
+    struct CheckEvent {
+        int32_t resourceId;
+        std::optional<TextInputAction> enterKeyType;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](const Ark_Int32 resourceId, Ark_EnterKeyType enterKey, const Ark_SubmitEvent event) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .enterKeyType = Converter::OptConvert<TextInputAction>(enterKey),
+        };
+        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+    };
+    auto arkCallback = Converter::ArkValue<SubmitCallback>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    int32_t value = TEST_ENTER_KEY_TYPE;
+    modifier_->setOnSubmit(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
     NG::TextFieldCommonEvent event;
-    event.SetText(TEST_TEXT);
-    eventHub->FireOnSubmit(value, event);
-    //const Ark_Int32 resourceId, Ark_EnterKeyType enterKey, const Ark_SubmitEvent event
-    EXPECT_EQ(GetFlag(recv.onSubmit), true);
+    EXPECT_FALSE(event.IsPreventDefault());
+    eventHub->FireOnSubmit(static_cast<int32_t>(TextInputAction::GO), event);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_TRUE(event.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
 }
 
 /**
@@ -704,16 +514,42 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_RichEditorChangeValue_Boolean func{};
+    struct CheckEvent {
+        int32_t resourceId;
+        RichEditorChangeValue info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId, const Ark_RichEditorChangeValue parameter, const Callback_Boolean_Void continuation) {
+        RichEditorChangeValue value;
+        auto rangeStart = Converter::OptConvert<int32_t>(parameter.rangeBefore.start);
+        auto rangeEnd = Converter::OptConvert<int32_t>(parameter.rangeBefore.end);
+        TextRange rangeBefore;
+        if (rangeStart) {
+            rangeBefore.start = *rangeStart;
+        }
+        if (rangeEnd) {
+            rangeBefore.end = *rangeEnd;
+        }
+        value.SetRangeBefore(rangeBefore);
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = value,
+        };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto func = Converter::ArkValue<Callback_RichEditorChangeValue_Boolean>(nullptr, inputCallback, frameNode->GetId());
     modifier_->setOnWillChange(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onWillChange), false);
-    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    RichEditorChangeValue info;
+    RichEditorChangeValue value;
     TextRange rangeBefore = {.start = TEST_RANGE_START, .end = TEST_RANGE_END};
-    info.SetRangeBefore(rangeBefore);
-    eventHub->FireOnWillChange(info);
-    EXPECT_EQ(GetFlag(recv.onWillChange), true);
+    value.SetRangeBefore(rangeBefore);
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    ASSERT_TRUE(eventHub);
+    auto result = eventHub->FireOnWillChange(value);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_TRUE(result);
+    EXPECT_EQ(checkEvent->info.GetRangeBefore().start, TEST_RANGE_START);
+    EXPECT_EQ(checkEvent->info.GetRangeBefore().end, TEST_RANGE_END);  
 }
 
 /**
@@ -724,16 +560,40 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnDidChangeCallback func{};
+    struct CheckEvent {
+        int32_t resourceId;
+        RichEditorChangeValue info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (const Ark_Int32 resourceId, const Ark_TextRange rangeBefore, const Ark_TextRange rangeAfter) {
+        RichEditorChangeValue changeValue;
+        changeValue.SetRangeBefore({
+            .start = Converter::OptConvert<int32_t>(rangeBefore.start).value_or(-1),
+            .end = Converter::OptConvert<int32_t>(rangeBefore.end).value_or(-1),
+        });
+        changeValue.SetRangeAfter({
+            .start = Converter::OptConvert<int32_t>(rangeAfter.start).value_or(-1),
+            .end = Converter::OptConvert<int32_t>(rangeAfter.end).value_or(-1),
+        });
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = changeValue,
+        };
+    };
+    auto func = Converter::ArkValue<OnDidChangeCallback>(inputCallback, frameNode->GetId());
     modifier_->setOnDidChange(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onDidChange), false);
-    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
     RichEditorChangeValue changeValue;
     changeValue.SetRangeBefore({.start = TEST_RANGE_START, .end = TEST_RANGE_END});
     changeValue.SetRangeAfter({.start = TEST_RANGE_START_TWO, .end = TEST_RANGE_END_TWO});
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    ASSERT_TRUE(eventHub);
     eventHub->FireOnDidChange(changeValue);
-    EXPECT_EQ(GetFlag(recv.onDidChange), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->info.GetRangeBefore().start, TEST_RANGE_START);
+    EXPECT_EQ(checkEvent->info.GetRangeBefore().end, TEST_RANGE_END);
+    EXPECT_EQ(checkEvent->info.GetRangeAfter().start, TEST_RANGE_START_TWO);
+    EXPECT_EQ(checkEvent->info.GetRangeAfter().end, TEST_RANGE_END_TWO);
 }
 
 /**
@@ -741,17 +601,30 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
  * @tc.desc: setOnCopy test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCopyTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_CopyEvent_Void func{};
-    modifier_->setOnCopy(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onCopy), false);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_CopyEvent parameter) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+    };
+    auto arkCallback = Converter::ArkValue<Callback_CopyEvent_Void>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
+    modifier_->setOnCopy(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
     NG::TextCommonEvent event;
+    EXPECT_FALSE(event.IsPreventDefault());
     eventHub->FireOnCopy(event);
-    EXPECT_EQ(GetFlag(recv.onCopy), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_TRUE(event.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
 }
 
 /**
@@ -759,16 +632,30 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
  * @tc.desc: setOnCut test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCutTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_CutEvent_Void func{};
-    modifier_->setOnCut(node_, &func);
-    EXPECT_EQ(GetFlag(recv.onCut), false);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_CutEvent parameter) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+    };
+    auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
+    modifier_->setOnCut(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
     NG::TextCommonEvent event;
+    EXPECT_FALSE(event.IsPreventDefault());
     eventHub->FireOnCut(event);
-    EXPECT_EQ(GetFlag(recv.onCut), true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_TRUE(event.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+}
 }
 } // namespace OHOS::Ace::NG

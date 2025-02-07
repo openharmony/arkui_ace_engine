@@ -160,7 +160,6 @@ void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderSty
     ret.fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(src.font.value.style);
     dst = ret;
 }
-
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -416,8 +415,9 @@ void OnSubmitImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onCallback = [arkCallback = CallbackHelper(*value)](int32_t param1, NG::TextFieldCommonEvent& param2) {
-        Ark_EnterKeyType enterKey = static_cast<Ark_EnterKeyType>(param1);
-        const auto event = Converter::ArkSubmitEventSync(param2);
+        auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
+        Converter::ConvContext ctx;
+        Ark_SubmitEvent event = Converter::ArkValue<Ark_SubmitEvent>(param2, &ctx);
         arkCallback.Invoke(enterKey, event);
     };
     RichEditorModelNG::SetOnSubmit(frameNode, std::move(onCallback));
@@ -464,7 +464,7 @@ void OnCutImpl(Ark_NativePointer node,
         Ark_CutEvent arkEvent = {
             .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
         };
-        arkCallback.Invoke(arkEvent);
+        arkCallback.InvokeSync(arkEvent);
     };
     RichEditorModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -482,7 +482,7 @@ void OnCopyImpl(Ark_NativePointer node,
         Ark_CopyEvent arkEvent = {
             .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
         };
-        arkCallback.Invoke(arkEvent);
+        arkCallback.InvokeSync(arkEvent);
     };
     RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
