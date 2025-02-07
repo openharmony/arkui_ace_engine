@@ -31,7 +31,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr float SCALE_NUMBER = 0.95f;
 constexpr float TOUCH_DRAG_PIXELMAP_SCALE = 1.05f;
 constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
@@ -77,9 +76,7 @@ void DragControllerFuncWrapper::CreatePreviewNode(RefPtr<FrameNode>& imageNode, 
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetSyncLoad(true);
 
-    float defaultPixelMapScale =
-        asyncCtxData.dragPointerEvent.sourceType == SOURCE_TYPE_MOUSE ? 1.0f : NG::DEFALUT_DRAG_PPIXELMAP_SCALE;
-    UpdatePreviewPositionAndScale(imageNode, frameOffset, defaultPixelMapScale);
+    UpdatePreviewPositionAndScale(imageNode, frameOffset, 1.0f);
     UpdatePreviewAttr(imageNode, asyncCtxData.dragPreviewOption);
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
