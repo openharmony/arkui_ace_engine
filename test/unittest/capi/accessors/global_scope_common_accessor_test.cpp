@@ -253,4 +253,62 @@ HWTEST_F(GlobalScopeCommonAccessorTest, restoreDefaultTest, TestSize.Level1)
     accessor_->restoreDefault();
 }
 
+/**
+ * @tc.name: animateToTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GlobalScopeCommonAccessorTest, animateToTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->animateTo, nullptr);
+
+    Ark_AnimateParam param;
+    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
+    param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.onFinish = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty());
+    param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Number>(Ark_Empty());
+
+    static uint32_t contextId = 123;
+    auto event = [](const Ark_Int32 resourceId) {
+        EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
+    };
+    auto callback = Converter::ArkValue<Callback_Void>(event, contextId);
+
+    accessor_->animateTo(&param, &callback);
+}
+
+/**
+ * @tc.name: animateToImmediatelyTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GlobalScopeCommonAccessorTest, animateToImmediatelyTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->animateToImmediately, nullptr);
+
+    Ark_AnimateParam param;
+    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
+    param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.onFinish = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty());
+    param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Number>(Ark_Empty());
+
+    static uint32_t contextId = 123;
+    auto event = [](const Ark_Int32 resourceId) {
+        EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
+    };
+    auto callback = Converter::ArkValue<Callback_Void>(event, contextId);
+
+    accessor_->animateToImmediately(&param, &callback);
+}
+
 } // namespace OHOS::Ace::NG

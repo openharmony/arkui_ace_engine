@@ -1115,5 +1115,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return false;
 }
+
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
