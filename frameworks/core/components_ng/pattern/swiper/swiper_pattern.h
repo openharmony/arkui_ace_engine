@@ -726,6 +726,7 @@ public:
     }
 
     bool NeedFastAnimation() const;
+    bool IsInFastAnimation() const;
 
     float CalcCurrentTurnPageRate() const;
     int32_t GetFirstIndexInVisibleArea() const;

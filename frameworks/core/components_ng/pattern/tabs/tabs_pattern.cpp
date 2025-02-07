@@ -753,9 +753,14 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->AdjustSymbolStats(index);
     tabBarPattern->UpdateImageColor(index);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    swiperLayoutProperty->UpdateIndex(index);
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    if (!swiperPattern->IsInFastAnimation()) {
+        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(swiperLayoutProperty);
+        swiperLayoutProperty->UpdateIndex(index);
+    }
     tabsLayoutProperty->UpdateIndex(index);
 }
 
