@@ -271,6 +271,11 @@ bool DynamicPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     return false;
 }
 
+void DynamicPattern::SetIsReportFrameEvent(bool isReportFrameEvent)
+{
+    hostConfig_.isReportFrameEvent = isReportFrameEvent;
+}
+
 void DynamicPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(dynamicComponentRenderer_);
@@ -362,6 +367,9 @@ void DynamicPattern::DumpInfo()
         .append(std::to_string(rendererDumpInfo.limitedWorkerInitTime)));
     DumpLog::GetInstance().AddDesc(std::string("loadAbcTime: ")
         .append(std::to_string(rendererDumpInfo.loadAbcTime)));
+    std::string isReportFrameEvent = hostConfig_.isReportFrameEvent ? "true" : "false";
+    DumpLog::GetInstance().AddDesc(std::string("isReportFrameEvent: ")
+        .append(isReportFrameEvent));
 }
 
 void DynamicPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -377,6 +385,8 @@ void DynamicPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("createUiContenTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
     json->Put("limitedWorkerInitTime", std::to_string(rendererDumpInfo.limitedWorkerInitTime).c_str());
     json->Put("loadAbcTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
+    std::string isReportFrameEvent = hostConfig_.isReportFrameEvent ? "true" : "false";
+    json->Put("isReportFrameEvent", isReportFrameEvent.c_str());
 }
 
 void DynamicPattern::InitializeAccessibility()

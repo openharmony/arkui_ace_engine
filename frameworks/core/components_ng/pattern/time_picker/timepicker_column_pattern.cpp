@@ -341,7 +341,7 @@ void TimePickerColumnPattern::OnTouchDown()
 
 void TimePickerColumnPattern::OnTouchUp()
 {
-    SetSelectedMarkFocus();
+    SetSelectedMark();
     if (hoverd_) {
         PlayPressAnimation(hoverColor_);
     } else {
@@ -773,7 +773,7 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-    if (selectedMarkPaint_ && (index == showCount / PICKER_SELECT_AVERAGE)) {
+    if (selectedMarkPaint_ && (index == (showCount / PICKER_SELECT_AVERAGE))) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -859,7 +859,7 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    SetSelectedMarkFocus();
+    SetSelectedMark();
 
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
@@ -1451,7 +1451,7 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
         pipeline->RequestFrame();
     }
 
-    SetSelectedMarkFocus();
+    SetSelectedMark();
 }
 void TimePickerColumnPattern::TossAnimationStoped()
 {
@@ -1535,26 +1535,38 @@ void TimePickerColumnPattern::AddHotZoneRectToText()
     }
 }
 
-void TimePickerColumnPattern::SetSelectedMarkFocus()
+void TimePickerColumnPattern::SetSelectedMarkListener(
+    const std::function<void(const std::string& selectedColumnId)>& listener)
+{
+    focusedListerner_ = listener;
+    if (!circleUtils_) {
+        circleUtils_ = new PickerColumnPatternCircleUtils<TimePickerColumnPattern>();
+    }
+}
+
+void TimePickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     if (pickerTheme->IsCircleDial()) {
-#ifdef ARKUI_WEARABLE
-        SetSelectedMark(pickerTheme, true);
-#endif
+        CHECK_NULL_VOID(circleUtils_);
+        circleUtils_->SetSelectedMark(this, pickerTheme, focus, notify, reRender);
     }
 }
 
-#ifdef ARKUI_WEARABLE
+void TimePickerColumnPattern::SetSelectedMarkId(const std::string &strColumnId)
+{
+    selectedColumnId_ = strColumnId;
+}
+
 void TimePickerColumnPattern::SetSelectedMarkPaint(bool paint)
 {
     selectedMarkPaint_ = paint;
 }
 
-void TimePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
+void TimePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1583,27 +1595,42 @@ void TimePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<Picker
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
-#else
-void TimePickerColumnPattern::SetSelectedMarkListener(const std::function<void(const std::string& focusId)>& listener)
-{
-    (void)listener;
-}
-
-void TimePickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
-{
-    (void)focus;
-    (void)notify;
-    (void)reRender;
-}
-
-void TimePickerColumnPattern::SetSelectedMarkId(const std::string &strColumnId)
-{
-    (void)strColumnId;
-}
-
-#endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
+std::string& TimePickerColumnPattern::GetSelectedColumnId()
+{
+    return selectedColumnId_;
+}
+
+bool TimePickerColumnPattern::IsCrownEventEnded()
+{
+    return isCrownEventEnded_;
+}
+
+int32_t TimePickerColumnPattern::GetDigitalCrownSensitivity()
+{
+    if (crownSensitivity_ == INVALID_CROWNSENSITIVITY) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, DEFAULT_CROWNSENSITIVITY);
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_RETURN(pickerTheme, DEFAULT_CROWNSENSITIVITY);
+        crownSensitivity_ = pickerTheme->GetDigitalCrownSensitivity();
+    }
+
+    return crownSensitivity_;
+}
+
+void TimePickerColumnPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    crownSensitivity_ = crownSensitivity;
+}
+
+bool TimePickerColumnPattern::OnCrownEvent(const CrownEvent& event)
+{
+    CHECK_NULL_RETURN(circleUtils_, false);
+    return circleUtils_->OnCrownEvent(this, event);
+}
+
 void TimePickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
 {
     auto toss = GetToss();
@@ -1612,6 +1639,7 @@ void TimePickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
     toss->SetStart(offsetY);
     yLast_ = offsetY;
     pressed_ = true;
+    isCrownEventEnded_ = false;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.angularVelocity, SceneStatus::START);
@@ -1621,10 +1649,11 @@ void TimePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 {
     SetMainVelocity(event.angularVelocity);
     animationBreak_ = false;
+    isCrownEventEnded_ = false;
     auto toss = GetToss();
     CHECK_NULL_VOID(toss);
-    auto offsetY = GetCrownRotatePx(event);
-
+    CHECK_NULL_VOID(circleUtils_);
+    auto offsetY = circleUtils_->GetCrownRotatePx(event, GetDigitalCrownSensitivity());
     offsetY += yLast_;
     toss->SetEnd(offsetY);
     UpdateColumnChildPosition(offsetY);
@@ -1637,6 +1666,7 @@ void TimePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 {
     SetMainVelocity(event.angularVelocity);
     pressed_ = false;
+    isCrownEventEnded_ = true;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
 

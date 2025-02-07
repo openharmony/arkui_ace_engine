@@ -2331,6 +2331,18 @@ void UIContentImpl::UnFocus()
     CHECK_NULL_VOID(pipelineContext);
 }
 
+void UIContentImpl::ActiveWindow()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]:window active", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    Platform::AceContainer::ActiveWindow(instanceId_);
+}
+
+void UIContentImpl::UnActiveWindow()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]:window unactive", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    Platform::AceContainer::UnActiveWindow(instanceId_);
+}
+
 void UIContentImpl::Destroy()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window destroy", bundleName_.c_str(), moduleName_.c_str(), instanceId_);

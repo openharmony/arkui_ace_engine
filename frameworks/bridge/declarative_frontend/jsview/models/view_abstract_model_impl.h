@@ -220,6 +220,8 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override;
+    void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override {};
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override;

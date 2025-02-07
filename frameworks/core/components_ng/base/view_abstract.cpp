@@ -3553,9 +3553,9 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (useEffect && effectType == EffectType::WINDOW_EFFECT) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+        pipeline->AddWindowActivateChangedCallback(frameNode->GetId());
     } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+        pipeline->RemoveWindowActivateChangedCallback(frameNode->GetId());
     }
     const auto& target = frameNode->GetRenderContext();
     if (target) {
@@ -4495,7 +4495,8 @@ double ViewAbstract::GetOpacity(FrameNode* frameNode)
 BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
 {
     Dimension defaultDimension(0);
-    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt};
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderWidths);
     return target->GetBorderWidthValue(borderWidths);
@@ -4532,7 +4533,8 @@ BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
     return target->GetBorderColorValue(borderColors);
@@ -5437,7 +5439,8 @@ RenderFit ViewAbstract::GetRenderFit(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetOuterBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     CHECK_NULL_RETURN(frameNode, borderColors);
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
@@ -5460,6 +5463,48 @@ void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(b
     CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+}
+
+void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+    int32_t expectedUpdateInterval)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
+void ViewAbstract::SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+    const std::vector<double>& ratioList, int32_t expectedUpdateInterval)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
 
 Color ViewAbstract::GetColorBlend(FrameNode* frameNode)

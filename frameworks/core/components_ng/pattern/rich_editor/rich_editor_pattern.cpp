@@ -146,6 +146,7 @@ RichEditorPattern::RichEditorPattern() :
     styledString_->SetSpanWatcher(WeakClaim(this));
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
+    floatingCaretState_.UpdateOriginCaretColor();
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -4780,12 +4781,12 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
+    floatingCaretState_.UpdateOriginCaretColor();
     auto scrollBar = GetScrollBar();
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBar && scrollbarTheme);
     scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
     scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
-    floatingCaretState_.UpdateOriginCaretColor(SystemProperties::GetColorMode());
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
@@ -5777,8 +5778,8 @@ void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
         DeleteValueInStyledString(length.value_or(INT_MAX), GetTextContentLength() - length.value_or(INT_MAX));
     } else {
         while (textContentLength > length.value_or(INT_MAX)) {
-            DeleteContent(CUSTOM_CONTENT_LENGTH);
             textContentLength -= CalculateDeleteLength(CUSTOM_CONTENT_LENGTH, true);
+            DeleteContent(CUSTOM_CONTENT_LENGTH);
         }
     }
 }
@@ -7005,7 +7006,8 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto touchOffset = Offset(offset.GetX(), std::max(offset.GetY(), static_cast<double>(contentRect_.GetY())));
+    Offset textOffset = ConvertTouchOffsetToTextOffset(touchOffset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     SetCaretTouchMoveOffset(offset);
@@ -7898,6 +7900,11 @@ void RichEditorPattern::CreateHandles()
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
 {
+    if (!IsSelected()) {
+        showSelect_ = true;
+        IF_TRUE(isEditing_, StartTwinkling());
+        return;
+    }
     ShowHandles();
 }
 

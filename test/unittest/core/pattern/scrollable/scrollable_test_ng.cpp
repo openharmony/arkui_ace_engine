@@ -1396,6 +1396,37 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitMouseEvent002
+ * @tc.desc: Test multiSelectable event and mouse scroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, InitMouseEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable.
+     * @tc.expected: create PartiallyMockedScrollable successfully.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    ASSERT_NE(scroll_, nullptr);
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    auto gestureHub = scroll_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->panEventActuator_, nullptr);
+    
+    /**
+     * @tc.steps: step2. execute the InitMouseEbent.
+     * @tc.expected: the isExcludedAxis_ of panEventActuator_ is true.
+     */
+    scrollPn->InitMouseEvent();
+    gestureHub = scroll_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    ASSERT_NE(gestureHub->panEventActuator_, nullptr);
+    EXPECT_TRUE(gestureHub->panEventActuator_->isExcludedAxis_);
+}
+
+/**
  * @tc.name: SetEdgeEffect001
  * @tc.desc: Test SetEdgeEffect
  * @tc.type: FUNC

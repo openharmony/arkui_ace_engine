@@ -500,6 +500,10 @@ public:
         return nullptr;
     }
 
+    virtual void ActiveWindow() {};
+
+    virtual void UnActiveWindow() {};
+
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 };
 

@@ -30,20 +30,29 @@ namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
 } // namespace
 
-#ifdef ARKUI_WEARABLE
 CanvasDrawFunction DatePickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    CanvasDrawFunction drawFunction = GetContentDrawFunctionL<DataPickerRowLayoutProperty>(paintWrapper, pipeline);
-    CHECK_NULL_RETURN(drawFunction, nullptr);
-    return [weak = WeakClaim(this), drawFunction](RSCanvas& canvas) {
-        auto picker = weak.Upgrade();
-        CHECK_NULL_VOID(picker);
-        drawFunction(canvas);
-    };
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (theme->IsCircleDial()) {
+        if (!circleUtils_) {
+            circleUtils_ = new PickerPaintMethodCircleUtils();
+            CHECK_NULL_RETURN(circleUtils_, nullptr);
+        }
+        CanvasDrawFunction drawFunction =
+            circleUtils_->GetContentDrawFunctionL<DataPickerRowLayoutProperty>(paintWrapper, pipeline);
+        CHECK_NULL_RETURN(drawFunction, nullptr);
+        return [weak = WeakClaim(this), drawFunction](RSCanvas& canvas) {
+            auto picker = weak.Upgrade();
+            CHECK_NULL_VOID(picker);
+            drawFunction(canvas);
+        };
+    }
+
+    return nullptr;
 }
-#endif
 
 CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -51,9 +60,8 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    CHECK_NULL_RETURN(theme->IsCircleDial(), nullptr);
+    CHECK_EQUAL_RETURN(theme->IsCircleDial(), true, nullptr);
     auto dividerColor = theme->GetDividerColor();
-
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();

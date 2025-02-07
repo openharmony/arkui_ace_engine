@@ -221,8 +221,9 @@ public:
             touchMoveOffset.reset();
         }
 
-        void UpdateOriginCaretColor(ColorMode colorMode)
+        void UpdateOriginCaretColor()
         {
+            auto colorMode = SystemProperties::GetColorMode();
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
@@ -1097,7 +1098,7 @@ public:
         isStopBackPress_ = isStopBackPress;
     }
 
-    bool IsStopBackPress() const
+    bool IsStopBackPress() const override
     {
         return isStopBackPress_;
     }

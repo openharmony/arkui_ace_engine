@@ -6680,6 +6680,26 @@ ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
     }
     return backdropBlur;
 }
+
+void SetOnVisibleAreaApproximateChange(
+    ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    std::vector<double> ratioList(values, values + size);
+    auto onEvent = [nodeId, extraParam](bool visible, double ratio) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = static_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_VISIBLE_AREA_APPROXIMATE_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = visible;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
+        SendArkUISyncEvent(&event);
+    };
+    ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, interval);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -7105,6 +7125,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setNodeBackdropBlur = SetNodeBackdropBlur,
         .getNodeBackdropBlur = GetNodeBackdropBlur,
         .setDisableDataPrefetch = SetDisableDataPrefetch,
+        .setOnVisibleAreaApproximateChange = SetOnVisibleAreaApproximateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

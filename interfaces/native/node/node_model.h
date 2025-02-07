@@ -53,6 +53,7 @@ struct ArkUI_Node {
     ArkUI_AttributeItem* areaChangeRadio = nullptr;
     void* transitionOption = nullptr;
     void* progressLinearStyle = nullptr;
+    void* visibleAreaEventOptions = nullptr;
 };
 
 struct ArkUI_Context {

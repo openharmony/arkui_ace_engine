@@ -1128,6 +1128,12 @@ public:
         ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios);
     }
 
+    void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override
+    {
+        ViewAbstract::SetOnVisibleAreaApproximateChange(std::move(onVisibleChange), ratioList, expectedUpdateInterval);
+    }
+
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override

@@ -245,6 +245,8 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
+    virtual void WindowActivate(bool isActive) {}
+
     virtual void ContainerModalUnFocus() = 0;
 
     virtual void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) = 0;
@@ -1278,6 +1280,11 @@ public:
         return onFocus_;
     }
 
+    bool GetOnActive() const
+    {
+        return onActive_;
+    }
+
     uint64_t GetVsyncTime() const
     {
         return vsyncTime_;
@@ -1405,6 +1412,11 @@ public:
     virtual bool IsWindowFocused() const
     {
         return GetOnFoucs();
+    }
+
+    virtual bool IsWindowActivated() const
+    {
+        return GetOnActive();
     }
 
     void SetDragNodeGrayscale(float dragNodeGrayscale)
@@ -1600,6 +1612,7 @@ protected:
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
+    std::atomic<bool> onActive_ = false;
     uint64_t lastTouchTime_ = 0;
     uint64_t lastMouseTime_ = 0;
     uint64_t lastDragTime_ = 0;

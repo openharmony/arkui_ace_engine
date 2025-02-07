@@ -251,7 +251,7 @@ bool TimePickerRowPattern::OnCrownEvent(const CrownEvent& event)
             }
             auto pickerColumnPattern = column->GetPattern<TimePickerColumnPattern>();
             CHECK_NULL_RETURN(pickerColumnPattern, false);
-            auto columnID =  pickerColumnPattern->GetselectedColumnId();
+            auto columnID =  pickerColumnPattern->GetSelectedColumnId();
             if (!pickerColumnPattern->IsCrownEventEnded()) {
                 crownPickerColumnPattern = pickerColumnPattern;
                 break;
@@ -711,7 +711,7 @@ uint32_t TimePickerRowPattern::GetHourFromAmPm(bool isAm, uint32_t amPmhour) con
 void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
     std::vector<RefPtr<FrameNode>> tags;
-    if (isEnableCascade_ && !IsStartEndTimeDefined()) {
+    if (wheelModeEnabled_ && isEnableCascade_ && !IsStartEndTimeDefined()) {
         OnDataLinking(tag, isAdd, index, tags);
     }
     for (const auto& tag : tags) {
@@ -883,7 +883,8 @@ void TimePickerRowPattern::UpdateSecondTimeRange()
         optionsTotalCount_[secondColumn]++;
     }
     secondColumnPattern->SetOptions(GetOptionsCount());
-    secondColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+    IsStartEndTimeDefined() ? secondColumnPattern->SetWheelModeEnabled(false)
+                            : secondColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 }
 
 void TimePickerRowPattern::HourChangeBuildTimeRange()
@@ -907,7 +908,8 @@ void TimePickerRowPattern::Hour24ChangeBuildTimeRange()
         optionsTotalCount_[hourColumn]++;
     }
     hourColumnPattern->SetOptions(GetOptionsCount());
-    hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+    IsStartEndTimeDefined() ? hourColumnPattern->SetWheelModeEnabled(false)
+                            : hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
     hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -934,7 +936,8 @@ void TimePickerRowPattern::Hour12ChangeBuildTimeRange()
     }
 
     hourColumnPattern->SetOptions(GetOptionsCount());
-    hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+    IsStartEndTimeDefined() ? hourColumnPattern->SetWheelModeEnabled(false)
+                            : hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 }
 
 void TimePickerRowPattern::MinuteChangeBuildTimeRange(uint32_t hourOf24)
@@ -968,7 +971,8 @@ void TimePickerRowPattern::MinuteChangeBuildTimeRange(uint32_t hourOf24)
     }
 
     minuteColumnPattern->SetOptions(GetOptionsCount());
-    minuteColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+    IsStartEndTimeDefined() ? minuteColumnPattern->SetWheelModeEnabled(false)
+                            : minuteColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 }
 
 void TimePickerRowPattern::OnFontConfigurationUpdate()
@@ -1446,7 +1450,8 @@ void TimePickerRowPattern::HandleHourColumnBuildingRange(const PickerTime& value
             optionsTotalCount_[hourColumn]++;
         }
         hourColumnPattern->SetOptions(GetOptionsCount());
-        hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+        IsStartEndTimeDefined() ? hourColumnPattern->SetWheelModeEnabled(false)
+                                : hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
         hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         HandleAmPmColumnBuilding(value);
@@ -1491,7 +1496,8 @@ void TimePickerRowPattern::HandleAmPmColumnBuilding(const PickerTime& value)
     amPmColumnPattern->SetOptions(GetOptionsCount());
     hourColumnPattern->SetOptions(GetOptionsCount());
     amPmColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
-    hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+    IsStartEndTimeDefined() ? hourColumnPattern->SetWheelModeEnabled(false)
+                            : hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 }
 
 void TimePickerRowPattern::HandleAmPmColumnChange(uint32_t selectedHour)
@@ -1579,7 +1585,8 @@ void TimePickerRowPattern::HandleMinColumnChange(const PickerTime& value)
         optionsTotalCount_[minuteColumn]++;
     }
     minuteColumnPattern->SetOptions(GetOptionsCount());
-    minuteColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+    IsStartEndTimeDefined() ? minuteColumnPattern->SetWheelModeEnabled(false)
+                            : minuteColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 }
 
 void TimePickerRowPattern::SetSelectedTime(const PickerTime& value)

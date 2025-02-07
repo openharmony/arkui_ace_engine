@@ -199,6 +199,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
     textModelNG.SetOnClick(onClickFunc, std::numeric_limits<double>::infinity());
     textModelNG.SetRemoteMessage(onRemoteMessage);
     textModelNG.SetCopyOption(copyOption);
+    textModelNG.SetOnDragStart(OnDragStartFunction);
 }
 
 /**

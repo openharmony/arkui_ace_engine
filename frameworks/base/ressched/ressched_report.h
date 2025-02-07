@@ -35,6 +35,11 @@ constexpr int32_t LOAD_PAGE_NO_REQUEST_FRAME_EVENT = 2;
 constexpr double JUDGE_DISTANCE = 3.125;
 }
 
+struct ReportConfig {
+    bool isReportTid = false;
+    uint64_t tid = 0;
+};
+
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
     const std::unordered_map<std::string, std::string>& payload);
 
@@ -46,7 +51,7 @@ public:
     void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
-    void OnTouchEvent(const TouchEvent& touchEvent);
+    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
@@ -55,19 +60,19 @@ public:
 private:
     ResSchedReport() {}
     ~ResSchedReport() {}
-    void HandleTouchDown(const TouchEvent& touchEvent);
-    void HandleTouchUp(const TouchEvent& touchEvent);
+    void HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchUp(const TouchEvent& touchEvent, const ReportConfig& config);
     bool IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
         int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime);
     bool IsPerSecRateLimit();
     bool IsPerMinRateLimit();
     void HandleKeyDown(const KeyEvent& event);
     void HandleKeyUp(const KeyEvent& event);
-    void HandleTouchMove(const TouchEvent& touchEvent);
-    void HandleTouchCancel(const TouchEvent& touchEvent);
-    void HandleTouchPullDown(const TouchEvent& touchEvent);
-    void HandleTouchPullUp(const TouchEvent& touchEvent);
-    void HandleTouchPullMove(const TouchEvent& touchEvent);
+    void HandleTouchMove(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchCancel(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchPullDown(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchPullUp(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchPullMove(const TouchEvent& touchEvent, const ReportConfig& config);
     double GetUpVelocity(const TouchEvent& lastMoveInfo,
         const TouchEvent& upEventInfo);
     void RecordTouchEvent(const TouchEvent& touchEvent, bool enforce = false);

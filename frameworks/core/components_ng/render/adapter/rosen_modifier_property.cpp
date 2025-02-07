@@ -41,9 +41,21 @@ void AddOrChangeScaleModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     }
 }
 
+void AddOrChangeScaleZModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSScaleZModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSScaleZModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+
 void AddOrChangeSkewModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSSkewModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector3f>>& property, const Rosen::Vector3f& value)
 {
     bool isCreate = CreateOrSetModifierValue(property, value);
     if (isCreate) {
@@ -79,7 +91,7 @@ void AddOrChangeTranslateZModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
 
 void AddOrChangePerspectiveModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSPerspModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector4f>>& property, const Rosen::Vector4f& value)
 {
     bool isCreate = CreateOrSetModifierValue(property, value);
     if (isCreate) {

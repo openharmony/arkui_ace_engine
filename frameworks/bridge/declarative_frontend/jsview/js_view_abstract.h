@@ -279,6 +279,7 @@ public:
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
+    static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);

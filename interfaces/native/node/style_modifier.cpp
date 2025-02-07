@@ -953,6 +953,26 @@ const ArkUI_AttributeItem* GetBackdropBlur(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetAreaChangeApproximateOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    node->visibleAreaEventOptions = item->object;
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAreaChangeApproximateOptions(ArkUI_NodeHandle node)
+{
+    g_attributeItem.object = node->visibleAreaEventOptions;
+    return &g_attributeItem;
+}
+
+void ResetAreaChangeApproximateOptions(ArkUI_NodeHandle node)
+{
+    node->visibleAreaEventOptions = nullptr;
+}
+
 int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if ((!item->string && !item->object) || (item->string && item->object)) {
@@ -14382,6 +14402,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetBackdropBlur,
         SetBackgroundImageResizableWithSlice,
         SetNextFocus,
+        SetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14494,6 +14515,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetTabStop,
         GetBackdropBlur,
         GetBackgroundImageResizableWithSlice,
+        nullptr,
+        GetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14611,6 +14634,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBackdropBlur,
         ResetBackgroundImageResizableWithSlice,
         ResetNextFocus,
+        ResetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
