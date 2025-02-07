@@ -200,7 +200,6 @@ public:
 
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
-    static void SetBackgroundAlign(FrameNode *frameNode, const std::optional<Alignment>& align);
 
     // decoration
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
@@ -496,7 +495,6 @@ public:
     static void ResetPosition(FrameNode* frameNode);
     static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
-    static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
@@ -513,7 +511,7 @@ public:
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
-    static void SetOverlay(FrameNode* frameNode, const std::optional<NG::OverlayOptions>& overlay);
+    static void SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay);
     static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(FrameNode* frameNode, const std::string& bdImageSrc);
     static void SetHasBorderImageSlice(FrameNode* frameNode, bool tag);
@@ -532,13 +530,12 @@ public:
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
-    static void SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& value);
+    static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
         bool followWithoutTransition, bool doRegisterSharedTransition);
     static const std::string GetGeometryTransition(FrameNode* frameNode,
         bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
-    static void SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, const std::optional<PixStretchEffectOption>& option);

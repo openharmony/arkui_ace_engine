@@ -133,16 +133,6 @@ ImageSourceInfo ImageSpanView::GetImageSpanSrc(FrameNode* frameNode)
     return layoutProperty->GetImageSourceInfo().value_or(defaultImageSource);
 }
 
-void ImageSpanView::SetImageSpanSrc(FrameNode* frameNode, const ImageSourceInfo& info)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, frameNode);
-    if (info.IsPixmap()) {
-        const auto& pattern = frameNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetSyncLoad(true);
-    }
-}
-
 ImageFit ImageSpanView::GetObjectFit(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, ImageFit::COVER);

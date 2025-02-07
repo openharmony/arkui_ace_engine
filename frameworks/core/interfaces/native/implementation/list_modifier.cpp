@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "frameworks/core/components_v2/list/list_properties.h"
@@ -415,12 +414,9 @@ void OnItemDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDelete = [callback = CallbackHelper(*value, frameNode)](int32_t index) -> bool {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkIndex);
-        return Converter::Convert<bool>(arkResult);
-    };
-    ListModelNG::SetOnItemDelete(frameNode, std::move(onItemDelete));
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ListModelNG::SetOnItemDelete(frameNode, convValue);
+    LOGE("ListModifier::OnItemDeleteImpl is not implemented yet!\n");
 }
 void OnItemMoveImpl(Ark_NativePointer node,
                     const Callback_Number_Number_Boolean* value)
@@ -428,11 +424,13 @@ void OnItemMoveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemMove = [callback = CallbackHelper(*value, frameNode)](int32_t from, int32_t to) {
+    auto onItemMove = [frameNode](int32_t from, int32_t to) {
         auto arkFrom = Converter::ArkValue<Ark_Number>(from);
         auto arkTo = Converter::ArkValue<Ark_Number>(to);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkFrom, arkTo);
-        return Converter::Convert<bool>(arkResult);
+        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onItemMove(frameNode->GetId(), arkFrom, arkTo);
+        // onItemMove should return bool value but it is a void
+        LOGE("ARKOALA onItemMove doesn`t handle bool returned value");
+        return false;
     };
     ListModelNG::SetOnItemMove(frameNode, std::move(onItemMove));
 }
@@ -442,14 +440,14 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragStart = [callback = CallbackHelper(*value, frameNode), frameNode, node](
-        const ItemDragInfo& dragInfo, int32_t itemIndex
-    ) -> RefPtr<AceType> {
+    auto onItemDragStart = [frameNode](const ItemDragInfo& dragInfo, int32_t itemIndex) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        auto builder =
-            callback.InvokeWithObtainResult<CustomNodeBuilder, Callback_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
-        return CallbackHelper(builder, frameNode).BuildSync(node);
+        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onItemDragStart(
+            frameNode->GetId(), arkDragInfo, arkItemIndex);
+        // onItemDragStart should return value [builder] but it is a void
+        LOGE("ARKOALA onItemDragStart doesn`t handle builder returned value");
+        return nullptr;
     };
     ListModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
@@ -518,16 +516,16 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollFrameBegin = [callback = CallbackHelper(*value, frameNode)](
-            const Dimension& offset, const ScrollState& state
-        ) -> ScrollFrameResult {
+    auto onScrollFrameBegin = [frameNode](const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
         auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
         auto arkState = Converter::ArkValue<Ark_ScrollState>(state);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_Literal_Number_offsetRemain,
-            Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState);
-        return {
-            .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
-        };
+        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onScrollFrameBegin(
+            frameNode->GetId(), arkOffset, arkState);
+        // onScrollFrameBegin should return value [offsetRemain] but it is a void
+        // that is a reason why we return [offset] value as the temporary stub
+        LOGE("ARKOALA onScrollFrameBegin doesn`t handle offsetRemain returned value");
+        return scrollRes;
     };
     ListModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
@@ -619,4 +617,5 @@ const GENERATED_ArkUIListModifier* GetListModifier()
     };
     return &ArkUIListModifierImpl;
 }
+
 }

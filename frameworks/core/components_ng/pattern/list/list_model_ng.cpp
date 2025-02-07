@@ -969,15 +969,6 @@ void ListModelNG::SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScroll
     eventHub->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
 }
 
-void ListModelNG::SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    LOGE("ListModelNG::SetOnItemDelete, the ListEventHub does not support 'OnItemDelete' yet");
-    AddDragFrameNodeToManager(frameNode);
-}
-
 void ListModelNG::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove)
 {
     CHECK_NULL_VOID(frameNode);

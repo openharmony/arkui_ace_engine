@@ -980,10 +980,6 @@ public:
         }
         unitNode_ = unitNode;
     }
-    RefPtr<NG::UINode> GetUnitNode() const
-    {
-        return unitNode_;
-    }
     void AddCounterNode();
     void ClearCounterNode();
     void SetShowError();

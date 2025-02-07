@@ -88,17 +88,6 @@ void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleAc
 }
 
 template<>
-void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src)
-{
-    auto blurStyle = OptConvert<BlurStyle>(src);
-    if (blurStyle) {
-        BlurStyleOption blurStyleOptions;
-        blurStyleOptions.blurStyle = blurStyle.value();
-        dst = blurStyleOptions;
-    }
-}
-
-template<>
 void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
 {
     switch (src) {
@@ -229,16 +218,6 @@ void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringS
 }
 
 template<>
-void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
-{
-    switch (src) {
-        case ARK_IMAGE_ANALYZER_TYPE_TEXT: dst = ImageAnalyzerType::TEXT; break;
-        case ARK_IMAGE_ANALYZER_TYPE_SUBJECT: dst = ImageAnalyzerType::SUBJECT; break;
-        default: LOGE("Unexpected enum value in Ark_ImageAnalyzerType: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
 {
     switch (src) {
@@ -361,52 +340,6 @@ void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src)
 }
 
 template<>
-void AssignCast(std::optional<SheetKeyboardAvoidMode>& dst, const Ark_SheetKeyboardAvoidMode& src)
-{
-    switch (src) {
-        case ARK_SHEET_KEYBOARD_AVOID_MODE_NONE: dst = SheetKeyboardAvoidMode::NONE; break;
-        case ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_RESIZE:
-            dst = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE; break;
-        case ARK_SHEET_KEYBOARD_AVOID_MODE_RESIZE_ONLY: dst = SheetKeyboardAvoidMode::RESIZE_ONLY; break;
-        case ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_SCROLL:
-            dst = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL; break;
-        default: LOGE("Unexpected enum value in Ark_SheetKeyboardAvoidMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<SheetLevel>& dst, const Ark_SheetMode& src)
-{
-    switch (src) {
-        case ARK_SHEET_MODE_OVERLAY: dst = SheetLevel::OVERLAY; break;
-        case ARK_SHEET_MODE_EMBEDDED: dst = SheetLevel::EMBEDDED; break;
-        default: LOGE("Unexpected enum value in Ark_SheetMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<SheetMode>& dst, const Ark_SheetSize& src)
-{
-    switch (src) {
-        case ARK_SHEET_SIZE_MEDIUM: dst = SheetMode::MEDIUM; break;
-        case ARK_SHEET_SIZE_LARGE: dst = SheetMode::LARGE; break;
-        case ARK_SHEET_SIZE_FIT_CONTENT: dst = SheetMode::AUTO; break;
-        default: LOGE("Unexpected enum value in Ark_SheetSize: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src)
-{
-    switch (src) {
-        case ARK_SHEET_TYPE_BOTTOM: dst = SheetType::SHEET_BOTTOM; break;
-        case ARK_SHEET_TYPE_CENTER: dst = SheetType::SHEET_CENTER; break;
-        case ARK_SHEET_TYPE_POPUP: dst = SheetType::SHEET_POPUP; break;
-        default: LOGE("Unexpected enum value in Ark_SheetType: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src)
 {
     switch (src) {
@@ -518,18 +451,6 @@ void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src)
         case ARK_BAR_STATE_AUTO: dst = DisplayMode::AUTO; break;
         case ARK_BAR_STATE_ON: dst = DisplayMode::ON; break;
         default: LOGE("Unexpected enum value in Ark_BarState: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src)
-{
-    switch (src) {
-        case ARK_DRAG_PREVIEW_MODE_AUTO: dst = DragPreviewMode::AUTO; break;
-        case ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE: dst = DragPreviewMode::DISABLE_SCALE; break;
-        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW: dst = DragPreviewMode::ENABLE_DEFAULT_SHADOW; break;
-        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS: dst = DragPreviewMode::ENABLE_DEFAULT_RADIUS; break;
-        default: LOGE("Unexpected enum value in Ark_DragPreviewMode: %{public}d", src);
     }
 }
 
@@ -745,17 +666,6 @@ void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src)
 }
 
 template<>
-void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src)
-{
-    switch (src) {
-        case ARK_ARROW_POINT_POSITION_START: dst = 0.0_pct; break;
-        case ARK_ARROW_POINT_POSITION_CENTER: dst = 0.5_pct; break;
-        case ARK_ARROW_POINT_POSITION_END: dst = 1.0_pct; break;
-        default: LOGE("Unexpected enum value in Ark_ArrowPointPosition: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
 {
     switch (src) {
@@ -957,32 +867,6 @@ void AssignCast(std::optional<SslError>& dst, const Ark_SslError& src)
         case ARK_SSL_ERROR_DATE_INVALID: dst = SslError::DATE_INVALID; break;
         case ARK_SSL_ERROR_UNTRUSTED: dst = SslError::UNTRUSTED; break;
         default: LOGE("Unexpected enum value in Ark_SslError: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src)
-{
-    switch (src) {
-        case ARK_FUNCTION_KEY_ESC: dst = "ESC"; break;
-        case ARK_FUNCTION_KEY_F1: dst = "F1"; break;
-        case ARK_FUNCTION_KEY_F2: dst = "F2"; break;
-        case ARK_FUNCTION_KEY_F3: dst = "F3"; break;
-        case ARK_FUNCTION_KEY_F4: dst = "F4"; break;
-        case ARK_FUNCTION_KEY_F5: dst = "F5"; break;
-        case ARK_FUNCTION_KEY_F6: dst = "F6"; break;
-        case ARK_FUNCTION_KEY_F7: dst = "F7"; break;
-        case ARK_FUNCTION_KEY_F8: dst = "F8"; break;
-        case ARK_FUNCTION_KEY_F9: dst = "F9"; break;
-        case ARK_FUNCTION_KEY_F10: dst = "F10"; break;
-        case ARK_FUNCTION_KEY_F11: dst = "F11"; break;
-        case ARK_FUNCTION_KEY_F12: dst = "F12"; break;
-        case ARK_FUNCTION_KEY_TAB: dst = "TAB"; break;
-        case ARK_FUNCTION_KEY_DPAD_UP: dst = "DPAD_UP"; break;
-        case ARK_FUNCTION_KEY_DPAD_DOWN: dst = "DPAD_DOWN"; break;
-        case ARK_FUNCTION_KEY_DPAD_LEFT: dst = "DPAD_LEFT"; break;
-        case ARK_FUNCTION_KEY_DPAD_RIGHT: dst = "DPAD_RIGHT"; break;
-        default: LOGE("Unexpected enum value in Ark_FunctionKey: %{public}d", src);
     }
 }
 
@@ -1215,17 +1099,6 @@ void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
 }
 
 template<>
-void AssignCast(std::optional<MenuPreviewMode>& dst, const Ark_MenuPreviewMode& src)
-{
-    switch (src) {
-        case ARK_MENU_PREVIEW_MODE_NONE: dst = MenuPreviewMode::NONE; break;
-        case ARK_MENU_PREVIEW_MODE_IMAGE: dst = MenuPreviewMode::IMAGE; break;
-        default:
-            LOGE("Unexpected enum value in Ark_MenuPreviewMode: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src)
 {
     switch (src) {
@@ -1352,15 +1225,6 @@ void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src)
         case ARK_SCROLL_ALIGN_END: dst = ScrollAlign::END; break;
         case ARK_SCROLL_ALIGN_AUTO: dst = ScrollAlign::AUTO; break;
         default: LOGE("Unexpected enum value in Ark_ScrollAlign: %{public}d", src);
-    }
-}
-
-template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollSizeMode& src)
-{
-    switch (src) {
-        case ARK_SCROLL_SIZE_MODE_FOLLOW_DETENT: dst = ScrollSizeMode::FOLLOW_DETENT; break;
-        case ARK_SCROLL_SIZE_MODE_CONTINUOUS: dst = ScrollSizeMode::CONTINUOUS; break;
-        default: LOGE("Unexpected enum value in Ark_ScrollSizeMode: %{public}d", src);
     }
 }
 
@@ -1515,28 +1379,6 @@ void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src)
 }
 
 template<>
-void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src)
-{
-    switch (src) {
-        case ARK_MODAL_TRANSITION_DEFAULT: dst = ModalTransition::DEFAULT; break;
-        case ARK_MODAL_TRANSITION_NONE: dst = ModalTransition::NONE; break;
-        case ARK_MODAL_TRANSITION_ALPHA: dst = ModalTransition::ALPHA; break;
-        default: LOGE("Unexpected enum value in Ark_ModalTransition: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src)
-{
-    switch (src) {
-        case ARK_MODIFIER_KEY_CTRL: dst = ModifierKey::CTRL; break;
-        case ARK_MODIFIER_KEY_SHIFT: dst = ModifierKey::SHIFT; break;
-        case ARK_MODIFIER_KEY_ALT: dst = ModifierKey::ALT; break;
-        default: LOGE("Unexpected enum value in Ark_ModifierKey: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src)
 {
     switch (src) {
@@ -1567,16 +1409,6 @@ void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& sr
         case ARK_TRANSITION_EDGE_END: dst = TransitionEdge::END; break;
         default:
             LOGE("Unknown transition edge type: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
-{
-    switch (src) {
-        case ARK_BLEND_APPLY_TYPE_FAST: dst = BlendApplyType::FAST; break;
-        case ARK_BLEND_APPLY_TYPE_OFFSCREEN: dst = BlendApplyType::OFFSCREEN; break;
-        default: LOGE("Unexpected enum value in Ark_BlendApplyType: %{public}d", src);
     }
 }
 
@@ -1619,26 +1451,6 @@ void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
 }
 
 template<>
-void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src)
-{
-    switch (src) {
-        case ARK_PLACEMENT_LEFT: dst = Placement::LEFT; break;
-        case ARK_PLACEMENT_RIGHT: dst = Placement::RIGHT; break;
-        case ARK_PLACEMENT_TOP: dst = Placement::TOP; break;
-        case ARK_PLACEMENT_BOTTOM: dst = Placement::BOTTOM; break;
-        case ARK_PLACEMENT_TOP_LEFT: dst = Placement::TOP_LEFT; break;
-        case ARK_PLACEMENT_TOP_RIGHT: dst = Placement::TOP_RIGHT; break;
-        case ARK_PLACEMENT_BOTTOM_LEFT: dst = Placement::BOTTOM_LEFT; break;
-        case ARK_PLACEMENT_BOTTOM_RIGHT: dst = Placement::BOTTOM_RIGHT; break;
-        case ARK_PLACEMENT_LEFT_TOP: dst = Placement::LEFT_TOP; break;
-        case ARK_PLACEMENT_LEFT_BOTTOM: dst = Placement::LEFT_BOTTOM; break;
-        case ARK_PLACEMENT_RIGHT_TOP: dst = Placement::RIGHT_TOP; break;
-        case ARK_PLACEMENT_RIGHT_BOTTOM: dst = Placement::RIGHT_BOTTOM; break;
-        default: LOGE("Unknown transition Ark_Placement type: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src)
 {
     switch (src) {
@@ -1671,27 +1483,6 @@ void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& 
 }
 
 template<>
-void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src)
-{
-    switch (src) {
-        case ARK_DIALOG_BUTTON_DIRECTION_AUTO: dst = DialogButtonDirection::AUTO; break;
-        case ARK_DIALOG_BUTTON_DIRECTION_HORIZONTAL: dst = DialogButtonDirection::HORIZONTAL; break;
-        case ARK_DIALOG_BUTTON_DIRECTION_VERTICAL: dst = DialogButtonDirection::VERTICAL; break;
-        default: LOGE("Unexpected enum value in Ark_DialogButtonDirection: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src)
-{
-    switch (src) {
-        case ARK_DIALOG_BUTTON_STYLE_DEFAULT: dst = DialogButtonStyle::DEFAULT; break;
-        case ARK_DIALOG_BUTTON_STYLE_HIGHLIGHT: dst = DialogButtonStyle::HIGHTLIGHT; break;
-        default: LOGE("Unexpected enum value in Ark_DialogButtonStyle: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src)
 {
     switch (src) {
@@ -1708,16 +1499,6 @@ void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src)
         case ARK_RENDER_MODE_ASYNC_RENDER: dst = RenderMode::ASYNC_RENDER; break;
         case ARK_RENDER_MODE_SYNC_RENDER: dst = RenderMode::SYNC_RENDER; break;
         default: LOGE("Unexpected enum value in Ark_RenderMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<ResponseType>& dst, const Ark_ResponseType& src)
-{
-    switch (src) {
-        case ARK_RESPONSE_TYPE_RIGHT_CLICK: dst = ResponseType::RIGHT_CLICK; break;
-        case ARK_RESPONSE_TYPE_LONG_PRESS: dst = ResponseType::LONG_PRESS; break;
-        default: LOGE("Unexpected enum value in Ark_ResponseType: %{public}d", src);
     }
 }
 
@@ -1747,28 +1528,6 @@ void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaTy
         case ARK_HOVER_MODE_AREA_TYPE_TOP_SCREEN: dst = HoverModeAreaType::TOP_SCREEN; break;
         case ARK_HOVER_MODE_AREA_TYPE_BOTTOM_SCREEN: dst = HoverModeAreaType::BOTTOM_SCREEN; break;
         default: LOGE("Unexpected enum value in Ark_HoverModeAreaType: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<SessionType>& dst, const Ark_EmbeddedType& src)
-{
-    switch (src) {
-        case ARK_EMBEDDED_TYPE_EMBEDDED_UI_EXTENSION: dst = SessionType::EMBEDDED_UI_EXTENSION; break;
-        default: LOGE("Unexpected enum value in Ark_EmbeddedType: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState& src)
-{
-    switch (src) {
-        case ARK_SWIPE_ACTION_STATE_COLLAPSED: dst = SwipeActionState::COLLAPSED; break;
-        case ARK_SWIPE_ACTION_STATE_EXPANDED: dst = SwipeActionState::EXPANDED; break;
-        case ARK_SWIPE_ACTION_STATE_ACTIONING: dst = SwipeActionState::ACTIONING; break;
-        default: {
-            LOGE("Unexpected enum value in Ark_SwipeActionState: %{public}d", src);
-        }
     }
 }
 } // namespace OHOS::Ace::NG::Converter

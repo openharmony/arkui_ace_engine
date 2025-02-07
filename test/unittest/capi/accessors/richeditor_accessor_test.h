@@ -21,18 +21,15 @@
 #include "core/interfaces/native/implementation/rich_editor_controller_structs.h"
 
 namespace OHOS::Ace::NG::Converter {
-class ConvContext;
 void AssignArkValue(Ark_DecorationStyleInterface& dst, const TextDecorationStruct& src);
 void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
 void AssignArkValue(Ark_RichEditorTextSpanOptions& dst, const OHOS::Ace::TextSpanOptions& src);
 void AssignArkValue(Ark_RichEditorImageSpanOptions& dst, const OHOS::Ace::ImageSpanOptions& src);
 void AssignArkValue(Ark_RichEditorSymbolSpanOptions& dst, const OHOS::Ace::SymbolSpanOptions& src);
 void AssignArkValue(Ark_RichEditorBuilderSpanOptions& dst, const OHOS::Ace::SpanOptionBase& src);
-void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpanOptionsForUpdate& src,
-    ConvContext *ctx);
-void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style, ConvContext *ctx);
-void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst, const TextSpanOptionsForUpdate& src,
-    ConvContext *ctx);
+void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpanOptionsForUpdate& src);
+void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style);
+void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst, const TextSpanOptionsForUpdate& src);
 void AssignArkValue(Ark_TextAlign& dst, const OHOS::Ace::TextAlign& src);
 void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);
 void AssignArkValue(Ark_LineBreakStrategy& dst, const OHOS::Ace::LineBreakStrategy& src);

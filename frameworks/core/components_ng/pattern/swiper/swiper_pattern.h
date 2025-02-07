@@ -545,8 +545,8 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
-    virtual bool IsAtStart() const;
-    virtual bool IsAtEnd() const;
+    bool IsAtStart() const;
+    bool IsAtEnd() const;
 
     bool IsIndicatorInteractive() const
     {

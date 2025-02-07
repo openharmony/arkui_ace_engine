@@ -26,16 +26,15 @@ namespace XComponentControllerAccessor {
 void DestroyPeerImpl(XComponentControllerPeer* peer)
 {
     CHECK_NULL_VOID(peer);
-    peer->DecRefCount();
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    auto peer = Referenced::MakeRefPtr<XComponentControllerPeer>();
-    peer->IncRefCount();
+    auto peer = new XComponentControllerPeer();
 #ifdef XCOMPONENT_SUPPORTED
     peer->controller = std::make_shared<OHOS::Ace::NG::XComponentControllerNG>();
 #endif //XCOMPONENT_SUPPORTED
-    return Referenced::RawPtr(peer);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -166,8 +165,8 @@ void StartImageAnalyzerImpl(XComponentControllerPeer* peer,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    peer->TriggerStartImageAnalyzer(config, outputArgumentForReturningPromise);
+    CHECK_NULL_VOID(peer && peer->controller);
+    LOGE("XComponentControllerAccessor::StartImageAnalyzerImpl - return promise need to be supported");
 #endif //XCOMPONENT_SUPPORTED
 }
 void StopImageAnalyzerImpl(XComponentControllerPeer* peer)

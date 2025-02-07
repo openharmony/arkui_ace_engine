@@ -194,16 +194,6 @@ void ViewAbstract::SetBackgroundAlign(const Alignment& align)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
 }
 
-void ViewAbstract::SetBackgroundAlign(FrameNode *frameNode, const std::optional<Alignment>& align)
-{
-    if (align.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundAlign, align.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, BackgroundAlign, frameNode);
-    }
-}
-
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1015,7 +1005,6 @@ void ViewAbstract::DisableOnTouch(FrameNode* frameNode)
 
 void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnKey();
@@ -1023,7 +1012,6 @@ void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
 
 void ViewAbstract::DisableOnHover(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnHover();
@@ -1039,7 +1027,6 @@ void ViewAbstract::DisableOnAccessibilityHover(FrameNode* frameNode)
 
 void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnMouse();
@@ -1759,13 +1746,9 @@ void ViewAbstract::SetPivot(const DimensionOffset& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
 }
 
-void ViewAbstract::SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue)
+void ViewAbstract::SetPivot(FrameNode* frameNode, const DimensionOffset& value)
 {
-    if (optValue.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, optValue.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, TransformCenter, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, value, frameNode);
 }
 
 void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
@@ -1791,25 +1774,7 @@ void ViewAbstract::SetRotate(const NG::Vector5F& value)
 
 void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, value, frameNode);
-}
-
-void  ViewAbstract::SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    NG::Vector5F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    int32_t indX = 0;
-    int32_t indY = 1;
-    int32_t indZ = 2;
-    int32_t indA = 3;
-    int32_t indP = 4;
-    rotateVec.x = (value.size() > indX && value[indX].has_value()) ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
-    rotateVec.y = (value.size() > indY && value[indY].has_value()) ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
-    rotateVec.z = (value.size() > indZ && value[indZ].has_value()) ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
-    rotateVec.w = (value.size() > indA && value[indA].has_value()) ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
-    rotateVec.v = (value.size() > indP && value[indP].has_value()) ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
-    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
 }
 
 void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
@@ -3108,13 +3073,6 @@ void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
     gestureHub->SetHitTestMode(hitTestMode);
 }
 
-void ViewAbstract::SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest)
-{
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
-}
-
 void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
@@ -3143,14 +3101,9 @@ void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& g
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
 }
 
-void ViewAbstract::SetOverlay(FrameNode* frameNode, const std::optional<NG::OverlayOptions>& overlay)
+void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
 {
-    if (overlay.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, OverlayText, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay, frameNode);
 }
 
 void ViewAbstract::SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage)
@@ -4143,7 +4096,6 @@ void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventF
 
 void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc)
 {
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
@@ -4151,7 +4103,6 @@ void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEv
 
 void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)
 {
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));

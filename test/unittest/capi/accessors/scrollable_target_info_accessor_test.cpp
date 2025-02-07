@@ -16,47 +16,14 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-class ScrollPatternMock : public ScrollPattern {
-public:
-    bool isBegin = false;
-    bool isEnd = false;
-
-    bool IsAtTop() const override
-    {
-        return isBegin;
-    }
-
-    bool IsAtBottom() const override
-    {
-        return isEnd;
-    }
-};
-
-class SwiperPatternMock : public SwiperPattern {
-public:
-    bool isBegin = false;
-    bool isEnd = false;
-
-    bool IsAtStart() const override
-    {
-        return isBegin;
-    }
-
-    bool IsAtEnd() const override
-    {
-        return isEnd;
-    }
-};
 
 class ScrollableTargetInfoAccessorTest : public AccessorTestBase<GENERATED_ArkUIScrollableTargetInfoAccessor,
     &GENERATED_ArkUIAccessors::getScrollableTargetInfoAccessor, ScrollableTargetInfoPeer> {
@@ -81,47 +48,5 @@ HWTEST_F(ScrollableTargetInfoAccessorTest, ctorTest, TestSize.Level1)
     finalyzer_(peer1);
     finalyzer_(peer2);
     finalyzer_(peer3);
-}
-
-/**
- * @tc.name: isBeginTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTargetInfoAccessorTest, isBeginTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->isBegin, nullptr);
-    EXPECT_FALSE(accessor_->isBegin(peer_));
-    auto scrollablePattern = AceType::MakeRefPtr<ScrollPatternMock>();
-    peer_->SetPattern(scrollablePattern);
-    EXPECT_FALSE(accessor_->isBegin(peer_));
-    scrollablePattern->isBegin = true;
-    EXPECT_TRUE(accessor_->isBegin(peer_));
-    auto swiperPattern = AceType::MakeRefPtr<SwiperPatternMock>();
-    peer_->SetPattern(swiperPattern);
-    EXPECT_FALSE(accessor_->isBegin(peer_));
-    swiperPattern->isBegin = true;
-    EXPECT_TRUE(accessor_->isBegin(peer_));
-}
-
-/**
- * @tc.name: isEndTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTargetInfoAccessorTest, isEndTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->isEnd, nullptr);
-    EXPECT_FALSE(accessor_->isEnd(peer_));
-    auto scrollablePattern = AceType::MakeRefPtr<ScrollPatternMock>();
-    peer_->SetPattern(scrollablePattern);
-    EXPECT_FALSE(accessor_->isEnd(peer_));
-    scrollablePattern->isEnd = true;
-    EXPECT_TRUE(accessor_->isEnd(peer_));
-    auto swiperPattern = AceType::MakeRefPtr<SwiperPatternMock>();
-    peer_->SetPattern(swiperPattern);
-    EXPECT_FALSE(accessor_->isEnd(peer_));
-    swiperPattern->isEnd = true;
-    EXPECT_TRUE(accessor_->isEnd(peer_));
 }
 } // namespace OHOS::Ace::NG

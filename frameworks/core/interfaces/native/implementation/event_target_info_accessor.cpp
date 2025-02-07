@@ -24,14 +24,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
 void DestroyPeerImpl(EventTargetInfoPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->DecRefCount();
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    auto peer = AceType::MakeRefPtr<EventTargetInfoPeer>();
-    peer->IncRefCount();
-    return AceType::RawPtr(peer);
+    return new EventTargetInfoPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -55,4 +52,8 @@ const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
     };
     return &EventTargetInfoAccessorImpl;
 }
+
+struct EventTargetInfoPeer {
+    virtual ~EventTargetInfoPeer() = default;
+};
 }

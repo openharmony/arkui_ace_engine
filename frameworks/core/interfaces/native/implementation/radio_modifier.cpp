@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -60,14 +59,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
         auto indicatorType = Converter::OptConvert<RadioIndicatorType>(options->indicatorType);
         RadioModelNG::SetRadioIndicatorType(frameNode, EnumToInt(indicatorType));
     }
-    auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
-    if (arkBuilder.has_value()) {
-        auto builder = [callback = CallbackHelper(arkBuilder.value(), frameNode), node]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-        RadioModelNG::SetBuilder(frameNode, std::move(builder));
-    }
+    LOGE("ARKOALA Opt_CustomBuilder -> Method is not implemented.");
 }
 } // RadioInterfaceModifier
 namespace RadioAttributeModifier {

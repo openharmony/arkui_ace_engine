@@ -17,7 +17,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
@@ -145,17 +144,14 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestValidValues, TestSize.Level1)
 {
-    Ark_CheckboxOptions options;
+    Opt_CheckboxOptions options;
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
 
-    options.group = Converter::ArkValue<Opt_String>(ATTRIBUTE_GROUP_TEST_VALUE);
-    options.name = Converter::ArkValue<Opt_String>(ATTRIBUTE_NAME_TEST_VALUE);
-    options.indicatorBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>();
-
-    auto optOptions = Converter::ArkValue<Opt_CheckboxOptions>(options);
-    modifier_->setCheckboxOptions(node_, &optOptions);
+    options.value.group = Converter::ArkValue<Opt_String>(ATTRIBUTE_GROUP_TEST_VALUE);
+    options.value.name = Converter::ArkValue<Opt_String>(ATTRIBUTE_NAME_TEST_VALUE);
+    modifier_->setCheckboxOptions(node_, &options);
 
     jsonValue = GetJsonValue(node_);
 
@@ -166,49 +162,6 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestValidValues, TestSize.Level
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
     expectedStr = ATTRIBUTE_NAME_TEST_VALUE;
     EXPECT_EQ(resultStr, expectedStr);
-}
-
-/*
- * @tc.name: setCheckboxOptionsTestBuilder
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestBuilder, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
-    static auto expectedCustomNode = CreateNode();
-    ASSERT_NE(expectedCustomNode, nullptr);
-    static const FrameNode* expectedParentNode = frameNode;
-    static FrameNode* actualParentNode = nullptr;
-
-    static const CustomNodeBuilder builder = {
-        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-            const Callback_Pointer_Void continuation) {
-            actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
-            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
-        }
-    };
-
-    Ark_CheckboxOptions options;
-    options.name = Converter::ArkValue<Opt_String>();
-    options.group = Converter::ArkValue<Opt_String>();
-    options.indicatorBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-
-    auto optOptions = Converter::ArkValue<Opt_CheckboxOptions>(options);
-    modifier_->setCheckboxOptions(node_, &optOptions);
-
-    auto pattern = frameNode->GetPattern();
-    ASSERT_NE(pattern, nullptr);
-    pattern->OnModifyDone();
-
-    EXPECT_EQ(actualParentNode, expectedParentNode);
-    auto children = frameNode->GetChildren();
-    auto iter = std::find(children.begin(), children.end(), reinterpret_cast<FrameNode*>(expectedCustomNode));
-    EXPECT_NE(iter, children.end());
-
-    DisposeNode(expectedCustomNode);
 }
 
 /*

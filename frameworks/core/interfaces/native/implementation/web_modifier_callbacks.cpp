@@ -144,8 +144,6 @@ void OnRequestSelected(const Callback_Void* value,
 bool OnAlert(const Callback_OnAlertEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -158,16 +156,16 @@ bool OnAlert(const Callback_OnAlertEvent_Boolean* value,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebModifier::OnAlertImpl return value can be incorrect");
+    return false;
 }
 
 bool OnBeforeUnload(const Callback_OnBeforeUnloadEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -180,16 +178,16 @@ bool OnBeforeUnload(const Callback_OnBeforeUnloadEvent_Boolean* value,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnBeforeUnloadImpl return value can be incorrect");
+    return false;
 }
 
 bool OnConfirm(const Callback_OnConfirmEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -202,16 +200,16 @@ bool OnConfirm(const Callback_OnConfirmEvent_Boolean* value,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnConfirmImpl return value can be incorrect");
+    return false;
 }
 
 bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -224,16 +222,16 @@ bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnPromptImpl return value can be incorrect");
+    return false;
 }
 
 bool OnConsole(const Callback_OnConsoleEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
@@ -243,9 +241,11 @@ bool OnConsole(const Callback_OnConsoleEvent_Boolean* value,
     auto peer = new ConsoleMessagePeer();
     peer->webConsoleLog = eventInfo->GetMessage();
     parameter.message.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnConsoleImpl return value can be incorrect");
+    return false;
 }
 
 void OnErrorReceive(const Callback_OnErrorReceiveEvent_Void* value,
@@ -326,8 +326,6 @@ void OnRefreshAccessedHistory(const Callback_OnRefreshAccessedHistoryEvent_Void*
 bool OnUrlLoadIntercept(const Type_WebAttribute_onUrlLoadIntercept_callback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -338,9 +336,11 @@ bool OnUrlLoadIntercept(const Type_WebAttribute_onUrlLoadIntercept_callback* val
     parameter.data = Converter::ArkUnion<Ark_Union_String_WebResourceRequest, Ark_String>(
         Converter::ArkValue<Ark_String>(eventInfo->GetData()));
     auto optParam = Converter::ArkValue<Opt_Literal_Union_String_WebResourceRequest_data>(parameter);
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(optParam);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(optParam, continuation);
+    LOGE("WebAttributeModifier::OnUrlLoadInterceptImpl return value can be incorrect");
+    return false;
 }
 
 void OnRenderExited(const Callback_OnRenderExitedEvent_Void* value,
@@ -362,8 +362,6 @@ void OnRenderExited(const Callback_OnRenderExitedEvent_Void* value,
 bool OnShowFileSelector(const Callback_OnShowFileSelectorEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -377,9 +375,11 @@ bool OnShowFileSelector(const Callback_OnShowFileSelectorEvent_Boolean* value,
     auto resultPeer = new FileSelectorResultPeer();
     resultPeer->handler = eventInfo->GetFileSelectorResult();
     parameter.result.ptr = resultPeer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnShowFileSelectorImpl return value can be incorrect");
+    return false;
 }
 
 void OnResourceLoad(const Callback_OnResourceLoadEvent_Void* value,
@@ -446,8 +446,6 @@ void OnScaleChange(const Callback_OnScaleChangeEvent_Void* value,
 bool OnHttpAuthRequest(const Callback_OnHttpAuthRequestEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -460,16 +458,16 @@ bool OnHttpAuthRequest(const Callback_OnHttpAuthRequestEvent_Boolean* value,
     auto peer = new HttpAuthHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnHttpAuthRequestImpl return value can be incorrect");
+    return false;
 }
 
 RefPtr<WebResponse> OnInterceptRequest(const Callback_OnInterceptRequestEvent_WebResourceResponse* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, nullptr);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -480,11 +478,11 @@ RefPtr<WebResponse> OnInterceptRequest(const Callback_OnInterceptRequestEvent_We
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.request.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebResourceResponse,
-        Callback_WebResourceResponse_Void>(parameter);
-    CHECK_NULL_RETURN(arkResult.ptr, nullptr);
-    return reinterpret_cast<WebResourceResponsePeer*>(arkResult.ptr)->handler;
+    Callback_WebResourceResponse_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnInterceptRequestImpl return value can be incorrect");
+    return nullptr;
 }
 
 void OnPermissionRequest(const Callback_OnPermissionRequestEvent_Void* value,
@@ -524,8 +522,6 @@ void OnScreenCaptureRequest(const Callback_OnScreenCaptureRequestEvent_Void* val
 bool OnContextMenuShow(const Callback_OnContextMenuShowEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -539,9 +535,11 @@ bool OnContextMenuShow(const Callback_OnContextMenuShowEvent_Boolean* value,
     auto resultPeer = new WebContextMenuResultPeer();
     resultPeer->handler = eventInfo->GetContextMenuResult();
     parameter.result.ptr = resultPeer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnContextMenuShowImpl return value can be incorrect");
+    return false;
 }
 
 void OnContextMenuHide(const OnContextMenuHideCallback* value,
@@ -884,8 +882,6 @@ void OnLargestContentfulPaint(const OnLargestContentfulPaintCallback* value,
 bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -896,9 +892,11 @@ bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.data.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnLoadInterceptImpl return value can be incorrect");
+    return false;
 }
 
 void OnControllerAttached(const Callback_Void* value, WeakPtr<FrameNode> weakNode, int32_t instanceId)
@@ -1074,8 +1072,6 @@ void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
 bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -1086,9 +1082,11 @@ bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.ptr = peer;
-    auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
-    return result.value_or(false);
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnOverrideUrlLoadingImpl return value can be incorrect");
+    return false;
 }
 
 void OnRenderProcessNotResponding(const OnRenderProcessNotRespondingCallback* value,
@@ -1139,8 +1137,6 @@ WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     WebKeyboardOption opt;
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, opt);
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, opt);
@@ -1169,23 +1165,10 @@ WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
     attributes.values = arkValues.array;
     parameter.attributes = attributes;
 
-    auto frameNode = refNode.GetRawPtr();
-    auto arkCallback = CallbackHelper(*valueCallback, frameNode);
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebKeyboardOptions,
-        Callback_WebKeyboardOptions_Void>(parameter);
-    opt.isSystemKeyboard_ = Converter::Convert<bool>(arkResult.useSystemKeyboard);
-    if (auto enterKeyType = Converter::OptConvert<int32_t>(arkResult.enterKeyType); enterKeyType) {
-        opt.enterKeyTpye_ = enterKeyType.value();
-    }
-    if (auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(arkResult.customKeyboard); optBuilder) {
-        opt.customKeyboardBuilder_ = [
-            callback = CallbackHelper(optBuilder.value(), frameNode),
-            node = reinterpret_cast<Ark_NativePointer>(frameNode)
-        ]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-    }
+    Callback_WebKeyboardOptions_Void continuation;
+    auto arkCallback = CallbackHelper(*valueCallback);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnInterceptKeyboardAttachImpl return value can be incorrect");
     return opt;
 }
 

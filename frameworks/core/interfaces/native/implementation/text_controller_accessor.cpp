@@ -14,14 +14,11 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/layout_manager_peer_impl.h"
-#include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextControllerAccessor {
 void DestroyPeerImpl(TextControllerPeer* peer)
 {
@@ -45,20 +42,12 @@ void CloseSelectionMenuImpl(TextControllerPeer* peer)
 void SetStyledStringImpl(TextControllerPeer* peer,
                          const Ark_StyledString* value)
 {
-    CHECK_NULL_VOID(peer && peer->controller);
-    CHECK_NULL_VOID(value && value->ptr);
-    auto styledStringPeer = reinterpret_cast<StyledStringPeer*>(value->ptr);
-    peer->controller->SetStyledString(styledStringPeer->spanString);
+    LOGW("TextControllerAccessor::SetStyledStringImpl is not implemented");
 }
 Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller, nullptr);
-    auto layoutManagerAccessor = GetLayoutManagerAccessor();
-    CHECK_NULL_RETURN(layoutManagerAccessor, nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(layoutManagerAccessor->ctor());
-    CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
-    layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
-    return layoutManagerPeer;
+    LOGW("TextControllerAccessor::GetLayoutManagerImpl is not implemented");
+    return nullptr;
 }
 } // TextControllerAccessor
 const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()

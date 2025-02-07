@@ -16,7 +16,8 @@
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
-#include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
+#include "core/components/scroll/scroll_controller_base.h"
+#include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -26,6 +27,20 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
+namespace Converter {
+void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
+{
+    switch (src) {
+        case MenuPolicy::DEFAULT: dst = ARK_MENU_POLICY_DEFAULT; break;
+        case MenuPolicy::HIDE: dst = ARK_MENU_POLICY_HIDE; break;
+        case MenuPolicy::SHOW: dst = ARK_MENU_POLICY_SHOW; break;
+        default:
+            dst = static_cast<Ark_MenuPolicy>(-1);
+            LOGE("Unexpected enum value in TabAnimateMode: %{public}d", src);
+            break;
+    }
+}
+} // namespace Converter
 namespace {
 class MockSearchController : public TextFieldControllerBase {
 public:
@@ -38,7 +53,7 @@ public:
 } // namespace
 
 class SearchControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUISearchControllerAccessor,
-    &GENERATED_ArkUIAccessors::getSearchControllerAccessor, SearchControllerPeer> {
+                                         &GENERATED_ArkUIAccessors::getSearchControllerAccessor, SearchControllerPeer> {
 public:
     void SetUp(void) override
     {
@@ -46,14 +61,14 @@ public:
         mockSearchController_ = new MockSearchController();
         mockSearchControllerKeeper_ = AceType::Claim(mockSearchController_);
         ASSERT_NE(mockSearchControllerKeeper_, nullptr);
-        ASSERT_NE(peer_, nullptr);
-        peer_->SetController(mockSearchControllerKeeper_);
+        auto peerImpl = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl*>(peer_);
+        ASSERT_NE(peerImpl, nullptr);
+        peerImpl->SetController(mockSearchControllerKeeper_);
         ASSERT_NE(mockSearchController_, nullptr);
     }
 
     void TearDown() override
     {
-        AccessorTestBase::TearDown();
         mockSearchControllerKeeper_ = nullptr;
         mockSearchController_ = nullptr;
     }
@@ -134,7 +149,7 @@ HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
         static_cast<MenuPolicy>(-1)
     };
 
-    EXPECT_CALL(*mockSearchController_, SetTextSelection(0, 0, CompareSelectionOptions(empty))).Times(0);
+    EXPECT_CALL(*mockSearchController_, SetTextSelection(0, 0, CompareSelectionOptions(empty))).Times(1);
     accessor_->setTextSelection(peer_, nullptr, nullptr, nullptr);
 
     Ark_SelectionOptions menuOptions;

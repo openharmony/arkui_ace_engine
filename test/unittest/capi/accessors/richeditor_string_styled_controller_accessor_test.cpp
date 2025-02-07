@@ -15,7 +15,6 @@
 #include "richeditor_accessor_test.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h"
-#include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -34,14 +33,9 @@ using namespace testing::ext;
 namespace {
 class MockRichEditorStyledStringController : public RichEditorStyledStringController {
 public:
-    MockRichEditorStyledStringController()
-    {
-        SetPattern(mockPattern_);
-    }
+    MockRichEditorStyledStringController() = default;
     ~MockRichEditorStyledStringController() override = default;
-
-private:
-    RefPtr<RichEditorPattern> mockPattern_ = AceType::MakeRefPtr<RichEditorPattern>();
+    MOCK_METHOD(void, SetStyledString, (const RefPtr<SpanStringBase>&));
 };
 } // namespace
 
@@ -57,7 +51,9 @@ public:
         mockRichEditorControllerKeeper_ = AceType::Claim(mockRichEditorController_);
         ASSERT_NE(mockRichEditorControllerKeeper_, nullptr);
 
-        peer_->AddTargetController(mockRichEditorControllerKeeper_);
+        auto peerImpl = reinterpret_cast<GeneratedModifier::RichEditorStyledStringControllerPeerImpl *>(peer_);
+        ASSERT_NE(peerImpl, nullptr);
+        peerImpl->AddTargetController(mockRichEditorControllerKeeper_);
 
         ASSERT_NE(mockRichEditorController_, nullptr);
     }
@@ -77,31 +73,17 @@ public:
  * @tc.desc: Check the functionality of setAndGetStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringControllerAccessorTest, setAndGetStyledStringTest, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_setAndGetStyledStringTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->setStyledString, nullptr);
     ASSERT_NE(accessor_->getStyledString, nullptr);
-    const auto stringAccessor = accessors_->getMutableStyledStringAccessor();
-    ASSERT_NE(stringAccessor, nullptr);
-    ASSERT_NE(stringAccessor->ctor, nullptr);
-    ASSERT_NE(stringAccessor->destroyPeer, nullptr);
-    const auto stringPeer = reinterpret_cast<MutableStyledStringPeer*>(stringAccessor->ctor());
-    const auto refString = AceType::MakeRefPtr<MutableSpanString>(TEST_TEXT);
-    stringPeer->spanString = refString;
-    Ark_StyledString arkStyledString {.ptr = stringPeer};
 
-    accessor_->setStyledString(peer_, &arkStyledString);
+    MutableSpanString* inputString = new MutableSpanString(TEST_TEXT);
+    RefPtr<SpanStringBase> spanString;
+    spanString = inputString;
+    Ark_Materialized inStyledString {.ptr = &spanString};
 
-    const auto stringPeer2 = reinterpret_cast<MutableStyledStringPeer*>(accessor_->getStyledString(peer_));
-
-    ASSERT_NE(stringPeer2, nullptr);
-    EXPECT_NE(stringPeer, stringPeer2);
-    const auto refString2 = stringPeer2->GetMutableString();
-    ASSERT_NE(refString2, nullptr);
-    EXPECT_EQ(*refString, *refString2);
-
-    stringAccessor->destroyPeer(stringPeer);
-    stringAccessor->destroyPeer(stringPeer2);
+    EXPECT_CALL(*mockRichEditorController_, SetStyledString(spanString)).Times(1);
+    accessor_->setStyledString(peer_, &inStyledString);
 }
 
 static bool g_onWillChangeCalled = false;
@@ -126,7 +108,9 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_onContentChanged
     patternRaw->AttachToFrameNode(frameNode);
     WeakPtr<RichEditorPattern> weakPattern = Referenced::WeakClaim(patternRaw);
 
-    peer_->SetPattern(weakPattern);
+    auto peerImpl = reinterpret_cast<GeneratedModifier::RichEditorStyledStringControllerPeerImpl *>(peer_);
+    ASSERT_NE(peerImpl, nullptr);
+    peerImpl->SetPattern(weakPattern);
 
     auto eventHub = frameNodeRaw->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);

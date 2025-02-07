@@ -48,7 +48,6 @@
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
-#include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
@@ -688,10 +687,7 @@ void* createDataPanelNode(ArkUI_Int32 nodeId)
 
 void* createEffectComponentNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = EffectComponentModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createEllipseNode(ArkUI_Int32 nodeId)
@@ -704,14 +700,7 @@ void* createEllipseNode(ArkUI_Int32 nodeId)
 
 void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 {
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto frameNode = UIExtensionModelNG::CreateEmbeddedFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-#else
     return nullptr;
-#endif // WINDOW_SCENE_SUPPORTED
 }
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)

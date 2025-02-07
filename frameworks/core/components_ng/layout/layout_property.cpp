@@ -162,9 +162,8 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     if (filter.IsFastFilter()) {
         return;
     }
-    ExpandSafeAreaToJsonValue(json, filter);
-    PaddingToJsonValue(safeAreaPadding_, "safeAreaPadding", json, filter);
-    PaddingToJsonValue(padding_, "padding", json, filter);
+
+    PaddingToJsonValue(json, filter);
     MarginToJsonValue(json, filter);
 
     json->PutExtAttr("visibility",
@@ -173,42 +172,27 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     json->PutExtAttr("pixelRound", PixelRoundToJsonValue().c_str(), filter);
 }
 
-void LayoutProperty::ExpandSafeAreaToJsonValue(std::unique_ptr<JsonValue>& json,
+void LayoutProperty::PaddingToJsonValue(std::unique_ptr<JsonValue>& json,
     const InspectorFilter& filter) const
 {
-    uint32_t types = SAFE_AREA_TYPE_ALL;
-    uint32_t edges = SAFE_AREA_EDGE_ALL;
-    auto SAJson = JsonUtil::Create(true);
-    if (safeAreaExpandOpts_) {
-        types = safeAreaExpandOpts_->type;
-        edges = safeAreaExpandOpts_->edges;
-    }
-    SafeAreaExpandOpts::TypeToJsonArray(SAJson, types);
-    SafeAreaExpandOpts::EdgeToJsonArray(SAJson, edges);
-    json->PutExtAttr("expandSafeArea", SAJson, filter);
-}
-
-void LayoutProperty::PaddingToJsonValue(const std::unique_ptr<PaddingProperty>& padding,
-    std::string attrName, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    if (padding) {
-        if (!padding->top.has_value() || !padding->right.has_value()
-            || !padding->left.has_value() || !padding->bottom.has_value()) {
+    if (padding_) {
+        if (!padding_->top.has_value() || !padding_->right.has_value()
+            || !padding_->left.has_value() || !padding_->bottom.has_value()) {
             auto paddingJsonValue = JsonUtil::Create(true);
-            paddingJsonValue->Put("top", padding->top.has_value()
-                ? padding->top.value().ToString().c_str() : "0.00vp");
-            paddingJsonValue->Put("right", padding->right.has_value()
-                ? padding->right.value().ToString().c_str() : "0.00vp");
-            paddingJsonValue->Put("bottom", padding->bottom.has_value()
-                ? padding->bottom.value().ToString().c_str() : "0.00vp");
-            paddingJsonValue->Put("left", padding->left.has_value()
-                ? padding->left.value().ToString().c_str() : "0.00vp");
-            json->PutExtAttr(attrName.c_str(), paddingJsonValue->ToString().c_str(), filter);
+            paddingJsonValue->Put("top", padding_->top.has_value()
+                ? padding_->top.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("right", padding_->right.has_value()
+                ? padding_->right.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("bottom", padding_->bottom.has_value()
+                ? padding_->bottom.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("left", padding_->left.has_value()
+                ? padding_->left.value().ToString().c_str() : "0.00vp");
+            json->PutExtAttr("padding", paddingJsonValue->ToString().c_str(), filter);
         } else {
-            json->PutExtAttr(attrName.c_str(), padding->ToJsonString().c_str(), filter);
+            json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
         }
     } else {
-        json->PutExtAttr(attrName.c_str(), "0.00vp", filter);
+        json->PutExtAttr("padding", "0.00vp", filter);
     }
 }
 

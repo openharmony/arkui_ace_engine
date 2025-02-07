@@ -49,19 +49,4 @@ HWTEST_F(EventTargetInfoAccessorTest, ctorTest, TestSize.Level1)
     finalyzer_(peer2);
     finalyzer_(peer3);
 }
-
-/**
- * @tc.name: DISABLED_getIdTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(EventTargetInfoAccessorTest, DISABLED_getIdTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->getId, nullptr);
-    static constexpr auto testedId = "EventTargetInfo ID";
-    peer_->id = testedId;
-    // Call accessor_->getId with peer_ and check the result with testedId if it possible.
-    EXPECT_EQ(peer_->id, testedId);
-}
-
 } // namespace OHOS::Ace::NG

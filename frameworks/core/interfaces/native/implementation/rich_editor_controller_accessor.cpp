@@ -38,6 +38,25 @@ OHOS::Ace::FontStyle Convert(const Ark_FontStyle& src)
 }
 
 template<>
+TextDecoration Convert(const Ark_TextDecorationType& src)
+{
+    switch (src) {
+        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_UNDERLINE:
+            return TextDecoration::UNDERLINE;
+        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_OVERLINE:
+            return TextDecoration::OVERLINE;
+        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_LINE_THROUGH:
+            return TextDecoration::LINE_THROUGH;
+        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE:
+            return TextDecoration::NONE;
+        default:
+            LOGE("Unexpected enum value in Ark_TextDecorationType: %{public}d", src);
+            break;
+    }
+    return TextDecoration::NONE;
+}
+
+template<>
 TextDecorationStruct Convert(const Ark_DecorationStyleInterface& src)
 {
     TextDecorationStruct ret;
@@ -325,16 +344,7 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
     std::optional<ImageSpanOptions> locOptions;
     if (options) {
         locOptions = Converter::OptConvert<ImageSpanOptions>(*options);
-    }
-
-    if (value && locOptions) {
-        auto info = Converter::OptConvert<ImageSourceInfo>(*value);
-        if (info) {
-            locOptions->image = info->GetSrc();
-            locOptions->bundleName = info->GetBundleName();
-            locOptions->moduleName = info->GetModuleName();
-            locOptions->imagePixelMap = info->GetPixmap();
-        }
+        LOGW("RichEditorControllerAccessor::AddImageSpanImpl,Ark_CustomObject::need setting pixel map to options");
     }
     if (locOptions) {
         result = peerImpl->AddImageSpanImpl(locOptions.value());
@@ -353,19 +363,7 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
         locOptions = Converter::OptConvert<SpanOptionBase>(*options);
     }
     if (locOptions) {
-        auto controller = peerImpl->GetController().Upgrade();
-        auto pattern = controller->GetPattern().Upgrade();
-        auto frameNodePtr = pattern->GetHost();
-        if (!value || !controller || !pattern || !frameNodePtr) {
-            result = peerImpl->AddBuilderSpanImpl(locOptions.value());
-        } else {
-            auto frameNode = frameNodePtr.GetRawPtr();
-            auto customNode = CallbackHelper(*value, frameNode).BuildSync(frameNode);
-            auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
-            if (customFrameNode) {
-                result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
-            }
-        }
+        result = peerImpl->AddBuilderSpanImpl(locOptions.value());
     }
     return Converter::ArkValue<Ark_Int32>(result);
 }
@@ -377,12 +375,8 @@ Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer,
     CHECK_NULL_RETURN(peerImpl, 0);
     int32_t result = 0;
     std::optional<SymbolSpanOptions> locOptions;
-    if (options && value) {
+    if (options) {
         locOptions = Converter::OptConvert<SymbolSpanOptions>(*options);
-        auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
-        if (convValue && convValue->symbol) {
-            locOptions->symbolId = convValue->symbol.value();
-        }
     }
     if (locOptions) {
         result = peerImpl->AddSymbolSpanImpl(locOptions.value());

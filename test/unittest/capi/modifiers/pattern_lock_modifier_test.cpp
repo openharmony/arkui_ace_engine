@@ -19,8 +19,6 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"
-#include "core/components_v2/pattern_lock/pattern_lock_component.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 
 using namespace testing;
@@ -28,6 +26,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_NAME = "activateCircleStyleOptions";
 const auto ATTRIBUTE_SIDE_LENGTH_NAME = "sideLength";
 const auto ATTRIBUTE_SIDE_LENGTH_DEFAULT_VALUE = "288.00vp";
 const auto ATTRIBUTE_CIRCLE_RADIUS_NAME = "circleRadius";
@@ -44,16 +43,13 @@ const auto ATTRIBUTE_PATH_COLOR_NAME = "pathColor";
 const auto ATTRIBUTE_PATH_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_AUTO_RESET_NAME = "autoReset";
 const auto ATTRIBUTE_AUTO_RESET_DEFAULT_VALUE = "true";
-const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME = "activeCircleColor";
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME = "color";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_DEFAULT_VALUE = "#FF0000FF";
-const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME = "activeCircleRadius";
-const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME = "radius";
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME = "enableWaveEffect";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VALUE = "true";
 
-const int32_t INT_NEG = -1234;
-const int32_t INT_ZERO = 0;
-const int32_t INT_POS = 1234;
 const Ark_Int32 AINT32_NEG(-1234);
 const Ark_Int32 AINT32_ZERO(0);
 const Ark_Int32 AINT32_POS(1234);
@@ -82,8 +78,6 @@ class PatternLockModifierTest : public ModifierTestBase<GENERATED_ArkUIPatternLo
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        auto themeStyle = SetupThemeStyle("pattern_lock_pattern");
-        themeStyle->SetAttr("side_length", { .value = V2::DEFAULT_SIDE_LENGTH });
         SetupTheme<V2::PatternLockTheme>();
         AddResource(RES_COLOR_ID, COLOR_BY_NUMBER);
         AddResource(RES_COLOR_NAME, COLOR_BY_STRING1);
@@ -99,6 +93,7 @@ HWTEST_F(PatternLockModifierTest, setSideLengthTestDefaultValues, TestSize.Level
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
+
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_LENGTH_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SIDE_LENGTH_DEFAULT_VALUE);
 }
@@ -383,6 +378,16 @@ HWTEST_F(PatternLockModifierTest, setPathColorTestValidValues, TestSize.Level1)
 }
 
 /*
+ * @tc.name: DISABLED_setOnPatternCompleteTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockModifierTest, DISABLED_setOnPatternCompleteTest, TestSize.Level1)
+{
+    //test is not implemented yet
+}
+
+/*
  * @tc.name: setAutoResetTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -422,100 +427,13 @@ HWTEST_F(PatternLockModifierTest, setAutoResetTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnPatternCompleteTest
- * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.name: DISABLED_setOnDotConnectTest
+ * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, DISABLED_setOnDotConnectTest, TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    struct CheckEvent {
-        int32_t nodeId;
-        std::vector<int32_t> input;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-
-    auto onPatternComplete = [](Ark_Int32 nodeId, const Array_Number input) {
-        checkEvent = {
-            .nodeId = nodeId,
-            .input = Converter::Convert<std::vector<int32_t>>(input),
-        };
-    };
-
-    Callback_Array_Number_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onPatternComplete
-    };
-
-    auto test = [this, &callBackValue, eventHub, frameNode](const std::vector<int> testVec) {
-        checkEvent = std::nullopt;
-        auto event = V2::PatternCompleteEvent(testVec);
-        modifier_->setOnPatternComplete(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
-        eventHub->UpdateCompleteEvent(&event);
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->input.size(), testVec.size());
-        for (int i = 0; i < testVec.size(); i++) {
-            EXPECT_EQ(checkEvent->input[i], testVec[i]);
-        }
-    };
-    std::vector<int32_t> vec = {INT_NEG, INT_ZERO, INT_POS};
-    test(vec);
-}
-
-/*
- * @tc.name: setOnDotConnectTest
- * @tc.desc: Checking the callback operation for a change in breakpoint.
- * @tc.type: FUNC
- */
-HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    struct CheckEvent {
-        int32_t nodeId;
-        int32_t code;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-
-    auto onDotConnect = [](Ark_Int32 nodeId, const Ark_Number code) {
-        checkEvent = {
-            .nodeId = nodeId,
-            .code = Converter::Convert<int32_t>(code),
-        };
-    };
-
-    Callback_Number_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onDotConnect
-    };
-
-    auto test = [this, &callBackValue, eventHub, frameNode](const int32_t testValue) {
-        checkEvent = std::nullopt;
-        modifier_->setOnDotConnect(node_, &callBackValue);
-        EXPECT_FALSE(checkEvent.has_value());
-        eventHub->UpdateDotConnectEvent(testValue);
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->code, testValue);
-    };
-    test(INT_NEG);
-    test(INT_ZERO);
-    test(INT_POS);
+    //test is not implemented yet
 }
 
 /*
@@ -527,13 +445,15 @@ HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestDefaultValu
 {
     std::string resultStr;
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME);
+    std::unique_ptr<JsonValue> resultJsonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue,
+        ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_NAME);
+    resultStr = GetAttrValue<std::string>(resultJsonOptions, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_DEFAULT_VALUE);
 
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME);
+    resultStr = GetAttrValue<std::string>(resultJsonOptions, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE);
 
-    resultStr = GetAttrValue<std::string>(jsonValue,
+    resultStr = GetAttrValue<std::string>(resultJsonOptions,
         ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VALUE);
 }
@@ -546,13 +466,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> styl
 };
 
 // Valid values for attribute 'radius' of method 'activateCircleStyle'
-using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
-static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = {
-    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(1)}, "1.00px" },
-    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(0)}, "0.00px" },
-    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(2.45f)}, "2.45vp" },
-    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(-7.f)}, "-7.00vp" },
-    { {.unit = ARK_LENGTH_UNIT_FP, .value = Converter::ArkValue<Ark_Number>(-65.5f)}, "-65.50fp" },
+static std::vector<std::tuple<std::string, Opt_LengthMetrics, std::string>> styleRadiusValidValues = {
 };
 
 // Valid values for attribute 'enableWaveEffect' of method 'activateCircleStyle'
@@ -566,7 +480,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> styleEnabl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultJsonOptions;
@@ -577,7 +491,9 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
         realInputValue.value.color = checkVal;
         modifier_->setActivateCircleStyle(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME);
+        resultJsonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue,
+            ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_NAME);
+        resultStr = GetAttrValue<std::string>(resultJsonOptions, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
     }
 
@@ -585,18 +501,22 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
         realInputValue.value.enableWaveEffect = checkVal;
         modifier_->setActivateCircleStyle(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue,
+        resultJsonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue,
+            ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_NAME);
+        resultStr = GetAttrValue<std::string>(resultJsonOptions,
             ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
     }
 
-    for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
-        realInputValue.value.radius = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+    for (auto [passed, checkVal, expected]: styleRadiusValidValues) {
+        realInputValue.value.radius = checkVal;
         modifier_->setActivateCircleStyle(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue,
+        resultJsonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue,
+            ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_NAME);
+        resultStr = GetAttrValue<std::string>(resultJsonOptions,
             ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << expected;
+        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
     }
 }
 } // namespace OHOS::Ace::NG

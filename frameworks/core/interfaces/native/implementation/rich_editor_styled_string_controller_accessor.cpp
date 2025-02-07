@@ -20,7 +20,6 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
-#include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Materialized& dst, const std::string& src)
@@ -40,16 +39,21 @@ void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeVa
 }
 } // namespace OHOS::Ace::NG::Converter
 
+struct RichEditorStyledStringControllerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 namespace RichEditorStyledStringControllerAccessor {
 void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
 {
-    delete peer;
+    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
 Ark_NativePointer CtorImpl()
 {
-    return new RichEditorStyledStringControllerPeer();
+    auto peerImpl = new RichEditorStyledStringControllerPeerImpl();
+    return reinterpret_cast<RichEditorStyledStringControllerPeer *>(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -61,26 +65,31 @@ void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(styledString);
     CHECK_NULL_VOID(styledString->ptr);
+    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     auto styledStringPeer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
-    peer->SetStyledString(styledStringPeer->spanString);
+    peerImpl->SetStyledString(styledStringPeer->spanString);
 }
 Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
 {
-    auto mutableString = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
-    CHECK_NULL_RETURN(peer && mutableString, mutableString);
-    mutableString->spanString = AceType::DynamicCast<MutableSpanString>(peer->GetStyledString());
-    return mutableString;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    LOGW("RichEditorStyledString Accessor:: GetStyledStringImpl is not implemented");
+    return nullptr;
 }
 Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
     LOGW("RichEditorStyledString Accessor:: GetSelectionImpl is not implemented");
     return nullptr;
 }
 void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
                           const Ark_StyledStringChangedListener* listener)
 {
-    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(listener);
 
     auto onWillChangeArk = Converter::OptConvert<Callback_StyledStringChangeValue_Boolean>(listener->onWillChange);
@@ -92,7 +101,7 @@ void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
         arkCallback.Invoke(changeValue, continuation);
         return true;
     };
-    peer->SetOnWillChange(std::move(onWillChange));
+    peerImpl->SetOnWillChange(std::move(onWillChange));
 
     auto onDidChangeArk = Converter::OptConvert<OnDidChangeCallback>(listener->onDidChange);
     auto onDidChangeCapture = std::make_shared<OnDidChangeCallback>(*onDidChangeArk);
@@ -102,7 +111,7 @@ void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
         arkCallback.Invoke(changeValue.range, changeValue.range);
         LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temporary and will be fixed");
     };
-    peer->SetOnDidChange(std::move(onDidChange));
+    peerImpl->SetOnDidChange(std::move(onDidChange));
 }
 } // RichEditorStyledStringControllerAccessor
 const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor()
@@ -118,4 +127,8 @@ const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyl
     };
     return &RichEditorStyledStringControllerAccessorImpl;
 }
+
+struct RichEditorStyledStringControllerPeer {
+    virtual ~RichEditorStyledStringControllerPeer() = default;
+};
 }

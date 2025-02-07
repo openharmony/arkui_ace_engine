@@ -134,7 +134,6 @@ public:
         }
         return nullptr;
     }
-
 protected:
     CallbackType callback_  = {
         .resource = {.hold = nullptr, .release = nullptr},

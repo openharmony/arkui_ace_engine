@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
@@ -23,16 +22,17 @@ namespace EffectComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = EffectComponentModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // EffectComponentModifier
 namespace EffectComponentInterfaceModifier {
 void SetEffectComponentOptionsImpl(Ark_NativePointer node)
 {
-    // keep it empty because EffectComponent doesn't have any options
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //EffectComponentModelNG::SetSetEffectComponentOptions(frameNode, convValue);
 }
 } // EffectComponentInterfaceModifier
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier()

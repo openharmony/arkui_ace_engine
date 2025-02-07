@@ -119,7 +119,6 @@ void FontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
-    Validator::ValidateNonPercent(convValue);
     TextClockModelNG::SetFontSize(frameNode, convValue);
 }
 void FontStyleImpl(Ark_NativePointer node,

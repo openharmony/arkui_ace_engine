@@ -29,7 +29,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 class RichEditorStyledStringControllerPeerImpl {
 public:
     RichEditorStyledStringControllerPeerImpl() = default;
-    virtual ~RichEditorStyledStringControllerPeerImpl() = default;
 
     void AddTargetController(const WeakPtr<RichEditorStyledStringController> &handler)
     {
@@ -77,8 +76,4 @@ private:
     Ace::WeakPtr<RichEditorStyledStringController> handler_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
-
-struct RichEditorStyledStringControllerPeer
-    : public OHOS::Ace::NG::GeneratedModifier::RichEditorStyledStringControllerPeerImpl {};
-
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_RICHEDITOR_STYLED_CONTROLLER_PEER_IMPL_H

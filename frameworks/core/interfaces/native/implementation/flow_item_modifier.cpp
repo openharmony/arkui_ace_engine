@@ -17,7 +17,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "arkoala_api_generated.h"
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FlowItemModifier {
@@ -33,7 +32,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 namespace FlowItemInterfaceModifier {
 void SetFlowItemOptionsImpl(Ark_NativePointer node)
 {
-    // keep it empty because FlowItem doesn`t have any options
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //FlowItemModelNG::SetSetFlowItemOptions(frameNode, convValue);
 }
 } // FlowItemInterfaceModifier
 const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()

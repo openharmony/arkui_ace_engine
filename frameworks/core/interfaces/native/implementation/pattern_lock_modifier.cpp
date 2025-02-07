@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
-#include "core/components_v2/pattern_lock/pattern_lock_component.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -39,8 +37,9 @@ CircleStyleOptions Convert(const Ark_CircleStyleOptions& src)
 {
     CircleStyleOptions style;
     style.color = OptConvert<Color>(src.color);
-    style.radius = OptConvert<Dimension>(src.radius);
     style.enableWaveEffect = OptConvert<bool>(src.enableWaveEffect);
+    LOGE("PatternLockInterfaceModifier::converter Ark_CircleStyleOptions -> CircleStyleOptions  is not fully"
+        "implemented. Need get style.radius");
     return style;
 }
 }
@@ -155,13 +154,9 @@ void OnPatternCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto call = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* info) {
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(info);
-        CHECK_NULL_VOID(eventInfo);
-        Converter::ArkArrayHolder<Array_Number> arrayHolder(eventInfo->GetInput());
-        arkCallback.Invoke(arrayHolder.ArkValue());
-    };
-    PatternLockModelNG::SetPatternComplete(frameNode, std::move(call));
+    //PatternLockModelNG::SetOnPatternComplete(frameNode, convValue);
+    LOGE("PatternLockInterfaceModifier::OnPatternCompleteImpl -> Method be "
+        "implemented later.");
 }
 void AutoResetImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -177,11 +172,9 @@ void OnDotConnectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto call = [arkCallback = CallbackHelper(*value)](int32_t index) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        arkCallback.Invoke(arkIndex);
-    };
-    PatternLockModelNG::SetDotConnect(frameNode, std::move(call));
+    //PatternLockModelNG::SetOnDotConnect(frameNode, convValue);
+    LOGE("PatternLockInterfaceModifier::OnDotConnectImpl -> Method be "
+        "implemented later.");
 }
 void ActivateCircleStyleImpl(Ark_NativePointer node,
                              const Opt_CircleStyleOptions* value)
@@ -193,7 +186,8 @@ void ActivateCircleStyleImpl(Ark_NativePointer node,
     if (convValue) {
         PatternLockModelNG::SetActiveCircleColor(frameNode, convValue->color);
         PatternLockModelNG::SetEnableWaveEffect(frameNode, convValue->enableWaveEffect);
-        PatternLockModelNG::SetActiveCircleRadius(frameNode, convValue->radius);
+        LOGE("PatternLockInterfaceModifier::ActivateCircleStyleImpl -> Method is not fully"
+            "implemented. Need add PatternLockModelNG::SetActiveCircleRadius");
     }
 }
 } // PatternLockAttributeModifier

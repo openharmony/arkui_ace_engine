@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
@@ -45,11 +44,6 @@ void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
         CalcDimension calcHeight(*height, DimensionUnit::VP);
         dst = std::make_pair(calcWidth, calcHeight);
     }
-}
-template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageContent& src)
-{
-    dst.reset();
 }
 } // Converter
 } // OHOS::Ace::NG
@@ -84,14 +78,9 @@ void SetImageOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    // Note.
-    // This function should skip InitImage invocation if info's optinal is empty.
-    if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
-    }
+    //auto convValue = Converter::OptConvert<type_name>(*src);
+    //ImageModelNG::SetSetImageOptions1(frameNode, convValue);
+    LOGE("Arkoala: Image.SetImageOptions1Impl - method not implemented");
 }
 void SetImageOptions2Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
@@ -272,7 +261,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [callback = CallbackHelper(*value)](const LoadImageSuccessEvent& info) {
+    auto onEvent = [frameNode](const LoadImageSuccessEvent& info) {
         Ark_Type_ImageAttribute_onComplete_callback_event event;
         event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
         event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
@@ -284,7 +273,7 @@ void OnCompleteImpl(Ark_NativePointer node,
         event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
         event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
         auto optEvent = Converter::ArkValue<Opt_Type_ImageAttribute_onComplete_callback_event>(event);
-        callback.Invoke(optEvent);
+        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onComplete(frameNode->GetId(), optEvent);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }

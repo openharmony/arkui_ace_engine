@@ -18,13 +18,12 @@
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "canvas_renderer_peer_impl.h"
-#include "canvas_path_accessor_peer_impl.h"
+#include "canvas_path_peer.h"
 #include "canvas_pattern_peer.h"
 #include "canvas_gradient_peer.h"
 #include "matrix2d_peer.h"
 #include "image_bitmap_peer_impl.h"
 #include "base/utils/utils.h"
-#include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,25 +32,6 @@ const auto ALPHA_LIMIT_MAX = 1.0;
 const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
-const auto EMPTY_STRING = "";
-const auto FILL_RULE_EVEN_ODD = "evenodd";
-const auto DIR_AUTO = "auto";
-const auto DIR_INHERIT = "inherit";
-const auto DIR_LTR = "ltr";
-const auto DIR_RTL = "rtl";
-const auto DOM_CENTER = "center";
-const auto DOM_END = "end";
-const auto DOM_JUSTIFY = "justify";
-const auto DOM_LEFT = "left";
-const auto DOM_RIGHT = "right";
-const auto DOM_START = "start";
-const auto DOM_ALPHABETIC = "alphabetic";
-const auto DOM_BOTTOM = "bottom";
-const auto DOM_HANGING = "hanging";
-const auto DOM_IDEOGRAPHIC = "ideographic";
-const auto DOM_MIDDLE = "middle";
-const auto DOM_TOP = "top";
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -71,94 +51,97 @@ const std::unordered_map<std::string, CompositeOperation> COMPOSITE_TABLE = {
     { "COPY", CompositeOperation::COPY },
     { "XOR", CompositeOperation::XOR }
 };
-std::optional<double> ConvertDimension(
-    GeneratedModifier::CanvasRendererPeerImpl* peerImpl, const Ark_Union_Number_String& src)
+
+const std::set<std::string> FONT_WEIGHTS = {
+    "100", "200", "300", "400", "500", "600", "700", "800", "900",
+    "bold", "bolder", "lighter", "medium", "normal", "regular",
+};
+const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
+const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
+constexpr double DEFAULT_QUALITY = 0.92;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr double DIFF = 1e-10;
+
+void FontParseSize(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
 {
-    std::optional<double> dst = std::nullopt;
-    Converter::VisitUnion(
-        src,
-        [&dst, peerImpl](const Ark_String& value) {
-            auto opt = Converter::OptConvert<Dimension>(value);
-            if (opt) {
-                dst = peerImpl->GetDimension(*opt, true);
+    if (fontProp.find("vp") != std::string::npos) {
+        Dimension dimension = StringUtils::StringToDimension(fontProp);
+        if (dimension.IsNegative()) {
+            return;
+        }
+        if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
+            peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value()));
+        } else if (dimension.Unit() == DimensionUnit::VP) {
+            if (dimension.IsNegative()) {
+                return;
             }
-        },
-        [&dst, peerImpl](const Ark_Number& value) {
-            auto opt = Converter::OptConvert<Dimension>(value);
-            if (opt) {
-                dst = peerImpl->GetDimension(*opt);
-            }
-        },
-        []() {});
-    return dst;
+            peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value()));
+            LOGE("ARKOALA CanvasRendererAccessor::SetFontImpl there is no implementation in controller "
+                 "for getter method of Dimension density.");
+        }
+        peerImpl->TriggerUpdateFontSize(Dimension(0.0));
+    } else {
+        std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
+        Dimension dimension = Dimension(StringUtils::StringToDouble(fontProp));
+        if (dimension.IsNegative()) {
+            return;
+        }
+        peerImpl->TriggerUpdateFontSize(dimension);
+    }
 }
-} // namespace
-namespace Converter {
-template<>
-TextBaseline Convert(const Ark_String& src)
+void FontParseFamilies(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
 {
-    auto baseLine = Converter::Convert<std::string>(src);
-    static const LinearMapNode<TextBaseline> textBaseAlignTable[] = {
-        { DOM_ALPHABETIC, TextBaseline::ALPHABETIC },
-        { DOM_BOTTOM, TextBaseline::BOTTOM },
-        { DOM_HANGING, TextBaseline::HANGING },
-        { DOM_IDEOGRAPHIC, TextBaseline::IDEOGRAPHIC },
-        { DOM_MIDDLE, TextBaseline::MIDDLE },
-        { DOM_TOP, TextBaseline::TOP },
-    };
-    auto index = BinarySearchFindIndex(textBaseAlignTable, ArraySize(textBaseAlignTable), baseLine.c_str());
-    return index < 0 ? TextBaseline::ALPHABETIC : textBaseAlignTable[index].value;
+    std::vector<std::string> fontFamilies;
+    std::stringstream stream(fontProp);
+    std::string fontFamily;
+    while (getline(stream, fontFamily, ',')) {
+        fontFamilies.emplace_back(fontFamily);
+    }
+    peerImpl->TriggerUpdateFontFamilies(fontFamilies);
 }
-template<>
-TextAlign Convert(const Ark_String& src)
+void FontParseStyle(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
 {
-    auto align = Converter::Convert<std::string>(src);
-    static const LinearMapNode<TextAlign> textAlignTable[] = {
-        { DOM_CENTER, TextAlign::CENTER },
-        { DOM_END, TextAlign::END },
-        { DOM_JUSTIFY, TextAlign::JUSTIFY },
-        { DOM_LEFT, TextAlign::LEFT },
-        { DOM_RIGHT, TextAlign::RIGHT },
-        { DOM_START, TextAlign::START },
-    };
-    auto index = BinarySearchFindIndex(textAlignTable, ArraySize(textAlignTable), align.c_str());
-    return index < 0 ? TextAlign::CENTER : textAlignTable[index].value;
+    auto fontStyle = fontProp == DOM_TEXT_FONT_STYLE_ITALIC ? OHOS::Ace::FontStyle::ITALIC : Ace::FontStyle::NORMAL;
+    peerImpl->TriggerUpdateFontStyle(fontStyle);
 }
-template<>
-TextDirection Convert(const Ark_String& src)
+void FontParseWeight(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
 {
-    auto val = Converter::Convert<std::string>(src);
-    static const LinearMapNode<TextDirection> textDirectionTable[] = {
-        { DIR_AUTO, TextDirection::AUTO },
-        { DIR_INHERIT, TextDirection::INHERIT },
-        { DIR_LTR, TextDirection::LTR },
-        { DIR_RTL, TextDirection::RTL },
-    };
-    auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
-    return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
+    auto weight = StringUtils::StringToFontWeight(fontProp, Ace::FontWeight::NORMAL);
+    peerImpl->TriggerUpdateFontWeight(weight);
 }
-template<>
-std::vector<uint32_t> Convert(const Ark_Buffer& src)
+void FontParser(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontStr)
 {
-    std::vector<uint32_t> dst;
-    auto array = (src.data != nullptr) ? static_cast<uint32_t*>(src.data) : nullptr;
-    auto size = static_cast<int64_t>(src.length);
-    if (array && size > 0) {
-        for (int64_t i = 0; i < size; i++) {
-            dst.push_back(array[i]);
+    bool updateFontweight = false;
+    bool updateFontStyle = false;
+    std::vector<std::string> fontProps;
+    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    for (const auto& fontProp : fontProps) {
+        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
+            FontParseWeight(peerImpl, fontProp);
+        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
+            updateFontStyle = true;
+            FontParseStyle(peerImpl, fontProp);
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+            FontParseFamilies(peerImpl, fontProp);
+        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
+            FontParseSize(peerImpl, fontProp);
         }
     }
-    return dst;
+    if (!updateFontStyle) {
+        peerImpl->TriggerUpdateFontStyle(Ace::FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        peerImpl->TriggerUpdateFontWeight(Ace::FontWeight::NORMAL);
+    }
 }
-template<>
-Ace::ImageData Convert(const Ark_ImageData& src)
-{
-    Ace::ImageData dst;
-    dst.dirtyWidth = Converter::Convert<uint32_t>(src.width);
-    dst.dirtyHeight = Converter::Convert<uint32_t>(src.height);
-    dst.data = Converter::Convert<std::vector<uint32_t>>(src.data);
-    return dst;
-}
+
+} // namespace
+namespace Converter {
+
 template<>
 void AssignCast(std::optional<CompositeOperation>& dst, const Ark_String& src)
 {
@@ -187,10 +170,6 @@ Rect Convert(const Ark_Custom_Rect& src)
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
-const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
-const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
-
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(CanvasRendererPeer* peer)
 {
@@ -251,56 +230,28 @@ void BeginPathImpl(CanvasRendererPeer* peer)
 void Clip0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(fillRule);
-    auto opt = Converter::OptConvert<std::string>(*fillRule);
-    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
-    peerImpl->Clip(rule);
+    LOGE("ARKOALA CanvasRendererAccessor::Clip0Impl Opt_String parameter "
+        "should be replaced with a valid ark enum for CanvasFillRule type.");
 }
 void Clip1Impl(CanvasRendererPeer* peer,
                const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(path);
-    CHECK_NULL_VOID(fillRule);
-    auto opt = Converter::OptConvert<std::string>(*fillRule);
-    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
-    CHECK_NULL_VOID(pathImpl);
-    CHECK_NULL_VOID(pathImpl->path);
-    peerImpl->Clip(rule, pathImpl->path);
+    LOGE("ARKOALA CanvasRendererAccessor::Clip1Impl Opt_String parameter "
+        "should be replaced with a valid ark enum for CanvasFillRule type.");
 }
 void Fill0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(fillRule);
-    auto opt = Converter::OptConvert<std::string>(*fillRule);
-    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
-    peerImpl->Fill(rule);
+    LOGE("ARKOALA CanvasRendererAccessor::Fill0Impl Opt_String parameter "
+        "should be replaced with a valid ark enum for CanvasFillRule type.");
 }
 void Fill1Impl(CanvasRendererPeer* peer,
                const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(path);
-    CHECK_NULL_VOID(fillRule);
-    auto opt = Converter::OptConvert<std::string>(*fillRule);
-    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
-    CHECK_NULL_VOID(pathImpl);
-    CHECK_NULL_VOID(pathImpl->path);
-    peerImpl->Fill(rule, pathImpl->path);
+    LOGE("ARKOALA CanvasRendererAccessor::Fill1Impl Opt_String parameter "
+        "should be replaced with a valid ark enum for CanvasFillRule type.");
 }
 void Stroke0Impl(CanvasRendererPeer* peer)
 {
@@ -316,11 +267,11 @@ void Stroke1Impl(CanvasRendererPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(path);
-    CHECK_NULL_VOID(path);
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
-    CHECK_NULL_VOID(pathImpl);
-    CHECK_NULL_VOID(pathImpl->path);
-    peerImpl->TriggerStroke1Impl(pathImpl->path);
+    auto pathPeer = reinterpret_cast<CanvasPathPeer*>(path->ptr);
+    CHECK_NULL_VOID(pathPeer);
+    auto path2D = pathPeer->GetCanvasPath2D();
+    CHECK_NULL_VOID(path2D);
+    peerImpl->TriggerStroke1Impl(path2D);
 }
 Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x0,
@@ -328,53 +279,17 @@ Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x1,
                                            const Ark_Number* y1)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(x0, nullptr);
-    CHECK_NULL_RETURN(y0, nullptr);
-    CHECK_NULL_RETURN(x1, nullptr);
-    CHECK_NULL_RETURN(y1, nullptr);
-    double cx0 = static_cast<double>(Converter::Convert<float>(*x0));
-    double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
-    double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
-    double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
-    auto gradient = peerImpl->CreateLinearGradient(cx0, cy0, cx1, cy1);
-    CHECK_NULL_RETURN(gradient, nullptr);
-    auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
-    CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
-    canvasGradientPeer->SetGradient(gradient);
-    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
+    LOGE("ARKOALA CanvasRendererAccessor::CreateLinearGradientImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark type for CanvasGradient.");
+    return nullptr;
 }
 Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
                                     const Ark_ImageBitmap* image,
                                     const Opt_String* repetition)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(image, nullptr);
-    CHECK_NULL_RETURN(repetition, nullptr);
-    auto bitmap = reinterpret_cast<ImageBitmapPeer*>(image->ptr);
-    CHECK_NULL_RETURN(bitmap, nullptr);
-    auto opt = Converter::OptConvert<std::string>(*repetition);
-    std::string repeat = opt ? *opt : EMPTY_STRING;
-    auto pattern = std::make_shared<OHOS::Ace::Pattern>();
-    pattern->SetImgSrc(bitmap->GetSrc());
-    pattern->SetImageWidth(bitmap->GetWidth());
-    pattern->SetImageHeight(bitmap->GetHeight());
-    pattern->SetRepetition(repeat);
-#if !defined(PREVIEW)
-    auto pixelMap = bitmap->GetPixelMap();
-    pattern->SetPixelMap(pixelMap);
-#endif
-    peerImpl->patterns[peerImpl->patternCount];
-    auto peerPattern = reinterpret_cast<CanvasPatternPeer*>(GetCanvasPatternAccessor()->ctor());
-    CHECK_NULL_RETURN(peerPattern, nullptr);
-    peerPattern->SetCanvasRenderer(AceType::WeakClaim(peerImpl));
-    peerPattern->SetId(peerImpl->patternCount);
-    peerPattern->SetUnit(peerImpl->GetUnit());
-    peerImpl->patternCount++;
-    return reinterpret_cast<Ark_NativePointer>(peerPattern);
+    LOGE("ARKOALA CanvasRendererAccessor::CreatePatternImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark type for CanvasPattern.");
+    return 0;
 }
 Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x0,
@@ -384,89 +299,35 @@ Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* y1,
                                            const Ark_Number* r1)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(x0, nullptr);
-    CHECK_NULL_RETURN(y0, nullptr);
-    CHECK_NULL_RETURN(r0, nullptr);
-    CHECK_NULL_RETURN(x1, nullptr);
-    CHECK_NULL_RETURN(y1, nullptr);
-    CHECK_NULL_RETURN(r1, nullptr);
-    double cx0 = static_cast<double>(Converter::Convert<float>(*x0));
-    double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
-    double cr0 = static_cast<double>(Converter::Convert<float>(*r0));
-    double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
-    double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
-    double cr1 = static_cast<double>(Converter::Convert<float>(*r1));
-    std::vector<double> params;
-    params.insert(params.end(), { cx0, cy0, cr0, cx1, cy1, cr1 });
-    auto gradient = peerImpl->CreateRadialGradient(params);
-    CHECK_NULL_RETURN(gradient, nullptr);
-    auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
-    CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
-    canvasGradientPeer->SetGradient(gradient);
-    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
+    LOGE("ARKOALA CanvasRendererAccessor::CreateRadialGradientImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark enum for CanvasGradient type.");
+    return nullptr;
 }
 Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
                                           const Ark_Number* startAngle,
                                           const Ark_Number* x,
                                           const Ark_Number* y)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(startAngle, nullptr);
-    CHECK_NULL_RETURN(x, nullptr);
-    CHECK_NULL_RETURN(y, nullptr);
-    double ca = static_cast<double>(Converter::Convert<float>(*startAngle));
-    double cx = static_cast<double>(Converter::Convert<float>(*x));
-    double cy = static_cast<double>(Converter::Convert<float>(*y));
-    auto gradient = peerImpl->CreateConicGradient(ca, cx, cy);
-    CHECK_NULL_RETURN(gradient, nullptr);
-    auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
-    CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
-    canvasGradientPeer->SetGradient(gradient);
-    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
+    LOGE("ARKOALA CanvasRendererAccessor::CreateConicGradientImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark enum for CanvasGradient type.");
+    return nullptr;
 }
 Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
                                        const Ark_Number* sw,
                                        const Ark_Number* sh)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(sw, nullptr);
-    CHECK_NULL_RETURN(sh, nullptr);
-    auto width = static_cast<double>(Converter::Convert<float>(*sw));
-    auto height = static_cast<double>(Converter::Convert<float>(*sh));
-    ImageSize imageSize = peerImpl->GetImageSize(0, 0, width, height);
-    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
-    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    peerImpl->ClearImageData();
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageDataImpl Integer Overflow!!! "
-             "The product of finalHeight and finalWidth is too big.");
-    } else {
-        peerImpl->imageData.dirtyWidth = finalWidth;
-        peerImpl->imageData.dirtyHeight = finalHeight;
-        for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
-            peerImpl->imageData.data.push_back(COLOR_WHITE);
-        }
-    }
     LOGE("ARKOALA CanvasRendererAccessor::CreateImageData0Impl return type Ark_NativePointer "
-        "should be replaced with a valid accessor for ImageData.");
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+        "should be replaced with a valid ark type for ImageData.");
+    return nullptr;
 }
 Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
                                        const Ark_ImageData* imagedata)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(imagedata, nullptr);
-    peerImpl->imageData = Converter::Convert<Ace::ImageData>(*imagedata);
-    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData0Impl return type Ark_NativePointer "
-        "should be replaced with a valid accessor for ImageData.");
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData1Impl return type Ark_NativePointer "
+        "should be replaced with a valid ark type for ImageData.");
+    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData1Impl Ark_ImageData includes Ark_ArrayBuffer "
+        "which is partially implemented.");
+    return nullptr;
 }
 Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
                                    const Ark_Number* sx,
@@ -474,32 +335,9 @@ Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
                                    const Ark_Number* sw,
                                    const Ark_Number* sh)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(sx, nullptr);
-    CHECK_NULL_RETURN(sy, nullptr);
-    CHECK_NULL_RETURN(sw, nullptr);
-    CHECK_NULL_RETURN(sh, nullptr);
-    auto x = static_cast<double>(Converter::Convert<float>(*sx));
-    auto y = static_cast<double>(Converter::Convert<float>(*sy));
-    auto width = static_cast<double>(Converter::Convert<float>(*sw));
-    auto height = static_cast<double>(Converter::Convert<float>(*sh));
-    ImageSize imageSize = peerImpl->GetImageSize(x, y, width, height);
-    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
-    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    peerImpl->ClearImageData();
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageDataImpl Integer Overflow!!! "
-             "The product of finalHeight and finalWidth is too big.");
-        return reinterpret_cast<Ark_NativePointer>(peerImpl);
-    }
-    std::unique_ptr<Ace::ImageData> canvasData = peerImpl->GetImageData(imageSize);
-    CHECK_NULL_RETURN(canvasData, nullptr);
-    if (canvasData) {
-        peerImpl->imageData = *canvasData;
-    }
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+    LOGE("ARKOALA CanvasRendererAccessor::GetImageDataImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark type for ImageData.");
+    return nullptr;
 }
 Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
                                   const Ark_Number* sx,
@@ -507,43 +345,17 @@ Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
                                   const Ark_Number* sw,
                                   const Ark_Number* sh)
 {
-#ifdef PIXEL_MAP_SUPPORTED
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(sx, nullptr);
-    CHECK_NULL_RETURN(sy, nullptr);
-    CHECK_NULL_RETURN(sw, nullptr);
-    CHECK_NULL_RETURN(sh, nullptr);
-    auto x = static_cast<double>(Converter::Convert<float>(*sx));
-    auto y = static_cast<double>(Converter::Convert<float>(*sy));
-    auto width = static_cast<double>(Converter::Convert<float>(*sw));
-    auto height = static_cast<double>(Converter::Convert<float>(*sh));
-    ImageSize imageSize = peerImpl->GetImageSize(x, y, width, height);
-    peerImpl->ClearImageData();
-    peerImpl->GetPixelMap(imageSize);
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
-#else
-    LOGE("ARKOALA CanvasRendererAccessor::GetPixelMapImpl PixelMap is not supported on current platform.");
-    return 0;
-#endif
+    LOGE("ARKOALA CanvasRendererAccessor::GetPixelMapImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark type for PixelMap.");
+    return nullptr;
 }
 void PutImageData0Impl(CanvasRendererPeer* peer,
                        const Ark_ImageData* imagedata,
                        const Ark_Union_Number_String* dx,
                        const Ark_Union_Number_String* dy)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(imagedata);
-    CHECK_NULL_VOID(dx);
-    CHECK_NULL_VOID(dy);
-    ImageSizeExt ext;
-    auto src = Converter::Convert<Ace::ImageData>(*imagedata);
-    ext.x = ConvertDimension(peerImpl, *dx);
-    ext.y = ConvertDimension(peerImpl, *dy);
-    peerImpl->PutImageData(src, ext);
+    LOGE("ARKOALA CanvasRendererAccessor::PutImageData0Impl Ark_ImageData includes Ark_ArrayBuffer "
+        "which is partially implemented.");
 }
 void PutImageData1Impl(CanvasRendererPeer* peer,
                        const Ark_ImageData* imagedata,
@@ -554,25 +366,8 @@ void PutImageData1Impl(CanvasRendererPeer* peer,
                        const Ark_Union_Number_String* dirtyWidth,
                        const Ark_Union_Number_String* dirtyHeight)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(imagedata);
-    CHECK_NULL_VOID(dx);
-    CHECK_NULL_VOID(dy);
-    CHECK_NULL_VOID(dirtyX);
-    CHECK_NULL_VOID(dirtyY);
-    CHECK_NULL_VOID(dirtyWidth);
-    CHECK_NULL_VOID(dirtyHeight);
-    ImageSizeExt ext;
-    auto src = Converter::Convert<Ace::ImageData>(*imagedata);
-    ext.x = ConvertDimension(peerImpl, *dx);
-    ext.y = ConvertDimension(peerImpl, *dy);
-    ext.dirtyX = ConvertDimension(peerImpl, *dirtyX);
-    ext.dirtyY = ConvertDimension(peerImpl, *dirtyY);
-    ext.dirtyWidth = ConvertDimension(peerImpl, *dirtyWidth);
-    ext.dirtyHeight = ConvertDimension(peerImpl, *dirtyHeight);
-    peerImpl->PutImageData(src, ext);
+    LOGE("ARKOALA CanvasRendererAccessor::PutImageData1Impl Ark_ImageData includes Ark_ArrayBuffer "
+        "which is partially implemented.");
 }
 void GetLineDashImpl(CanvasRendererPeer* peer)
 {
@@ -723,15 +518,8 @@ void FillTextImpl(CanvasRendererPeer* peer,
 Ark_NativePointer MeasureTextImpl(CanvasRendererPeer* peer,
                                   const Ark_String* text)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(text, nullptr);
-    auto content = Converter::Convert<std::string>(*text);
-    auto opt = peerImpl->GetTextMetrics(content);
-    CHECK_NULL_RETURN(opt, nullptr);
     LOGE("ARKOALA CanvasRendererAccessor::MeasureTextImpl return type Ark_NativePointer "
-         "should be replaced with an accessor type for TextMetrics.");
+        "should be replaced with a valid ark type for TextMetrics.");
     return nullptr;
 }
 void StrokeTextImpl(CanvasRendererPeer* peer,
@@ -761,18 +549,9 @@ void StrokeTextImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(GetMatrix2DAccessor()->ctor());
-    CHECK_NULL_RETURN(matrixPeer, nullptr);
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto opt = peerImpl->GetTransform();
-        if (opt) {
-            matrixPeer->transform = *opt;
-        }
-    }
-    return reinterpret_cast<Ark_NativePointer>(matrixPeer);
+    LOGE("ARKOALA CanvasRendererAccessor::GetTransformImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark type for Matrix2D.");
+    return nullptr;
 }
 void ResetTransformImpl(CanvasRendererPeer* peer)
 {
@@ -903,20 +682,6 @@ void TranslateImpl(CanvasRendererPeer* peer,
 void SetPixelMapImpl(CanvasRendererPeer* peer,
                      const Opt_PixelMap* value)
 {
-#ifdef PIXEL_MAP_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(value);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto opt = Converter::OptConvert<Ark_PixelMap>(*value);
-    CHECK_NULL_VOID(opt);
-    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(opt->ptr);
-    CHECK_NULL_VOID(pixelMapPeer);
-    peerImpl->SetPixelMap(pixelMapPeer->pixelMap);
-#else
-    LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl function 'setPixelMap'"
-         " is not supported on the current platform.");
-#endif
 }
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
                                  const Ark_ImageBitmap* bitmap)
@@ -1059,12 +824,8 @@ Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
 void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
                                   const Ark_String* imageSmoothingQuality)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(imageSmoothingQuality);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto quality = Converter::Convert<std::string>(*imageSmoothingQuality);
-    peerImpl->SetImageSmoothingQuality(quality);
+    LOGE("ARKOALA CanvasRendererAccessor::SetImageSmoothingQualityImpl Ark_String type parameter "
+        "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
 }
 Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
 {
@@ -1077,23 +838,14 @@ Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
 void SetLineCapImpl(CanvasRendererPeer* peer,
                     const Ark_String* lineCap)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(lineCap);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto capStr = Converter::Convert<std::string>(*lineCap);
-    peerImpl->SetLineCap(capStr);
+    LOGE("ARKOALA CanvasRendererAccessor::SetLineCapImpl return type Ark_NativePointer "
+        "should be replaced with a valid ark enum for CanvasLineCap type.");
 }
 Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
-
-    double offset = peerImpl->TriggerGetLineDashOffsetImpl();
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl return type Ark_Int32 "
-         "should be replaced with a valid Ark_Number for LineDashParam offset double type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(offset));
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl there is no implementation in controller "
+        "for getter method of LineDashOffset.");
+    return 0;
 }
 void SetLineDashOffsetImpl(CanvasRendererPeer* peer,
                            const Ark_Number* lineDashOffset)
@@ -1117,12 +869,8 @@ Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
 void SetLineJoinImpl(CanvasRendererPeer* peer,
                      const Ark_String* lineJoin)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(lineJoin);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto joinStr = Converter::Convert<std::string>(*lineJoin);
-    peerImpl->SetLineJoin(joinStr);
+    LOGE("ARKOALA CanvasRendererAccessor::SetLineJoinImpl Ark_String type parameter "
+        "should be replaced with a valid ark enum for CanvasLineJoin type.");
 }
 Ark_Int32 GetLineWidthImpl(CanvasRendererPeer* peer)
 {
@@ -1236,12 +984,8 @@ Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(direction);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto dir = Converter::Convert<TextDirection>(*direction);
-    peerImpl->SetTextDirection(dir);
+    LOGE("ARKOALA CanvasRendererAccessor::SetDirectionImpl Ark_String type parameter "
+        "should be replaced with a valid ark enum for CanvasDirection type.");
 }
 void GetFontImpl(CanvasRendererPeer* peer)
 {
@@ -1256,7 +1000,7 @@ void SetFontImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     auto fontStr = Converter::Convert<std::string>(*font);
 
-    peerImpl->SetFont(fontStr);
+    FontParser(peerImpl, fontStr);
 }
 Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 {
@@ -1269,12 +1013,8 @@ Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 void SetTextAlignImpl(CanvasRendererPeer* peer,
                       const Ark_String* textAlign)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(textAlign);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto align = Converter::Convert<TextAlign>(*textAlign);
-    peerImpl->SetTextAlign(align);
+    LOGE("ARKOALA CanvasRendererAccessor::SetTextAlignImpl Ark_String type parameter "
+        "should be replaced with a valid ark enum for CanvasTextAlign type.");
 }
 Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 {
@@ -1287,12 +1027,8 @@ Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(textBaseline);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto baseLine = Converter::Convert<TextBaseline>(*textBaseline);
-    peerImpl->SetTextBaseline(baseLine);
+    LOGE("ARKOALA CanvasRendererAccessor::SetTextBaselineImpl Ark_String type parameter "
+        "should be replaced with a valid ark enum for CanvasTextBaseline type.");
 }
 } // CanvasRendererAccessor
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()

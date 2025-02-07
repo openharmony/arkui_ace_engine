@@ -16,9 +16,10 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_INPUT_CONTROLLER_PEER_H
 
 #include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
 
-struct TextInputControllerPeer : public TextContentControllerBasePeer {
+using TextFieldController = OHOS::Ace::RefPtr<OHOS::Ace::TextFieldControllerBase>;
+
+struct TextInputControllerPeer {
     const TextFieldController& GetController() const
     {
         return controller_;
@@ -28,5 +29,7 @@ struct TextInputControllerPeer : public TextContentControllerBasePeer {
     {
         controller_ = controller;
     }
+private:
+    TextFieldController controller_;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_INPUT_CONTROLLER_PEER_H

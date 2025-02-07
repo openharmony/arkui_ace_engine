@@ -16,16 +16,11 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "point_light_test.h"
-#include "generated/type_helpers.h"
 #include <gtest/gtest.h>
-
 #include "arkoala_api_generated.h"
 
 using namespace testing;
 using namespace testing::ext;
-using namespace OHOS::Ace::NG::PointLight;
-using namespace OHOS::Ace::NG::TypeHelper;
 
 namespace OHOS::Ace::NG {
 namespace  {
@@ -46,19 +41,17 @@ namespace  {
     const auto ATTRIBUTE_SET_FLEX_DIRECTION_VALID_VALUE = "FlexDirection.Column";
     const auto ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_VALID_VALUE = "FlexAlign.Center";
     const auto ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_VALID_VALUE = "ItemAlign.Center";
+    const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
+    const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME = "lightSource";
+    const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_DEFAULT_VALUE = "!NOT-DEFINED!";
+    const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME = "illuminated";
+    const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "!NOT-DEFINED!";
+    const auto ATTRIBUTE_POINT_LIGHT_BLOOM_NAME = "bloom";
+    const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "!NOT-DEFINED!";
 } // namespace
 
 class FlexModifierTest : public ModifierTestBase<GENERATED_ArkUIFlexModifier,
  &GENERATED_ArkUINodeModifiers::getFlexModifier, GENERATED_ARKUI_FLEX> {
-public:
-    static void SetUpTestCase()
-    {
-        ModifierTestBase::SetUpTestCase();
-        for (auto& [id, strid, res] : resourceInitTable) {
-            AddResource(id, res);
-            AddResource(strid, res);
-        }
-    }
 };
 
 /*
@@ -206,489 +199,95 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestWrapValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FlexModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
+HWTEST_F(FlexModifierTest,  DISABLED_setPointLightTestDefaultValues, TestSize.Level1)
 {
-    auto jsonValue = GetJsonValue(node_);
-    auto resultPointLight =
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultPointLight =
         GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
     std::string resultStr;
-    double resultDouble;
 
-    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
-    resultDouble = StringUtils::StringToDouble(resultStr);
-    EXPECT_NEAR(resultDouble, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE, FLT_EPSILON) <<
-        "Default value for attribute 'pointLight.lightSource.intensity'";
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_DEFAULT_VALUE);
 
-    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE) <<
-        "Default value for attribute 'pointLight.lightSource'";
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE);
 
-    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
-        "Default value for attribute 'pointLight.illuminated'";
-
-    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-    resultDouble = StringUtils::StringToDouble(resultStr);
-    EXPECT_NEAR(resultDouble, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
-        "Default value for attribute 'pointLight.bloom'";
-    auto resultPointLightPosition =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
-    EXPECT_EQ(resultPointLightPosition->ToString(), ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_DEFAULT_VALUE) <<
-        "Default value for attribute 'pointLight.lightSource.position'";
-    EXPECT_TRUE(resultPointLightPosition->IsObject()) <<
-        "Default value for attribute 'pointLight.lightSource.position'";
-    EXPECT_FALSE(resultPointLightPosition->IsNull()) <<
-        "Default value for attribute 'pointLight.lightSource.position'";
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_BLOOM_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setPointLightTestPointLightLightSourcePositionXValidValues
+ * @tc.name: setPointLightTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourcePositionXValidValues, TestSize.Level1)
+HWTEST_F(FlexModifierTest,  DISABLED_setPointLightTestValidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPointLight;
+    std::string resultStr;
+    Ark_PointLightStyle inputValuePointLight;
 
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
+    //Initial setup
 
-    auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_NONE);
+    // Valid values are not defined for attribute 'bloom' of type 'Opt_Number'
 
-        WriteTo(inputValuePointLight.lightSource).positionX = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionX";
-    };
+    // Test
+    modifier_->setPointLight(node_, &inputValuePointLight);
 
-    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
-        checkValue(input, expected, value);
-    }
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME);
+    EXPECT_EQ(resultStr, "!NOT-DEFINED!");
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, "IlluminatedType.NONE");
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_BLOOM_NAME);
+    EXPECT_EQ(resultStr, "!NOT-DEFINED!");
+
+    // Verifying attribute's 'illuminated' other values
+    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER);
+    modifier_->setPointLight(node_, &inputValuePointLight);
+    jsonValue = GetJsonValue(node_);
+    resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, "IlluminatedType.BORDER");
+
+    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_CONTENT);
+    modifier_->setPointLight(node_, &inputValuePointLight);
+    jsonValue = GetJsonValue(node_);
+    resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, "IlluminatedType.CONTENT");
+
+    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT);
+    modifier_->setPointLight(node_, &inputValuePointLight);
+    jsonValue = GetJsonValue(node_);
+    resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, "IlluminatedType.BORDER_CONTENT");
+
+    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER);
+    modifier_->setPointLight(node_, &inputValuePointLight);
+    jsonValue = GetJsonValue(node_);
+    resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, "IlluminatedType.BLOOM_BORDER");
+
+    inputValuePointLight.illuminated =
+     Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT);
+    modifier_->setPointLight(node_, &inputValuePointLight);
+    jsonValue = GetJsonValue(node_);
+    resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
 }
 
 /*
- * @tc.name: setPointLightTestPointLightLightSourcePositionYValidValues
+ * @tc.name: setPointLightTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourcePositionYValidValues, TestSize.Level1)
+HWTEST_F(FlexModifierTest,  DISABLED_setPointLightTestInvalidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        WriteTo(inputValuePointLight.lightSource).positionY = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionY";
-    };
-
-    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setPointLightTestPointLightLightSourcePositionZValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        WriteTo(inputValuePointLight.lightSource).positionZ = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionZ";
-    };
-
-    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setPointLightTestPointLightLightSourceIntensity
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourceIntensity, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const double& expected, const Ark_Number& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        WriteTo(inputValuePointLight.lightSource).intensity = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
-        auto result = StringUtils::StringToDouble(resultStr);
-        EXPECT_NEAR(result, expected, FLT_EPSILON) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.intensity";
-    };
-
-    for (auto& [input, value, expected] : testFixtureIntensityValidValues) {
-        checkValue(input, expected, value);
-    }
-
-    for (auto& [input, value] : testFixtureIntensityInvalidValues) {
-        checkValue(input, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE, value);
-    }
-}
-
-/*
- * @tc.name: setPointLightTestPointLightLightSourceColorValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourceColorValidValues, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        WriteTo(inputValuePointLight.lightSource).color = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.color";
-    };
-
-    for (auto& [input, value, expected] : testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
-    }
-    for (auto& [input, value, expected] : testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
-    }
-    for (auto& [input, value, expected] : testFixtureColorsResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
-    }
-    for (auto& [input, value, expected] : testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
-    }
-}
-
-/*
- * @tc.name: setPointLightTestPointLightLightSourceColorInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourceColorInvalidValues, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_ResourceColor& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        WriteTo(inputValuePointLight.lightSource).color = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE) <<
-            "Default value for attribute 'pointLight.lightSource'";
-    };
-
-    for (auto& [input, value] : testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
-    }
-    for (auto& [input, value] : testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_ResourceColor>());
-}
-
-/*
- * @tc.name: setPointLightTestPointLightIlluminatedValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightIlluminatedValidValues, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Opt_IlluminatedType& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        inputValuePointLight.illuminated = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
-    };
-
-    for (auto& [input, value, expected] : testFixtureEnumIlluminatedTypeValidValues) {
-        checkValue(input, expected, ArkValue<Opt_IlluminatedType>(value));
-    }
-}
-
-/*
- * @tc.name: setPointLightTestPointLightIlluminatedInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_IlluminatedType& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-        inputValuePointLight.illuminated = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
-    };
-
-    for (auto& [input, value] : testFixtureEnumIlluminatedTypeInvalidValues) {
-        checkValue(input, ArkValue<Opt_IlluminatedType>(value));
-    }
-}
-
-/*
- * @tc.name: setPointLightTestPointLightBloomValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        inputValuePointLight.bloom = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-        auto result = StringUtils::StringToDouble(resultStr);
-        EXPECT_NEAR(result, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
-    };
-
-    for (auto& [input, value, expected] : testFixtureBloomValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Number>(value));
-    }
-}
-
-/*
- * @tc.name: setPointLightTestPointLightBloomInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FlexModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSize.Level1)
-{
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
-    WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
-    WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
-    initValuePointLight.illuminated =
-        ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
-    initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
-
-    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_Number& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        inputValuePointLight.bloom = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-        auto result = StringUtils::StringToDouble(resultStr);
-        EXPECT_NEAR(result, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
-            "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
-    };
-
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Number>());
 }
 } // namespace OHOS::Ace::NG

@@ -14,13 +14,113 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/text/html_utils.h"
+#include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG {
+using StyleValueOptions = std::variant<
+    Ark_TextStyle_styled_string,
+    Ark_DecorationStyle,
+    Ark_BaselineOffsetStyle,
+    Ark_LetterSpacingStyle,
+    Ark_TextShadowStyle,
+    Ark_GestureStyle,
+    Ark_ImageAttachment,
+    Ark_ParagraphStyle,
+    Ark_LineHeightStyle,
+    Ark_UrlStyle,
+    Ark_CustomSpan,
+    Ark_UserDataSpan,
+    Ark_BackgroundColorStyle
+>;
+
+
+struct MarginOptions {
+    std::optional<MarginProperty> margin;
+};
+
+struct StyleOptions {
+    int32_t start = 0;
+    int32_t length = 0;
+    std::optional<Ace::SpanType> styledKey;
+    std::optional<StyleValueOptions> styledValue;
+};
+
+struct DecorationSpanOptions {
+    TextDecoration type = TextDecoration::NONE;
+    std::optional<Color> color;
+    std::optional<TextDecorationStyle> style;
+};
+}
 
 namespace OHOS::Ace::NG::Converter {
+
+template<>
+ImageSpanSize Convert(const Ark_SizeOptions& src)
+{
+    ImageSpanSize ret;
+    ret.width = Converter::OptConvert<CalcDimension>(src.width);
+    ret.height = Converter::OptConvert<CalcDimension>(src.height);
+    return ret;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
+{
+    BorderRadiusProperty dst;
+    if (auto value = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
+        value.has_value()) {
+        dst = value.value();
+    }
+    return dst;
+}
+
+template<>
+MarginOptions Convert(const Ark_ImageAttachmentLayoutStyle& src)
+{
+    return MarginOptions {
+        .margin = Converter::OptConvert<MarginProperty>(src.margin)
+    };
+}
+
+template<>
+PaddingProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
+{
+    PaddingProperty dst;
+    if (auto value = Converter::OptConvert<PaddingProperty>(src.padding);
+        value.has_value()) {
+        dst = value.value();
+    }
+    return dst;
+}
+
+template<>
+ImageSpanAttribute Convert(const Ark_ImageAttachment& src)
+{
+    return ImageSpanAttribute {
+        .size = Converter::OptConvert<ImageSpanSize>(src.size),
+        .verticalAlign = Converter::OptConvert<VerticalAlign>(src.verticalAlign),
+        .objectFit = Converter::OptConvert<ImageFit>(src.objectFit),
+        .marginProp = Converter::OptConvert<MarginOptions>(src.layoutStyle).value().margin,
+        .borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.layoutStyle),
+        .paddingProp = Converter::OptConvert<PaddingProperty>(src.layoutStyle)
+    };
+}
+
+template<>
+Ace::ImageSpanOptions Convert(const Ark_ImageAttachment& src)
+{
+    Ace::ImageSpanOptions options;
+    options.imageAttribute = Converter::OptConvert<ImageSpanAttribute>(src);
+    LOGE("Converter::Convert Ark_ImageAttachment, the PixelMap support not implemented");
+    return options;
+}
+
 template<>
 void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& src)
 {
@@ -43,51 +143,20 @@ void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& sr
 }
 
 template<>
-ImageSpanSize Convert(const Ark_SizeOptions& src)
+StyleOptions Convert(const Ark_StyleOptions& src)
 {
-    return {
-        .width = OptConvert<CalcDimension>(src.width),
-        .height = OptConvert<CalcDimension>(src.height)
-    };
-}
-
-template<>
-BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
-{
-    auto result = OptConvert<BorderRadiusProperty>(src.borderRadius);
-    if (!result.has_value()) {
-        result = BorderRadiusProperty();
-    }
-    return result.value();
-}
-
-template<>
-ImageSpanAttribute Convert(const Ark_ImageAttachment& src)
-{
-    const auto optLayoutStyle = OptConvert<Ark_ImageAttachmentLayoutStyle>(src.layoutStyle);
-    return {
-        .size = OptConvert<ImageSpanSize>(src.size),
-        .verticalAlign = OptConvert<VerticalAlign>(src.verticalAlign),
-        .objectFit = OptConvert<ImageFit>(src.objectFit),
-        .marginProp = optLayoutStyle ? OptConvert<MarginProperty>(optLayoutStyle->margin) : std::nullopt,
-        .borderRadius = OptConvert<BorderRadiusProperty>(src.layoutStyle),
-        .paddingProp = optLayoutStyle ? OptConvert<MarginProperty>(optLayoutStyle->padding) : std::nullopt
-    };
-}
-
-template<>
-ImageSpanOptions Convert(const Ark_ImageAttachment& src)
-{
-    return {
-        .imagePixelMap = OptConvert<RefPtr<PixelMap>>(src.value),
-        .imageAttribute = OptConvert<ImageSpanAttribute>(src)
-    };
+    StyleOptions dst;
+    dst.start = OptConvert<int32_t>(src.start).value_or(0);
+    dst.length = OptConvert<int32_t>(src.length).value_or(0);
+    dst.styledKey = OptConvert<Ace::SpanType>(src.styledKey);
+    dst.styledValue = OptConvert<StyleValueOptions>(src.styledValue);
+    return dst;
 }
 
 template<>
 Font Convert(const Ark_TextStyle_styled_string& src)
 {
-    return {
+    return Font {
         .fontWeight = OptConvert<FontWeight>(src.fontWeight),
         .fontSize = OptConvert<Dimension>(src.fontSize),
         .fontStyle = OptConvert<Ace::FontStyle>(src.fontStyle),
@@ -96,16 +165,20 @@ Font Convert(const Ark_TextStyle_styled_string& src)
     };
 }
 
-struct DecorationSpanOptions {
-    TextDecoration type;
-    std::optional<Color> color;
-    std::optional<TextDecorationStyle> style;
-};
+template<>
+Font Convert(const StyleValueOptions& src)
+{
+    Font font;
+    if (auto textStyle = std::get_if<Ark_TextStyle_styled_string>(&src); textStyle) {
+        font = Converter::OptConvert<Font>(*textStyle).value_or(font);
+    }
+    return font;
+}
 
 template<>
 DecorationSpanOptions Convert(const Ark_DecorationStyle& src)
 {
-    return {
+    return DecorationSpanOptions {
         .type = OptConvert<TextDecoration>(src.type).value_or(TextDecoration::NONE),
         .color = OptConvert<Color>(src.color),
         .style = OptConvert<TextDecorationStyle>(src.style)
@@ -113,248 +186,252 @@ DecorationSpanOptions Convert(const Ark_DecorationStyle& src)
 }
 
 template<>
-Dimension Convert(const Ark_LetterSpacingStyle& src)
+DecorationSpanOptions Convert(const StyleValueOptions& src)
 {
-    return Convert<Dimension>(src.letterSpacing);
+    DecorationSpanOptions dst;
+    if (auto decorationStyle = std::get_if<Ark_DecorationStyle>(&src); decorationStyle) {
+        dst = OptConvert<DecorationSpanOptions>(*decorationStyle).value_or(dst);
+    }
+    return dst;
 }
 
 template<>
-Dimension Convert(const Ark_BaselineOffsetStyle& src)
+Dimension Convert(const StyleValueOptions& src)
 {
-    return Convert<Dimension>(src.baselineOffset);
+    Dimension dst(0);
+    if (auto style = std::get_if<Ark_LetterSpacingStyle>(&src); style) {
+        dst = OptConvert<Dimension>(style->letterSpacing).value_or(dst);
+    } else if (auto style = std::get_if<Ark_BaselineOffsetStyle>(&src); style) {
+        dst = OptConvert<Dimension>(style->baselineOffset).value_or(dst);
+    } else if (auto style = std::get_if<Ark_LineHeightStyle>(&src); style) {
+        dst = OptConvert<Dimension>(style->lineHeight).value_or(dst);
+    }
+    return dst;
 }
 
 template<>
-Dimension Convert(const Ark_LineHeightStyle& src)
+GestureStyle Convert(const StyleValueOptions& src)
 {
-    return Convert<Dimension>(src.lineHeight);
+    GestureStyle dst;
+    if (auto style = std::get_if<Ark_GestureStyle>(&src); style) {
+        LOGE("Converter::Convert Ark_GestureStyle, the handle support not implemented");
+    }
+    return dst;
 }
 
 template<>
-GestureStyle Convert(const Ark_GestureStyle& src)
+std::vector<Shadow> Convert(const StyleValueOptions& src)
 {
-    LOGE("Converter::Convert Ark_GestureStyle, the handle support not implemented");
-    return GestureStyle();
+    std::vector<Shadow> dst;
+    if (auto style = std::get_if<Ark_TextShadowStyle>(&src); style) {
+        dst = OptConvert<std::vector<Shadow>>(style->textShadow).value_or(dst);
+    }
+    return dst;
 }
 
 template<>
-std::vector<Shadow> Convert(const Ark_TextShadowStyle& src)
+NG::LeadingMarginSize Convert(const Ark_Number& src)
 {
-    return Convert<std::vector<Shadow>>(src.textShadow);
+    auto size = OptConvert<Dimension>(src).value_or(Dimension(0));
+    return NG::LeadingMarginSize(size, size);
 }
 
 template<>
-LeadingMarginSize Convert(const Ark_Number& src)
+NG::LeadingMarginSize Convert(const Ark_Tuple_Dimension_Dimension& src)
 {
-    auto size = Convert<Dimension>(src);
-    return LeadingMarginSize(size, size);
+    auto width = Converter::OptConvert<Dimension>(src.value0).value_or(Dimension(0));
+    auto height = Converter::OptConvert<Dimension>(src.value1).value_or(Dimension(0));
+    return NG::LeadingMarginSize(width, height);
 }
 
 template<>
-LeadingMarginSize Convert(const Ark_Tuple_Dimension_Dimension& src)
+NG::LeadingMargin Convert(const Ark_Number& src)
 {
-    auto width = Convert<Dimension>(src.value0);
-    auto height = Convert<Dimension>(src.value1);
-    return LeadingMarginSize(width, height);
-}
-
-template<>
-LeadingMargin Convert(const Ark_Number& src)
-{
-    return {
-        .size = Convert<LeadingMarginSize>(src),
+    return NG::LeadingMargin {
+        .size = OptConvert<NG::LeadingMarginSize>(src).value_or(NG::LeadingMarginSize()),
         .pixmap = nullptr
     };
 }
 
 template<>
-LeadingMargin Convert(const Ark_LeadingMarginPlaceholder& src)
+NG::LeadingMargin Convert(const Ark_LeadingMarginPlaceholder& src)
 {
-    return {
-        .size = Convert<LeadingMarginSize>(src.size),
-        .pixmap = Convert<RefPtr<PixelMap>>(src.pixelMap)
-    };
+    NG::LeadingMargin dst;
+    dst.size = OptConvert<NG::LeadingMarginSize>(src.size).value_or(NG::LeadingMarginSize());
+    dst.pixmap = nullptr;
+    LOGE("Converter::Convert Ark_LeadingMarginPlaceholder, the PixelMap support not implemented");
+    return dst;
 }
 
 template<>
 SpanParagraphStyle Convert(const Ark_ParagraphStyle& src)
 {
-    return {
+    return SpanParagraphStyle {
         .align = OptConvert<TextAlign>(src.textAlign),
         .maxLines = OptConvert<int32_t>(src.maxLines),
         .wordBreak = OptConvert<WordBreak>(src.wordBreak),
         .textOverflow = OptConvert<TextOverflow>(src.overflow),
-        .leadingMargin = OptConvert<LeadingMargin>(src.leadingMargin),
+        .leadingMargin = OptConvert<NG::LeadingMargin>(src.leadingMargin),
         .textIndent = OptConvert<Dimension>(src.textIndent)
     };
 }
 
 template<>
-TextBackgroundStyle Convert(const Ark_BackgroundColorStyle& src)
+SpanParagraphStyle Convert(const StyleValueOptions& src)
 {
-    return Convert<TextBackgroundStyle>(src.textBackgroundStyle);
+    SpanParagraphStyle dst;
+    if (auto style = std::get_if<Ark_ParagraphStyle>(&src); style) {
+        dst = OptConvert<SpanParagraphStyle>(*style).value_or(dst);
+    }
+    return dst;
 }
 
 template<>
-std::string Convert(const Ark_UrlStyle& src)
+TextBackgroundStyle Convert(const StyleValueOptions& src)
 {
-    return Convert<std::string>(src.url);
+    TextBackgroundStyle dst;
+    if (auto style = std::get_if<Ark_BackgroundColorStyle>(&src); style) {
+        dst = OptConvert<TextBackgroundStyle>(style->textBackgroundStyle).value_or(dst);
+    }
+    return dst;
 }
 
-// The information for the Ark_StyleOptions converter.
-template<typename T>
-struct StyleOptionsTypes {};
 template<>
-struct StyleOptionsTypes<Ark_TextStyle_styled_string> {
-    using Style = Font;
-    using Span = FontSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_FONT;
-};
-template<>
-struct StyleOptionsTypes<Ark_BaselineOffsetStyle> {
-    using Style = Dimension;
-    using Span = BaselineOffsetSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_BASELINE_OFFSET;
-};
-template<>
-struct StyleOptionsTypes<Ark_LetterSpacingStyle> {
-    using Style = Dimension;
-    using Span = LetterSpacingSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_LETTER_SPACING;
-};
-template<>
-struct StyleOptionsTypes<Ark_TextShadowStyle> {
-    using Style = std::vector<Shadow>;
-    using Span = TextShadowSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_TEXT_SHADOW;
-};
-template<>
-struct StyleOptionsTypes<Ark_LineHeightStyle> {
-    using Style = Dimension;
-    using Span = LineHeightSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_LINE_HEIGHT;
-};
-template<>
-struct StyleOptionsTypes<Ark_BackgroundColorStyle> {
-    using Style = std::optional<TextBackgroundStyle>;
-    using Span = BackgroundColorSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_BACKGROUND_COLOR;
-};
-template<>
-struct StyleOptionsTypes<Ark_UrlStyle> {
-    using Style = std::string;
-    using Span = UrlSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_URL;
-};
-template<>
-struct StyleOptionsTypes<Ark_GestureStyle> {
-    using Style = GestureStyle;
-    using Span = GestureSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_GESTURE;
-};
-template<>
-struct StyleOptionsTypes<Ark_ParagraphStyle> {
-    using Style = SpanParagraphStyle;
-    using Span = ParagraphStyleSpan;
-    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE;
-};
-
-struct StyleOptionsData {
-    explicit StyleOptionsData(const Ark_StyleOptions& src)
-        : start(Converter::OptConvert<int32_t>(src.start).value_or(0)),
-        end(Converter::OptConvert<int32_t>(src.length).value_or(0) + start),
-        key(src.styledKey) {}
-
-    int32_t start;
-    int32_t end;
-    Ark_StyledStringKey key;
-    RefPtr<SpanBase> result;
-};
-
-template<>
-RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
+std::string Convert(const StyleValueOptions& src)
 {
-    StyleOptionsData data(src);
-    Converter::VisitUnion(src.styledValue,
-        [&data](const auto& style) {
-            using StyleTypes = StyleOptionsTypes<std::remove_cv_t<std::remove_reference_t<decltype(style)>>>;
-            CHECK_NULL_VOID(data.key == StyleTypes::KEY);
-            auto value = Convert<typename StyleTypes::Style>(style);
-            data.result = AceType::MakeRefPtr<typename StyleTypes::Span>(value, data.start, data.end);
-        },
-        [&data](const Ark_DecorationStyle& style) {
-            CHECK_NULL_VOID(data.key == ARK_STYLED_STRING_KEY_DECORATION);
-            auto value = Convert<DecorationSpanOptions>(style);
-            data.result = AceType::MakeRefPtr<DecorationSpan>(value.type, value.color,
-                value.style, data.start, data.end);
-        },
-        [&data](const Ark_UserDataSpan& style) {
-            CHECK_NULL_VOID(data.key == ARK_STYLED_STRING_KEY_USER_DATA);
-            data.result = AceType::MakeRefPtr<ExtSpan>(data.start, data.end);
-        },
-        [](const Ark_ImageAttachment& style) {
-            LOGE("Converter::Convert(Ark_StyleOptions) the Ark_ImageAttachment is not implemented.");
-        },
-        [](const Ark_CustomSpan& style) {
-            LOGE("Converter::Convert(Ark_StyleOptions) the Ark_CustomSpan is not implemented.");
-        },
-        []() {}
-    );
-    return data.result;
+    std::string dst;
+    if (auto style = std::get_if<Ark_UrlStyle>(&src); style) {
+        dst = OptConvert<std::string>(style->url).value_or(dst);
+    }
+    return dst;
+}
+
+template<typename Spn, typename In>
+RefPtr<Spn> CreateSpan(int32_t start, int32_t length, const StyleOptions& src)
+{
+    In data;
+    if (src.styledValue.has_value()) {
+        data = OptConvert<In>(src.styledValue.value()).value_or(data);
+    }
+    return AceType::MakeRefPtr<Spn>(data, start, start + length);
+}
+
+RefPtr<DecorationSpan> CreateDecorationSpan(int32_t start, int32_t length, const StyleOptions& src)
+{
+    DecorationSpanOptions options;
+    if (src.styledValue.has_value()) {
+        options = OptConvert<DecorationSpanOptions>(src.styledValue.value()).value_or(options);
+    }
+    return AceType::MakeRefPtr<DecorationSpan>(
+        options.type, options.color, options.style, start, start + length);
+}
+
+template<>
+RefPtr<SpanBase> Convert(const StyleOptions& src)
+{
+    if (!src.styledKey.has_value()) {
+        return nullptr;
+    }
+    auto type = src.styledKey.value();
+    auto start = src.start;
+    auto length = src.length;
+
+    if (type == Ace::SpanType::Image || type == Ace::SpanType::CustomSpan) {
+        return nullptr;
+    }
+
+    switch (type) {
+        case Ace::SpanType::Font:
+            return CreateSpan<FontSpan, Font>(start, length, src);
+        case Ace::SpanType::Decoration:
+            return CreateDecorationSpan(start, length, src);
+        case Ace::SpanType::LetterSpacing:
+            return CreateSpan<LetterSpacingSpan, Dimension>(start, length, src);
+        case Ace::SpanType::BaselineOffset:
+            return CreateSpan<BaselineOffsetSpan, Dimension>(start, length, src);
+        case Ace::SpanType::Gesture:
+            return CreateSpan<GestureSpan, GestureStyle>(start, length, src);
+        case Ace::SpanType::TextShadow:
+            return CreateSpan<TextShadowSpan, std::vector<Shadow>>(start, length, src);
+        case Ace::SpanType::LineHeight:
+            return CreateSpan<LineHeightSpan, Dimension>(start, length, src);
+        case Ace::SpanType::ParagraphStyle:
+            return CreateSpan<ParagraphStyleSpan, SpanParagraphStyle>(start, length, src);
+        case Ace::SpanType::ExtSpan:
+            return AceType::MakeRefPtr<ExtSpan>(start, start + length);
+        case Ace::SpanType::BackgroundColor:
+            return CreateSpan<BackgroundColorSpan, std::optional<TextBackgroundStyle>>(start, length, src);
+        case Ace::SpanType::Url:
+            return CreateSpan<UrlSpan, std::string>(start, length, src);
+        default:
+            break;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace {
-void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
-{
-    for (auto& style : styles) {
-        if (style->GetStartIndex() < 0 || style->GetStartIndex() >= maxLength) {
-            style->UpdateStartIndex(0);
-        }
-        if (style->GetEndIndex() < style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
-            style->UpdateEndIndex(maxLength);
-        }
-    }
-}
-} // namespace
-
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
-
 namespace StyledStringAccessor {
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
-    delete peer;
+    if (peer) {
+        delete peer;
+    }
+}
+std::vector<RefPtr<SpanBase>> ParseSpanBaseVector(const std::vector<StyleOptions>& styles, int32_t maxLength)
+{
+    std::vector<RefPtr<SpanBase>> spanBaseVector;
+    if (styles.empty()) {
+        return spanBaseVector;
+    }
+    spanBaseVector.reserve(styles.size());
+    for (const auto& style : styles) {
+        StyleOptions styleTmp = style;
+        styleTmp.length  = style.length > maxLength - style.start || style.length <= 0
+            ? maxLength - style.start : style.length;
+        styleTmp.start = style.start < 0 || style.start >= maxLength ? 0 : style.start;
+        auto spanBase = Converter::OptConvert<RefPtr<SpanBase>>(styleTmp);
+        if (spanBase) {
+            spanBaseVector.push_back(spanBase.value());
+        }
+    }
+    return spanBaseVector;
 }
 Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                            const Opt_Array_StyleOptions* styles)
 {
     auto peer = new StyledStringPeer();
+    RefPtr<SpanString> spanString = nullptr;
     if (value) {
         Converter::VisitUnion(*value,
-            [&peer, styles](const Ark_String& arkText) {
-                std::string data = Converter::Convert<std::string>(arkText);
-                peer->spanString = AceType::MakeRefPtr<SpanString>(data);
-                CHECK_NULL_VOID(!data.empty() && styles);
-                auto spans = Converter::OptConvert<std::vector<RefPtr<SpanBase>>>(*styles);
-                CHECK_NULL_VOID(spans);
-                UpdateSpansRange(spans.value(), StringUtils::ToWstring(data).length());
-                peer->spanString->BindWithSpans(spans.value());
+            [&spanString, &styles](const Ark_String& arkText) {
+                std::string data = Converter::OptConvert<std::string>(arkText).value_or("");
+                spanString = AceType::MakeRefPtr<SpanString>(data);
+                if (!data.empty() && styles && styles->tag != ARK_TAG_UNDEFINED) {
+                    auto styleOptions = Converter::OptConvert<std::vector<StyleOptions>>(*styles).value_or(
+                        std::vector<StyleOptions>());
+                    int32_t maxLength = StringUtils::ToWstring(data).length();
+                    auto spanBases = ParseSpanBaseVector(styleOptions, maxLength);
+                    spanString->BindWithSpans(spanBases);
+                }
             },
-            [&peer](const Ark_ImageAttachment& arkImageAttachment) {
-                auto attachment = Converter::OptConvert<ImageSpanOptions>(arkImageAttachment);
-                CHECK_NULL_VOID(attachment);
-                peer->spanString = AceType::MakeRefPtr<SpanString>(attachment.value());
+            [&spanString](const Ark_ImageAttachment& arkImageAttachment) {
+                auto attachment = Converter::OptConvert<Ace::ImageSpanOptions>(arkImageAttachment);
+                if (attachment.has_value()) {
+                    spanString = AceType::MakeRefPtr<SpanString>(attachment.value());
+                }
             },
-            [](const Ark_CustomSpan& arkCustomSpan) {
+            [&spanString](const Ark_CustomSpan& arkCustomSpan) {
                 LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
             },
             []() {}
         );
     }
-    if (!peer->spanString) {
-        peer->spanString = AceType::MakeRefPtr<SpanString>(std::string());
+    if (!spanString) {
+        spanString = AceType::MakeRefPtr<SpanString>(std::string());
     }
+    peer->spanString = spanString;
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -506,4 +583,8 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
     };
     return &StyledStringAccessorImpl;
 }
+
+struct StyledStringPeer {
+    virtual ~StyledStringPeer() = default;
+};
 }

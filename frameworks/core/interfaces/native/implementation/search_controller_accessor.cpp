@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "search_controller_accessor_peer.h"
+#include "search_controller_accessor_peer_impl.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 
@@ -21,13 +21,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
 void DestroyPeerImpl(SearchControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller_ = nullptr;
-    delete peer;
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 Ark_NativePointer CtorImpl()
 {
-    return new SearchControllerPeer();
+    auto peerImpl = Referenced::MakeRefPtr<SearchControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<SearchControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,25 +39,42 @@ Ark_NativePointer GetFinalizerImpl()
 void CaretPositionImpl(SearchControllerPeer* peer,
                        const Ark_Number* value)
 {
-    CHECK_NULL_VOID(peer && value && peer->controller_);
-    peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
+    CHECK_NULL_VOID(value);
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto caretPosition = Converter::Convert<int32_t>(*value);
+    caretPosition = std::max(caretPosition, 0);
+    peerImpl->TriggerCaretPosition(caretPosition);
 }
 void StopEditingImpl(SearchControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer && peer->controller_);
-    peer->controller_->StopEditing();
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerStopEditing();
 }
 void SetTextSelectionImpl(SearchControllerPeer* peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)
 {
-    CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
-    auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
-    peer->controller_->SetTextSelection(
-        Converter::Convert<int32_t>(*selectionStart),
-        Converter::Convert<int32_t>(*selectionEnd),
-        selectionOptions);
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    std::optional<SelectionOptions> selectionOptions = std::nullopt;
+    int32_t start = 0;
+    int32_t end = 0;
+    if (!selectionStart || !selectionEnd) {
+        LOGE("ArkUISearchControllerAccessor::SetTextSelection: The selectionStart or selectionEnd is NULL");
+    }
+    if (selectionStart != nullptr) {
+        start = Converter::Convert<int32_t>(*selectionStart);
+    }
+    if (selectionEnd != nullptr) {
+        end = Converter::Convert<int32_t>(*selectionEnd);
+    }
+    if (options != nullptr) {
+        selectionOptions = Converter::OptConvert<SelectionOptions>(*options);
+    }
+    peerImpl->TriggerSetTextSelection(start, end, selectionOptions);
 }
 } // SearchControllerAccessor
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()

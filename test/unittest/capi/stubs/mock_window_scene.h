@@ -48,7 +48,7 @@ public:
 
     Ace::RefPtr<ScreenSession> GetScreenSession(uint64_t screenId)
     {
-        return Ace::AceType::MakeRefPtr<ScreenSession>(screenId);
+        return Ace::AceType::MakeRefPtr<ScreenSession>();
     }
 };
 }

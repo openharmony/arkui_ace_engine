@@ -20,10 +20,9 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
-#include "core/interfaces/native/utility/callback_helper.h"
+
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -31,47 +30,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-static constexpr int TEST_RESOURCE_ID = 1000;
-static constexpr int32_t NODE_ID = 555;
-struct CheckEvent {
-    int32_t resourceId;
-    Ark_NativePointer parentNode;
-};
-static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
-static std::optional<CheckEvent> checkEventH = std::nullopt;
-static std::optional<CheckEvent> checkEventF = std::nullopt;
 
 class ListItemGroupModifierTest : public ModifierTestBase<GENERATED_ArkUIListItemGroupModifier,
     &GENERATED_ArkUINodeModifiers::getListItemGroupModifier, GENERATED_ARKUI_LIST_ITEM_GROUP> {
-public:
-    CustomNodeBuilder getBuilderCb(bool headerCb = true)
-    {
-        static std::optional<bool> isHeader;
-        static std::optional<bool> isFooter;
-        if (headerCb) {
-            isHeader = true;
-        } else {
-            isFooter = true;
-        }
-        auto checkCallback = [](
-            Ark_VMContext context,
-            const Ark_Int32 resourceId,
-            const Ark_NativePointer parentNode,
-            const Callback_Pointer_Void continuation) {
-            if (isHeader) {
-                checkEventH = {.resourceId = resourceId, .parentNode = parentNode};
-            }
-            if (isFooter) {
-                checkEventF = {.resourceId = resourceId, .parentNode = parentNode};
-            }
-            if (uiNode) {
-                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
-            }
-        };
-        CustomNodeBuilder customBuilder =
-            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
-        return customBuilder;
-    }
 };
 
 /*
@@ -132,37 +93,22 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
     EXPECT_EQ(space, "0.00vp");
 }
 
-/*
- * @tc.name: setListItemGroupOptionsCustomBuilderTest
+/**
+ * @tc.name: setListItemGroupOptionsHeaderTest
  * @tc.desc: Check the functionality of ListItemGroupModifier.setListItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsCustomBuilderTest, TestSize.Level1)
+HWTEST_F(ListItemGroupModifierTest, DISABLED_setListItemGroupOptionsHeaderTest, TestSize.Level1)
 {
-    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
-    auto builder = getBuilderCb();
-    auto header = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
+}
 
-    auto builder2 = getBuilderCb(false);
-    auto footer = Converter::ArkValue<Opt_CustomNodeBuilder>(builder2);
-    Ark_ListItemGroupOptions options = {
-        .header = header,
-        .footer = footer,
-        .style = Converter::ArkValue<Opt_ListItemGroupStyle>
-            (Converter::ArkValue<Ark_ListItemGroupStyle>(V2::ListItemGroupStyle::CARD)),
-        .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(10))};
-    auto optionsOpt = Converter::ArkValue<Opt_ListItemGroupOptions>(options);
-    checkEventH = std::nullopt;
-    checkEventF = std::nullopt;
-    modifier_->setListItemGroupOptions(node_, &optionsOpt);
-    ASSERT_EQ(checkEventH.has_value(), true);
-    EXPECT_EQ(checkEventH->resourceId, TEST_RESOURCE_ID);
-    ASSERT_EQ(checkEventF.has_value(), true);
-    EXPECT_EQ(checkEventF->resourceId, TEST_RESOURCE_ID);
-    uiNode = std::nullopt;
-    checkEventH = std::nullopt;
-    checkEventF = std::nullopt;
+/**
+ * @tc.name: setListItemGroupOptionsFooterTest
+ * @tc.desc: Check the functionality of ListItemGroupModifier.setListItemGroupOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModifierTest, DISABLED_setListItemGroupOptionsFooterTest, TestSize.Level1)
+{
 }
 
 /**

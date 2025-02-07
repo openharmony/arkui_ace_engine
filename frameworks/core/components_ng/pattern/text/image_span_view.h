@@ -38,7 +38,6 @@ public:
     static void Create();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static ImageSourceInfo GetImageSpanSrc(FrameNode* frameNode);
-    static void SetImageSpanSrc(FrameNode* frameNode, const ImageSourceInfo& info);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static void SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static VerticalAlign GetVerticalAlign(FrameNode* frameNode);

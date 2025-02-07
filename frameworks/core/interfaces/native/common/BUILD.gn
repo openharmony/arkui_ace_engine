@@ -78,11 +78,7 @@ template("ace_core_interfaces_native") {
     ]
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
-      external_deps += [
-        "ability_base:want",
-        "window_manager:scene_session",
-        "window_manager:scene_session_manager",
-      ]
+      external_deps += [ "ability_base:want" ]
     }
   }
 }

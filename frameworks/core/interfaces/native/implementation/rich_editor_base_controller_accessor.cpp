@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h"
-#include "core/interfaces/native/implementation/layout_manager_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -73,8 +72,9 @@ struct UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
 }
 }
 
+struct RichEditorBaseControllerPeer : public OHOS::Ace::NG::GeneratedModifier::RichEditorBaseControllerPeerImpl {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace RichEditorBaseControllerAccessor {
 void DestroyPeerImpl(RichEditorBaseControllerPeer* peer)
 {
@@ -152,18 +152,12 @@ void StopEditingImpl(RichEditorBaseControllerPeer* peer)
 }
 Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());
-    CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
-    layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
-    return layoutManagerPeer;
+    LOGW("RichEditorBaseControllerAccessor:: GetLayoutManagerImpl is not implemented");
+    return nullptr;
 }
 Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
 {
     LOGW("RichEditorBaseControllerAccessor:: GetPreviewTextImpl is not implemented");
-    // fix a return value
-    CHECK_NULL_RETURN(peer, nullptr);
-    peer->GetPreviewText();
     return nullptr;
 }
 } // RichEditorBaseControllerAccessor

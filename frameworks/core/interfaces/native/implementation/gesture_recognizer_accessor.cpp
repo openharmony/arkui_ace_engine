@@ -15,11 +15,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
-#include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
+#include "gesture_recognizer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -127,4 +126,8 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
     };
     return &GestureRecognizerAccessorImpl;
 }
+
+struct GestureRecognizerPeer {
+    virtual ~GestureRecognizerPeer() = default;
+};
 }

@@ -131,6 +131,22 @@ void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src)
     dst.position = Converter::ArkValue<Opt_Position>(position);
 }
 
+void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
+{
+    Ark_Area area;
+    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth());
+    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight());
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX());
+    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY());
+    area.position = Converter::ArkValue<Ark_Position>(position);
+    Ark_Position globPosition;
+    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX());
+    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
+    area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
+    dst.area = area;
+}
+
 void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src)
 {
     switch (src) {
@@ -1731,27 +1747,6 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
     WebModelNG::RegisterNativeEmbedRule(frameNode, convValueTag, convValueType);
 #endif // WEB_SUPPORTED
 }
-void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callback_Void& onAppear,
-                         const Opt_Callback_Void& onDisappear)
-{
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto arkOnDisappear = Converter::OptConvert<Callback_Void>(onDisappear);
-    if (arkOnDisappear) {
-        auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
-        };
-        dst.onDisappear = std::move(onDisappear);
-    }
-    auto arkOnAppear = Converter::OptConvert<Callback_Void>(onAppear);
-    if (arkOnAppear) {
-        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
-        };
-        dst.onAppear = std::move(onAppear);
-    }
-}
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_WebElementType elementType,
                            const CustomNodeBuilder* content,
@@ -1762,22 +1757,35 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto elType = Converter::OptConvert<WebElementType>(elementType);
-    CHECK_EQUAL_VOID(elType.has_value(), false);
-    MenuParam menuParam;
-    auto arkOptions = options ? Converter::OptConvert<Ark_SelectionMenuOptionsExt>(*options) : std::nullopt;
-    auto menuType = arkOptions ? Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType) : std::nullopt;
-    std::function<void()> contentNodeBuilder = nullptr;
-    std::function<void()> previewNodeBuilder = nullptr;
-    if (arkOptions) {
-        InitCallbackParams_(frameNode, menuParam, arkOptions.value().onAppear, arkOptions.value().onDisappear);
+    if (!elType.has_value()) {
+        return;
     }
-    if (menuType) {
-        menuParam.previewMode = MenuPreviewMode::CUSTOM;
-        auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
-        if (preview.has_value()) {
-            previewNodeBuilder = [callback = CallbackHelper(preview.value(), frameNode), node]() {
-                NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
+    LOGE("WebAttributeModifier::BindSelectionMenuImpl - content builder is not supported yet");
+    MenuParam menuParam;
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto arkOptions = options ? Converter::OptConvert<Ark_SelectionMenuOptionsExt>(*options) : std::nullopt;
+    if (arkOptions) {
+        auto arkOnDisappear = Converter::OptConvert<Callback_Void>(arkOptions.value().onDisappear);
+        if (arkOnDisappear) {
+            auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke();
             };
+            menuParam.onDisappear = std::move(onDisappear);
+        }
+        auto arkOnAppear = Converter::OptConvert<Callback_Void>(arkOptions.value().onAppear);
+        if (arkOnAppear) {
+            auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke();
+            };
+            menuParam.onAppear = std::move(onAppear);
+        }
+        auto menuType = Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType);
+        bool isPreviewMenu = menuType && menuType.value() == SelectionMenuType::PREVIEW_MENU;
+        if (menuType) {
+            menuParam.previewMode = MenuPreviewMode::CUSTOM;
+            LOGE("WebAttributeModifier::BindSelectionMenuImpl - preview builder is not supported yet");
         }
     }
     auto resType = Converter::OptConvert<ResponseType>(responseType);
@@ -1789,13 +1797,8 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     menuParam.isShow = true;
     WebModelNG::SetNewDragStyle(frameNode, true);
-    if (content) {
-        contentNodeBuilder = [callback = CallbackHelper(*content, frameNode), node]() {
-            NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
-        };
-    }
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
-        elType.value(), resType.value(), contentNodeBuilder, previewNodeBuilder, menuParam);
+        elType.value(), resType.value(), nullptr, nullptr, menuParam);
     WebModelNG::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
 #endif // WEB_SUPPORTED
 }

@@ -17,10 +17,10 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "rich_editor_controller_peer_impl.h"
 #include "rich_editor_styled_string_controller_peer_impl.h"
@@ -154,6 +154,62 @@ void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src, C
 }
 
 template<>
+void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
+{
+    CHECK_NULL_VOID(src.array);
+    std::string ret;
+    for (int idx = 0; idx < src.length; idx++) {
+        Ark_TextDataDetectorType type = src.array[idx];
+        switch (type) {
+            case ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER:
+                ret += "phoneNum";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_URL:
+                ret += "url";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_EMAIL:
+                ret += "email";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS:
+                ret += "location";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_DATE_TIME:
+                ret += "datetime";
+                break;
+            default:
+                break;
+        }
+        bool isLast = idx == (src.length - 1);
+        if (!isLast) {
+            ret += ",";
+        }
+    }
+    dst = ret;
+}
+
+template<>
+void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_DecorationStyleInterface& src)
+{
+    if (auto style = Converter::OptConvert<TextDecorationStyle>(src.style); style) {
+        dst = style.value();
+    }
+}
+
+template<>
+TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
+{
+    TextDetectConfig ret;
+    ret.types = Converter::OptConvert<std::string>(src.types).value_or("");
+    if (auto color = Converter::OptConvert<Color>(src.color); color) {
+        ret.entityColor = color.value();
+    }
+    if (auto style = Converter::OptConvert<TextDecorationStyle>(src.decoration); style) {
+        ret.entityDecorationStyle = style.value();
+    }
+    return ret;
+}
+
+template<>
 void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderStyle& src)
 {
     PlaceholderOptions ret;
@@ -214,7 +270,8 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     WeakPtr<RichEditorStyledStringController> controller;
     controller = rawPtr;
 
-    auto peerImplPtr = reinterpret_cast<RichEditorStyledStringControllerPeer *>(options->controller.ptr);
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::RichEditorStyledStringControllerPeerImpl *>(
+        options->controller.ptr);
     CHECK_NULL_VOID(peerImplPtr);
 
     // pass the internal controller to external management
@@ -525,21 +582,43 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(responseType);
     CHECK_NULL_VOID(options);
     auto aceSpanType = Converter::OptConvert<TextSpanType>(spanType);
+    CHECK_NULL_VOID(aceSpanType);
     auto aceResponseType = Converter::OptConvert<TextResponseType>(*responseType);
-    auto response = aceResponseType.value_or(TextResponseType::NONE);
-    auto span = aceSpanType.value_or(TextSpanType::NONE);
-    std::function<void()> convBuildFunc;
-    if (content) {
-        convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+    CHECK_NULL_VOID(aceResponseType); // A required parameter
+    auto arkMenuOptions = Converter::OptConvert<Ark_SelectionMenuOptions>(*options);
+    SelectMenuParam menuParam;
+    menuParam.onAppear = [](int32_t start, int32_t end) {};
+    menuParam.onDisappear = []() {};
+    if (arkMenuOptions) {
+        auto appearCb = Converter::OptConvert<MenuOnAppearCallback>(arkMenuOptions->onAppear);
+        auto disappearCb = Converter::OptConvert<Callback_Void>(arkMenuOptions->onDisappear);
+
+        CHECK_NULL_VOID(appearCb);
+        auto appearCbPtr = std::make_shared<MenuOnAppearCallback>(*appearCb); // Well captured as shared_ptr
+        menuParam.onAppear =
+            [appearCbPtr, arkCallback = CallbackHelper(*appearCbPtr)](int32_t start, int32_t end) {
+            if (appearCbPtr) {
+                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+            }
+        };
+
+        CHECK_NULL_VOID(disappearCb);
+        auto disappearCbPtr = std::make_shared<Callback_Void>(*disappearCb); // Well captured as shared_ptr
+        menuParam.onDisappear =
+            [disappearCbPtr, arkCallback = CallbackHelper(*disappearCbPtr)]() {
+            if (disappearCbPtr) {
+                arkCallback.Invoke();
+            }
         };
     }
-    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
-    if (convMenuParam.has_value()) {
-        RichEditorModelNG::BindSelectionMenu(
-            frameNode, span, response, convBuildFunc, convMenuParam.value());
-    }
+
+    std::function<void()> buildFunc = [arkCallback = CallbackHelper(*content), parentNode = frameNode]() {
+        Callback_Pointer_Void continuation;
+        arkCallback.Invoke(parentNode, continuation);
+    };
+
+    RichEditorModelNG::BindSelectionMenu(
+        frameNode, aceSpanType.value(), aceResponseType.value(), buildFunc, menuParam);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const CustomNodeBuilder* value,
@@ -553,11 +632,14 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     if (convValue) {
         supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
     }
-    auto builder = [callback = CallbackHelper(*value, frameNode), node]() {
-        auto builderNode = callback.BuildSync(node);
-        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-    };
-    RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance);
+    std::function<void()> callback = []() {};
+    if (value) {
+        callback = [arkCallback = CallbackHelper(*value), parentNode = frameNode]() -> void {
+            Callback_Pointer_Void continuation;
+            arkCallback.Invoke(parentNode, continuation);
+        };
+    }
+    RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(callback), supportAvoidance);
 }
 void PlaceholderImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,

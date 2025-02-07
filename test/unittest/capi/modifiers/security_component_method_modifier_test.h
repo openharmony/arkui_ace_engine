@@ -123,17 +123,17 @@ const auto THEME_TEXT_ICON_SPACE = Dimension(4., DimensionUnit::VP);
 
 const auto DEFAULT_JSON_INT = -1;
 
-const auto FLOAT_RES_0_ID = 1000;
+const uint32_t FLOAT_RES_0_ID = 100;
 const float FLOAT_RES_0_VALUE = 70.5f;
 const auto FLOAT_RES_0_STORED_VALUE = Dimension(FLOAT_RES_0_VALUE, DimensionUnit::PX);
 const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, Converter::ResourceType::FLOAT);
 
-const int32_t FLOAT_RES_1_ID = 1001;
+const uint32_t FLOAT_RES_1_ID = 101;
 const float FLOAT_RES_1_VALUE = 19.5f;
 const auto FLOAT_RES_1_STORED_VALUE = Dimension(FLOAT_RES_1_VALUE, DimensionUnit::FP);
 const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, Converter::ResourceType::FLOAT);
 
-const uint32_t STRARRAY_RES_2_ID = 1002;
+const uint32_t STRARRAY_RES_2_ID = 102;
 const std::string STRARRAY_RES_2_VALUE = "ResourceFontFamily";
 const Ark_Resource STRARRAY_RES_2 = CreateResource(STRARRAY_RES_2_ID, Converter::ResourceType::STRARRAY);
 
@@ -161,14 +161,14 @@ public:
 
         SetupTheme<SecurityComponentTheme>();
 
+        AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_STORED_VALUE);
+        AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_STORED_VALUE);
+        AddResource(STRARRAY_RES_2_ID, STRARRAY_RES_2_VALUE);
+
         for (const auto &[resId, resName, value] : Fixtures::resourceInitTable) {
             AddResource(resId, value);
             AddResource(resName, value);
         }
-
-        AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_STORED_VALUE);
-        AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_STORED_VALUE);
-        AddResource(STRARRAY_RES_2_ID, STRARRAY_RES_2_VALUE);
     }
 
     void SetUp(void) override

@@ -27,16 +27,8 @@ namespace {
     constexpr float INTENSITY_MAX = 1.0f;
     constexpr float BLOOM_MIN = 0.0f;
     constexpr float BLOOM_MAX = 1.0f;
-    const auto DATE_MIN = PickerDate(1970, 1, 1);
-    const auto DATE_MAX = PickerDate(2100, 12, 31);
 } // namespace
 
-void ClampByRange(std::optional<float>& opt, const float& left, const float& right)
-{
-    if (opt.has_value()) {
-        opt = std::clamp(opt.value(), left, right);
-    }
-}
 void ValidateNonNegative(std::optional<Dimension>& opt)
 {
     if (opt.has_value() && opt.value().IsNegative()) {
@@ -162,18 +154,6 @@ void ValidateNonPercent(std::optional<CalcLength>& opt)
 {
     if (opt.has_value() && (opt.value().GetDimension().Unit() == DimensionUnit::PERCENT)) {
         opt.reset();
-    }
-}
-
-void ValidatePickerDate(PickerDate& date)
-{
-    auto maxDay = PickerDate::GetMaxDay(date.GetYear(), date.GetMonth());
-    if (date.GetYear() < DATE_MIN.GetYear() || date.GetYear() > DATE_MAX.GetYear()) {
-        date = DATE_MIN;
-    } else if (date.GetMonth() < DATE_MIN.GetMonth() || date.GetMonth() > DATE_MAX.GetMonth()) {
-        date = DATE_MIN;
-    } else if (date.GetDay() < DATE_MIN.GetDay() || date.GetDay() > maxDay) {
-        date = DATE_MIN;
     }
 }
 } // namespace OHOS::Ace::NG::Validator
