@@ -2196,7 +2196,7 @@ bool SliderPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(paintProperty, result);
     result = !paintProperty->HasBlockColor() ||
         !paintProperty->HasTrackBackgroundColor() ||
-        !paintProperty->HasSelectColor()
+        !paintProperty->HasSelectColor() ||
         !paintProperty->HasStepColor();
     return result;
 }
