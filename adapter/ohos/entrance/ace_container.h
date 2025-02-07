@@ -617,7 +617,7 @@ public:
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
-    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion = Rosen::INVALID_API_VERSION);
+    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion = Rosen::API_VERSION_INVALID);
 
     uint32_t GetStatusBarHeight();
 
