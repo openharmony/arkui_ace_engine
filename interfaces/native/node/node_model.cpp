@@ -385,6 +385,30 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         }
         impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaChange(
             nodePtr->uiNodeHandle, reinterpret_cast<int64_t>(nodePtr), radioList, radioLength);
+    } else if (eventType == NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT) {
+        auto options = nodePtr->visibleAreaEventOptions;
+        if (!options) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        auto visibleAreaEventOptions = reinterpret_cast<ArkUI_VisibleAreaEventOptions*>(options);
+        if (!visibleAreaEventOptions) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        ArkUI_Int32 radioLength = static_cast<ArkUI_Int32>(visibleAreaEventOptions->ratios.size());
+        if (radioLength <= 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        ArkUI_Float32 radioList[radioLength];
+        for (int i = 0; i < radioLength; ++i) {
+            if (LessNotEqual(visibleAreaEventOptions->ratios[i], 0.0f) ||
+                GreatNotEqual(visibleAreaEventOptions->ratios[i], 1.0f)) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            radioList[i] = visibleAreaEventOptions->ratios[i];
+        }
+        impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaApproximateChange(nodePtr->uiNodeHandle,
+            reinterpret_cast<int64_t>(nodePtr), radioList, radioLength,
+            visibleAreaEventOptions->expectedUpdateInterval);
     } else {
         impl->getBasicAPI()->registerNodeAsyncEvent(
             nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));

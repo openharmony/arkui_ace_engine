@@ -6987,6 +6987,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
+    JSClass<JSViewAbstract>::StaticMethod(
+        "onVisibleAreaApproximateChange", &JSViewAbstract::JsOnVisibleAreaApproximateChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
@@ -8275,6 +8277,54 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
         func->ExecuteJS(2, params);
     };
     ViewAbstractModel::GetInstance()->SetOnVisibleChange(std::move(onVisibleChange), ratioVec);
+}
+
+void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info)
+{
+    if (info.Length() != PARAMETER_LENGTH_SECOND) {
+        return;
+    }
+
+    if (!info[0]->IsObject() || !info[1]->IsFunction()) {
+        return;
+    }
+
+    const auto& options = info[0];
+    JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(options);
+    JSRef<JSVal> ratios = optionObj->GetProperty("ratios");
+    if (!ratios->IsArray()) {
+        return;
+    }
+    auto ratioArray = JSRef<JSArray>::Cast(ratios);
+    size_t size = ratioArray->Length();
+    std::vector<double> ratioVec(size);
+    for (size_t i = 0; i < size; i++) {
+        double ratio = 0.0;
+        ParseJsDouble(ratioArray->GetValueAt(i), ratio);
+        ratio = std::clamp(ratio, VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+        ratioVec.push_back(ratio);
+    }
+    int32_t expectedUpdateInterval = DEFAULT_DURATION;
+    JSRef<JSVal> expectedUpdateIntervalVal = optionObj->GetProperty("expectedUpdateInterval");
+    if (expectedUpdateIntervalVal->IsNumber()) {
+        JSViewAbstract::ParseJsInteger(expectedUpdateIntervalVal, expectedUpdateInterval);
+    }
+
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onVisibleChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                               bool visible, double ratio) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onVisibleAreaApproximateChange");
+
+        JSRef<JSVal> params[2];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(visible));
+        params[1] = JSRef<JSVal>::Make(ToJSValue(ratio));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    ViewAbstractModel::GetInstance()->SetOnVisibleAreaApproximateChange(
+        std::move(onVisibleChange), ratioVec, expectedUpdateInterval);
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)

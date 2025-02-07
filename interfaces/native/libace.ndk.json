@@ -2729,6 +2729,30 @@
     },
     {
         "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_Dispose"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_SetRatios"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_GetRatios"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval"
+    },
+    {
+        "first_introduced": "16",
         "name": "OH_ArkUI_GestureInterrupter_GetUserData"
     },
     {
