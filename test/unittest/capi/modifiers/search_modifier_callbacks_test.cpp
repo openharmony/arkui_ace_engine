@@ -39,7 +39,7 @@ namespace {
 const auto INPUT_FILTER_ATTR("inputFilter");
 #endif
 // check text
-const auto CHECK_TEXT(u"test_text");
+const std::u16string CHECK_TEXT(u"test_text");
 #ifdef WRONG_CALLBACK
 const auto ERROR_TEXT("test_error_text");
 #endif
@@ -91,6 +91,11 @@ struct EventsTracker {
     };
 }; // EventsTracker
 } // namespace
+
+namespace Converter {
+    template<>
+    PreviewText Convert(const Ark_PreviewText& value);
+}
 
 class SearchModifierCallbackTest : public ModifierTestBase<GENERATED_ArkUISearchModifier,
                                &GENERATED_ArkUINodeModifiers::getSearchModifier, GENERATED_ARKUI_SEARCH> {
@@ -395,21 +400,28 @@ HWTEST_F(SearchModifierCallbackTest, setOnEditChangeTest, TestSize.Level1)
 HWTEST_F(SearchModifierCallbackTest, setOnSubmit0Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnSubmit0, nullptr);
-    EventsTracker::eventsReceiver.onSubmit0 = [](Ark_Int32 nodeId, Ark_String value) {
-        g_EventTestString = Convert<std::u16string>(value);
-    };
-    g_EventTestString = EMPTY_TEXT;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_String_Void func{};
-    modifier_->setOnSubmit0(node_, &func);
+    ASSERT_NE(frameNode, nullptr);
+
+    static std::u16string testString;
+    Callback_String_Void onSubmit0Callback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_String value) {
+            testString.clear();
+            testString.append(Converter::Convert<std::u16string>(value));
+        }
+    };
+
+    testString.clear();
+    modifier_->setOnSubmit0(node_, &onSubmit0Callback);
     auto searchEventHub = frameNode->GetEventHub<SearchEventHub>();
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
+    EXPECT_EQ(testString, EMPTY_TEXT);
     ASSERT_NE(searchEventHub, nullptr);
     NG::TextFieldCommonEvent event;
     searchEventHub->FireOnSubmit(CHECK_TEXT, event);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
+    EXPECT_EQ(testString, CHECK_TEXT);
     searchEventHub->FireOnSubmit(EMPTY_TEXT, event);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
+    EXPECT_EQ(testString, EMPTY_TEXT);
 }
 
 /**
@@ -419,27 +431,31 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit0Test, TestSize.Level1)
  */
 HWTEST_F(SearchModifierCallbackTest, setOnChangeTest, TestSize.Level1)
 {
-    g_EventTestString = u"";
-    g_EventTestOffset = 0;
-    EventsTracker::eventsReceiver.onChange = [](Ark_Int32 nodeId,
-        const Ark_String value,
-        const Opt_PreviewText previewText) {
-        g_EventTestOffset = PREVIEW_TEXT.offset;
-        g_EventTestString.append(CHECK_TEXT).append(PREVIEW_TEXT.value);
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    static std::u16string eventTestString = u"";
+    static int32_t eventTestOffset = 0;
+    EditableTextOnChangeCallback onChangeCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+            auto convValue = Converter::Convert<std::u16string>(value);
+            auto convPreviewText = Converter::OptConvert<PreviewText>(previewText).value_or(PREVIEW_TEXT);
+            eventTestOffset = convPreviewText.offset;
+            eventTestString.append(convValue).append(convPreviewText.value);
+        }
+    };
+
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    EditableTextOnChangeCallback func{};
-    modifier_->setOnChange(node_, &func);
+    EXPECT_EQ(eventTestString, EMPTY_TEXT);
+    EXPECT_EQ(eventTestOffset, 0);
+    modifier_->setOnChange(node_, &onChangeCallback);
     textFieldEventHub->FireOnChange(CHECK_TEXT, PREVIEW_TEXT);
     std::u16string checkString = CHECK_TEXT;
     checkString.append(PREVIEW_TEXT.value);
-    EXPECT_EQ(g_EventTestString, checkString);
-    EXPECT_EQ(g_EventTestOffset, PREVIEW_TEXT.offset);
+    EXPECT_EQ(eventTestString, checkString);
+    EXPECT_EQ(eventTestOffset, PREVIEW_TEXT.offset);
 }
 
 /**

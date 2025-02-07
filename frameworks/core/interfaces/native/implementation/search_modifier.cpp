@@ -281,10 +281,12 @@ void OnSubmit0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSubmit = [frameNode](const std::u16string& value, NG::TextFieldCommonEvent&) {
+    auto onSubmit = [arkCallback = CallbackHelper(*value, frameNode)](const std::u16string& value,
+        NG::TextFieldCommonEvent&
+    ) {
         Converter::ConvContext ctx;
         auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onSubmit0(frameNode->GetId(), arkStringValue);
+        arkCallback.Invoke(arkStringValue);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
@@ -303,12 +305,13 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const std::u16string& text, PreviewText& prevText) {
+    auto onChange = [arkCallback = CallbackHelper(*value, frameNode)](const std::u16string& text,
+        PreviewText& prevText
+    ) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(text, &ctx);
         auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText, &ctx);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onChange(frameNode->GetId(),
-            textArkString, textArkPrevText);
+        arkCallback.Invoke(textArkString, textArkPrevText);
     };
     SearchModelNG::SetOnChange(frameNode, std::move(onChange));
 }

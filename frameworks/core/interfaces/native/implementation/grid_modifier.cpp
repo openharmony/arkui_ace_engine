@@ -327,7 +327,7 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         arkCallback.Invoke(arkDragInfo, arkItemIndex);
     };
-    
+
     GridModelNG::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
 }
 void OnItemDropImpl(Ark_NativePointer node,
