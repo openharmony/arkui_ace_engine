@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/network/download_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
@@ -1105,13 +1106,12 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 bool ImagePattern::RecycleImageData()
 {
     //when image component is [onShow] , [no cache], do not clean image data
-    bool dataValid = false;
-    bool isCheckDataCache =
+    bool isDataNoCache =
         (!loadingCtx_ ||
         (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
         SystemProperties::GetDownloadByNetworkEnabled() &&
-        ImageLoadingContext::QueryDataFromCache(loadingCtx_->GetSourceInfo(), dataValid) == nullptr));
-    if (isShow_ || isCheckDataCache) {
+        DownloadManager::GetInstance()->IsContains(loadingCtx_->GetSourceInfo().GetSrc()) == false));
+    if (isShow_ || isDataNoCache) {
         return false;
     }
     auto frameNode = GetHost();

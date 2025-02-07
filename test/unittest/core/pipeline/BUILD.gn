@@ -37,6 +37,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_ace_trace.cpp",
+    "$ace_root/test/mock/base/mock_download_manager.cpp",
     "$ace_root/test/mock/base/mock_drag_window.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
