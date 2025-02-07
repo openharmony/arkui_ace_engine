@@ -355,7 +355,6 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
 {
-    Callback_ItemDragInfo_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -366,17 +365,20 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
         int32_t itemIndex;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridEventsReceiver.onItemDragLeave = [](Ark_Int32 nodeId,
-        const Ark_ItemDragInfo event, const Ark_Number itemIndex)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .dragInfo = Converter::Convert<ItemDragInfo>(event),
-            .itemIndex = Converter::Convert<int32_t>(itemIndex)
-        };
+    Callback_ItemDragInfo_Number_Void onItemDragLeave = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId,
+            const Ark_ItemDragInfo event, const Ark_Number itemIndex)
+            {
+                checkEvent = {
+                    .nodeId = nodeId,
+                    .dragInfo = Converter::Convert<ItemDragInfo>(event),
+                    .itemIndex = Converter::Convert<int32_t>(itemIndex)
+            };
+        }
     };
 
-    modifier_->setOnItemDragLeave(node_, &func);
+    modifier_->setOnItemDragLeave(node_, &onItemDragLeave);
 
     dragInfo.SetX(135);
     dragInfo.SetY(246);
