@@ -17,7 +17,9 @@
 
 #include "want.h"
 
-#include "core/common/form_manager.h"
+#include "form_constants.h"
+#include "form_mgr.h"
+
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +47,7 @@ void FormButtonPattern::InitClickEvent()
         TAG_LOGI(AceLogTag::ACE_FORM, "gestureEvent - clickCallback");
         CHECK_NULL_VOID(formButtonPattern);
 
-        AAFwk::Want want;
+        OHOS::AAFwk::Want want;
         const std::string bundleName = formButtonPattern->GetBundleName();
         const std::string abilityName = formButtonPattern->GetAbilityName();
         const std::string cardName = formButtonPattern->GetCardName();
@@ -56,10 +58,15 @@ void FormButtonPattern::InitClickEvent()
         want.SetParam("name", cardName);
         want.SetParam("moduleName", moduleName);
         want.SetParam("dimension", dimension);
-        auto formUtils = FormManager::GetInstance().GetFormUtils();
-        if (formUtils) {
-            formUtils->RequestOpenFormManageViewEvent(want);
-        }
+
+        OHOS::AAFwk::Want wantToScb(want);
+        wantToScb.SetAction(AppExecFwk::Constants::FORM_PAGE_ACTION);
+        wantToScb.SetParam(AppExecFwk::Constants::PARAM_PAGE_ROUTER_SERVICE_CODE,
+            AppExecFwk::Constants::PAGE_ROUTER_SERVICE_CODE_FORM_MANAGE);
+        const std::string key = AppExecFwk::Constants::PARMA_REQUEST_METHOD;
+        const std::string value = AppExecFwk::Constants::OPEN_FORM_MANAGE_VIEW;
+        wantToScb.SetParam(key, value);
+        AppExecFwk::FormMgr::GetInstance().StartAbilityByFms(wantToScb);
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gestureEventHub->AddClickEvent(clickEvent);
