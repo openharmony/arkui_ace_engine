@@ -33,8 +33,8 @@ public:
     virtual ~ICustomNodeBuilderTestHelper() = default;
     virtual void TestFunction(const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                               const Callback_Pointer_Void continuation) = 0;
-    virtual void TestFunctionSync(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-                                  const Callback_Pointer_Void continuation);
+    virtual void TestFunctionSync(Ark_VMContext context, const Ark_Int32 resourceId,
+                                  const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) = 0;
 };
 
 class TestHelperManager {
@@ -131,7 +131,7 @@ public:
         return syncCallbackCounter_ + asyncCallbackCounter_;
     }
 
-    CustomNodeBuilder GetBuilder()
+    CustomNodeBuilder GetBuilder() const
     {
         CustomNodeBuilder builder;
         builder.resource = {.resourceId = uniqueId_, .hold = [](InteropInt32){}, .release = [](InteropInt32){}};
@@ -202,29 +202,35 @@ private:
     struct has_DisposeNode : std::false_type {};
 
     template <typename U>
-    struct has_DisposeNode<U, decltype(std::declval<U>().DisposeNode(std::declval<Ark_NodeHandle&>()), void())> : std::true_type {};
+    struct has_DisposeNode<U, decltype(std::declval<U>().DisposeNode(std::declval<Ark_NodeHandle&>()), void())> :
+        std::true_type {};
 
     // Overloading functions to select CreateNode and DisposeNode methods
     template <class U>
-    static std::enable_if_t<has_CreateNode<U>::value, Ark_NodeHandle> call_CreateNode(U* testClassObject, Ark_NodeHandle) {
+    static std::enable_if_t<has_CreateNode<U>::value, Ark_NodeHandle> call_CreateNode(U* testClassObject,
+                                                                                      Ark_NodeHandle)
+    {
         Ark_NodeHandle customNode = testClassObject->CreateNode();
         return customNode;
     }
 
     template <class U>
-    static std::enable_if_t<!has_CreateNode<U>::value, Ark_NodeHandle> call_CreateNode(U*, Ark_NodeHandle customNode) {
+    static std::enable_if_t<!has_CreateNode<U>::value, Ark_NodeHandle> call_CreateNode(U*, Ark_NodeHandle customNode)
+    {
         return customNode;
     }
 
     template <class U>
-    static std::enable_if_t<has_DisposeNode<U>::value, void> call_DisposeNode(U* testClassObject, Ark_NodeHandle& node) {
+    static std::enable_if_t<has_DisposeNode<U>::value, void> call_DisposeNode(U* testClassObject, Ark_NodeHandle& node)
+    {
         if (node) {
             testClassObject->DisposeNode(node);
         }
     }
 
     template <class U>
-    static std::enable_if_t<!has_DisposeNode<U>::value, void> call_DisposeNode(U* testClassObject, Ark_NodeHandle& node) {
+    static std::enable_if_t<!has_DisposeNode<U>::value, void> call_DisposeNode(U* testClassObject, Ark_NodeHandle& node)
+    {
         // No default action if there is no DisposeNode method
     }
 };
