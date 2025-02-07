@@ -58,7 +58,7 @@ Ark_Int32 GetXImpl(AccessibilityHoverEventPeer* peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, 0);
     const auto& localLocation = info->GetLocalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetXImpl return int32_t value");
+    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
@@ -82,7 +82,7 @@ Ark_Int32 GetYImpl(AccessibilityHoverEventPeer* peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, 0);
     const auto& localLocation = info->GetLocalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetYImpl return int32_t value");
+    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
@@ -130,7 +130,7 @@ Ark_Int32 GetDisplayYImpl(AccessibilityHoverEventPeer* peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, 0);
     const auto& screenLocation = info->GetScreenLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetDisplayYImpl return int32_t value");
+    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
@@ -178,7 +178,7 @@ Ark_Int32 GetWindowYImpl(AccessibilityHoverEventPeer* peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, 0);
     const auto& globalLocation = info->GetGlobalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetWindowYImpl return int32_t value");
+    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
