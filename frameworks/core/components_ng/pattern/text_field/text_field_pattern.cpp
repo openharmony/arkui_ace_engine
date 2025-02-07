@@ -8808,6 +8808,9 @@ void TextFieldPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    if (selectOverlay_) {
+        selectOverlay_->AddAvoidKeyboardCallback(isCustomKeyboardAttached_);
+    }
     textFieldManager->TriggerAvoidOnCaretChange();
     auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
     SetLastCaretPos(caretPos);
