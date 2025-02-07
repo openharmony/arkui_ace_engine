@@ -33,6 +33,7 @@ public:
     {
         auto value = MakeRefPtr<SliderPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
+        value->PaintProperty::UpdatePaintPropertyHost(DynamicCast<PaintProperty>(this));
         value->propSliderPaintStyle_ = CloneSliderPaintStyle();
         value->propSliderTipStyle_ = CloneSliderTipStyle();
         return value;
@@ -57,7 +58,9 @@ public:
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, "");
-        auto theme = pipeline->GetTheme<SliderTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, "");
+        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
         CHECK_NULL_RETURN(theme, "");
         return theme->GetTrackBgColor().ColorToString();
     }
@@ -116,7 +119,9 @@ public:
         }
         auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, "");
-        auto theme = pipeline->GetTheme<SliderTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, "");
+        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
         CHECK_NULL_RETURN(theme, "");
         return GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString();
     }
@@ -133,7 +138,9 @@ public:
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SliderTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         auto jsonConstructor = JsonUtil::Create(true);
         jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());

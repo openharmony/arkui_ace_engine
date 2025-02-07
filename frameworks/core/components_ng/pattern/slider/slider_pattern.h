@@ -166,6 +166,7 @@ public:
     void SetSliderValue(double value, int32_t mode);
     void InitAccessibilityVirtualNodeTask();
     void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)

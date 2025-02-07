@@ -889,7 +889,7 @@ std::vector<GradientColor> SliderContentModifier::GetTrackBackgroundColor() cons
     if (gradientColors.empty()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, gradientColors);
-        auto theme = pipeline->GetTheme<SliderTheme>();
+        auto theme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
         CHECK_NULL_RETURN(theme, gradientColors);
         gradientColors = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()).GetColors();
     }
