@@ -56,10 +56,6 @@ public:
     explicit SliderContentModifier(const Parameters& parameters, std::function<void(float)> updateImageCenterX,
         std::function<void(float)> updateImageCenterY);
     ~SliderContentModifier() override = default;
-    SliderContentModifier(const WeakPtr<FrameNode>& host)
-    {
-        host_ = host;
-    }
 
     void onDraw(DrawingContext& context) override;
 
@@ -301,12 +297,6 @@ public:
         return stepPointVec_;
     }
 
-    uint32_t GetThemeScopeId() const
-    {
-        auto host = host_.GetRawPtr();
-        return host ? host->GetThemeScopeId() : 0;
-    }
-
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -327,7 +317,6 @@ private:
 private:
     std::function<void(float)> updateImageCenterX_;
     std::function<void(float)> updateImageCenterY_;
-    WeakPtr<FrameNode> host_;
 
     // animatable property
     RefPtr<AnimatablePropertyOffsetF> selectStart_;
