@@ -76,6 +76,11 @@ struct KeyComb final {
     {
         return code == other.code ? modKeyFlags < other.modKeyFlags : code < other.code;
     }
+
+    bool operator==(const KeyComb& other) const
+    {
+        return code == other.code && modKeyFlags == other.modKeyFlags;
+    }
 };
 
 class TextInputClient : public virtual AceType {
@@ -148,6 +153,7 @@ public:
     }
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    virtual void UpdateShiftFlag(const KeyEvent& keyEvent) {}
 
     virtual bool HandleOnEscape()
     {
@@ -218,8 +224,13 @@ public:
         return false;
     }
     virtual void DeleteRange(int32_t start, int32_t end) {}
+    virtual void HandleOnPageUp() {};
+    virtual void HandleOnPageDown() {};
+    virtual void ResetOriginCaretPosition() {};
+    virtual bool RecordOriginCaretPosition() { return false; };
 protected:
     int32_t instanceId_ = -1;
+    bool shiftFlag_ = false;
 };
 
 } // namespace OHOS::Ace
