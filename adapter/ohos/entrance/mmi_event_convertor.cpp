@@ -308,9 +308,13 @@ MouseButton GetMouseEventButton(int32_t button)
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
             return MouseButton::MIDDLE_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_SIDE:
-            return MouseButton::BACK_BUTTON;
+            return MouseButton::SIDE_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
+            return MouseButton::EXTRA_BUTTON;
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD:
             return MouseButton::FORWARD_BUTTON;
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK:
+            return MouseButton::BACK_BUTTON;
         default:
             return MouseButton::NONE_BUTTON;
     }
@@ -333,12 +337,9 @@ void ConvertMouseEvent(
     events.screenY = item.GetDisplayY();
     events.rawDeltaX = item.GetRawDx();
     events.rawDeltaY = item.GetRawDy();
-    int32_t orgAction = pointerEvent->GetPointerAction();
-    GetMouseEventAction(orgAction, events, isScenceBoardWindow);
-    int32_t orgButton = pointerEvent->GetButtonId();
-    events.button = GetMouseEventButton(orgButton);
-    int32_t orgDevice = pointerEvent->GetSourceType();
-    GetEventDevice(orgDevice, events);
+    GetMouseEventAction(pointerEvent->GetPointerAction(), events, isScenceBoardWindow);
+    events.button = GetMouseEventButton(pointerEvent->GetButtonId());
+    GetEventDevice(pointerEvent->GetSourceType(), events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
@@ -358,7 +359,10 @@ void ConvertMouseEvent(
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
     for (const auto& pressedButton : pressedSet) {
-        events.pressedButtonsArray.emplace_back(GetMouseEventButton(pressedButton));
+        auto convertedButton = GetMouseEventButton(pressedButton);
+        if (convertedButton != MouseButton::NONE_BUTTON) {
+            events.pressedButtonsArray.emplace_back(convertedButton);
+        }
     }
     events.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     events.pointerEvent = pointerEvent;
