@@ -460,6 +460,16 @@ public:
         return customButtonNode_;
     }
 
+    void SetCustomAppBarNode(const RefPtr<UINode>& customNode)
+    {
+        customAppBarNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomAppBarNode() const
+    {
+        return customAppBarNode_;
+    }
+
     void SetIsBuilderNode(bool isBuilderNode)
     {
         isBuilderNode_ = isBuilderNode;
@@ -504,6 +514,7 @@ private:
 
     RefPtr<UINode> customTitleNode_;
     RefPtr<UINode> customButtonNode_;
+    RefPtr<UINode> customAppBarNode_;
     RefPtr<UINode> customWindowMaskNode_;
 
     RefPtr<GestureProcessor> gestureStack_;

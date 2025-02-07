@@ -712,7 +712,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest014, TestSize.Level1)
     frameNode_->GetGeometryNode()->SetContentOffset(OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
     auto eventHub = frameNode_->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto inputEventHub = eventHub->GetInputEventHub();
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
     pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
     auto paintProperty_ = frameNode_->GetPaintProperty<PatternLockPaintProperty>();

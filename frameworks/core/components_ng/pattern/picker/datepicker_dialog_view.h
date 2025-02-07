@@ -38,6 +38,7 @@ public:
     static void SetStartDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetEndDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetSelectedDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
+    static void SetMode(const RefPtr<FrameNode>& frameNode, const DatePickerMode& mode);
     static void SetShowLunar(const RefPtr<FrameNode>& frameNode, bool lunar = false);
     static void SetDateTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);

@@ -41,9 +41,9 @@ HWTEST_F(FocusHubTestNg, PaintFocusState0002, TestSize.Level1)
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child);
     frameNode->AddChild(child2);
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     context->isFocusActive_ = true;

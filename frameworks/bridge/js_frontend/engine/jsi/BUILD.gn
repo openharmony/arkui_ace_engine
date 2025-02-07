@@ -16,30 +16,32 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
-base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
-abcstrip_native_min_obj_path = base_output_path + "strip.native.min.abc"
+if (is_arkui_x || use_mac || use_mingw_win || use_linux) {
+  base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
+  abcstrip_native_min_obj_path = base_output_path + "strip.native.min.abc"
 
-es2abc_gen_abc("gen_strip_native_min_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
-  src_js = rebase_path(
-          "$root_out_dir/obj/third_party/jsframework/dist/strip.native.min.js")
-  dst_file = rebase_path(base_output_path + "/strip.native.min.abc")
+  es2abc_gen_abc("gen_strip_native_min_abc") {
+    extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+    src_js = rebase_path(
+            "$root_out_dir/obj/third_party/jsframework/dist/strip.native.min.js")
+    dst_file = rebase_path(base_output_path + "/strip.native.min.abc")
 
-  in_puts =
-      [ "$root_out_dir/obj/third_party/jsframework/dist/strip.native.min.js" ]
-  out_puts = [ base_output_path + "/strip.native.min.abc" ]
-  extra_dependencies = [ "//third_party/jsframework:gen_snapshot" ]
-}
-
-gen_obj("abc_strip_native_min") {
-  input = base_output_path + "/strip.native.min.abc"
-  if (use_mac || use_mingw_win || use_ios || use_linux) {
-    abcstripnativemin_obj_path = base_output_path + "/strip_native_min.c"
-  } else {
-    abcstripnativemin_obj_path = base_output_path + "/strip_native_min.o"
+    in_puts =
+        [ "$root_out_dir/obj/third_party/jsframework/dist/strip.native.min.js" ]
+    out_puts = [ base_output_path + "/strip.native.min.abc" ]
+    extra_dependencies = [ "//third_party/jsframework:gen_snapshot" ]
   }
-  output = abcstripnativemin_obj_path
-  snapshot_dep = [ ":gen_strip_native_min_abc" ]
+
+  gen_obj("abc_strip_native_min") {
+    input = base_output_path + "/strip.native.min.abc"
+    if (use_mac || use_mingw_win || use_ios || use_linux) {
+      abcstripnativemin_obj_path = base_output_path + "/strip_native_min.c"
+    } else {
+      abcstripnativemin_obj_path = base_output_path + "/strip_native_min.o"
+    }
+    output = abcstripnativemin_obj_path
+    snapshot_dep = [ ":gen_strip_native_min_abc" ]
+  }
 }
 
 template("js_engine_ark") {

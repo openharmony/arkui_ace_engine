@@ -238,6 +238,23 @@ class CalendarPickerBorderColorModifier extends ModifierWithKey<ResourceColor | 
   }
 }
 
+class CalendarPickerMarkTodayModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('calendarPickerMarkToday');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerMarkToday(node);
+    } else {
+      getUINativeModule().calendarPicker.setCalendarPickerMarkToday(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -352,6 +369,10 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
   }
   borderColor(value: ResourceColor | EdgeColors): this {
     modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderColorModifier.identity, CalendarPickerBorderColorModifier, value);
+    return this;
+  }
+  markToday(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerMarkTodayModifier.identity, CalendarPickerMarkTodayModifier, value);
     return this;
   }
 }

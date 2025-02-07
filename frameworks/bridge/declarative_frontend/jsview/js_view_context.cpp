@@ -709,6 +709,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
+    auto iterations = option.GetIteration();
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     std::optional<int32_t> count;
@@ -718,8 +720,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count]() mutable {
-            RecordAnimationFinished(count.value_or(1));
+                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count,
+                            iterations]() mutable {
+            RecordAnimationFinished(iterations);
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -733,13 +736,12 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
-        onFinishEvent = [traceStreamPtr, count]() {
-            RecordAnimationFinished(count.value_or(1));
+        onFinishEvent = [traceStreamPtr, iterations]() {
+            RecordAnimationFinished(iterations);
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     }
 
-    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()

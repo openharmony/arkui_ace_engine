@@ -96,6 +96,7 @@ private:
     void DumpInfo() override;
 
     void InitArrayValue(bool& autoCollapseModeChanged);
+    RefPtr<FrameNode> BuildIcon();
     void BuildArrayValueItems();
     void BuildFullArrayValue();
     void CollapseArrayValue();
@@ -112,6 +113,7 @@ private:
     void InitTouchEvent ();
     void ResetArrayValue (bool isModeChanged);
     void UpdateChildNodeStyle(int32_t index);
+    void SetChildNodeAccessibility(const RefPtr<FrameNode>& childNode, const std::string &nodeStr);
     void SetChildNodeStyle(int32_t index, const std::string &nodeStr, bool fromTouchUp);
     void SetFocusIndexStyle(int32_t index, const std::string &nodeStr, bool isTextNodeInTree);
     std::string GetChildNodeContent(int32_t index);

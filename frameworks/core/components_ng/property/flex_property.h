@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 using AlignRulesItem = std::map<AlignDirection, AlignRule>;
 using BiasPair = std::pair<float, float>;
-using LayoutWeightPair = std::pair<std::optional<float>, std::optional<float>>; // <horizontal,vertical>
+using ChainWeightPair = std::pair<std::optional<float>, std::optional<float>>; // <horizontal,vertical>
 using GuidelineItem = std::vector<GuidelineInfo>;
 using BarrierItem = std::vector<BarrierInfo>;
 
@@ -248,7 +248,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Barrier, BarrierItem);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Guideline, GuidelineItem);
     ACE_DEFINE_PROPERTY_GROUP_ITEM_WITH_CALLBACK(AlignRules, AlignRulesItem);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ChainWeight, LayoutWeightPair); // <horizontal,vertical>
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ChainWeight, ChainWeightPair); // <horizontal,vertical>
 
 private:
     void OnAlignRulesUpdate(const AlignRulesItem& item)

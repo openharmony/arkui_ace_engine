@@ -313,7 +313,6 @@ void JSIndicator::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            TAG_LOGW(AceLogTag::ACE_INDICATOR, "IndicatorComponent onChange callback execute failed.");
             return;
         }
         PipelineContext::SetCallBackNode(node);

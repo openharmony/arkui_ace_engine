@@ -24,7 +24,6 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -58,6 +57,21 @@ private:
         }
     }
 
+    bool ConvertFromJSCallbackInfo(const JSCallbackInfo& args, size_t index, size_t& result)
+    {
+        int32_t value = 0;
+        if (!args.GetInt32Arg(index, value)) {
+            return false;
+        }
+        if (value < 0) {
+            TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Invalid index: %{public}d, change negative value to 0",
+                value);
+            value = 0;
+        }
+        result = static_cast<size_t>(value);
+        return true;
+    }
+
     void OnDataReloaded(const JSCallbackInfo& args)
     {
         useOldInterface = true;
@@ -85,8 +99,8 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        int length = 2;
-        if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
+            !ConvertFromJSCallbackInfo(args, 1, count)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataBulkAdded, index, count);
@@ -110,8 +124,8 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        int length = 2;
-        if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
+            !ConvertFromJSCallbackInfo(args, 1, count)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataBulkDeleted, index, count);
@@ -126,6 +140,22 @@ private:
         NotifyAll(&V2::DataChangeListener::OnDataChanged, args);
     }
 
+    void OnDataBulkChanged(const JSCallbackInfo& args)
+    {
+        useOldInterface = true;
+        if (useAnotherInterface(useNewInterface)) {
+            return;
+        }
+        ContainerScope scope(instanceId_);
+        size_t index = 0;
+        size_t count = 0;
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
+            !ConvertFromJSCallbackInfo(args, 1, count)) {
+            return;
+        }
+        NotifyAll(&V2::DataChangeListener::OnDataBulkChanged, index, count);
+    }
+
     void OnDataMoved(const JSCallbackInfo& args)
     {
         useOldInterface = true;
@@ -135,7 +165,8 @@ private:
         ContainerScope scope(instanceId_);
         size_t from = 0;
         size_t to = 0;
-        if (args.Length() < 2 || !ConvertFromJSValue(args[0], from) || !ConvertFromJSValue(args[1], to)) {
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, from) ||
+            !ConvertFromJSCallbackInfo(args, 1, to)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataMoved, from, to);
@@ -280,7 +311,7 @@ private:
     {
         ContainerScope scope(instanceId_);
         size_t index = 0;
-        if (args.Length() > 0 && ConvertFromJSValue(args[0], index)) {
+        if (args.Length() > 0 && ConvertFromJSCallbackInfo(args, 0, index)) {
             NotifyAll(method, index);
         }
     }

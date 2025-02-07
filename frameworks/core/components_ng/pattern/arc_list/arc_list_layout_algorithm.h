@@ -71,6 +71,7 @@ protected:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup) override;
     float GetLayoutFixOffset() override;
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper) override;
+    void FixPredictSnapPos() override {};
 
 private:
     void MeasureList(LayoutWrapper* layoutWrapper) override;
@@ -80,7 +81,7 @@ private:
 
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos);
 
-    float GetNearScale(float pos);
+    static float GetNearScale(float pos);
     float InitItemOffset(LayoutWrapper* layoutWrapper);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
 

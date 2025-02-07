@@ -75,6 +75,9 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
         uiContent_->SetFormRenderingMode(static_cast<int8_t>(renderingMode_));
     }
+    if (enableBlurBackground_) {
+        uiContent_->SetFormEnableBlurBackground(enableBlurBackground_);
+    }
     uiContent_->RunFormPage();
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (!backgroundColor_.empty()) {
@@ -113,7 +116,7 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
     }
     rsSurfaceNode->SetBounds(round(borderWidth_), round(borderWidth_), round(width_ - borderWidth_ * DOUBLE),
         round(height_ - borderWidth_ * DOUBLE));
-    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
         HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
     }
@@ -136,6 +139,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
+    enableBlurBackground_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
+        false);
     borderWidth_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f);
     fontScaleFollowSystem_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, true);
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
@@ -236,6 +241,17 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         formJsInfo.imageDataMap.size());
 }
 
+void FormRenderer::RemoveFormDeathRecipient()
+{
+    if (!formRendererDelegate_) {
+        return;
+    }
+    auto renderDelegate = formRendererDelegate_->AsObject();
+    if (renderDelegate != nullptr) {
+        renderDelegate->RemoveDeathRecipient(renderDelegateDeathRecipient_);
+    }
+}
+
 void FormRenderer::Destroy()
 {
     HILOG_INFO("Destroy FormRenderer start.");
@@ -247,9 +263,7 @@ void FormRenderer::Destroy()
         }
     }
 
-    if (formRendererDelegate_ != nullptr && formRendererDelegate_->AsObject() != nullptr) {
-        formRendererDelegate_->AsObject()->RemoveDeathRecipient(renderDelegateDeathRecipient_);
-    }
+    RemoveFormDeathRecipient();
     renderDelegateDeathRecipient_ = nullptr;
     formRendererDelegate_ = nullptr;
     formRendererDispatcherImpl_ = nullptr;
@@ -283,12 +297,18 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         uiContent_->SetFormHeight(resizedHeight);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-        if (eventHandler) {
-            eventHandler->PostTask([uiContent = uiContent_, resizedWidth, resizedHeight]() {
-                uiContent->OnFormSurfaceChange(resizedWidth, resizedHeight);
-            });
-        }
         rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
+        if (!eventHandler) {
+            HILOG_ERROR("eventHandler is null");
+            return;
+        }
+        eventHandler->PostTask([uiContent = uiContent_, resizedWidth, resizedHeight]() {
+            if (!uiContent) {
+                HILOG_ERROR("uiContent is null");
+                return;
+            }
+            uiContent->OnFormSurfaceChange(resizedWidth, resizedHeight);
+        });
     }
 }
 
@@ -404,6 +424,7 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
     if (!formRendererDelegate_) {
         formRendererDelegate_ = renderRemoteObj;
     } else {
+        RemoveFormDeathRecipient();
         auto formRendererDelegate = renderRemoteObj;
         bool checkFlag = true;
         formRendererDelegate->OnCheckManagerDelegate(checkFlag);
@@ -444,6 +465,8 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
 void FormRenderer::ResetRenderDelegate()
 {
     HILOG_INFO("ResetRenderDelegate.");
+    RemoveFormDeathRecipient();
+    renderDelegateDeathRecipient_ = nullptr;
     formRendererDelegate_ = nullptr;
 }
 
@@ -507,7 +530,7 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         backgroundColor_ = backgroundColor;
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
-    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
         HILOG_INFO("AttachUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
     }

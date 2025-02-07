@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include "base/utils/string_utils.h"
+#include "core/common/container.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -129,7 +130,37 @@ public:
             theme->backgroundBlurColor_ = pattern->GetAttr<Color>("background_blur_color", Color(0x19E6E6E6));
             theme->mainTitleFontColor_ = pattern->GetAttr<Color>("title_primary_color", Color(0xe5000000));
             theme->subTitleFontColor_ = pattern->GetAttr<Color>("title_subheader_color", Color(0x99000000));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                SetToolBarTheme(pattern, theme);
+            }
             ParsePatternContinue(themeConstants, theme);
+        }
+
+        void SetToolBarTheme(RefPtr<ThemeStyle> pattern, const RefPtr<NavigationBarTheme>& theme) const
+        {
+            theme->toolbarItemFocusBorderWidth_ =
+                pattern->GetAttr<Dimension>("toolbar_item_focus_border_size_api_sixteen", 2.0_vp);
+            theme->toolbarItemFocusBorderColor_ =
+                pattern->GetAttr<Color>("toolbar_item_focus_color_api_sixteen", Color(0x007dff));
+            theme->toolbarItemFontSize_ = pattern->GetAttr<Dimension>("toolbar_item_font_size_api_sixteen", 10.0_fp);
+            theme->toolbarItemFontColor_ =
+                pattern->GetAttr<Color>("toolbar_item_font_color_api_sixteen", Color(0x66182431));
+            theme->toolbarItemBorderRadiusValue_ =
+                pattern->GetAttr<Dimension>("toolbar_item_bg_button_border_radius_api_sixteen", 12.0_vp);
+            theme->toolbarItemBorderRadius_.SetRadius(theme->toolbarItemBorderRadiusValue_);
+            theme->toolbarIconColor_ =
+                pattern->GetAttr<Color>("toolbar_item_icon_color_api_sixteen", Color(0x66182431));
+            theme->toolbarActiveIconColor_ =
+                pattern->GetAttr<Color>("toolbar_item_active_icon_color_api_sixteen", Color(0xff007dff));
+            theme->toolbarActiveTextColor_ =
+                pattern->GetAttr<Color>("toolbar_item_active_text_color_api_sixteen", Color(0xff007dff));
+            theme->toolbarItemHeight_ = 44.0_vp;
+            theme->toolbarHeight_ = 48.0_vp;
+            theme->toolbarItemHorizontalPadding_ = 4.0_vp;
+            theme->toolbarItemVerticalPadding_ = 4.0_vp;
+            theme->toolbarItemTopPadding_ = 2.0_vp;
+            theme->toolbarItemLeftOrRightPadding_ = 2.0_vp;
+            theme->toolbarItemBottomPadding_ = 2.0_vp;
         }
 
         void ParsePatternContinue(const RefPtr<ThemeConstants>& themeConstants,
@@ -368,6 +399,10 @@ public:
     {
         return toolbarIconSize_;
     }
+    const Dimension& GetToolbarHideTextIconSize() const
+    {
+        return toolbarHideTextIconSize_;
+    }
     const Color& GetToolbarActiveIconColor() const
     {
         return toolbarActiveIconColor_;
@@ -400,13 +435,25 @@ public:
     {
         return toolbarItemLeftOrRightPadding_;
     }
+    const Dimension& GetToolbarItemTextLeftOrRightPadding() const
+    {
+        return ToolbarItemTextLeftOrRightPadding_;
+    }
     const Dimension& GetToolbarItemHeigth() const
     {
         return toolbarItemHeight_;
     }
+    const Dimension& GetToolbarHeigth() const
+    {
+        return toolbarHeight_;
+    }
     const Dimension& GetToolbarItemBottomPadding() const
     {
         return toolbarItemBottomPadding_;
+    }
+    const Dimension& GetToolbarItemIconTopPadding() const
+    {
+        return toolbarItemIconTopPadding_;
     }
     const Dimension& GetToolbarItemMargin() const
     {
@@ -650,16 +697,20 @@ private:
     double toolbarBgAlpha_ = 0.95;
     Color toolbarIconColor_;
     Dimension toolbarIconSize_ = 24.0_vp;
+    Dimension toolbarHideTextIconSize_ = 36.0_vp;
     Color toolbarActiveIconColor_;
     Color toolbarActiveTextColor_;
     uint32_t toolbarItemTextMaxLines_ = 2;
     Dimension toolbarItemSafeInterval_ = 8.0_vp;
     Dimension toolbarItemHorizontalPadding_ = 8.0_vp;
+    Dimension ToolbarItemTextLeftOrRightPadding_ = 4.0_vp;
     Dimension toolbarItemVerticalPadding_ = 12.0_vp;
     Dimension toolbarItemTopPadding_ = 8.0_vp;
     Dimension toolbarItemLeftOrRightPadding_ = 4.0_vp;
     Dimension toolbarItemHeight_ = 56.0_vp;
+    Dimension toolbarHeight_ = 56.0_vp;
     Dimension toolbarItemBottomPadding_ = 4.0_vp;
+    Dimension toolbarItemIconTopPadding_ = 4.0_vp;
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
     std::string moreMessage_ = "";

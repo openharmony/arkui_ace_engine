@@ -38,6 +38,7 @@ struct DragDropInitiatingParams {
     CancelableCallback<void()> showGatherCallback;
     OptionsAfterApplied optionsAfterApplied;
     WeakPtr<FrameNode> frameNode;
+    SourceType triggeredSourceType;
 
     RefPtr<FrameNode> GetFrameNode()
     {
@@ -49,6 +50,7 @@ struct DragDropInitiatingParams {
         idleFingerId = -1;
         preScaleValue = 1.0f;
         preScaledPixelMap = nullptr;
+        triggeredSourceType = SourceType::TOUCH;
         isThumbnailCallbackTriggered = false;
         isNeedGather = false;
         getTextThumbnailPixelMapCallback = nullptr;

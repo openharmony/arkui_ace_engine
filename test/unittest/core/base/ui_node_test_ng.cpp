@@ -214,9 +214,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
      * @tc.expected: result is parent and nullptr
      */
     for (int i = 0; i < 3; ++i) {
-        auto eventHub = AceType::MakeRefPtr<EventHub>();
-        auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub, focusTypes[i]);
-        eventHub->focusHub_ = focusHub;
+        RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+        auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)), focusTypes[i]);
+        parent->focusHub_ = focusHub;
         parent->eventHub_ = eventHub;
         ONE->parent_ = parent;
         auto result = ONE->GetFocusParent();
@@ -250,13 +250,14 @@ HWTEST_F(UINodeTestNg, UINodeTestNg005, TestSize.Level1)
      * @tc.expected: THREE's children size is 2
      */
     std::list<RefPtr<FrameNode>> children;
-    auto eventHubTwo = AceType::MakeRefPtr<EventHub>();
-    auto focusHubTwo = AceType::MakeRefPtr<FocusHub>(eventHubTwo, FocusType::NODE);
-    auto eventHubFour = AceType::MakeRefPtr<EventHub>();
-    auto focusHubFour = AceType::MakeRefPtr<FocusHub>(eventHubFour, FocusType::DISABLE);
-    eventHubTwo->focusHub_ = focusHubTwo;
+    RefPtr<EventHub> eventHubTwo = AceType::MakeRefPtr<EventHub>();
+    auto focusHubTwo = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubTwo)), FocusType::NODE);
+    RefPtr<EventHub> eventHubFour = AceType::MakeRefPtr<EventHub>();
+    auto focusHubFour = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubFour)), FocusType::DISABLE);
+    TWO->focusHub_ = focusHubTwo;
     TWO->eventHub_ = eventHubTwo;
-    eventHubFour->focusHub_ = focusHubFour;
+    FOUR->focusHub_ = focusHubFour;
     FOUR->eventHub_ = eventHubFour;
     THREE->AddChild(TWO, 1, false);
     THREE->AddChild(FOUR, 1, false);
@@ -420,6 +421,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg011, TestSize.Level1)
     ONE->MountToParent(ZERO, 1, false);
     retPageId = ONE->GetPageId();
     EXPECT_EQ(retPageId, 1);
+    ZERO->SetDestroying(false);
     ONE->Clean();
     ZERO->Clean();
 }
@@ -441,10 +443,11 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
      * @tc.steps: step2. call the GetFirstFocusHubChild functionand and set focus type is DISABLE
      * @tc.expected: the return value is null
      */
-    auto eventHubZero = AceType::MakeRefPtr<EventHub>();
-    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
+    RefPtr<EventHub> eventHubZero = AceType::MakeRefPtr<EventHub>();
+    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::DISABLE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
     EXPECT_EQ(retFirstFocusHubChild, nullptr);
@@ -452,9 +455,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
      * @tc.steps: step3. call the GetFirstFocusHubChild functionand set focus type is NODE
      * @tc.expected: the return focusHub type is NODE
      */
-    focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::NODE);
+    focusHubZero = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::NODE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
     EXPECT_EQ(retFirstFocusHubChild->GetFocusType(), FocusType::NODE);
@@ -463,9 +466,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
      * @tc.steps: step4. call the GetFirstFocusHubChild functionand set focus type is SCOPE
      * @tc.expected: the return focusHub type is SCOPE
      */
-    focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::SCOPE);
+    focusHubZero = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::SCOPE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
     EXPECT_EQ(retFirstFocusHubChild->GetFocusType(), FocusType::SCOPE);
@@ -483,14 +486,15 @@ HWTEST_F(UINodeTestNg, UINodeTestNg013, TestSize.Level1)
      * @tc.steps: step1. add one child to ZERO and set focus type is NODE
      * @tc.expected: the return focusHub type is NODE
      */
-    auto eventHubZero = AceType::MakeRefPtr<EventHub>();
-    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
-    auto eventHubOne = AceType::MakeRefPtr<EventHub>();
-    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::NODE);
+    RefPtr<EventHub> eventHubZero = AceType::MakeRefPtr<EventHub>();
+    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::DISABLE);
+    RefPtr<EventHub> eventHubOne = AceType::MakeRefPtr<EventHub>();
+    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::NODE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
 
     ZERO->AddChild(ONE, 1, false);
@@ -501,9 +505,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg013, TestSize.Level1)
      * @tc.steps: step2. add one child to ZERO and set focus type is DISABLE
      * @tc.expected: the return value is null
      */
-    focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::DISABLE);
+    focusHubOne = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::DISABLE);
 
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
     ZERO->AddChild(ONE, 1, false);
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
@@ -522,14 +526,16 @@ HWTEST_F(UINodeTestNg, UINodeTestNg014, TestSize.Level1)
      * @tc.steps: step1. add one child to ZERO and set focus type is SCOPE
      * @tc.expected: the return focusHub type is SCOPE
      */
-    auto eventHubZero = AceType::MakeRefPtr<EventHub>();
-    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
-    auto eventHubOne = AceType::MakeRefPtr<EventHub>();
-    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::SCOPE);
+    RefPtr<EventHub> eventHubZero = AceType::MakeRefPtr<EventHub>();
+    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::DISABLE);
+    RefPtr<EventHub> eventHubOne = AceType::MakeRefPtr<EventHub>();
+    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::SCOPE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
 
     ZERO->AddChild(ONE, 1, false);
@@ -540,9 +546,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg014, TestSize.Level1)
      * @tc.steps: step2. add one child to ZERO and set focus type is DISABLE
      * @tc.expected: the return value is null
      */
-    focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::DISABLE);
+    focusHubOne = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::DISABLE);
 
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
     ZERO->AddChild(ONE, 1, false);
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
@@ -982,6 +988,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg033, TestSize.Level1)
     ZERO->children_.emplace_back(nullptr);
     ZERO->SetChildrenInDestroying();
     EXPECT_EQ(ZERO->children_.size(), 3);
+    ONE->SetDestroying(false);
+    TWO->SetDestroying(false);
     ZERO->children_.clear();
     ZERO->Clean();
 }
@@ -2516,4 +2524,35 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
      */
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
+
+/**
+ * @tc.name: IsAutoFillContainerNode001
+ * @tc.desc: Test ui node method IsAutoFillContainerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, IsAutoFillContainerNode001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode1->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode2->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode3->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 4, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode4->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 5, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode5->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode6 =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, 6, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode6->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode7 =
+        FrameNode::CreateFrameNode("OTHER_TAG", 7, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_FALSE(testNode7->IsAutoFillContainerNode());
+}
+
 } // namespace OHOS::Ace::NG

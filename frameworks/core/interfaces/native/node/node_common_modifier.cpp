@@ -1922,8 +1922,8 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
 
 void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
 {
-    std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::BOTTOM, ResizableOption::LEFT,
-        ResizableOption::RIGHT };
+    std::vector<ResizableOption> directions = { ResizableOption::LEFT, ResizableOption::TOP, ResizableOption::RIGHT,
+        ResizableOption::BOTTOM };
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
         SetCalcDimension(optDimension, options, NUM_13, index);
@@ -1941,6 +1941,19 @@ void SetBackgroundImageResizable(ArkUINodeHandle node, ArkUIStringAndFloat* opti
     ImageResizableSlice resizable;
     SetResizableFromVec(resizable, options);
     ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
+}
+
+ArkUIImageResizableSlice GetBackgroundImageResizable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    ArkUIImageResizableSlice arkUISlice {};
+    CHECK_NULL_RETURN(frameNode, arkUISlice);
+    auto slice = ViewAbstract::GetBackgroundImageResizableSlice(frameNode);
+    arkUISlice.left = static_cast<ArkUI_Float32>(slice.left.ConvertToVp());
+    arkUISlice.top = static_cast<ArkUI_Float32>(slice.top.ConvertToVp());
+    arkUISlice.right = static_cast<ArkUI_Float32>(slice.right.ConvertToVp());
+    arkUISlice.bottom = static_cast<ArkUI_Float32>(slice.bottom.ConvertToVp());
+    return arkUISlice;
 }
 
 void ResetBackgroundImageResizable(ArkUINodeHandle node)
@@ -3719,6 +3732,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
     option.enableEdgeAutoScroll = dragInteractionOptions.enableEdgeAutoScroll;
     option.enableHapticFeedback = dragInteractionOptions.enableHapticFeedback;
+    option.isLiftingDisabled = dragInteractionOptions.isLiftingDisabled;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3726,8 +3740,14 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, true, false, true, false, false, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode, NG::DragPreviewOption());
+}
+
+void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisableDataPrefetch(frameNode, value);
 }
 
 void SetMouseResponseRegion(
@@ -6256,6 +6276,13 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
     CHECK_NULL_VOID(frameNode);
     NG::DragDropInfo dragPreviewInfo;
     dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    dragPreviewInfo.onlyForLifting = dragPreview.onlyForLifting;
+    if (dragPreview.extraInfo) {
+        dragPreviewInfo.extraInfo = dragPreview.extraInfo;
+    }
+    if (dragPreview.pixelMap) {
+        dragPreviewInfo.pixelMap = PixelMap::CreatePixelMap(dragPreview.pixelMap);
+    }
     ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
 }
 
@@ -6330,6 +6357,70 @@ ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, -1);
     return frameNode->GetId();
+}
+
+void SetNextFocus(ArkUINodeHandle node, ArkUI_CharPtr forward, ArkUI_CharPtr backward,
+    ArkUI_CharPtr up, ArkUI_CharPtr down, ArkUI_CharPtr left, ArkUI_CharPtr right, ArkUI_Uint32 hasValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if ((hasValue >> 5) & 1) { // 5: forward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, forward);
+    }
+    if ((hasValue >> 4) & 1) { // 4: backward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::SHIFT_TAB, backward);
+    }
+    if ((hasValue >> 3) & 1) { // 3: up
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::UP, up);
+    }
+    if ((hasValue >> 2) & 1) { // 2: down
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::DOWN, down);
+    }
+    if ((hasValue >> 1) & 1) { // 1: left
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::LEFT, std::string(left));
+    }
+    if ((hasValue >> 0) & 1) { // 0: right
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::RIGHT, std::string(right));
+    }
+}
+
+void SetNextFocusOneByOne(ArkUINodeHandle node, ::FocusMove idx, ArkUINodeHandle focusNode)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* focusFrameNode = reinterpret_cast<FrameNode*>(focusNode);
+    auto nodePtr = AceType::WeakClaim<AceType>(focusFrameNode);
+    FocusIntension key;
+    switch (idx) {
+        case ::FocusMove::FOCUS_MOVE_FORWARD:
+            key = FocusIntension::TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_BACKWARD:
+            key = FocusIntension::SHIFT_TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_UP:
+            key = FocusIntension::UP;
+            break;
+        case ::FocusMove::FOCUS_MOVE_DOWN:
+            key = FocusIntension::DOWN;
+            break;
+        case ::FocusMove::FOCUS_MOVE_LEFT:
+            key = FocusIntension::LEFT;
+            break;
+        case ::FocusMove::FOCUS_MOVE_RIGHT:
+            key = FocusIntension::RIGHT;
+            break;
+        default:
+            return;
+    }
+    ViewAbstract::SetNextFocus(frameNode, key, nodePtr);
+}
+
+void ResetNextFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetNextFocus(frameNode);
 }
 
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
@@ -6940,6 +7031,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetMask = ResetMask,
         .getAspectRatio = GetAspectRatio,
         .setBackgroundImageResizable = SetBackgroundImageResizable,
+        .getBackgroundImageResizable = GetBackgroundImageResizable,
         .resetBackgroundImageResizable = ResetBackgroundImageResizable,
         .setBackgroundImageSizeWithUnit = SetBackgroundImageSizeWithUnit,
         .getRenderFit = GetRenderFit,
@@ -6988,6 +7080,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .setDragPreview = SetDragPreview,
         .resetDragPreview = ResetDragPreview,
         .getNodeUniqueId = GetNodeUniqueId,
+        .setNextFocus = SetNextFocus,
+        .setNextFocusOneByOne = SetNextFocusOneByOne,
+        .resetNextFocus = ResetNextFocus,
         .setFocusBoxStyle = SetFocusBoxStyle,
         .resetFocusBoxStyle = ResetFocusBoxStyle,
         .setClickDistance = SetClickDistance,
@@ -7009,6 +7104,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
         .getNodeBackdropBlur = GetNodeBackdropBlur,
+        .setDisableDataPrefetch = SetDisableDataPrefetch,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7568,7 +7664,6 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
         bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
-        event.clickEvent.targetDisplayId = info.GetTargetDisplayId();
         //x
         event.componentAsyncEvent.data[0].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()) : localOffset.GetX();
@@ -7789,6 +7884,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
     touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
+    touchPoint.operatingHand = locationInfo.GetOperatingHand();
 }
 
 void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
@@ -7823,6 +7919,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
+        points[i].operatingHand = touchPoint.operatingHand;
         i++;
     }
 }
@@ -7993,7 +8090,6 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_HOVER;
         event.componentAsyncEvent.data[0].i32 = isHover;
-        event.hoverEvent.targetDisplayId = info.GetTargetDisplayId();
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHover(frameNode, onEvent);

@@ -19,6 +19,7 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -59,7 +60,7 @@ struct MenuItemInfo {
 struct PreviewMenuAnimationInfo {
     float previewScale = -1.0f;
     float menuScale = -1.0f;
-    float borderRadius = -1.0f;
+    BorderRadiusProperty borderRadius = BorderRadiusProperty(Dimension(-1.0f));
 
     // for hoverScale animation
     float clipRate = -1.0f;
@@ -586,6 +587,8 @@ public:
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
+
+    bool IsSelectOverlayDefaultModeRightClickMenu();
 
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);

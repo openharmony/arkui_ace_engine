@@ -652,4 +652,57 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPositio
     auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, false);
     EXPECT_EQ(index, 4);
 }
+
+/**
+ * @tc.name: TextFieldSelectOverlay_OnMenuItemAction
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_OnMenuItemAction, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. crate textfield node.
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call selectoverlay OnMenuItemAction.
+     * tc.expected: step2. no error.
+     */
+    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::TOUCH_MENU);
+    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::CUT, OptionMenuType::TOUCH_MENU);
+    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::TOUCH_MENU);
+    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::TOUCH_MENU);
+    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::SEARCH, OptionMenuType::TOUCH_MENU);
+    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::CAMERA_INPUT, OptionMenuType::TOUCH_MENU);
+    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::AI_WRITE, OptionMenuType::TOUCH_MENU);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_OnHandleLevelModeChanged
+ * @tc.desc: test OnHandleLevelModeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_OnHandleLevelModeChanged, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_INFO_NONE);
+
+    pattern->selectOverlay_->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
+    pattern->selectOverlay_->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
+    pattern->selectOverlay_->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
 } // namespace OHOS::Ace::NG

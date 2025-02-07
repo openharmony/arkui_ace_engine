@@ -497,6 +497,9 @@ HWTEST_F(RichEditorEditTestOneNg, ShowHandles001, TestSize.Level1)
     richEditorPattern->ShowHandles(false);
     EXPECT_EQ(richEditorPattern->showSelect_, true);
 
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
     richEditorPattern->isSpanStringMode_ = true;
     auto pasteStr = richEditorPattern->GetPasteStr();
     richEditorPattern->InsertValueByPaste(pasteStr);
@@ -1302,5 +1305,23 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnDelete001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleOnDelete(true);
     richEditorPattern->HandleOnDelete(false);
+}
+
+/**
+ * @tc.name: KeyboardAppearance001
+ * @tc.desc: test KeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, KeyboardAppearance001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetKeyboardAppearance(KeyboardAppearance::IMMERSIVE);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_EQ(richEditorPattern->GetKeyboardAppearance(), KeyboardAppearance::IMMERSIVE);
 }
 } // namespace OHOS::Ace::NG

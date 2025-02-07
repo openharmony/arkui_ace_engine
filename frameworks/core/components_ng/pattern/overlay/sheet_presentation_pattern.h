@@ -143,13 +143,7 @@ public:
         onWillDisappear_ = std::move(onWillDisappear);
     }
 
-    void OnWillDisappear()
-    {
-        if (onWillDisappear_) {
-            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
-            onWillDisappear_();
-        }
-    }
+    void OnWillDisappear();
 
     void UpdateOnAppear(std::function<void()>&& onAppear)
     {
@@ -463,7 +457,7 @@ public:
 
     void ResetToInvisible();
 
-    bool IsFold();
+    bool IsFoldExpand();
 
     void SetSheetKey(const SheetKey& sheetKey)
     {
@@ -696,6 +690,7 @@ public:
     void RecoverHalfFoldOrAvoidStatus();
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
         sheetPopupInfo_ = sheetPopupInfo;
@@ -712,6 +707,7 @@ public:
     {
         return isPlayTransition_;
     }
+    void OnFontScaleConfigurationUpdate() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -793,7 +789,7 @@ private:
     std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
-
+    
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 

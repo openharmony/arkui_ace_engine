@@ -1119,6 +1119,44 @@ void ResetSwiperOnChange(ArkUINodeHandle node)
     SwiperModelNG::SetOnChange(frameNode, nullptr);
 }
 
+void SetSwiperOnSelected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        SwiperModelNG::SetOnSelected(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnSelected(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnSelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnSelected(frameNode, nullptr);
+}
+
+void SetSwiperOnUnselected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        SwiperModelNG::SetOnUnselected(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnUnselected(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnUnselected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnUnselected(frameNode, nullptr);
+}
+
 void SetSwiperOnAnimationStart(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1315,6 +1353,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .getSwiperController = GetSwiperController,
         .setSwiperOnChange = SetSwiperOnChange,
         .resetSwiperOnChange = ResetSwiperOnChange,
+        .setSwiperOnUnselected = SetSwiperOnUnselected,
+        .resetSwiperOnUnselected = ResetSwiperOnUnselected,
         .setSwiperOnAnimationStart = SetSwiperOnAnimationStart,
         .resetSwiperOnAnimationStart = ResetSwiperOnAnimationStart,
         .setSwiperOnAnimationEnd = SetSwiperOnAnimationEnd,
@@ -1329,6 +1369,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .getSwiperPageFlipMode = GetSwiperSwiperPageFlipMode,
         .setSwiperOnContentWillScroll = SetSwiperOnContentWillScroll,
         .resetSwiperOnContentWillScroll = ResetSwiperOnContentWillScroll,
+        .setSwiperOnSelected = SetSwiperOnSelected,
+        .resetSwiperOnSelected = ResetSwiperOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1415,6 +1457,8 @@ const CJUISwiperModifier* GetCJUISwiperModifier()
         .resetSwiperOnAnimationEnd = ResetSwiperOnAnimationEnd,
         .setSwiperOnGestureSwipe = SetSwiperOnGestureSwipe,
         .resetSwiperOnGestureSwipe = ResetSwiperOnGestureSwipe,
+        .setSwiperOnSelected = SetSwiperOnSelected,
+        .resetSwiperOnSelected = ResetSwiperOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1439,6 +1483,27 @@ void SetSwiperChange(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
+}
+
+void SetSwiperSelected(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("Swiper onSelected callback execute failed.");
+            return;
+        }
+        int32_t index = swiperInfo->GetIndex();
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_SELECTED;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        SendArkUISyncEvent(&event);
+    };
+    SwiperModelNG::SetOnSelected(frameNode, std::move(onEvent));
 }
 
 void SetSwiperAnimationStart(ArkUINodeHandle node, void* extraParam)
@@ -1510,6 +1575,49 @@ void SetSwiperOnContentDidScroll(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(onEvent));
+}
+
+void SetSwiperUnselected(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("Swiper onUnselected callback execute failed.");
+            return;
+        }
+        int32_t index = swiperInfo->GetIndex();
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_UNSELECTED;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        SendArkUISyncEvent(&event);
+    };
+    SwiperModelNG::SetOnUnselected(frameNode, std::move(onEvent));
+}
+
+void SetSwiperContentWillScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const SwiperContentWillScrollResult& result) -> bool {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_CONTENT_WILL_SCROLL;
+        event.componentAsyncEvent.data[NUM_0].i32 = result.currentIndex;
+        event.componentAsyncEvent.data[NUM_1].i32 = result.comingIndex;
+        event.componentAsyncEvent.data[NUM_2].f32 = result.offset;
+        SendArkUISyncEvent(&event);
+        auto ret = event.componentAsyncEvent.data[0].i32;
+        if (ret == 0) {
+            return false;
+        }
+        return true;
+    };
+    SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

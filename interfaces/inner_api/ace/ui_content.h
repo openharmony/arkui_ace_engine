@@ -210,6 +210,7 @@ public:
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
+    virtual void SetFormEnableBlurBackground(bool enableBlurBackground) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -312,6 +313,8 @@ public:
     virtual void RecoverForm(const std::string &statusData) {}
 
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
+
+    virtual bool GetContainerModalTitleVisible() { return false; }
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
@@ -496,6 +499,8 @@ public:
     {
         return nullptr;
     }
+
+    virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 };
 
 } // namespace OHOS::Ace

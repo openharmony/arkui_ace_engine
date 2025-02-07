@@ -596,7 +596,11 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
         colorResult = Color(CompleteColorAlphaIfIncomplete(colorInt));
         return true;
     }
-    colorResult = themeConstants->GetColor(resourceInfo.resId);
+    if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
+        colorResult = themeConstants->GetColorByName(resourceInfo.params[0]);
+    } else {
+        colorResult = themeConstants->GetColor(resourceInfo.resId);
+    }
     return true;
 }
 

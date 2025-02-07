@@ -38,8 +38,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_date_picker_theme.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_time_picker_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -306,7 +304,17 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
     JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
     JSClass<JSDatePicker>::StaticMethod("enableHapticFeedback", &JSDatePicker::SetEnableHapticFeedback);
+    JSClass<JSDatePicker>::StaticMethod("digitalCrownSensitivity", &JSDatePicker::SetDigitalCrownSensitivity);
     JSClass<JSDatePicker>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSDatePicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+    DatePickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
 }
 
 void JSDatePicker::Create(const JSCallbackInfo& info)
@@ -446,7 +454,6 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
@@ -458,7 +465,6 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
     }
@@ -479,7 +485,6 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
@@ -698,9 +703,7 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
     ParseDatePickerMode(mode);
-    if (!JSDatePickerTheme::ApplyTheme()) {
-        SetDefaultAttributes();
-    }
+    SetDefaultAttributes();
 }
 
 void JSDatePicker::SetDefaultAttributes()
@@ -709,19 +712,16 @@ void JSDatePicker::SetDefaultAttributes()
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
-    textStyle.textColor = selectedStyle.GetTextColor();
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
-    textStyle.textColor = disappearStyle.GetTextColor();
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
-    textStyle.textColor = normalStyle.GetTextColor();
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
@@ -1439,7 +1439,17 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
     JSClass<JSTimePicker>::StaticMethod("enableCascade", &JSTimePicker::EnableCascade);
     JSClass<JSTimePicker>::StaticMethod("onEnterSelectedArea", &JSTimePicker::OnEnterSelectedArea);
+    JSClass<JSTimePicker>::StaticMethod("digitalCrownSensitivity", &JSTimePicker::SetDigitalCrownSensitivity);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSTimePicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+    TimePickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
 }
 
 void JSTimePicker::Create(const JSCallbackInfo& info)
@@ -1545,7 +1555,6 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
     }
@@ -1557,7 +1566,6 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
     }
@@ -1569,7 +1577,6 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
     }
@@ -1611,9 +1618,7 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
             TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
         }
     }
-    if (!JSTimePickerTheme::ApplyTheme()) {
-        SetDefaultAttributes();
-    }
+    SetDefaultAttributes();
 }
 
 void JSTimePicker::SetDefaultAttributes()
@@ -1622,19 +1627,16 @@ void JSTimePicker::SetDefaultAttributes()
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
-    textStyle.textColor = selectedStyle.GetTextColor();
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
-    textStyle.textColor = disappearStyle.GetTextColor();
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
-    textStyle.textColor = normalStyle.GetTextColor();
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);

@@ -81,6 +81,10 @@ export struct CalendarPickerDialogBootcamp {
   @State compShadowOptionsOffsetY: number = 0;
   @State enableCompShadowOptionsFill: boolean = false;
   @State compShadowOptionsFill: boolean = false;
+  @State enableStartDate: boolean = false;
+  @State startDate: Date = new Date('2020-12-10');
+  @State enableEndDate: boolean = false;
+  @State endDate: Date = new Date('2028-12-30');
 
   build() {
     NavDestination() {
@@ -166,7 +170,9 @@ export struct CalendarPickerDialogBootcamp {
             },
             onWillDisappear: () => {
               console.info('calendar onWillDisappear')
-            }
+            },
+            start: useEnabled(this.enableStartDate, this.startDate),
+            end: useEnabled(this.enableEndDate, this.endDate)
           })
         })
     }
@@ -438,6 +444,34 @@ export struct CalendarPickerDialogBootcamp {
           })
 
         }
+
+        RadioBlock({
+          title: 'CalendarDialogOptions.start',
+          isEnabled: $enableStartDate,
+          value: $startDate,
+          dataSource: [
+            { label: '2020-12-10', value: new Date('2020-12-10') },
+            { label: '2021-12-10', value: new Date('2021-12-10') },
+            { label: '2022-12-10', value: new Date('2022-12-10') },
+            { label: '2023-12-10', value: new Date('2023-12-10') },
+            { label: '2024-12-10', value: new Date('2024-12-10') },
+            { label: '2025-12-10', value: new Date('2025-12-10') }
+          ]
+        })
+
+        RadioBlock({
+          title: 'CalendarDialogOptions.end',
+          isEnabled: $enableEndDate,
+          value: $endDate,
+          dataSource: [
+            { label: '2025-12-10', value: new Date('2025-12-10') },
+            { label: '2026-12-10', value: new Date('2026-12-10') },
+            { label: '2027-12-10', value: new Date('2027-12-10') },
+            { label: '2028-12-10', value: new Date('2028-12-10') },
+            { label: '2029-12-10', value: new Date('2029-12-10') },
+            { label: '2030-12-10', value: new Date('2030-12-10') }
+          ]
+        })
 
       }.width('100%')
     }

@@ -49,6 +49,7 @@ public:
     void HandlePullEvent(const DragPointerEvent& dragPointerEvent);
     void HandleReStartDrag(const GestureEvent& info);
     void HandleDragStart();
+    void HandleDragEnd();
     void TransDragWindowToFwk();
 
     void RequestStatusTransition(RefPtr<DragDropInitiatingStateBase> currentState, int32_t nextStatus);

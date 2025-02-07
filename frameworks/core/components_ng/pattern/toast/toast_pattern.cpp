@@ -259,6 +259,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     offsetY += Dimension(wrapperRect_.Top());
     bool needResizeBottom = false;
     AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom);
+    needResizeBottom = needResizeBottom || (!toastProp->HasToastAlignment() && toastInfo_.bottom.empty());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && needResizeBottom &&
         !GreatNotEqual(offsetY.Value(), 0)) {
         return limitPos_ + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();

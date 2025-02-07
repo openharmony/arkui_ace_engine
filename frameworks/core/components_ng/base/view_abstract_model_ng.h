@@ -538,9 +538,9 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
-    void SetLayoutWeight(const LayoutWeightPair& value) override
+    void SetChainWeight(const ChainWeightPair& value) override
     {
-        ViewAbstract::SetLayoutWeight(value);
+        ViewAbstract::SetChainWeight(value);
     }
 
     void SetPixelRound(uint16_t value) override
@@ -1194,6 +1194,16 @@ public:
         ViewAbstract::SetTabIndex(index);
     }
 
+    void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) override
+    {
+        ViewAbstract::SetNextFocus(key, nextFocus);
+    }
+
+    void ResetNextFocus() override
+    {
+        ViewAbstract::ResetNextFocus();
+    }
+
     void SetFocusOnTouch(bool isSet) override
     {
         ViewAbstract::SetFocusOnTouch(isSet);
@@ -1510,6 +1520,16 @@ public:
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override
     {
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+    }
+
+    int32_t CancelDataLoading(const std::string& key) override
+    {
+        return ViewAbstract::CancelDataLoading(key);
+    }
+
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override
+    {
+        return ViewAbstract::SetDisableDataPrefetch(disableDataPrefetch);
     }
 
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override

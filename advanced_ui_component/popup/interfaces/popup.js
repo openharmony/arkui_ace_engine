@@ -591,13 +591,20 @@ export class g1 extends ViewPU {
         return this.theme.button.fontWeight;
     }
     getWindowsPadding() {
+        let top = this.theme.l1.padding.top;
+        let bottom = LengthMetrics.vp(this.theme.l1.padding.bottom.value - (this.theme.button.h1.bottom.value / 2));
+        let start = LengthMetrics.vp(this.theme.l1.padding.start.value - (this.theme.button.margin.end.value / 2));
+        let end = this.theme.l1.padding.end;
+        let resolvedMaxWidth = this.toVp(this.maxWidth);
+        if (resolvedMaxWidth === 0) {
+            start = LengthMetrics.vp(0);
+            end = LengthMetrics.vp(0);
+        }
         return {
-            top: this.theme.l1.padding.top,
-            bottom: LengthMetrics.vp(this.theme.l1.padding.bottom.value -
-                (this.theme.button.h1.bottom.value / 2)),
-            start: LengthMetrics.vp(this.theme.l1.padding.start.value -
-                (this.theme.button.margin.end.value / 2)),
-            end: this.theme.l1.padding.end
+            top: top,
+            bottom: bottom,
+            start: start,
+            end: end
         };
     }
     onWillApplyTheme(theme) {

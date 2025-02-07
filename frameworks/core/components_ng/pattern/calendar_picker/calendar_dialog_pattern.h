@@ -136,6 +136,8 @@ public:
         titleNode_ = titleNode;
     }
 
+    bool CanReportChangeEvent(const PickerDate& pickerDate);
+
 private:
     void OnModifyDone() override;
     void InitClickEvent();
@@ -203,6 +205,7 @@ private:
     std::vector<ButtonInfo> currentButtonInfos_;
     CalendarSettingData currentSettingData_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    PickerDate reportedPickerDate_;
     WeakPtr<FrameNode> titleNode_;
 };
 } // namespace OHOS::Ace::NG

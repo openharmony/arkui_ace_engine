@@ -265,7 +265,10 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // restore eventHub state when node appears.
-    host->GetEventHub<EventHub>()->RestoreEnabled();
+    auto eventHub = host->GetEventHubOnly<EventHub>();
+    if (eventHub) {
+        eventHub->RestoreEnabled();
+    }
     if (recursive && !propTransitionAppearing_ && !transitionEffect_) {
         // recursive and has no transition, no need to handle transition.
         return;
@@ -3599,7 +3602,6 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(
             DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
-        rsNode_->AddModifier(accessibilityFocusStateModifier_);
         RequestNextFrame();
         return;
     }
@@ -3626,6 +3628,7 @@ void RosenRenderContext::InitAccessibilityFocusModidifer(
     if (!accessibilityFocusStateModifier_) {
         accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
     }
+    rsNode_->AddModifier(accessibilityFocusStateModifier_);
     accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
     accessibilityFocusStateModifier_->SetPaintColor(paintColor);
     accessibilityFocusStateModifier_->SetFrameNode(frameNode);
@@ -3762,6 +3765,7 @@ void RosenRenderContext::FlushKitContentModifier(const RefPtr<Kit::Modifier>& mo
 
     auto modifierAdapter = ConvertKitContentModifier(modifier);
     rsNode_->AddModifier(modifierAdapter);
+    modifier->OnAttached();
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)

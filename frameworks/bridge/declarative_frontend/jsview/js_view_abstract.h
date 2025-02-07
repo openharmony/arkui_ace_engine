@@ -135,6 +135,11 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
+    static void ParseDragPreviewConfig(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewValue(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewBuilderNode(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo,
+        const JSRef<JSVal>& builder);
+    static void ParseDragInteractionOptions(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static NG::DragPreviewOption ParseDragPreviewOptions(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
@@ -361,9 +366,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void JsConstraintSize(const JSCallbackInfo& info);
     static void JsLayoutPriority(const JSCallbackInfo& info);
-    static void JsPixelRound(const JSCallbackInfo& info);
     static void JsLayoutWeight(const JSCallbackInfo& info);
-    static void JsChainWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
@@ -426,6 +429,7 @@ public:
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsTabStop(const JSCallbackInfo& info);
+    static void JsNextFocus(const JSCallbackInfo& info);
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);
@@ -477,6 +481,7 @@ public:
 
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
+    static void JsCancelDataLoading(const std::string& key);
     static void SetSymbolOptionApply(const JSCallbackInfo& info,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj);
     static void SetTextStyleApply(const JSCallbackInfo& info,

@@ -53,4 +53,12 @@ const RectF& SelectOverlayInfo::GetSecondHandlePaintRect()
 {
     return handleLevelMode == HandleLevelMode::OVERLAY ? secondHandle.paintRect : secondHandle.localPaintRect;
 }
+
+TextMenuShowMode CastToTextMenuShowMode(int32_t value)
+{
+    if (value <= static_cast<int32_t>(TextMenuShowMode::BEGIN) || value > static_cast<int32_t>(TextMenuShowMode::END)) {
+        return TextMenuShowMode::DEFAULT;
+    }
+    return static_cast<TextMenuShowMode>(value);
+}
 } // namespace OHOS::Ace::NG

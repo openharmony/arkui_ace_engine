@@ -17,14 +17,14 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_NODE_PAINT_METHOD_H
 
 #include "ui/base/ace_type.h"
-#include "ui/view/draw/modifier.h"
+#include "ui/view/draw/content_modifier.h"
 
 namespace OHOS::Ace::Kit {
 class NodePaintMethod : public AceType {
     DECLARE_ACE_TYPE(NodePaintMethod, AceType);
 
 public:
-    virtual RefPtr<Modifier> GetContentModifier() = 0;
+    virtual RefPtr<ContentModifier> GetContentModifier() = 0;
 };
 } // namespace OHOS::Ace::Kit
 

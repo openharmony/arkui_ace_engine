@@ -39,6 +39,8 @@ public:
     static ArkUINativeModuleValue ResetTimepickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTimepickerEnableCascade(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTimepickerEnableCascade(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

@@ -93,7 +93,7 @@ public:
     void SetLayoutPriority(int32_t priority) override;
     void SetPixelRound(uint16_t value) override;
     void SetLayoutWeight(float value) override;
-    void SetLayoutWeight(const NG::LayoutWeightPair& value) override {};
+    void SetChainWeight(const NG::ChainWeightPair& value) override {};
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
@@ -344,6 +344,8 @@ public:
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
+    int32_t CancelDataLoading(const std::string& key) override { return 0; };
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override {};
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
     // global light
     void SetLightPosition(

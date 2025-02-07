@@ -38,6 +38,7 @@ constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_CMD[] = "CMD";
 constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
+constexpr char APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char EVENT_NAME_JS_ERROR[] = "JS_ERROR";
 constexpr char STATISTIC_DURATION[] = "DURATION";
 constexpr char EVENT_KEY_STARTTIME[] = "STARTTIME";
@@ -68,6 +69,7 @@ constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
 constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
+constexpr char EVENT_KEY_REAL_SKIPPED_FRAME_TIME[] = "REAL_SKIPPED_FRAME_TIME";
 constexpr char EVENT_KEY_PAGE_NODE_COUNT[] = "PAGE_NODE_COUNT";
 constexpr char EVENT_KEY_PAGE_NODE_THRESHOLD[] = "PAGE_NODE_THRESHOLD";
 constexpr char EVENT_KEY_PAGE_DEPTH[] = "PAGE_DEPTH";
@@ -110,6 +112,10 @@ constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
 constexpr char UIEXTENSION_TRANSPARENT_DETECTED[] = "UIEXTENSION_TRANSPARENT_DETECTED";
+constexpr char EVENT_KEY_SCROLLABLE_ERROR[] = "SCROLLABLE_ERROR";
+constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
+constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
+constexpr char EVENT_KEY_TARGET_API_VERSION[] = "TARGET_API_VERSION";
 
 void StrTrim(std::string& str)
 {
@@ -278,13 +284,14 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
 }
 
 void EventReport::JsErrReport(
-    const std::string& packageName, const std::string& reason, const std::string& summary)
+    const std::string& packageName, const std::string& reason, const std::string& summary, const std::string& uniqueId)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_REASON, reason,
-        EVENT_KEY_SUMMARY, summary);
+        EVENT_KEY_SUMMARY, summary,
+        APP_RUNNING_UNIQUE_ID, uniqueId);
 }
 
 void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
@@ -547,6 +554,7 @@ void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
     const auto& versionName = info.baseInfo.versionName;
     const auto& pageName = info.baseInfo.pageName;
     const auto& skippedFrameTime = info.skippedFrameTime;
+    const auto& realSkippedFrameTime = info.realSkippedFrameTime;
     const auto& windowName = info.windowName;
     const auto& filterType = info.filterType;
     const auto& sceneId = info.sceneId;
@@ -561,6 +569,7 @@ void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
         EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_FILTER_TYPE, filterType,
         EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_REAL_SKIPPED_FRAME_TIME, static_cast<uint64_t>(realSkippedFrameTime),
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_UNFILTERED: skipppedFrameTime=%lld(ms), windowName=%s, filterType=%d",
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str(), filterType);
@@ -672,5 +681,25 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
         EVENT_KEY_VERSION_NAME, app_version_name,
         EVENT_KEY_BUNDLE_NAME, bundleName,
         EVENT_KEY_MODULE_NAME, moduleName);
+}
+
+void EventReport::ReportScrollableErrorEvent(
+    const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    auto target_api_version = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    StrTrim(packageName);
+    StrTrim(app_version_name);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_SCROLLABLE_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_NODE_TYPE, nodeType,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(errorType),
+        EVENT_KEY_SUB_ERROR_TYPE, subErrorType,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_TARGET_API_VERSION, target_api_version,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name);
 }
 } // namespace OHOS::Ace

@@ -160,6 +160,11 @@ struct CJTextPickerResult {
     uint32_t index;
 };
 
+struct CJDatePickerResult {
+    const char* value;
+    uint32_t index;
+};
+
 struct CJImageComplete {
     double width;
     double height;
@@ -277,6 +282,12 @@ struct CJGestureEvent {
 struct CJDragInfo {
     const char* extraParams;
     CJPosition* position;
+};
+
+struct CJDragEvent {
+    void* evtPtr;
+    bool useCustomDropAnimation;
+    int32_t dragBehavior;
 };
 
 struct CJDragItemInfo {

@@ -50,6 +50,10 @@ void EventHub::OnDetachContext(PipelineContext *context)
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
+    auto eventManager = context->GetEventManager();
+    if (eventManager) {
+        eventManager->DelKeyboardShortcutNode(host->GetId());
+    }
 }
 
 RefPtr<FrameNode> EventHub::GetFrameNode() const
@@ -655,30 +659,26 @@ const RefPtr<InputEventHub>& EventHub::GetInputEventHub() const
     return inputEventHub_;
 }
 
-const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
+RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
     const std::unique_ptr<FocusPaintParam>& paintParamsPtr)
 {
-    if (!focusHub_) {
-        focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
-        focusHub_->SetFocusStyleType(focusStyleType);
-        if (paintParamsPtr) {
-            focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
-        }
-    }
-    return focusHub_;
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetOrCreateFocusHub(type, focusable, focusStyleType, paintParamsPtr);
 }
 
-const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(const FocusPattern& focusPattern)
+RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(const FocusPattern& focusPattern)
 {
-    if (!focusHub_) {
-        focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
-    }
-    return focusHub_;
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetOrCreateFocusHub(focusPattern);
 }
 
-const RefPtr<FocusHub>& EventHub::GetFocusHub() const
+RefPtr<FocusHub> EventHub::GetFocusHub() const
 {
-    return focusHub_;
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetFocusHub();
 }
 
 void EventHub::OnContextAttached()
@@ -849,6 +849,16 @@ bool EventHub::HasCustomerOnDragEnd() const
 bool EventHub::HasCustomerOnDrop() const
 {
     return customerOnDrop_ != nullptr;
+}
+
+void EventHub::SetDisableDataPrefetch(bool disableDataPrefetch)
+{
+    disableDataPrefetch_ = disableDataPrefetch;
+}
+
+bool EventHub::GetDisableDataPrefetch() const
+{
+    return disableDataPrefetch_;
 }
 
 bool EventHub::IsEnabled() const

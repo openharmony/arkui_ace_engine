@@ -51,10 +51,6 @@ MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& cont
 void MovingPhotoPattern::OnModifyDone()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto onModifydone start.");
-    if (isRefreshMovingPhoto_) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto onModifydone isRefreshing return.");
-        return;
-    }
     Pattern::OnModifyDone();
     UpdateImageNode();
     UpdateVideoNode();
@@ -476,35 +472,24 @@ void MovingPhotoPattern::ResetMediaPlayer()
 {
     CHECK_NULL_VOID(mediaPlayer_);
     isPrepared_ = false;
-    ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (isRefreshMovingPhoto_) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "ArkUIMovingPhotoResetMediaPlayerAsync.");
-        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        bgTaskExecutor.PostTask(
-            [weak = WeakClaim(RawPtr(mediaPlayer_))] {
-                auto mediaPlayer = weak.Upgrade();
-                CHECK_NULL_VOID(mediaPlayer);
-                mediaPlayer->ResetMediaPlayer();
+    mediaPlayer_->ResetMediaPlayer();
+    RegisterMediaPlayerEvent();
+    if (!mediaPlayer_->SetSourceByFd(fd_)) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
+        ContainerScope scope(instanceId_);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->instanceId_);
+                pattern->FireMediaPlayerError();
             },
-            "ArkUIMovingPhotoResetMediaPlayerAsync");
-    } else {
-        mediaPlayer_->ResetMediaPlayer();
-        RegisterMediaPlayerEvent();
-        if (!mediaPlayer_->SetSourceByFd(fd_)) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
-            auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [weak = WeakClaim(this)] {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    ContainerScope scope(pattern->instanceId_);
-                    pattern->FireMediaPlayerError();
-                },
-                "ArkUIMovingPhotoReset");
-            return;
-        }
+            "ArkUIMovingPhotoReset");
+        return;
     }
 }
 
@@ -888,7 +873,6 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::IDLE:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is IDLE.");
-            OnMediaPlayerIdle();
             break;
         case PlaybackStatus::INITIALIZED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is INITIALIZED.");
@@ -921,32 +905,6 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
         default:
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "Invalid player status.");
             break;
-    }
-}
-
-void MovingPhotoPattern::OnMediaPlayerIdle()
-{
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnMediaPlayerIdle.");
-    CHECK_NULL_VOID(mediaPlayer_);
-    if (isRefreshMovingPhoto_) {
-        if (!mediaPlayer_->SetSourceByFd(fd_)) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
-            ContainerScope scope(instanceId_);
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-
-            auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [weak = WeakClaim(this)] {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    ContainerScope scope(pattern->instanceId_);
-                    pattern->FireMediaPlayerError();
-                },
-                "ArkUIMovingPhotoResetAsyncError");
-            return;
-        }
-        SelectPlaybackMode(autoAndRepeatLevel_);
     }
 }
 
@@ -1162,7 +1120,6 @@ void MovingPhotoPattern::PausePlayback()
 
 void MovingPhotoPattern::RefreshMovingPhoto()
 {
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto start.");
     if (uri_ == "") {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
         return;
@@ -1189,13 +1146,16 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
-    autoAndRepeatLevel_ = PlaybackMode::NONE;
-    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        autoAndRepeatLevel_ = PlaybackMode::NONE;
+        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         Pause();
+        StopAnimation();
     }
     ResetMediaPlayer();
-    currentPlayStatus_ = PlaybackStatus::IDLE;
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+        autoAndRepeatLevel_ = PlaybackMode::AUTO;
+    }
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();
     }

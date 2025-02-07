@@ -169,7 +169,7 @@ void CreateCustomMenuWithPreview(
     if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
         auto context = targetNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         auto pixelMap = context->GetThumbnailPixelMap();
         gestureHub->SetPixelMap(pixelMap);
@@ -304,7 +304,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
             CHECK_NULL_VOID(inputHub);
             inputHub->BindContextMenu(std::move(event));
         } else if (type == ResponseType::LONG_PRESS) {
-            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gestureHub);
             gestureHub->SetPreviewMode(menuParam.previewMode);
             // create or show menu on long press
@@ -328,7 +328,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
-                            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+                            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
                             CHECK_NULL_VOID(gestureHub);
                             auto pixelMap = context->GetThumbnailPixelMap();
                             gestureHub->SetPixelMap(pixelMap);

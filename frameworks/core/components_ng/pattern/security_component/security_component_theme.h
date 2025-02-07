@@ -146,6 +146,11 @@ public:
         return borderColor_;
     }
 
+    const Color& GetDefaultSymbolIconColor() const
+    {
+        return defaultSymbolIconColor_;
+    }
+
     const std::string& GetLocationDescriptions(int32_t index)
     {
         if (index < 0 || index >= static_cast<int32_t>(locationDescriptions_.size())) {
@@ -282,6 +287,7 @@ private:
         theme->fontColorNoBg_ = securityComponentPattern->GetAttr<Color>("font_color_no_bg", Color());
         theme->backgroundColor_ = securityComponentPattern->GetAttr<Color>("background_color", Color());
         theme->borderColor_ = securityComponentPattern->GetAttr<Color>("border_color", Color());
+        theme->defaultSymbolIconColor_ = securityComponentPattern->GetAttr<Color>("menu_icon_color", Color());
         ParseLocationDescriptions(securityComponentPattern, theme);
         ParsePasteDescriptions(securityComponentPattern, theme);
         ParseSaveDescriptions(securityComponentPattern, theme);
@@ -307,6 +313,7 @@ private:
     Color fontColorNoBg_;
     Color backgroundColor_;
     Color borderColor_;
+    Color defaultSymbolIconColor_;
 
     uint32_t defaultTextMaxLines_ = 1000000; // Infinity
     TextStyle textStyle_;

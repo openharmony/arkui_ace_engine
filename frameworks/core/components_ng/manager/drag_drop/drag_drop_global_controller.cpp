@@ -59,6 +59,30 @@ bool DragDropGlobalController::IsMenuShowing() const
     return isContextMenuShowing_;
 }
 
+void DragDropGlobalController::SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    dragStartRequestStatus_ = dragStartRequestStatus;
+}
+
+DragStartRequestStatus DragDropGlobalController::GetDragStartRequestStatus()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return dragStartRequestStatus_;
+}
+
+void DragDropGlobalController::SetAsyncDragCallback(std::function<void()> asyncDragCallbac)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    asyncDragCallback_ = asyncDragCallbac;
+}
+
+std::function<void()> DragDropGlobalController::GetAsyncDragCallback()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return asyncDragCallback_;
+}
+
 void DragDropGlobalController::UpdateDragDropInitiatingStatus(const RefPtr<FrameNode>& frameNode,
     const DragDropInitiatingStatus& dragStatus)
 {

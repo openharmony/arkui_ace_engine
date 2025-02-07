@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent001, TestSize.Level1)
      * @tc.cases: Call HandleTouchEvent with empty TouchLocationInfo
      * @tc.expected: isTouchDown_ is still false when touch
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
 
     pattern_->HandleTouchEvent(TouchEventInfo("touch"));
@@ -88,7 +90,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent002, TestSize.Level1)
      * @tc.cases: Call HandleTouchEvent with invalid TouchType::UNKNOWN
      * @tc.expected: isTouchDown_ is still false when touch
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
 
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::UNKNOWN, Offset()));
@@ -106,7 +110,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
      * @tc.steps: step1. Swipe to item(index:1), set animation to true
      * @tc.expected: When touch up, will trigger UpdateAnimationProperty and stop animation
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     ShowNext();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
@@ -141,7 +147,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->fadeAnimationIsRunning_ = true;
 
     /**
@@ -168,7 +176,9 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     pattern_->springAnimationIsRunning_ = true;
 
     /**
@@ -330,7 +340,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
      * @tc.cases: LoopIndex is middle item(index:1)
      */
     ChangeIndex(1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_));
 
@@ -344,7 +354,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
      * @tc.cases: LoopIndex is last item(index:3)
      */
     ChangeIndex(3);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(CurrentIndex(3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr));
 
@@ -409,7 +419,9 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, FocusStep005, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -484,7 +496,9 @@ HWTEST_F(SwiperCommonTestNg, Distributed001, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
 
     /**
@@ -645,7 +659,9 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
     /**
      * @tc.steps: step1. set axis default
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
@@ -717,7 +733,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      * @tc.expected: Verify ignoreBlank on the homepage is effective
      */
     ChangeIndex(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
     EXPECT_EQ(GetChildX(frameNode_, 1), itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), itemWidth * 2);
@@ -728,7 +744,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      * @tc.expected: Verify ignoreBlank is not effective
      */
     ChangeIndex(1);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN);
     EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth);
@@ -740,7 +756,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      * @tc.expected: Verify ignoreBlank on the endPage is effective
      */
     ChangeIndex(2);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + NEXT_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + NEXT_MARGIN);
     EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + NEXT_MARGIN + itemWidth);
@@ -771,7 +787,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest002, TestSize.Level1)
      * @tc.expected: loop is true, ignoreBlank on the endPage is not effective
      */
     ChangeIndex(0);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN);
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + itemWidth * 1);
@@ -802,7 +818,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
      * @tc.steps: step2. check first item position
      * @tc.expected: current index is 0, prevMargin and itemspace is both 0.
      */
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);
 }
 
@@ -1024,28 +1040,28 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems001, TestSize.Level1)
     model.SetIndex(0);
     CreateSwiperItems(5);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 2);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 380.0f);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 860.0f);
 
     pattern_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -480.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0.0f);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -100.0f);
@@ -1053,7 +1069,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems001, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 860.0f);
 
     pattern_->ChangeIndex(4, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 2);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -480.0f);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 0.0f);
@@ -1074,7 +1090,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems002, TestSize.Level1)
     model.SetIndex(0);
     CreateSwiperItems(5);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
@@ -1082,7 +1098,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems002, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 380.0f);
@@ -1090,7 +1106,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems002, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 1340.0f);
 
     pattern_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -480.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0.0f);
@@ -1098,7 +1114,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems002, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -100.0f);
@@ -1107,7 +1123,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems002, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 1340.0f);
 
     pattern_->ChangeIndex(4, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, -960.0f);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -480.0f);
@@ -1129,7 +1145,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems003, TestSize.Level1)
     model.SetIndex(0);
     CreateSwiperItems(5);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
@@ -1138,7 +1154,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems003, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 1440.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 380.0f);
@@ -1147,7 +1163,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems003, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 1820.0f);
 
     pattern_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -480.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0.0f);
@@ -1156,7 +1172,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems003, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 1440.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -100.0f);
@@ -1165,7 +1181,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems003, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 1340.0f);
 
     pattern_->ChangeIndex(4, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -1440.0f);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, -960.0f);
@@ -1188,7 +1204,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems004, TestSize.Level1)
     model.SetIndex(4);
     CreateSwiperItems(10);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -160.0f);
@@ -1198,7 +1214,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems004, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[7].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 6);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -260.0f);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, -100.0f);
@@ -1208,7 +1224,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems004, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[8].startPos, 540.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 6);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, -200.0f);
     EXPECT_EQ(pattern_->itemPosition_[5].startPos, -40.0f);
@@ -1218,7 +1234,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems004, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[9].startPos, 600.0f);
 
     pattern_->ChangeIndex(7, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[6].startPos, -160.0f);
     EXPECT_EQ(pattern_->itemPosition_[7].startPos, 0.0f);
@@ -1244,7 +1260,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems005, TestSize.Level1)
     model.SetItemSpace(Dimension(10, DimensionUnit::PX));
     CreateSwiperItems(10);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 7);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -1350.0f);
@@ -1258,7 +1274,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems005, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[7].startPos, 1350.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 6);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, -1000.0f);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -550.0f);
@@ -1268,7 +1284,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems005, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[7].startPos, 1250.0f);
 
     pattern_->ChangeIndex(6, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 7);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -1350.0f);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, -900.0f);
@@ -1279,7 +1295,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems005, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[9].startPos, 1350.0f);
 
     pattern_->ChangeIndex(9, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[6].startPos, -1350.0f);
     EXPECT_EQ(pattern_->itemPosition_[7].startPos, -900.0f);
@@ -1302,7 +1318,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems006, TestSize.Level1)
     model.SetIndex(0);
     CreateSwiperItems(5);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -480.0f);
@@ -1310,7 +1326,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems006, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100.0f);
@@ -1318,14 +1334,14 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems006, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 860.0f);
 
     pattern_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -480.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0.0f);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -100.0f);
@@ -1333,7 +1349,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems006, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 860.0f);
 
     pattern_->ChangeIndex(4, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -480.0f);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 0.0f);
@@ -1355,7 +1371,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems007, TestSize.Level1)
     model.SetIndex(0);
     CreateSwiperItems(5);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-2].startPos, -960.0f);
@@ -1365,7 +1381,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems007, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100.0f);
@@ -1374,7 +1390,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems007, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 1340.0f);
 
     pattern_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -960.0f);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -480.0f);
@@ -1383,7 +1399,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems007, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -100.0f);
@@ -1392,7 +1408,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems007, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 1340.0f);
 
     pattern_->ChangeIndex(4, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, -960.0f);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -480.0f);
@@ -1416,7 +1432,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems008, TestSize.Level1)
     model.SetIndex(0);
     CreateSwiperItems(5);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-2].startPos, -960.0f);
@@ -1426,7 +1442,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems008, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100.0f);
@@ -1435,7 +1451,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems008, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 1340.0f);
 
     pattern_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -960.0f);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -480.0f);
@@ -1444,7 +1460,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems008, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -580.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -100.0f);
@@ -1453,7 +1469,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems008, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 1340.0f);
 
     pattern_->ChangeIndex(4, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, -960.0f);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -480.0f);
@@ -1477,7 +1493,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems009, TestSize.Level1)
     model.SetIndex(0);
     CreateSwiperItems(10);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -160.0f);
@@ -1487,7 +1503,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems009, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 6);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -260.0f);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100.0f);
@@ -1497,7 +1513,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems009, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 540.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 6);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -200.0f);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -40.0f);
@@ -1507,7 +1523,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems009, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[5].startPos, 600.0f);
 
     pattern_->ChangeIndex(7, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[6].startPos, -160.0f);
     EXPECT_EQ(pattern_->itemPosition_[7].startPos, 0.0f);
@@ -1534,7 +1550,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems010, TestSize.Level1)
     model.SetItemSpace(Dimension(10, DimensionUnit::PX));
     CreateSwiperItems(10);
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 7);
     EXPECT_EQ(pattern_->itemPosition_[-3].startPos, -1350.0f);
@@ -1548,7 +1564,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems010, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 1350.0f);
 
     pattern_->UpdateCurrentOffset(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 6);
     EXPECT_EQ(pattern_->itemPosition_[-2].startPos, -1000.0f);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -550.0f);
@@ -1558,7 +1574,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems010, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 1250.0f);
 
     pattern_->ChangeIndex(6, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 7);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -1350.0f);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, -900.0f);
@@ -1569,7 +1585,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems010, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[9].startPos, 1350.0f);
 
     pattern_->ChangeIndex(9, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 7);
     EXPECT_EQ(pattern_->itemPosition_[6].startPos, -1350.0f);
     EXPECT_EQ(pattern_->itemPosition_[7].startPos, -900.0f);
@@ -1596,7 +1612,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems011, TestSize.Level1)
     CreateSwiperItems(5);
     CreateSwiperDone();
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -480.0f);
@@ -1604,7 +1620,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems011, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[-2].startPos, -860.0f);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -380.0f);
@@ -1612,14 +1628,14 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems011, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 580.0f);
 
     pattern_->ChangeIndex(4, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 3);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -480.0f);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 0.0f);
     EXPECT_EQ(pattern_->itemPosition_[5].startPos, 480.0f);
 
     pattern_->UpdateCurrentOffset(100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 4);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, -860.0f);
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -380.0f);
@@ -1644,7 +1660,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems012, TestSize.Level1)
     CreateSwiperDone();
 
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -960.0f);
@@ -1654,7 +1670,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems012, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -860.0f);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -380.0f);
@@ -1663,7 +1679,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems012, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, 1060.0f);
 
     pattern_->ChangeIndex(0, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-2].startPos, -960.0f);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -480.0f);
@@ -1672,7 +1688,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems012, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 960.0f);
 
     pattern_->UpdateCurrentOffset(100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 5);
     EXPECT_EQ(pattern_->itemPosition_[-2].startPos, -860.0f);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, -380.0f);
@@ -1704,7 +1720,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems024, TestSize.Level1)
     CreateItemWithSize(300.0f, 300.0f);
     CreateSwiperDone();
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto swiperSize = frameNode_->GetGeometryNode()->GetFrameRect();
     EXPECT_EQ(swiperSize.Width(), 100.0f);
@@ -1722,7 +1738,7 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems024, TestSize.Level1)
     EXPECT_EQ(fifthChildSize.Height(), 300.0f);
 
     pattern_->UpdateCurrentOffset(-10.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     swiperSize = frameNode_->GetGeometryNode()->GetFrameRect();
     EXPECT_EQ(swiperSize.Width(), 100.0f);
     EXPECT_EQ(swiperSize.Height(), 150.0f);
@@ -1731,6 +1747,64 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems024, TestSize.Level1)
     auto thirdChildSize = thirdChild->GetGeometryNode()->GetFrameRect();
     EXPECT_EQ(thirdChildSize.Width(), 100.0f);
     EXPECT_EQ(thirdChildSize.Height(), 200.0f);
+}
+
+/**
+ * @tc.name: UpdateOnUnselectedEvent
+ * @tc.desc: Test UpdateOnUnselectedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, UpdateOnUnselectedEvent, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->unselectedEvents_.clear();
+
+    auto onUnselected = [](const BaseEventInfo* info) {};
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {});
+    EXPECT_EQ(eventHub->unselectedEvents_.size(), 1);
+
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {});
+    EXPECT_EQ(eventHub->unselectedEvents_.size(), 1);
+
+    auto onUnselected2 = [](const BaseEventInfo* info) {};
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected2)](int32_t index) {});
+    EXPECT_EQ(eventHub->unselectedEvents_.size(), 1);
+}
+
+/**
+ * @tc.name: UpdateOnSelectedEvent
+ * @tc.desc: Test UpdateOnSelectedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, UpdateOnSelectedEvent, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->selectedEvents_.clear();
+   
+    auto onSelected = [](const BaseEventInfo* info) {};
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected)](int32_t index) {});
+    EXPECT_EQ(eventHub->selectedEvents_.size(), 1);
+   
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected)](int32_t index) {});
+    EXPECT_EQ(eventHub->selectedEvents_.size(), 1);
+
+    auto onSelected2 = [](const BaseEventInfo* info) {};
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected2)](int32_t index) {});
+    EXPECT_EQ(eventHub->selectedEvents_.size(), 1);
 }
 
 /**
@@ -1794,7 +1868,9 @@ HWTEST_F(SwiperCommonTestNg, SwiperIndicatorAccessibilityProperty001, TestSize.L
      * @tc.steps: step1. indicator type is DOT, indicator use mode is INNER
      * @tc.expected: check function.
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     ASSERT_NE(accessibilityProperty_, nullptr);
     auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);

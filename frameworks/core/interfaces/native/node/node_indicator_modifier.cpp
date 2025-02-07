@@ -321,8 +321,22 @@ void ResetVertical(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()
 {
-    static const ArkUIIndicatorComponentModifier modifier = { SetInitialIndex, ResetInitialIndex, SetCount, ResetCount,
-        SetOnChange, ResetOnChange, SetStyle, ResetStyle, SetLoop, ResetLoop, SetVertical, ResetVertical };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIIndicatorComponentModifier modifier = {
+        .setInitialIndex = SetInitialIndex,
+        .resetInitialIndex = ResetInitialIndex,
+        .setCount = SetCount,
+        .resetCount = ResetCount,
+        .setOnChange = SetOnChange,
+        .resetOnChange = ResetOnChange,
+        .setStyle = SetStyle,
+        .resetStyle = ResetStyle,
+        .setLoop = SetLoop,
+        .resetLoop = ResetLoop,
+        .setVertical = SetVertical,
+        .resetVertical = ResetVertical
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 };
 

@@ -35,6 +35,12 @@ void FfiOHOSAceFrameworkListItemCreate()
     ListItemModel::GetInstance()->Create();
 }
 
+void FfiOHOSAceFrameworkListItemCreateWithOptions(int32_t style)
+{
+    V2::ListItemStyle listItemStyle = static_cast<V2::ListItemStyle>(style);
+    ListItemModel::GetInstance()->Create(nullptr, listItemStyle);
+}
+
 void FfiOHOSAceFrameworkListItemSetBorderRaduis(double raduis, int32_t unit)
 {
     Dimension value(raduis, static_cast<DimensionUnit>(unit));
@@ -62,6 +68,11 @@ void FfiOHOSAceFrameworkListItemSetSelectable(bool flag)
     ListItemModel::GetInstance()->SetSelectable(flag);
 }
 
+void FfiOHOSAceFrameworkListItemSetSelected(bool flag)
+{
+    ListItemModel::GetInstance()->SetSelected(flag);
+}
+
 void FfiOHOSAceFrameworkListItemSetOnSelect(void (*callback)(bool flag))
 {
     ListItemModel::GetInstance()->SetSelectCallback(CJLambda::Create(callback));
@@ -84,5 +95,29 @@ void FfiOHOSAceFrameworkListItemSetSwipeAction(void (*startBuilder)(), void (*en
 
     ListItemModel::GetInstance()->SetSwiperAction(
         nullptr, nullptr, nullptr, SWIPE_EDGE_EFFECT[edgeEffect]);
+}
+
+void FfiOHOSAceFrameworkListItemSetSwipeAction2(void (*startBuilder)(), void (*endBuilder)(),
+    int32_t edgeEffect, void (*onOffsetChange)(int32_t offset))
+{
+    if (!Utils::CheckParamsValid(edgeEffect, SWIPE_EDGE_EFFECT.size())) {
+        LOGE("invalid value for font swipeEdgeAction");
+        return;
+    }
+
+    ListItemModel::GetInstance()->SetDeleteArea(
+        CJLambda::Create(endBuilder), nullptr, nullptr, nullptr, nullptr,
+        Dimension(0, DimensionUnit::VP), false, nullptr);
+
+    ListItemModel::GetInstance()->SetDeleteArea(
+        CJLambda::Create(startBuilder), nullptr, nullptr, nullptr, nullptr,
+        Dimension(0, DimensionUnit::VP), true, nullptr);
+
+    auto onOffsetCallback = [callback = CJLambda::Create(onOffsetChange)](int32_t offset_) {
+        callback(offset_);
+    };
+
+    ListItemModel::GetInstance()->SetSwiperAction(
+        nullptr, nullptr, std::move(onOffsetCallback), SWIPE_EDGE_EFFECT[edgeEffect]);
 }
 }

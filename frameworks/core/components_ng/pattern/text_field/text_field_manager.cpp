@@ -67,7 +67,8 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         CHECK_NULL_VOID(host);
         auto parent = host->GetAncestorNodeOfFrame(true);
         while (parent) {
-            if (parent->GetTag() == "Panel" || parent->GetTag() == "SheetPage") {
+            // when Panel and SheetPage is out of screen, no need to update position_ for keyboard avoidance
+            if (parent->GetTag() == V2::PANEL_ETS_TAG || parent->GetTag() == V2::SHEET_PAGE_TAG) {
                 return;
             }
             parent = parent->GetAncestorNodeOfFrame(true);
@@ -77,7 +78,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    position_ = position;
+    position_ = position; // use for keyboard avoidance, uses like caret position
     optionalPosition_ = position;
 }
 
@@ -314,10 +315,8 @@ void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField
 {
     CHECK_NULL_VOID(textField);
     auto parent = textField->GetAncestorNodeOfFrame(true);
-    bool findSheet = false;
     while (parent) {
         if (parent->GetHostTag() == V2::SHEET_PAGE_TAG) {
-            findSheet = true;
             break;
         }
         parent = parent->GetAncestorNodeOfFrame(true);
@@ -340,6 +339,9 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
             auto sheetNode = parent->GetChildAtIndex(0);
             CHECK_NULL_RETURN(sheetNode, nullptr);
             return AceType::DynamicCast<FrameNode>(sheetNode);
+        }
+        if (parent->GetHostTag() == V2::DIALOG_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(parent);
         }
         if (parent->GetHostTag() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
             parent->GetHostTag() == V2::NAVBAR_ETS_TAG) {

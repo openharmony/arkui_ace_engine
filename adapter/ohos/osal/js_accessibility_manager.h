@@ -57,8 +57,9 @@ struct CommonProperty {
     int32_t windowId = 0;
     int32_t windowLeft = 0;
     int32_t windowTop = 0;
-    int32_t pageId = 0;
-    std::string pagePath;
+    std::vector<std::string> pagePaths;
+    std::vector<RefPtr<NG::FrameNode>> pageNodes;
+    bool isReduceMode = false;
 };
 
 struct ActionTable {
@@ -311,7 +312,9 @@ public:
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;
-    void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) override;
+    void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
+
+    AccessibilityWorkMode GetAccessibilityWorkMode() override;
 
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
@@ -319,6 +322,11 @@ public:
     void RegisterGetParentRectHandler();
 
     bool IsScreenReaderEnabled() override;
+
+    void SetFocusMoveResultWithNode(
+        const WeakPtr<NG::FrameNode>& hostNode,
+        AccessibilityElementOperatorCallback& callback,
+        const int32_t requestId);
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -565,7 +573,7 @@ private:
         Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
 
     void UpdateCacheInfoNG(std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
-        const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
+        CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
@@ -616,7 +624,17 @@ private:
     void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
+
     void RegisterDynamicRenderGetParentRectHandler();
+
+    void GetCurrentWindowPages(
+        const RefPtr<NG::PipelineContext>& ngPipeline,
+        std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        std::vector<std::string>& pagePaths);
+    const std::string GetPagePathInPageNodes(
+        int32_t pageId,
+        const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        const std::vector<std::string> pagePaths);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
@@ -643,8 +661,11 @@ private:
 
     std::string pageMode_;
     std::vector<Accessibility::AccessibilityEventInfo> cacheEventVec_;
+    mutable std::mutex cacheEventVecMutex_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
+    mutable std::mutex defaultFocusListMutex_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
+    mutable std::mutex extensionComponentStatusVecMutex_;
     std::unordered_map<int32_t, std::optional<Accessibility::AccessibilityEventInfo>> pageIdEventMap_;
     AccessibilityParentRectInfo uecRectInfo_;
 };

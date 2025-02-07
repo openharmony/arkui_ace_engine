@@ -370,6 +370,9 @@ void NavBarPattern::OnAttachToFrameNode()
 void NavBarPattern::OnCoordScrollStart()
 {
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnCoordScrollStartAction();
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -381,9 +384,12 @@ void NavBarPattern::OnCoordScrollStart()
     titlePattern->OnCoordScrollStart();
 }
 
-float NavBarPattern::OnCoordScrollUpdate(float offset)
+float NavBarPattern::OnCoordScrollUpdate(float offset, float currentOffset)
 {
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        CHECK_NULL_RETURN(eventHub, 0.0f);
+        eventHub->FireOnCoordScrollUpdateAction(currentOffset);
         return 0.0f;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -400,6 +406,9 @@ void NavBarPattern::OnCoordScrollEnd()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "OnCoordScroll end");
     if (titleMode_ != NavigationTitleMode::FREE) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleMode_ is not free");
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnCoordScrollEndAction();
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -482,7 +491,14 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     CHECK_NULL_RETURN(titleNode, false);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
-    return Negative(offset) && !titlePattern->IsCurrentMinTitle();
+    bool canScrollUp = false;
+    if (titleMode_ != NavigationTitleMode::FREE) {
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
+            canScrollUp = true;
+        }
+    }
+    return (Negative(offset) && !titlePattern->IsCurrentMinTitle()) || canScrollUp;
 }
 
 float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const

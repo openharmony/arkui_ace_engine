@@ -89,6 +89,7 @@ private:
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnClick() const;
+    void InitAccessibilityText();
     int32_t TotalCount() const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
 

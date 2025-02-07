@@ -17,8 +17,9 @@
 
 #include "input_manager.h"
 
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
+#include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/tsa_advanced_feature.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -75,6 +76,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
     touchPoint.height = pointerItem.GetHeight();
+    touchPoint.operatingHand = pointerItem.GetBlobId() & (OPERATING_HAND_LEFT | OPERATING_HAND_RIGHT);
     return touchPoint;
 }
 
@@ -169,7 +171,11 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetSourceType(SourceType::NONE)
         .SetSourceTool(touchPoint.sourceTool)
         .SetOriginalId(touchPoint.originalId)
-        .SetSourceType(SourceType::NONE);
+        .SetSourceType(SourceType::NONE)
+        .SetOperatingHand(touchPoint.operatingHand)
+        .SetPressedTime(touchPoint.downTime)
+        .SetWidth(touchPoint.width)
+        .SetHeight(touchPoint.height);
     return event;
 }
 

@@ -672,10 +672,10 @@ HWTEST_F(ScrollNestedTestNg, NestTest009, TestSize.Level1)
     EXPECT_TRUE(Position(dragDelta));
     EXPECT_TRUE(Position(nestNode_, dragDelta));
     EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK));
-    FlushLayoutTask(nestNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(nestNode_, dragDelta + velocityDelta / TICK));
     EXPECT_TRUE(TickPosition(dragDelta + velocityDelta));
-    FlushLayoutTask(nestNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(nestNode_, dragDelta + velocityDelta));
     EXPECT_TRUE(pattern_->IsAtBottom());
     EXPECT_FALSE(nestPattern_->IsAtTop());
@@ -704,10 +704,10 @@ HWTEST_F(ScrollNestedTestNg, NestTest009, TestSize.Level1)
     EXPECT_TRUE(Position(nestNode_, dragDelta - VERTICAL_SCROLLABLE_DISTANCE));
     EXPECT_TRUE(Position(dragDelta - TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(TickPosition(nestNode_, dragDelta + velocityDelta / TICK - VERTICAL_SCROLLABLE_DISTANCE));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(dragDelta + velocityDelta / TICK - TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(TickPosition(nestNode_, dragDelta + velocityDelta - VERTICAL_SCROLLABLE_DISTANCE));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(dragDelta + velocityDelta - TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(nestPattern_->IsAtTop());
@@ -849,21 +849,21 @@ HWTEST_F(ScrollNestedTestNg, NestTest012, TestSize.Level1)
     auto nestScrollable = nestPattern_->GetScrollableEvent()->GetScrollable();
     nestScrollable->HandleDragStart(info);
     nestScrollable->HandleDragEnd(info);
-    FlushLayoutTask(nestNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(Position(nestNode_, dragDelta));
     nestScrollable->scrollPause_ = true;
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(nestNode_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
+    FlushUITasks();
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 0);
     EXPECT_TRUE(Position(-TOP_CONTENT_MAIN_SIZE + dragDelta));
     EXPECT_TRUE(Position(nestNode_, -VERTICAL_SCROLLABLE_DISTANCE));
     EXPECT_TRUE(pattern_->IsScrollableSpringMotionRunning());
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(nestNode_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
+    FlushUITasks();
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 1);
 }
@@ -903,8 +903,8 @@ HWTEST_F(ScrollNestedTestNg, NestTest013, TestSize.Level1)
      */
     nestPattern_->Fling(-300.f);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(nestNode_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
+    FlushUITasks();
     EXPECT_LT(GetChildY(frameNode_, 0), -110.f);
     EXPECT_TRUE(Position(nestNode_, 0.f));
     EXPECT_EQ(startCount, 1);

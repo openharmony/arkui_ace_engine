@@ -915,6 +915,48 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperOnChange(ArkUIRuntimeCallInfo* r
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SwiperBridge::SetSwiperOnSelected(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnSelected(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo* info)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onSelected callback execute failed.");
+            return;
+        }
+        panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, swiperInfo->GetIndex());
+        panda::Local<panda::JSValueRef> params[1] = { indexParam }; // 1: Array length
+        func->Call(vm, func.ToLocal(), params, 1); // 1: Array length
+    };
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperOnSelected(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperOnSelected(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnSelected(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SwiperBridge::SetSwiperOnAnimationStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1049,6 +1091,48 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperOnGestureSwipe(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnGestureSwipe(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperOnUnselected(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnUnselected(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo* info)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper OnUnselected callback execute failed.");
+            return;
+        }
+        panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, swiperInfo->GetIndex());
+        panda::Local<panda::JSValueRef> params[1] = { indexParam }; // 1: Array length
+        func->Call(vm, func.ToLocal(), params, 1); // 1: Array length
+    };
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperOnUnselected(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperOnUnselected(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnUnselected(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

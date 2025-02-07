@@ -179,13 +179,6 @@ bool DragDropInitiatingStateBase::CheckStatusForPanActionBegin(
             dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
         return false;
     }
-    auto prepareDragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
-    if (DragDropGlobalController::GetInstance().GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
-        (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode &&
-            info.GetSourceDevice() != SourceType::MOUSE)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Drag preview is landing finished, stop dragging.");
-        return false;
-    }
     if (dragDropManager->IsDragNodeNeedClean()) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Drag node have been cleaned by backpress or click event, stop dragging.");
         return false;

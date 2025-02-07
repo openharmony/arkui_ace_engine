@@ -93,6 +93,16 @@ export struct ProgressButtonV2 {
     }
   }
 
+  private getProgressButtonRadius(): LengthMetrics {
+    if (!this.progressButtonRadius || this.progressButtonRadius.unit === LengthUnit.PERCENT) {
+      return LengthMetrics.vp(this.buttonBorderRadius);
+    } else if (this.progressButtonRadius.value < 0) {
+      return LengthMetrics.vp(0);
+    } else {
+      return this.progressButtonRadius;
+    }
+  }
+
   build() {
     Button() {
       Stack() {
@@ -105,13 +115,10 @@ export struct ProgressButtonV2 {
           .borderRadius(this.buttonBorderRadius)
           .width('100%')
           .hoverEffect(HoverEffect.None)
-          .style(this.progressButtonRadius ?
-            { borderRadius: new LengthMetrics(Math.max(this.progressButtonRadius.value, 0)) } : {})
-          .padding({
-            top: 0.6,
-            left: 0.6,
-            right: 0.6,
-            bottom: 0.6
+          .style({
+            borderColor: this.colorOptions?.borderColor?.color ?
+              this.colorOptions?.borderColor?.color : this.containerBorderColor,
+            borderRadius: this.getProgressButtonRadius()
           })
           .clip(false)
           .enabled(this.isEnabled)
@@ -152,12 +159,12 @@ export struct ProgressButtonV2 {
           })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
-          .borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+          .borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
           this.buttonBorderRadius)
           .width('100%')
       }
     }
-    .borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+    .borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
     this.buttonBorderRadius)
     .clip(false)
     .hoverEffect(HoverEffect.None)

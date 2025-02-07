@@ -24,37 +24,55 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         LOGW("ui_session InterfaceToken check failed");
         return -1;
     }
-    std::string result = data.ReadString();
     switch (code) {
         case REPORT_CLICK_EVENT: {
+            std::string result = data.ReadString();
             ReportClickEvent(result);
             break;
         }
         case REPORT_SWITCH_EVENT: {
+            std::string result = data.ReadString();
             ReportRouterChangeEvent(result);
             break;
         }
         case REPORT_COMPONENT_EVENT: {
+            std::string result = data.ReadString();
             ReportComponentChangeEvent(result);
             break;
         }
         case REPORT_SEARCH_EVENT: {
+            std::string result = data.ReadString();
             ReportSearchEvent(result);
             break;
         }
         case REPORT_INSPECTOR_VALUE: {
+            std::string result = data.ReadString();
             int32_t partNum = data.ReadInt32();
             bool isLastPart = data.ReadBool();
             ReportInspectorTreeValue(result, partNum, isLastPart);
             break;
         }
         case REPORT_WEB_UNFOCUS_EVENT: {
+            std::string result = data.ReadString();
             int64_t accessibilityId = data.ReadInt64();
             ReportWebUnfocusEvent(accessibilityId, result);
             break;
         }
         case SEND_BASE_INFO: {
+            std::string result = data.ReadString();
             SendBaseInfo(result);
+            break;
+        }
+        case SEND_CURRENT_LANGUAGE: {
+            std::string result = data.ReadString();
+
+            SendCurrentLanguage(result);
+            break;
+        }
+        case SEND_TEXT: {
+            std::string res = data.ReadString();
+            int32_t nodeId = data.ReadInt32();
+            SendWebText(nodeId, res);
             break;
         }
         default: {
@@ -151,6 +169,16 @@ void UiReportStub::RegisterWebUnfocusEventCallback(
     unfocusEvent_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterGetWebViewCurrentLanguage(const EventCallback& eventCallback)
+{
+    getWebViewCurrentLanguageCallback_ = std::move(eventCallback);
+}
+
+void UiReportStub::RegisterGetTranslateTextCallback(const std::function<void(int32_t, std::string)>& eventCallback)
+{
+    getTranslateTextCallback_ = std::move(eventCallback);
+}
+
 void UiReportStub::UnregisterClickEventCallback()
 {
     clickEventCallback_ = nullptr;
@@ -169,5 +197,15 @@ void UiReportStub::UnregisterRouterChangeEventCallback()
 void UiReportStub::UnregisterComponentChangeEventCallback()
 {
     ComponentChangeEventCallback_ = nullptr;
+}
+
+void UiReportStub::SendCurrentLanguage(const std::string& data)
+{
+    getWebViewCurrentLanguageCallback_(data);
+}
+
+void UiReportStub::SendWebText(int32_t nodeId, std::string res)
+{
+    getTranslateTextCallback_(nodeId, res);
 }
 } // namespace OHOS::Ace

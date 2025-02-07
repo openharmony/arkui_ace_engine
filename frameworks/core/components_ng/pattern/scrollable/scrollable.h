@@ -95,9 +95,7 @@ public:
         IDLE,
     };
 
-    static void SetVelocityScale(double sVelocityScale);
     static double GetVelocityScale();
-    static void SetFriction(double sFriction);
 
     void Initialize(const RefPtr<FrameNode>& host);
 
@@ -540,6 +538,11 @@ public:
         return isCrownEventDragging_;
     }
 
+    void SetCrownEventDragging(bool draging)
+    {
+        isCrownEventDragging_ = draging;
+    }
+
     void SetReachBoundary(bool flag)
     {
         reachBoundary_ = flag;
@@ -644,8 +647,6 @@ private:
     // The tag of UINode
     std::string nodeTag_ = "Scrollable";
     double slipFactor_ = 0.0;
-    static std::optional<double> sFriction_;
-    static std::optional<double> sVelocityScale_;
     bool continuousDragStatus_ = false;
     CancelableCallback<void()> task_;
     int32_t dragCount_ = 0;
@@ -719,6 +720,7 @@ private:
 
     int crownEventNum_ = 0;
     bool reachBoundary_ = false;
+    CancelableCallback<void()> crownTask_;
 #endif
 };
 

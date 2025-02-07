@@ -88,6 +88,21 @@ void InitDatePickerSettingData(DatePickerSettingData& settingData)
     settingData.showTime = true;
     settingData.useMilitary = false;
 }
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -137,18 +152,10 @@ void DatePickerTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else if (type == ButtonTheme::TypeId()) {
-            return AceType::MakeRefPtr<ButtonTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -255,7 +262,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Lev
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
-    EXPECT_TRUE(pickerProperty->HasDisappearColor());
+    EXPECT_FALSE(pickerProperty->HasDisappearColor());
     EXPECT_TRUE(pickerProperty->HasDisappearWeight());
 }
 
@@ -338,7 +345,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle001, TestSize.Level1
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
-    EXPECT_TRUE(pickerProperty->HasColor());
+    EXPECT_FALSE(pickerProperty->HasColor());
     EXPECT_TRUE(pickerProperty->HasWeight());
 }
 
@@ -421,7 +428,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle001, TestSize.Leve
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
-    EXPECT_TRUE(pickerProperty->HasSelectedColor());
+    EXPECT_FALSE(pickerProperty->HasSelectedColor());
     EXPECT_TRUE(pickerProperty->HasSelectedWeight());
 }
 

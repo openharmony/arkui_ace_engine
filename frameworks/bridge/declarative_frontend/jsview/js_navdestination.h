@@ -41,6 +41,8 @@ public:
     static void SetWillShow(const JSCallbackInfo& info);
     static void SetWillHide(const JSCallbackInfo& info);
     static void SetWillDisAppear(const JSCallbackInfo& info);
+    static void SetOnActive(const JSCallbackInfo& info);
+    static void SetOnInactive(const JSCallbackInfo& info);
     static void SetResultCallback(const JSCallbackInfo& info);
     static void SetToolBarConfiguration(const JSCallbackInfo& info);
     static void SetHideToolBar(const JSCallbackInfo& info);
@@ -50,6 +52,7 @@ public:
     static void SetSystemTransition(const JSCallbackInfo& info);
     static void BindToScrollable(const JSCallbackInfo& info);
     static void BindToNestedScrollable(const JSCallbackInfo& info);
+    static void SetCustomTransition(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

@@ -17,9 +17,9 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
-#include "frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
-#include "frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -29,6 +29,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace {
 
@@ -317,6 +318,12 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         if (!JSRadioTheme::ObtainUncheckedBorderColor(uncheckedBorderColorVal)) {
             uncheckedBorderColorVal = theme->GetInactiveColor();
         }
+    } else {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::RadioPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsUserSetUncheckBorderColor(true);
     }
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
     Color indicatorColorVal;

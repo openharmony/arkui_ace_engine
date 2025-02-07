@@ -481,7 +481,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
         auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
         CHECK_NULL_VOID(childFrameNode);
         auto childEventHub = childFrameNode->GetEventHub<EventHub>();
-        auto childGestureHub = childEventHub->GetGestureEventHub();
+        auto childGestureHub = childEventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(childGestureHub);
         childGestureHub->SetTouchable(searchTouchable);
         childGestureHub->SetHitTestMode(searchHitTestMode);
@@ -507,9 +507,9 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetOnChange()) {
         auto searchChangeFunc = [weak = AceType::WeakClaim(this)]
-        (const std::u16string& value, PreviewText& previewText) {
+        (const ChangeValueInfo& info) {
             auto searchPattern = weak.Upgrade();
-            searchPattern->UpdateChangeEvent(value);
+            searchPattern->UpdateChangeEvent(info.value);
         };
         eventHub->SetOnChange(std::move(searchChangeFunc));
     }
@@ -829,17 +829,13 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(!textFieldPattern->IsDragging());
     CHECK_NULL_VOID(!textFieldPattern->IsHandleDragging());
     focusChoice_ = FocusChoice::SEARCH;
-    textFieldPattern->InitEditingValueText(u"");
+    textFieldPattern->ClearTextContent();
     textFieldPattern->SetTextChangedAtCreation(true);
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateValue(u"");
-    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    PreviewText previewText {};
-    eventHub->FireOnChange(u"", previewText);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -2265,7 +2261,6 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
         index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
     layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                 : GetSearchNode()->GetCancelSymbolIconColor()});
-    layoutProperty->UpdateTextColorFlagByUser(false);
     float maxFontScale = MAX_FONT_SCALE;
     if (layoutProperty->GetFontSize()->Unit() != DimensionUnit::VP) {
         maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);

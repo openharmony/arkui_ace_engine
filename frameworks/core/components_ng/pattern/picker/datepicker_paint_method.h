@@ -24,10 +24,17 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#ifdef ARKUI_WEARABLE
+#include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
+#ifdef ARKUI_WEARABLE
+class ACE_EXPORT DatePickerPaintMethod : public PickerPaintMethodCircleUtils, public NodePaintMethod {
+#else
 class ACE_EXPORT DatePickerPaintMethod : public NodePaintMethod {
+#endif
     DECLARE_ACE_TYPE(DatePickerPaintMethod, NodePaintMethod)
 public:
     DatePickerPaintMethod() = default;
@@ -37,7 +44,9 @@ public:
     {
         pattern_ = pattern;
     }
-
+#ifdef ARKUI_WEARABLE
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+#endif
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
     void SetEnabled(bool enabled)
@@ -53,7 +62,7 @@ public:
 private:
     bool enabled_ = true;
     Color backgroundColor_ = Color::WHITE;
-    
+
     WeakPtr<Pattern> pattern_;
 };
 } // namespace OHOS::Ace::NG

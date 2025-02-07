@@ -24,7 +24,7 @@ RSSurfaceNode::SharedPtr RSSurfaceNode::Create(const RSSurfaceNodeConfig& surfac
 }
 
 RSSurfaceNode::SharedPtr RSSurfaceNode::Create(
-    const RSSurfaceNodeConfig& surfaceNodeConfig, RSSurfaceNodeType type, bool isWindow)
+    const RSSurfaceNodeConfig& surfaceNodeConfig, RSSurfaceNodeType type, bool isWindow, bool unobscured)
 {
     return nullptr;
 }

@@ -47,6 +47,7 @@
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
       "OHOS::Ace::BaseId::BaseId()";
+      OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
       OHOS::Ace::CubicCurve::*;
@@ -89,8 +90,11 @@
       OHOS::Ace::Dimension::*;
       OHOS::Ace::Matrix4::*;
       OHOS::Ace::NG::DragDropFuncWrapper::*;
+      OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
       OHOS::Ace::WindowUtils::*;
+      OHOS::Ace::NG::ParallelPagePattern::*;
+      OHOS::Ace::NG::ViewAdvancedRegister::*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -101,6 +105,9 @@
       OHOS::Ace::Alignment::*;
       OHOS::Ace::LinearColor::*;
       OHOS::Ace::NG::Gradient::*;
+      OHOS::Ace::NG::ContainerModalView::*;
+      OHOS::Ace::NG::BuildTitleNodeForCj*;
+      OHOS::Ace::NG::AddControlButtonsForCj*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
@@ -361,9 +368,13 @@
       VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
+      VTT?for?OHOS::Ace::NG::ParallelPagePattern;
+      VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
+      VTT?for?OHOS::Ace::NG::ContainerModalView;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
+      OHOS::Ace::BorderImage::*;
       OHOS::Ace::ContainerScope::*;
       OHOS::Ace::Dimension::*;
       OHOS::Ace::ImageSourceInfo::*;
@@ -406,14 +417,30 @@
       OHOS::Ace::Kit::ResourceParser::*;
       OHOS::Ace::Kit::ThemeFactory::*;
       OHOS::Ace::Kit::ThemeStyle::*;
+      OHOS::Ace::Kit::AgingAdapationDialogUtil::*;
+      OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::MeasureUtils::*;
+      OHOS::Ace::Kit::MenuView::*;
+      OHOS::Ace::Kit::OverlayManager::*;
+      OHOS::Ace::Kit::UIContext::*;
       OHOS::Ace::Theme::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
       OHOS::Ace::NG::ScrollBarModelNG::*;
+      OHOS::Ace::NG::ScrollableModelNG::*;
+      OHOS::Ace::Kit::ContentModifier::*;
+      OHOS::Ace::Kit::Property::*;
+      OHOS::Ace::Kit::ParseColor*;
+      OHOS::Ace::Kit::ParseDimension*;
+      OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::View::*;
+      OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::Text::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       OHOS::Ace::NG::ComponentSnapshot::*;
+      virtual?thunk?to?OHOS::Ace::Kit::ContentModifier::*;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
@@ -450,10 +477,14 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
+      vtable?for?OHOS::Ace::NG::ParallelPagePattern;
+      vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
+      vtable?for?OHOS::Ace::NG::ContainerModalView;      
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
       vtable?for?OHOS::Ace::NG::ScrollBarModelNG;
+      vtable?for?OHOS::Ace::NG::ScrollableModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

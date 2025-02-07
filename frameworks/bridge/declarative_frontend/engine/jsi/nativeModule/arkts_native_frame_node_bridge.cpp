@@ -115,7 +115,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
     const Offset& localOffset = touchInfo.GetLocalLocation();
     const Offset& screenOffset = touchInfo.GetScreenLocation();
     const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y",
-        "pressedTime", "pressure", "width", "height" };
+        "pressedTime", "pressure", "width", "height", "hand" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(touchInfo.GetTouchType())),
         panda::NumberRef::New(vm, touchInfo.GetFingerId()), panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -128,7 +128,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
         panda::NumberRef::New(vm, static_cast<double>(touchInfo.GetPressedTime().time_since_epoch().count())),
         panda::NumberRef::New(vm, touchInfo.GetForce()),
         panda::NumberRef::New(vm, touchInfo.GetWidth() / density),
-        panda::NumberRef::New(vm, touchInfo.GetHeight() / density) };
+        panda::NumberRef::New(vm, touchInfo.GetHeight() / density),
+        panda::NumberRef::New(vm, touchInfo.GetOperatingHand()) };
     auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
@@ -457,10 +458,33 @@ ArkUINativeModuleValue FrameNodeBridge::GetChild(ArkUIRuntimeCallInfo* runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     int index = secondArg->ToNumber(vm)->Value();
-    int isExpanded = GetIsExpanded(runtimeCallInfo, 2);
-    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getChild(nativeNode, index, isExpanded);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index of the expand mode
+    int expandMode = thirdArg->ToNumber(vm)->Value();
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getChild(nativeNode, index, expandMode);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetFirstChildIndexWithoutExpand(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t index = -1;
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(nativeNode, &index);
+    return panda::NumberRef::New(vm, index);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetLastChildIndexWithoutExpand(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t index = -1;
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(nativeNode, &index);
+    return panda::NumberRef::New(vm, index);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::GetFirst(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1710,7 +1734,6 @@ ArkUINativeModuleValue FrameNodeBridge::MarkDirty(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-#ifndef ARKUI_WEARABLE
 ArkUINativeModuleValue FrameNodeBridge::CreateNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1749,7 +1772,6 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveFrameNodeFromNodeContent(ArkUIRunt
     }
     return panda::BooleanRef::New(vm, !result);
 }
-#endif
 
 ArkUINativeModuleValue FrameNodeBridge::GetFirstUINode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
