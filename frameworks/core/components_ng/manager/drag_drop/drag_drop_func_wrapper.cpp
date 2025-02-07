@@ -138,9 +138,6 @@ void EnvelopedDragData(
 {
     auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
     CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    dragAction->dragPointerEvent.displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
 
     std::vector<ShadowInfoCore> shadowInfos;
     GetShadowInfoArray(dragAction, shadowInfos);

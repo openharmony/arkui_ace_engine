@@ -3130,6 +3130,7 @@ bool AceContainer::GetCurPointerEventInfo(PointerEvent& dragPointerEvent, StopDr
     dragPointerEvent.displayX = pointerItem.GetDisplayX();
     dragPointerEvent.displayY = pointerItem.GetDisplayY();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
+    dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
     dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
     RegisterStopDragCallback(dragPointerEvent.pointerId, std::move(stopDragCallback));
     return true;
