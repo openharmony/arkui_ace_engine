@@ -37,7 +37,7 @@ public:
     {
         return 1;
     }
-    
+	
     int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defualtbundleName)
     {
