@@ -221,8 +221,9 @@ public:
             touchMoveOffset.reset();
         }
 
-        void UpdateOriginCaretColor(ColorMode colorMode)
+        void UpdateOriginCaretColor()
         {
+            auto colorMode = SystemProperties::GetColorMode();
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
