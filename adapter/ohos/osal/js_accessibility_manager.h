@@ -99,7 +99,21 @@ enum class DumpMode {
     TREE,
     NODE,
     HANDLE_EVENT,
-    HOVER_TEST
+    HOVER_TEST,
+    EVENT_TEST
+};
+
+struct DumpInfoArgument {
+    bool useWindowId = false;
+    DumpMode mode = DumpMode::TREE;
+    bool isDumpSimplify = false;
+    bool verbose = false;
+    int64_t rootId = -1;
+    int32_t pointX = 0;
+    int32_t pointY = 0;
+    int64_t nodeId = -1;
+    int32_t action = 0;
+    int32_t eventId = -1;
 };
 
 class JsAccessibilityManager : public AccessibilityNodeManager,
@@ -308,6 +322,9 @@ public:
         const std::vector<std::string>& params,
         int64_t& actionAccessibilityId,
         ActionType& actionOp);
+    bool DumpProcessEventParameters(
+        AccessibilityEvent& event, const std::vector<std::string>& params);
+    bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument);
 
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
@@ -536,6 +553,8 @@ private:
     void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
+    void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
+
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 

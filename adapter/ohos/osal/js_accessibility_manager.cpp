@@ -3598,6 +3598,27 @@ RefPtr<NG::PipelineContext> JsAccessibilityManager::GetPipelineByWindowId(uint32
     return nullptr;
 }
 
+// DFX related
+namespace {
+template <typename Iterator>
+bool CheckAndGetEventTestArgument(Iterator start, const std::vector<std::string>& params, DumpInfoArgument& argument)
+{
+    auto arg = start;
+    argument.mode = DumpMode::EVENT_TEST;
+    static constexpr int32_t NUM_EVENT_DIMENSION = 2;
+    if (std::distance(arg, params.end()) <= NUM_EVENT_DIMENSION) {
+        DumpLog::GetInstance().Print(std::string("Error: --event-test is used to send event with node ") +
+            "need elementId and eventId, e.g. '--event-test ${elementId} ${eventId}'!");
+        return false;
+    }
+    ++arg;
+    argument.nodeId = StringUtils::StringToLongInt(*arg);
+    ++arg;
+    argument.eventId = StringUtils::StringToInt(*arg);
+    return true;
+}
+} // DFX related
+
 void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
 {
     if (!useWindowId && rootId == -1) {
@@ -3650,6 +3671,64 @@ void JsAccessibilityManager::DumpHoverTestNG(uint32_t windowId, int64_t rootId, 
     }
 }
 
+bool JsAccessibilityManager::DumpProcessEventParameters(
+    AccessibilityEvent& event, const std::vector<std::string>& params)
+{
+    static constexpr int32_t NUM_PARAMETERS_DIMENSION = 1;
+    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
+        if (*arg == "--stackNodeId") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            event.stackNodeId = StringUtils::StringToLongInt(*arg);
+        } else if (*arg == "--beforeText") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            event.beforeText = *arg;
+        } else if (*arg == "--latestContent") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            event.latestContent = *arg;
+        } else if (*arg == "--textAnnounced") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            event.textAnnouncedForAccessibility = *arg;
+        }
+    }
+    return true;
+}
+
+void JsAccessibilityManager::DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params)
+{
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<NG::PipelineContext> ngPipeline;
+
+    RefPtr<NG::FrameNode> frameNode;
+    ngPipeline = FindPipelineByElementId(nodeId, frameNode);
+    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_VOID(frameNode);
+
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.nodeId = nodeId;
+    accessibilityEvent.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    accessibilityEvent.type = static_cast<AccessibilityEventType>(eventId);
+    if (DumpProcessEventParameters(accessibilityEvent, params)) {
+        SendEventToAccessibilityWithNode(accessibilityEvent, frameNode, ngPipeline);
+    }
+}
+
 bool JsAccessibilityManager::CheckDumpInfoParams(const std::vector<std::string> &params)
 {
     if (params.size() < 1) {
@@ -3663,76 +3742,83 @@ bool JsAccessibilityManager::CheckDumpInfoParams(const std::vector<std::string> 
     return true;
 }
 
+bool JsAccessibilityManager::GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument)
+{
+    argument.isDumpSimplify = params[0].compare("-simplify") == 0;
+    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
+        if (*arg == "-w") {
+            argument.useWindowId = true;
+        } else if (*arg == "--root") {
+            ++arg;
+            if (arg == params.end()) {
+                DumpLog::GetInstance().Print(std::string("Error: --root is used to set the root node, ") +
+                    "e.g. '--root ${AccessibilityId}'!");
+                return false;
+            }
+            argument.rootId = StringUtils::StringToLongInt(*arg);
+        } else if (*arg == "--hover-test") {
+            argument.mode = DumpMode::HOVER_TEST;
+            static constexpr int32_t NUM_POINT_DIMENSION = 2;
+            if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: --hover-test is used to get nodes at a point ") +
+                    "relative to the root node, e.g. '--hover-test ${x} ${y}'!");
+                return false;
+            }
+            ++arg;
+            argument.pointX = StringUtils::StringToInt(*arg);
+            ++arg;
+            argument.pointY = StringUtils::StringToInt(*arg);
+        } else if (*arg == "--event-test") {
+            return CheckAndGetEventTestArgument(arg, params, argument);
+        } else if (*arg == "-v") {
+            argument.verbose = true;
+        } else if (*arg == "-json") {
+            argument.mode = DumpMode::TREE;
+        } else {
+            if (argument.mode == DumpMode::NODE) {
+                argument.mode = DumpMode::HANDLE_EVENT;
+                break;
+            } else {
+                argument.mode = DumpMode::NODE;
+                argument.nodeId = StringUtils::StringToLongInt(*arg);
+            }
+        }
+    }
+    return true;
+}
+
 void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson)
 {
     if (!CheckDumpInfoParams(params)) {
         DumpLog::GetInstance().Print("Error: invalid arguments!");
         return;
     }
-    bool useWindowId = false;
-    DumpMode mode = DumpMode::TREE;
-    bool isDumpSimplify = params[0].compare("-simplify") == 0;
-    bool verbose = false;
-    int64_t rootId = -1;
-    int32_t pointX = 0;
-    int32_t pointY = 0;
-    int64_t nodeId = -1;
-    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
-        if (*arg == "-w") {
-            useWindowId = true;
-        } else if (*arg == "--root") {
-            ++arg;
-            if (arg == params.end()) {
-                DumpLog::GetInstance().Print(std::string("Error: --root is used to set the root node, ") +
-                    "e.g. '--root ${AccessibilityId}'!");
-                return;
-            }
-            rootId = StringUtils::StringToLongInt(*arg);
-        } else if (*arg == "--hover-test") {
-            mode = DumpMode::HOVER_TEST;
-            static constexpr int32_t NUM_POINT_DIMENSION = 2;
-            if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
-                DumpLog::GetInstance().Print(std::string("Error: --hover-test is used to get nodes at a point ") +
-                    "relative to the root node, e.g. '--hover-test ${x} ${y}'!");
-                return;
-            }
-            ++arg;
-            pointX = StringUtils::StringToInt(*arg);
-            ++arg;
-            pointY = StringUtils::StringToInt(*arg);
-        } else if (*arg == "-v") {
-            verbose = true;
-        } else if (*arg == "-json") {
-            mode = DumpMode::TREE;
-        } else {
-            if (mode == DumpMode::NODE) {
-                mode = DumpMode::HANDLE_EVENT;
-                break;
-            } else {
-                mode = DumpMode::NODE;
-                nodeId = StringUtils::StringToLongInt(*arg);
-            }
-        }
-    }
-    std::vector<std::string> info;
-    bool isChildElement = CheckIsChildElement(nodeId, params, info, mode, rootId);
-    if (isChildElement) {
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "dump child element: %{public}" PRId64, nodeId);
+    DumpInfoArgument argument;
+    if (!GetDumpInfoArgument(params, argument)) {
         return;
     }
-    switch (mode) {
+    std::vector<std::string> info;
+    bool isChildElement = CheckIsChildElement(argument.nodeId, params, info, argument.mode, argument.rootId);
+    if (isChildElement) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "dump child element: %{public}" PRId64, argument.nodeId);
+        return;
+    }
+    switch (argument.mode) {
         case DumpMode::TREE:
             isUseJson_ = hasJson;
-            DumpTreeNG(useWindowId, windowId, rootId, isDumpSimplify);
+            DumpTreeNG(argument.useWindowId, windowId, argument.rootId, argument.isDumpSimplify);
             break;
         case DumpMode::NODE:
-            DumpPropertyNG(nodeId);
+            DumpPropertyNG(argument.nodeId);
             break;
         case DumpMode::HANDLE_EVENT:
             DumpHandleEvent(params);
             break;
         case DumpMode::HOVER_TEST:
-            DumpHoverTestNG(windowId, rootId, pointX, pointY, verbose);
+            DumpHoverTestNG(windowId, argument.rootId, argument.pointX, argument.pointY, argument.verbose);
+            break;
+        case DumpMode::EVENT_TEST:
+            DumpSendEventTest(argument.nodeId, argument.eventId, params);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
