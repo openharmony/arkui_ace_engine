@@ -497,6 +497,18 @@ void HandleAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
     uiEvent.inputEvent = &(innerEvent->axisEvent);
 }
 
+void HandleHoverEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_HOVER_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->hoverEvent);
+}
+
+void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_CLICK_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->clickEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -537,6 +549,8 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
             {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent},
             {NODE_ON_AXIS, HandleAxisEvent},
+            {NODE_ON_CLICK_EVENT, HandleClickEvent},
+            {NODE_ON_HOVER_EVENT, HandleHoverEvent},
         };
 
         auto it = eventHandlers.find(eventType);
@@ -601,6 +615,12 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case AXIS_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->axisEvent.subKind);
+            break;
+        case CLICK_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->clickEvent.subKind);
+            break;
+        case HOVER_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->hoverEvent.subKind);
             break;
         default:
             break; /* Empty */

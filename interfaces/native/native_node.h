@@ -6530,6 +6530,26 @@ typedef enum {
      */
     NODE_ON_AXIS = 25,
 
+     /* @brief Defines the event triggered when the bound component is clicked.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}.  \n
+     *
+     * @since 16
+     */
+    NODE_ON_CLICK_EVENT = 26,
+
+    /**
+     * @brief Defines the event triggered when the mouse pointer hovers over or moves away from a component.
+     *
+     * This event is triggered when the mouse pointer enters or leaves the component's bounding box. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     *
+     *@since 16
+     */
+    NODE_ON_HOVER_EVENT = 27,
+
     /**
      * @brief Sets the callback for the NODE_EVENT_ON_VISIBLE_AREA_CHANGE event, which limits the callback interval.
      *

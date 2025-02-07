@@ -228,6 +228,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_KEY_PREIME;
         case NODE_DISPATCH_KEY_EVENT:
             return ON_KEY_DISPATCH;
+        case NODE_ON_CLICK_EVENT:
+            return ON_CLICK_EVENT;
+        case NODE_ON_HOVER_EVENT:
+            return ON_HOVER_EVENT;
         case NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT:
             return ON_VISIBLE_AREA_APPROXIMATE_CHANGE;
         case NODE_CHECKBOX_EVENT_ON_CHANGE:
@@ -450,6 +454,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT;
         case ON_KEY_DISPATCH:
             return NODE_DISPATCH_KEY_EVENT;
+        case ON_CLICK_EVENT:
+            return NODE_ON_CLICK_EVENT;
+        case ON_HOVER_EVENT:
+            return NODE_ON_HOVER_EVENT;
         case ON_CHECKBOX_CHANGE:
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
@@ -685,6 +693,18 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case AXIS_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->axisEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case CLICK_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->clickEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case HOVER_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->hoverEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }

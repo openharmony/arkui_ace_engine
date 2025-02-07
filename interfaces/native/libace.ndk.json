@@ -2798,5 +2798,37 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_AxisEvent_GetScrollStep"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetWidth"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetHeight"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionX"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionY"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetModifierKeyStates"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_HoverEvent_IsHovered"
     }
 ]
