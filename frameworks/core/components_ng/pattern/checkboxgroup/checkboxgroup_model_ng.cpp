@@ -188,6 +188,7 @@ void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std:
 
 void CheckBoxGroupModelNG::SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent)
 {
+    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <utility>
-
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "arkoala_api_generated.h"
