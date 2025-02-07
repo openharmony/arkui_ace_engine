@@ -50,9 +50,11 @@ public:
     {
         AccessorTestBase::SetUp();
         ASSERT_NE(peer_, nullptr);
-        OHOS::Ace::AccessibilityHoverInfo info;
-        peer_->SetEventInfo(info);
+        eventInfo_ = std::make_unique<AccessibilityHoverInfo>();
+        peer_->SetEventInfo(eventInfo_.get());
     }
+
+    std::unique_ptr<AccessibilityHoverInfo> eventInfo_;
 };
 
 /**
