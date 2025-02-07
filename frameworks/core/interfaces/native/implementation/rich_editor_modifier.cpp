@@ -341,7 +341,7 @@ void OnPasteImpl(Ark_NativePointer node,
         Ark_PasteEvent arkEvent = {
             .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
         };
-        arkCallback.Invoke(Converter::ArkValue<Opt_PasteEvent>(arkEvent));
+        arkCallback.InvokeSync(Converter::ArkValue<Opt_PasteEvent>(arkEvent));
     };
     RichEditorModelNG::SetOnPaste(frameNode, std::move(onPaste));
 }

@@ -56,17 +56,6 @@ namespace  {
     const auto ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE = "222.00px";
     static constexpr int SIZE1 = 111;
     static constexpr int SIZE2 = 222;
-
-    struct EventsTracker {
-    static inline GENERATED_ArkUICheckboxEventsReceiver checkboxEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getCheckboxEventsReceiver = [] () -> const GENERATED_ArkUICheckboxEventsReceiver* {
-            return &checkboxEventReceiver;
-        }
-    };
-}; // EventsTracker
-
 } // namespace
 
 class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier,
@@ -77,9 +66,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<CheckboxTheme>();
-
-        // setup the test event handler
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -88,32 +74,32 @@ public:
  * @tc.desc: Test Checkbox setOnChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, DISABLED_setChackboxOnChangeTest, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, setCheckboxOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto checkBoxEventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-    ASSERT_NE(checkBoxEventHub, nullptr);
-
     struct CheckEvent {
-        bool value;
+        int32_t resourceId;
+        bool result;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::checkboxEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Boolean value) {
+    auto testCallback = [] (const Ark_Int32 resourceId, const Ark_Boolean value) {
         checkEvent = {
-           .value = value,
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .result = Converter::Convert<bool>(value),
         };
     };
-
-    modifier_->setOnChange(node_, {});
-
-    EXPECT_EQ(checkEvent.has_value(), false);
-    checkBoxEventHub->UpdateChangeEvent(false);
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->value, false);
-    checkBoxEventHub->UpdateChangeEvent(true);
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->value, true);
+    auto arkCallback = Converter::ArkValue<OnCheckboxChangeCallback>(testCallback, frameNode->GetId());
+    modifier_->setOnChange(node_, &arkCallback);
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    EXPECT_FALSE(checkEvent);
+    eventHub->UpdateChangeEvent(false);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_FALSE(checkEvent->result);
+    eventHub->UpdateChangeEvent(true);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_TRUE(checkEvent->result);
 }
 
 /*

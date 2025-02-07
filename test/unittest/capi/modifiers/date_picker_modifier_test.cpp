@@ -28,16 +28,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-struct EventsTracker {
-    static inline GENERATED_ArkUIDatePickerEventsReceiver eventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getDatePickerEventsReceiver = []() -> const GENERATED_ArkUIDatePickerEventsReceiver* {
-            return &eventsReceiver;
-        }
-    };
-}; // EventsTracker
-
 // Attribute names
 const auto ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME = "disappearTextStyle";
 const auto ATTRIBUTE_TEXT_STYLE_NAME = "textStyle";
@@ -270,8 +260,6 @@ class DatePickerModifierTest : public ModifierTestBase<GENERATED_ArkUIDatePicker
         AddResource(RES_COLOR_ID, RES_COLOR_ID_VALUE);
         AddResource(RES_COLOR_NAME, RES_COLOR_NAME_VALUE);
         AddResource(RES_COLOR_INVALID_ID, RES_COLOR_INVALID_ID_VALUE);
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

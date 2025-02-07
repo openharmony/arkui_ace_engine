@@ -419,7 +419,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
         int32_t resourceId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto testCallback = [](const Ark_Int32 resourceId, const Opt_PasteEvent event) {
+    auto testCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Opt_PasteEvent event) {
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
@@ -430,7 +430,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
             helper.Invoke();
         }
     };
-    auto arkCallback = Converter::ArkValue<PasteEventCallback>(testCallback, frameNode->GetId());
+    auto arkCallback = Converter::ArkValue<PasteEventCallback>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     modifier_->setOnPaste(node_, &arkCallback);
