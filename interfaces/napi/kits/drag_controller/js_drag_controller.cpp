@@ -888,11 +888,13 @@ void LogDragInfoInner(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Ms
     std::string summarys = NG::DragDropFuncWrapper::GetSummaryString(dragData.summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "dragData, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordSize %{public}d, "
-        "extraParams length %{public}d, pointerId %{public}d, toolType %{public}d, summary %{public}s.",
+        "extraParams length %{public}d, pointerId %{public}d, toolType %{public}d, summary %{public}s, "
+        "eventId %{public}d",
         pixelMap->GetWidth(), pixelMap->GetHeight(),
         NG::DragDropFuncWrapper::GetAnonyString(dragData.udKey).c_str(), dragData.dragNum,
         static_cast<int32_t>(asyncCtx->extraParams.length()), asyncCtx->dragPointerEvent.pointerId,
-        static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool), summarys.c_str());
+        static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool), summarys.c_str(),
+        asyncCtx->dragPointerEvent.pointerEventId);
 }
 
 bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
