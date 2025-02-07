@@ -5462,6 +5462,48 @@ void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(b
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
 }
 
+void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+    int32_t expectedUpdateInterval)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
+void ViewAbstract::SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+    const std::vector<double>& ratioList, int32_t expectedUpdateInterval)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
 Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
 {
     Color defaultColor = Color::TRANSPARENT;
