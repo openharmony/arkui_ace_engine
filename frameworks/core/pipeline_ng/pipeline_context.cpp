@@ -1882,7 +1882,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
 void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
     const float safeHeight, const bool supportAvoidance)
 {
-    auto func = [this, keyboardHeight, safeHeight, supportAvoidance]() mutable {
+    auto func = [this, keyboardHeight, safeHeight]() mutable {
         safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
