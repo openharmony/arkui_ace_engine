@@ -67,4 +67,26 @@ const std::vector<std::tuple<std::string, double, double, Ark_Int32>> testFixtur
     { "[0., 40.]", 0., 40., ArkValue<Ark_Int32>(20) },
     { "[0., 0.]", 0., 0., ArkValue<Ark_Int32>(0) },
 };
+
+const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureNumberFloatAnythingValidValues = {
+    { "100", 100, ArkValue<Ark_Number>(100) },
+    { "0", 0, ArkValue<Ark_Number>(0) },
+    { "-100", -100, ArkValue<Ark_Number>(-100) },
+    { "12.34", 12.34, ArkValue<Ark_Number>(12.34) },
+    { "-56.73", -56.34, ArkValue<Ark_Number>(-56.73) },
+};
+
+const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVelocityValues = {
+    { "100", 100, ArkValue<Ark_Number>(std::sqrt((100 * 100) + (100 * 100))) },
+    { "0", 0, ArkValue<Ark_Number>(0) },
+    { "-100", -100, ArkValue<Ark_Number>(std::sqrt((100 * 100) + (100 * 100))) },
+    { "12.34", 12.34, ArkValue<Ark_Number>(std::sqrt((12.34 * 12.34) + (12.34 * 12.34))) },
+    { "-56.73", -56.34, ArkValue<Ark_Number>(std::sqrt((56.34 * 56.34) + (56.34 * 56.34))) },
+};
+
+const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
+    testFixtureEnumDragBehaviorValues = {
+    { "ARK_DRAG_BEHAVIOR_COPY", ARK_DRAG_BEHAVIOR_COPY, OHOS::Ace::DragBehavior::COPY },
+    { "ARK_DRAG_BEHAVIOR_MOVE", ARK_DRAG_BEHAVIOR_MOVE, OHOS::Ace::DragBehavior::MOVE },
+};
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
