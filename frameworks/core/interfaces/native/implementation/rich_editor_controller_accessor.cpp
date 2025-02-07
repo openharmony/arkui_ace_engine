@@ -173,13 +173,15 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
     const auto arkOnClickOpt = Converter::OptConvert<Callback_ClickEvent_Void>(src.onClick);
     if (arkOnClickOpt) {
         result.onClick = [callback = CallbackHelper(arkOnClickOpt.value())](OHOS::Ace::GestureEvent& info) {
-            callback.Invoke(Converter::ArkValue<ClickEventInfo>(info).result);
+            const auto event = Converter::ArkClickEventSync(info);
+            callback.Invoke(event.ArkValue());
         };
     }
     const auto arkOnLongPressOpt = Converter::OptConvert<Callback_GestureEvent_Void>(src.onLongPress);
     if (arkOnLongPressOpt) {
         result.onLongPress = [callback = CallbackHelper(arkOnLongPressOpt.value())](OHOS::Ace::GestureEvent& info) {
-            callback.Invoke(Converter::ArkValue<GestureEventInfo>(info).result);
+            const auto event = Converter::ArkGestureEventSync(info);
+            callback.Invoke(event.ArkValue());
         };
     }
     return result;

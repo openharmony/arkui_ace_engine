@@ -25,7 +25,9 @@ struct BaseEventPeer {
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-template<typename AceInfo>
+template<typename AceInfo,
+    std::enable_if_t<std::is_base_of_v<BaseEventInfo, AceInfo>, bool> = true
+>
 class SomeEventPeer : public BaseEventPeer {
 public:
     ~SomeEventPeer() override = default;
@@ -37,17 +39,16 @@ public:
 
     AceInfo* GetEventInfo()
     {
-        CHECK_NULL_RETURN(eventInfo, nullptr);
-        return &eventInfo.value();
+        return eventInfo;
     }
 
-    void SetEventInfo(const AceInfo& info)
+    void SetEventInfo(AceInfo* info)
     {
         eventInfo = info;
     }
 
 private:
-    std::optional<AceInfo> eventInfo;
+    AceInfo* eventInfo;
 };
 
 using BaseEventPeerImpl = SomeEventPeer<BaseEventInfo>;

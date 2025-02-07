@@ -701,9 +701,10 @@ bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    auto parameter = Converter::ArkValue<Ark_KeyEvent>(keyEventInfo);
+    const auto event = Converter::ArkKeyEventSync(keyEventInfo);
     auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(
+        event.ArkValue());
     return result.value_or(false);
 }
 
@@ -1060,8 +1061,8 @@ void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     Ark_NativeEmbedTouchInfo parameter;
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
-    Ark_TouchEvent touchEvent = Converter::ArkValue<Ark_TouchEvent>(touchEventInfo);
-    parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(touchEvent);
+    const auto event = Converter::ArkTouchEventSync(touchEventInfo);
+    parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(event.ArkValue());
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
     peer->handler = eventInfo->GetResult();

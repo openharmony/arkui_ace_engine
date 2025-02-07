@@ -32,8 +32,12 @@ public:
         AccessorTestBase::SetUp();
         const double testDensity = 2.0;
         MockPipelineContext::GetCurrent()->SetDensity(testDensity);
-        peer_->SetEventInfo(GestureEvent());
+        eventInfo_ = std::make_unique<GestureEvent>();
+        peer_->SetEventInfo(eventInfo_.get());
     }
+
+private:
+    std::unique_ptr<GestureEvent> eventInfo_;
 };
 
 namespace {

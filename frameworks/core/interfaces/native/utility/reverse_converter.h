@@ -45,7 +45,17 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
+#include "core/interfaces/native/implementation/hover_event_peer.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "core/gestures/drag_event.h"
@@ -121,14 +131,13 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // SORTED_SECTION
-    void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src);
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
-    void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
+    void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
@@ -149,12 +158,10 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
-    void AssignArkValue(Ark_HoverEvent& dst, const HoverInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
-    void AssignArkValue(Ark_KeyEvent& dst, const OHOS::Ace::KeyEventInfo& src);
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
@@ -173,7 +180,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
     void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src);
     void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src);
-    void AssignArkValue(Ark_MouseEvent& dst, const MouseInfo& src);
     void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);
     void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src);
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
@@ -223,7 +229,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
-    void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
     void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src);
@@ -233,7 +238,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
     void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
     void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
-    void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src);
     void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
@@ -245,8 +249,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
-    void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src);
-    void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
@@ -618,6 +620,46 @@ namespace OHOS::Ace::NG::Converter {
             .call = callback, .callSync = callbackSync
         };
     }
+
+    template<typename Ark_Type, typename Peer, typename AceEvent>
+    class SyncEvent {
+    public:
+        SyncEvent(AceEvent& eventInfo)
+        {
+            peer_->SetEventInfo(&eventInfo);
+        }
+        ~SyncEvent()
+        {
+            peer_->SetEventInfo(nullptr);
+        }
+
+        Ark_Type ArkValue() const
+        {
+            return {
+                .ptr = peer_
+            };
+        }
+
+    private:
+        Peer* const peer_ = new Peer();
+    };
+
+    using ArkAccessibilityHoverEventSync
+        = SyncEvent<Ark_AccessibilityHoverEvent, AccessibilityHoverEventPeer, OHOS::Ace::AccessibilityHoverInfo>;
+    using ArkClickEventSync
+        = SyncEvent<Ark_ClickEvent, ClickEventPeer, OHOS::Ace::GestureEvent>;
+    using ArkGestureEventSync
+        = SyncEvent<Ark_GestureEvent, GestureEventPeer, OHOS::Ace::GestureEvent>;
+    using ArkHoverEventSync
+        = SyncEvent<Ark_HoverEvent, HoverEventPeer, OHOS::Ace::HoverInfo>;
+    using ArkKeyEventSync
+        = SyncEvent<Ark_KeyEvent, KeyEventPeer, OHOS::Ace::KeyEventInfo>;
+    using ArkMouseEventSync
+        = SyncEvent<Ark_MouseEvent, MouseEventPeer, OHOS::Ace::MouseInfo>;
+    using ArkSubmitEventSync
+        = SyncEvent<Ark_SubmitEvent, SubmitEventPeer, OHOS::Ace::NG::TextFieldCommonEvent>;
+    using ArkTouchEventSync
+        = SyncEvent<Ark_TouchEvent, TouchEventPeer, OHOS::Ace::TouchEventInfo>;
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H

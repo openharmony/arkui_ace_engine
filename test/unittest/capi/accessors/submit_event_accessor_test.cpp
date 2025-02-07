@@ -30,8 +30,11 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        peer_->SetEventInfo(TextFieldCommonEvent());
+        eventInfo_ = std::make_unique<TextFieldCommonEvent>();
+        peer_->SetEventInfo(eventInfo_.get());
     }
+
+    std::unique_ptr<TextFieldCommonEvent> eventInfo_;
 };
 
 /**
