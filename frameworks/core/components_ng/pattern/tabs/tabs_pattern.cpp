@@ -607,7 +607,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         if (index >= tabContentNum) {
             index = 0;
         }
-        UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, index);
+        UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
     }
 }
 
@@ -629,7 +629,7 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
     }
     SetLastWeakFocusNode(tabsNode, tabBarNode, tabsLayoutProperty, indexSetByUser);
     if (!tabsLayoutProperty->GetIndex().has_value()) {
-        UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
+        UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
     } else {
         auto preIndex = tabsLayoutProperty->GetIndex().value();
         if (preIndex == indexSetByUser || indexSetByUser < 0) {
@@ -643,7 +643,7 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
         }
         AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
         tabBarPattern->SetMaskAnimationByCreate(true);
-        UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
+        UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
     }
 }
 
@@ -732,22 +732,18 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
  * This function is responsible for updating the indicator, text color, font weight, image color,
  * and index of the tab bar and swiper nodes when updating children or creating a tab.
  *
- * @param tabBarNode The node representing the tab bar.
  * @param swiperNode The node representing the swiper.
  * @param tabBarPattern The pattern for the tab bar.
  * @param tabsLayoutProperty The layout property for the tabs.
  * @param index The index of the tab being created.
  */
-void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
-    const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index)
+void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
+    const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index)
 {
     if (index < 0) {
         index = 0;
     }
-    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->SetClickRepeat(false);
+    tabBarPattern->UpdateIndicator(index);
     tabBarPattern->ResetIndicatorAnimationState();
     tabBarPattern->UpdateSubTabBoard(index);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
