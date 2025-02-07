@@ -464,6 +464,20 @@ void TextModelNG::SetSelectedBackgroundColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value);
 }
 
+void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
+{
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        auto dragInfo = dragStartFunc(event, extraParams);
+        DragDropInfo info;
+        info.extraInfo = dragInfo.extraInfo;
+        info.pixelMap = dragInfo.pixelMap;
+        info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+        return info;
+    };
+    ViewAbstract::SetOnDragStart(std::move(dragStart));
+}
+
 void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);

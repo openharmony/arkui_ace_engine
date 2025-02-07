@@ -814,6 +814,46 @@ void JSText::SetOnCopy(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 
+void JSText::JsOnDragStart(const JSCallbackInfo& info)
+{
+    if ((AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN))) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
+                           targetNode = frameNode](
+                           const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+        PipelineContext::SetCallBackNode(targetNode);
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            return itemInfo;
+        }
+        auto node = ParseDragNode(ret);
+        if (node) {
+            itemInfo.node = node;
+            return itemInfo;
+        }
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if defined(PIXEL_MAP_SUPPORTED)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        node = ParseDragNode(builderObj->GetProperty("builder"));
+        itemInfo.node = node;
+        return itemInfo;
+    };
+
+    TextModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
+}
+
 void JSText::JsFocusable(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
@@ -1027,6 +1067,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
