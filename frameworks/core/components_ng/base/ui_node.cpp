@@ -515,6 +515,7 @@ void UINode::DoAddChild(
         child->AttachToMainTree(!addDefaultTransition, context_);
     }
     MarkNeedSyncRenderTree(true);
+    ProcessIsInDestroyingForReuseableNode(child);
 }
 
 void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -1981,5 +1982,15 @@ bool UINode::HasSkipNode()
         }
     }
     return false;
+}
+
+void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !child || !child->IsReusableNode()) {
+        return;
+    }
+    if (!IsInDestroying() && child->IsInDestroying()) {
+        child->SetDestroying(false, false);
+    }
 }
 } // namespace OHOS::Ace::NG

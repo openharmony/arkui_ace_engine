@@ -830,7 +830,7 @@ public:
 
     bool IsReusableNode() const
     {
-        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_;
+        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_ || isArkTsRenderNode_;
     }
 
     virtual RefPtr<UINode> GetCurrentPageRootNode()
@@ -880,6 +880,19 @@ public:
     {
         return apiVersion_ >= static_cast<int32_t>(version);
     }
+
+    bool IsArkTsRenderNode() const
+    {
+        return isArkTsRenderNode_;
+    }
+
+    void SetIsArkTsRenderNode(bool isArkTsRenderNode)
+    {
+        isArkTsRenderNode_ = isArkTsRenderNode;
+    }
+
+    void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -990,6 +1003,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isArkTsRenderNode_ = false;
     bool isTraversing_ = false;
     bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
