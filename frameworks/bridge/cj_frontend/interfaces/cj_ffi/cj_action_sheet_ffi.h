@@ -58,22 +58,6 @@ struct NativeOptionRect {
     NativeRectangle value;
 };
 
-struct NativeBorderRadiuses {
-    double topLeftRadiuses;
-    int32_t topLeftUnit;
-    double topRightRadiuses;
-    int32_t topRightUnit;
-    double bottomLeftRadiuses;
-    int32_t bottomLeftUnit;
-    double bottomRightRadiuses;
-    int32_t bottomRightUnit;
-};
-
-struct NativeOptionRadius {
-    bool hasValue;
-    NativeBorderRadiuses value;
-};
-
 struct NativeActionSheetOptions {
     const char* title;
     const char* message;
