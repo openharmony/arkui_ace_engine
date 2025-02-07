@@ -56,6 +56,7 @@ public:
                     CHECK_NULL_VOID(pattern);
                     pattern->UpdateImagePositionY(y);
                 });
+            sliderContentModifier_->SetHost(GetHost());
         }
         InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());

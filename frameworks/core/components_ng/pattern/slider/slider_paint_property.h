@@ -21,6 +21,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.
