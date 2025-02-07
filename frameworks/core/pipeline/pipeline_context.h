@@ -855,6 +855,7 @@ private:
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
     void FlushTouchEvents();
+    bool OnKeyEvent(const NonPointerEvent& nonPointerEvent);
 
     template<typename T>
     struct NodeCompare {

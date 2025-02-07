@@ -65,6 +65,7 @@ constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
 constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
 constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
+constexpr int32_t ROTATION_DIVISOR = 64; // from adapter/ohos/entrance/ace_view_ohos.cpp
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -1629,7 +1630,7 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
-bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+bool PipelineContext::OnKeyEvent(const NonPointerEvent& nonPointerEvent)
 {
     CHECK_RUN_ON(UI);
     if (nonPointerEvent.eventType != UIInputEventType::KEY) {
@@ -1642,9 +1643,7 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
         return false;
     }
     rootElement_->HandleSpecifiedKey(event);
-
     SetShortcutKey(event);
-
     pressedKeyCodes = event.pressedCodes;
     isKeyCtrlPressed_ = !pressedKeyCodes.empty() && (pressedKeyCodes.back() == KeyCode::KEY_CTRL_LEFT ||
                                                         pressedKeyCodes.back() == KeyCode::KEY_CTRL_RIGHT);
@@ -1681,6 +1680,20 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
     if (rootElement_->HandleKeyEvent(event)) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
         return true;
+    }
+    return false;
+}
+
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+{
+    CHECK_RUN_ON(UI);
+    if (nonPointerEvent.eventType == UIInputEventType::KEY) {
+        return OnKeyEvent(nonPointerEvent);
+    } else if (nonPointerEvent.eventType == UIInputEventType::CROWN) {
+        const auto& crownEvent = static_cast<const CrownEvent&>(nonPointerEvent);
+        RotationEvent rotationEvent;
+        rotationEvent.value = crownEvent.degree * ROTATION_DIVISOR;
+        return OnRotationEvent(rotationEvent);
     }
     return false;
 }
