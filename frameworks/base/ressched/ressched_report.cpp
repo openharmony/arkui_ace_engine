@@ -53,7 +53,6 @@ constexpr int32_t LONG_FRAME_END_EVENT = 1;
 constexpr char NAME[] = "name";
 constexpr char PID[] = "pid";
 constexpr char UID[] = "uid";
-constexpr char SCRTID[] = "scrTid";
 constexpr char BUNDLE_NAME[] = "bundleName";
 constexpr char ABILITY_NAME[] = "abilityName";
 constexpr char CLICK[] = "click";
@@ -84,14 +83,6 @@ void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& pay
     payload[UID] = std::to_string(aceApplicationInfo.GetUid());
     payload[BUNDLE_NAME] = aceApplicationInfo.GetPackageName();
     payload[ABILITY_NAME] = aceApplicationInfo.GetAbilityName();
-}
-
-void LoadReportConfig(
-    const ReportConfig& config, std::unordered_map<std::string, std::string>& payload)
-{
-    if (config.isReportTid) {
-        payload[SCRTID] = std::to_string(config.tid);
-    }
 }
 }
 
@@ -189,29 +180,29 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     }
 }
 
-void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
 {
     switch (touchEvent.type) {
         case TouchType::DOWN:
-            HandleTouchDown(touchEvent, config);
+            HandleTouchDown(touchEvent);
             break;
         case TouchType::UP:
-            HandleTouchUp(touchEvent, config);
+            HandleTouchUp(touchEvent);
             break;
         case TouchType::MOVE:
-            HandleTouchMove(touchEvent, config);
+            HandleTouchMove(touchEvent);
             break;
         case TouchType::CANCEL:
-            HandleTouchCancel(touchEvent, config);
+            HandleTouchCancel(touchEvent);
             break;
         case TouchType::PULL_DOWN:
-            HandleTouchPullDown(touchEvent, config);
+            HandleTouchPullDown(touchEvent);
             break;
         case TouchType::PULL_UP:
-            HandleTouchPullUp(touchEvent, config);
+            HandleTouchPullUp(touchEvent);
             break;
         case TouchType::PULL_MOVE:
-            HandleTouchPullMove(touchEvent, config);
+            HandleTouchPullMove(touchEvent);
             break;
         default:
             break;
@@ -282,10 +273,9 @@ void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce
     }
 }
 
-void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    LoadReportConfig(config, payload);
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
@@ -300,10 +290,9 @@ void ResSchedReport::HandleKeyDown(const KeyEvent& event)
     ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_DOWN_EVENT, payload);
 }
 
-void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    LoadReportConfig(config, payload);
     RecordTouchEvent(touchEvent);
     payload[Ressched::NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
@@ -321,48 +310,45 @@ void ResSchedReport::HandleKeyUp(const KeyEvent& event)
     ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_UP_EVENT, payload);
 }
 
-void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent);
     averageDistance_ += curTouchEvent_.GetOffset() - lastTouchEvent_.GetOffset();
     if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE &&
         !isInSlide_ && isInTouch_) {
         std::unordered_map<std::string, std::string> payload;
-        LoadReportConfig(config, payload);
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
     }
 }
 
-void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
 {
     isInSlide_ = false;
     isInTouch_ = false;
     averageDistance_.Reset();
 }
 
-void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent, true);
     isInTouch_ = true;
 }
 
-void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    LoadReportConfig(config, payload);
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_PULL_UP_EVENT, payload);
     averageDistance_.Reset();
     isInTouch_ = false;
 }
 
-void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
 {
     if (!isInSlide_) {
         std::unordered_map<std::string, std::string> payload;
-        LoadReportConfig(config, payload);
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
