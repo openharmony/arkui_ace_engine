@@ -67,6 +67,11 @@ public:
     void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
     void SetVisibleChange(bool isVisible);
     void UpdateFormSize(float width, float height, float borderWidth);
+    void HandleTimeStampAndSetBounds(std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode);
+    void CheckWhetherNeedResizeFormAgain(float borderWidth, float width, float height);
+    void ResizeFormAgain(float borderWidth, float width, float height);
+    int64_t GetRunFormPageInnerTimeStamp();
+    void SetRunFormPageInnerTimeStamp(int64_t timeStamp);
 
 private:
     void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
@@ -96,6 +101,7 @@ private:
     std::shared_ptr<UIContent> uiContent_;
     sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
     sptr<IRemoteObject> proxy_;
+    int64_t runFormPageInnerTimeStamp_ = -1;
 };
 
 /**
