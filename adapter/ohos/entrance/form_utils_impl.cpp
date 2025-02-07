@@ -15,7 +15,6 @@
 
 #include "adapter/ohos/entrance/form_utils_impl.h"
 
-#include "form_constants.h"
 #include "form_mgr.h"
 #include "want.h"
 
@@ -100,19 +99,6 @@ int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
         errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
     }
     
-    return ret;
-}
-
-int32_t FormUtilsImpl::RequestOpenFormManageViewEvent(const AAFwk::Want& want)
-{
-    Want wantToScb(want);
-    wantToScb.SetAction(AppExecFwk::Constants::FORM_PAGE_ACTION);
-    wantToScb.SetParam(AppExecFwk::Constants::PARAM_PAGE_ROUTER_SERVICE_CODE,
-        AppExecFwk::Constants::PAGE_ROUTER_SERVICE_CODE_FORM_MANAGE);
-    const std::string key = AppExecFwk::Constants::PARMA_REQUEST_METHOD;
-    const std::string value = AppExecFwk::Constants::OPEN_FORM_MANAGE_VIEW;
-    wantToScb.SetParam(key, value);
-    int32_t ret = AppExecFwk::FormMgr::GetInstance().StartAbilityByFms(wantToScb);
     return ret;
 }
 
