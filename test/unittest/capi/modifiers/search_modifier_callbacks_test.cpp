@@ -371,11 +371,13 @@ HWTEST_F(SearchModifierCallbackTest, setOnContentScrollTest, TestSize.Level1)
 HWTEST_F(SearchModifierCallbackTest, setOnEditChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    EventsTracker::eventsReceiver.onEditChange = [](Ark_Int32 nodeId, const Ark_Boolean isEditChange) {
-        g_isEditChangeTest = isEditChange;
+    Callback_Boolean_Void onEditChange = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Boolean isEditChange) {
+            g_isEditChangeTest = isEditChange;
+        }
     };
-    Callback_Boolean_Void func{};
-    modifier_->setOnEditChange(node_, &func);
+    modifier_->setOnEditChange(node_, &onEditChange);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_isEditChangeTest, true);

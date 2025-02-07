@@ -123,8 +123,8 @@ void OnSelectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSelect = [frameNode](bool isSelected) {
-        GetFullAPI()->getEventsAPI()->getGridItemEventsReceiver()->onSelect(frameNode->GetId(), isSelected);
+    auto onSelect = [arkCallback = CallbackHelper(*value, frameNode)](bool isSelected) {
+        arkCallback.Invoke(isSelected);
     };
     GridItemModelNG::SetOnSelect(frameNode, onSelect);
 }

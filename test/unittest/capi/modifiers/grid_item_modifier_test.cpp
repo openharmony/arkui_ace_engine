@@ -459,7 +459,6 @@ HWTEST_F(GridItemModifierTest, setSelectedTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
 {
-    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
 
@@ -468,15 +467,17 @@ HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
         bool isSelected;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridItemEventReceiver.onSelect = [](Ark_Int32 nodeId, const Ark_Boolean isSelected)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .isSelected = Converter::ArkValue<Ark_Boolean>(isSelected)
-        };
+    Callback_Boolean_Void onSelect = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Boolean isSelected) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .isSelected = Converter::Convert<bool>(isSelected)
+            };
+        }
     };
 
-    modifier_->setOnSelect(node_, &func);
+    modifier_->setOnSelect(node_, &onSelect);
 
     // check true value
     EXPECT_EQ(checkEvent.has_value(), false);

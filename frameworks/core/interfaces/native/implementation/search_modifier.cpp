@@ -215,10 +215,10 @@ void OnEditChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEditEvent = [frameNode](const bool value) {
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onEditChange(frameNode->GetId(), value);
+    auto onEditChange = [arkCallback = CallbackHelper(*value, frameNode)](bool value) {
+        arkCallback.Invoke(value);
     };
-    SearchModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
+    SearchModelNG::SetOnEditChange(frameNode, std::move(onEditChange));
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
                                  const Ark_ResourceColor* value)
