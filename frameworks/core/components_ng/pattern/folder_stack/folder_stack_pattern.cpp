@@ -33,6 +33,7 @@ void FolderStackPattern::OnAttachToFrameNode()
     Pattern::OnAttachToFrameNode();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
         auto pattern = weak.Upgrade();
         if (pattern) {
