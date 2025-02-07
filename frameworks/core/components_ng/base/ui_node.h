@@ -312,6 +312,11 @@ public:
         return isInDestroying_;
     }
 
+    bool IsDestroyingState() const
+    {
+        return isDestroyingState_;
+    }
+
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -819,6 +824,11 @@ public:
         isCNode_ = createByCapi;
     }
 
+    bool IsReusableNode() const
+    {
+        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_;
+    }
+
     virtual RefPtr<UINode> GetCurrentPageRootNode()
     {
         return nullptr;
@@ -857,7 +867,10 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus) {}
+    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+    {
+        isDestroyingState_ = isDestroying;
+    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
     bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
     {
@@ -987,6 +1000,7 @@ private:
     bool useOffscreenProcess_ = false;
 
     bool isCNode_ = false;
+    bool isDestroyingState_ = false;
     bool isAllowAddChildBelowModalUec_ = true;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
