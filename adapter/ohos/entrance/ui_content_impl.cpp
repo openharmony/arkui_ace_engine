@@ -1534,6 +1534,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
 void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
+    if (isFormRender_ && !fontScaleFollowSystem_) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "use form default size");
+        return;
+    }
     CHECK_NULL_VOID(config);
     auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
     auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
