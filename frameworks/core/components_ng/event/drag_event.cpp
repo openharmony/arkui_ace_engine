@@ -266,7 +266,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(nullptr);
-    dragDropManager->SetIsDragNodeNeedClean(false);
     if (!DragDropFuncWrapper::IsGlobalStatusSuitableForDragging() ||
         !DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict) ||
         IsBelongToMultiItemNode(frameNode)) {
@@ -274,6 +273,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     }
     lastTouchFingerId_ = touchRestrict.touchEvent.id;
     dragDropManager->SetIsDisableDefaultDropAnimation(false);
+    dragDropManager->SetIsDragNodeNeedClean(false);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenuUsingGesture =
         focusHub == nullptr ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -1360,6 +1360,13 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
         actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
             actuator->HideTextAnimation();
+            auto frameNode = gestureHub->GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto context = frameNode->GetContextRefPtr();
+            CHECK_NULL_VOID(context);
+            auto dragDropManager = context->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            dragDropManager->SetIsDragNodeNeedClean(true);
         } else {
             actuator->HidePixelMap();
             actuator->HideFilter();

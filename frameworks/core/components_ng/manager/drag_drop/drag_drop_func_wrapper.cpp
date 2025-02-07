@@ -475,7 +475,7 @@ std::optional<EffectOption> DragDropFuncWrapper::BlurStyleToEffection(
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
-        LOGW("cannot find theme of blurStyle, create blurStyle failed");
+        TAG_LOGW(AceLogTag::ACE_DRAG, "cannot find theme of blurStyle, create blurStyle failed");
         return std::nullopt;
     }
     CHECK_NULL_RETURN(blurStyleOp, std::nullopt);
