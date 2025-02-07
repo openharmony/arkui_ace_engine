@@ -102,6 +102,13 @@ int32_t GetDepthFromParams(const std::vector<std::string>& params)
 
     return depth;
 }
+
+UIContentType GetUIContentType(int32_t instanceId)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, UIContentType::UNDEFINED);
+    return container->GetUIContentType();
+}
 } // namespace
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -2556,7 +2563,12 @@ void PipelineContext::OnTouchEvent(
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     eventManager_->CheckDownEvent(scalePoint);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
+    ReportConfig config;
+    config.isReportTid = GetUIContentType(instanceId_) == UIContentType::DYNAMIC_COMPONENT;
+    if (config.isReportTid) {
+        config.tid = static_cast<uint64_t>(pthread_self());
+    }
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
