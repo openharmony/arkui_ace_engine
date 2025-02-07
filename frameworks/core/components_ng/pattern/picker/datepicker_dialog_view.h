@@ -101,11 +101,8 @@ private:
     static void SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
         const RefPtr<DateTimeAnimationController>& animationController, bool useMilitary = false);
     static void SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool isSwitchByTitle = false);
-    static bool UpdateVisibilityForNode(const RefPtr<FrameNode>& dateStackNode, bool isSwitchByTitle, uint32_t index);
-    static void UpdateDateStackNodeVisibility(const RefPtr<LayoutProperty>& layoutProperty,
-        bool isSwitchByTitle, uint32_t index);
-    static void UpdateDateStackNodeWeight(const RefPtr<LayoutProperty>& layoutProperty,
-        bool isSwitchByTitle, uint32_t index);
+    static void UpdateDateNodeVisibilityAndWeight(const RefPtr<LayoutProperty>& layoutProperty,
+        const RefPtr<LayoutProperty>& dateChildNodeLayoutProperty, bool isSwitchByTitle, uint32_t index);
     static void HideContentChildrenButton(const RefPtr<FrameNode>& contentRow);
     static void SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary = false);
     static void ShowContentRowButton(const RefPtr<FrameNode>& contentRow, bool isFirstPage = true);
