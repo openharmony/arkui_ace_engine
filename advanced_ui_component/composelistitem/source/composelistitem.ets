@@ -1105,8 +1105,6 @@ function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (
  * @returns string
  */
 function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: () => void): string {
-  console.log('zcy ::: getAccessibilityLevelOnAction accessibilityLevel' + accessibilityLevel )
-  console.log('zcy ::: getAccessibilityLevelOnAction  onAction' + onAction )
   if (accessibilityLevel) {
     return accessibilityLevel;
   }

@@ -1941,8 +1941,6 @@ function getAccessibilityLevelOnChange(v2, w2) {
     return ACCESSIBILITY_LEVEL_NO;
 }
 function getAccessibilityLevelOnAction(t2, u2) {
-    console.log('zcy ::: getAccessibilityLevelOnAction accessibilityLevel' + t2);
-    console.log('zcy ::: getAccessibilityLevelOnAction  onAction' + u2);
     if (t2) {
         return t2;
     }
@@ -2617,7 +2615,7 @@ export class ComposeListItem extends ViewPU {
                             if (r) {
                                 let s = new ContentItemStruct(this, {
                                     isWrapText: this.__isWrapText
-                                }, undefined, q, () => { }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1406, col: 11 });
+                                }, undefined, q, () => { }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1404, col: 11 });
                                 ViewPU.create(s);
                                 let t = () => {
                                     return {
@@ -2659,7 +2657,7 @@ export class ComposeListItem extends ViewPU {
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
                                     isWrapText: this.__isWrapText
-                                }, undefined, k, () => { }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1411, col: 11 });
+                                }, undefined, k, () => { }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1409, col: 11 });
                                 ViewPU.create(m);
                                 let n = () => {
                                     return {
@@ -2743,7 +2741,7 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.__containerDirection,
                                     isFocus: this.__isFocus,
                                     isChecked: this.__isChecked,
-                                }, undefined, c, () => { }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1427, col: 11 });
+                                }, undefined, c, () => { }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1425, col: 11 });
                                 ViewPU.create(e);
                                 let f = () => {
                                     return {
