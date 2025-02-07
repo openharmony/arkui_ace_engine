@@ -199,6 +199,8 @@
       OHOS::Ace::VideoModel::*;
       OHOS::Ace::WebModel::*;
       OHOS::Ace::ImageInfoConfig::*;
+      OHOS::Ace::RecycleViewModel::*;
+      OHOS::Ace::NG::RecycleDummyNode::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -480,7 +482,7 @@
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
       vtable?for?OHOS::Ace::NG::ParallelPagePattern;
       vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
-      vtable?for?OHOS::Ace::NG::ContainerModalView;      
+      vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
