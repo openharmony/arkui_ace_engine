@@ -711,7 +711,7 @@ uint32_t TimePickerRowPattern::GetHourFromAmPm(bool isAm, uint32_t amPmhour) con
 void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
     std::vector<RefPtr<FrameNode>> tags;
-    if (isEnableCascade_ && !IsStartEndTimeDefined()) {
+    if (wheelModeEnabled_ && isEnableCascade_ && !IsStartEndTimeDefined()) {
         OnDataLinking(tag, isAdd, index, tags);
     }
     for (const auto& tag : tags) {
