@@ -1612,7 +1612,11 @@ double ArcSwiperPattern::GetCrownRotatePx(const CrownEvent& event) const
     CHECK_NULL_RETURN(theme, 0.0);
 
     if (LessOrEqualCustomPrecision(velocity, theme->GetSlowVelocityThreshold(), 0.01f)) {
+        px = theme->GetDisplayControlRatioVerySlow() * velocity;
+    } else if (LessOrEqualCustomPrecision(velocity, theme->GetMediumVelocityThreshold(), 0.01f)) {
         px = theme->GetDisplayControlRatioSlow() * velocity;
+    } else if (LessOrEqualCustomPrecision(velocity, theme->GetFastVelocityThreshold(), 0.01f)) {
+        px = theme->GetDisplayControlRatioMedium() * velocity;
     } else {
         px = theme->GetDisplayControlRatioFast() * velocity;
     }

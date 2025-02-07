@@ -190,21 +190,35 @@ public:
             theme->arcMaskStartColor_ = swiperPattern->GetAttr<Color>("mask_color_start", Color::TRANSPARENT);
             theme->arcMaskEndColor_ = swiperPattern->GetAttr<Color>("mask_color_end", Color::TRANSPARENT);
             theme->arcContainerColor_ = swiperPattern->GetAttr<Color>("container_color", Color::TRANSPARENT);
+            theme->indicatorDragMinAngle_ =
+                swiperPattern->GetAttr<double>("swiper_indicator_drag_min_angle", INDICATOR_DRAG_MIN_ANGLE);
+            theme->indicatorDragMaxAngle_ =
+                swiperPattern->GetAttr<double>("swiper_indicator_drag_max_angle", INDICATOR_DRAG_MAX_ANGLE);
 #ifdef SUPPORT_DIGITAL_CROWN
+            ParsePattern3(themeConstants, theme, swiperPattern);
+#endif
+        }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void ParsePattern3(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme,
+            const RefPtr<ThemeStyle> swiperPattern) const
+        {
             theme->slowVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_slow_velocity_threshold", 0.0f);
+            theme->mediumVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_medium_velocity_threshold", 0.0f);
+            theme->fastVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_fast_velocity_threshold", 0.0f);
+            theme->displayControlRatioVerySlow_ =
+                swiperPattern->GetAttr<double>("swiper_display_control_ratio_very_slow", 0.0f);
             theme->displayControlRatioSlow_ = swiperPattern->GetAttr<double>("swiper_display_control_ratio_slow", 0.0f);
+            theme->displayControlRatioMedium_ =
+                swiperPattern->GetAttr<double>("swiper_display_control_ratio_medium", 0.0f);
             theme->displayControlRatioFast_ = swiperPattern->GetAttr<double>("swiper_display_control_ratio_fast", 0.0f);
             theme->crownSensitivityLow_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_low", 0.0f);
             theme->crownSensitivityMedium_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_medium", 0.0f);
             theme->crownSensitivityHigh_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_high", 0.0f);
             theme->springVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_spring_velocity_threshold", 0.0f);
             theme->crownTranslocationRatio_ = swiperPattern->GetAttr<double>("swiper_crown_translocation_ratio", 0.0f);
-#endif
-            theme->indicatorDragMinAngle_ =
-                swiperPattern->GetAttr<double>("swiper_indicator_drag_min_angle", INDICATOR_DRAG_MIN_ANGLE);
-            theme->indicatorDragMaxAngle_ =
-                swiperPattern->GetAttr<double>("swiper_indicator_drag_max_angle", INDICATOR_DRAG_MAX_ANGLE);
         }
+#endif
     };
 
     ~SwiperIndicatorTheme() override = default;
@@ -532,9 +546,29 @@ public:
         return slowVelocityThreshold_;
     }
 
+    double GetMediumVelocityThreshold() const
+    {
+        return mediumVelocityThreshold_;
+    }
+
+    double GetFastVelocityThreshold() const
+    {
+        return fastVelocityThreshold_;
+    }
+
+    double GetDisplayControlRatioVerySlow() const
+    {
+        return displayControlRatioVerySlow_;
+    }
+
     double GetDisplayControlRatioSlow() const
     {
         return displayControlRatioSlow_;
+    }
+
+    double GetDisplayControlRatioMedium() const
+    {
+        return displayControlRatioMedium_;
     }
 
     double GetDisplayControlRatioFast() const
@@ -657,7 +691,11 @@ private:
     int focusStyleType_ = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     double slowVelocityThreshold_ = 0.0f;
+    double mediumVelocityThreshold_ = 0.0f;
+    double fastVelocityThreshold_ = 0.0f;
+    double displayControlRatioVerySlow_ = 0.0f;
     double displayControlRatioSlow_ = 0.0f;
+    double displayControlRatioMedium_ = 0.0f;
     double displayControlRatioFast_ = 0.0f;
     double crownSensitivityLow_ = 0.0f;
     double crownSensitivityMedium_ = 0.0f;
