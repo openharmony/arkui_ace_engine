@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
@@ -3289,14 +3290,25 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (!InstanceOf<KeyboardPattern>(pattern)) {
-            if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
-                rootNode->RemoveChild(overlay);
-            }
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            return true;
+            return RemoveNonKeyboardOverlay(overlay);
         }
     }
     return false;
+}
+
+bool OverlayManager::RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode && overlay, true);
+    auto pattern = overlay->GetPattern();
+    if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        rootNode->RemoveChild(overlay);
+    }
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    CHECK_NULL_RETURN(overlay->GetTag() == V2::MAGNIFIER_TAG, true);
+    auto magnifierPattern = DynamicCast<MagnifierPattern>(pattern);
+    CHECK_NULL_RETURN(magnifierPattern, true);
+    return magnifierPattern->IsStopBackPress();
 }
 
 RefPtr<FrameNode> OverlayManager::GetOverlayFrameNode()

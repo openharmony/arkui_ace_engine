@@ -1097,7 +1097,7 @@ public:
         isStopBackPress_ = isStopBackPress;
     }
 
-    bool IsStopBackPress() const
+    bool IsStopBackPress() const override
     {
         return isStopBackPress_;
     }
