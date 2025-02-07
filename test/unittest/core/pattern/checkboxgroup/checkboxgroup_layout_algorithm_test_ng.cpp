@@ -100,7 +100,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest001
      * @tc.expected: The return values are DEFAULT_PADDING_SIZE and DEFAULT_PADDING_SIZE.
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.verticalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
@@ -130,7 +130,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest002
      * @tc.expected: The return values are HORIZONTAL_PADDING and VERTICAL_PADDING.
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
 }
@@ -164,7 +164,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest003
      * @tc.expected: The return values are DEFAULT_WIDTH, DEFAULT_HEIGHT and DEFAULT_PADDING_SIZE.
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.defaultWidth_, DEFAULT_WIDTH.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.defaultHeight_, DEFAULT_HEIGHT.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
@@ -198,7 +198,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest004
      * @tc.expected: The return values are DEFAULT_WIDTH, DEFAULT_HEIGHT, HORIZONTAL_PADDING and VERTICAL_PADDING.
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.defaultWidth_, DEFAULT_WIDTH.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.defaultHeight_, DEFAULT_HEIGHT.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
@@ -226,7 +226,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest005
      * @tc.expected: Check the param value
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.defaultWidth_, theme->defaultWidth_.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.defaultHeight_, theme->defaultHeight_.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, theme->defaultPaddingSize_.ConvertToPx());
@@ -256,7 +256,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest006
      * @tc.expected: Check the param value
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.defaultWidth_, theme->defaultWidth_.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.defaultHeight_, theme->defaultHeight_.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, theme->defaultPaddingSize_.ConvertToPx());
@@ -287,7 +287,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest007
      * @tc.expected: Check the param value
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.defaultWidth_, theme->GetWidth().ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.defaultHeight_, theme->GetHeight().ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, theme->GetDefaultPaddingSize().ConvertToPx());
@@ -316,7 +316,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest008
      * @tc.expected: Check the param value.
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.InitializeParam();
+    layoutAlgorithm.InitializeParam(0);
     EXPECT_EQ(layoutAlgorithm.defaultWidth_, theme->GetWidth().ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.defaultHeight_, theme->GetHeight().ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, theme->GetHotZoneHorizontalPadding().ConvertToPx());
