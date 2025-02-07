@@ -1010,7 +1010,7 @@ public:
     void ClearFocusStyle();
     void ProcessFocusStyle();
     bool OnBackPressed() override;
-    bool IsStopBackPress() const;
+    bool IsStopBackPress() const override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     bool CheckMousePressedOverScrollBar(GestureEvent& info);
