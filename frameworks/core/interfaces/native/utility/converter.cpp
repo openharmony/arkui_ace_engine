@@ -1626,7 +1626,7 @@ PickerTime Convert(const Ark_Date& src)
 {
     auto milliseconds = static_cast<int64_t>(src);
     const auto SEC_TO_MILLISEC = 1000L;
-    auto seconds = milliseconds / SEC_TO_MILLISEC;
+    auto seconds = static_cast<time_t>(milliseconds / SEC_TO_MILLISEC);
     struct std::tm time_info;
 #ifdef WINDOWS_PLATFORM
     errno_t err = localtime_s(&time_info, &seconds);
