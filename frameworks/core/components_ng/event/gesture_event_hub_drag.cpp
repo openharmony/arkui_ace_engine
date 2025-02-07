@@ -772,7 +772,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     dragDropManager->SetSummaryMap(summary);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
-    if (pixelMap_ == nullptr) {
+    if (pixelMap) {
+        SetPixelMap(pixelMap);
+    } else if (pixelMap == nullptr) {
         FireCustomerOnDragEnd(pipeline, eventHub);
         TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
         if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
