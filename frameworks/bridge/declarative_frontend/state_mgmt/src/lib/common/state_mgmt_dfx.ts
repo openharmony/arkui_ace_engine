@@ -51,6 +51,7 @@ class stateMgmtDFX {
     const decoratorInfo: string = ObserveV2.getObserve().getDecoratorInfo(target, attrName);
     let val;
     let id;
+    // get state value and id
     if (Array.isArray(target) || target instanceof Set || target instanceof Map || target instanceof Date) {
       val = target;
       id = Utils.getArkTsUtil().getHash(target)?.toString();
@@ -59,10 +60,11 @@ class stateMgmtDFX {
       val = Reflect.get(target, attrName);
       id = Utils.getArkTsUtil().getHash(target)?.toString() + attrName;
     }
-    // handle MakeObsered
+    // handle MakeObserved
     if (target[RefInfo.MAKE_OBSERVED_PROXY]) {
       let raw = UIUtilsImpl.instance().getTarget(target[RefInfo.MAKE_OBSERVED_PROXY]);
-      if (Array.isArray(raw) || raw instanceof Set || raw instanceof Map || raw instanceof Date) {
+      if (Array.isArray(raw) || raw instanceof Set || raw instanceof Map || raw instanceof Date ||
+        SendableType.isArray(raw) || SendableType.isMap(raw) || SendableType.isSet(raw)) {
         val = raw;
         id = Utils.getArkTsUtil().getHash(target)?.toString();
       } else {
@@ -71,6 +73,7 @@ class stateMgmtDFX {
       }
     }
 
+    // dump dependent element id
     const dependentElementIds: Array<ElementType | string> = Array<ElementType | string>();
     changeIdSet.forEach((id: number) => {
       if (id < ComputedV2.MIN_COMPUTED_ID) {
@@ -78,12 +81,17 @@ class stateMgmtDFX {
       }
     });
 
+    // dump owned view or class
     let ownedTarget: TargetInfo;
     if (target instanceof ViewV2) {
       ownedTarget = { componentName: target.constructor.name, id: target.id__() };
+    } else if (target[RefInfo.MAKE_OBSERVED_PROXY]) {
+      let raw = UIUtilsImpl.instance().getTarget(target[RefInfo.MAKE_OBSERVED_PROXY]);
+      ownedTarget = { className: raw.constructor.name, id: Utils.getArkTsUtil().getHash(raw) };
     } else {
       ownedTarget = { className: target.constructor.name, id: Utils.getArkTsUtil().getHash(target) };
     }
+
     stateInfo.observedPropertiesInfo.push({
       decorator: decoratorInfo, propertyName: attrName, idV2: id,
       value: stateMgmtDFX.getRawValue(val), inRenderingElementId: ObserveV2.getCurrentRecordedId(),
@@ -186,7 +194,7 @@ class stateMgmtDFX {
     return dumpArr.map(item => (item && typeof item === 'object') ? this.getType(item) : item);
   }
 
-  private static dumpMap(map: Map<RawValue, RawValue>): Array<DumpBuildInType> {
+  private static dumpMap(map: Map<RawValue, RawValue> | SendableMap<RawValue, RawValue>): Array<DumpBuildInType> {
     let dumpKey = this.dumpItems(Array.from(map.keys()));
     let dumpValue = this.dumpItems(Array.from(map.values()));
     return dumpKey.map((item: any, index: number) => [item, dumpValue[index]]);
@@ -212,7 +220,7 @@ class stateMgmtDFX {
     return tempObj;
   }
 
-  private static getRawValue<T>(prop: T): DumpObjectType | Array<DumpBuildInType> | T | string {
+  private static getRawValue<T>(prop: T | ObservedPropertyAbstractPU<T>): DumpObjectType | Array<DumpBuildInType> | T | string {
     let rawValue: T;
     if (prop instanceof ObservedPropertyAbstract) {
       let wrappedValue: T = prop.getUnmonitored();
@@ -223,12 +231,12 @@ class stateMgmtDFX {
     if (!rawValue || typeof rawValue !== 'object') {
       return rawValue;
     }
-    if (rawValue instanceof Map) {
-      return stateMgmtDFX.dumpMap(rawValue);
-    } else if (rawValue instanceof Set) {
-      return stateMgmtDFX.dumpItems(Array.from(rawValue.values()));
-    } else if (rawValue instanceof Array) {
-      return stateMgmtDFX.dumpItems(Array.from(rawValue));
+    if (rawValue instanceof Map || SendableType.isMap(rawValue as unknown as object)) {
+      return stateMgmtDFX.dumpMap(rawValue as unknown as Map<RawValue, RawValue> | SendableMap<RawValue, RawValue>);
+    } else if (rawValue instanceof Set || SendableType.isSet(rawValue as unknown as object)) {
+      return stateMgmtDFX.dumpItems(Array.from((rawValue as unknown as Set<RawValue> | SendableSet<RawValue>).values()));
+    } else if (rawValue instanceof Array || SendableType.isArray(rawValue as unknown as object)) {
+      return stateMgmtDFX.dumpItems(Array.from(rawValue as unknown as Array<RawValue>));
     } else if (rawValue instanceof Date) {
       return rawValue;
     } else {
