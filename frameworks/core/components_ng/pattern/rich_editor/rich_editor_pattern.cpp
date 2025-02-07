@@ -146,6 +146,7 @@ RichEditorPattern::RichEditorPattern() :
     styledString_->SetSpanWatcher(WeakClaim(this));
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
+    floatingCaretState_.UpdateOriginCaretColor();
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -4782,12 +4783,12 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
+    floatingCaretState_.UpdateOriginCaretColor();
     auto scrollBar = GetScrollBar();
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBar && scrollbarTheme);
     scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
     scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
-    floatingCaretState_.UpdateOriginCaretColor(SystemProperties::GetColorMode());
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
