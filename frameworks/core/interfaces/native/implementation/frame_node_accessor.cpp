@@ -195,6 +195,14 @@ void DisposeImpl(FrameNodePeer* peer)
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(currentUINodeRef);
 }
+Ark_Int32 GetOpacityImpl(FrameNodePeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetPositionToWindowWithTransformImpl(FrameNodePeer* peer)
+{
+    return nullptr;
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -214,6 +222,8 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetParentImpl,
         FrameNodeAccessor::GetChildrenCountImpl,
         FrameNodeAccessor::DisposeImpl,
+        FrameNodeAccessor::GetOpacityImpl,
+        FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
     };
     return &FrameNodeAccessorImpl;
 }

@@ -83,6 +83,9 @@ namespace OHOS::Ace::NG::Converter {
         (std::is_rvalue_reference_v<From> || !std::is_reference_v<From>), bool> = false>
     To ArkValue(From&& src) = delete; // Constructing Ark_ values from r-value is prohibited
 
+    template<typename Dst, typename... Args>
+    Dst ArkCreate(Args... args) = delete;
+
     class ConvContext {
     public:
         Ark_String Store(const std::string_view& src);
@@ -250,6 +253,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
+
+    // SORTED_SECTION
+    template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 

@@ -14,8 +14,10 @@
  */
 
 #include "reverse_converter.h"
+
 #include "base/utils/string_utils.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "validators.h"
 
@@ -95,17 +97,7 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
-    AssignArkValue(dst.value, src.Value());
-    switch (src.Unit()) {
-        case DimensionUnit::PX: dst.unit = ARK_LENGTH_UNIT_PX; break;
-        case DimensionUnit::VP: dst.unit = ARK_LENGTH_UNIT_VP; break;
-        case DimensionUnit::FP: dst.unit = ARK_LENGTH_UNIT_FP; break;
-        case DimensionUnit::PERCENT: dst.unit = ARK_LENGTH_UNIT_PERCENT; break;
-        case DimensionUnit::LPX: dst.unit = ARK_LENGTH_UNIT_LPX; break;
-        default:
-            AssignArkValue(dst.value, 0.0);
-            dst.unit = ARK_LENGTH_UNIT_VP;
-    }
+    dst.ptr = LengthMetricsPeer::Create(src);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -284,5 +276,20 @@ void AssignArkValue(Ark_Buffer& dst, const std::string& src)
 {
     dst.data = const_cast<char*>(src.data());
     dst.length = src.size();
+}
+
+template<>
+Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
+{
+    DimensionUnit du = DimensionUnit::INVALID;
+    switch (unit) {
+        case ARK_LENGTH_UNIT_PX: du = DimensionUnit::PX; break;
+        case ARK_LENGTH_UNIT_VP: du = DimensionUnit::VP; break;
+        case ARK_LENGTH_UNIT_FP: du = DimensionUnit::FP; break;
+        case ARK_LENGTH_UNIT_PERCENT: du = DimensionUnit::PERCENT; break;
+        case ARK_LENGTH_UNIT_LPX: du = DimensionUnit::LPX; break;
+        default: du = DimensionUnit::INVALID;
+    }
+    return { LengthMetricsPeer::Create(Dimension(value, du)) };
 }
 } // namespace OHOS::Ace::NG::Converter

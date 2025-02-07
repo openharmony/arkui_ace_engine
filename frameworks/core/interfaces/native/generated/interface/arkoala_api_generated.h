@@ -26,6 +26,8 @@
 
 #include <stdint.h>
 
+#define INTEROP_FATAL(msg, ...) fprintf(stderr, msg "\n", ##__VA_ARGS__); abort();
+
 typedef enum InteropTag
 {
   INTEROP_TAG_UNDEFINED = 101,
@@ -153,7 +155,7 @@ typedef struct InteropBuffer {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 115
+#define GENERATED_ARKUI_FULL_API_VERSION 117
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -243,7 +245,7 @@ typedef struct Ark_Tuple_Dimension_Dimension Ark_Tuple_Dimension_Dimension;
 typedef struct Opt_Tuple_Dimension_Dimension Opt_Tuple_Dimension_Dimension;
 typedef Ark_Materialized Ark_PixelMap;
 typedef struct Opt_PixelMap Opt_PixelMap;
-typedef struct Ark_LengthMetrics Ark_LengthMetrics;
+typedef Ark_Materialized Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics Opt_LengthMetrics;
 typedef struct Ark_Padding Ark_Padding;
 typedef struct Opt_Padding Opt_Padding;
@@ -445,7 +447,7 @@ typedef struct Map_String_String Map_String_String;
 typedef struct Opt_Map_String_String Opt_Map_String_String;
 typedef Ark_Materialized Ark_WebResourceRequest;
 typedef struct Opt_WebResourceRequest Opt_WebResourceRequest;
-typedef struct Ark_WebviewController Ark_WebviewController;
+typedef Ark_Materialized Ark_WebviewController;
 typedef struct Opt_WebviewController Opt_WebviewController;
 typedef Ark_Materialized Ark_WebController;
 typedef struct Opt_WebController Opt_WebController;
@@ -1073,6 +1075,8 @@ typedef struct Ark_FadingEdgeOptions Ark_FadingEdgeOptions;
 typedef struct Opt_FadingEdgeOptions Opt_FadingEdgeOptions;
 typedef struct Ark_RectShape Ark_RectShape;
 typedef struct Opt_RectShape Opt_RectShape;
+typedef struct Ark_ConstraintSizeOptions Ark_ConstraintSizeOptions;
+typedef struct Opt_ConstraintSizeOptions Opt_ConstraintSizeOptions;
 typedef struct GestureRecognizerJudgeBeginCallback GestureRecognizerJudgeBeginCallback;
 typedef struct Opt_GestureRecognizerJudgeBeginCallback Opt_GestureRecognizerJudgeBeginCallback;
 typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
@@ -1225,6 +1229,10 @@ typedef Ark_Materialized Ark_ClickEvent;
 typedef struct Opt_ClickEvent Opt_ClickEvent;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
+typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
+typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
+typedef struct AsyncCallback_image_PixelMap_Void AsyncCallback_image_PixelMap_Void;
+typedef struct Opt_AsyncCallback_image_PixelMap_Void Opt_AsyncCallback_image_PixelMap_Void;
 typedef struct Callback_RangeUpdate Callback_RangeUpdate;
 typedef struct Opt_Callback_RangeUpdate Opt_Callback_RangeUpdate;
 typedef struct Ark_DoubleAnimationParam Ark_DoubleAnimationParam;
@@ -2253,8 +2261,6 @@ typedef struct Array_TouchTestInfo Array_TouchTestInfo;
 typedef struct Opt_Array_TouchTestInfo Opt_Array_TouchTestInfo;
 typedef struct Callback_Array_TouchTestInfo_TouchResult Callback_Array_TouchTestInfo_TouchResult;
 typedef struct Opt_Callback_Array_TouchTestInfo_TouchResult Opt_Callback_Array_TouchTestInfo_TouchResult;
-typedef struct Ark_ConstraintSizeOptions Ark_ConstraintSizeOptions;
-typedef struct Opt_ConstraintSizeOptions Opt_ConstraintSizeOptions;
 typedef struct Ark_Union_Array_Rectangle_Rectangle Ark_Union_Array_Rectangle_Rectangle;
 typedef struct Opt_Union_Array_Rectangle_Rectangle Opt_Union_Array_Rectangle_Rectangle;
 typedef struct Ark_TouchObject Ark_TouchObject;
@@ -2337,6 +2343,10 @@ typedef struct Ark_SheetInfo Ark_SheetInfo;
 typedef struct Opt_SheetInfo Opt_SheetInfo;
 typedef struct Ark_Literal_Want_want Ark_Literal_Want_want;
 typedef struct Opt_Literal_Want_want Opt_Literal_Want_want;
+typedef struct Ark_WebHeader Ark_WebHeader;
+typedef struct Opt_WebHeader Opt_WebHeader;
+typedef struct Array_WebHeader Array_WebHeader;
+typedef struct Opt_Array_WebHeader Opt_Array_WebHeader;
 typedef enum Ark_LengthUnit {
     ARK_LENGTH_UNIT_PX = 0,
     ARK_LENGTH_UNIT_VP = 1,
@@ -4151,6 +4161,26 @@ typedef struct Opt_IndexerAlign {
     Ark_Tag tag;
     Ark_IndexerAlign value;
 } Opt_IndexerAlign;
+typedef enum Ark_PerfMonitorSourceType {
+    ARK_PERF_MONITOR_SOURCE_TYPE_PERF_TOUCH_EVENT = 0,
+    ARK_PERF_MONITOR_SOURCE_TYPE_PERF_MOUSE_EVENT = 1,
+    ARK_PERF_MONITOR_SOURCE_TYPE_PERF_TOUCHPAD_EVENT = 2,
+    ARK_PERF_MONITOR_SOURCE_TYPE_PERF_JOYSTICK_EVENT = 3,
+    ARK_PERF_MONITOR_SOURCE_TYPE_PERF_KEY_EVENT = 4,
+} Ark_PerfMonitorSourceType;
+typedef struct Opt_PerfMonitorSourceType {
+    Ark_Tag tag;
+    Ark_PerfMonitorSourceType value;
+} Opt_PerfMonitorSourceType;
+typedef enum Ark_PerfMonitorActionType {
+    ARK_PERF_MONITOR_ACTION_TYPE_LAST_DOWN = 0,
+    ARK_PERF_MONITOR_ACTION_TYPE_LAST_UP = 1,
+    ARK_PERF_MONITOR_ACTION_TYPE_FIRST_MOVE = 2,
+} Ark_PerfMonitorActionType;
+typedef struct Opt_PerfMonitorActionType {
+    Ark_Tag tag;
+    Ark_PerfMonitorActionType value;
+} Opt_PerfMonitorActionType;
 typedef enum Ark_SideBarPosition {
     ARK_SIDE_BAR_POSITION_START = 0,
     ARK_SIDE_BAR_POSITION_END = 1,
@@ -5204,10 +5234,6 @@ typedef struct Opt_PixelMap {
     Ark_Tag tag;
     Ark_PixelMap value;
 } Opt_PixelMap;
-typedef struct Ark_LengthMetrics {
-    Ark_LengthUnit unit;
-    Ark_Number value;
-} Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics {
     Ark_Tag tag;
     Ark_LengthMetrics value;
@@ -6135,9 +6161,6 @@ typedef struct Opt_WebResourceRequest {
     Ark_Tag tag;
     Ark_WebResourceRequest value;
 } Opt_WebResourceRequest;
-typedef struct Ark_WebviewController {
-    Ark_String __WebviewControllerStub;
-} Ark_WebviewController;
 typedef struct Opt_WebviewController {
     Ark_Tag tag;
     Ark_WebviewController value;
@@ -8963,6 +8986,16 @@ typedef struct Opt_RectShape {
     Ark_Tag tag;
     Ark_RectShape value;
 } Opt_RectShape;
+typedef struct Ark_ConstraintSizeOptions {
+    Opt_Length minWidth;
+    Opt_Length maxWidth;
+    Opt_Length minHeight;
+    Opt_Length maxHeight;
+} Ark_ConstraintSizeOptions;
+typedef struct Opt_ConstraintSizeOptions {
+    Ark_Tag tag;
+    Ark_ConstraintSizeOptions value;
+} Opt_ConstraintSizeOptions;
 typedef struct GestureRecognizerJudgeBeginCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_BaseGestureEvent event, const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers, const Callback_GestureJudgeResult_Void continuation);
@@ -9828,6 +9861,23 @@ typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
     NavExtender_OnUpdateStack value;
 } Opt_NavExtender_OnUpdateStack;
+typedef struct Ark_SnapshotOptions {
+    Opt_Number scale;
+    Opt_Boolean waitUntilRenderFinished;
+} Ark_SnapshotOptions;
+typedef struct Opt_SnapshotOptions {
+    Ark_Tag tag;
+    Ark_SnapshotOptions value;
+} Opt_SnapshotOptions;
+typedef struct AsyncCallback_image_PixelMap_Void {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_PixelMap result);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PixelMap result);
+} AsyncCallback_image_PixelMap_Void;
+typedef struct Opt_AsyncCallback_image_PixelMap_Void {
+    Ark_Tag tag;
+    AsyncCallback_image_PixelMap_Void value;
+} Opt_AsyncCallback_image_PixelMap_Void;
 typedef struct Callback_RangeUpdate {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_NativePointer mark, const Ark_Int32 end);
@@ -14497,16 +14547,6 @@ typedef struct Opt_Callback_Array_TouchTestInfo_TouchResult {
     Ark_Tag tag;
     Callback_Array_TouchTestInfo_TouchResult value;
 } Opt_Callback_Array_TouchTestInfo_TouchResult;
-typedef struct Ark_ConstraintSizeOptions {
-    Opt_Length minWidth;
-    Opt_Length maxWidth;
-    Opt_Length minHeight;
-    Opt_Length maxHeight;
-} Ark_ConstraintSizeOptions;
-typedef struct Opt_ConstraintSizeOptions {
-    Ark_Tag tag;
-    Ark_ConstraintSizeOptions value;
-} Opt_ConstraintSizeOptions;
 typedef struct Ark_Union_Array_Rectangle_Rectangle {
     Ark_Int32 selector;
     union {
@@ -14935,6 +14975,22 @@ typedef struct Opt_Literal_Want_want {
     Ark_Tag tag;
     Ark_Literal_Want_want value;
 } Opt_Literal_Want_want;
+typedef struct Ark_WebHeader {
+    Ark_String headerKey;
+    Ark_String headerValue;
+} Ark_WebHeader;
+typedef struct Opt_WebHeader {
+    Ark_Tag tag;
+    Ark_WebHeader value;
+} Opt_WebHeader;
+typedef struct Array_WebHeader {
+    Ark_WebHeader* array;
+    Ark_Int32 length;
+} Array_WebHeader;
+typedef struct Opt_Array_WebHeader {
+    Ark_Tag tag;
+    Array_WebHeader value;
+} Opt_Array_WebHeader;
 typedef struct Opt_Float32 {
     Ark_Tag tag;
     Ark_Float32 value;
@@ -18509,6 +18565,56 @@ typedef struct GENERATED_ArkUIDrawingCanvasAccessor {
                      const Ark_Number* bottom);
 } GENERATED_ArkUIDrawingCanvasAccessor;
 
+typedef struct LengthMetricsPeer LengthMetricsPeer;
+typedef struct GENERATED_ArkUILengthMetricsAccessor {
+    void (*destroyPeer)(LengthMetricsPeer* peer);
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_NativePointer (*px)(const Ark_Number* value);
+    Ark_NativePointer (*resource)(const Ark_Resource* value);
+    Ark_NativePointer (*getUnit)(LengthMetricsPeer* peer);
+    void (*setUnit)(LengthMetricsPeer* peer,
+                    Ark_LengthUnit unit);
+    Ark_Int32 (*getValue)(LengthMetricsPeer* peer);
+    void (*setValue)(LengthMetricsPeer* peer,
+                     const Ark_Number* value);
+} GENERATED_ArkUILengthMetricsAccessor;
+
+typedef struct WebviewControllerPeer WebviewControllerPeer;
+typedef struct GENERATED_ArkUIWebviewControllerAccessor {
+    void (*destroyPeer)(WebviewControllerPeer* peer);
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*initializeWebEngine)();
+    void (*loadUrl)(WebviewControllerPeer* peer,
+                    const Ark_Union_String_Resource* url,
+                    const Opt_Array_WebHeader* headers);
+} GENERATED_ArkUIWebviewControllerAccessor;
+
+typedef struct GlobalScope_ohos_arkui_componentSnapshotPeer GlobalScope_ohos_arkui_componentSnapshotPeer;
+typedef struct GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor {
+    void (*destroyPeer)(GlobalScope_ohos_arkui_componentSnapshotPeer* peer);
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*get)(const Ark_String* id,
+                const AsyncCallback_image_PixelMap_Void* callback,
+                const Opt_SnapshotOptions* options);
+} GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor;
+
+typedef struct GlobalScope_ohos_arkui_performanceMonitorPeer GlobalScope_ohos_arkui_performanceMonitorPeer;
+typedef struct GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor {
+    void (*destroyPeer)(GlobalScope_ohos_arkui_performanceMonitorPeer* peer);
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*begin)(const Ark_String* scene,
+                  Ark_PerfMonitorActionType startInputType,
+                  const Opt_String* note);
+    void (*end)(const Ark_String* scene);
+    void (*recordInputEventTime)(Ark_PerfMonitorActionType type,
+                                 Ark_PerfMonitorSourceType sourceType,
+                                 const Ark_Number* time);
+} GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor;
+
 typedef struct FrameNodePeer FrameNodePeer;
 typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*destroyPeer)(FrameNodePeer* peer);
@@ -18531,6 +18637,8 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_NativePointer (*getParent)(FrameNodePeer* peer);
     Ark_Int32 (*getChildrenCount)(FrameNodePeer* peer);
     void (*dispose)(FrameNodePeer* peer);
+    Ark_Int32 (*getOpacity)(FrameNodePeer* peer);
+    Ark_NativePointer (*getPositionToWindowWithTransform)(FrameNodePeer* peer);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct PixelMapPeer PixelMapPeer;
@@ -19237,6 +19345,18 @@ typedef struct GENERATED_ArkUIProgressMaskAccessor {
     void (*enableBreathingAnimation)(ProgressMaskPeer* peer,
                                      Ark_Boolean value);
 } GENERATED_ArkUIProgressMaskAccessor;
+
+typedef struct MeasurablePeer MeasurablePeer;
+typedef struct GENERATED_ArkUIMeasurableAccessor {
+    void (*destroyPeer)(MeasurablePeer* peer);
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_NativePointer (*measure)(MeasurablePeer* peer,
+                                 const Ark_ConstraintSizeOptions* constraint);
+    Ark_NativePointer (*getMargin)(MeasurablePeer* peer);
+    Ark_NativePointer (*getPadding)(MeasurablePeer* peer);
+    Ark_NativePointer (*getBorderWidth)(MeasurablePeer* peer);
+} GENERATED_ArkUIMeasurableAccessor;
 
 typedef struct ViewPeer ViewPeer;
 typedef struct GENERATED_ArkUIViewAccessor {
@@ -21622,6 +21742,10 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();
+    const GENERATED_ArkUILengthMetricsAccessor* (*getLengthMetricsAccessor)();
+    const GENERATED_ArkUIWebviewControllerAccessor* (*getWebviewControllerAccessor)();
+    const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* (*getGlobalScope_ohos_arkui_componentSnapshotAccessor)();
+    const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* (*getGlobalScope_ohos_arkui_performanceMonitorAccessor)();
     const GENERATED_ArkUIFrameNodeAccessor* (*getFrameNodeAccessor)();
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
@@ -21651,6 +21775,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDragEventAccessor* (*getDragEventAccessor)();
     const GENERATED_ArkUIKeyEventAccessor* (*getKeyEventAccessor)();
     const GENERATED_ArkUIProgressMaskAccessor* (*getProgressMaskAccessor)();
+    const GENERATED_ArkUIMeasurableAccessor* (*getMeasurableAccessor)();
     const GENERATED_ArkUIViewAccessor* (*getViewAccessor)();
     const GENERATED_ArkUITextContentControllerBaseAccessor* (*getTextContentControllerBaseAccessor)();
     const GENERATED_ArkUIDynamicNodeAccessor* (*getDynamicNodeAccessor)();
