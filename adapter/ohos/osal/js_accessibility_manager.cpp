@@ -43,6 +43,7 @@
 #include "js_third_provider_interaction_operation.h"
 #include "nlohmann/json.hpp"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
+#include "base/log/event_report.h"
 #include "base/geometry/ng/point_t.h"
 
 using namespace OHOS::Accessibility;
@@ -5476,6 +5477,9 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
         result = ActAccessibilityAction(action, actionArguments, accessibilityProperty);
+        if (!result) {
+            EventReport::ReportAccessibilityFailEvent(ConvertActionTypeToString(action));
+        }
     }
     return result;
 }
