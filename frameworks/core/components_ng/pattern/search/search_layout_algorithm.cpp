@@ -565,11 +565,18 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     maxFontScale_ = CalculateMaxFontScale(layoutWrapper);
     minFontScale_ = CalculateMinFontScale(layoutWrapper);
 
-    SearchButtonMeasure(layoutWrapper);
-    DividerMeasure(layoutWrapper);
+    auto searchPattern = host->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(searchPattern);
+    if (searchPattern->IsShowSearchButton()) {
+        SearchButtonMeasure(layoutWrapper);
+        DividerMeasure(layoutWrapper);
+    }
+    if (searchPattern->IsShowCancelButton()) {
+        CancelImageMeasure(layoutWrapper);
+        CancelButtonMeasure(layoutWrapper);
+    }
+
     ImageMeasure(layoutWrapper);
-    CancelImageMeasure(layoutWrapper);
-    CancelButtonMeasure(layoutWrapper);
     TextFieldMeasure(layoutWrapper);
     SelfMeasure(layoutWrapper);
 }
@@ -670,11 +677,18 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .searchFrameHeight = searchFrameHeight,
         .isRTL = isRTL
     };
+
+    auto searchPattern = host->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(searchPattern);
+    if (searchPattern->IsShowSearchButton()) {
+        LayoutSearchButton(params);
+        LayoutDivider(params);
+    }
+    if (searchPattern->IsShowCancelButton()) {
+        LayoutCancelButton(params);
+        LayoutCancelImage(params);
+    }
     LayoutSearchIcon(params);
-    LayoutSearchButton(params);
-    LayoutDivider(params);
-    LayoutCancelButton(params);
-    LayoutCancelImage(params);
     LayoutTextField(params);
 
     CalcChildrenHotZone(layoutWrapper);
