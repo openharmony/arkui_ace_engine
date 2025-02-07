@@ -622,6 +622,8 @@ build_component_ng("pattern_ng") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:app_manager",
+    "bundle_framework:appexecfwk_core",
     "form_fwk:fmskit_native",
     "form_fwk:form_manager",
   ]
@@ -639,6 +641,8 @@ build_component_ng("pattern_ng") {
   if (is_ohos_standard_system) {
     external_deps += [
       "ability_base:want",
+      "ability_runtime:app_manager",
+      "bundle_framework:appexecfwk_core",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
       "graphic_2d:librender_service_client",
