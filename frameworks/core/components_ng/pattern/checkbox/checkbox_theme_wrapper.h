@@ -29,13 +29,11 @@ namespace OHOS::Ace::NG {
  * basing on TokenTheme's data.
  * CheckboxThemeWrapper should be built using CheckboxThemeWrapper::WrapperBuilder.
  */
-class CheckboxThemeWrapper : public CheckboxTheme, public TokenThemeWrapper
-{
+class CheckboxThemeWrapper : public CheckboxTheme, public TokenThemeWrapper {
     DECLARE_ACE_TYPE(CheckboxThemeWrapper, CheckboxTheme);
 
 public:
-    class WrapperBuilder : public Builder
-    {
+    class WrapperBuilder : public Builder {
     public:
         WrapperBuilder() = default;
         ~WrapperBuilder() = default;
