@@ -462,6 +462,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     GetAxisEventAction(orgAction, event);
     event.isRotationEvent = (orgAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) &&
                             (orgAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END);
+    event.scrollStep = pointerEvent->GetScrollRows();
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     event.sourceTool = GetSourceTool(item.GetToolType());

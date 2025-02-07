@@ -273,6 +273,7 @@ public:
     virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
     virtual void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
+    virtual void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
@@ -324,6 +325,7 @@ public:
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;
     virtual void DisableOnFocusAxisEvent() = 0;
+    virtual void DisableOnAxisEvent() = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void DisableOnCrownEvent() = 0;
 #endif

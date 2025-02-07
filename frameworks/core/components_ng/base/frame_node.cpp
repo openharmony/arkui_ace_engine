@@ -3224,7 +3224,7 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     CollectSelfAxisResult(
         globalPoint, localPoint, consumed, revertPoint, axisResult, preventBubbling, testResult, touchRestrict);
 
-    axisResult.splice(axisResult.end(), std::move(newComingTargets));
+    axisResult.splice(axisResult.begin(), std::move(newComingTargets));
     if (!consumed) {
         return testResult;
     }

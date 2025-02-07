@@ -990,6 +990,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnMouse));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnMouse"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnMouse));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnAxisEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnAxisEvent));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAxisEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnAxisEvent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSizeChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnSizeChange));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSizeChange"),

@@ -923,6 +923,13 @@ void ViewAbstract::DisableOnMouse()
     eventHub->ClearUserOnMouse();
 }
 
+void ViewAbstract::DisableOnAxisEvent()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAxisEvent();
+}
+
 void ViewAbstract::DisableOnAppear()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
@@ -1078,6 +1085,13 @@ void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
     eventHub->ClearUserOnMouse();
 }
 
+void ViewAbstract::DisableOnAxisEvent(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAxisEvent();
+}
+
 void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
 {
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -1193,6 +1207,13 @@ void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAxisEvent(std::move(onAxisEventFunc));
 }
 
 void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
@@ -4293,6 +4314,13 @@ void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEv
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAxisEvent(std::move(onAxisEventFunc));
 }
 
 void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)

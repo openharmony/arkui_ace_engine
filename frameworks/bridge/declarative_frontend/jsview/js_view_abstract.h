@@ -268,6 +268,7 @@ public:
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
+    static void JsOnAxisEvent(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnAccessibilityHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);

@@ -6950,6 +6950,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSViewAbstract>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
+    JSClass<JSViewAbstract>::StaticMethod("onAxisEvent", &JSViewAbstract::JsOnAxisEvent);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHover", &JSViewAbstract::JsOnAccessibilityHover);
     JSClass<JSViewAbstract>::StaticMethod("onDigitalCrown", &JSViewAbstract::JsOnCrownEvent);
@@ -7975,6 +7976,37 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
         func->Execute(mouseInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnMouse(std::move(onMouse));
+}
+
+void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (arg->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnAxisEvent();
+        return;
+    }
+    if (!arg->IsFunction()) {
+        return;
+    }
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnAxisEventFunc = JSRef<JSFunc>::Cast(args[0]);
+    if (jsOnAxisEventFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnAxisFuncLocalHandle = jsOnAxisEventFunc->GetLocalHandle();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onAxisEvent = [vm, execCtx = args.GetExecutionContext(),
+                       func = panda::CopyableGlobal(vm, jsOnAxisFuncLocalHandle),
+                       node = frameNode](Ace::AxisInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onAxis");
+        PipelineContext::SetCallBackNode(node);
+        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    ViewAbstractModel::GetInstance()->SetOnAxisEvent(std::move(onAxisEvent));
 }
 
 void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)

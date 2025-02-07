@@ -1656,6 +1656,54 @@ int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* eve
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_AxisEvent_SetPropagation(const ArkUI_UIInputEvent* event, bool propagation)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_AXIS_EVENT_ID: {
+            auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                axisEvent->propagation = propagation;
+                break;
+            }
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        default:
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_AxisEvent_GetScrollStep(const ArkUI_UIInputEvent* event)
+{
+    int32_t scroll_step_value = 0;
+
+    if (!event) {
+        return scroll_step_value;
+    }
+    switch (event->eventTypeId) {
+        case AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                scroll_step_value = axisEvent->scrollStep;
+            }
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                scroll_step_value = axisEvent->scrollStep;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return scroll_step_value;
+}
+
 #ifdef __cplusplus
 };
 #endif
