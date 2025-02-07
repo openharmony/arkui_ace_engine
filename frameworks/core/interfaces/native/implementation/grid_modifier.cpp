@@ -304,13 +304,13 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragMove = [frameNode](const ItemDragInfo& dragInfo,
-        int32_t itemIndex, int32_t insertIndex) {
+    auto onItemDragMove = [arkCallback = CallbackHelper(*value, frameNode), frameNode, node](
+        const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex
+    ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onItemDragMove(
-            frameNode->GetId(), arkDragInfo, arkItemIndex, arkInsertIndex);
+        arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex);
     };
     GridModelNG::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
 }
