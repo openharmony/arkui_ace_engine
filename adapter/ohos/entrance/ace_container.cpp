@@ -3896,4 +3896,14 @@ void AceContainer::SetDrawReadyEventCallback()
     };
     surfaceNode->SetBufferAvailableCallback(callback);
 }
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    if (!uiWindow_) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "uiwindow is null, can't get displayId");
+        return Rect();
+    }
+
+    return DisplayInfoUtils::GetInstance().GetDisplayAvailableRect(uiWindow_->GetDisplayId());
+}
 } // namespace OHOS::Ace::Platform

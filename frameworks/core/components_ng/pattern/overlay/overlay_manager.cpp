@@ -149,6 +149,8 @@ constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
+constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
     V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
@@ -7388,5 +7390,45 @@ bool OverlayManager::isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& 
         return true;
     }
     return false;
+}
+
+Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(mainPipeline, Rect());
+
+    auto rect = mainPipeline->GetDisplayAvailableRect();
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return rect;
+    }
+
+    CHECK_NULL_RETURN(frameNode, rect);
+    auto pipeContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeContext, rect);
+    auto container = AceEngine::Get().GetContainer(pipeContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, rect);
+    if (!container->IsSubContainer()) {
+        return rect;
+    }
+
+    rect = container->GetDisplayAvailableRect();
+    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
+        return rect;
+    }
+
+    // foldStatus need exclude crease area
+    auto foldCreaseRects = container->GetCurrentFoldCreaseRegion();
+    if (foldCreaseRects.empty()) {
+        return rect;
+    }
+
+    auto foldCreaseRect = foldCreaseRects.front();
+    if (container->GetDisplayId() == DEFAULT_DISPLAY_ID) {
+        return Rect(rect.Left(), rect.Top(), rect.Width(), std::min(rect.Bottom(), foldCreaseRect.Top()) - rect.Top());
+    } else if (container->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+        return Rect(rect.Left(), 0.0, rect.Width(), rect.Bottom() - std::max(rect.Top(), foldCreaseRect.Bottom()));
+    } else {
+        return rect;
+    }
 }
 } // namespace OHOS::Ace::NG

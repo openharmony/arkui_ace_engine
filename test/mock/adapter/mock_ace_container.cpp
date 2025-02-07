@@ -75,4 +75,8 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration) {}
 
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
 } // namespace OHOS::Ace::Platform
