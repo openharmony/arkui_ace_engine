@@ -401,6 +401,14 @@ void PipelineContext::WindowFocus(bool isFocus)
     GetOrCreateFocusManager()->WindowFocus(isFocus);
 }
 
+void PipelineContext::WindowActivate(bool isActive) {}
+
+void PipelineContext::AddWindowActivateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::RemoveWindowActivateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::FlushWindowActivateChangedCallback(bool isActivate) {}
+
 void PipelineContext::RootLostFocus(BlurReason reason) const {}
 
 void PipelineContext::ContainerModalUnFocus() {}

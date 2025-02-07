@@ -3926,6 +3926,13 @@ void PipelineContext::WindowFocus(bool isFocus)
     FlushWindowFocusChangedCallback(isFocus);
 }
 
+void PipelineContext::WindowActivate(bool isActive)
+{
+    CHECK_RUN_ON(UI);
+    onActive_ = isActive;
+    FlushWindowActivateChangedCallback(isActive);
+}
+
 void PipelineContext::ContainerModalUnFocus()
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
@@ -4208,6 +4215,34 @@ void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
                 node->OnWindowFocused();
             } else {
                 node->OnWindowUnfocused();
+            }
+            ++iter;
+        }
+    }
+}
+
+void PipelineContext::AddWindowActivateChangedCallback(int32_t nodeId)
+{
+    onWindowActivateChangedCallbacks_.emplace(nodeId);
+}
+
+void PipelineContext::RemoveWindowActivateChangedCallback(int32_t nodeId)
+{
+    onWindowActivateChangedCallbacks_.erase(nodeId);
+}
+
+void PipelineContext::FlushWindowActivateChangedCallback(bool isActivate)
+{
+    auto iter = onWindowActivateChangedCallbacks_.begin();
+    while (iter != onWindowActivateChangedCallbacks_.end()) {
+        auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
+        if (!node) {
+            iter = onWindowActivateChangedCallbacks_.erase(iter);
+        } else {
+            if (isActivate) {
+                node->OnWindowActivated();
+            } else {
+                node->OnWindowDeactivated();
             }
             ++iter;
         }

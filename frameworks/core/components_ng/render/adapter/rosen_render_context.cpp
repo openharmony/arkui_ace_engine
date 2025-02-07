@@ -891,11 +891,6 @@ void RosenRenderContext::SetBackBlurFilter()
 
 void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
 {
-    auto useEffect = GetUseEffect().value_or(false);
-    auto effectType = GetUseEffectType().value_or(EffectType::DEFAULT);
-    if (effectType == EffectType::WINDOW_EFFECT) {
-        OnUseEffectUpdate(useEffect);
-    }
     if (GetBackBlurStyle().has_value() &&
         GetBackBlurStyle()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
         auto blurStyle = GetBackBlurStyle().value();
@@ -907,6 +902,15 @@ void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
         auto effect = GetBackgroundEffect().value();
         effect.isWindowFocused = isFocused;
         UpdateBackgroundEffect(effect);
+    }
+}
+
+void RosenRenderContext::UpdateWindowActiveState(bool isActive)
+{
+    auto useEffect = GetUseEffect().value_or(false);
+    auto effectType = GetUseEffectType().value_or(EffectType::DEFAULT);
+    if (effectType == EffectType::WINDOW_EFFECT) {
+        OnUseEffectUpdate(useEffect);
     }
 }
 
@@ -2549,9 +2553,9 @@ bool RosenRenderContext::GetStatusByEffectTypeAndWindow()
 {
     auto pipeline = GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto isWindowFocused = pipeline->IsWindowFocused();
+    auto isWindowActivated = pipeline->IsWindowActivated();
     auto effectType = GetUseEffectType().value_or(EffectType::DEFAULT);
-    return effectType == EffectType::WINDOW_EFFECT && !isWindowFocused;
+    return effectType == EffectType::WINDOW_EFFECT && !isWindowActivated;
 }
 
 void RosenRenderContext::OnUseEffectUpdate(bool useEffect)

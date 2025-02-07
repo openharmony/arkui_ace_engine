@@ -3357,6 +3357,22 @@ void FrameNode::OnWindowUnfocused()
     pattern_->OnWindowUnfocused();
 }
 
+void FrameNode::OnWindowActivated()
+{
+    if (renderContext_) {
+        renderContext_->UpdateWindowActiveState(true);
+    }
+    pattern_->OnWindowActivated();
+}
+
+void FrameNode::OnWindowDeactivated()
+{
+    if (renderContext_) {
+        renderContext_->UpdateWindowActiveState(false);
+    }
+    pattern_->OnWindowDeactivated();
+}
+
 std::pair<float, float> FrameNode::ContextPositionConvertToPX(
     const RefPtr<RenderContext>& context, const SizeF& percentReference)
 {

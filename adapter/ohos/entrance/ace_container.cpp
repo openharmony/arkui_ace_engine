@@ -742,7 +742,7 @@ void AceContainer::OnActive(int32_t instanceId)
     CHECK_NULL_VOID(taskExecutor);
 
     auto front = container->GetFrontend();
-    if (front && !container->IsSubContainer()) {
+    if (front && !container->IsSubContainer() && front->GetState() != Frontend::State::ON_ACTIVE) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
             [weakFrontend, instanceId]() {
@@ -780,7 +780,7 @@ void AceContainer::OnInactive(int32_t instanceId)
     CHECK_NULL_VOID(taskExecutor);
 
     auto front = container->GetFrontend();
-    if (front && !container->IsSubContainer()) {
+    if (front && !container->IsSubContainer() && front->GetState() != Frontend::State::ON_INACTIVE) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
             [weakFrontend, instanceId]() {
@@ -810,6 +810,85 @@ void AceContainer::OnInactive(int32_t instanceId)
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIWindowUnfocus", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+}
+
+void AceContainer::ActiveWindow(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend, instanceId]() {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    ContainerScope scope(instanceId);
+                    frontend->UpdateState(Frontend::State::ON_ACTIVE);
+                    frontend->OnActive();
+                }
+            },
+            TaskExecutor::TaskType::JS, "ArkUIFrontendActive",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    }
+
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, ActiveWindow failed.");
+                return;
+            }
+            ContainerScope scope(container->GetInstanceId());
+            pipelineContext->WindowActivate(true);
+            pipelineContext->ChangeDarkModeBrightness();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWindowActivate", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+}
+
+void AceContainer::UnActiveWindow(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend, instanceId]() {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    ContainerScope scope(instanceId);
+                    frontend->UpdateState(Frontend::State::ON_INACTIVE);
+                    frontend->OnInactive();
+                }
+            },
+            TaskExecutor::TaskType::JS, "ArkUIFrontendInactive",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    }
+
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnInactive failed.");
+                return;
+            }
+            ContainerScope scope(container->GetInstanceId());
+            pipelineContext->WindowActivate(false);
+            pipelineContext->ChangeDarkModeBrightness();
+            if (container->IsScenceBoardWindow()) {
+                JankFrameReport::GetInstance().FlushRecord();
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWindowUnActivate", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::OnNewWant(int32_t instanceId, const std::string& data)

@@ -252,6 +252,7 @@ public:
     void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
     void UpdateWindowFocusState(bool isFocused) override;
+    void UpdateWindowActiveState(bool isActive) override;
     void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;

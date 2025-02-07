@@ -295,6 +295,8 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void WindowActivate(bool isActive) override;
+
     void ContainerModalUnFocus() override;
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
@@ -475,6 +477,10 @@ public:
     void AddWindowFocusChangedCallback(int32_t nodeId);
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
+
+    void AddWindowActivateChangedCallback(int32_t nodeId);
+
+    void RemoveWindowActivateChangedCallback(int32_t nodeId);
 
     void AddWindowSizeChangeCallback(int32_t nodeId);
 
@@ -1151,6 +1157,8 @@ private:
 
     void FlushWindowFocusChangedCallback(bool isFocus);
 
+    void FlushWindowActivateChangedCallback(bool isActivate);
+
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
@@ -1246,6 +1254,8 @@ private:
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
     std::set<int32_t> onWindowFocusChangedCallbacks_;
+    // window on activate or on unactivate
+    std::set<int32_t> onWindowActivateChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
     // window size drag end
