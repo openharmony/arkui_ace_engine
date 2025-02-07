@@ -1052,6 +1052,18 @@ void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderSty
 }
 
 template<>
+void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER: dst = AccessibilityHoverAction::HOVER_ENTER; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE: dst = AccessibilityHoverAction::HOVER_MOVE; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT: dst = AccessibilityHoverAction::HOVER_EXIT; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL: dst = AccessibilityHoverAction::HOVER_CANCEL; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
 {
     switch (src) {

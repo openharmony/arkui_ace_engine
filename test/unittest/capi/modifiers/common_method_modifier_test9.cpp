@@ -18,6 +18,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -447,11 +448,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
 
     auto onAccessibilityHoverFunc = [](const Ark_Int32 resourceId,
                           const Ark_Boolean isHover,
-                          const Ark_AccessibilityHoverEvent event) {
-        auto info = event ? event->GetEventInfo() : nullptr;
+                          const Ark_AccessibilityHoverEvent peer) {
+        auto info = peer ? peer->GetEventInfo() : nullptr;
         ASSERT_NE(info, nullptr);
         checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
-        GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(event);
+        GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(peer);
     };
     auto callBackValue = Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId());
 
