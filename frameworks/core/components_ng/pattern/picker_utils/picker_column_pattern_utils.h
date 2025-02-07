@@ -33,20 +33,21 @@ public:
     virtual ~PickerColumnPatternCircleUtils() {}
 
     void SetSelectedMark(
-        T* pickerColoum, RefPtr<PickerTheme>& pickerTheme, bool focus, bool notify = true, bool reRender = true)
+        T* pickerColumn, RefPtr<PickerTheme>& pickerTheme, bool focus, bool notify = true, bool reRender = true)
     {
         CHECK_NULL_VOID(pickerTheme);
+        CHECK_NULL_VOID(pickerColumn);
         if (selectedMark_ == focus) {
             return;
         }
         selectedMark_ = focus;
-        pickerColoum->SetSelectedMarkPaint(selectedMark_);
+        pickerColumn->SetSelectedMarkPaint(selectedMark_);
         if (reRender) {
-            pickerColoum->UpdateSelectedTextColor(pickerTheme);
+            pickerColumn->UpdateSelectedTextColor(pickerTheme);
         }
 
-        if (focus && notify && pickerColoum->focusedListerner_) {
-            pickerColoum->focusedListerner_(pickerColoum->selectedColumnId_);
+        if (focus && notify && pickerColumn->focusedListerner_) {
+            pickerColumn->focusedListerner_(pickerColumn->selectedColumnId_);
         }
     }
 
@@ -85,17 +86,18 @@ public:
         return px;
     }
 
-    bool OnCrownEvent(T* pickerColoum, const CrownEvent& event)
+    bool OnCrownEvent(T* pickerColumn, const CrownEvent& event)
     {
+        CHECK_NULL_RETURN(pickerColumn, false);
         switch (event.action) {
             case OHOS::Ace::CrownAction::BEGIN:
-                pickerColoum->HandleCrownBeginEvent(event);
+                pickerColumn->HandleCrownBeginEvent(event);
                 break;
             case OHOS::Ace::CrownAction::UPDATE:
-                pickerColoum->HandleCrownMoveEvent(event);
+                pickerColumn->HandleCrownMoveEvent(event);
                 break;
             case OHOS::Ace::CrownAction::END:
-                pickerColoum->HandleCrownEndEvent(event);
+                pickerColumn->HandleCrownEndEvent(event);
                 break;
             default:
                 return false;

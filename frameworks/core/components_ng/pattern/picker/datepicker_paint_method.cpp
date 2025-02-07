@@ -39,8 +39,8 @@ CanvasDrawFunction DatePickerPaintMethod::GetContentDrawFunction(PaintWrapper* p
     if (theme->IsCircleDial()) {
         if (!circleUtils_) {
             circleUtils_ = new PickerPaintMethodCircleUtils();
+            CHECK_NULL_RETURN(circleUtils_, nullptr);
         }
-        CHECK_NULL_RETURN(circleUtils_, nullptr);
         CanvasDrawFunction drawFunction =
             circleUtils_->GetContentDrawFunctionL<DataPickerRowLayoutProperty>(paintWrapper, pipeline);
         CHECK_NULL_RETURN(drawFunction, nullptr);

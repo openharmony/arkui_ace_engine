@@ -37,8 +37,8 @@ CanvasDrawFunction TimePickerPaintMethod::GetContentDrawFunction(PaintWrapper* p
     if (theme->IsCircleDial()) {
         if (!circleUtils_) {
             circleUtils_ = new PickerPaintMethodCircleUtils();
+            CHECK_NULL_RETURN(circleUtils_, nullptr);
         }
-        CHECK_NULL_RETURN(circleUtils_, nullptr);
         CanvasDrawFunction drawFun =
             circleUtils_->GetContentDrawFunctionL<TimePickerLayoutProperty>(paintWrapper, pipeline);
         CHECK_NULL_RETURN(drawFun, nullptr);
