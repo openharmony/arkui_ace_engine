@@ -6769,7 +6769,6 @@ void JSViewAbstract::JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& 
 
 void JSViewAbstract::JsNotifyDragStartRequest(const JSCallbackInfo& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     if (info[0]->IsNumber()) {
         int32_t dragStatus = info[0]->ToNumber<int32_t>();
         ViewAbstractModel::GetInstance()->NotifyDragStartRequest(
