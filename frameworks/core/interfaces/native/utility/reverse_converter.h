@@ -115,12 +115,6 @@ namespace OHOS::Ace::NG::Converter {
         AssignArkValue(dst, std::string_view(src), ctx);
     }
 
-    inline void AssignArkValue(Ark_Buffer& dst, const std::string& src)
-    {
-        dst.data = const_cast<char*>(src.data());
-        dst.length = src.size();
-    }
-
     inline void AssignArkValue(Ark_NativePointer& dst, void *src)
     {
         dst = src;
@@ -136,7 +130,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
-    void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
+    void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
     void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
@@ -155,6 +149,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_HoverEvent& dst, const HoverInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
