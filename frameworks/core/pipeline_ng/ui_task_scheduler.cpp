@@ -450,5 +450,4 @@ void UITaskScheduler::FlushAfterRenderTask()
         }
     }
 }
-
 } // namespace OHOS::Ace::NG
