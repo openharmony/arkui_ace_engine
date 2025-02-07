@@ -134,6 +134,8 @@ public:
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static const std::string GetSelectedObjectStr(FrameNode* frameNode,
         const std::string value, const uint32_t index);
+    static void SetOnValueChangeEvent(FrameNode* frameNode, TextCascadeValueChangeEvent&& onChange);
+    static void SetOnSelectedChangeEvent(FrameNode* frameNode, TextCascadeSelectedChangeEvent&& onChange);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

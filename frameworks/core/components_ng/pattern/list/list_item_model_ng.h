@@ -57,6 +57,7 @@ public:
     static void SetSelectable(FrameNode* frameNode, bool selectable);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback);
+    static void SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent);
     static void SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode);
     static void SetEditMode(FrameNode* frameNode, uint32_t editMode);
     static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style);

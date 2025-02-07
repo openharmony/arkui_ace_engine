@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -143,8 +144,12 @@ void __onChangeEvent_isOnImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //ToggleModelNG::Set__onChangeEvent_isOn(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool isOn) {
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isOn));
+    };
+    ToggleModelNG::OnChangeEvent(frameNode, std::move(onEvent));
 }
 } // ToggleAttributeModifier
 const GENERATED_ArkUIToggleModifier* GetToggleModifier()

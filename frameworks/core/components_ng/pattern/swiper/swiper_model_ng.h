@@ -143,6 +143,8 @@ public:
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
     static bool GetIndicatorInteractive(FrameNode* frameNode);
+    static void SetOnChangeEvent(FrameNode* frameNode,
+        std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
 };
 
 } // namespace OHOS::Ace::NG

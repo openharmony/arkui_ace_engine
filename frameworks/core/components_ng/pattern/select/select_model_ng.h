@@ -121,6 +121,8 @@ public:
     static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetMenuBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
+    static void SetSelectChangeEvent(FrameNode* frameNode, NG::SelectChangeEvent&& selectChangeEvent);
+    static void SetValueChangeEvent(FrameNode* frameNode, NG::ValueChangeEvent&& valueChangeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

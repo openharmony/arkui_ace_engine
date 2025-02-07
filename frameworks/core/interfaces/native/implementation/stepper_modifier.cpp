@@ -104,8 +104,12 @@ void __onChangeEvent_indexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //StepperModelNG::Set__onChangeEvent_index(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](int32_t value) {
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+    };
+    StepperModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // StepperAttributeModifier
 const GENERATED_ArkUIStepperModifier* GetStepperModifier()

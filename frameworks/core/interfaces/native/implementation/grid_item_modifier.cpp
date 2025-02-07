@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
@@ -132,8 +134,12 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //GridItemModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool isSelected) {
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isSelected));
+    };
+    GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
 } // GridItemAttributeModifier
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()

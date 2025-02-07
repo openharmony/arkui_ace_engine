@@ -60,6 +60,7 @@ public:
     static void SetIsShow(FrameNode* frameNode, bool isShow);
     static void SetOnSizeChange(FrameNode* frameNode, ChangeEvent&& changeEvent);
     static void SetOnHeightChange(FrameNode* frameNode, HeightChangeEvent&& onHeightChange);
+    static void SetModeChangeEvent(FrameNode* frameNode, ChangeEvent&& modeChangeEvent);
 
 private:
     static RefPtr<SlidingPanelNode> GetOrCreateSlidingPanelNode(
