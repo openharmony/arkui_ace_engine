@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -375,12 +374,8 @@ void __onChangeEvent_valueImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](float value) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
-    };
-    SliderModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
+    //SliderModelNG::Set__onChangeEvent_value(frameNode, convValue);
 }
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()

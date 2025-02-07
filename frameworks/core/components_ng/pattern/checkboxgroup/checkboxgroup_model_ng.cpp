@@ -185,11 +185,4 @@ void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std:
         eventHub->SetGroupName(groupName.value());
     }
 }
-
-void CheckBoxGroupModelNG::SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent)
-{
-    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetChangeEvent(std::move(changeEvent));
-}
 } // namespace OHOS::Ace::NG

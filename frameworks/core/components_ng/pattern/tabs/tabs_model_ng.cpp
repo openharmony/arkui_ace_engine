@@ -682,15 +682,6 @@ void TabsModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& o
     tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
 }
 
-void TabsModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent)
-{
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabPattern);
-    tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
-}
-
 void TabsModelNG::SetClipEdge(bool clipEdge)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

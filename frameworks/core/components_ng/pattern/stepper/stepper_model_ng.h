@@ -38,7 +38,6 @@ public:
     static void SetOnChange(FrameNode* frameNode, IndexCallbackEvent&& eventOnChange);
     static void SetOnNext(FrameNode* frameNode, IndexCallbackEvent&& eventOnNext);
     static void SetOnPrevious(FrameNode* frameNode, IndexCallbackEvent&& eventOnPrevious);
-    static void SetOnChangeEvent(FrameNode* frameNode, IndexChangeEvent&& onChangeEvent);
 
 private:
     static RefPtr<FrameNode> CreateSwiperChild(int32_t id, uint32_t index);

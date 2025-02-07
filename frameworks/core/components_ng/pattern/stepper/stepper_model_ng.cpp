@@ -186,12 +186,4 @@ void StepperModelNG::SetOnChangeEvent(IndexChangeEvent&& onChangeEvent)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
-
-void StepperModelNG::SetOnChangeEvent(FrameNode* frameNode, IndexChangeEvent&& onChangeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
-}
 } // namespace OHOS::Ace::NG
