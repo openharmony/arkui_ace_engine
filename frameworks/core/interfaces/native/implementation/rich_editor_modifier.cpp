@@ -417,9 +417,8 @@ void OnSubmitImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onCallback = [arkCallback = CallbackHelper(*value)](int32_t param1, NG::TextFieldCommonEvent& param2) {
         auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
-        Converter::ConvContext ctx;
-        Ark_SubmitEvent event = Converter::ArkValue<Ark_SubmitEvent>(param2, &ctx);
-        arkCallback.Invoke(enterKey, event);
+        const auto event = Converter::ArkSubmitEventSync(param2);
+        arkCallback.InvokeSync(enterKey, event.ArkValue());
     };
     RichEditorModelNG::SetOnSubmit(frameNode, std::move(onCallback));
 }

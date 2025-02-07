@@ -98,10 +98,9 @@ void OnClickImpl(Ark_NativePointer node,
         }
 #endif
         const auto event = Converter::ArkClickEventSync(info);
-        Ark_PasteButtonOnClickResult arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
-        arkCallback.Invoke(arkClickEvent, arkResult);
+        auto arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
+        arkCallback.InvokeSync(event.ArkValue(), arkResult);
     };
-
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
 }
 } // PasteButtonAttributeModifier

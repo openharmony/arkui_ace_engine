@@ -23,6 +23,10 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
+namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
+}
+
 namespace OHOS::Ace::NG::Converter {
 template<>
 RichEditorDeleteDirection Convert(const Ark_RichEditorDeleteDirection& src)
@@ -492,6 +496,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSubmitTest, TestSize.Level1
             .enterKeyType = Converter::OptConvert<TextInputAction>(enterKey),
         };
         // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+        auto deletePtr = reinterpret_cast<SubmitEventPeer*>(event.ptr);
+        GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(deletePtr);
     };
     auto arkCallback = Converter::ArkValue<SubmitCallback>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
