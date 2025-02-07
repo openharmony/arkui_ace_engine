@@ -1220,6 +1220,15 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
     overlayManager->SetIsMenuShow(false);
+    ToOpenMenuAtAnimationFinished();
+}
+
+void OverlayManager::ToOpenMenuAtAnimationFinished()
+{
+    if (openNextMenu_) {
+        openNextMenu_();
+        openNextMenu_ = nullptr;
+    }
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
@@ -2193,6 +2202,27 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDr
             PopMenuAnimation(node, showPreviewAnimation, startDrag);
         }
     }
+}
+
+RefPtr<FrameNode> OverlayManager::GetMenuNodeWithExistContent(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto iter = menuMap_.begin();
+    while (iter != menuMap_.end()) {
+        auto menuNode = (*iter).second;
+        CHECK_NULL_RETURN(menuNode, nullptr);
+        auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+        auto menu = menuWrapperPattern->GetMenu();
+        CHECK_NULL_RETURN(menu, nullptr);
+        auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+        CHECK_NULL_RETURN(menuPattern, nullptr);
+        if (menuPattern->GetCustomNode() == node) {
+            return menuNode;
+        }
+        iter++;
+    }
+    return nullptr;
 }
 
 RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)

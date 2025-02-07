@@ -39,6 +39,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -1148,6 +1149,127 @@ void JSViewContext::JSClosePopup(const JSCallbackInfo& info)
     return;
 }
 
+int32_t GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)
+{
+    if (!node) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto context = node->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, ERROR_CODE_INTERNAL_ERROR);
+    auto overlayManager = context->GetOverlayManager();
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuNode = overlayManager->GetMenuNodeWithExistContent(node);
+    if (!menuNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "GetMenuParam failed because cannot find menuNode.");
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    auto wrapperPattern = AceType::DynamicCast<NG::MenuWrapperPattern>(menuNode->GetPattern());
+    CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto menuProperties = wrapperPattern->GetMenuParam();
+    menuParam = menuProperties;
+    return ERROR_CODE_NO_ERROR;
+}
+
+void JSViewContext::JSOpenMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    int32_t targetId = INVALID_ID;
+    if (info[INDEX_ONE]->IsObject()) {
+        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        auto result = ParseTargetInfo(menuObj, targetId);
+        if (result != ERROR_CODE_NO_ERROR) {
+            ReturnPromise(info, result);
+            return;
+        }
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    NG::MenuParam menuParam;
+    if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
+        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
+        JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+    }
+    auto ret = JSViewAbstract::OpenMenu(menuParam, menuContentNode, targetId);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSUpdateMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    bool isPartialUpdate = false;
+    if (paramCnt == LENGTH_THREE) {
+        if (!info[INDEX_TWO]->IsBoolean()) {
+            ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+            return;
+        }
+        isPartialUpdate = info[INDEX_TWO]->ToBoolean();
+    }
+    NG::MenuParam menuParam;
+    if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
+        if (isPartialUpdate) {
+            auto result = GetMenuParam(menuParam, menuContentNode);
+            if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+                ReturnPromise(info, result);
+                return;
+            }
+        }
+        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto ret = JSViewAbstract::UpdateMenu(menuParam, menuContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSCloseMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_ONE) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto ret = JSViewAbstract::CloseMenu(menuContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
 void JSViewContext::IsFollowingSystemFontScale(const JSCallbackInfo& info)
 {
     auto container = Container::CurrentSafely();
@@ -1201,6 +1323,9 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("openPopup", JSOpenPopup);
     JSClass<JSViewContext>::StaticMethod("updatePopup", JSUpdatePopup);
     JSClass<JSViewContext>::StaticMethod("closePopup", JSClosePopup);
+    JSClass<JSViewContext>::StaticMethod("openMenu", JSOpenMenu);
+    JSClass<JSViewContext>::StaticMethod("updateMenu", JSUpdateMenu);
+    JSClass<JSViewContext>::StaticMethod("closeMenu", JSCloseMenu);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
     JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);

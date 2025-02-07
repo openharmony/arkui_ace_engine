@@ -1321,6 +1321,19 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
+    int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
+    {
+        return ViewAbstract::OpenMenu(menuParam, customNode, targetId);
+    }
+    int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::UpdateMenu(menuParam, customNode);
+    }
+    int32_t CloseMenu(const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::CloseMenu(customNode);
+    }
+
     void BindMenuGesture(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
 

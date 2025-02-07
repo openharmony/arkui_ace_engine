@@ -1860,9 +1860,7 @@ bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        menuParam.placement = Placement::BOTTOM_LEFT;
-    }
+    MenuDefaultParam(menuParam);
     size_t builderIndex = 0;
     GetMenuShowInSubwindow(menuParam);
     if (info.Length() > PARAMETER_LENGTH_FIRST) {
@@ -1921,6 +1919,44 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         };
         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
     }
+}
+
+void JSViewAbstract::MenuDefaultParam(NG::MenuParam& menuParam)
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
+}
+
+void JSViewAbstract::ParseContentMenuCommonParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam)
+{
+    CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
+    if (!menuParam.placement.has_value()) {
+        MenuDefaultParam(menuParam);
+    }
+    ParseMenuParam(info, menuObj, menuParam);
+    auto preview = menuObj->GetProperty("preview");
+    if (preview->IsNumber() && preview->ToNumber<int32_t>() == 1) {
+        menuParam.previewMode = MenuPreviewMode::IMAGE;
+        ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
+    }
+}
+
+int32_t JSViewAbstract::OpenMenu(
+    NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+{
+    return ViewAbstractModel::GetInstance()->OpenMenu(menuParam, customNode, targetId);
+}
+
+int32_t JSViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->UpdateMenu(menuParam, customNode);
+}
+
+int32_t JSViewAbstract::CloseMenu(const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->CloseMenu(customNode);
 }
 
 void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,

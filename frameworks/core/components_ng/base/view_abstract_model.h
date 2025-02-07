@@ -378,6 +378,10 @@ public:
     virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
     virtual int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void DismissPopup() = 0;
+    virtual int32_t OpenMenu(
+        NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) = 0;
+    virtual int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,

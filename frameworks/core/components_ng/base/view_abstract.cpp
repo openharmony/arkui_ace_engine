@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/base/view_abstract.h"
+#include <cstdint>
+#include <functional>
+#include <unordered_map>
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -23,6 +27,7 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -2113,6 +2118,35 @@ PopupInfo ViewAbstract::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNod
     return popupInfoError;
 }
 
+RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& node)
+{
+    auto context = node->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, nullptr);
+    if (GetTargetNodeIsInSubwindow(node)) {
+        auto instanceId = context->GetInstanceId();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+        if (subwindow) {
+            auto overlayManager = subwindow->GetOverlayManager();
+            return overlayManager;
+        } else {
+            return nullptr;
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    return overlayManager;
+}
+
+bool ViewAbstract::GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto instanceId = pipelineContext->GetInstanceId();
+    auto aceContainer = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(aceContainer, false);
+    return aceContainer->IsSubContainer();
+}
+
 RefPtr<OverlayManager> ViewAbstract::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
 {
     auto context = customNode->GetContextWithCheck();
@@ -2317,6 +2351,145 @@ void ViewAbstract::DismissDialog()
         UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
 #endif
     }
+}
+
+void ViewAbstract::ShowMenuPreview(
+    const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, const NG::MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
+        auto context = targetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto eventHub = targetNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        CHECK_NULL_VOID(pixelMap);
+        gestureHub->SetPixelMap(pixelMap);
+        menuWrapperPattern->SetIsShowFromUser(true);
+        MenuView::GetMenuPixelMap(targetNode, menuParam, wrapperNode);
+    }
+}
+
+void ViewAbstract::CheckMenuPreview(NG::MenuParam& menuParam)
+{
+#ifdef PREVIEW
+    menuParam.previewMode = MenuPreviewMode::NONE;
+#endif
+}
+
+int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
+    if (!targetNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
+        return ERROR_CODE_TARGET_INFO_NOT_EXIST;
+    }
+    if (!targetNode->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
+        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);
+    if (overlayManager->GetMenuNodeWithExistContent(customNode)) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of menu already existed.");
+        return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
+    }
+    CheckMenuPreview(menuParam);
+    auto openMenuFunc = [targetNode, customNode, overlayManager, menuParam]()->int32_t {
+        auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
+        CHECK_NULL_RETURN(wrapperNode, ERROR_CODE_INTERNAL_ERROR);
+        ShowMenuPreview(targetNode, wrapperNode, menuParam);
+        auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_RETURN(menuWrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+        menuWrapperPattern->RegisterMenuCallback(wrapperNode, menuParam);
+        menuWrapperPattern->SetMenuTransitionEffect(wrapperNode, menuParam);
+        auto menu = menuWrapperPattern->GetMenu();
+        CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+        auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+        CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
+        auto node = WeakPtr<UINode>(customNode);
+        menuPattern->SetCustomNode(node);
+        auto pipelineContext = targetNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
+        auto theme = pipelineContext->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
+        auto expandDisplay = theme->GetExpandDisplay();
+        if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+            SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuParam.positionOffset);
+            return ERROR_CODE_NO_ERROR;
+        }
+        overlayManager->ShowMenu(targetNode->GetId(), menuParam.positionOffset, wrapperNode);
+        return ERROR_CODE_NO_ERROR;
+    };
+    return OpenMenuMode(targetNode, overlayManager, std::move(openMenuFunc));
+}
+
+int32_t ViewAbstract::OpenMenuMode(const RefPtr<FrameNode>& targetNode, RefPtr<OverlayManager>& overlayManager,
+    std::function<int32_t()>&& openMenuFunc)
+{
+    auto isShowMenu = overlayManager->GetMenuById(targetNode->GetId());
+    if (isShowMenu) {
+        // The menu is already opened, close the previous menu first
+        overlayManager->SetOpenNextMenu(std::move(openMenuFunc));
+        overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false);
+        return ERROR_CODE_NO_ERROR;
+    } else {
+        // Open the menu directly
+        return openMenuFunc();
+    }
+}
+
+int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(customNode);
+    if (!menuWrapperNode) {
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menuWrapperNode->GetPattern());
+    CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto menu = wrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+    wrapperPattern->SetMenuParam(menuParam);
+    MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
+    MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ViewAbstract::CloseMenu(const RefPtr<UINode>& customNode)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(customNode);
+    if (!menuWrapperNode) {
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    overlayManager->HideMenu(menuWrapperNode, customNode->GetId(), false);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
