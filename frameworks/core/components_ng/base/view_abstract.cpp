@@ -4495,7 +4495,8 @@ double ViewAbstract::GetOpacity(FrameNode* frameNode)
 BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
 {
     Dimension defaultDimension(0);
-    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt};
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderWidths);
     return target->GetBorderWidthValue(borderWidths);
@@ -4532,7 +4533,8 @@ BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
     return target->GetBorderColorValue(borderColors);
@@ -5437,7 +5439,8 @@ RenderFit ViewAbstract::GetRenderFit(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetOuterBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     CHECK_NULL_RETURN(frameNode, borderColors);
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
