@@ -357,7 +357,7 @@ RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
         if (NearZero(res.Width())) {
-            res.SetWidth(TextBase::GetSelectedBlankLineWidth());
+            pattern->AdjustSelectedBlankLineWidth(res);
         }
     }
     auto globalContentRect = GetVisibleContentRect(true);

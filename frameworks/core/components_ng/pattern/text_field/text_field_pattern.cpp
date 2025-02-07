@@ -10022,6 +10022,16 @@ std::vector<RectF> TextFieldPattern::GetTextBoxesForSelect()
     return selectedRects;
 }
 
+void TextFieldPattern::AdjustSelectedBlankLineWidth(RectF& rect)
+{
+    CHECK_NULL_VOID(paragraph_);
+    auto paragraphStyle = paragraph_->GetParagraphStyle();
+    auto textAlign = TextBase::CheckTextAlignByDirection(paragraphStyle.align, paragraphStyle.direction);
+    const float blankWidth = TextBase::GetSelectedBlankLineWidth();
+    auto contentWidth = GetTextContentRect().Width();
+    TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);
+}
+
 std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)
 {
     auto touchInfos = info.GetChangedTouches();
