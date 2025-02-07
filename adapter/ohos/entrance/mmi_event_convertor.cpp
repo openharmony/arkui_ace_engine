@@ -179,6 +179,20 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
     return event;
 }
 
+void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned)
+{
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUITouchEventCloned->rawPointerEvent = clonedEvent;
+    }
+}
+
+void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent)
+{
+    std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
+    touchEvent.SetPointerEvent(pointer);
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(pointerEvent, TouchEvent());
