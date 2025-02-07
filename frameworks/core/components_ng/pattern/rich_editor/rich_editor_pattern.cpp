@@ -7900,6 +7900,11 @@ void RichEditorPattern::CreateHandles()
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
 {
+    if (!IsSelected()) {
+        showSelect_ = true;
+        IF_TRUE(isEditing_, StartTwinkling());
+        return;
+    }
     ShowHandles();
 }
 
