@@ -106,7 +106,7 @@ Ark_Int32 GetDisplayXImpl(AccessibilityHoverEventPeer* peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, 0);
     const auto& screenLocation = info->GetScreenLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetDisplayXImpl return int32_t value");
+    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
@@ -154,7 +154,7 @@ Ark_Int32 GetWindowXImpl(AccessibilityHoverEventPeer* peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, 0);
     const auto& globalLocation = info->GetGlobalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetWindowXImpl return int32_t value");
+    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
