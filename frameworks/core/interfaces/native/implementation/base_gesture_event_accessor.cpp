@@ -25,7 +25,7 @@ void DestroyPeerImpl(BaseGestureEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new BaseGestureEventPeer();
+    return new BaseGestureEventPeerImpl();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,7 +36,7 @@ void SetFingerListImpl(BaseGestureEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(fingerList);
-    auto eventInfo = peer->GetEventInfo();
+    auto eventInfo = peer->GetBaseGestureInfo();
     CHECK_NULL_VOID(eventInfo);
     std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     eventInfo->SetFingerList(list);

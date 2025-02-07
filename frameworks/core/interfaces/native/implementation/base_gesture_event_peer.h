@@ -18,29 +18,44 @@
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-struct BaseGestureEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::BaseGestureEvent> {
+struct BaseGestureEventPeer : public BaseEventPeer {
     ~BaseGestureEventPeer() override = default;
+
+    virtual OHOS::Ace::BaseGestureEvent* GetBaseGestureInfo() = 0;
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-template<typename AceGestureInfo>
+template<typename AceGestureInfo,
+    std::enable_if_t<std::is_base_of_v<BaseEventInfo, AceGestureInfo>, bool> = true,
+    std::enable_if_t<std::is_base_of_v<BaseGestureEvent, AceGestureInfo>, bool> = true
+>
 class SomeGestureEventPeer : public BaseGestureEventPeer {
 public:
     ~SomeGestureEventPeer() override = default;
 
-    AceGestureInfo* GetEventInfo()
+    BaseEventInfo* GetBaseInfo() override
     {
-        CHECK_NULL_RETURN(eventInfo, nullptr);
-        return &eventInfo.value();
+        return GetEventInfo();
     }
 
-    void SetEventInfo(const AceGestureInfo& info)
+    BaseGestureEvent* GetBaseGestureInfo() override
+    {
+        return GetEventInfo();
+    }
+
+    AceGestureInfo* GetEventInfo()
+    {
+        return eventInfo.get();
+    }
+
+    void SetEventInfo(const std::shared_ptr<AceGestureInfo>& info)
     {
         eventInfo = info;
     }
 
 private:
-    std::optional<AceGestureInfo> eventInfo;
+    std::shared_ptr<AceGestureInfo> eventInfo;
 };
+
+using BaseGestureEventPeerImpl = SomeGestureEventPeer<BaseGestureEvent>;
 } // namespace OHOS::Ace::NG::GeneratedModifier

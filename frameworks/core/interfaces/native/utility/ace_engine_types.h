@@ -155,17 +155,5 @@ struct ScaleOpt {
     std::optional<Dimension> centerX;
     std::optional<Dimension> centerY;
 };
-
-struct ClickEventInfo {
-    Ark_ClickEvent result {
-        .ptr = nullptr
-    };
-};
-struct GestureEventInfo {
-    Ark_GestureEvent result {
-        .ptr = nullptr
-    };
-};
-
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H
