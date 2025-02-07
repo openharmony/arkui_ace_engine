@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cmath>
 #include <vector>
 #include <tuple>
 
@@ -25,6 +26,8 @@
 #include "core/interfaces/native/implementation/unified_data_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "frameworks/base/geometry/offset.h"
+#include "frameworks/core/gestures/velocity.h"
 
 namespace OHOS::Ace::NG {
 
@@ -224,4 +227,109 @@ HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
             "Input value is: " << input << ", method: GetYTest";
     }
 }
+
+/**
+ * @tc.name: GetDisplayXTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetDisplayXTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+        dragEvent_->SetScreenX(value);
+        auto x = accessor_->getDisplayX(peer_);
+        EXPECT_EQ(x, static_cast<int32_t>(Convert<int>(expected))) <<
+            "Input value is: " << input << ", method: getDisplayX";
+    }
+}
+
+/**
+ * @tc.name: GetDisplayYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetDisplayYTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+        dragEvent_->SetScreenY(value);
+        auto y = accessor_->getDisplayY(peer_);
+        EXPECT_EQ(y, static_cast<int32_t>(Convert<int>(expected))) <<
+            "Input value is: " << input << ", method: getDisplayY";
+    }
+}
+
+/**
+ * @tc.name: GetVelocityXTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetVelocityXTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+        auto offset = Offset(value, 0.0);
+        auto velocity = Velocity(offset);
+        dragEvent_->SetVelocity(velocity);
+        auto velocityX = accessor_->getVelocityX(peer_);
+        EXPECT_EQ(velocityX, static_cast<int32_t>(Convert<int>(expected))) <<
+            "Input value is: " << input << ", method: getVelocityX";
+        auto arkVelocity = accessor_->getVelocity(peer_);
+        EXPECT_EQ(arkVelocity, abs(static_cast<int32_t>(Convert<int>(expected)))) <<
+            "Input value is: " << input << ", method: getVelocity";
+    }
+}
+
+/**
+ * @tc.name: GetVelocityYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetVelocityYTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+        auto offset = Offset(0.0, value);
+        auto velocity = Velocity(offset);
+        dragEvent_->SetVelocity(velocity);
+        auto velocityY = accessor_->getVelocityY(peer_);
+        EXPECT_EQ(velocityY, static_cast<int32_t>(Convert<int>(expected))) <<
+            "Input value is: " << input << ", method: getVelocityY";
+        auto arkVelocity = accessor_->getVelocity(peer_);
+        EXPECT_EQ(arkVelocity, abs(static_cast<int32_t>(Convert<int>(expected)))) <<
+            "Input value is: " << input << ", method: getVelocity";
+    }
+}
+
+/**
+ * @tc.name: GetVelocityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetVelocityTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureVelocityValues) {
+        auto offset = Offset(value, value);
+        auto velocity = Velocity(offset);
+        dragEvent_->SetVelocity(velocity);
+        auto arkVelocity = accessor_->getVelocity(peer_);
+        EXPECT_EQ(arkVelocity, abs(static_cast<int32_t>(Convert<int>(expected)))) <<
+            "Input value is: " << input << ", method: getVelocity";
+    }
+}
+
+/**
+ * @tc.name: SetDragBehaviorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, SetDragBehaviorTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureEnumDragBehaviorValues) {
+        EXPECT_EQ(OHOS::Ace::DragBehavior::UNKNOWN, dragEvent_->GetDragBehavior());
+        dragEvent_->GetDragBehavior();
+        accessor_->setDragBehavior(peer_, value);
+        EXPECT_EQ(expected, dragEvent_->GetDragBehavior()) <<
+            "Input value is: " << input << ", method: setDragBehavior";
+        dragEvent_->SetDragBehavior(OHOS::Ace::DragBehavior::UNKNOWN);
+    }
+}
+
 } // namespace OHOS::Ace::NG
