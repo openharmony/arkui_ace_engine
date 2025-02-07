@@ -35,9 +35,7 @@
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
-#ifdef ARKUI_WEARABLE
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
@@ -87,21 +85,17 @@ enum class DatePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
-#ifdef ARKUI_WEARABLE
-class DatePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<std::string> {
-#else
 class DatePickerColumnPattern : public LinearLayoutPattern {
-#endif
     DECLARE_ACE_TYPE(DatePickerColumnPattern, LinearLayoutPattern);
 
 public:
-#ifdef ARKUI_WEARABLE
-    DatePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils("") {};
-#else
     DatePickerColumnPattern() : LinearLayoutPattern(true) {};
-#endif
-
-    ~DatePickerColumnPattern() override = default;
+    ~DatePickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -289,11 +283,15 @@ public:
 
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController();
-
-#ifndef ARKUI_WEARABLE
-    void SetSelectedMarkListener(std::function<void(std::string& focusId)>& listener);
-    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true);
+    void SetSelectedMarkListener(std::function<void(std::string& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const std::string &strColumnId);
+#ifdef SUPPORT_DIGITAL_CROWN
+    std::string& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
 #endif
 
 private:
@@ -333,16 +331,12 @@ private:
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
-    void SetSelectedMarkFocus();
-#ifdef ARKUI_WEARABLE
-    void SetSelectedMarkPaint(bool paint) override;
-    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
-#endif
-
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownBeginEvent(const CrownEvent& event) override;
-    void HandleCrownMoveEvent(const CrownEvent& event) override;
-    void HandleCrownEndEvent(const CrownEvent& event) override;
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
 #endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);
@@ -438,6 +432,15 @@ private:
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<DatePickerColumnPattern>;
+    PickerColumnPatternCircleUtils<DatePickerColumnPattern> *circleUtils_ = nullptr;
+    std::string selectedColumnId_ = "";
+    std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

@@ -44,15 +44,13 @@ public:
 
     virtual ~PickerPaintMethodCircleUtils() {}
 
-protected:
     template<class T>
     CanvasDrawFunction GetContentDrawFunctionL(PaintWrapper* paintWrapper, const RefPtr<PipelineBase>& pipeline)
     {
+        CHECK_NULL_RETURN(paintWrapper, nullptr);
+        CHECK_NULL_RETURN(pipeline, nullptr);
         auto theme = pipeline->GetTheme<PickerTheme>();
-        if (!theme->IsCircleDial()) {
-            return nullptr;
-        }
-
+        CHECK_NULL_RETURN(theme, nullptr);
         auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
         const auto& geometryNode = paintWrapper->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, nullptr);
@@ -81,6 +79,7 @@ protected:
         };
     }
 
+protected:
     static void checkRepeat(std::vector<int32_t>& vec, int32_t _x, int32_t _y, int32_t up)
     {
         if (vec[_y - up] < _x) {

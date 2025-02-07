@@ -602,12 +602,11 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     stack->Push(textPickerNode);
     rangeValue_.clear();
-#ifdef ARKUI_WEARABLE
+
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = textPickerNode->GetRenderContext();
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
     }
-#endif
 }
 
 void TextPickerModelNG::SetIsCascade(bool isCascade)

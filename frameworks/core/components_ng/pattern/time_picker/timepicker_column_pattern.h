@@ -30,11 +30,9 @@
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#endif
-#ifdef ARKUI_WEARABLE
-#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -85,21 +83,17 @@ enum class TimePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
-#ifdef ARKUI_WEARABLE
-class TimePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<std::string> {
-#else
 class TimePickerColumnPattern : public LinearLayoutPattern {
-#endif
     DECLARE_ACE_TYPE(TimePickerColumnPattern, LinearLayoutPattern);
 
 public:
-#ifdef ARKUI_WEARABLE
-    TimePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils("") {};
-#else
     TimePickerColumnPattern() : LinearLayoutPattern(true) {};
-#endif
-
-    ~TimePickerColumnPattern() override = default;
+    ~TimePickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -348,10 +342,15 @@ public:
         enterSelectedAreaEventCallback_ = value;
     }
 
-#ifndef ARKUI_WEARABLE
-    void SetSelectedMarkListener(const std::function<void(const std::string& focusId)>& listener);
-    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true);
+    void SetSelectedMarkListener(const std::function<void(const std::string& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const std::string &strColumnId);
+#ifdef SUPPORT_DIGITAL_CROWN
+    std::string& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
 #endif
 
 private:
@@ -369,15 +368,12 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-    void SetSelectedMarkFocus();
-#ifdef ARKUI_WEARABLE
-    void SetSelectedMarkPaint(bool paint) override;
-    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
-#endif
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownBeginEvent(const CrownEvent& event) override;
-    void HandleCrownMoveEvent(const CrownEvent& event) override;
-    void HandleCrownEndEvent(const CrownEvent& event) override;
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
 #endif
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -487,9 +483,19 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
-    bool selectedMarkPaint_ = false;
+
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<TimePickerColumnPattern>;
+    PickerColumnPatternCircleUtils<TimePickerColumnPattern> *circleUtils_ = nullptr;
+    std::string selectedColumnId_ = "";
+    bool selectedMarkPaint_ = false;
+    std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 
