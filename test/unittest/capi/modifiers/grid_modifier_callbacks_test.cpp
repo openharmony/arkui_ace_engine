@@ -269,7 +269,6 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
  */
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
 {
-    Callback_ItemDragInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -279,16 +278,17 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
         ItemDragInfo dragInfo;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridEventsReceiver.onItemDragEnter = [](
-        Ark_Int32 nodeId, const Ark_ItemDragInfo event)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .dragInfo = Converter::Convert<ItemDragInfo>(event),
-        };
-    };
 
-    modifier_->setOnItemDragEnter(node_, &func);
+    Callback_ItemDragInfo_Void onItemDragEnter = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .dragInfo = Converter::Convert<ItemDragInfo>(event),
+            };
+        }
+    };
+    modifier_->setOnItemDragEnter(node_, &onItemDragEnter);
 
     dragInfo.SetX(234);
     dragInfo.SetY(567);

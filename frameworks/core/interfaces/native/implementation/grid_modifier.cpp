@@ -290,32 +290,13 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // auto onItemDragEnter = [frameNode](const ItemDragInfo& dragInfo) {
-    auto onItemDragEnter = [callback = CallbackHelper(*value, frameNode), frameNode, node](
+    auto onItemDragEnter = [arkCallback = CallbackHelper(*value, frameNode), frameNode, node](
         const ItemDragInfo& dragInfo
     ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        auto builder =
-            callback.InvokeWithObtainResult<CustomNodeBuilder, Callback_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
-        auto uiNode = CallbackHelper(builder, frameNode).BuildSync(node);
-        ViewStackProcessor::GetInstance()->Push(uiNode);
+        arkCallback.Invoke(arkDragInfo);
     };
     GridModelNG::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
-
-    /*
-    auto onItemDragStart = [callback = CallbackHelper(*value, frameNode), frameNode, node](
-        const ItemDragInfo& dragInfo, int32_t itemIndex
-    ) {
-        auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        auto builder =
-            callback.InvokeWithObtainResult<CustomNodeBuilder, Callback_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
-        auto uiNode = CallbackHelper(builder, frameNode).BuildSync(node);
-        ViewStackProcessor::GetInstance()->Push(uiNode);
-    };
-    GridModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
-    */
 }
 void OnItemDragMoveImpl(Ark_NativePointer node,
                         const Callback_ItemDragInfo_Number_Number_Void* value)
