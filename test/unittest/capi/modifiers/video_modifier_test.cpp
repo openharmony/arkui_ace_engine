@@ -50,28 +50,10 @@ namespace  {
     const auto ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE = "ImageFit.Cover";
     const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME = "enableAnalyzer";
     const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE = "false";
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUIVideoEventsReceiver videoEventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getVideoEventsReceiver = [] () -> const GENERATED_ArkUIVideoEventsReceiver* {
-                return &videoEventsReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class VideoModifierTest : public ModifierTestBase<GENERATED_ArkUIVideoModifier,
-    &GENERATED_ArkUINodeModifiers::getVideoModifier, GENERATED_ARKUI_VIDEO> {
-public:
-
-    static void SetUpTestCase()
-    {
-        ModifierTestBase::SetUpTestCase();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
-    }
-};
+    &GENERATED_ArkUINodeModifiers::getVideoModifier, GENERATED_ARKUI_VIDEO> {};
 
 /*
  * @tc.name: setOptionsSrcTestDefaultValues
@@ -634,27 +616,29 @@ HWTEST_F(VideoModifierTest, setObjectFitTestInvalidValues, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
-{
-    VoidCallback func{};
+{    
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
 
     struct CheckEvent {
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onStart = [](Ark_Int32 nodeId)
+    auto onStart = [](const Ark_Int32 resourceId)
     {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = Converter::Convert<int32_t>(resourceId),
         };
     };
 
-    modifier_->setOnStart(node_, &func);
+    auto arkCallback = Converter::ArkValue<VoidCallback>(onStart, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnStart(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
     eventHub->FireStartEvent("params");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
@@ -665,26 +649,28 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
 {
-    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
 
     struct CheckEvent {
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onPause = [](Ark_Int32 nodeId)
+    auto onPause = [](const Ark_Int32 resourceId)
     {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = Converter::Convert<int32_t>(resourceId),
         };
     };
 
-    modifier_->setOnPause(node_, &func);
+    auto arkCallback = Converter::ArkValue<VoidCallback>(onPause, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnPause(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
     eventHub->FirePauseEvent("params");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
@@ -695,26 +681,28 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
 {
-    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
 
     struct CheckEvent {
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onFinish = [](Ark_Int32 nodeId)
+    auto onFinish = [](const Ark_Int32 resourceId)
     {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = Converter::Convert<int32_t>(resourceId),
         };
     };
 
-    modifier_->setOnFinish(node_, &func);
+    auto arkCallback = Converter::ArkValue<VoidCallback>(onFinish, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnFinish(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
     eventHub->FireFinishEvent("params");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
@@ -725,7 +713,6 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
 {
-    Callback_FullscreenInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -734,29 +721,31 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
         bool fullscreen;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onFullscreenChange = [](Ark_Int32 nodeId, Ark_FullscreenInfo event)
+    auto onFullscreenChange = [](const Ark_Int32 resourceId, const Ark_FullscreenInfo parameter)
     {
         checkEvent = {
-            .nodeId = nodeId,
-            .fullscreen = Converter::Convert<bool>(event.fullscreen),
+            .nodeId = Converter::Convert<int32_t>(resourceId),
+            .fullscreen = Converter::Convert<bool>(parameter.fullscreen),
         };
     };
 
-    modifier_->setOnFullscreenChange(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_FullscreenInfo_Void>(onFullscreenChange, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnFullscreenChange(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
 
     auto json = JsonUtil::Create(true);
     json->Put("fullscreen", true);
     eventHub->FireFullScreenChangeEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->fullscreen, true);
 
     json = JsonUtil::Create(true);
     json->Put("fullscreen", false);
     eventHub->FireFullScreenChangeEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->fullscreen, false);
 }
@@ -768,7 +757,6 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
 {
-    Callback_PreparedInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -777,29 +765,31 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
         float duration;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onPrepared = [](Ark_Int32 nodeId, Ark_PreparedInfo event)
+    auto onPrepared = [](const Ark_Int32 resourceId, const Ark_PreparedInfo parameter)
     {
         checkEvent = {
-            .nodeId = nodeId,
-            .duration = Converter::Convert<float>(event.duration),
+            .nodeId = Converter::Convert<int32_t>(resourceId),
+            .duration = Converter::Convert<float>(parameter.duration),
         };
     };
 
-    modifier_->setOnPrepared(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_PreparedInfo_Void>(onPrepared, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnPrepared(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
 
     auto json = JsonUtil::Create(true);
     json->Put("duration", static_cast<double>(1.25f));
     eventHub->FirePreparedEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->duration, 1.25f, FLT_EPSILON);
 
     json = JsonUtil::Create(true);
     json->Put("duration", static_cast<double>(3.75f));
     eventHub->FirePreparedEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->duration, 3.75f, FLT_EPSILON);
 }
@@ -811,7 +801,6 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
 {
-    Callback_PlaybackInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -820,29 +809,31 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onSeeking = [](Ark_Int32 nodeId, Ark_PlaybackInfo event)
+    auto onSeeking = [](const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
         checkEvent = {
-            .nodeId = nodeId,
-            .time = Converter::Convert<float>(event.time),
+            .nodeId = Converter::Convert<int32_t>(resourceId),
+            .time = Converter::Convert<float>(parameter.time),
         };
     };
 
-    modifier_->setOnSeeking(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_PlaybackInfo_Void>(onSeeking, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnSeeking(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
 
     auto json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(1.25f));
     eventHub->FireSeekingEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
 
     json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(3.75f));
     eventHub->FireSeekingEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
 }
@@ -854,7 +845,6 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
 {
-    Callback_PlaybackInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -863,29 +853,31 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onSeeked = [](Ark_Int32 nodeId, Ark_PlaybackInfo event)
+    auto onSeeked = [](const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
         checkEvent = {
-            .nodeId = nodeId,
-            .time = Converter::Convert<float>(event.time),
+            .nodeId = Converter::Convert<int32_t>(resourceId),
+            .time = Converter::Convert<float>(parameter.time),
         };
     };
 
-    modifier_->setOnSeeked(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_PlaybackInfo_Void>(onSeeked, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnSeeked(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
 
     auto json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(1.25f));
     eventHub->FireSeekedEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
 
     json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(3.75f));
     eventHub->FireSeekedEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
 }
@@ -897,7 +889,6 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
 {
-    Callback_PlaybackInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -906,29 +897,31 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onUpdate = [](Ark_Int32 nodeId, Ark_PlaybackInfo event)
+    auto onUpdate = [](const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
         checkEvent = {
-            .nodeId = nodeId,
-            .time = Converter::Convert<float>(event.time),
+            .nodeId = Converter::Convert<int32_t>(resourceId),
+            .time = Converter::Convert<float>(parameter.time),
         };
     };
 
-    modifier_->setOnUpdate(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_PlaybackInfo_Void>(onUpdate, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnUpdate(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
 
     auto json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(1.25f));
     eventHub->FireUpdateEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
 
     json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(3.75f));
     eventHub->FireUpdateEvent(json->ToString());
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
 }
@@ -940,26 +933,28 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
 {
-    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
 
     struct CheckEvent {
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onError = [](Ark_Int32 nodeId)
+    auto onError = [](const Ark_Int32 resourceId)
     {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = Converter::Convert<int32_t>(resourceId),
         };
     };
 
-    modifier_->setOnError(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onError, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnError(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
     eventHub->FireErrorEvent("params");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
@@ -970,26 +965,28 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
 {
-    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
 
     struct CheckEvent {
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onStop = [](Ark_Int32 nodeId)
+    auto onStop = [](const Ark_Int32 resourceId)
     {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = Converter::Convert<int32_t>(resourceId),
         };
     };
 
-    modifier_->setOnStop(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onStop, frameNode->GetId());
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    modifier_->setOnStop(node_, &arkCallback);
+
+    EXPECT_FALSE(checkEvent);
     eventHub->FireStopEvent("params");
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
