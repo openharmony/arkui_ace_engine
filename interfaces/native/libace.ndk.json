@@ -2600,27 +2600,27 @@
         "name": "OH_ArkUI_UnregisterDrawCallbackOnNodeHandle"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_Create"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_Destroy"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius"
     },
     {
@@ -2628,19 +2628,19 @@
         "name": "OH_ArkUI_PointerEvent_GetChangedPointerId"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius"
     },
     {
