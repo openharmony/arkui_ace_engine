@@ -38,6 +38,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
@@ -683,6 +684,16 @@ public:
         return false;
     }
 
+    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    WeakPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
+    }
+
     void SetCurrentDisplayId(uint64_t displayId)
     {
         currentDisplayId_ = displayId;
@@ -721,6 +732,8 @@ protected:
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
+    // for common handler
+    WeakPtr<ContainerHandler> containerHandler_;
 
 private:
     std::string bundleName_;
