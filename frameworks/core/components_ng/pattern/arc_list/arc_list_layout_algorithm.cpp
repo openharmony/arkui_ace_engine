@@ -175,7 +175,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineForward(
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
 
     endPos = startPos + mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos };
+    itemPosition_[currentIndex] = { id, startPos, endPos, false };
 
     OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
     return 1;
@@ -200,7 +200,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineBackward(
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
 
     startPos = endPos - mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos };
+    itemPosition_[currentIndex] = { id, startPos, endPos, false };
 
     OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
     return 1;
