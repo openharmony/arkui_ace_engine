@@ -945,6 +945,15 @@ class FocusController {
         this.ohos_focusController.configWindowMask(enable);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    setKeyProcessingMode(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setKeyProcessingMode(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class CursorController {
