@@ -473,6 +473,7 @@ private:
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     bool IsScrollSnapAlignCenter() const;
+    void SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm);
     void SetChainAnimationCallback();
     bool NeedScrollSnapAlignEffect() const;
     ScrollAlign GetInitialScrollAlign() const;

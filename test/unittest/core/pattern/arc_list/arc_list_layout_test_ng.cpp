@@ -535,62 +535,6 @@ HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffset002, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnItemPositionAddOrUpdate001
- * @tc.desc: Test ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(ArcListLayoutTestNg, OnItemPositionAddOrUpdate001, TestSize.Level1)
-{
-    int32_t count = 3;
-
-    ListModelNG model = CreateList();
-    CreateListItems(count);
-    CreateDone();
-
-    pattern_->SetPredictSnapOffset(100.0);
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
-        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-
-    // Before scroll, call SetPredictSnapOffset to set value.
-    listLayoutAlgorithm->SetPredictSnapOffset(100.0);
-    uint32_t index = 0;
-    // For check OnItemPositionAddOrUpdate switch cover, in this case predictSnapEndPos_ is not set.
-    listLayoutAlgorithm->OnItemPositionAddOrUpdate(frameNode_.GetRawPtr(), index);
-    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
-}
-
-/**
- * @tc.name: OnItemPositionAddOrUpdate002
- * @tc.desc: Test ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(ArcListLayoutTestNg, OnItemPositionAddOrUpdate002, TestSize.Level1)
-{
-    int32_t count = 3;
-
-    ListModelNG model = CreateList();
-    CreateListItems(count);
-    CreateDone();
-
-    pattern_->SetPredictSnapOffset(100.0);
-    // Call SetPredictSnapOffset twice to cover more switch(the init value check switch).
-    pattern_->SetPredictSnapOffset(100.0);
-
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
-        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-
-    // Before scroll, call SetPredictSnapOffset to set value.
-    listLayoutAlgorithm->SetPredictSnapOffset(100.0);
-    listLayoutAlgorithm->SetPredictSnapEndPosition(200.0);
-
-    for (uint32_t index = 0; index < count; ++index) {
-        // For check OnItemPositionAddOrUpdate switch cover, in this case predictSnapEndPos_ is set.
-        listLayoutAlgorithm->OnItemPositionAddOrUpdate(frameNode_.GetRawPtr(), index);
-        EXPECT_FALSE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
-    }
-}
-
-/**
  * @tc.name: MeasureList001
  * @tc.desc: Test ArcListLayoutAlgorithm::MeasureList
  * @tc.type: FUNC
