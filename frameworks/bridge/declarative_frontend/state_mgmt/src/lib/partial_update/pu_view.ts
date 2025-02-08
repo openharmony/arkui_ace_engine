@@ -19,6 +19,7 @@
 
 type DFXCommand = { what: string, viewId: number, isRecursive: boolean };
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
+type PrebuildFunc = () => void;
 
 /**
  * A decorator function that sets the static `isReusable_` property to `true`
@@ -261,6 +262,7 @@ abstract class ViewPU extends PUV2ViewBase
     }
     PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
+    PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
   }
 
   public purgeDeleteElmtId(rmElmtId: number): boolean {
@@ -458,6 +460,15 @@ abstract class ViewPU extends PUV2ViewBase
     aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+    } else if (this.isPrebuilding_) {
+      const propertyChangedFunc: PrebuildFunc = () => {
+        this.viewPropertyHasChanged(varName, dependentElmtIds);
+      };
+      if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+      }
+      PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+      return;
     }
 
     this.syncInstanceId();
@@ -502,6 +513,16 @@ abstract class ViewPU extends PUV2ViewBase
  * FIXME will still use in the future?
  */
   public uiNodeNeedUpdateV2(elmtId: number): void {
+    if (this.isPrebuilding_) {
+      const propertyChangedFunc: PrebuildFunc = () => {
+        this.uiNodeNeedUpdateV2(elmtId);
+      };
+      if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+      }
+      PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+      return;
+    }
     if (this.isFirstRender()) {
       return;
     }
@@ -689,6 +710,14 @@ abstract class ViewPU extends PUV2ViewBase
   // executed on first render only
   // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeComponentCreation(compilerAssignedUpdateFunc);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation `);
       return;
@@ -719,6 +748,14 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: UIClassObject): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
       return;
@@ -836,6 +873,14 @@ abstract class ViewPU extends PUV2ViewBase
    * @return void
    */
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeRecycleComponentCreation(name, recycleUpdateFunc);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     // convert recycle update func to update func
     const compilerAssignedUpdateFunc: UpdateFunc = (element, isFirstRender) => {
       recycleUpdateFunc(element, isFirstRender, undefined);

@@ -403,6 +403,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      }
 
     public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
+        if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+            const prebuildFunc: PrebuildFunc = () => {
+              this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
+            };
+            PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+            ViewStackProcessor.PushPrebuildCompCmd();
+            return;
+        }
         if (this.isDeleting_) {
             stateMgmtConsole.error(`@ComponentV2 ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
             return;
@@ -496,6 +504,16 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * FIXME will still use in the future?
      */
     public uiNodeNeedUpdateV2(elmtId: number): void {
+        if (this.isPrebuilding_) {
+            const propertyChangedFunc: PrebuildFunc = () => {
+                this.uiNodeNeedUpdateV2(elmtId);
+            };
+            if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+                PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+            }
+            PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+            return;
+        }
         if (this.isFirstRender()) {
             return;
         }

@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/models/list_item_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
@@ -80,6 +81,9 @@ void JSListItem::Create(const JSCallbackInfo& args)
 
 void JSListItem::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSListItem][pop]", &JSListItem::Pop);
+    }
     JSContainerBase::Pop();
     ListItemModel::GetInstance()->OnDidPop();
 }

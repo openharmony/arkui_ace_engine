@@ -171,11 +171,8 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         return;
     }
     if (!params[PARAM_PARENT_VIEW]->IsObject()|| !params[PARAM_DATA_SOURCE]->IsObject()
-        || !params[PARAM_ITEM_GENERATOR]->IsFunction()) {
+        || !params[PARAM_ITEM_GENERATOR]->IsFunction() || !params[PARAM_VIEW_ID]->IsString()) {
             return;
-    }
-    if (!params[PARAM_VIEW_ID]->IsString()) {
-        return;
     }
     std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 
@@ -214,11 +211,20 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     actuator->SetDataSourceObj(dataSourceObj);
     actuator->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
     actuator->SetUpdateChangedNodeFlag(updateChangedNodeFlag);
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        auto createFunc = [actuator]() {
+            LazyForEachModel::GetInstance()->Create(actuator);
+        };
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSLazyForEach][create]", createFunc);
+    }
     LazyForEachModel::GetInstance()->Create(actuator);
 }
 
 void JSLazyForEach::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSLazyForEach][pop]", &JSLazyForEach::Pop);
+    }
     auto* stack = NG::ViewStackProcessor::GetInstance();
     if (stack->GetMainFrameNode() && stack->GetMainFrameNode()->GetTag() == V2::TABS_ETS_TAG) {
         return;

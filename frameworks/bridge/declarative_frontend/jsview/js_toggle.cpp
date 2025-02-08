@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -415,6 +416,9 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSToggle::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSToggle][pop]", &JSToggle::Pop);
+    }
     ToggleModel::GetInstance()->Pop();
 }
 
