@@ -662,6 +662,13 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
         CHECK_NULL_RETURN(list, 0.0f);
         return list->GetChainDelta(index);
     });
+    if (chainAnimation_ && chainAnimation_->HasSpaceDelta() && !itemPosition_.empty()) {
+        auto res = GetOutBoundaryOffset(currentDelta_, false);
+        if ((NearZero(res.start) || !CanOverScrollStart(GetScrollSource())) &&
+            (NearZero(res.end) || !CanOverScrollEnd(GetScrollSource()))) {
+            chainAnimation_->ResetSpaceDelta();
+        }
+    }
     if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
         listLayoutAlgorithm->SetChainInterval(CHAIN_INTERVAL_DEFAULT.ConvertToPx());
     }
