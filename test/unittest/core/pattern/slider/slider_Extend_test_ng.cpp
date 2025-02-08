@@ -487,6 +487,7 @@ HWTEST_F(SliderExTestNg, SliderLayoutAlgorithmTest001, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
 
     SliderLayoutAlgorithm sliderLayoutAlgorithm;
     sliderLayoutAlgorithm.Measure(AceType::RawPtr(layoutWrapper));
@@ -545,6 +546,7 @@ HWTEST_F(SliderExTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     SliderLayoutAlgorithm sliderLayoutAlgorithm;
     sliderLayoutAlgorithm.Measure(AceType::RawPtr(layoutWrapper));
     sliderLayoutAlgorithm.Layout(AceType::RawPtr(layoutWrapper));
@@ -614,6 +616,7 @@ HWTEST_F(SliderExTestNg, SliderLayoutAlgorithmTest003, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     // test MeasureContent function
     SliderLayoutAlgorithm sliderLayoutAlgorithm;
     auto size = sliderLayoutAlgorithm.MeasureContent(layoutConstraintSizevalid, Referenced::RawPtr(layoutWrapper));
@@ -675,7 +678,8 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. create paintWrapper.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(frameNode);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
@@ -693,6 +697,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest001, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
 
     // call UpdateContentModifier function
     sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper));
@@ -755,6 +760,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest002, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
 
     Testing::MockCanvas canvas;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
@@ -782,6 +788,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step1. create paintWrapper and sliderContentModifier.
      */
@@ -789,18 +796,22 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
         AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
     SliderPaintMethod sliderPaintMethod(sliderContentModifier, SliderContentModifier::Parameters(), 1.0f, 1.0f, nullptr,
         SliderPaintMethod::TipParameters(), TextDirection::AUTO);
-    auto sliderPaintProperty = AceType::MakeRefPtr<SliderPaintProperty>();
-    ASSERT_NE(sliderPaintProperty, nullptr);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
-    auto paintWrapper1 = PaintWrapper(nullptr, geometryNode, sliderPaintProperty);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(frameNode);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto paintWrapper1 = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, sliderPaintProperty);
     sliderPaintProperty->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
     sliderPaintProperty->UpdateDirection(Axis::HORIZONTAL);
     /**
      * @tc.steps: step2. call UpdateContentModifier function.
      */
-    sliderPaintMethod.UpdateContentModifier(&paintWrapper1);
+    sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper1));
     EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
     EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
     auto rect1 = sliderContentModifier->GetBoundsRect();
@@ -808,8 +819,8 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
     EXPECT_EQ(rect1->Height(), 60.0f);
     sliderPaintProperty->UpdateSliderMode(SliderModelNG::SliderMode::OUTSET);
     sliderPaintProperty->UpdateDirection(Axis::VERTICAL);
-    auto paintWrapper2 = PaintWrapper(nullptr, geometryNode, sliderPaintProperty);
-    sliderPaintMethod.UpdateContentModifier(&paintWrapper2);
+    auto paintWrapper2 = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, sliderPaintProperty);
+    sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper2));
     EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
     EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::VERTICAL));
     auto rect2 = sliderContentModifier->GetBoundsRect();
@@ -1363,6 +1374,7 @@ HWTEST_F(SliderExTestNg, SliderValidRangeTest003, TestSize.Level1)
         PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
         auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
         EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
         sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
         sliderPattern->blockHotSize_ = SizeF(setValue, MIN_LABEL);
 
@@ -1919,7 +1931,8 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest004, TestSize.Level1)
     /**
      * @tc.steps: step2. create paintWrapper.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(frameNode);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
@@ -1937,6 +1950,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     Color color = Color::RED;
     sliderTheme->markerColor_ = color;
     // call UpdateContentModifier function
