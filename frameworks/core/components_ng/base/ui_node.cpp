@@ -248,7 +248,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
 
     // the node set isInDestroying state when destroying in pop animation
     // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return children_.end();
     }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
@@ -391,7 +391,7 @@ void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationC
 
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return false;
     }
     // The recursive flag will used by RenderContext, if recursive flag is false,
@@ -733,7 +733,7 @@ void UINode::DetachFromMainTree(bool recursive)
     if (!onMainTree_) {
         return;
     }
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return;
     }
     onMainTree_ = false;
@@ -1959,7 +1959,7 @@ void UINode::SetDestroying(bool isDestroying, bool cleanStatus)
 
     isInDestroying_ = isDestroying;
     for (const auto& child : GetChildren()) {
-        if (child->GetTag() == "BuilderProxyNode") {
+        if (child->IsReusableNode()) {
             child->SetDestroying(isDestroying, false);
         } else {
             child->SetDestroying(isDestroying, cleanStatus);

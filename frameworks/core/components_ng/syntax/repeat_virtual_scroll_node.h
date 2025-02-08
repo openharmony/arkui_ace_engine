@@ -157,7 +157,7 @@ public:
     void SetDestroying(bool isDestroying = true, bool cleanStatus = true) override
     {
         for (const auto& [key, child] : caches_.GetAllNodes()) {
-            if (child.item->GetTag() == "BuilderProxyNode") {
+            if (child.item->IsReusableNode()) {
                 child.item->SetDestroying(isDestroying, false);
             } else {
                 child.item->SetDestroying(isDestroying, cleanStatus);

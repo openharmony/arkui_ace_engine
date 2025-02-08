@@ -1140,7 +1140,7 @@ namespace OHOS::Ace::NG {
             if (node.second.second == nullptr) {
                 continue;
             }
-            if (node.second.second->GetTag() == "BuilderProxyNode") {
+            if (node.second.second->IsReusableNode()) {
                 node.second.second->SetDestroying(isDestroying, false);
             } else {
                 node.second.second->SetDestroying(isDestroying, cleanStatus);
@@ -1151,7 +1151,7 @@ namespace OHOS::Ace::NG {
             if (node.second.second == nullptr) {
                 continue;
             }
-            if (node.second.second->GetTag() == "BuilderProxyNode") {
+            if (node.second.second->IsReusableNode()) {
                 node.second.second->SetDestroying(isDestroying, false);
             } else {
                 node.second.second->SetDestroying(isDestroying, cleanStatus);
