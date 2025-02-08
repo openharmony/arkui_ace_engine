@@ -218,3 +218,13 @@ SCROLLABLE_ERROR:
   TARGET_API_VERSION: {type: INT32, desc: target api version}
   VERSION_CODE: {type: INT32, desc: version code}
   VERSION_NAME: {type: STRING, desc: version name}
+
+TEXTFIELD_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in textfield}
+  PACKAGE_NAME: {type: STRING, desc: application package name}
+  PAGE_URL: {type: STRING, desc: page url}
+
+CLIPBOARD_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in clipboard }
+  PACKAGE_NAME: {type: STRING, desc: application package name}
+  PAGE_URL: {type: STRING, desc: page url}

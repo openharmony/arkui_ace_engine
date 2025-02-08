@@ -87,4 +87,10 @@ void EventReport::ReportDragInfo(const DragInfo& dragInfo)
     MockEventReport::dragInfo_ = dragInfo;
     return;
 }
+
+void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
+{}
+
+void EventReport::ReportClipboardFailEvent(const std::string& errorType)
+{}
 } // namespace OHOS::Ace
