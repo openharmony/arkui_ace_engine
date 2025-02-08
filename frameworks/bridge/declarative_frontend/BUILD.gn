@@ -543,7 +543,8 @@ template("declarative_js_engine") {
         "udmf:udmf_data_napi",
       ]
     }
-    if (is_ohos_standard_system && !build_ohos_sdk) {
+    if (defined(config.form_button_component_support) &&
+        config.form_button_component_support) {
       sources += [ "jsview/js_form_button.cpp" ]
     }
 
@@ -1043,7 +1044,8 @@ template("declarative_js_engine_ng") {
         ]
       }
     }
-    if (is_ohos_standard_system && !build_ohos_sdk) {
+    if (defined(config.form_button_component_support) &&
+        config.form_button_component_support) {
       sources += [ "jsview/js_form_button.cpp" ]
     }
     if (defined(config.enable_ability_component) &&
