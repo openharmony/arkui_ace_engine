@@ -348,8 +348,10 @@ const char FORM_LINK_TAG[] = "FormLink";
 const char FORM_LINK_ETS_TAG[] = "FormLink";
 
 // formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
 const char FORM_BUTTON_TAG[] = "FormButton";
 const char FORM_BUTTON_ETS_TAG[] = "FormButton";
+#endif
 
 // PluginComponent
 const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";

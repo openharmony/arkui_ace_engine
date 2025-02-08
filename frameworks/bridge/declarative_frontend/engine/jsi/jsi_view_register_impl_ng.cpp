@@ -57,8 +57,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
+#endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
@@ -577,7 +579,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEffectComponent::JSBind(globalObj);
 #endif
     JSFormLink::JSBind(globalObj);
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
     JSFormButton::JSBind(globalObj);
+#endif
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
