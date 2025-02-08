@@ -1046,7 +1046,6 @@ template("declarative_js_engine_ng") {
     if (is_ohos_standard_system && !build_ohos_sdk) {
       sources += [ "jsview/js_form_button.cpp" ]
     }
-    
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       sources += [
