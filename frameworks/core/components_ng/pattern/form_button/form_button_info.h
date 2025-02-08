@@ -55,7 +55,7 @@ public:
         return abilityName_;
     }
 
-    std::string GetModuleName()
+    std::string GetModuleName() const
     {
         return moduleName_;
     }
