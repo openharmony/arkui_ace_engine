@@ -29,6 +29,17 @@ namespace {
 constexpr int32_t ARKUI_DEVICE_ID = 1;
 constexpr uint64_t ARKUI_TIME = 20;
 constexpr ArkUI_Int32 AXIS_UPDATE = 2;
+constexpr float ARKUI_X = 2.0;
+constexpr float ARKUI_Y = 3.0;
+constexpr float ARKUI_WIDTH = 2.0;
+constexpr float ARKUI_HEIGHT = 3.0;
+constexpr double ARKUI_TILTX = 2.0;
+constexpr double ARKUI_TILTY = 3.0;
+constexpr double ARKUI_PRESSURE = 1.0;
+constexpr int32_t ARKUI_SOURCETYPE = 1;
+constexpr int32_t ARKUI_TOOLTYPE = 7;
+constexpr ArkUI_Uint64 ARKUI_MODIFIERKEYSTATE = 1;
+constexpr ArkUI_Uint32 ARKUI_POINTERCOUNTER = 2;
 } // namespace
 class UIInputEventTest : public testing::Test {
 public:
@@ -217,6 +228,348 @@ HWTEST_F(UIInputEventTest, AxisEventGetActionTest004, TestSize.Level1)
     uiInputEvent->eventTypeId = C_AXIS_EVENT_ID;
     action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
     EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+}
+
+/**
+ * @tc.name: CapiInputTest001
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::CLICK_EVENT;
+    event.clickEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    event.clickEvent.localX = ARKUI_X;
+    event.clickEvent.localY = ARKUI_Y;
+    event.clickEvent.timestamp = ARKUI_TIME;
+    event.clickEvent.sourceType = ARKUI_SOURCETYPE;
+    event.clickEvent.windowX = ARKUI_X;
+    event.clickEvent.windowY = ARKUI_Y;
+    event.clickEvent.displayX = ARKUI_X;
+    event.clickEvent.displayY = ARKUI_Y;
+    event.clickEvent.targetPositionX = ARKUI_X;
+    event.clickEvent.targetPositionY = ARKUI_Y;
+    event.clickEvent.targetGlobalPositionX = ARKUI_X;
+    event.clickEvent.targetGlobalPositionY = ARKUI_Y;
+    uiInputEvent.inputEvent = &event.clickEvent;
+    uiInputEvent.eventTypeId = C_CLICK_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTime(inputEvent), ARKUI_TIME);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SOURCETYPE);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetDisplayX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetDisplayY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(inputEvent), ARKUI_Y);
+}
+
+/**
+ * @tc.name: CapiInputTest002
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::CLICK_EVENT;
+    event.clickEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    event.clickEvent.width = ARKUI_WIDTH;
+    event.clickEvent.height = ARKUI_HEIGHT;
+    event.clickEvent.tiltX = ARKUI_TILTX;
+    event.clickEvent.tiltY = ARKUI_TILTY;
+    event.clickEvent.pressure = ARKUI_PRESSURE;
+    event.clickEvent.toolType = ARKUI_TOOLTYPE;
+    event.clickEvent.deviceId = ARKUI_DEVICE_ID;
+    event.clickEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    event.clickEvent.clickPointSize = ARKUI_POINTERCOUNTER;
+    uiInputEvent.inputEvent = &event.clickEvent;
+    uiInputEvent.eventTypeId = C_CLICK_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_WIDTH);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_HEIGHT);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_TILTX);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_TILTY);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_PRESSURE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerCount(inputEvent), ARKUI_POINTERCOUNTER);
+}
+
+/**
+ * @tc.name: CapiInputTest003
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::HOVER_EVENT;
+    event.hoverEvent.subKind = ON_HOVER_EVENT;
+    event.hoverEvent.isHover = true;
+    // width height x y globalx globaly
+    event.hoverEvent.targetPositionX = ARKUI_X;
+    event.hoverEvent.targetPositionY = ARKUI_Y;
+    event.hoverEvent.targetGlobalPositionX = ARKUI_X;
+    event.hoverEvent.targetGlobalPositionY = ARKUI_Y;
+    event.hoverEvent.width = ARKUI_WIDTH;
+    event.hoverEvent.height = ARKUI_HEIGHT;
+    // deviceid
+    event.hoverEvent.deviceId = ARKUI_DEVICE_ID;
+    // modifierkeystates
+    event.hoverEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    // timestamp
+    event.hoverEvent.timeStamp = ARKUI_TIME;
+    // sourcetool
+    event.hoverEvent.toolType = ARKUI_TOOLTYPE;
+    // source
+    event.hoverEvent.sourceType = ARKUI_SOURCETYPE;
+    // tiltX tiltY
+    event.hoverEvent.tiltX = ARKUI_TILTX;
+    event.hoverEvent.tiltY = ARKUI_TILTY;
+    // stoppropagation
+    event.hoverEvent.stopPropagation = false;
+    uiInputEvent.inputEvent = &event.hoverEvent;
+    uiInputEvent.eventTypeId = C_HOVER_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTime(inputEvent), ARKUI_TIME);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SOURCETYPE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_TILTX);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_TILTY);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_TRUE(OH_ArkUI_HoverEvent_IsHovered(inputEvent));
+    const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(inputEvent->inputEvent);
+    EXPECT_FALSE(hoverEvent->stopPropagation);
+    OH_ArkUI_PointerEvent_SetStopPropagation(inputEvent, true);
+    EXPECT_TRUE(hoverEvent->stopPropagation);
+}
+
+/**
+ * @tc.name: CapiInputTest004
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = TOUCH_EVENT;
+    // width height x y globalx globaly
+    event.touchEvent.targetPositionX = ARKUI_X;
+    event.touchEvent.targetPositionY = ARKUI_Y;
+    event.touchEvent.targetGlobalPositionX = ARKUI_X;
+    event.touchEvent.targetGlobalPositionY = ARKUI_Y;
+    event.touchEvent.width = ARKUI_WIDTH;
+    event.touchEvent.height = ARKUI_HEIGHT;
+    // deviceid
+    event.touchEvent.deviceId = ARKUI_DEVICE_ID;
+    // modifierkeystates
+    event.touchEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+}
+
+/**
+ * @tc.name: CapiInputTest005
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = MOUSE_INPUT_EVENT;
+    event.mouseEvent.subKind = ON_MOUSE;
+    // width height x y globalx globaly
+    event.mouseEvent.targetPositionX = ARKUI_X;
+    event.mouseEvent.targetPositionY = ARKUI_Y;
+    event.mouseEvent.targetGlobalPositionX = ARKUI_X;
+    event.mouseEvent.targetGlobalPositionY = ARKUI_Y;
+    event.mouseEvent.width = ARKUI_WIDTH;
+    event.mouseEvent.height = ARKUI_HEIGHT;
+    // deviceid
+    event.mouseEvent.deviceId = ARKUI_DEVICE_ID;
+    // modifierkeystates
+    event.mouseEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    // pressure
+    event.mouseEvent.actionTouchPoint.pressure = ARKUI_PRESSURE;
+    // toolType
+    event.mouseEvent.actionTouchPoint.toolType = ARKUI_TOOLTYPE;
+    // source
+    event.mouseEvent.sourceType = ARKUI_SOURCETYPE;
+    // stoppropagation
+    event.mouseEvent.stopPropagation = false;
+    uiInputEvent.inputEvent = &event.mouseEvent;
+    uiInputEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_PRESSURE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SOURCETYPE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
+    const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(inputEvent->inputEvent);
+    EXPECT_FALSE(mouseEvent->stopPropagation);
+    OH_ArkUI_PointerEvent_SetStopPropagation(inputEvent, true);
+    EXPECT_TRUE(mouseEvent->stopPropagation);
+}
+
+/**
+ * @tc.name: CapiInputTest006
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+    event.focusAxisEvent.subKind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+    // width height x y globalx globaly
+    event.focusAxisEvent.targetPositionX = ARKUI_X;
+    event.focusAxisEvent.targetPositionY = ARKUI_Y;
+    event.focusAxisEvent.targetGlobalPositionX = ARKUI_X;
+    event.focusAxisEvent.targetGlobalPositionY = ARKUI_Y;
+    event.focusAxisEvent.width = ARKUI_WIDTH;
+    event.focusAxisEvent.height = ARKUI_HEIGHT;
+    // deviceid
+    event.focusAxisEvent.deviceId = ARKUI_DEVICE_ID;
+    // modifierkeystates
+    event.focusAxisEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    uiInputEvent.inputEvent = &event.focusAxisEvent;
+    uiInputEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+}
+
+/**
+ * @tc.name: CapiInputTest007
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+    event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
+    // deviceid
+    event.keyEvent.deviceId = ARKUI_DEVICE_ID;
+    // modifierkeystates
+    event.keyEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    uiInputEvent.inputEvent = &event.mouseEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
 }
 
 /**
