@@ -2005,6 +2005,14 @@ void SwiperPattern::FastAnimation(int32_t targetIndex)
     }
 }
 
+bool SwiperPattern::IsInFastAnimation() const
+{
+    if (!NeedFastAnimation()) {
+        return false;
+    }
+    return propertyAnimationIsRunning_;
+}
+
 void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
 {
     int32_t targetIndex = 0;
