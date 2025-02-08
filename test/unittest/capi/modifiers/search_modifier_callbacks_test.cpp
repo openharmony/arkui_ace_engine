@@ -192,19 +192,20 @@ HWTEST_F(SearchModifierCallbackTest, setInputFilterTest, TestSize.Level1)
 HWTEST_F(SearchModifierCallbackTest, setOnTextSelectionChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnTextSelectionChange, nullptr);
-    EventsTracker::eventsReceiver.onTextSelectionChange = [](Ark_Int32 nodeId,
-        Ark_Number selectionStart,
-        Ark_Number selectionEnd) {
-        g_startValue = Convert<int32_t>(selectionStart);
-        g_endValue = Convert<int32_t>(selectionEnd);
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnTextSelectionChangeCallback func{};
+    ASSERT_NE(frameNode, nullptr);
+    OnTextSelectionChangeCallback onTextSelectionChangeCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number selectionStart, const Ark_Number selectionEnd) {
+            g_startValue = Convert<int32_t>(selectionStart);
+            g_endValue = Convert<int32_t>(selectionEnd);
+        }
+    };
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        modifier_->setOnTextSelectionChange(node_, &func);
+        modifier_->setOnTextSelectionChange(node_, &onTextSelectionChangeCallback);
         textFieldEventHub->FireOnSelectionChange(value, value);
         EXPECT_EQ(g_startValue, expectVal);
         EXPECT_EQ(g_endValue, expectVal);
@@ -219,19 +220,21 @@ HWTEST_F(SearchModifierCallbackTest, setOnTextSelectionChangeTest, TestSize.Leve
 HWTEST_F(SearchModifierCallbackTest, setOnCopyTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnCopy, nullptr);
-    EventsTracker::eventsReceiver.onCopy = [](Ark_Int32 nodeId, Ark_String value) {
-        auto textString = Convert<std::u16string>(value);
-        g_EventTestString = textString;
-    };
-    g_EventTestString = EMPTY_TEXT;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    Callback_String_Void onCopyCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, Ark_String value) {
+            g_EventTestString = Convert<std::u16string>(value);
+        }
+    };
+    g_EventTestString.clear();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    Callback_String_Void func{};
-    modifier_->setOnCopy(node_, &func);
+    modifier_->setOnCopy(node_, &onCopyCallback);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
 }
@@ -244,18 +247,21 @@ HWTEST_F(SearchModifierCallbackTest, setOnCopyTest, TestSize.Level1)
 HWTEST_F(SearchModifierCallbackTest, setOnCutTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnCut, nullptr);
-    EventsTracker::eventsReceiver.onCut = [](Ark_Int32 nodeId, Ark_String value) {
-        g_EventTestString = Convert<std::u16string>(value);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    Callback_String_Void onCutCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, Ark_String value) {
+            g_EventTestString = Convert<std::u16string>(value);
+        }
     };
     g_EventTestString = EMPTY_TEXT;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    Callback_String_Void func{};
-    modifier_->setOnCut(node_, &func);
+    modifier_->setOnCut(node_, &onCutCallback);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
 }
@@ -349,19 +355,20 @@ HWTEST_F(SearchModifierCallbackTest, setOnPasteTest, TestSize.Level1)
 HWTEST_F(SearchModifierCallbackTest, setOnContentScrollTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnContentScroll, nullptr);
-    EventsTracker::eventsReceiver.onContentScroll = [](Ark_Int32 nodeId,
-        Ark_Number totalOffsetX,
-        Ark_Number totalOffsetY) {
-        g_scrollX = Convert<float>(totalOffsetX);
-        g_scrollY = Convert<float>(totalOffsetY);
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnContentScrollCallback func{};
+    ASSERT_NE(frameNode, nullptr);
+    OnContentScrollCallback onContentScroll = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, Ark_Number totalOffsetX, Ark_Number totalOffsetY) {
+            g_scrollX = Convert<float>(totalOffsetX);
+            g_scrollY = Convert<float>(totalOffsetY);
+        }
+    };
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 
     for (const auto& [value, expectVal] : FLOAT_NUMBER_TEST_PLAN) {
-        modifier_->setOnContentScroll(node_, &func);
+        modifier_->setOnContentScroll(node_, &onContentScroll);
         textFieldEventHub->FireOnScrollChangeEvent(value, value);
         EXPECT_EQ(g_scrollX, expectVal);
         EXPECT_EQ(g_scrollY, expectVal);
@@ -578,18 +585,23 @@ HWTEST_F(SearchModifierCallbackTest, setOnWillDeleteTest, TestSize.Level1)
  */
 HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnDidDelete, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     g_EventTestString = u"";
     g_EventTestOffset = 0;
-    EventsTracker::eventsReceiver.onDidDelete = [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-        g_EventTestString = Convert<std::u16string>(data.deleteValue);
-        g_EventTestOffset = Convert<int32_t>(data.deleteOffset);
-        auto didDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
-        if (didDeleteDirection) {
-            g_deleteDirection = didDeleteDirection.value();
+    Callback_DeleteValue_Void onDidDeleteCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
+            g_EventTestString = Convert<std::u16string>(data.deleteValue);
+            g_EventTestOffset = Convert<int32_t>(data.deleteOffset);
+            auto didDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
+            if (didDeleteDirection) {
+                g_deleteDirection = didDeleteDirection.value();
+            }
         }
     };
     g_deleteDirection = TextDeleteDirection::FORWARD;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
@@ -598,8 +610,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
     EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
-    Callback_DeleteValue_Void func{};
-    modifier_->setOnDidDelete(node_, &func);
+    modifier_->setOnDidDelete(node_, &onDidDeleteCallback);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
             DeleteValueInfo checkValue = {
