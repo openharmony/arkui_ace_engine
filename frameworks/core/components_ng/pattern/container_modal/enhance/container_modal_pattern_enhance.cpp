@@ -821,6 +821,9 @@ void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name
     auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
     controlButtonsNode->FireCustomCallback(name, value);
+    auto customTitleNode = GetCustomTitleNode();
+    CHECK_NULL_VOID(customTitleNode);
+    customTitleNode->FireCustomCallback(name, value);
 }
 
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
