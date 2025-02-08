@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,15 @@
  */
 
 #include "tabs_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+constexpr double FRICTION = 0.6;
+} // namespace
 
 class TabBarEventTestNg : public TabsTestNg {
 public:
@@ -28,6 +30,12 @@ public:
     void DragTo(Offset location);
     AssertionResult IsEqualNextFocusNode(
         FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
+    void DragStart(Offset startOffset, InputEventType inputEventType = InputEventType::TOUCH_SCREEN);
+    void DragUpdate(float delta);
+    void DragEnd(float velocityDelta);
+    void DragAction(Offset startOffset, float dragDelta, float velocityDelta);
+
+    GestureEvent dragInfo_;
 };
 
 void TabBarEventTestNg::LongPress(Offset location)
@@ -69,6 +77,56 @@ AssertionResult TabBarEventTestNg::IsEqualNextFocusNode(
         return AssertionFailure() << "Next focusNode is not as expected";
     }
     return AssertionSuccess();
+}
+
+void TabBarEventTestNg::DragStart(Offset startOffset, InputEventType inputEventType)
+{
+    GestureEvent gesture;
+    dragInfo_ = gesture;
+    dragInfo_.SetSourceTool(SourceTool::FINGER);
+    dragInfo_.SetInputEventType(inputEventType);
+    dragInfo_.SetGlobalPoint(Point() + startOffset);
+    dragInfo_.SetGlobalLocation(startOffset);
+    dragInfo_.SetLocalLocation(startOffset);
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->isDragging_ = true;
+    scrollable->HandleDragStart(dragInfo_);
+}
+
+void TabBarEventTestNg::DragUpdate(float delta)
+{
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    double velocity = delta > 0 ? 200 : -200;
+    dragInfo_.SetMainVelocity(velocity);
+    dragInfo_.SetMainDelta(delta);
+    dragInfo_.SetGlobalPoint(Point(0, delta));
+    dragInfo_.SetGlobalLocation(Offset(0, delta));
+    dragInfo_.SetLocalLocation(Offset(0, delta));
+    scrollable->HandleDragUpdate(dragInfo_);
+    FlushUITasks();
+}
+
+void TabBarEventTestNg::DragEnd(float velocityDelta)
+{
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    float velocity = velocityDelta * FRICTION * -FRICTION_SCALE;
+    dragInfo_.SetMainDelta(0);
+    dragInfo_.SetMainVelocity(velocity);
+    dragInfo_.SetGlobalPoint(dragInfo_.GetGlobalPoint());
+    dragInfo_.SetGlobalLocation(dragInfo_.GetGlobalLocation());
+    dragInfo_.SetLocalLocation(dragInfo_.GetLocalLocation());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(dragInfo_);
+    scrollable->isDragging_ = false;
+    FlushUITasks();
+}
+
+void TabBarEventTestNg::DragAction(Offset startOffset, float dragDelta, float velocityDelta)
+{
+    DragStart(startOffset);
+    DragUpdate(dragDelta);
+    DragEnd(velocityDelta);
 }
 
 /**
@@ -829,7 +887,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     // Set tabs width less than total barItems width, make tabBar scrollable
-    const float tabsWidth = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    const float tabsWidth = BAR_ITEM_SIZE * (TABCONTENT_NUMBER - 1);
     ViewAbstract::SetWidth(CalcLength(tabsWidth));
     CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
     CreateTabsDone(model);
@@ -840,8 +898,8 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
      */
     float outOffset = 1.f;
     tabBarPattern_->visibleItemPosition_.clear();
-    tabBarPattern_->visibleItemPosition_[0] = { outOffset, outOffset + BARITEM_SIZE };
-    tabBarPattern_->visibleItemPosition_[2] = { outOffset + BARITEM_SIZE * 2, outOffset + tabsWidth };
+    tabBarPattern_->visibleItemPosition_[0] = { outOffset, outOffset + BAR_ITEM_SIZE };
+    tabBarPattern_->visibleItemPosition_[2] = { outOffset + BAR_ITEM_SIZE * 2, outOffset + tabsWidth };
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     float dragOffset = 100.f;
     scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
@@ -853,8 +911,8 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
      * @tc.expected: The friction take effect
      */
     tabBarPattern_->visibleItemPosition_.clear();
-    tabBarPattern_->visibleItemPosition_[1] = { -outOffset, -outOffset + BARITEM_SIZE };
-    tabBarPattern_->visibleItemPosition_[TABCONTENT_NUMBER - 1] = { -outOffset + BARITEM_SIZE * 2,
+    tabBarPattern_->visibleItemPosition_[1] = { -outOffset, -outOffset + BAR_ITEM_SIZE };
+    tabBarPattern_->visibleItemPosition_[TABCONTENT_NUMBER - 1] = { -outOffset + BAR_ITEM_SIZE * 2,
         -outOffset + tabsWidth };
     dragOffset = -100.f;
     scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
@@ -872,7 +930,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     // Set tabs width less than total barItems width, make scrollable
-    ViewAbstract::SetWidth(CalcLength(BARITEM_SIZE));
+    ViewAbstract::SetWidth(CalcLength(BAR_ITEM_SIZE));
     CreateTabContentsWithBuilder(2);
     CreateTabsDone(model);
 
@@ -881,16 +939,16 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
      * @tc.expected: The scrollOffset not changed by AdjustOffset
      */
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
-    scrollable->UpdateScrollPosition(-BARITEM_SIZE / 2, SCROLL_FROM_AXIS);
+    scrollable->UpdateScrollPosition(-BAR_ITEM_SIZE / 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, -BARITEM_SIZE / 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, -BAR_ITEM_SIZE / 2);
 
     /**
      * @tc.steps: step2. Scroll to right out of Boundary
      * @tc.expected: Can not out of Boundary by AdjustOffset
      */
-    scrollable->UpdateScrollPosition(-BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
+    scrollable->UpdateScrollPosition(-BAR_ITEM_SIZE * 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
@@ -900,7 +958,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
      * @tc.steps: step3. Scroll to left out of Boundary
      * @tc.expected: Can not out of Boundary by AdjustOffset
      */
-    scrollable->UpdateScrollPosition(BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
+    scrollable->UpdateScrollPosition(BAR_ITEM_SIZE * 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
@@ -1379,5 +1437,137 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest006, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode0));
     EXPECT_TRUE(isTrigger);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+}
+
+/**
+ * @tc.name: HandleDragOverScroll001
+ * @tc.desc: Test position when out of Boundary, the friction will take effect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleDragOverScroll001, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    // Set tabs width less than total barItems width, make tabBar scrollable
+    float tabsWidth = BAR_ITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    ViewAbstract::SetWidth(CalcLength(tabsWidth));
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    EXPECT_TRUE(tabBarPattern_->CanScroll());
+    EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().Width(), tabsWidth);
+    // The tabBar scrollable distance
+    float scrollableDistance = 10.0f;
+    EXPECT_EQ(BAR_ITEM_SIZE * TABCONTENT_NUMBER - tabsWidth, scrollableDistance);
+
+    /**
+     * @tc.steps: step1. Drag out of left boundary
+     * @tc.expected: The friction take effect
+     */
+    float dragDelta = 1.0f;
+    DragStart(Offset());
+    DragUpdate(dragDelta);
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), dragDelta);
+
+    // The friction take effect
+    DragUpdate(dragDelta);
+    EXPECT_GT(GetChildX(tabBarNode_, 0), dragDelta);
+    EXPECT_LT(GetChildX(tabBarNode_, 0), dragDelta * 2);
+
+    // Scroll spring back
+    DragEnd(0);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), 0);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
+    /**
+     * @tc.steps: step2. Drag out of right boundary
+     * @tc.expected: The friction take effect
+     */
+    // Drag to right edge
+    DragStart(Offset());
+    DragUpdate(-scrollableDistance);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
+
+    // Drag out of boundary
+    DragUpdate(-dragDelta);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), -dragDelta);
+
+    // The friction take effect
+    DragUpdate(-dragDelta);
+    EXPECT_GT(GetChildX(tabBarNode_, 1), -dragDelta * 2);
+    EXPECT_LT(GetChildX(tabBarNode_, 1), -dragDelta);
+
+    // Scroll spring back
+    DragEnd(0);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::Enable(false);
+}
+
+/**
+ * @tc.name: HandleDragOverScroll002
+ * @tc.desc: Test IsMouseWheelScroll, would not over the edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleDragOverScroll002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    // Set tabs width less than total barItems width, make tabBar scrollable
+    float tabsWidth = BAR_ITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    ViewAbstract::SetWidth(CalcLength(tabsWidth));
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Use InputEventType::AXIS, MouseWheelScroll to left
+     * @tc.expected: Would not over the edge
+     */
+    float dragDelta = 1.0f;
+    DragStart(Offset(), InputEventType::AXIS);
+    DragUpdate(dragDelta);
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), 0);
+
+    DragEnd(0);
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), 0);
+}
+
+/**
+ * @tc.name: HandleDragOverScroll003
+ * @tc.desc: Test IsMouseWheelScroll, would not over the edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleDragOverScroll003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    // Set tabs width less than total barItems width, make tabBar scrollable
+    float tabsWidth = BAR_ITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    ViewAbstract::SetWidth(CalcLength(tabsWidth));
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Use InputEventType::AXIS, MouseWheelScroll to right
+     * @tc.expected: Would not over the edge
+     */
+    // scroll to right edge
+    DragStart(Offset(), InputEventType::AXIS);
+    float scrollableDistance = 10.0f;
+    DragUpdate(-scrollableDistance);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
+
+    float dragDelta = 1.0f;
+    DragUpdate(-dragDelta);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
+
+    DragEnd(0);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
 }
 } // namespace OHOS::Ace::NG
