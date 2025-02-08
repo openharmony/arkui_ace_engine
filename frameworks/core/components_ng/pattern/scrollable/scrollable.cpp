@@ -1492,6 +1492,14 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
     }
 }
 
+std::optional<float> Scrollable::GetPredictSnapOffset() const
+{
+    if (state_ == AnimationState::SNAP) {
+        return endPos_ - currentPos_;
+    }
+    return std::nullopt;
+}
+
 void Scrollable::AttachAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property)
 {
     auto host = weakHost_.Upgrade();

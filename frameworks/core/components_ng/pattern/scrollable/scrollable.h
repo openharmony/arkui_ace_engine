@@ -373,6 +373,8 @@ public:
         getSnapTypeCallback_ = getSnapTypeCallback;
     }
 
+    std::optional<float> GetPredictSnapOffset() const;
+
     void SetHandleScrollCallback(NestableScrollCallback&& func)
     {
         handleScrollCallback_ = std::move(func);
