@@ -321,7 +321,9 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onTextSelectionChange = [arkCallback = CallbackHelper(*value, frameNode)](int32_t selectionStart, int32_t selectionEnd) {
+    auto onTextSelectionChange = [arkCallback = CallbackHelper(*value, frameNode)](
+        int32_t selectionStart, int32_t selectionEnd
+    ) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
         auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
         arkCallback.Invoke(arkSelectionStart, arkSelectionEnd);

@@ -244,11 +244,11 @@ HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
 {
-    EXPECT_NE(modifier_->setOnError,nullptr);
+    EXPECT_NE(modifier_->setOnError, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    EXPECT_NE(frameNode,nullptr);
+    EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
-    EXPECT_NE(eventHub,nullptr);
+    EXPECT_NE(eventHub, nullptr);
     const auto width = 0.5f;
     const auto height = 0.6f;
     const auto error = "error_test";
