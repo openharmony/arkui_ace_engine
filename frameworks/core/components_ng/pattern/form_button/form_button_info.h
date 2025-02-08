@@ -22,13 +22,6 @@
 namespace OHOS::Ace::NG {
 class FormButtonInfo final {
 public:
-    std::string action_;
-    std::string bundleName_;
-    std::string abilityName_;
-    std::string moduleName_;
-    std::string cardName_;
-    int32_t dimension_;
-
     FormButtonInfo() = default;
     ~FormButtonInfo() = default;
 
@@ -107,6 +100,12 @@ public:
 
 private:
     RectF formButtonRect_;
+    std::string action_;
+    std::string bundleName_;
+    std::string abilityName_;
+    std::string moduleName_;
+    std::string cardName_;
+    int32_t dimension_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_BUTTON_INFO_H

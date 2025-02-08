@@ -36,7 +36,7 @@ public:
 
     std::string GetAction()
     {
-        return formButtonInfo_.action_;
+        return formButtonInfo_.GetAction();
     }
 
     void SetBundleName(const std::string& bundleName)
@@ -46,7 +46,7 @@ public:
 
     std::string GetBundleName()
     {
-        return formButtonInfo_.bundleName_;
+        return formButtonInfo_.GetBundleName();
     }
 
     void SetAbilityName(const std::string& abilityName)
@@ -56,11 +56,11 @@ public:
 
     std::string GetAbilityName()
     {
-        return formButtonInfo_.abilityName_;
+        return formButtonInfo_.GetAbilityName();
     }
     std::string GetModuleName()
     {
-        return formButtonInfo_.moduleName_;
+        return formButtonInfo_.GetModuleName();
     }
 
     void SetModuleName(const std::string& moduleName)
@@ -70,7 +70,7 @@ public:
 
     int32_t GetDimension()
     {
-        return formButtonInfo_.dimension_;
+        return formButtonInfo_.GetDimension();
     }
 
     void SetDimension(const int32_t& dimension)
@@ -80,7 +80,7 @@ public:
 
     std::string GetCardName()
     {
-        return formButtonInfo_.cardName_;
+        return formButtonInfo_.GetCardName();
     }
 
     void SetCardName(const std::string& cardName)
