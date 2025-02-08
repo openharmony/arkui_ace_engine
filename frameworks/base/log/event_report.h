@@ -225,6 +225,8 @@ public:
     static void ReportDragInfo(const DragInfo& dragInfo);
     static void ReportScrollableErrorEvent(
         const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType);
+    static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
+    static void ReportClipboardFailEvent(const std::string& errorType);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
