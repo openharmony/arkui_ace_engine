@@ -1048,7 +1048,6 @@ template("declarative_js_engine_ng") {
       defines += [ "FORM_BUTTON_COMPONENT_SUPPORT" ]
       sources += [ "jsview/js_form_button.cpp" ]
     }
-    
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       sources += [
