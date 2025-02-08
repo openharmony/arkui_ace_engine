@@ -67,6 +67,7 @@ constexpr char EVENT_KEY_MAX_HITCH_TIME_SINCE_START[] = "MAX_HITCH_TIME_SINCE_ST
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
+constexpr char ACTION_NAME[] = "ACTION_NAME";
 constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
 constexpr char EVENT_KEY_REAL_SKIPPED_FRAME_TIME[] = "REAL_SKIPPED_FRAME_TIME";
@@ -113,6 +114,7 @@ constexpr char EVENT_KEY_WINDOW_ID[] = "WINDOW_ID";
 constexpr char EVENT_KEY_INSTANCE_ID[] = "INSTANCE_ID";
 constexpr char EVENT_KEY_VSYNC_TIMESTAMP[] = "VSYNC_TIMESTAMP";
 #endif
+constexpr char ACCESSIBILITY_FAIL[] = "ACCESSIBILITY_FAIL";
 constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
@@ -253,6 +255,19 @@ void EventReport::SendAccessibilityException(AccessibilityExcepType type)
     };
 
     SendEventInner(eventInfo);
+}
+
+void EventReport::ReportAccessibilityFailEvent(const std::string& actionName)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    auto processName = AceApplicationInfo::GetInstance().GetProcessName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, ACCESSIBILITY_FAIL,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PROCESS_NAME, processName,
+        ACTION_NAME, actionName);
 }
 
 void EventReport::SendFormException(FormExcepType type)

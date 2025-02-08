@@ -189,6 +189,7 @@ public:
     static void SendEventException(EventExcepType type);
     static void SendInternalException(InternalExcepType type);
     static void SendAccessibilityException(AccessibilityExcepType type);
+    static void ReportAccessibilityFailEvent(const std::string& actionName);
     static void SendFormException(FormExcepType type);
 #ifdef VSYNC_TIMEOUT_CHECK
     static void SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp);

@@ -39,6 +39,8 @@ void EventReport::SendInternalException(InternalExcepType type) {}
 
 void EventReport::SendAccessibilityException(AccessibilityExcepType type) {}
 
+void EventReport::ReportAccessibilityFailEvent(const std::string& actionName) {}
+
 void EventReport::SendFormException(FormExcepType type) {}
 
 void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr) {}
