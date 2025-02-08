@@ -175,6 +175,16 @@ OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, boo
             auto renderPosition = FrameNode::ContextPositionConvertToPX(
                 parentRenderContext, parentLayoutConstraint.value().percentReference);
             offset += OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second));
+        } else if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() &&
+            parentRenderContext->GetPositionProperty()->HasPositionEdges()) {
+            auto parentLayoutProp = parent->GetLayoutProperty();
+            CHECK_NULL_RETURN(parentLayoutProp, offset);
+            auto parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
+            CHECK_EQUAL_RETURN(parentLayoutConstraint.has_value(), false, offset);
+            auto positionEdges = parentRenderContext->GetPositionEdgesValue(EdgesParam {});
+            auto renderPosition = parentRenderContext->GetRectOffsetWithPositionEdges(positionEdges,
+                parentLayoutConstraint->percentReference.Width(), parentLayoutConstraint->percentReference.Height());
+            offset += renderPosition;
         } else {
             offset += parent->GetFrameRectWithSafeArea().GetOffset();
         }
@@ -209,6 +219,18 @@ RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
         auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
         rect =
             RectF(OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second)), size);
+        return rect;
+    } else if (checkPosition && renderContext && renderContext->GetPositionProperty() &&
+        renderContext->GetPositionProperty()->HasPositionEdges()) {
+        auto layoutProp = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProp, rect);
+        auto layoutConstraint = layoutProp->GetLayoutConstraint();
+        CHECK_EQUAL_RETURN(layoutConstraint.has_value(), false, rect);
+        auto positionEdges = renderContext->GetPositionEdgesValue(EdgesParam {});
+        auto renderPosition = renderContext->GetRectOffsetWithPositionEdges(positionEdges,
+            layoutConstraint->percentReference.Width(), layoutConstraint->percentReference.Height());
+        auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
+        rect = RectF(renderPosition, size);
         return rect;
     }
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
