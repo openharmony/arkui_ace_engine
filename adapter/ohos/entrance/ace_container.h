@@ -802,6 +802,8 @@ public:
 
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
+    Rect GetDisplayAvailableRect() const override;
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

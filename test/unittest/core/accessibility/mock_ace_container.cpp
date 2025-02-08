@@ -292,4 +292,9 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
 {
     return true;
 }
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
 } // namespace OHOS::Ace::Platform

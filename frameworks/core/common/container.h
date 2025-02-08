@@ -715,6 +715,13 @@ public:
         return false;
     }
 
+    virtual std::vector<Rect> GetCurrentFoldCreaseRegion();
+
+    virtual Rect GetDisplayAvailableRect() const
+    {
+        return Rect();
+    }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

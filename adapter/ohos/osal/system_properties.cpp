@@ -1034,4 +1034,10 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
 }
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SUPER_FOLDER;
+}
 } // namespace OHOS::Ace

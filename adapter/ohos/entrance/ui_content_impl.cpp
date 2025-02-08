@@ -2237,9 +2237,17 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
             TAG_LOGI(AceLogTag::ACE_WINDOW,
-                "InitializeDisplayAvailableRect : %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
-                availableArea.posY_, availableArea.width_, availableArea.height_);
+                "Initialize displayId: %{public}u, availableRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+                (uint32_t)displayId, availableArea.posX_, availableArea.posY_, availableArea.width_,
+                availableArea.height_);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WINDOW, "Display failed to get availableArea, displayId: %{public}u",
+                (uint32_t)displayId);
         }
+    }
+
+    if (!defaultDisplay) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "DisplayManager failed to get display by id: %{public}u", (uint32_t)displayId);
     }
 }
 

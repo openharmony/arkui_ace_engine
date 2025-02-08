@@ -188,6 +188,15 @@ void SetSubWindowCutout(const RefPtr<PipelineBase> parentPipeline, int32_t child
     subSafeAreaManager->SetUseCutout(parentUseCutout);
 }
 
+Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    CHECK_NULL_RETURN(defaultDisplay, Size());
+
+    // @todo: parentWindow is sceneboard or crossDisplay, return fullscreen size
+    return Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+}
+
 bool SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -238,13 +247,17 @@ bool SubwindowOhos::InitContainer()
             isAppSubwindow = true;
         }
         auto displayId = parentContainer->GetCurrentDisplayId();
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-            "The display id obtained from parent window is %{public}u", (uint32_t)displayId);
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
         if (!defaultDisplay) {
-            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager GetDefaultDisplay failed");
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager failed to getDisplay by id: %{public}u",
+                (uint32_t)displayId);
             return false;
         }
+
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
+            (uint32_t)displayId, defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        auto windowSize = GetSubWindowSize(parentContainerId_, displayId);
+        windowOption->SetWindowRect({ 0, 0, windowSize.Width(), windowSize.Height() });
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
@@ -414,10 +427,8 @@ std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& 
 void SubwindowOhos::ResizeWindow()
 {
     CHECK_NULL_VOID(window_);
-    auto displayId = window_->GetDisplayId();
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    CHECK_NULL_VOID(defaultDisplay);
-    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    auto windowSize = GetSubWindowSize(parentContainerId_, window_->GetDisplayId());
+    auto ret = window_->Resize(windowSize.Width(), windowSize.Height());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
             static_cast<int32_t>(ret));
@@ -1924,7 +1935,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus()
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
+        "foldStatus is changed, subwindowOhos is resized to [%{public}d, %{public}d, %{public}u, %{public}u]",
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 
