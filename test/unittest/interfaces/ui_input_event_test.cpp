@@ -31,15 +31,15 @@ constexpr uint64_t ARKUI_TIME = 20;
 constexpr ArkUI_Int32 AXIS_UPDATE = 2;
 constexpr float ARKUI_X = 2.0;
 constexpr float ARKUI_Y = 3.0;
-constexpr float ARKUI_Width = 2.0;
-constexpr float ARKUI_Height = 3.0;
-constexpr double ARKUI_TiltX = 2.0;
-constexpr double ARKUI_TiltY = 3.0;
-constexpr double ARKUI_Pressure = 1.0;
-constexpr int32_t ARKUI_SourceType = 1;
-constexpr int32_t ARKUI_ToolType = 7;
-constexpr ArkUI_Uint64 ARKUI_ModifierKeyState = 1;
-constexpr ArkUI_Uint32 ARKUI_PointerCount = 2;
+constexpr float ARKUI_WIDTH = 2.0;
+constexpr float ARKUI_HEIGHT = 3.0;
+constexpr double ARKUI_TILTX = 2.0;
+constexpr double ARKUI_TILTY = 3.0;
+constexpr double ARKUI_PRESSURE = 1.0;
+constexpr int32_t ARKUI_SOURCETYPE = 1;
+constexpr int32_t ARKUI_TOOLTYPE = 7;
+constexpr ArkUI_Uint64 ARKUI_MODIFIERKEYSTATE = 1;
+constexpr ArkUI_Uint32 ARKUI_POINTERCOUNTER = 2;
 } // namespace
 class UIInputEventTest : public testing::Test {
 public:
@@ -231,11 +231,11 @@ HWTEST_F(UIInputEventTest, AxisEventGetActionTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeInputTest001
- * @tc.desc: Test OH_ArkUI_NodeEvent_GetEventType function.
+ * @tc.name: CapiInputTest001
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTest, NativeNodeInputTest001, TestSize.Level1)
+HWTEST_F(UIInputEventTest, CapiInputTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
@@ -248,7 +248,7 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest001, TestSize.Level1)
     event.clickEvent.localX = ARKUI_X;
     event.clickEvent.localY = ARKUI_Y;
     event.clickEvent.timestamp = ARKUI_TIME;
-    event.clickEvent.sourceType = ARKUI_SourceType;
+    event.clickEvent.sourceType = ARKUI_SOURCETYPE;
     event.clickEvent.windowX = ARKUI_X;
     event.clickEvent.windowY = ARKUI_Y;
     event.clickEvent.displayX = ARKUI_X;
@@ -257,15 +257,6 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest001, TestSize.Level1)
     event.clickEvent.targetPositionY = ARKUI_Y;
     event.clickEvent.targetGlobalPositionX = ARKUI_X;
     event.clickEvent.targetGlobalPositionY = ARKUI_Y;
-    event.clickEvent.width = ARKUI_Width;
-    event.clickEvent.height = ARKUI_Height;
-    event.clickEvent.tiltX = ARKUI_TiltX;
-    event.clickEvent.tiltY = ARKUI_TiltY;
-    event.clickEvent.pressure = ARKUI_Pressure;
-    event.clickEvent.toolType = ARKUI_ToolType;
-    event.clickEvent.deviceId = ARKUI_DEVICE_ID;
-    event.clickEvent.modifierKeyState = ARKUI_ModifierKeyState;
-    event.clickEvent.clickPointSize = ARKUI_PointerCount;
     uiInputEvent.inputEvent = &event.clickEvent;
     uiInputEvent.eventTypeId = C_CLICK_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -278,7 +269,7 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest001, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetX(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetY(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTime(inputEvent), ARKUI_TIME);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SourceType);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SOURCETYPE);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowX(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowY(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetDisplayX(inputEvent), ARKUI_X);
@@ -287,23 +278,58 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest001, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionY(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(inputEvent), ARKUI_Y);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_Width);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Height);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_TiltX);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_TiltY);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_Pressure);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_ToolType));
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_ModifierKeyState);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerCount(inputEvent), ARKUI_PointerCount);
 }
 
 /**
- * @tc.name: NativeNodeInputTest002
- * @tc.desc: Test OH_ArkUI_NodeEvent_GetEventType function.
+ * @tc.name: CapiInputTest002
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTest, NativeNodeInputTest002, TestSize.Level1)
+HWTEST_F(UIInputEventTest, CapiInputTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::CLICK_EVENT;
+    event.clickEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    event.clickEvent.width = ARKUI_WIDTH;
+    event.clickEvent.height = ARKUI_HEIGHT;
+    event.clickEvent.tiltX = ARKUI_TILTX;
+    event.clickEvent.tiltY = ARKUI_TILTY;
+    event.clickEvent.pressure = ARKUI_PRESSURE;
+    event.clickEvent.toolType = ARKUI_TOOLTYPE;
+    event.clickEvent.deviceId = ARKUI_DEVICE_ID;
+    event.clickEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    event.clickEvent.clickPointSize = ARKUI_POINTERCOUNTER;
+    uiInputEvent.inputEvent = &event.clickEvent;
+    uiInputEvent.eventTypeId = C_CLICK_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_WIDTH);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_HEIGHT);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_TILTX);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_TILTY);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_PRESSURE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerCount(inputEvent), ARKUI_POINTERCOUNTER);
+}
+
+/**
+ * @tc.name: CapiInputTest003
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
@@ -319,21 +345,21 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest002, TestSize.Level1)
     event.hoverEvent.targetPositionY = ARKUI_Y;
     event.hoverEvent.targetGlobalPositionX = ARKUI_X;
     event.hoverEvent.targetGlobalPositionY = ARKUI_Y;
-    event.hoverEvent.width = ARKUI_Width;
-    event.hoverEvent.height = ARKUI_Height;
+    event.hoverEvent.width = ARKUI_WIDTH;
+    event.hoverEvent.height = ARKUI_HEIGHT;
     // deviceid
     event.hoverEvent.deviceId = ARKUI_DEVICE_ID;
     // modifierkeystates
-    event.hoverEvent.modifierKeyState = ARKUI_ModifierKeyState;
+    event.hoverEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
     // timestamp
     event.hoverEvent.timeStamp = ARKUI_TIME;
     // sourcetool
-    event.hoverEvent.toolType = ARKUI_ToolType;
+    event.hoverEvent.toolType = ARKUI_TOOLTYPE;
     // source
-    event.hoverEvent.sourceType = ARKUI_SourceType;
+    event.hoverEvent.sourceType = ARKUI_SOURCETYPE;
     // tiltX tiltY
-    event.hoverEvent.tiltX = ARKUI_TiltX;
-    event.hoverEvent.tiltY = ARKUI_TiltY;
+    event.hoverEvent.tiltX = ARKUI_TILTX;
+    event.hoverEvent.tiltY = ARKUI_TILTY;
     // stoppropagation
     event.hoverEvent.stopPropagation = false;
     uiInputEvent.inputEvent = &event.hoverEvent;
@@ -346,18 +372,18 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest002, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTime(inputEvent), ARKUI_TIME);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SourceType);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SOURCETYPE);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionX(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetPositionY(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_TiltX);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_TiltY);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_ToolType));
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_TILTX);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_TILTY);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_ModifierKeyState);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
     EXPECT_TRUE(OH_ArkUI_HoverEvent_IsHovered(inputEvent));
     const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(inputEvent->inputEvent);
     EXPECT_FALSE(hoverEvent->stopPropagation);
@@ -366,11 +392,11 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeInputTest003
- * @tc.desc: Test OH_ArkUI_NodeEvent_GetEventType function.
+ * @tc.name: CapiInputTest004
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTest, NativeNodeInputTest003, TestSize.Level1)
+HWTEST_F(UIInputEventTest, CapiInputTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
@@ -384,12 +410,12 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest003, TestSize.Level1)
     event.touchEvent.targetPositionY = ARKUI_Y;
     event.touchEvent.targetGlobalPositionX = ARKUI_X;
     event.touchEvent.targetGlobalPositionY = ARKUI_Y;
-    event.touchEvent.width = ARKUI_Width;
-    event.touchEvent.height = ARKUI_Height;
+    event.touchEvent.width = ARKUI_WIDTH;
+    event.touchEvent.height = ARKUI_HEIGHT;
     // deviceid
     event.touchEvent.deviceId = ARKUI_DEVICE_ID;
     // modifierkeystates
-    event.touchEvent.modifierKeyState = ARKUI_ModifierKeyState;
+    event.touchEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
     uiInputEvent.inputEvent = &event.touchEvent;
     uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -406,15 +432,15 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest003, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_ModifierKeyState);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
 }
 
 /**
- * @tc.name: NativeNodeInputTest004
- * @tc.desc: Test OH_ArkUI_NodeEvent_GetEventType function.
+ * @tc.name: CapiInputTest005
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTest, NativeNodeInputTest004, TestSize.Level1)
+HWTEST_F(UIInputEventTest, CapiInputTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
@@ -429,18 +455,18 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest004, TestSize.Level1)
     event.mouseEvent.targetPositionY = ARKUI_Y;
     event.mouseEvent.targetGlobalPositionX = ARKUI_X;
     event.mouseEvent.targetGlobalPositionY = ARKUI_Y;
-    event.mouseEvent.width = ARKUI_Width;
-    event.mouseEvent.height = ARKUI_Height;
+    event.mouseEvent.width = ARKUI_WIDTH;
+    event.mouseEvent.height = ARKUI_HEIGHT;
     // deviceid
     event.mouseEvent.deviceId = ARKUI_DEVICE_ID;
     // modifierkeystates
-    event.mouseEvent.modifierKeyState = ARKUI_ModifierKeyState;
+    event.mouseEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
     // pressure
-    event.mouseEvent.actionTouchPoint.pressure = ARKUI_Pressure;
+    event.mouseEvent.actionTouchPoint.pressure = ARKUI_PRESSURE;
     // toolType
-    event.mouseEvent.actionTouchPoint.toolType = ARKUI_ToolType;
+    event.mouseEvent.actionTouchPoint.toolType = ARKUI_TOOLTYPE;
     // source
-    event.mouseEvent.sourceType = ARKUI_SourceType;
+    event.mouseEvent.sourceType = ARKUI_SOURCETYPE;
     // stoppropagation
     event.mouseEvent.stopPropagation = false;
     uiInputEvent.inputEvent = &event.mouseEvent;
@@ -459,10 +485,10 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest004, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_ModifierKeyState);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_Pressure);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SourceType);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_ToolType));
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_PRESSURE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SOURCETYPE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
     const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(inputEvent->inputEvent);
     EXPECT_FALSE(mouseEvent->stopPropagation);
     OH_ArkUI_PointerEvent_SetStopPropagation(inputEvent, true);
@@ -470,11 +496,11 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeInputTest005
- * @tc.desc: Test OH_ArkUI_NodeEvent_GetEventType function.
+ * @tc.name: CapiInputTest006
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTest, NativeNodeInputTest005, TestSize.Level1)
+HWTEST_F(UIInputEventTest, CapiInputTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
@@ -489,12 +515,12 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest005, TestSize.Level1)
     event.focusAxisEvent.targetPositionY = ARKUI_Y;
     event.focusAxisEvent.targetGlobalPositionX = ARKUI_X;
     event.focusAxisEvent.targetGlobalPositionY = ARKUI_Y;
-    event.focusAxisEvent.width = ARKUI_Width;
-    event.focusAxisEvent.height = ARKUI_Height;
+    event.focusAxisEvent.width = ARKUI_WIDTH;
+    event.focusAxisEvent.height = ARKUI_HEIGHT;
     // deviceid
     event.focusAxisEvent.deviceId = ARKUI_DEVICE_ID;
     // modifierkeystates
-    event.focusAxisEvent.modifierKeyState = ARKUI_ModifierKeyState;
+    event.focusAxisEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
     uiInputEvent.inputEvent = &event.focusAxisEvent;
     uiInputEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -511,15 +537,15 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest005, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_ModifierKeyState);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
 }
 
 /**
- * @tc.name: NativeNodeInputTest006
- * @tc.desc: Test OH_ArkUI_NodeEvent_GetEventType function.
+ * @tc.name: CapiInputTest007
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTest, NativeNodeInputTest006, TestSize.Level1)
+HWTEST_F(UIInputEventTest, CapiInputTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
@@ -532,7 +558,7 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest006, TestSize.Level1)
     // deviceid
     event.keyEvent.deviceId = ARKUI_DEVICE_ID;
     // modifierkeystates
-    event.keyEvent.modifierKeyState = ARKUI_ModifierKeyState;
+    event.keyEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
     uiInputEvent.inputEvent = &event.mouseEvent;
     uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -543,6 +569,164 @@ HWTEST_F(UIInputEventTest, NativeNodeInputTest006, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_ModifierKeyState);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest001
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_InteractionHand *hand = nullptr;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(uiInputEvent.get(), hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest002
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(uiInputEvent.get(), &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest003
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest003, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.touchEvent.actionTouchPoint.operatingHand = ARKUI_EVENT_HAND_LEFT;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(&uiInputEvent, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_LEFT);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandTest004
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandTest004, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.touchEvent.actionTouchPoint.operatingHand = ARKUI_EVENT_HAND_RIGHT;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHand(&uiInputEvent, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_RIGHT);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest001
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand *hand = nullptr;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(uiInputEvent.get(), 0, hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest002
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(uiInputEvent.get(), 0, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest003
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest003, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    auto result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(uiInputEvent.get(), 0, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
+}
+
+/**
+ * @tc.name: PointerEventGetInteractionHandByIndexTest004
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_GetInteractionHandByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest004, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    ArkUITouchPoint points[2]; // 2 points
+    points[0].operatingHand = ARKUI_EVENT_HAND_LEFT;
+    points[1].operatingHand = ARKUI_EVENT_HAND_RIGHT;
+    event.touchEvent.touchPointes = points;
+    event.touchEvent.touchPointSize = 2;  // 2 points
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUI_InteractionHand hand = ARKUI_EVENT_HAND_NONE;
+    int32_t result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(&uiInputEvent, 0, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_LEFT);
+
+    hand = ARKUI_EVENT_HAND_NONE;
+    result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(&uiInputEvent, 1, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_RIGHT);
+
+    hand = ARKUI_EVENT_HAND_NONE;
+    // 2 is out of range
+    result = OH_ArkUI_PointerEvent_GetInteractionHandByIndex(&uiInputEvent, 2, &hand);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
 }
 } // namespace OHOS::Ace

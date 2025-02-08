@@ -56,6 +56,7 @@ public:
     virtual void SetOnPop(std::function<void(const RefPtr<NG::NavPathInfo>&)>&& onPop) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetHideItemText(bool isHideItemText) {};
     virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
@@ -81,6 +82,7 @@ public:
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) {}
     virtual void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
+    virtual void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

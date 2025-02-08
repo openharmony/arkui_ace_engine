@@ -37,22 +37,23 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
-#include "core/components_ng/manager/form_visible/form_visible_manager.h"
-#include "core/components_ng/manager/form_event/form_event_manager.h"
-#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
-#include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #endif
+#include "core/common/ace_translate_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
@@ -60,6 +61,10 @@
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
+namespace OHOS::Ace::Kit {
+class UIContext;
+class UIContextImpl;
+}
 
 namespace OHOS::Ace::NG {
 
@@ -290,6 +295,8 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void WindowActivate(bool isActive) override;
+
     void ContainerModalUnFocus() override;
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
@@ -420,8 +427,6 @@ public:
 
     virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
 
-    virtual SafeAreaInsets GetScbSafeArea() const;
-
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
@@ -473,9 +478,15 @@ public:
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
 
+    void AddWindowActivateChangedCallback(int32_t nodeId);
+
+    void RemoveWindowActivateChangedCallback(int32_t nodeId);
+
     void AddWindowSizeChangeCallback(int32_t nodeId);
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
+
+    void AddWindowSizeDragEndCallback(std::function<void()>&& callback);
 
     void AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode);
 
@@ -1066,6 +1077,21 @@ public:
     std::string GetBundleName();
     std::string GetModuleName();
 
+    void SaveTranslateManager(std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager)
+    {
+        uiTranslateManager_ = uiTranslateManager;
+    }
+    
+    void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
+    {
+        uiTranslateManager_->AddTranslateListener(node);
+    }
+
+    void UnRegisterListenerForTranslate(int32_t nodeId)
+    {
+        uiTranslateManager_->RemoveTranslateListener(nodeId);
+    }
+
     void SetEnableSwipeBack(bool isEnable) override;
 
     Offset GetHostParentOffsetToWindow() const
@@ -1074,6 +1100,17 @@ public:
     }
 
     void SetHostParentOffsetToWindow(const Offset& offset);
+
+    RefPtr<Kit::UIContext> GetUIContext();
+    void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
+    void FlushPendingDeleteCustomNode();
+
+    bool IsWindowSizeDragging() const
+    {
+        return isWindowSizeDragging_;
+    }
+
+    void SetIsWindowSizeDragging(bool isDragging);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1119,6 +1156,8 @@ private:
     void FlushWindowStateChangedCallback(bool isShow);
 
     void FlushWindowFocusChangedCallback(bool isFocus);
+
+    void FlushWindowActivateChangedCallback(bool isActivate);
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
@@ -1180,7 +1219,8 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+                nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
                 return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
@@ -1206,6 +1246,7 @@ private:
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
     std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
+    std::stack<RefPtr<CustomNode>> pendingDeleteCustomNode_;
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
@@ -1214,8 +1255,12 @@ private:
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
     std::set<int32_t> onWindowFocusChangedCallbacks_;
+    // window on activate or on unactivate
+    std::set<int32_t> onWindowActivateChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
+    // window size drag end
+    std::list<std::function<void()>> onWindowSizeDragEndCallbacks_;
 
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
@@ -1284,6 +1329,7 @@ private:
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
+    bool isWindowSizeDragging_ = false;
     KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
@@ -1358,6 +1404,8 @@ private:
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
 
+    RefPtr<Kit::UIContextImpl> uiContextImpl_;
+    std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
     friend class ScopedLayout;
     friend class FormGestureManager;
 };

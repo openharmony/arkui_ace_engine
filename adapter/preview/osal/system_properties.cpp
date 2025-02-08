@@ -51,6 +51,7 @@ bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
 bool SystemProperties::accessTraceEnable_ = false;
+bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -335,6 +336,11 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
 }
 
 bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
+}
+
+bool SystemProperties::IsBigFoldProduct()
 {
     return false;
 }

@@ -204,6 +204,31 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddClickEvent(onClick_);
 }
 
+RectF DialogPattern::GetContentRect(const RefPtr<FrameNode>& contentNode)
+{
+    auto contentRect = contentNode->GetGeometryNode()->GetFrameRect();
+    if (!dialogProperties_.customStyle) {
+        return contentRect;
+    }
+
+    RefPtr<FrameNode> customContent;
+    auto customNode = customNode_.Upgrade();
+    while (customNode) {
+        customContent = DynamicCast<FrameNode>(customNode);
+        if (customContent) {
+            break;
+        }
+        customNode = customNode->GetChildAtIndex(0);
+    }
+    CHECK_NULL_RETURN(customContent, contentRect);
+
+    auto customContentRect = customContent->GetGeometryNode()->GetFrameRect();
+    auto customContentX = contentRect.GetX() + customContentRect.GetX();
+    auto customContentY = contentRect.GetY() + customContentRect.GetY();
+    contentRect.SetRect(customContentX, customContentY, customContentRect.Width(), customContentRect.Height());
+    return contentRect;
+}
+
 void DialogPattern::HandleClick(const GestureEvent& info)
 {
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
@@ -218,7 +243,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
     if (autoCancel) {
         auto content = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(content);
-        auto contentRect = content->GetGeometryNode()->GetFrameRect();
+        auto contentRect = GetContentRect(content);
         // close dialog if clicked outside content rect
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
@@ -716,15 +741,16 @@ void DialogPattern::ParseButtonFontColorAndBgColor(
     }
 
     // Parse default focus
+    bool isNormalButton = dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL;
     if (textColor.empty()) {
-        if (params.defaultFocus && isFirstDefaultFocus_) {
+        if (params.defaultFocus && isFirstDefaultFocus_ && !isNormalButton) {
             textColor = dialogTheme_->GetButtonHighlightFontColor().ColorToString();
         } else {
             textColor = dialogTheme_->GetButtonDefaultFontColor().ColorToString();
         }
     }
     if (!bgColor.has_value()) {
-        if (params.defaultFocus && isFirstDefaultFocus_) {
+        if (params.defaultFocus && isFirstDefaultFocus_ && !isNormalButton) {
             bgColor = dialogTheme_->GetButtonHighlightBgColor();
             isFirstDefaultFocus_ = false;
         } else {
@@ -745,6 +771,13 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     std::optional<Color> bgColor;
     isFirstDefaultFocus_ = true;
     ParseButtonFontColorAndBgColor(params, textColor, bgColor);
+    if ((dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) && params.dlgButtonStyle.has_value()) {
+        auto buttonStyle = params.dlgButtonStyle.value() == DialogButtonStyle::HIGHTLIGHT ? ButtonStyleMode::EMPHASIZE
+                                                                                          : ButtonStyleMode::NORMAL;
+        auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+        CHECK_NULL_RETURN(buttonProp, nullptr);
+        buttonProp->UpdateButtonStyle(buttonStyle);
+    }
 
     // append text inside button
     auto textNode = CreateButtonText(params.text, textColor);

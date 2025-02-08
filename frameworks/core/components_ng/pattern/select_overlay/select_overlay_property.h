@@ -80,6 +80,7 @@ struct SelectHandleInfo {
     bool needLayout = false;
     bool isPaintHandleWithPoints = false;
     bool isCircleShow = true;
+    bool forceDraw = false;
     // in Global coordinates.
     RectF paintRect;
     RectF localPaintRect;
@@ -142,8 +143,8 @@ enum class OptionMenuActionId {
     PASTE,
     SELECT_ALL,
     TRANSLATE,
-    SEARCH,
     SHARE,
+    SEARCH,
     CAMERA_INPUT,
     AI_WRITE,
     APPEAR,
@@ -156,7 +157,8 @@ enum class CloseReason {
     CLOSE_REASON_TOOL_BAR,
     CLOSE_REASON_BACK_PRESSED,
     CLOSE_REASON_CLICK_OUTSIDE,
-    CLOSE_REASON_DRAG_FLOATING
+    CLOSE_REASON_DRAG_FLOATING,
+    CLOSE_REASON_WINDOW_SIZE_CHANGE
 };
 
 struct HoldSelectionInfo {
@@ -183,7 +185,7 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
-    bool showTranslate = true;
+    bool showTranslate = false;
     bool showSearch = false;
     bool showShare = false;
     bool showCameraInput = false;
@@ -368,8 +370,28 @@ struct SelectOverlayInfo {
     void GetCallerNodeAncestorViewPort(RectF& viewPort);
     const RectF& GetFirstHandlePaintRect();
     const RectF& GetSecondHandlePaintRect();
+    bool enableSubWindowMenu = false;
+    OffsetF containerModalOffset;
 };
 
+enum class TextMenuShowMode {
+    BEGIN = -1,
+    UNSPECIFIED = BEGIN,
+    // Display the text selection menu in the current window
+    DEFAULT = 0,
+    /**
+     * Prefer to display the text selection menu in a separate window
+     * and continue to display it within the current window if a separate window is not supported
+     */
+    PREFER_WINDOW = 1,
+    END = PREFER_WINDOW,
+};
+
+TextMenuShowMode CastToTextMenuShowMode(int32_t value);
+
+struct TextMenuOptions {
+    std::optional<TextMenuShowMode> showMode;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_OVERLAY_PROPERTY_H

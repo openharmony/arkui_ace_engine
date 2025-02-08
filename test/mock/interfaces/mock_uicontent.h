@@ -96,6 +96,7 @@ public:
     MOCK_METHOD1(SetParentToken, void(sptr<IRemoteObject> token));
     MOCK_METHOD0(GetParentToken, sptr<IRemoteObject>());
 
+    MOCK_METHOD0(GetContainerModalTitleVisible, bool());
     MOCK_METHOD2(SetContainerModalTitleVisible, void(bool customTitleSettedShow, bool floatingTitleSettedShow));
     MOCK_METHOD1(SetContainerModalTitleHeight, void(int height));
     MOCK_METHOD0(GetContainerModalTitleHeight, int());

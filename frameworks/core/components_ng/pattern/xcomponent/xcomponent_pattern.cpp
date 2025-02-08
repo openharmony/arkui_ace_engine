@@ -42,7 +42,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
-#include "ui/rs_ext_node_operation.h"
+#include "feature/anco_manager/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 
@@ -59,6 +59,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+
 std::string XComponentTypeToString(XComponentType type)
 {
     switch (type) {
@@ -237,6 +239,7 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {

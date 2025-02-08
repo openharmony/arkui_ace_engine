@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
+constexpr double DEFAULT_PROGRESS_TOTAL = 100;
 constexpr int32_t MIN_COLOR_STOPS_VALUE_INDEX = 0;
 constexpr int32_t MIN_COLOR_STOPS_HAS_DIMENSION_INDEX = 1;
 constexpr int32_t MIN_COLOR_STOPS_DIMENSION_INDEX = 2;
@@ -36,6 +37,8 @@ constexpr double DEFAULT_FONT_SIZE = 12;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+constexpr float STROKEWIDTH_DEFAULT_VALUE = 4.0f;
+
 /**
  * @param colors color value
  * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
@@ -77,6 +80,7 @@ void ResetProgressValue(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
+    ProgressModelNG::SetTotal(frameNode, DEFAULT_PROGRESS_TOTAL);
 }
 
 
@@ -424,8 +428,12 @@ void GetProgressLinearStyle(ArkUINodeHandle node, ArkUIProgressLinearStyleOption
 
     option.scanEffectEnable = paintProperty->GetEnableLinearScanEffect().value_or(false);
     option.smoothEffectEnable = paintProperty->GetEnableSmoothEffect().value_or(true);
-    option.strokeWidth = layoutProperty->GetStrokeWidth().value_or(Dimension(4.0_vp)).Value();
-    option.strokeRadius = paintProperty->GetStrokeRadiusValue(Dimension(2.0_vp)).Value();
+    auto strokeWidth = layoutProperty->GetStrokeWidth().value_or(
+        Dimension(STROKEWIDTH_DEFAULT_VALUE, DimensionUnit::VP)).Value();
+    option.strokeWidth = strokeWidth;
+    auto strokeRadius = paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth / 2.0f, DimensionUnit::VP)).Value();
+    strokeRadius = std::min(strokeWidth / 2.0f, strokeRadius);
+    option.strokeRadius = strokeRadius;
 }
 
 void SetProgressInitialize(

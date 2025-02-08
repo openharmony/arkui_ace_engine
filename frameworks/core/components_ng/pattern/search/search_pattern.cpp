@@ -836,7 +836,6 @@ void SearchPattern::OnClickCancelButton()
     textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateValue(u"");
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -2262,7 +2261,6 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
         index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
     layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                 : GetSearchNode()->GetCancelSymbolIconColor()});
-    layoutProperty->UpdateTextColorFlagByUser(false);
     float maxFontScale = MAX_FONT_SCALE;
     if (layoutProperty->GetFontSize()->Unit() != DimensionUnit::VP) {
         maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
@@ -2705,6 +2703,31 @@ float SearchPattern::GetMinFontScale()
         minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
     }
     return minFontScale;
+}
+
+bool SearchPattern::IsShowCancelButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, false);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto style = static_cast<int16_t>(layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT));
+    bool isEventEnabled = IsEventEnabled(textFieldPattern->GetTextUtf16Value(), style);
+    return isEventEnabled;
+}
+
+bool SearchPattern::IsShowSearchButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto searchButton = layoutProperty->GetSearchButton();
+    return searchButton.has_value();
 }
 
 } // namespace OHOS::Ace::NG

@@ -65,7 +65,6 @@ constexpr int32_t RATIO_ZERO = 0;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 constexpr int32_t NODE_ZERO = 0;
-constexpr int32_t NODE_TWO = 2;
 constexpr int32_t FIRST_STACK  = 0;
 constexpr int32_t SECOND_STACK = 1;
 constexpr int32_t FIRST_PAGE  = 0;
@@ -515,17 +514,47 @@ void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNod
     for (uint32_t index = 0; index < dateNode->GetChildren().size(); index++) {
         auto dateStackNode = AceType::DynamicCast<FrameNode>(dateNode->GetChildAtIndex(index));
         CHECK_NULL_VOID(dateStackNode);
-        auto result = UpdateVisibilityForNode(dateStackNode, isSwitchByTitle, index);
-        CHECK_NULL_VOID(result);
+        auto layoutProperty = dateStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        for (uint32_t k = 0; k < dateStackNode->GetChildren().size(); k++) {
+            auto dateChildNode = AceType::DynamicCast<FrameNode>(dateStackNode->GetChildAtIndex(k));
+            CHECK_NULL_VOID(dateChildNode);
+            auto dateChildNodeLayoutProperty = dateChildNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(dateChildNodeLayoutProperty);
+            UpdateDateNodeVisibilityAndWeight(layoutProperty, dateChildNodeLayoutProperty, isSwitchByTitle, index);
+            dateChildNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        }
     }
 
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
-    datePickerPattern->SetCurrentFocusKeyID(switchDatePickerFlag_ ? SECOND_STACK : FIRST_STACK);
-    datePickerPattern->SetCurrentPage(switchDatePickerFlag_ ? SECOND_PAGE : FIRST_PAGE);
+    if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
+        datePickerPattern->SetCurrentFocusKeyID(FIRST_STACK);
+    } else if (datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
+        datePickerPattern->SetCurrentFocusKeyID(SECOND_STACK);
+    } else {
+        datePickerPattern->SetCurrentFocusKeyID(switchDatePickerFlag_ ? SECOND_STACK : FIRST_STACK);
+    }
+    datePickerPattern->SetCurrentPage((switchDatePickerFlag_ && !isSwitchByTitle) ? SECOND_PAGE : FIRST_PAGE);
 
     switchDatePickerFlag_ = !switchDatePickerFlag_;
     dateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void DatePickerDialogView::UpdateDateNodeVisibilityAndWeight(const RefPtr<LayoutProperty>& layoutProperty,
+    const RefPtr<LayoutProperty>& dateChildNodeLayoutProperty, bool isSwitchByTitle, uint32_t index)
+{
+    if (!switchDatePickerFlag_ || isSwitchByTitle) {
+        if (!isShowTime_ && datePickerMode_ != DatePickerMode::DATE) {
+            return;
+        }
+        dateChildNodeLayoutProperty->UpdateVisibility((index == NODE_ZERO) ? VisibleType::VISIBLE : VisibleType::GONE);
+        switchDatePickerFlag_ = false;
+        layoutProperty->UpdateLayoutWeight((index == NODE_ZERO) ? RATIO_TWO : RATIO_ZERO);
+    } else {
+        dateChildNodeLayoutProperty->UpdateVisibility((index == NODE_ZERO) ? VisibleType::GONE : VisibleType::VISIBLE);
+        layoutProperty->UpdateLayoutWeight((index == NODE_ZERO) ? RATIO_ZERO : RATIO_ONE);
+    }
 }
 
 void DatePickerDialogView::UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode)
@@ -549,61 +578,6 @@ void DatePickerDialogView::UpdateTimePickerChildrenStatus(const RefPtr<FrameNode
             layoutProperty->UpdateLayoutWeight(switchTimePickerFlag_ ? 0 : RATIO_TWO);
             childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
-    }
-}
-
-bool DatePickerDialogView::UpdateVisibilityForNode(const RefPtr<FrameNode>& dateStackNode,
-    bool isSwitchByTitle, uint32_t index)
-{
-    auto layoutProperty = dateStackNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    UpdateDateStackNodeVisibility(layoutProperty, isSwitchByTitle, index);
-    UpdateDateStackNodeWeight(layoutProperty, isSwitchByTitle, index);
-    for (uint32_t k = 0; k < dateStackNode->GetChildren().size(); k++) {
-        auto dateChildNode = AceType::DynamicCast<FrameNode>(dateStackNode->GetChildAtIndex(k));
-        CHECK_NULL_RETURN(dateChildNode, false);
-        auto dateChildNodeLayoutProperty = dateChildNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(dateChildNodeLayoutProperty, false);
-        if ((!switchDatePickerFlag_ || isSwitchByTitle)) {
-            switchDatePickerFlag_ = false;
-            if (datePickerMode_ == DatePickerMode::DATE) {
-                dateChildNodeLayoutProperty->UpdateVisibility((NODE_ZERO == index) ?
-                    VisibleType::VISIBLE : VisibleType::GONE);
-            }
-        } else {
-            dateChildNodeLayoutProperty->UpdateVisibility((NODE_ZERO == index) ?
-                VisibleType::GONE : VisibleType::VISIBLE);
-        }
-        dateChildNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    }
-    return true;
-}
-
-void DatePickerDialogView::UpdateDateStackNodeVisibility(const RefPtr<LayoutProperty>& layoutProperty,
-    bool isSwitchByTitle, uint32_t index)
-{
-    if (isShowTime_ && datePickerMode_ == DatePickerMode::DATE) {
-        if ((!switchDatePickerFlag_ || isSwitchByTitle)) {
-            layoutProperty->UpdateVisibility((NODE_ZERO == index) ? VisibleType::VISIBLE : VisibleType::GONE);
-        } else {
-            layoutProperty->UpdateVisibility((NODE_ZERO == index) ? VisibleType::GONE : VisibleType::VISIBLE);
-        }
-    }
-}
-
-void DatePickerDialogView::UpdateDateStackNodeWeight(const RefPtr<LayoutProperty>& layoutProperty,
-    bool isSwitchByTitle, uint32_t index)
-{
-    if ((!switchDatePickerFlag_ || isSwitchByTitle)) {
-        if (datePickerMode_ == DatePickerMode::DATE) {
-            layoutProperty->UpdateLayoutWeight((NODE_ZERO == index) ? RATIO_TWO : RATIO_ZERO);
-        } else if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
-            layoutProperty->UpdateLayoutWeight((NODE_TWO == index) ? RATIO_ZERO : RATIO_ONE);
-        } else if (datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
-            layoutProperty->UpdateLayoutWeight((NODE_ZERO == index) ? RATIO_ZERO : RATIO_ONE);
-        }
-    } else {
-        layoutProperty->UpdateLayoutWeight((NODE_ZERO == index) ? RATIO_ZERO : RATIO_ONE);
     }
 }
 
@@ -1809,9 +1783,10 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
         if (NeedAdaptForAging()) {
             switchTimePickerFlag_ = true;
             SwitchTimePickerPage(monthDaysNode, timeNode, contentRow);
+        } else {
+            timePickerPattern->SetFocusEnable();
         }
         datePickerPattern->SetFocusDisable();
-        timePickerPattern->SetFocusDisable();
         monthDaysPickerPattern->SetFocusEnable();
         monthDaysNode->MarkModifyDone();
     } else {

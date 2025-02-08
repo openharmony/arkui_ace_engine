@@ -1035,6 +1035,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0029, TestSize.Level1)
      * @tc.steps: step1. callback MarkRemoving.
      * @tc.expected: expect The function return value is true.
      */
+    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     FRAME_NODE2->AddChild(FRAME_NODE3);
     FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto mark = FRAME_NODE2->MarkRemoving();
@@ -1482,7 +1483,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback048, TestSize
     callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
     callbackInfo.period = minInterval;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
-    FRAME_NODE2->ProcessThrottledVisibleCallback();
+    FRAME_NODE2->ProcessThrottledVisibleCallback(false);
     EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
 }
 

@@ -269,6 +269,8 @@ public:
 
     void TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex);
 
+    RectF GetOriginalPaintRect(int32_t currentIndex);
+
     void HandleBottomTabBarChange(int32_t index);
 
     bool GetChangeByClick() const
@@ -678,6 +680,7 @@ private:
     void InitTabBarProperties(const RefPtr<TabTheme>& tabTheme);
     void InitFocusEvent();
     const Color& GetSubTabBarHoverColor(int32_t index) const;
+    void UpdateFocusToSelectedNode(bool isFocusActive);
     void UpdateFocusTabBarPageState();
     void UpdateSubTabBarItemStyles(const RefPtr<FrameNode>& columnNode, int32_t focusedColumnId,
         int32_t selectedColumnId, OHOS::Ace::Axis axis, int32_t index);

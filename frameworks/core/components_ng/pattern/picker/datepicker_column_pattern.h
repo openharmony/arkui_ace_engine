@@ -32,6 +32,10 @@
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -86,8 +90,12 @@ class DatePickerColumnPattern : public LinearLayoutPattern {
 
 public:
     DatePickerColumnPattern() : LinearLayoutPattern(true) {};
-
-    ~DatePickerColumnPattern() override = default;
+    ~DatePickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -275,6 +283,16 @@ public:
 
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController();
+    void SetSelectedMarkListener(std::function<void(std::string& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const std::string &strColumnId);
+#ifdef SUPPORT_DIGITAL_CROWN
+    std::string& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
 
 private:
     void OnModifyDone() override;
@@ -313,6 +331,13 @@ private:
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
+#endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);
     void ScrollOption(double delta, bool isJump = false);
@@ -403,9 +428,19 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<DatePickerColumnPattern>;
+    PickerColumnPatternCircleUtils<DatePickerColumnPattern> *circleUtils_ = nullptr;
+    std::string selectedColumnId_ = "";
+    std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

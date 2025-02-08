@@ -1865,26 +1865,78 @@ typedef enum {
     NODE_TAB_STOP = 98,
 
     /**
-     * @brief Defines blur attribute of backdrop, which can be set, reset, and obtained as required through APIs.
+     * @brief Defines the backdrop blur attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
-     * .value[1]?.f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
-     * The value range is [0,127].\n
-     * .value[2]?.f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
-     * The value range is [0,127].\n
+     * .value[0].f32：backdrop blur radius, in px. The value range is [0, +∞).\n
+     * .value[1]?.f32：grayscale blur settings that control the brightness of the black color.\n
+     * The value range is [0, 127].\n
+     * .value[2]?.f32：grayscale blur settings that control the darkness of the white color.\n
+     * The value range is [0, 127].\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
-     * .value[1].f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
-     * The value range is [0,127].\n
-     * .value[2].f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
-     * The value range is [0,127].\n
+     * .value[0].f32：backdrop blur radius, in px. The value range is [0, +∞).\n
+     * .value[1].f32：grayscale blur settings that control the brightness of the black color.\n
+     * The value range is [0, 127].\n
+     * .value[2].f32：grayscale blur settings that control the darkness of the white color.\n
+     * The value range is [0, 127].\n
      *
      * @since 16
      */
     NODE_BACKDROP_BLUR = 99,
 
+    /*
+     * @brief Defines the background image resizable attribute, which can be set, reset,
+     * and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32：width of the left edge. The unit is vp. \n
+     * .value[1].f32：width of the top edge. The unit is vp. \n
+     * .value[2].f32：width of the right edge. The unit is vp. \n
+     * .value[3].f32：width of the bottom edge. The unit is vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32：width of the left edge. The unit is vp. \n
+     * .value[1].f32：width of the top edge. The unit is vp. \n
+     * .value[2].f32：width of the right edge. The unit is vp. \n
+     * .value[3].f32：width of the bottom edge. The unit is vp. \n
+     *
+     * @since 16
+     */
+    NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE = 100,
+    
+    /**
+     * @brief Sets the next focus node.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: focus movement direction, as defined in {@link ArkUI_FocusMove}.
+     * .object: next focus node. The parameter type is {@link ArkUI_NodeHandle}.\n
+     * \n
+     *
+     */
+    NODE_NEXT_FOCUS = 101,
+
+    /**
+     * @brief Sets the parameters for visible area change events.
+     *
+     * @note The visible area change callback is not a real-time callback. The actual callback interval may differ from
+     * the expected interval due to system load and other factors.
+     * The interval between two visible area change callbacks will not be less than the expected update interval. If the
+     * provided expected interval is too short, the actual callback interval will be determined by the system load.
+     * By default, the interval threshold of the visible area change callback includes 0. This means that,
+     * if the provided threshold is [0.5], the effective threshold will be [0.0, 0.5].
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: parameters for visible area change events.
+     * The parameter type is {@link ArkUI_VisibleAreaEventOptions}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: parameters for visible area change events.
+     * The parameter type is {@link ArkUI_VisibleAreaEventOptions}. \n
+     *
+     */
+    NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO = 102,
+    
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -4973,6 +5025,22 @@ typedef enum {
     NODE_SCROLL_CLIP_CONTENT,
 
     /**
+     * @brief Defines whether the scrollable scrolls back to top when status bar is clicked.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the scrollable scrolls back to top when status bar is clicked. \n
+     * The value <b>1</b> means to scroll back to top, and <b>0</b> means the opposite.
+     * The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0]i.32: whether the scrollable scrolls back to top when status bar is clicked. \n
+     * 
+     * @since 16
+     */
+    NODE_SCROLL_BACK_TO_TOP,
+    
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *
@@ -6094,6 +6162,34 @@ typedef enum {
      *
     */
     NODE_IMAGE_ANIMATOR_ITERATION = 19006,
+    /**
+     * @brief Defines the disabled date range of the calendar picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: A string of dates. The `1st start date`,`1st end date`,`2nd start date`,`2nd end date`,
+     * ...,`nth start date`,`nth end date` of the disabled date range.\n
+     *  Example: 1910-01-01,1910-12-31,2020-01-01,2020-12-31\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: A string of dates.\n
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_DISABLED_DATE_RANGE = 16006,
+    /**
+     * @brief Defines whether the calendar picker marks today.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to the calendar picker marks today. The default value is: <b>false</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to the calendar picker marks today.
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_MARK_TODAY = 16007,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -6423,6 +6519,55 @@ typedef enum {
      * @since 16
      */
     NODE_DISPATCH_KEY_EVENT = 24,
+
+    /**
+     * @brief Defines the event triggered when the bound component receives an axis event.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     * 
+     * @since 16
+     */
+    NODE_ON_AXIS = 25,
+
+     /* @brief Defines the event triggered when the bound component is clicked.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}.  \n
+     *
+     * @since 16
+     */
+    NODE_ON_CLICK_EVENT = 26,
+
+    /**
+     * @brief Defines the event triggered when the mouse pointer hovers over or moves away from a component.
+     *
+     * This event is triggered when the mouse pointer enters or leaves the component's bounding box. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     *
+     *@since 16
+     */
+    NODE_ON_HOVER_EVENT = 27,
+
+    /**
+     * @brief Sets the callback for the NODE_EVENT_ON_VISIBLE_AREA_CHANGE event, which limits the callback interval.
+     *
+     * The callback is triggered when the ratio of the component's visible area to its total area is greater than or
+     * less than the threshold. Before registering the callback, you must configure the threshold and update interval
+     * using <b>NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO</b>. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: how the ratio of the component's visible area to its total area
+     * changes compared to the previous one. The value <b>1</b> indicates an increase, and <b>0</b> indicates
+     * a decrease. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area
+     * when this callback is invoked. \n
+     *
+     * @since 16
+     */
+    NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT = 28,
 
     /**
      * @brief Triggers onDetectResultUpdate callback
@@ -7026,6 +7171,31 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index of the element becomes selected. \n
      */
     NODE_SWIPER_EVENT_ON_SELECTED,
+
+    /**
+     * @brief Defines the event triggered when a new <b>ARKUI_NODE_SWIPER</b> instance becomes unselected.
+     * Animation is not necessarily complete.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index of the element becomes unselected. \n
+     */
+    NODE_SWIPER_EVENT_ON_UNSELECTED = 1001006,
+
+    /**
+     * @brief Defines the event triggered when content in the swiper component will scroll.
+     * Instructions: Before page scrolling, the </b>ContentWillScrollCallback</b> callback is invoked. \n \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index value of the current child page. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: the index value of the child page that will display. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: the sliding offset of each frame.
+     * Positive numbers indicating slide backward(e.g. from index=1 to index=0), negative numbers indicating
+     * slide forward(e.g. from index=0 to index=1). \n
+     */
+    NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL = 1001007,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
@@ -8868,6 +9038,49 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @since 16
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Obtains the index of the current FrameNode's first child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index The index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains the index of the current FrameNode's last child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index the index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains a subnode by position with the expand mode.
+ *
+ * @param node Indicates the target node.
+ * @param position Indicates the position of the subnode.
+ * @param subnode The pointer to the subnode.
+ * @param expandMode Indicates the expand mode. {@link ArkUI_ExpandMode}.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
+    ArkUI_NodeHandle* subnode, uint32_t expandMode);
+
 #ifdef __cplusplus
 };
 #endif

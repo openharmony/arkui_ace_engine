@@ -25,7 +25,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     startIndex_ = StartIndex();
     endIndex_ = EndIndex();
     if (startIndex_ > endIndex_) {
-        SyncOnEmptyLanes();
+        SyncOnEmptyLanes(mainSize);
         return;
     }
     const auto* startLane = GetLane(startIndex_);
@@ -39,7 +39,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     endPos_ = EndPos();
 
     prevItemStart_ = itemStart_;
-    itemStart_ = OverScrollTop();
+    itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
         itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
@@ -52,7 +52,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     }
 
     const float contentEnd = endPos_ + footerHeight_ + BotMargin();
-    offsetEnd_ = OverScrollBottom();
+    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(contentEnd, mainSize, 0.1f);
     maxHeight_ = std::max(-totalOffset_ + contentEnd, maxHeight_);
 
     newStartIndex_ = EMPTY_NEW_START_INDEX;
@@ -60,12 +60,12 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     synced_ = true;
 }
 
-bool WaterFlowLayoutInfoSW::OverScrollTop()
+bool WaterFlowLayoutInfoSW::IsAtTopWithDelta()
 {
-    return startIndex_ == 0 && NonNegative(startPos_ + delta_ - TopMargin());
+    return AtStartPos(startIndex_) && NonNegative(startPos_ + delta_ - TopMargin());
 }
 
-bool WaterFlowLayoutInfoSW::OverScrollBottom()
+bool WaterFlowLayoutInfoSW::IsAtBottomWithDelta()
 {
     return itemEnd_ && LessOrEqualCustomPrecision(endPos_ + delta_ + footerHeight_ + BotMargin(), lastMainSize_, 0.1f);
 }
@@ -144,7 +144,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         return res;
     }
     delta += delta_;
-    if (startIndex_ == 0) {
+    if (AtStartPos(startIndex_)) {
         float disToTop = -StartPosWithMargin();
         if (!itemStart_) {
             res.start = std::max(0.0f, delta - disToTop);
@@ -221,6 +221,10 @@ float WaterFlowLayoutInfoSW::EndPos() const
     if (synced_) {
         return endPos_;
     }
+    if (StartIndex() > EndIndex()) {
+        // when lanes_ is empty, the endPos of all section is same.
+        return lanes_[0][0].endPos;
+    }
     for (auto it = lanes_.rbegin(); it != lanes_.rend(); ++it) {
         if (SectionEmpty(*it)) {
             continue;
@@ -234,6 +238,10 @@ float WaterFlowLayoutInfoSW::StartPos() const
 {
     if (synced_) {
         return startPos_;
+    }
+    if (StartIndex() > EndIndex()) {
+        // when lanes_ is empty, the startPos of all section is same.
+        return lanes_[0][0].startPos;
     }
     for (const auto& section : lanes_) {
         if (SectionEmpty(section)) {
@@ -922,16 +930,18 @@ std::optional<float> WaterFlowLayoutInfoSW::GetCachedHeight(int32_t idx) const
     return std::nullopt;
 }
 
-void WaterFlowLayoutInfoSW::SyncOnEmptyLanes()
+void WaterFlowLayoutInfoSW::SyncOnEmptyLanes(float mainSize)
 {
-    startPos_ = 0.0f;
-    endPos_ = 0.0f;
-    itemStart_ = true;
+    startPos_ = StartPos();
+    endPos_ = EndPos();
+    itemStart_ = NonNegative(startPos_ - TopMargin());
     itemEnd_ = true;
-    offsetEnd_ = true;
+    offsetEnd_ = LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin(), mainSize, 0.1f);
     maxHeight_ = footerHeight_;
     knowTotalHeight_ = true;
     newStartIndex_ = EMPTY_NEW_START_INDEX;
+    delta_ = 0.0f;
+    lastMainSize_ = mainSize;
     synced_ = true;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,42 +37,10 @@ constexpr int32_t SWIPER_TO_SEVEN = 7;
 
 class SwiperControllerTestNg : public SwiperTestNg {
 public:
-    AssertionResult VerifyShowNext(int32_t expectIndex);
-    AssertionResult VerifyShowPrevious(int32_t expectIndex);
-    AssertionResult VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex);
-    AssertionResult VerifyChangeIndex(int32_t targetIndex, SwiperAnimationMode mode, int32_t expectIndex);
     void CreateForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
     void CreateItemsInLazyForEach(int32_t itemNumber = ITEM_NUMBER);
 };
 
-AssertionResult SwiperControllerTestNg::VerifyShowNext(int32_t expectIndex)
-{
-    controller_->ShowNext();
-    FlushUITasks();
-    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
-}
-
-AssertionResult SwiperControllerTestNg::VerifyShowPrevious(int32_t expectIndex)
-{
-    controller_->ShowPrevious();
-    FlushUITasks();
-    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
-}
-
-AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex)
-{
-    controller_->ChangeIndex(targetIndex, useAnimation);
-    FlushUITasks();
-    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
-}
-
-AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, SwiperAnimationMode mode,
-    int32_t expectIndex)
-{
-    controller_->ChangeIndex(targetIndex, mode);
-    FlushUITasks();
-    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
-}
 
 void SwiperControllerTestNg::CreateForEachSwiper(int32_t itemNumber)
 {
@@ -141,10 +109,18 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex001, TestSize.Le
      */
     CreateSwiper();
     CreateSwiperDone();
-    EXPECT_TRUE(VerifyShowNext(0));
-    EXPECT_TRUE(VerifyShowPrevious(0));
-    EXPECT_TRUE(VerifyChangeIndex(1, false, 0));
-    EXPECT_TRUE(VerifyChangeIndex(1, true, 0));
+
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(0));
+
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
+
+    ChangeIndex(1, false);
+    EXPECT_TRUE(CurrentIndex(0));
+
+    ChangeIndex(1, true);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -162,10 +138,18 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex002, TestSize.Le
     model.SetDisplayCount(ITEM_NUMBER + 1);
     CreateSwiperItems();
     CreateSwiperDone();
-    EXPECT_TRUE(VerifyShowNext(0));
-    EXPECT_TRUE(VerifyShowPrevious(0));
-    EXPECT_TRUE(VerifyChangeIndex(1, false, 0));
-    EXPECT_TRUE(VerifyChangeIndex(1, true, 0));
+
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(0));
+
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
+
+    ChangeIndex(1, false);
+    EXPECT_TRUE(CurrentIndex(0));
+
+    ChangeIndex(1, true);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -175,37 +159,21 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex002, TestSize.Le
  */
 HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex003, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create Swiper, set isVisibleArea_:false for without animation
-     */
-    CreateDefaultSwiper();
-    pattern_->isVisibleArea_ = false; // for without animation
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
-    /**
-     * @tc.steps: step2. Call ShowNext
-     * @tc.expected: Show next page
-     */
-    EXPECT_TRUE(VerifyShowNext(1));
-    EXPECT_EQ(GetChildX(frameNode_, 1), 0.f);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(1));
 
-    /**
-     * @tc.steps: step3. Call ShowPrevious
-     * @tc.expected: Show ShowPrevious page
-     */
-    EXPECT_TRUE(VerifyShowPrevious(0));
-    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 1)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
-    /**
-     * @tc.steps: step4. Call ChangeIndex without animation
-     * @tc.expected: Show ChangeIndex page
-     */
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
-    EXPECT_EQ(GetChildX(frameNode_, 3), 0.f);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 3)->IsActive());
+    ChangeIndex(3, false);
+    EXPECT_TRUE(CurrentIndex(3));
+
+    ChangeIndex(1, true);
+    EXPECT_TRUE(CurrentIndex(1));
 }
 
 /**
@@ -220,7 +188,10 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Le
      * @tc.steps: step1. Loop default is true, Set item(index:1,2) INVISIBLE and GONE
      * @tc.expected: The item still take a place
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushUITasks();
@@ -229,32 +200,47 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Le
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show next page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyShowNext(1));
-    EXPECT_TRUE(VerifyShowNext(2));
-    EXPECT_TRUE(VerifyShowNext(3));
-    EXPECT_TRUE(VerifyShowNext(4)); // because of loop, equal to index:0
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(1));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(2));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(0)); // because of loop, equal to index:0
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show ShowPrevious page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyShowPrevious(3));
-    EXPECT_TRUE(VerifyShowPrevious(2));
-    EXPECT_TRUE(VerifyShowPrevious(1));
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(3));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(2));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(1));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step4. Call ChangeIndex without animation
      * @tc.expected: Show ChangeIndex page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyChangeIndex(0, false, 0)); // same index
-    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
-    EXPECT_TRUE(VerifyChangeIndex(-1, false, 0));  // invalid index
-    EXPECT_TRUE(VerifyChangeIndex(100, false, 0)); // invalid index
+    ChangeIndex(0, false);
+    EXPECT_TRUE(CurrentIndex(0)); // same index
+    ChangeIndex(1, false);
+    EXPECT_TRUE(CurrentIndex(1));
+    ChangeIndex(3, false);
+    EXPECT_TRUE(CurrentIndex(3));
+    ChangeIndex(-1, false);
+    EXPECT_TRUE(CurrentIndex(0)); // invalid index
+    ChangeIndex(100, false);
+    EXPECT_TRUE(CurrentIndex(0)); // invalid index
     // with animation
-    EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
-    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
+    ChangeIndex(1, true);
+    EXPECT_TRUE(CurrentIndex(1));
+    ChangeIndex(3, true);
+    EXPECT_TRUE(CurrentIndex(3));
 }
 
 /**
@@ -277,29 +263,41 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex005, TestSize.Le
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show next page
      */
-    EXPECT_TRUE(VerifyShowNext(1));
-    EXPECT_TRUE(VerifyShowNext(2));
-    EXPECT_TRUE(VerifyShowNext(3));
-    EXPECT_TRUE(VerifyShowNext(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(1));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(2));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show ShowPrevious page
      */
-    EXPECT_TRUE(VerifyShowPrevious(2));
-    EXPECT_TRUE(VerifyShowPrevious(1));
-    EXPECT_TRUE(VerifyShowPrevious(0));
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(2));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(1));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step4. Call ChangeIndex without animation
      * @tc.expected: Show ChangeIndex page
      */
-    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    ChangeIndex(1, false);
+    EXPECT_TRUE(CurrentIndex(1));
+    ChangeIndex(3, false);
+    EXPECT_TRUE(CurrentIndex(3));
     // with animation
-    EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
-    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
+    ChangeIndex(1, true);
+    EXPECT_TRUE(CurrentIndex(1));
+    ChangeIndex(3, true);
+    EXPECT_TRUE(CurrentIndex(3));
 }
 
 /**
@@ -331,29 +329,41 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex006, TestSize.Le
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show next page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyShowNext(1));
-    EXPECT_TRUE(VerifyShowNext(2));
-    EXPECT_TRUE(VerifyShowNext(3));
-    EXPECT_TRUE(VerifyShowNext(4)); // because of loop, equal to index:0
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(1));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(2));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(0)); // because of loop, equal to index:0
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show ShowPrevious page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyShowPrevious(3));
-    EXPECT_TRUE(VerifyShowPrevious(2));
-    EXPECT_TRUE(VerifyShowPrevious(1));
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(3));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(2));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(1));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step4. Call ChangeIndex without animation
      * @tc.expected: Show ChangeIndex page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    ChangeIndex(1, false);
+    EXPECT_TRUE(CurrentIndex(1));
+    ChangeIndex(3, false);
+    EXPECT_TRUE(CurrentIndex(3));
     // with animation
-    EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
-    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
+    ChangeIndex(1, true);
+    EXPECT_TRUE(CurrentIndex(1));
+    ChangeIndex(3, true);
+    EXPECT_TRUE(CurrentIndex(3));
 }
 
 /**
@@ -377,22 +387,28 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex007, TestSize.Le
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show next page
      */
-    EXPECT_TRUE(VerifyShowNext(3));
-    EXPECT_TRUE(VerifyShowNext(6)); // because of loop, equal to index:0
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(0)); // because of loop, equal to index:0
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show ShowPrevious page
      */
-    EXPECT_TRUE(VerifyShowPrevious(3));
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(3));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step4. Call ChangeIndex
      * @tc.expected: Show ChangeIndex page
      */
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
-    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
+    ChangeIndex(3, false);
+    EXPECT_TRUE(CurrentIndex(3));
+    ChangeIndex(3, true);
+    EXPECT_TRUE(CurrentIndex(3));
 }
 
 /**
@@ -419,28 +435,36 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex008, TestSize.Le
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show next page
      */
-    EXPECT_TRUE(VerifyShowNext(1));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show ShowPrevious page
      */
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step4. Call ChangeIndex
      * @tc.expected: Show ChangeIndex page
      */
-    EXPECT_TRUE(VerifyChangeIndex(0, false, 0));
+    ChangeIndex(0, false);
+    EXPECT_TRUE(CurrentIndex(0));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(2, false, 1));
+    ChangeIndex(2, false);
+    EXPECT_TRUE(CurrentIndex(1));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 1));
-    EXPECT_TRUE(VerifyChangeIndex(0, true, 0));
+    ChangeIndex(3, false);
+    EXPECT_TRUE(CurrentIndex(1));
+    ChangeIndex(0, true);
+    EXPECT_TRUE(CurrentIndex(0));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(2, true, 1));
+    ChangeIndex(2, true);
+    EXPECT_TRUE(CurrentIndex(1));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(3, true, 1));
+    ChangeIndex(3, true);
+    EXPECT_TRUE(CurrentIndex(1));
 }
 
 /**
@@ -467,26 +491,32 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex009, TestSize.Le
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show next page
      */
-    EXPECT_TRUE(VerifyShowNext(0));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show ShowPrevious page
      */
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step4. Call ChangeIndex
      * @tc.expected: Show ChangeIndex page
      */
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(0, false, 0));
+    ChangeIndex(0, false);
+    EXPECT_TRUE(CurrentIndex(0));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(2, false, 0));
+    ChangeIndex(2, false);
+    EXPECT_TRUE(CurrentIndex(0));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(0, true, 0));
+    ChangeIndex(0, true);
+    EXPECT_TRUE(CurrentIndex(0));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(3, true, 0));
+    ChangeIndex(3, true);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -519,13 +549,15 @@ HWTEST_F(SwiperControllerTestNg, ShowNext005, TestSize.Level1)
      * @tc.steps: step3. Call ShowNext
      * @tc.expected: Show next item(index:1)
      */
-    EXPECT_TRUE(VerifyShowNext(1));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step4. Call ShowNext
      * @tc.expected: Show item(index:3) because item(index:2) is GONE
      */
-    EXPECT_TRUE(VerifyShowNext(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
 }
 
 /**
@@ -560,19 +592,22 @@ HWTEST_F(SwiperControllerTestNg, ShowNext006, TestSize.Level1)
      * @tc.steps: step3. Call ShowNext
      * @tc.expected: Show next item(index:1)
      */
-    EXPECT_TRUE(VerifyShowNext(1));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step4. Call ShowNext
      * @tc.expected: Show item(index:3) because item(index:2) is GONE
      */
-    EXPECT_TRUE(VerifyShowNext(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
 
     /**
      * @tc.steps: step4. Call ShowNext
      * @tc.expected: Show item(index:3) because loop:false
      */
-    EXPECT_TRUE(VerifyShowNext(3));
+    ShowNext();
+    EXPECT_TRUE(CurrentIndex(3));
 }
 
 /**
@@ -593,7 +628,7 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious005, TestSize.Level1)
     CreateItemWithSize(400.f, SWIPER_HEIGHT);
     CreateItemWithSize(500.f, SWIPER_HEIGHT);
     CreateSwiperDone();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(CurrentIndex(3));
 
     /**
      * @tc.steps: step2. Set item(index:1,2) visibility:false
@@ -607,13 +642,15 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious005, TestSize.Level1)
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show pre item(index:1) because item(index:2) is GONE
      */
-    EXPECT_TRUE(VerifyShowPrevious(1));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step4. Call ShowPrevious
      * @tc.expected: Show pre item
      */
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -649,19 +686,22 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Show pre item(index:1) because item(index:2) is GONE
      */
-    EXPECT_TRUE(VerifyShowPrevious(1));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step4. Call ShowPrevious
      * @tc.expected: Show pre item
      */
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step4. Call ShowPrevious
      * @tc.expected: Show item(index:0) because loop:false
      */
-    EXPECT_TRUE(VerifyShowPrevious(0));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -671,7 +711,9 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Call FinishAnimation
@@ -861,9 +903,12 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushUITasks();
 
-    EXPECT_TRUE(VerifyChangeIndex(2, false, 3));
-    EXPECT_TRUE(VerifyChangeIndex(5, false, 5));
-    EXPECT_TRUE(VerifyChangeIndex(2, false, 1));
+    ChangeIndex(2, false);
+    EXPECT_TRUE(CurrentIndex(3));
+    ChangeIndex(5, false);
+    EXPECT_TRUE(CurrentIndex(5));
+    ChangeIndex(2, false);
+    EXPECT_TRUE(CurrentIndex(1));
 }
 
 /**
@@ -881,7 +926,8 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
     CreateSwiperItems(10);
     CreateSwiperDone();
 
-    EXPECT_TRUE(VerifyChangeIndex(9, false, 9));
+    ChangeIndex(9, false);
+    EXPECT_TRUE(CurrentIndex(9));
 }
 
 /**
@@ -896,8 +942,10 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
     CreateSwiperItems(8);
     CreateSwiperDone();
 
-    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
-    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
+    ChangeIndex(3, true);
+    EXPECT_TRUE(CurrentIndex(3));
+    ChangeIndex(1, false);
+    EXPECT_TRUE(CurrentIndex(1));
 }
 
 /**
@@ -912,14 +960,22 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex004, TestSize.Level1)
     CreateSwiperItems(DEFAULT_ITEMS);
     CreateSwiperDone();
 
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_THREE, SwiperAnimationMode::NO_ANIMATION, SWIPER_TO_THREE));
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::NO_ANIMATION, SWIPER_TO_ONE));
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_THREE, SwiperAnimationMode::DEFAULT_ANIMATION, SWIPER_TO_THREE));
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::DEFAULT_ANIMATION, SWIPER_TO_ONE));
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_SEVEN, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_SEVEN));
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_ONE));
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_TWO, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_TWO));
-    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_ONE));
+    ChangeIndex(SWIPER_TO_THREE, SwiperAnimationMode::NO_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_THREE));
+    ChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::NO_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_ONE));
+    ChangeIndex(SWIPER_TO_THREE, SwiperAnimationMode::DEFAULT_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_THREE));
+    ChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::DEFAULT_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_ONE));
+    ChangeIndex(SWIPER_TO_SEVEN, SwiperAnimationMode::FAST_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_SEVEN));
+    ChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::FAST_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_ONE));
+    ChangeIndex(SWIPER_TO_TWO, SwiperAnimationMode::FAST_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_TWO));
+    ChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::FAST_ANIMATION);
+    EXPECT_TRUE(CurrentIndex(SWIPER_TO_ONE));
 }
 
 /**
@@ -938,7 +994,8 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndexWithLoopChange001, TestSize.Level1)
     model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
     CreateSwiperItems();
     CreateSwiperDone();
-    EXPECT_TRUE(VerifyShowPrevious(-1));
+    ShowPrevious();
+    EXPECT_TRUE(CurrentIndex(3));
 
     /**
      * @tc.steps: step2. ChangeIndex and loop changes to true
@@ -948,6 +1005,6 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndexWithLoopChange001, TestSize.Level1)
     layoutProperty_->UpdateLoop(false);
     pattern_->OnModifyDone();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 }
 } // namespace OHOS::Ace::NG

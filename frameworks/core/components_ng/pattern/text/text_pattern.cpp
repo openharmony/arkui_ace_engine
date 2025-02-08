@@ -58,6 +58,7 @@ const std::u16string SYMBOL_TRANS = u"\uF0001";
 const std::u16string WIDE_NEWLINE = u"\n";
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
+const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 
 bool IsJumpLink(const std::string& content)
 {
@@ -115,6 +116,7 @@ void TextPattern::OnAttachToFrameNode()
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto theme = pipeline->GetTheme<TextTheme>();
@@ -145,6 +147,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
     pipeline->RemoveVisibleAreaChangeNode(node->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -848,6 +851,7 @@ void TextPattern::HandleOnSelectAll()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetOriginCaretPosition();
 }
 
 bool TextPattern::IsShowTranslate()
@@ -1597,6 +1601,7 @@ void TextPattern::InitFocusEvent()
         CHECK_NULL_VOID(contentModifier);
         contentModifier->SetIsFocused(false);
         pattern->RemoveIsFocusActiveUpdateEvent();
+        pattern->ResetOriginCaretPosition();
     };
     focusHub->SetOnBlurInternal(blurTask);
 
@@ -1768,6 +1773,9 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleMouseRightButton(info, textOffset);
         sourceType_ = info.GetSourceDevice();
+    }
+    if (!IsSelected()) {
+        ResetOriginCaretPosition();
     }
 }
 
@@ -1971,6 +1979,7 @@ void TextPattern::MarkDirtySelf()
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     DoGestureSelection(info);
+    ResetOriginCaretPosition();
 }
 
 void TextPattern::InitKeyEvent()
@@ -2023,7 +2032,12 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     }
 
     if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
-        HandleOnSelectAll();
+        auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+        HandleSelectionChange(0, textSize);
+        CalculateHandleOffsetAndShowOverlay();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return true;
     }
 
@@ -2057,6 +2071,10 @@ void TextPattern::HandleOnSelect(KeyCode code)
         default:
             break;
     }
+    if (!(shiftFlag_ && (code == KeyCode::KEY_DPAD_UP ||
+                         code == KeyCode::KEY_DPAD_DOWN))) {
+        ResetOriginCaretPosition();
+    }
 }
 
 void TextPattern::HandleSelectionUp()
@@ -2071,8 +2089,12 @@ void TextPattern::HandleSelectionUp()
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
+    RecordOriginCaretPosition({ secondOffsetX, secondOffsetY });
+    OffsetF originCaretPosition;
+    auto caretXPosition = GetOriginCaretPosition(originCaretPosition) ? // recorded offset x
+        originCaretPosition.GetX() : secondOffsetX;
     double height = GetTextHeight(end, false);
-    Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
+    Offset offset = { caretXPosition, secondOffsetY - height * 0.5 };
     auto caculateIndex = GetHandleIndex(offset);
     if (end == caculateIndex) {
         caculateIndex = 0;
@@ -2092,8 +2114,12 @@ void TextPattern::HandleSelectionDown()
     CaretMetricsF secondHandleMetrics;
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
+    RecordOriginCaretPosition({ secondOffsetX, secondHandleMetrics.offset.GetY() });
+    OffsetF originCaretPosition;
+    auto caretXPosition = GetOriginCaretPosition(originCaretPosition) ? // recorded offset x
+        originCaretPosition.GetX() : secondOffsetX;
     double height = GetTextHeight(end, true);
-    auto caculateIndex = GetHandleIndex({ secondOffsetX, height });
+    auto caculateIndex = GetHandleIndex({ caretXPosition, height });
     if (NearZero(height) || caculateIndex == end || caculateIndex > lastIndex) {
         caculateIndex = lastIndex;
     }
@@ -3141,8 +3167,8 @@ std::string TextPattern::GetFontInJson() const
 void TextPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
 {
     Pattern::ToTreeJson(json, config);
-    if (!json->Contains(TreeKey::CONTENT) && !textForDisplay_.empty()) {
-        json->Put(TreeKey::CONTENT, textForDisplay_.c_str());
+    if (!textForDisplay_.empty()) {
+        json->Put(TreeKey::CONTENT, UtfUtils::Str16DebugToStr8(textForDisplay_).c_str());
     }
 }
 
@@ -3410,6 +3436,7 @@ void TextPattern::ResetAfterTextChange()
 {
     CloseSelectOverlay();
     ResetSelection();
+    ResetOriginCaretPosition();
 }
 
 void TextPattern::ParseOriText(const std::u16string& currentText)
@@ -3850,6 +3877,12 @@ void TextPattern::DumpTextStyleInfo3()
     CHECK_NULL_VOID(textLayoutProp);
     if (textStyle_.has_value()) {
         dumpLog.AddDesc(
+            std::string("fontFamily: ")
+                .append(GetFontFamilyInJson(textStyle_->GetFontFamilies()))
+                .append(" pro: ")
+                .append(textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily().value())
+                                                        : "Na"));
+        dumpLog.AddDesc(
             std::string("LetterSpacing: ")
                 .append(textStyle_->GetLetterSpacing().ToString())
                 .append(" pro: ")
@@ -4007,7 +4040,11 @@ void TextPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    OnThemeScopeUpdate(host->GetThemeScopeId());
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!textLayoutProperty->HasTextColor()) {
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
@@ -4023,7 +4060,7 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
 
-    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !contex->HasForegroundColor()) {
+    if (!textLayoutProperty->HasTextColor() && !contex->HasForegroundColor()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
@@ -4031,6 +4068,32 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
     }
     return false;
+}
+
+// return: whether the offset is valid, return false if invalid
+bool TextPattern::GetOriginCaretPosition(OffsetF& offset) const
+{
+    if (!originCaretPosition_.NonNegative()) {
+        return false;
+    }
+    offset = originCaretPosition_;
+    return true;
+}
+
+void TextPattern::ResetOriginCaretPosition()
+{
+    originCaretPosition_ = DEFAULT_NEGATIVE_CARET_OFFSET;
+}
+
+// Record current caret position if originCaretPosition_ is invalid
+// return: whether the current offset is recorded and valid
+bool TextPattern::RecordOriginCaretPosition(const OffsetF& offset)
+{
+    if (originCaretPosition_.NonNegative() || !offset.NonNegative()) {
+        return false;
+    }
+    originCaretPosition_ = offset;
+    return true;
 }
 
 void TextPattern::ResetCustomFontColor()
@@ -4545,13 +4608,15 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
     return resultObject;
 }
 
-void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
+void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
 {
     AllocStyledString();
     isSpanStringMode_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CloseSelectOverlay();
+    if (closeSelectOverlay) {
+        CloseSelectOverlay();
+    }
     auto length = styledString_->GetLength();
     styledString_->RemoveCustomSpan();
     styledString_->ReplaceSpanString(0, length, value);
@@ -4908,9 +4973,10 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty() && spans_.empty() && contentMod_ && !NeedShowAIDetect()) {
-        contentMod_->TextColorModifier(value);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (children.empty() && spans_.empty() && !NeedShowAIDetect()) {
+        if (contentMod_) {
+            contentMod_->TextColorModifier(value);
+        }
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -4983,6 +5049,7 @@ void TextPattern::OnTextGenstureSelectionEnd(const TouchLocationInfo& locationIn
     }
     if (HasContent()) {
         CalculateHandleOffsetAndShowOverlay();
+        oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
         ShowSelectOverlay({ .animation = true });
     }
 }
@@ -5189,5 +5256,11 @@ std::string TextPattern::GetSelectedBackgroundColor() const
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
     return textLayoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor()).ColorToString();
+}
+
+void TextPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    CHECK_NULL_VOID(selectOverlay_);
+    selectOverlay_->UpdateMenuOnWindowSizeChanged(type);
 }
 } // namespace OHOS::Ace::NG

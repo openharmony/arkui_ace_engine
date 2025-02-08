@@ -204,7 +204,7 @@ public:
                     pipeline->UpdateSystemSafeArea(safeArea);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
-                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
                 }
                 // for ui extension component

@@ -19,6 +19,8 @@
 #include <cstdint>
 #include <string>
 
+#include "ui/properties/flex.h"
+
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 
@@ -207,37 +209,6 @@ enum class FlexDirection {
     COLUMN,
     ROW_REVERSE,
     COLUMN_REVERSE,
-};
-
-enum class FlexAlign {
-    AUTO,
-
-    // align to the start of the axis, can be both used in MainAxisAlign and CrossAxisAlign.
-    FLEX_START,
-
-    // align to the center of the axis, can be both used in MainAxisAlign and CrossAxisAlign.
-    CENTER,
-
-    // align to the end of the axis, can be both used in MainAxisAlign and CrossAxisAlign.
-    FLEX_END,
-
-    // stretch the cross size, only used in CrossAxisAlign.
-    STRETCH,
-
-    // adjust the cross position according to the textBaseline, only used in CrossAxisAlign.
-    BASELINE,
-
-    // align the children on both ends, only used in MainAxisAlign.
-    SPACE_BETWEEN,
-
-    // align the child with equivalent space, only used in MainAxisAlign.
-    SPACE_AROUND,
-
-    // align the child with space evenly, only used in MainAxisAlign.
-    SPACE_EVENLY,
-
-    // User-defined space, only used in MainAxisAlign.
-    SPACE_CUSTOMIZATION,
 };
 
 enum class MainAxisSize {
@@ -532,11 +503,21 @@ namespace StringUtils {
 inline std::string ToString(const ImageFit& imageFit)
 {
     static const LinearEnumMapNode<ImageFit, std::string> table[] = {
-        { ImageFit::FILL, "FILL" }, { ImageFit::CONTAIN, "CONTAIN" }, { ImageFit::COVER, "COVER" },
-        { ImageFit::FITWIDTH, "FITWIDTH" }, { ImageFit::FITHEIGHT, "FITHEIGHT" }, { ImageFit::NONE, "NONE" },
-        { ImageFit::SCALE_DOWN, "SCALE_DOWN" }, { ImageFit::TOP_LEFT, "TOP_LEFT" },  { ImageFit::TOP, "TOP" },
-        { ImageFit::TOP_END, "TOP_END" }, { ImageFit::START, "START" }, { ImageFit::CENTER, "CENTER" },
-        { ImageFit::END, "END" }, { ImageFit::BOTTOM_START, "BOTTOM_START" }, { ImageFit::BOTTOM, "BOTTOM" },
+        { ImageFit::FILL, "FILL" },
+        { ImageFit::CONTAIN, "CONTAIN" },
+        { ImageFit::COVER, "COVER" },
+        { ImageFit::FITWIDTH, "FITWIDTH" },
+        { ImageFit::FITHEIGHT, "FITHEIGHT" },
+        { ImageFit::NONE, "NONE" },
+        { ImageFit::SCALE_DOWN, "SCALE_DOWN" },
+        { ImageFit::TOP_LEFT, "TOP_LEFT" },
+        { ImageFit::TOP, "TOP" },
+        { ImageFit::TOP_END, "TOP_END" },
+        { ImageFit::START, "START" },
+        { ImageFit::CENTER, "CENTER" },
+        { ImageFit::END, "END" },
+        { ImageFit::BOTTOM_START, "BOTTOM_START" },
+        { ImageFit::BOTTOM, "BOTTOM" },
         { ImageFit::BOTTOM_END, "BOTTOM_END" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), imageFit);
@@ -612,10 +593,7 @@ enum class BorderImageDirection {
     END,
 };
 
-enum class TimePickerFormat {
-    HOUR_MINUTE,
-    HOUR_MINUTE_SECOND
-};
+enum class TimePickerFormat { HOUR_MINUTE, HOUR_MINUTE_SECOND };
 
 enum class SrcType {
     UNSUPPORTED = -1,

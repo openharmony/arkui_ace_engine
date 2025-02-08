@@ -17,17 +17,17 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
-#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
-#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -64,6 +64,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
+    const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
 } // namespace
 
 class UIExtensionComponentTestTwoNg : public testing::Test {
@@ -328,6 +329,455 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEventProxyFlagCallbackTest001, T
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 0);
     pattern->RegisterEventProxyFlagCallback();
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 1);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern RegisterEventProxyFlagCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEventProxyFlagCallbackTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test RegisterEventProxyFlagCallback
+     */
+    pattern->RegisterEventProxyFlagCallback();
+    AAFwk::Want want;
+    auto ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::EVENT_PROXY)(want);
+    EXPECT_EQ(ret, -1);
+
+    std::string type = "OccupyEvents";
+    want.SetParam("type", type);
+    ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::EVENT_PROXY)(want);
+    EXPECT_EQ(ret, 0);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern RegisterReplyPageModeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test RegisterReplyPageModeCallback
+     */
+    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 0);
+    pattern->RegisterReplyPageModeCallback();
+    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 1);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern RegisterReplyPageModeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test RegisterReplyPageModeCallback
+     */
+    pattern->RegisterReplyPageModeCallback();
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> op = std::nullopt;
+    auto ret = pattern->businessDataUECConsumeReplyCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE)(
+        want, op);
+    EXPECT_EQ(ret, -1);
+
+    std::string value = "testuec";
+    AAFwk::Want want2;
+    want2.SetParam("requestPageMode", value);
+    op = want2;
+    ret = pattern->businessDataUECConsumeReplyCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE)(
+        want, op);
+    EXPECT_EQ(ret, -1);
+
+    want.SetParam("requestPageMode", value);
+    ret = pattern->businessDataUECConsumeReplyCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE)(
+        want, op);
+    EXPECT_EQ(ret, 0);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern SendBusinessDataSyncReply
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataSyncReplyTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. test SendBusinessDataSyncReply
+     */
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    AAFwk::Want want;
+    AAFwk::Want reply;
+    auto ret = pattern->SendBusinessDataSyncReply(code, std::move(want), reply);
+    ASSERT_EQ(ret, false);
+    
+    pattern->sessionWrapper_ = nullptr;
+    ret = pattern->SendBusinessDataSyncReply(code, std::move(want), reply);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern SendBusinessData
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. test SendBusinessData
+     */
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    AAFwk::Want want;
+    BusinessDataSendType type = BusinessDataSendType::ASYNC;
+    auto ret = pattern->SendBusinessData(code, std::move(want), type);
+    ASSERT_EQ(ret, false);
+    
+    pattern->sessionWrapper_ = nullptr;
+    ret = pattern->SendBusinessData(code, std::move(want), type);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern OnUIExtBusinessReceiveReply
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, OnUIExtBusinessReceiveReplyTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnUIExtBusinessReceiveReply
+     */
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    AAFwk::Want data;
+    std::string value = "testuec";
+    data.SetParam("requestPageMode", value);
+    std::optional<AAFwk::Want> reply;
+    AAFwk::Want want2;
+    want2.SetParam("requestPageMode", value);
+    reply = want2;
+    pattern->OnUIExtBusinessReceiveReply(code, data, reply);
+    EXPECT_EQ(reply->HasParameter("pageMode"), false);
+
+    pattern->RegisterReplyPageModeCallback();
+    pattern->OnUIExtBusinessReceiveReply(code, data, reply);
+    EXPECT_EQ(reply->HasParameter("pageMode"), true);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern OnUIExtBusinessReceive
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, OnUIExtBusinessReceiveTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnUIExtBusinessReceive
+     */
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    AAFwk::Want data;
+    pattern->OnUIExtBusinessReceive(code, data);
+
+    pattern->RegisterReplyPageModeCallback();
+    pattern->OnUIExtBusinessReceive(code, data);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern NotifyHostWindowMode and NotifyHostWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, NotifyHostWindowModeTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test NotifyHostWindowMode and NotifyHostWindowMode
+     */
+    Rosen::WindowMode mode = Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
+    pattern->isWindowModeFollowHost_ = false;
+    pattern->NotifyHostWindowMode(mode);
+
+    pattern->isWindowModeFollowHost_ = true;
+    pattern->NotifyHostWindowMode(mode);
+
+    mode = Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    pattern->NotifyHostWindowMode(mode);
+
+    pattern->sessionWrapper_ = nullptr;
+    pattern->NotifyHostWindowMode(mode);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern OnFrameNodeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, OnFrameNodeChangedTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnFrameNodeChanged
+     */
+    bool isAncestorNodeGeometryChange = false;
+    bool isAncestorNodeTransformChange = false;
+    FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_TRUE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+
+    flag = FRAME_NODE_CHANGE_INFO_NONE;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_FALSE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+
+    flag = FRAME_NODE_CHANGE_START_SCROLL;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_FALSE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+
+    flag = FRAME_NODE_CHANGE_END_SCROLL;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_FALSE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern OnFrameNodeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, OnFrameNodeChangedTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnFrameNodeChanged
+     */
+    bool isAncestorNodeGeometryChange = false;
+    bool isAncestorNodeTransformChange = false;
+    FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_TRANSFORM_CHANGE;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_FALSE(isAncestorNodeGeometryChange);
+    ASSERT_TRUE(isAncestorNodeTransformChange);
+
+    flag = FRAME_NODE_CHANGE_TRANSITION_START;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_FALSE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+
+    flag = FRAME_NODE_CONTENT_CLIP_CHANGE;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_FALSE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+
+    flag = FRAME_NODE_CHANGE_START_ANIMATION;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_FALSE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern GetAccessibilityRectInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, GetAccessibilityRectInfoTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetAccessibilityRectInfo
+     */
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->instanceId_ = IGNORE_POSITION_TRANSITION_SWITCH;
+    auto rectInfo = pattern->GetAccessibilityRectInfo();
+    EXPECT_EQ(rectInfo.left, 0);
+    EXPECT_EQ(rectInfo.top, 0);
+    EXPECT_EQ(rectInfo.scaleX, 1.0f);
+    EXPECT_EQ(rectInfo.scaleY, 1.0f);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern TransferAccessibilityRectInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, TransferAccessibilityRectInfoTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test TransferAccessibilityRectInfo
+     */
+    pattern->TransferAccessibilityRectInfo();
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -413,8 +413,6 @@ public:
         return childLayoutConstraint_;
     }
 
-    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, int32_t index);
-
     void SetListChildrenMainSize(const RefPtr<ListChildrenMainSize>& childrenMainSize)
     {
         childrenSize_ = childrenMainSize;
@@ -498,6 +496,7 @@ protected:
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     virtual void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    virtual void FixPredictSnapPos();
     void FixPredictSnapOffsetAlignCenter();
     bool LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index, bool forward, float &currPos, float crossSize);
     virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);

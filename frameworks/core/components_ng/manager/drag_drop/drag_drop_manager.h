@@ -91,6 +91,26 @@ public:
         return eventStrictReportingEnabled_;
     }
 
+    int32_t GetCurrentAnimationCnt() const
+    {
+        return currentAnimationCnt_;
+    }
+
+    void SetCurrentAnimationCnt(int32_t value)
+    {
+        currentAnimationCnt_ = value;
+    }
+
+    int32_t GetAllAnimationCnt() const
+    {
+        return allAnimationCnt_;
+    }
+
+    void SetAllAnimationCnt(int32_t value)
+    {
+        allAnimationCnt_ = value;
+    }
+
     void UpdateItemDragPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
@@ -196,6 +216,11 @@ public:
     void SetIsDragCancel(bool isDragCancel)
     {
         isDragCancel_ = isDragCancel;
+    }
+
+    bool IsMouseDrag() const
+    {
+        return isMouseDragged_;
     }
 
     void SetIsMouseDrag(bool isMouseDragged)
@@ -337,6 +362,16 @@ public:
         info_ = DragPreviewInfo();
     }
 
+    void SetDragPreviewInfo(const DragPreviewInfo& newInfo)
+    {
+        info_ = newInfo;
+    }
+
+    DragPreviewInfo GetDragPreviewInfo() const
+    {
+        return info_;
+    }
+
     void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
     {
         isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
@@ -356,16 +391,6 @@ public:
     void SetDragMoveLastPoint(Point point) noexcept;
 
     void SetDelayDragCallBack(const std::function<void()>& cb) noexcept;
-
-    DragStartRequestStatus IsDragStartNeedToBePended() const
-    {
-        return dragStartRequestStatus_;
-    }
-
-    bool HasDelayDragCallBack() const
-    {
-        return asyncDragCallback_ != nullptr;
-    }
 
     bool IsStartAnimationFInished() const
     {
@@ -390,6 +415,16 @@ public:
         pixelMapOffset_ = pixelMapOffset;
     }
 
+    OffsetF GetPixelMapOffset()
+    {
+        return pixelMapOffset_;
+    }
+
+    void SetCurPointerOffset(OffsetF curPointerOffset)
+    {
+        curPointerOffset_ = curPointerOffset;
+    }
+
     bool IsNeedDisplayInSubwindow();
     void ClearGatherPixelMap()
     {
@@ -407,6 +442,16 @@ public:
     void SetDragDropPointerEvent(const DragPointerEvent& dragDropPointerEvent)
     {
         dragDropPointerEvent_ = dragDropPointerEvent;
+    }
+
+    bool IsDragFwkShow() const
+    {
+        return isDragFwkShow_;
+    }
+
+    void SetDragFwkShow(bool value)
+    {
+        isDragFwkShow_ = value;
     }
 
     void SetIsShowBadgeAnimation(bool isShowBadgeAnimation)
@@ -466,6 +511,11 @@ public:
     uint32_t GetDampingOverflowCount() const
     {
         return dampingOverflowCount_;
+    }
+
+    void SetDampingOverflowCount(uint32_t count)
+    {
+        dampingOverflowCount_ = count;
     }
 
     void SetDampingOverflowCount()
@@ -637,9 +687,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
 
-    Point dragMoveLastPoint_;
-    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
-    std::function<void()> asyncDragCallback_;
+    Point dragMoveLastPoint_{};
     bool isStartAnimationFinished_{};
 };
 } // namespace OHOS::Ace::NG

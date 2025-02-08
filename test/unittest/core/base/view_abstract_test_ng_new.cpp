@@ -1802,4 +1802,75 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
     ViewAbstract::SetNeedFocus(AceType::RawPtr(frameNode), false);
     EXPECT_EQ(ContainerScope::CurrentId(), -1);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: ViewAbstract
+ * @tc.desc: Test DisableOnCrownEvent001 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent001, TestSize.Level1)
+{
+    /**
+    * @tc.steps1: create and put frameNode
+    * @tc.expected: frameNode is't nullptr.
+    */
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    /**
+     * @tc.steps2: Call the function SetOnCrownEvent and DisableOnCrownEvent
+     */
+    OnCrownCallbackFunc onCrownCallback = [](CrownEventInfo& info) {};
+    ViewAbstract::SetOnCrownEvent(AceType::RawPtr(node), std::move(onCrownCallback));
+    ViewAbstract::DisableOnCrownEvent(AceType::RawPtr(node));
+    EXPECT_NE(onCrownCallback, nullptr);
+}
+
+/**
+ * @tc.name: ViewAbstract
+ * @tc.desc: Test DisableOnCrownEvent002 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent002, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: Call the function SetOnCrownEvent and DisableOnCrownEvent
+     */
+    OnCrownCallbackFunc onCrownCallback = [](CrownEventInfo& info) {};
+    ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
+    ViewAbstract::DisableOnCrownEvent();
+    EXPECT_EQ(ContainerScope::CurrentId(), -1);
+}
+
+/**
+ * @tc.name: ViewAbstract
+ * @tc.desc: Test DisableOnCrownEvent003 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call the function SetOnCrownEvent, node is nullptr
+     */
+    auto node = AceType::DynamicCast<NG::FrameNode>((AceType*)nullptr);
+    OnCrownCallbackFunc onCrownCallback = [](CrownEventInfo& info) {};
+
+    ViewAbstract::SetOnCrownEvent(node, std::move(onCrownCallback));
+    EXPECT_NE(onCrownCallback, nullptr);
+}
+#endif
+
 } // namespace OHOS::Ace::NG

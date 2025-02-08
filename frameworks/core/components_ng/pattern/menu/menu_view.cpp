@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
@@ -362,7 +363,7 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
 }
 
 void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
-    const RefPtr<MenuPreviewPattern>& previewPattern, float radius, float rate)
+    const RefPtr<MenuPreviewPattern>& previewPattern, const BorderRadiusProperty& radius, float rate)
 {
     CHECK_NULL_VOID(previewPattern && clipContext);
     // clip area start by actual image size after contain stack container and squeezed by parent proc
@@ -379,8 +380,46 @@ void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
     RoundRect roundRectInstance;
     roundRectInstance.SetRect(RectF(OffsetF((1 - rate) * clipOffset.GetX(), (1 - rate) * clipOffset.GetY()),
         SizeF(curentClipAreaWidth, curentClipAreaHeight)));
-    roundRectInstance.SetCornerRadius(rate * radius);
+    CHECK_NULL_VOID(radius.radiusTopLeft);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::TOP_LEFT_POS, rate * radius.radiusTopLeft->Value(), rate * radius.radiusTopLeft->Value());
+    CHECK_NULL_VOID(radius.radiusTopRight);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::TOP_RIGHT_POS, rate * radius.radiusTopRight->Value(), rate * radius.radiusTopRight->Value());
+    CHECK_NULL_VOID(radius.radiusBottomLeft);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::BOTTOM_LEFT_POS, rate * radius.radiusBottomLeft->Value(), rate * radius.radiusBottomLeft->Value());
+    CHECK_NULL_VOID(radius.radiusBottomRight);
+    roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_RIGHT_POS, rate * radius.radiusBottomRight->Value(),
+        rate * radius.radiusBottomRight->Value());
     clipContext->ClipWithRoundRect(roundRectInstance);
+}
+
+BorderRadiusProperty GetHoverPreviewBorderRadius(
+    const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<MenuTheme>& menuTheme)
+{
+    CHECK_NULL_RETURN(previewPattern, {});
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, {});
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, {});
+    CHECK_NULL_RETURN(menuTheme, {});
+    auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
+    auto menuParam = menuWrapperPattern->GetMenuParam();
+    if (menuParam.previewBorderRadius.has_value() && !menuParam.previewBorderRadius->multiValued) {
+        auto paramRadius = menuParam.previewBorderRadius->radiusTopLeft;
+        radius = (paramRadius->Unit() == DimensionUnit::PERCENT)
+                     ? paramRadius->Value() * previewPattern->GetCustomPreviewWidth()
+                     : paramRadius->ConvertToPx();
+    }
+
+    if (menuParam.previewBorderRadius.has_value() && menuParam.previewBorderRadius->multiValued) {
+        BorderRadiusProperty previewBorderRadius;
+        previewBorderRadius.SetRadius(Dimension(radius));
+        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        return previewBorderRadius;
+    }
+    return BorderRadiusProperty(Dimension(radius));
 }
 
 void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
@@ -415,13 +454,14 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
-    auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, radius](float rate) {
+    BorderRadiusProperty previewRadius = GetHoverPreviewBorderRadius(previewPattern, menuTheme);
+
+    auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, previewRadius](float rate) {
         CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
         menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
         menuWrapperPattern->SetAnimationClipRate(rate);
-        menuWrapperPattern->SetAnimationBorderRadius(rate * radius);
-        UpdatePreviewVisibleAreaByFrame(stackContext, previewPattern, radius, rate);
+        menuWrapperPattern->SetAnimationBorderRadius(rate, previewRadius);
+        UpdatePreviewVisibleAreaByFrame(stackContext, previewPattern, previewRadius, rate);
     };
 
     auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
@@ -698,6 +738,25 @@ void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameN
     });
 }
 
+BorderRadiusProperty GetPixelMapPreviewBorderRadius(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_RETURN(previewNode, {});
+    auto pipelineContext = previewNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, {});
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(menuTheme, {});
+    auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
+
+    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    if (menuParam.previewBorderRadius.has_value()) {
+        BorderRadiusProperty previewBorderRadius;
+        previewBorderRadius.SetRadius(Dimension(previewBorderRadiusValue));
+        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        return previewBorderRadius;
+    }
+    return BorderRadiusProperty((Dimension(previewBorderRadiusValue)));
+}
+
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
@@ -738,8 +797,9 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
+        BorderRadiusProperty borderRadius = GetPixelMapPreviewBorderRadius(previewNode, menuParam);
         if (menuParam.previewBorderRadius) {
-            imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
+            imageContext->UpdateBorderRadius(borderRadius);
         }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
@@ -820,23 +880,24 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub) && !gestureEventHub->GetTextDraggable();
+    auto isLiftingDisabled = targetNode->GetDragPreviewOption().isLiftingDisabled;
     if (targetNode->GetTag() == V2::TEXT_ETS_TAG && targetNode->IsDraggable() && !targetNode->IsCustomerSet()) {
         auto textPattern = targetNode->GetPattern<TextPattern>();
         if (textPattern && textPattern->GetCopyOptions() == CopyOptions::None) {
             isAllowedDrag = false;
         }
     }
-    if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
+    if (menuParam.previewMode != MenuPreviewMode::NONE || (isAllowedDrag && !isLiftingDisabled)) {
         DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
         SetFilter(targetNode, wrapperNode);
     }
     if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
         (menuParam.previewMode == MenuPreviewMode::NONE && menuParam.menuBindType == MenuBindingType::LONG_PRESS &&
-            isAllowedDrag) ||
+            isAllowedDrag && !isLiftingDisabled) ||
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
+    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag && !isLiftingDisabled) {
         CHECK_NULL_VOID(wrapperNode);
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
         CHECK_NULL_VOID(pixelMapNode);
@@ -871,7 +932,20 @@ void SetHasCustomRadius(
         CHECK_NULL_VOID(menuProperty);
         menuProperty->UpdateBorderRadius(menuParam.borderRadius.value());
     } else {
+        auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
         menuWrapperPattern->SetHasCustomRadius(false);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        Dimension defaultDimension(0);
+        BorderRadiusProperty radius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+        auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                 ? theme->GetMenuDefaultRadius()
+                                 : theme->GetMenuBorderRadius();
+        radius.SetRadius(defaultRadius);
+        menuProperty->UpdateBorderRadius(radius);
     }
 }
 
@@ -981,6 +1055,23 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
         ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
     }
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageNode, isShowHoverImage);
+}
+
+void MenuView::GetMenuPixelMap(
+    const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam, const RefPtr<FrameNode>& wrapperNode)
+{
+    CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(wrapperNode);
+    MenuType type = MenuType::MENU;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    CHECK_NULL_VOID(previewNode);
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), type));
+    CHECK_NULL_VOID(menuNode);
+    ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
+    MountTextNode(wrapperNode, nullptr);
 }
 
 // create menu with MenuElement array
@@ -1128,7 +1219,37 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
     MountScrollToMenu(customNode, scroll, type, menuNode);
+    UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
 
+    if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
+        wrapperNode->RemoveChild(menuNode);
+        wrapperNode.Reset();
+        return menuNode;
+    }
+    if (type == MenuType::CONTEXT_MENU) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
+        MountTextNode(wrapperNode, previewCustomNode);
+    }
+    return wrapperNode;
+}
+
+void MenuView::UpdateMenuParam(
+    const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    UpdateMenuBackgroundStyle(menuNode, menuParam);
+    SetPreviewTransitionEffect(wrapperNode, menuParam);
+    SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+}
+
+void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
+    const MenuParam& menuParam, const MenuType& type)
+{
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
@@ -1144,17 +1265,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
-    if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
-        wrapperNode->RemoveChild(menuNode);
-        wrapperNode.Reset();
-        return menuNode;
-    }
-    if (type == MenuType::CONTEXT_MENU) {
-        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
-        MountTextNode(wrapperNode, previewCustomNode);
-    }
-    return wrapperNode;
 }
 
 void MenuView::UpdateMenuPaintProperty(
@@ -1292,6 +1402,7 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         renderContext->SetBorderWidth(innerWidthProp);
     }
 }
+
 void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     auto menuNodeRenderContext = menuNode->GetRenderContext();
@@ -1338,9 +1449,26 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             }
             menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
         }
-    } else if (menuParam.backgroundColor.has_value()) {
-        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
+    } else {
+        UpdateMenuBackgroundStyleSub(menuNode, menuParam);
     }
+}
+
+void MenuView::UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    auto pipeLineContext = menuNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeLineContext);
+    auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    menuNodeRenderContext->UpdateBackgroundColor(
+        menuParam.backgroundColor.value_or(selectTheme->GetBackgroundColor()));
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
+    if (menuParam.backgroundBlurStyle.has_value()) {
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(menuParam.backgroundBlurStyle.value());
+    }
+    menuNodeRenderContext->UpdateBackBlurStyle(blurStyleOption);
 }
 
 void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)

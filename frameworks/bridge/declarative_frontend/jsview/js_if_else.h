@@ -44,6 +44,8 @@ public:
     }
 
     static void CanRetake(const JSCallbackInfo& info);
+
+    static void GetRetakenElmtIds(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

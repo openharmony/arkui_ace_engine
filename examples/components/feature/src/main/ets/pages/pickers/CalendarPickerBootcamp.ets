@@ -868,6 +868,10 @@ export struct CalendarPickerBootcamp {
   @State compUseEffect: boolean = false;
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+  @State enableStartDate: boolean = false;
+  @State startDate: Date = new Date('2020-12-10');
+  @State enableEndDate: boolean = false;
+  @State endDate: Date = new Date('2028-12-30');
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -1038,7 +1042,8 @@ export struct CalendarPickerBootcamp {
 
   @Builder Content() {
     Column({ space: 8 }) {
-      CalendarPicker({ hintRadius: useEnabled(this.enableHintRadius, this.hintRadius), selected: this.selectedDate })
+      CalendarPicker({ hintRadius: useEnabled(this.enableHintRadius, this.hintRadius), selected: this.selectedDate,
+          start: useEnabled(this.enableStartDate, this.startDate), end: useEnabled(this.enableEndDate, this.endDate) })
         .edgeAlign(useEnabled(this.enableEdgeAlignCalendarAlign, this.edgeAlignCalendarAlign),
           {dx:useEnabled(this.enableEdgeAlignOffsetX,this.alignOffsetX),
             dy:useEnabled(this.enableEdgeAlignOffsetY,this.alignOffsetY)})
@@ -2848,6 +2853,35 @@ export struct CalendarPickerBootcamp {
             { label: 'false', value: false },
           ]
         })
+
+        RadioBlock({
+          title: 'CalendarOptions.start',
+          isEnabled: $enableStartDate,
+          value: $startDate,
+          dataSource: [
+            { label: '2020-12-10', value: new Date('2020-12-10') },
+            { label: '2021-12-10', value: new Date('2021-12-10') },
+            { label: '2022-12-10', value: new Date('2022-12-10') },
+            { label: '2023-12-10', value: new Date('2023-12-10') },
+            { label: '2024-12-10', value: new Date('2024-12-10') },
+            { label: '2025-12-10', value: new Date('2025-12-10') }
+          ]
+        })
+
+        RadioBlock({
+          title: 'CalendarOptions.end',
+          isEnabled: $enableEndDate,
+          value: $endDate,
+          dataSource: [
+            { label: '2025-12-10', value: new Date('2025-12-10') },
+            { label: '2026-12-10', value: new Date('2026-12-10') },
+            { label: '2027-12-10', value: new Date('2027-12-10') },
+            { label: '2028-12-10', value: new Date('2028-12-10') },
+            { label: '2029-12-10', value: new Date('2029-12-10') },
+            { label: '2030-12-10', value: new Date('2030-12-10') }
+          ]
+        })
+
       }
     }
     .height('52%')

@@ -58,7 +58,8 @@ constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
 constexpr float MIN_SPRING_RESPONSE = 0.05f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
-constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
+constexpr int32_t RESERVED_DEVICEID_1 = 0xAAAAAAFF;
+constexpr int32_t RESERVED_DEVICEID_2 = 0xAAAAAAFE;
 constexpr uint32_t TASK_DELAY_TIME = 5 * 1000;
 } // namespace
 
@@ -88,7 +89,7 @@ void DragDropManager::SetDragMoveLastPoint(Point point) noexcept
 
 void DragDropManager::SetDelayDragCallBack(const std::function<void()>& cb) noexcept
 {
-    asyncDragCallback_ = cb;
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(cb);
 }
 
 void DragDropManager::ExecuteDeadlineTimer()
@@ -101,7 +102,9 @@ void DragDropManager::ExecuteDeadlineTimer()
         [weakManager = WeakClaim(this)]() {
             auto dragDropManager = weakManager.Upgrade();
             CHECK_NULL_VOID(dragDropManager);
-            dragDropManager->asyncDragCallback_();
+            if (DragDropGlobalController::GetInstance().GetAsyncDragCallback()) {
+                DragDropGlobalController::GetInstance().GetAsyncDragCallback()();
+            }
             dragDropManager->RemoveDeadlineTimer();
         },
         TaskExecutor::TaskType::UI, TASK_DELAY_TIME, "ArkUIDragDeadlineTimer");
@@ -109,8 +112,8 @@ void DragDropManager::ExecuteDeadlineTimer()
 
 void DragDropManager::RemoveDeadlineTimer()
 {
-    asyncDragCallback_ = nullptr;
-    dragStartRequestStatus_ = DragStartRequestStatus::READY;
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(nullptr);
+    DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::READY);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -122,15 +125,15 @@ void DragDropManager::HandleSyncOnDragStart(DragStartRequestStatus dragStartRequ
 {
     if (dragStartRequestStatus == DragStartRequestStatus::WAITING) {
         ExecuteDeadlineTimer();
-        dragStartRequestStatus_ = dragStartRequestStatus;
+        DragDropGlobalController::GetInstance().SetDragStartRequestStatus(dragStartRequestStatus);
     }
-    if (dragStartRequestStatus == DragStartRequestStatus::READY && asyncDragCallback_) {
-        dragStartRequestStatus_ = dragStartRequestStatus;
-        asyncDragCallback_();
+    if (dragStartRequestStatus == DragStartRequestStatus::READY &&
+        DragDropGlobalController::GetInstance().GetAsyncDragCallback()) {
+        DragDropGlobalController::GetInstance().SetDragStartRequestStatus(dragStartRequestStatus);
+        DragDropGlobalController::GetInstance().GetAsyncDragCallback()();
         RemoveDeadlineTimer();
     }
 }
-
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowItemDragOverlay(
     const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub)
@@ -1980,7 +1983,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
 {
     auto containerId = Container::CurrentId();
     auto deviceId = static_cast<int32_t>(event.GetDeviceId());
-    if (deviceId == RESERVED_DEVICEID) {
+    if (deviceId == RESERVED_DEVICEID_1 || deviceId == RESERVED_DEVICEID_2) {
         isDragFwkShow_ = false;
         TAG_LOGI(AceLogTag::ACE_DRAG, "Do not need animation.");
         TransDragWindowToDragFwk(containerId);
@@ -1988,7 +1991,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     }
     CHECK_NULL_VOID(overlayManager);
     CHECK_NULL_VOID(gestureHub);
-    bool isDragStartPending = HasDelayDragCallBack();
+    bool isDragStartPending = DragDropGlobalController::GetInstance().GetAsyncDragCallback() != nullptr;
     if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_
         && !isDragStartPending)) {

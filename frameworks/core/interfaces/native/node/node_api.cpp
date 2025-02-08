@@ -132,6 +132,25 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
+void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::function<bool(uint64_t)>* func = reinterpret_cast<std::function<bool(uint64_t)>*>(callback);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+}
+
+void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+}
+
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
@@ -139,6 +158,8 @@ const ArkUIStateModifier* GetUIStateModifier()
     static const ArkUIStateModifier modifier = {
         .getUIState = GetUIState,
         .setSupportedUIState = SetSupportedUIState,
+        .addSupportedUIState = AddSupportedUIState,
+        .removeSupportedUIState = RemoveSupportedUIState
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -230,6 +251,11 @@ ArkUINodeHandle CreateCustomNode(ArkUI_CharPtr tag)
 ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
 {
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
+}
+
+ArkUI_Bool IsRightToLeft()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
 void CreateNewScope()
@@ -383,6 +409,9 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
     NodeModifier::SetOnKeyEventDispatch,
+    NodeModifier::SetOnAxisEvent,
+    NodeModifier::SetOnClick,
+    NodeModifier::SetOnHover,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -471,9 +500,11 @@ const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnScrollStop,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCalendarPickerOnChange,
 };
+#endif
 
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
@@ -494,6 +525,8 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperGestureSwipe,
     NodeModifier::SetSwiperOnContentDidScroll,
     NodeModifier::SetSwiperSelected,
+    NodeModifier::SetSwiperUnselected,
+    NodeModifier::SetSwiperContentWillScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -597,6 +630,8 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnPreDrag,
     NodeModifier::ResetOnKeyPreIme,
     NodeModifier::ResetOnFocusAxisEvent,
+    nullptr,
+    NodeModifier::ResetOnAxisEvent,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -696,6 +731,8 @@ const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 };
 
 const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1927,30 +1964,32 @@ ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
 
 const ArkUIDialogAPI* GetDialogAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        SetDialogContent,
-        RemoveDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogModalMode,
-        SetDialogAutoCancel,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridColumnCount,
-        EnableDialogCustomStyle,
-        EnableDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegisterOnWillDialogDismiss,
-        RegisterOnWillDismissWithUserData,
-        SetKeyboardAvoidDistance,
-        SetDialogLevelMode,
-        SetDialogLevelUniqueId,
-        SetDialogImmersiveMode,
+        .create = CreateDialog,
+        .dispose = DisposeDialog,
+        .setContent = SetDialogContent,
+        .removeContent = RemoveDialogContent,
+        .setContentAlignment = SetDialogContentAlignment,
+        .resetContentAlignment = ResetDialogContentAlignment,
+        .setModalMode = SetDialogModalMode,
+        .setAutoCancel = SetDialogAutoCancel,
+        .setMask = SetDialogMask,
+        .setBackgroundColor = SetDialogBackgroundColor,
+        .setCornerRadius = SetDialogCornerRadius,
+        .setGridColumnCount = SetDialogGridColumnCount,
+        .enableCustomStyle = EnableDialogCustomStyle,
+        .enableCustomAnimation = EnableDialogCustomAnimation,
+        .show = ShowDialog,
+        .close = CloseDialog,
+        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
+        .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
+        .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
+        .setLevelMode = SetDialogLevelMode,
+        .setLevelUniqueId = SetDialogLevelUniqueId,
+        .setImmersiveMode = SetDialogImmersiveMode,
     };
+    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
 }
 
@@ -2003,6 +2042,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .createCustomNode = CreateCustomNode,
     .getOrCreateCustomNode = GetOrCreateCustomNode,
     .getRSNodeByNode = GetRSNodeByNode,
+    .isRightToLeft = IsRightToLeft,
     .createNewScope = CreateNewScope,
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
@@ -2366,8 +2406,14 @@ ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshot
 
 const ArkUISnapshotAPI* GetComponentSnapshotAPI()
 {
-    static const ArkUISnapshotAPI impl { CreateSnapshotOptions, DestroySnapshotOptions, SnapshotOptionsSetScale,
-        GetNodeSnapshot };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISnapshotAPI impl {
+        .createSnapshotOptions = CreateSnapshotOptions,
+        .destroySnapshotOptions = DestroySnapshotOptions,
+        .snapshotOptionsSetScale = SnapshotOptionsSetScale,
+        .getSyncSnapshot = GetNodeSnapshot
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 

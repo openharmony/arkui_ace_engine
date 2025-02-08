@@ -17,6 +17,32 @@
 
 namespace OHOS::Ace {
 
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
+{
+    uint64_t modifierKeysState = 0;
+    // check ctrl
+    if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_LEFT) != std::end(status)) ||
+        (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_RIGHT) != std::end(status))) {
+        modifierKeysState |= static_cast<uint64_t>(ModifierKeyName::ModifierKeyCtrl);
+    }
+    // check alt
+    if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_ALT_LEFT) != std::end(status)) ||
+        (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_ALT_RIGHT) != std::end(status))) {
+        modifierKeysState |= static_cast<uint64_t>(ModifierKeyName::ModifierKeyAlt);
+    }
+    // check shift
+    if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_SHIFT_LEFT) != std::end(status)) ||
+        (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_SHIFT_RIGHT) != std::end(status))) {
+        modifierKeysState |= static_cast<uint64_t>(ModifierKeyName::ModifierKeyShift);
+    }
+    // check fn
+    if (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_FN) != std::end(status)) {
+        modifierKeysState |= static_cast<uint64_t>(ModifierKeyName::ModifierKeyFn);
+    }
+
+    return modifierKeysState;
+}
+
 namespace {
 
 // key : define aosp key event code, value : define ace key string

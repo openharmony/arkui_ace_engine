@@ -123,7 +123,10 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-        paintMethod->SetTouchBottomPageRate(swiperPattern->CalcCurrentTurnPageRate());
+        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+            swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
+            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate();
+        paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
     }
@@ -330,7 +333,8 @@ private:
 protected:
     OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
     OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
-    virtual void FireChangeEvent(int32_t index) const {}
+    virtual void FireChangeEvent() const {}
+    virtual void FireIndicatorIndexChangeEvent(int32_t index) const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
     virtual void ShowPrevious();
     virtual void ShowNext();
@@ -341,7 +345,10 @@ protected:
     virtual int32_t GetCurrentShownIndex() const;
     virtual int32_t DisplayIndicatorTotalCount() const;
     virtual bool IsLoop() const;
+    virtual int32_t GetTouchCurrentIndex() const;
+    virtual std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
+
     RefPtr<SwiperPattern> GetSwiperPattern() const
     {
         auto swiperNode = GetSwiperNode();
@@ -383,6 +390,11 @@ protected:
         }
     }
 
+    void ResetOptinalMouseClickIndex()
+    {
+        mouseClickIndex_ = std::nullopt;
+    }
+
     const TouchBottomType& GetTouchBottomType() const
     {
         return touchBottomType_;
@@ -417,10 +429,10 @@ protected:
     {
         dragStartPoint_ = dragStartPoint;
     }
+
     RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
-    int32_t lastNotifyIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

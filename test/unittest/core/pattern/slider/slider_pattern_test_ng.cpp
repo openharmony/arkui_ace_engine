@@ -23,6 +23,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/common/mock_container.h"
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/point.h"
@@ -91,6 +92,7 @@ constexpr Dimension BLOCK_SIZE_HEIGHT = Dimension(300.0);
 const SizeT<Dimension> BLOCK_SIZE(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
 const std::string SLIDER_MODEL_NG_BLOCK_IMAGE = "Default Image";
 const std::string SLIDER_TEST_BUNDLE_NAME = "com.test.slider";
+const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 const std::string SLIDER_TEST_MODULE_NAME = "testModule";
 const PointF POINTF_START { 10.0f, 10.0f };
 const PointF POINTF_END { 20.0f, 20.0f };
@@ -1851,5 +1853,96 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
     sliderPattern->HandleTouchUp(localLocation, SourceType::TOUCH);
     EXPECT_EQ(sliderPattern->mousePressedFlag_, false);
     EXPECT_EQ(sliderPattern->sliderContentModifier_->isPressed_->Get(), false);
+}
+
+/**
+ * @tc.name: EnableHapticFeedbackTest001
+ * @tc.desc: Test SliderModelNG GetEnableHapticFeedback SetEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, EnableHapticFeedbackTest001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetBlockColor(TEST_COLOR);
+    sliderModelNG.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    sliderModelNG.SetSelectColor(TEST_COLOR);
+    sliderModelNG.SetEnableHapticFeedback(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(sliderModelNG.GetEnableHapticFeedback(frameNode.GetRawPtr()));
+}
+
+/**
+ * @tc.name: PlayHapticFeedbackTest001
+ * @tc.desc: Test PlayHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest001, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    float step = 10.0f;
+    float oldvalue = 1.0f;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
+    sliderPattern->isEnableHaptic_ = false;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->isEnableHaptic_ = true;
+    sliderPattern->valueRatio_ = 0.5f;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->valueRatio_ = 0.0f;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->valueRatio_ = 1.0f;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->PlayHapticFeedback(true, step, oldvalue);
+    EXPECT_NE(sliderPattern->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest001
+ * @tc.desc: Test InitHapticController
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, InitHapticControllerTest001, TestSize.Level1)
+{
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    sliderPattern->InitHapticController();
+    EXPECT_EQ(sliderPattern->hapticController_, nullptr);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    sliderPattern->isEnableHaptic_ = true;
+    sliderPattern->InitHapticController();
+    EXPECT_NE(sliderPattern->hapticController_, nullptr);
+    sliderPattern->InitHapticController();
+    EXPECT_NE(sliderPattern->hapticController_, nullptr);
+    sliderPattern->isEnableHaptic_ = false;
+    sliderPattern->InitHapticController();
+    EXPECT_NE(sliderPattern->hapticController_, nullptr);
+    sliderPattern->hapticController_ = nullptr;
+    sliderPattern->InitHapticController();
+    EXPECT_EQ(sliderPattern->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: StopAnimationTest001
+ * @tc.desc: Test StopAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, StopAnimationTest001, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    ASSERT_NE(sliderPattern->sliderContentModifier_, nullptr);
+    sliderPattern->StopAnimation();
+    EXPECT_FALSE(sliderPattern->sliderContentModifier_->GetVisible());
+    sliderPattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
+    sliderPattern->StopAnimation();
+    EXPECT_FALSE(sliderPattern->sliderContentModifier_->GetVisible());
 }
 } // namespace OHOS::Ace::NG

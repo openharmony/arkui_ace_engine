@@ -681,6 +681,7 @@ ArkUINativeModuleValue TextBridge::SetContent(ArkUIRuntimeCallInfo* runtimeCallI
     Framework::JSRef<Framework::JSVal> args = info[1];
     if (args->IsObject() && Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>()) {
         auto* spanString = Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>();
+        CHECK_NULL_RETURN(spanString, panda::JSValueRef::Undefined(vm));
         auto spanStringController = spanString->GetController();
         if (spanStringController) {
             TextModelNG::InitSpanStringController(reinterpret_cast<FrameNode*>(nativeNode), spanStringController);
@@ -1414,7 +1415,7 @@ ArkUINativeModuleValue TextBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCallI
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     auto containerId = Container::CurrentId();
-    std::function<void(GestureEvent& info)> callback = [vm, frameNode,
+    std::function<void(GestureEvent& info)> callback = [vm,
         func = panda::CopyableGlobal(vm, func), containerId, node = AceType::WeakClaim(frameNode)]
         (GestureEvent& info) {
         panda::LocalScope pandaScope(vm);

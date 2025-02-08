@@ -145,6 +145,14 @@ enum class VsyncExcepType {
 
 enum class RawEventType { WARNING, FREEZE, RECOVER };
 
+enum class ScrollableErrorType {
+    GET_CHILD_FAILED = 0,
+    INTERNAL_ERROR,
+    GESTURE_MISMATCH,
+    CONTROLLER_NOT_BIND,
+    STOP_ANIMATION_TIMEOUT,
+};
+
 struct EventInfo {
     std::string eventType;
     int32_t errorType = 0;
@@ -188,7 +196,8 @@ public:
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
     static void JsErrReport(
-        const std::string& packageName, const std::string& reason, const std::string& summary);
+        const std::string& packageName, const std::string& reason, const std::string& summary,
+        const std::string& uniqueId = "");
     static void ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
         const std::string& processName, const std::string& msg = " ");
     static void ANRShowDialog(int32_t uid, const std::string& packageName,
@@ -214,6 +223,8 @@ public:
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName);
     static void ReportDragInfo(const DragInfo& dragInfo);
+    static void ReportScrollableErrorEvent(
+        const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

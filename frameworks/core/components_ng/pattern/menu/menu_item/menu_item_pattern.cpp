@@ -211,9 +211,7 @@ void MenuItemPattern::OnModifyDone()
         UpdateIcon(rightRow, false);
         AddExpandIcon(rightRow);
         AddClickableArea();
-        if (IsDisabled()) {
-            UpdateDisabledStyle();
-        }
+        UpdateDisabledStyle();
         SetAccessibilityAction();
 
         auto renderContext = host->GetRenderContext();
@@ -601,11 +599,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(outterMenuLayoutProps);
     param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
     auto focusMenuRenderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(focusMenuRenderContext);
-    if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
-        auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
-        CHECK_NULL_VOID(focusMenuBlurStyle);
-        param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
+    if (!ParseMenuBlurStyleEffect(param, focusMenuRenderContext)) {
+        return;
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
@@ -632,6 +627,23 @@ void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu,
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show sub menu, open type %{public}d", type);
+}
+
+bool MenuItemPattern::ParseMenuBlurStyleEffect(MenuParam& param, const RefPtr<RenderContext>& focusMenuRenderContext)
+{
+    CHECK_NULL_RETURN(focusMenuRenderContext, false);
+    if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
+        auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
+        CHECK_NULL_RETURN(focusMenuBlurStyle, false);
+        param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
+        param.blurStyleOption = focusMenuBlurStyle;
+    }
+    if (focusMenuRenderContext->GetBackgroundEffect().has_value()) {
+        auto focusMenuEffect = focusMenuRenderContext->GetBackgroundEffect();
+        CHECK_NULL_RETURN(focusMenuEffect, false);
+        param.effectOption = focusMenuEffect;
+    }
+    return true;
 }
 
 RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
@@ -2000,9 +2012,7 @@ void MenuItemPattern::UpdateTextNodes()
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
-    if (IsDisabled()) {
-        UpdateDisabledStyle();
-    }
+    UpdateDisabledStyle();
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -2016,24 +2026,42 @@ bool MenuItemPattern::IsDisabled()
 
 void MenuItemPattern::UpdateDisabledStyle()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+    auto enabled = eventHub->IsEnabled();
+    auto alpha = theme->GetDisabledFontColorAlpha();
     if (content_) {
-        content_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = content_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         content_->MarkModifyDone();
     }
     if (label_) {
-        label_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = label_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         label_->MarkModifyDone();
     }
     if (startIcon_) {
-        startIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = startIcon_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         startIcon_->MarkModifyDone();
     }
     if (endIcon_) {
-        endIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = endIcon_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         endIcon_->MarkModifyDone();
     }
 }
@@ -2653,6 +2681,15 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     }
     SetAccessibilityAction();
     InitFocusEvent();
+    auto textAlign = static_cast<TextAlign>(selectTheme_->GetOptionContentNormalAlign());
+    if (textAlign != TextAlign::CENTER) {
+        return;
+    }
+    CHECK_NULL_VOID(text_);
+    auto textProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProperty);
+    textProperty->UpdateTextAlign(textAlign);
+    text_->MarkModifyDone();
 }
 
 void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha)

@@ -445,7 +445,6 @@ HWTEST_F(TextTestThreeNg, OnColorConfigurationUpdate001, TestSize.Level1)
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateTextColorByRender(Color::BLACK);
-    textLayoutProperty->UpdateTextColorFlagByUser(true);
     textPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }

@@ -340,6 +340,11 @@ public:
         return accessTraceEnable_;
     }
 
+    static bool GetVsyncModeTraceEnabled()
+    {
+        return vsyncModeTraceEnable_;
+    }
+
     static bool GetTraceInputEventEnabled()
     {
         return traceInputEventEnable_.load();
@@ -621,6 +626,8 @@ public:
 
     static bool IsSmallFoldProduct();
 
+    static bool IsBigFoldProduct();
+
     static std::string GetWebDebugRenderMode();
 
     static std::string GetDebugInspectorId();
@@ -657,6 +664,7 @@ private:
     static bool textTraceEnable_;
     static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
+    static bool vsyncModeTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
     static bool isRound_;

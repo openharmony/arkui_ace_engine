@@ -29,6 +29,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+
 namespace OHOS::Ace {
 
 static bool g_setBoolStatus = false;
@@ -399,6 +401,14 @@ void PipelineContext::WindowFocus(bool isFocus)
     GetOrCreateFocusManager()->WindowFocus(isFocus);
 }
 
+void PipelineContext::WindowActivate(bool isActive) {}
+
+void PipelineContext::AddWindowActivateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::RemoveWindowActivateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::FlushWindowActivateChangedCallback(bool isActivate) {}
+
 void PipelineContext::RootLostFocus(BlurReason reason) const {}
 
 void PipelineContext::ContainerModalUnFocus() {}
@@ -670,6 +680,8 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+void PipelineContext::AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node) {}
+
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -769,6 +781,24 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
+void PipelineContext::AddWindowSizeDragEndCallback(std::function<void()>&& callback)
+{
+    onWindowSizeDragEndCallbacks_.emplace_back(std::move(callback));
+}
+
+void PipelineContext::SetIsWindowSizeDragging(bool isDragging)
+{
+    isWindowSizeDragging_ = isDragging;
+    if (!isDragging) {
+        decltype(onWindowSizeDragEndCallbacks_) dragEndCallbacks(std::move(onWindowSizeDragEndCallbacks_));
+        for (const auto& func : dragEndCallbacks) {
+            if (func) {
+                func();
+            }
+        }
+    }
+}
+
 void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode) {}
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
@@ -831,11 +861,6 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 }
 
 SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
-{
-    return SafeAreaInsets({}, { 0, 1 }, {}, {});
-}
-
-PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
 {
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
@@ -1270,6 +1295,11 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 }
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+
+RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
+{
+    return nullptr;
+}
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}

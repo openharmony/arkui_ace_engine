@@ -785,6 +785,10 @@ void JSText::Create(const JSCallbackInfo& info)
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
     if (jsController) {
         jsController->SetController(controller);
+        auto styledString = jsController->GetStyledString();
+        if (styledString) {
+            controller->SetStyledString(styledString, false);
+        }
     }
 }
 
@@ -808,6 +812,46 @@ void JSText::SetOnCopy(const JSCallbackInfo& info)
     CHECK_NULL_VOID(args->IsFunction());
     JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(args));
     TextModel::GetInstance()->SetOnCopy(std::move(callback));
+}
+
+void JSText::JsOnDragStart(const JSCallbackInfo& info)
+{
+    if ((AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN))) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
+                           targetNode = frameNode](
+                           const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+        PipelineContext::SetCallBackNode(targetNode);
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            return itemInfo;
+        }
+        auto node = ParseDragNode(ret);
+        if (node) {
+            itemInfo.node = node;
+            return itemInfo;
+        }
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if defined(PIXEL_MAP_SUPPORTED)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        node = ParseDragNode(builderObj->GetProperty("builder"));
+        itemInfo.node = node;
+        return itemInfo;
+    };
+
+    TextModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
 }
 
 void JSText::JsFocusable(const JSCallbackInfo& info)
@@ -1023,6 +1067,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
@@ -1072,11 +1117,12 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
-    auto controller = controllerWeak_.Upgrade();
-    CHECK_NULL_VOID(controller);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
-    controller->SetStyledString(spanStringController);
+    styledString_ = spanStringController;
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    controller->SetStyledString(spanStringController, true);
     auto thisObj = info.This();
     thisObj->SetPropertyObject("STYLED_STRING_IN_CONTROLLER", info[0]);
 }

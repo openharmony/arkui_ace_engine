@@ -199,8 +199,12 @@ class __Repeat<T> implements RepeatAPI<T> {
         }
         this.isVirtualScroll = true;
 
-        if (options?.reusable !== undefined) {
+        if (typeof options?.reusable === 'boolean') {
             this.config.reusable = options.reusable;
+        } else {
+            this.config.reusable = true;
+            stateMgmtConsole.warn(
+                `Repeat.reusable is not set or not a boolean value. Use default setting: reusable = true`);
         }
         return this;
     }

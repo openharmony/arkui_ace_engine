@@ -700,6 +700,7 @@ public:
         return selectController_->GetSelectedRects();
     }
     std::vector<RectF> GetTextBoxesForSelect();
+    void AdjustSelectedBlankLineWidth(RectF& rect);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1010,7 +1011,7 @@ public:
     void ClearFocusStyle();
     void ProcessFocusStyle();
     bool OnBackPressed() override;
-    bool IsStopBackPress() const;
+    bool IsStopBackPress() const override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     bool CheckMousePressedOverScrollBar(GestureEvent& info);
@@ -1969,6 +1970,7 @@ private:
         CHECK_NULL_RETURN(context, true);
         return !(context->GetIsFocusActive() && independentControlKeyboard_);
     }
+    void SetIsEnableSubWindowMenu();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2161,6 +2163,7 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isPreviewTextOverCount_ = false;
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;

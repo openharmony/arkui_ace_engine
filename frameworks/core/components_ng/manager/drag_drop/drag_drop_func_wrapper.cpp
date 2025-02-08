@@ -475,7 +475,7 @@ std::optional<EffectOption> DragDropFuncWrapper::BlurStyleToEffection(
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
-        LOGW("cannot find theme of blurStyle, create blurStyle failed");
+        TAG_LOGW(AceLogTag::ACE_DRAG, "cannot find theme of blurStyle, create blurStyle failed");
         return std::nullopt;
     }
     CHECK_NULL_RETURN(blurStyleOp, std::nullopt);
@@ -950,6 +950,12 @@ void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetMenuWrapperNode(menuWrapperNode);
+
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragMainDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragMainDropManager);
+    dragMainDropManager->SetMenuWrapperNode(menuWrapperNode);
 }
 
 RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByInspectorId(const std::string& inspectorId)
@@ -1344,8 +1350,12 @@ void DragDropFuncWrapper::GetThumbnailPixelMap(
         gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
         gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
         pixelMapCallback(dragPreviewInfo.pixelMap, false);
-    } else if (dragPreviewInfo.customNode != nullptr) {
+    } else if (dragPreviewInfo.customNode || (dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc)) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
+        if (!dragPreviewInfo.customNode && dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc) {
+            dragPreviewInfo.customNode = dragPreviewInfo.buildFunc();
+        }
+        frameNode->SetDragPreview(dragPreviewInfo);
         if (isSync) {
             GetThumbnailPixelMapForCustomNodeSync(gestureHub, pixelMapCallback);
         } else {
@@ -1354,5 +1364,22 @@ void DragDropFuncWrapper::GetThumbnailPixelMap(
     } else {
         GetThumbnailPixelMapAsync(gestureHub);
     }
+}
+
+float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
+{
+    float scale = 1.0f;
+    CHECK_NULL_RETURN(frameNode, scale);
+    auto pixelMap = frameNode->GetDragPixelMap();
+    CHECK_NULL_RETURN(pixelMap, scale);
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        return scale;
+    }
+    auto width = pixelMap->GetWidth();
+    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
+    if (frameNode->GetDragPreviewOption().isScaleEnabled && width != 0 && width > maxWidth) {
+        scale = maxWidth / width;
+    }
+    return scale;
 }
 } // namespace OHOS::Ace::NG

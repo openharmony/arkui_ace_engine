@@ -215,6 +215,7 @@ protected:
     std::pair<int32_t, int32_t> GetIndexOnRTL(int32_t index);
     bool NeedBottomAnimation() const;
     int32_t CalculateMouseClickIndexOnRTL();
+    std::pair<int32_t, int32_t> CalCurrentIndex();
 
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     PointF hoverPoint_;

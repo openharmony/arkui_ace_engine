@@ -30,6 +30,10 @@
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -84,8 +88,12 @@ class TimePickerColumnPattern : public LinearLayoutPattern {
 
 public:
     TimePickerColumnPattern() : LinearLayoutPattern(true) {};
-
-    ~TimePickerColumnPattern() override = default;
+    ~TimePickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -334,6 +342,17 @@ public:
         enterSelectedAreaEventCallback_ = value;
     }
 
+    void SetSelectedMarkListener(const std::function<void(const std::string& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const std::string &strColumnId);
+#ifdef SUPPORT_DIGITAL_CROWN
+    std::string& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -349,6 +368,13 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
+#endif
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
@@ -457,8 +483,19 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<TimePickerColumnPattern>;
+    PickerColumnPatternCircleUtils<TimePickerColumnPattern> *circleUtils_ = nullptr;
+    std::string selectedColumnId_ = "";
+    bool selectedMarkPaint_ = false;
+    std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

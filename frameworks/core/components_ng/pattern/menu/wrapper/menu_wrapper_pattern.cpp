@@ -610,7 +610,9 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
-    if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
+    if (host->IsOnMainTree() &&
+        ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide()) ||
+            GetIsSelectOverlaySubWindowWrapper())) {
         SetHotAreas(dirty);
     }
     MarkAllMenuNoDraggable();
@@ -619,15 +621,26 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     return false;
 }
 
+bool MenuWrapperPattern::IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    bool menuNotNeedsHotAreas = (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
+                                !(theme->GetExpandDisplay() && isShowInSubWindow_);
+    if (menuNotNeedsHotAreas && !GetIsSelectOverlaySubWindowWrapper()) {
+        return false;
+    }
+
+    return true;
+}
+
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
-        !(theme->GetExpandDisplay() && isShowInSubWindow_)) {
+    if (!IsNeedSetHotAreas(layoutWrapper)) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();
@@ -671,7 +684,11 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_VOID(subwindowManager);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    subwindowManager->SetHotAreas(rects, host->GetId(), GetContainerId());
+    if (GetIsSelectOverlaySubWindowWrapper()) {
+        subwindowManager->SetSelectOverlayHotAreas(rects, host->GetId(), GetContainerId());
+    } else {
+        subwindowManager->SetHotAreas(rects, host->GetId(), GetContainerId());
+    }
 }
 
 void MenuWrapperPattern::StartShowAnimation()
@@ -830,6 +847,12 @@ void MenuWrapperPattern::ClearAllSubMenu()
     }
 }
 
+bool PreviewBorderRadiusHasPositive(const BorderRadiusProperty& borderRadius)
+{
+    return borderRadius.radiusTopLeft->IsValid() || borderRadius.radiusTopRight->IsValid() ||
+           borderRadius.radiusBottomLeft->IsValid() || borderRadius.radiusBottomRight->IsValid();
+}
+
 void MenuWrapperPattern::StopPreviewMenuAnimation()
 {
     if (HasTransitionEffect() || HasPreviewTransitionEffect()) {
@@ -883,8 +906,8 @@ void MenuWrapperPattern::StopPreviewMenuAnimation()
         if (previewScaleContext && Positive(animationInfo.previewScale)) {
             previewScaleContext->UpdateTransformScale(VectorF(animationInfo.previewScale, animationInfo.previewScale));
 
-            if (Positive(animationInfo.borderRadius)) {
-                previewScaleContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(animationInfo.borderRadius)));
+            if (PreviewBorderRadiusHasPositive(animationInfo.borderRadius)) {
+                previewScaleContext->UpdateBorderRadius(animationInfo.borderRadius);
             }
         }
     });

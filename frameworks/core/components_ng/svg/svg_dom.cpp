@@ -52,6 +52,7 @@ namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
+constexpr int32_t ONE_BYTE_TO_HEX_LEN = 2;
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -216,9 +217,17 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     if (fillColor_) {
+        std::string newValue;
         std::stringstream stream;
-        stream << std::hex << fillColor_.value().GetValue();
-        std::string newValue(stream.str());
+        auto fillColor = fillColor_.value();
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            stream << std::hex << fillColor.GetValue();
+            newValue = stream.str();
+        } else {
+            //convert color to #rgba format.
+            newValue = IntToHexString(fillColor.GetRed()) + IntToHexString(fillColor.GetGreen()) +
+                       IntToHexString(fillColor.GetBlue()) + IntToHexString(fillColor.GetAlpha());
+        }
         svgNode->SetAttr(SVG_FILL, "#" + newValue);
     } else {
         svgNode->SetAttr(SVG_FILL, value);
@@ -407,5 +416,12 @@ void SvgDom::SetSmoothEdge(float value)
 void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
 {
     colorFilter_ = colorFilter;
+}
+
+std::string SvgDom::IntToHexString(const int number)
+{
+    std::stringstream stringStream;
+    stringStream << std::setw(ONE_BYTE_TO_HEX_LEN) << std::setfill('0') << std::hex << number;
+    return stringStream.str();
 }
 } // namespace OHOS::Ace::NG

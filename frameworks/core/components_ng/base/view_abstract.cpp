@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/base/view_abstract.h"
+#include <cstdint>
+#include <functional>
+#include <unordered_map>
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -23,6 +27,7 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -372,7 +377,7 @@ void ViewAbstract::SetLayoutWeight(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
-void ViewAbstract::SetLayoutWeight(const NG::LayoutWeightPair& value)
+void ViewAbstract::SetChainWeight(const NG::ChainWeightPair& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -923,6 +928,13 @@ void ViewAbstract::DisableOnMouse()
     eventHub->ClearUserOnMouse();
 }
 
+void ViewAbstract::DisableOnAxisEvent()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAxisEvent();
+}
+
 void ViewAbstract::DisableOnAppear()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
@@ -1078,6 +1090,13 @@ void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
     eventHub->ClearUserOnMouse();
 }
 
+void ViewAbstract::DisableOnAxisEvent(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAxisEvent();
+}
+
 void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
 {
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -1195,6 +1214,13 @@ void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
+void ViewAbstract::SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAxisEvent(std::move(onAxisEventFunc));
+}
+
 void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -1288,6 +1314,20 @@ void ViewAbstract::SetFocusOnTouch(bool isSet)
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsFocusOnTouch(isSet);
+}
+
+void ViewAbstract::SetNextFocus(FocusIntension key, const std::string& nextFocus)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetNextFocus(key, nextFocus);
+}
+
+void ViewAbstract::ResetNextFocus()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ResetNextFocus();
 }
 
 void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
@@ -2078,6 +2118,35 @@ PopupInfo ViewAbstract::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNod
     return popupInfoError;
 }
 
+RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& node)
+{
+    auto context = node->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, nullptr);
+    if (GetTargetNodeIsInSubwindow(node)) {
+        auto instanceId = context->GetInstanceId();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+        if (subwindow) {
+            auto overlayManager = subwindow->GetOverlayManager();
+            return overlayManager;
+        } else {
+            return nullptr;
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    return overlayManager;
+}
+
+bool ViewAbstract::GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto instanceId = pipelineContext->GetInstanceId();
+    auto aceContainer = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(aceContainer, false);
+    return aceContainer->IsSubContainer();
+}
+
 RefPtr<OverlayManager> ViewAbstract::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
 {
     auto context = customNode->GetContextWithCheck();
@@ -2282,6 +2351,145 @@ void ViewAbstract::DismissDialog()
         UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
 #endif
     }
+}
+
+void ViewAbstract::ShowMenuPreview(
+    const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, const NG::MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
+        auto context = targetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto eventHub = targetNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        CHECK_NULL_VOID(pixelMap);
+        gestureHub->SetPixelMap(pixelMap);
+        menuWrapperPattern->SetIsShowFromUser(true);
+        MenuView::GetMenuPixelMap(targetNode, menuParam, wrapperNode);
+    }
+}
+
+void ViewAbstract::CheckMenuPreview(NG::MenuParam& menuParam)
+{
+#ifdef PREVIEW
+    menuParam.previewMode = MenuPreviewMode::NONE;
+#endif
+}
+
+int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
+    if (!targetNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
+        return ERROR_CODE_TARGET_INFO_NOT_EXIST;
+    }
+    if (!targetNode->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
+        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);
+    if (overlayManager->GetMenuNodeWithExistContent(customNode)) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of menu already existed.");
+        return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
+    }
+    CheckMenuPreview(menuParam);
+    auto openMenuFunc = [targetNode, customNode, overlayManager, menuParam]()->int32_t {
+        auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
+        CHECK_NULL_RETURN(wrapperNode, ERROR_CODE_INTERNAL_ERROR);
+        ShowMenuPreview(targetNode, wrapperNode, menuParam);
+        auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_RETURN(menuWrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+        menuWrapperPattern->RegisterMenuCallback(wrapperNode, menuParam);
+        menuWrapperPattern->SetMenuTransitionEffect(wrapperNode, menuParam);
+        auto menu = menuWrapperPattern->GetMenu();
+        CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+        auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+        CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
+        auto node = WeakPtr<UINode>(customNode);
+        menuPattern->SetCustomNode(node);
+        auto pipelineContext = targetNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
+        auto theme = pipelineContext->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
+        auto expandDisplay = theme->GetExpandDisplay();
+        if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+            SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuParam.positionOffset);
+            return ERROR_CODE_NO_ERROR;
+        }
+        overlayManager->ShowMenu(targetNode->GetId(), menuParam.positionOffset, wrapperNode);
+        return ERROR_CODE_NO_ERROR;
+    };
+    return OpenMenuMode(targetNode, overlayManager, std::move(openMenuFunc));
+}
+
+int32_t ViewAbstract::OpenMenuMode(const RefPtr<FrameNode>& targetNode, RefPtr<OverlayManager>& overlayManager,
+    std::function<int32_t()>&& openMenuFunc)
+{
+    auto isShowMenu = overlayManager->GetMenuById(targetNode->GetId());
+    if (isShowMenu) {
+        // The menu is already opened, close the previous menu first
+        overlayManager->SetOpenNextMenu(std::move(openMenuFunc));
+        overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false);
+        return ERROR_CODE_NO_ERROR;
+    } else {
+        // Open the menu directly
+        return openMenuFunc();
+    }
+}
+
+int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(customNode);
+    if (!menuWrapperNode) {
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menuWrapperNode->GetPattern());
+    CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto menu = wrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+    wrapperPattern->SetMenuParam(menuParam);
+    MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
+    MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ViewAbstract::CloseMenu(const RefPtr<UINode>& customNode)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(customNode);
+    if (!menuWrapperNode) {
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    overlayManager->HideMenu(menuWrapperNode, customNode->GetId(), false);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
@@ -3518,9 +3726,9 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (useEffect && effectType == EffectType::WINDOW_EFFECT) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+        pipeline->AddWindowActivateChangedCallback(frameNode->GetId());
     } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+        pipeline->RemoveWindowActivateChangedCallback(frameNode->GetId());
     }
     const auto& target = frameNode->GetRenderContext();
     if (target) {
@@ -3821,7 +4029,7 @@ void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, float value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, value, frameNode);
 }
 
-void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value)
+void ViewAbstract::SetChainWeight(FrameNode* frameNode, const NG::ChainWeightPair& value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value, frameNode);
@@ -4281,6 +4489,13 @@ void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEv
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
+void ViewAbstract::SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAxisEvent(std::move(onAxisEventFunc));
+}
+
 void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();
@@ -4453,7 +4668,8 @@ double ViewAbstract::GetOpacity(FrameNode* frameNode)
 BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
 {
     Dimension defaultDimension(0);
-    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt};
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderWidths);
     return target->GetBorderWidthValue(borderWidths);
@@ -4490,7 +4706,8 @@ BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
     return target->GetBorderColorValue(borderColors);
@@ -5244,6 +5461,23 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
+void ViewAbstract::SetNextFocus(FrameNode* frameNode, FocusIntension key,
+    std::variant<WeakPtr<AceType>, std::string> nextFocus)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetNextFocus(key, nextFocus);
+}
+
+void ViewAbstract::ResetNextFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ResetNextFocus();
+}
+
 void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
 {
     CHECK_NULL_VOID(frameNode);
@@ -5289,6 +5523,16 @@ void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const 
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
 }
+
+ImageResizableSlice ViewAbstract::GetBackgroundImageResizableSlice(FrameNode* frameNode)
+{
+    ImageResizableSlice slice;
+    CHECK_NULL_RETURN(frameNode, slice);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, slice);
+    return target->GetBackgroundImageResizableSliceValue(slice);
+}
+
 void ViewAbstract::SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc&& touchInterceptFunc)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -5368,7 +5612,8 @@ RenderFit ViewAbstract::GetRenderFit(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetOuterBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     CHECK_NULL_RETURN(frameNode, borderColors);
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
@@ -5391,6 +5636,48 @@ void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(b
     CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+}
+
+void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+    int32_t expectedUpdateInterval)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
+void ViewAbstract::SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+    const std::vector<double>& ratioList, int32_t expectedUpdateInterval)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
 
 Color ViewAbstract::GetColorBlend(FrameNode* frameNode)

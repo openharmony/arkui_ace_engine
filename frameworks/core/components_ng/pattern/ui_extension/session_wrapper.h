@@ -63,6 +63,7 @@ enum class SessionType : int32_t {
     SECURITY_UI_EXTENSION_ABILITY = 3,
     DYNAMIC_COMPONENT = 4,
     ISOLATED_COMPONENT = 5,
+    INVALID_TYPE = 100,
 };
 
 enum class UIExtensionUsage : uint32_t {

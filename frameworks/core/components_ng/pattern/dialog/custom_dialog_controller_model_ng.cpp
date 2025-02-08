@@ -54,7 +54,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
             isShown = isShownStatus;
         }
     };
-
+    dialogProperties.isUserCreatedDialog = true;
     auto executor = context->GetTaskExecutor();
     if (!executor) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
@@ -137,6 +137,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
             overlayManager = embeddedOverlay;
         }
     }
+    dialogProperties.isUserCreatedDialog = true;
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);

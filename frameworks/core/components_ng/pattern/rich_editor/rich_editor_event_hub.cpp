@@ -650,6 +650,18 @@ void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
     }
 }
 
+void RichEditorEventHub::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    onShare_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnShare(NG::TextCommonEvent& value)
+{
+    if (onShare_) {
+        onShare_(value);
+    }
+}
+
 void RichEditorEventHub::SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func)
 {
     onStyledStringWillChange_ = std::move(func);

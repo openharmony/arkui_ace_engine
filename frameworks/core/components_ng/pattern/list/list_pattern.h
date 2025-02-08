@@ -41,6 +41,8 @@ struct ListItemGroupPara {
     int32_t itemEndIndex = -1;
     int32_t displayStartIndex = -1;
     int32_t displayEndIndex = -1;
+    bool hasHeader = false;
+    bool hasFooter = false;
 };
 
 struct ListScrollTarget {
@@ -176,6 +178,11 @@ public:
     float GetTotalOffset() const override
     {
         return currentOffset_;
+    }
+
+    float GetContentStartOffset() const override
+    {
+        return contentStartOffset_;
     }
 
     RefPtr<ScrollControllerBase> GetPositionController() const
@@ -456,8 +463,8 @@ private:
     WeakPtr<FocusHub> ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step);
     bool HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex);
-    bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
-        int32_t moveStep, FocusStep step, bool isScrollIndex);
+    bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
+        int32_t curIndexInGroup, int32_t moveStep, FocusStep step, bool isScrollIndex);
     void VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param);
 
     SizeF GetContentSize() const;

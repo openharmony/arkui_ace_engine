@@ -280,6 +280,21 @@ public:
     {
         isSupportMenuSearch_ = isSupportMenuSearch;
     }
+    void SetEnableSubWindowMenu(bool enableSubWindowMenu)
+    {
+        enableSubWindowMenu_ = enableSubWindowMenu;
+    }
+    void UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type);
+
+    bool GetIsHostNodeEnableSubWindowMenu() const override
+    {
+        return isHostNodeEnableSubWindowMenu_;
+    }
+
+    void SetIsHostNodeEnableSubWindowMenu(bool enable)
+    {
+        isHostNodeEnableSubWindowMenu_ = enable;
+    }
 
 protected:
     RectF MergeSelectedBoxes(
@@ -390,6 +405,13 @@ private:
     bool enableContainerModal_ = false;
     bool menuTranslateIsSupport_ = false;
     bool isSupportMenuSearch_ = false;
+    bool enableSubWindowMenu_ = false;
+    /**
+     * Whether the host node supports show menu in subwindow.
+     * In certain scenarios, such as the autofill scenario:
+     * the menu window may conflict with the autofill window.
+     */
+    bool isHostNodeEnableSubWindowMenu_ = true;
 };
 
 } // namespace OHOS::Ace::NG

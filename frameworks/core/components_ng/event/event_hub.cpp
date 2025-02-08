@@ -50,6 +50,10 @@ void EventHub::OnDetachContext(PipelineContext *context)
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
+    auto eventManager = context->GetEventManager();
+    if (eventManager) {
+        eventManager->DelKeyboardShortcutNode(host->GetId());
+    }
 }
 
 RefPtr<FrameNode> EventHub::GetFrameNode() const
@@ -71,6 +75,22 @@ void EventHub::SetSupportedStates(UIState state)
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
     stateStyleMgr_->SetSupportedStates(state);
+}
+
+void EventHub::AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)> callback, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner);
+}
+
+void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->RemoveSupportedUIState(state, isInner);
 }
 
 void EventHub::SetCurrentUIState(UIState state, bool flag)
@@ -655,20 +675,26 @@ const RefPtr<InputEventHub>& EventHub::GetInputEventHub() const
     return inputEventHub_;
 }
 
-const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
+RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
     const std::unique_ptr<FocusPaintParam>& paintParamsPtr)
 {
-    return GetFrameNode()->GetOrCreateFocusHub(type, focusable, focusStyleType, paintParamsPtr);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetOrCreateFocusHub(type, focusable, focusStyleType, paintParamsPtr);
 }
 
-const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(const FocusPattern& focusPattern)
+RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(const FocusPattern& focusPattern)
 {
-    return GetFrameNode()->GetOrCreateFocusHub(focusPattern);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetOrCreateFocusHub(focusPattern);
 }
 
-const RefPtr<FocusHub>& EventHub::GetFocusHub() const
+RefPtr<FocusHub> EventHub::GetFocusHub() const
 {
-    return GetFrameNode()->GetFocusHub();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetFocusHub();
 }
 
 void EventHub::OnContextAttached()

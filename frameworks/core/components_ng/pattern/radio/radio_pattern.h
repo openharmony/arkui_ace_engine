@@ -70,6 +70,7 @@ public:
         paintMethod->SetIsFirstCreated(isFirstCreated_);
         paintMethod->SetShowHoverEffect(showHoverEffect_);
         isFirstCreated_ = false;
+        paintMethod->SetIsUserSetUncheckBorderColor(isUserSetUncheckBorderColor_);
         return paintMethod;
     }
 
@@ -172,6 +173,11 @@ public:
     void SetRadioChecked(bool check);
     RefPtr<GroupManager> GetGroupManager();
 
+    void SetIsUserSetUncheckBorderColor(bool isUserSet)
+    {
+        isUserSetUncheckBorderColor_ = isUserSet;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -257,6 +263,7 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
+    bool isUserSetUncheckBorderColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 

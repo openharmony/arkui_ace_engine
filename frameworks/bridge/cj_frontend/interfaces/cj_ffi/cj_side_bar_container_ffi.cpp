@@ -29,11 +29,18 @@ constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 
 enum class CJWidthType : uint32_t {
     SIDEBAR_WIDTH = 0,
     MIN_SIDEBAR_WIDTH,
     MAX_SIDEBAR_WIDTH,
+    STROKE_WIDTH,
+    START_MARGIN,
+    END_MARGIN,
 };
 
 const std::vector<SideBarContainerType> SIDE_BAR_TYPE = { SideBarContainerType::EMBED, SideBarContainerType::OVERLAY };
@@ -53,6 +60,18 @@ void ParseAndSetWidth(Dimension dimension, CJWidthType widthType)
         case CJWidthType::MAX_SIDEBAR_WIDTH:
             SideBarContainerModel::GetInstance()->SetMaxSideBarWidth(
                 dimension.IsNonNegative() ? dimension : DEFAULT_MAX_SIDE_BAR_WIDTH);
+            break;
+        case CJWidthType::STROKE_WIDTH:
+            SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(
+                dimension.IsNonNegative() ? dimension : DEFAULT_DIVIDER_STROKE_WIDTH);
+            break;
+        case CJWidthType::START_MARGIN:
+            SideBarContainerModel::GetInstance()->SetDividerStartMargin(
+                dimension.IsNonNegative() ? dimension : DEFAULT_DIVIDER_START_MARGIN);
+            break;
+        case CJWidthType::END_MARGIN:
+            SideBarContainerModel::GetInstance()->SetDividerEndMargin(
+                dimension.IsNonNegative() ? dimension : DEFAULT_DIVIDER_END_MARGIN);
             break;
         default:
             break;
@@ -141,5 +160,34 @@ void FfiOHOSAceFrameworkSideBarSideBarPosition(int32_t position)
 void FfiOHOSAceFrameworkSideBarPop()
 {
     NG::ViewStackProcessor::GetInstance()->PopContainer();
+}
+
+void FfiOHOSAceFrameworkSideBarDividerNull()
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        // sideBar divider set default width when input illegal value
+        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(DEFAULT_DIVIDER_STROKE_WIDTH);
+    } else {
+        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(0.0_vp);
+    }
+}
+
+void FfiOHOSAceFrameworkSideBarDivider(CJDividerStyle info)
+{
+    ParseAndSetWidth(Dimension(info.strokeWidth, static_cast<DimensionUnit>(info.strokeWidthUnit)),
+        CJWidthType::STROKE_WIDTH);
+
+    Color color = info.hasColor ? Color(info.color) : DEFAULT_DIVIDER_COLOR;
+    SideBarContainerModel::GetInstance()->SetDividerColor(color);
+    ParseAndSetWidth(Dimension(info.startMargin, static_cast<DimensionUnit>(info.startMarginUnit)),
+        CJWidthType::STROKE_WIDTH);
+    ParseAndSetWidth(Dimension(info.endMargin, static_cast<DimensionUnit>(info.endMarginUnit)),
+        CJWidthType::STROKE_WIDTH);
+}
+
+void FfiOHOSAceFrameworkSideBarMinContentWidth(double width, int32_t unit)
+{
+    CalcDimension minContentWidth(width, static_cast<DimensionUnit>(unit));
+    SideBarContainerModel::GetInstance()->SetMinContentWidth(minContentWidth);
 }
 }

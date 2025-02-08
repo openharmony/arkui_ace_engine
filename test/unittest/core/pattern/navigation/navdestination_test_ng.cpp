@@ -1144,6 +1144,48 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
 }
 
 /**
+ * @tc.name: SetHideBackButton001
+ * @tc.desc: Test SetHideBackButton function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideBackButton001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideBackButton(true);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideBackButtonValue = navDestinationLayoutProperty->GetHideBackButtonValue(false);
+    ASSERT_EQ(hideBackButtonValue, true);
+}
+
+/**
+ * @tc.name: SetHideBackButton002
+ * @tc.desc: Test SetHideBackButton function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideBackButton002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideBackButton(false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideBackButtonValue = navDestinationLayoutProperty->GetHideBackButtonValue(false);
+    ASSERT_EQ(hideBackButtonValue, false);
+}
+
+/**
  * @tc.name: SetTitlebarOptions001
  * @tc.desc: Test SetTitlebarOptions function.
  * @tc.type: FUNC

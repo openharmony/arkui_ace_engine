@@ -18,6 +18,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
@@ -37,6 +38,7 @@ constexpr int CALL_ARG_3 = 3;
 constexpr int CALL_ARG_4 = 4;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
+constexpr int PARAM_ARR_LENGTH_3 = 3;
 constexpr int32_t ARG_GROUP_LENGTH = 4;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr uint32_t ILLEGAL_VALUE = 0;
@@ -1097,9 +1099,15 @@ ArkUINativeModuleValue TextInputBridge::SetKeyboardAppearance(ArkUIRuntimeCallIn
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsNumber()) {
         uint32_t keyboardAppearance = secondArg->Uint32Value(vm);
-        GetArkUINodeModifiers()->getTextInputModifier()->
-            setTextInputKeyboardAppearance(nativeNode, keyboardAppearance);
+        if (keyboardAppearance >= static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) &&
+            keyboardAppearance <= static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+            GetArkUINodeModifiers()->getTextInputModifier()->
+                setTextInputKeyboardAppearance(nativeNode, keyboardAppearance); // when input is valid
+            return panda::JSValueRef::Undefined(vm);
+        }
     }
+    GetArkUINodeModifiers()->getTextInputModifier()->
+        setTextInputKeyboardAppearance(nativeNode, static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1544,7 +1552,7 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
         srcStr = "";
     }
 
-    struct ArkUISizeType size = {iconSize.Value(), static_cast<int8_t>(iconSize.Unit())};
+    struct ArkUISizeType size = { iconSize.Value(), static_cast<int8_t>(iconSize.Unit()), nullptr };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelButton(nativeNode,
         style, &size, color, srcStr.c_str());
 }
@@ -1753,6 +1761,48 @@ ArkUINativeModuleValue TextInputBridge::ResetOnSubmit(ArkUIRuntimeCallInfo* runt
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextInputBridge::SetOnWillChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnWillChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<bool(const ChangeValueInfo&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const ChangeValueInfo& changeValueInfo) -> bool {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto eventObject = CommonBridge::CreateChangeValueInfoObj(vm, changeValueInfo);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { eventObject };
+        auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean(vm)->Value();
+        }
+        return true;
+    };
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnWillChange(nativeNode,
+        reinterpret_cast<intptr_t>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetOnWillChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnWillChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextInputBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -1767,18 +1817,17 @@ ArkUINativeModuleValue TextInputBridge::SetOnChange(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::u16string&, PreviewText&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::u16string& changeValue, PreviewText& previewText) {
+    std::function<void(const ChangeValueInfo&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const ChangeValueInfo& changeValueInfo) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "offset", "value" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
-            panda::StringRef::NewFromUtf16(vm, previewText.value.c_str()) };
-        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
-            panda::StringRef::NewFromUtf16(vm, changeValue.c_str()), eventObject };
-        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+        auto eventObject = CommonBridge::CreateChangeValueInfoObj(vm, changeValueInfo);
+        auto contentObj = eventObject->Get(vm, "content");
+        auto previewTextObj = eventObject->Get(vm, "previewText");
+        auto optionsObj = eventObject->Get(vm, "options");
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_3] = { contentObj, previewTextObj, optionsObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_3);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnChange(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -2000,10 +2049,10 @@ ArkUINativeModuleValue TextInputBridge::SetPadding(ArkUIRuntimeCallInfo *runtime
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
 
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension rightDimen(0, DimensionUnit::VP);

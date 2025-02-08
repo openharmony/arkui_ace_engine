@@ -112,7 +112,7 @@ void ArcIndexerLayoutAlgorithm::MeasurePopup(LayoutWrapper* layoutWrapper, uint3
 {
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount - 1);
     CHECK_NULL_VOID(childWrapper);
-    auto childLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
+    auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(childLayoutProperty);
     auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
     layoutConstraint->Reset();

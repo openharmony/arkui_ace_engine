@@ -75,6 +75,10 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
     if (!value->IsNull() && value->IsString()) {
         auto label = value->ToString();
         badgeParameters.badgeValue = label;
+    } else if (!value->IsNull() && value->IsObject()) {
+        std::string valueResult;
+        ParseJsString(value, valueResult);
+        badgeParameters.badgeValue = valueResult;
     }
 
     auto position = obj->GetProperty("position");

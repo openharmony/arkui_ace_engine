@@ -163,6 +163,7 @@ public:
     uint64_t GetDisplayId() override;
 
     void InitializeSafeArea();
+    bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
 private:
     RefPtr<StackElement> GetStack();

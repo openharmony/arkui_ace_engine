@@ -228,6 +228,12 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_KEY_PREIME;
         case NODE_DISPATCH_KEY_EVENT:
             return ON_KEY_DISPATCH;
+        case NODE_ON_CLICK_EVENT:
+            return ON_CLICK_EVENT;
+        case NODE_ON_HOVER_EVENT:
+            return ON_HOVER_EVENT;
+        case NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT:
+            return ON_VISIBLE_AREA_APPROXIMATE_CHANGE;
         case NODE_CHECKBOX_EVENT_ON_CHANGE:
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
@@ -332,6 +338,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_LIST_WILL_SCROLL;
         case NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL:
             return ON_SWIPER_DID_CONTENT_SCROLL;
+        case NODE_SWIPER_EVENT_ON_UNSELECTED:
+            return ON_SWIPER_UNSELECTED;
+        case NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL:
+            return ON_SWIPER_CONTENT_WILL_SCROLL;
         case NODE_ON_ACCESSIBILITY_ACTIONS:
             return ON_ACCESSIBILITY_ACTIONS;
         case NODE_REFRESH_ON_OFFSET_CHANGE:
@@ -354,6 +364,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
         case NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE:
             return ON_CHECKBOX_GROUP_CHANGE;
+        case NODE_ON_AXIS:
+            return ON_AXIS;
         default:
             return -1;
     }
@@ -438,8 +450,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_KEY_EVENT;
         case ON_KEY_PREIME:
             return NODE_ON_KEY_PRE_IME;
+        case ON_VISIBLE_AREA_APPROXIMATE_CHANGE:
+            return NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT;
         case ON_KEY_DISPATCH:
             return NODE_DISPATCH_KEY_EVENT;
+        case ON_CLICK_EVENT:
+            return NODE_ON_CLICK_EVENT;
+        case ON_HOVER_EVENT:
+            return NODE_ON_HOVER_EVENT;
         case ON_CHECKBOX_CHANGE:
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
@@ -556,6 +574,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_RADIO_EVENT_ON_CHANGE;
         case ON_SWIPER_DID_CONTENT_SCROLL:
             return NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL;
+        case ON_SWIPER_UNSELECTED:
+            return NODE_SWIPER_EVENT_ON_UNSELECTED;
+        case ON_SWIPER_CONTENT_WILL_SCROLL:
+            return NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL;
         case ON_ACCESSIBILITY_ACTIONS:
             return NODE_ON_ACCESSIBILITY_ACTIONS;
         case ON_REFRESH_ON_OFFSET_CHANGE:
@@ -578,6 +600,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT;
         case ON_CHECKBOX_GROUP_CHANGE:
             return NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE;
+        case ON_AXIS:
+            return NODE_ON_AXIS;
         default:
             return -1;
     }
@@ -663,6 +687,24 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case TEXT_INPUT_CHANGE: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->textChangeEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case AXIS_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->axisEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case CLICK_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->clickEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case HOVER_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->hoverEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -860,10 +902,7 @@ ArkUI_NodeHandle OH_ArkUI_NodeEvent_GetNodeHandle(ArkUI_NodeEvent* event)
 
 ArkUI_UIInputEvent* OH_ArkUI_NodeEvent_GetInputEvent(ArkUI_NodeEvent* event)
 {
-    if (!event ||
-        (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT) &&
-            (event->kind != ArkUI_NodeEventType::NODE_ON_CLICK && event->kind != ArkUI_NodeEventType::NODE_ON_HOVER &&
-                event->kind != ArkUI_NodeEventType::NODE_ON_MOUSE))) {
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
         return nullptr;
     }
     return reinterpret_cast<ArkUI_UIInputEvent*>(event->origin);

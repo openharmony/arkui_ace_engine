@@ -158,6 +158,7 @@ public:
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
+    RefPtr<FrameNode> GetMenuNodeWithExistContent(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetMenuNode(int32_t targetId);
     void HideMenuInSubWindow(bool showPreviewAnimation = true, bool startDrag = false);
     void CleanMenuInSubWindow(int32_t targetId);
@@ -259,6 +260,7 @@ public:
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
     bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId);
+    bool RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay);
 
     void RegisterOnHideDialog(std::function<void()> callback)
     {
@@ -629,6 +631,18 @@ public:
             menuMap_.erase(targetId);
         }
     }
+    RefPtr<FrameNode> GetMenuById(int32_t targetId)
+    {
+        auto it = menuMap_.find(targetId);
+        if (it == menuMap_.end()) {
+            return nullptr;
+        }
+        return AceType::DynamicCast<FrameNode>(it->second);
+    }
+    void SetOpenNextMenu(std::function<int32_t()>&& func)
+    {
+        openNextMenu_ = std::move(func);
+    }
 
     bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
@@ -670,6 +684,7 @@ public:
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
+    bool isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -853,7 +868,7 @@ private:
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
-
+    void ToOpenMenuAtAnimationFinished();
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
@@ -868,6 +883,7 @@ private:
     std::list<WeakPtr<FrameNode>> modalList_;
     std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash> sheetMap_;
     std::function<void(const int32_t, const int32_t)> cleanViewContextMapCallback_ = nullptr;
+    std::function<int32_t()> openNextMenu_ = nullptr;
     std::unordered_map<int32_t, RefPtr<NG::ClickEvent>> sheetMaskClickEventMap_; // Key: maskNodeId
     WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
     float sheetHeight_ { 0.0 };

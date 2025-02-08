@@ -87,6 +87,9 @@ void ListItemDragManager::InitDragDropEvent()
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     dragEvent->SetLongPressEventFunc(std::move(actionLongPress));
     gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    CHECK_NULL_VOID(dragEventActuator);
+    dragEventActuator->SetIsForDragDrop(true);
 }
 
 void ListItemDragManager::DeInitDragDropEvent()

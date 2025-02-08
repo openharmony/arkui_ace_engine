@@ -89,11 +89,11 @@ bool WaterFlowPattern::IsAtBottom() const
 };
 bool WaterFlowPattern::IsAtTopWithDelta() const
 {
-    return layoutInfo_->OverScrollTop();
+    return layoutInfo_->IsAtTopWithDelta();
 };
 bool WaterFlowPattern::IsAtBottomWithDelta() const
 {
-    return layoutInfo_->OverScrollBottom();
+    return layoutInfo_->IsAtBottomWithDelta();
 };
 bool WaterFlowPattern::IsReverse() const
 {

@@ -1439,20 +1439,20 @@ void JSSearch::SetStopBackPress(const JSCallbackInfo& info)
 
 void JSSearch::SetKeyboardAppearance(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
-    auto jsValue = info[0];
-    if (!jsValue->IsNumber()) {
-        return;
-    }
-    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
+    auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
     if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
         keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
-    SearchModel::GetInstance()->
-        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+    SearchModel::GetInstance()->SetKeyboardAppearance(
+        static_cast<KeyboardAppearance>(keyboardAppearance));
 }
 
 JSRef<JSVal> JSSearch::CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo)

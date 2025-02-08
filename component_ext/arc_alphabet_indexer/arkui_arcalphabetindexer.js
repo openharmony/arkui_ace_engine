@@ -14,6 +14,8 @@
  */
 
 const __ArcAlphabetIndexer__ = requireInternal('arkui.ArcAlphabetIndexer');
+const ModifierMap = requireNapi('arkui.modifier').ModifierMap;
+const ModifierUtils = requireNapi('arkui.modifier').ModifierUtils;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 
 class ArcAlphabetIndexerColorModifier extends ModifierWithKey {
@@ -206,7 +208,7 @@ class ArcAlphabetIndexer extends AlphabetIndexer {
         attributeModifierFunc.call(this, modifier, (nativePtr) => {
             return new ArcAlphabetIndexerComponent(nativePtr);
         }, (nativePtr, classType, modifierJS) => {
-            return new modifierJS.ArcAlphabetIndexerModifier(nativePtr, classType);
+            return new ArcAlphabetIndexerModifier(nativePtr, classType);
         });
     }
 

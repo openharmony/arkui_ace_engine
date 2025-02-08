@@ -158,7 +158,7 @@ public:
 
     void UpdateLayoutWeight(float value);
 
-    void UpdateChainWeight(const LayoutWeightPair& value);
+    void UpdateChainWeight(const ChainWeightPair& value);
 
     void UpdatePixelRound(uint16_t value)
     {
@@ -416,6 +416,7 @@ private:
 
     void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;

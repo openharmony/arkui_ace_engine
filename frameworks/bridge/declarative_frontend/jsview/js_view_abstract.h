@@ -135,6 +135,11 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
+    static void ParseDragPreviewConfig(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewValue(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewBuilderNode(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo,
+        const JSRef<JSVal>& builder);
+    static void ParseDragInteractionOptions(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static NG::DragPreviewOption ParseDragPreviewOptions(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
@@ -161,6 +166,12 @@ public:
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void MenuDefaultParam(NG::MenuParam& menuParam);
+    static void ParseContentMenuCommonParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam);
+    static int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId);
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+    static int32_t CloseMenu(const RefPtr<NG::UINode>& customNode);
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
@@ -263,6 +274,7 @@ public:
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
+    static void JsOnAxisEvent(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnAccessibilityHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
@@ -273,6 +285,7 @@ public:
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
+    static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
@@ -361,9 +374,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void JsConstraintSize(const JSCallbackInfo& info);
     static void JsLayoutPriority(const JSCallbackInfo& info);
-    static void JsPixelRound(const JSCallbackInfo& info);
     static void JsLayoutWeight(const JSCallbackInfo& info);
-    static void JsChainWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
@@ -426,6 +437,7 @@ public:
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsTabStop(const JSCallbackInfo& info);
+    static void JsNextFocus(const JSCallbackInfo& info);
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);

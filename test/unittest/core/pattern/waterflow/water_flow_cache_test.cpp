@@ -116,7 +116,7 @@ HWTEST_F(WaterFlowTestNg, Cache005, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToIndex(10);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
     std::list<int32_t> preloadList = { 26, 27, 28 };
@@ -124,7 +124,7 @@ HWTEST_F(WaterFlowTestNg, Cache005, TestSize.Level1)
 
     // change height to 0.0f.
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(0.0f))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 500.0f, 0)));
     EXPECT_TRUE(pattern_->PreloadListEmpty());
 }
@@ -307,7 +307,7 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToIndex(2, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 2);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
 
@@ -315,7 +315,7 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     mockLazy->SetTotalCount(99);
     FlushUITasks();
     pattern_->ScrollToIndex(58, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 58);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 99);
@@ -327,7 +327,7 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
     EXPECT_EQ(GetChildY(frameNode_, 58), 0.0f);
     pattern_->ScrollToIndex(60, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 60);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 67);
     EXPECT_TRUE(GetItem(58, true)->IsOnMainTree());
@@ -336,7 +336,7 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     mockLazy->SetTotalCount(97);
     FlushUITasks();
     pattern_->ScrollToIndex(49, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 49);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 56);
 
@@ -344,7 +344,7 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     mockLazy->SetTotalCount(96);
     FlushUITasks();
     pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 96);

@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/network/download_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
@@ -292,7 +293,7 @@ void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
     const auto& geometryNode = host->GetGeometryNode();
     auto contentRect = geometryNode->GetContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset_, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame(false);
+    auto parent = host->GetAncestorNodeOfFrame(true);
     visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
@@ -326,7 +327,7 @@ OffsetF ImagePattern::GetParentGlobalOffset() const
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    return host->GetPaintRectOffset() - rootOffset;
+    return host->GetPaintRectOffset(false, true) - rootOffset;
 }
 
 void ImagePattern::OnAreaChangedInner()
@@ -754,7 +755,7 @@ void ImagePattern::LoadImage(
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+    if (!((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT) == PROPERTY_UPDATE_LAYOUT) ||
         visibleType == VisibleType::GONE) {
         loadingCtx_->FinishMearuse();
     }
@@ -1105,13 +1106,12 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 bool ImagePattern::RecycleImageData()
 {
     //when image component is [onShow] , [no cache], do not clean image data
-    bool dataValid = false;
-    bool isCheckDataCache =
+    bool isDataNoCache =
         (!loadingCtx_ ||
         (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
         SystemProperties::GetDownloadByNetworkEnabled() &&
-        ImageLoadingContext::QueryDataFromCache(loadingCtx_->GetSourceInfo(), dataValid) == nullptr));
-    if (isShow_ || isCheckDataCache) {
+        DownloadManager::GetInstance()->IsContains(loadingCtx_->GetSourceInfo().GetSrc()) == false));
+    if (isShow_ || isDataNoCache) {
         return false;
     }
     auto frameNode = GetHost();
@@ -1297,6 +1297,14 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
+}
+
+void ImagePattern::OnDetachFromMainTree()
+{
+    if (isNeedReset_) {
+        ResetImageAndAlt();
+        isNeedReset_ = false;
+    }
 }
 
 void ImagePattern::EnableDrag()
@@ -2398,6 +2406,12 @@ void ImagePattern::ResetAltImage()
 
 void ImagePattern::ResetImageAndAlt()
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsInDestroying() && frameNode->IsOnMainTree()) {
+        isNeedReset_ = true;
+        return;
+    }
     image_ = nullptr;
     loadingCtx_ = nullptr;
     srcRect_.Reset();
@@ -2406,8 +2420,6 @@ void ImagePattern::ResetImageAndAlt()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);

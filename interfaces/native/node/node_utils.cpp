@@ -413,15 +413,13 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
 
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
-    if (node == nullptr) {
+    if (node == nullptr || option == nullptr) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
     bool isCross = impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(node->uiNodeHandle);
-    option = new ArkUI_CrossLanguageOption {
-        .attributeSetting = isCross
-    };
+    option->attributeSetting = isCross;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -468,6 +466,45 @@ int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(node->uiNodeHandle,
         target_parent->uiNodeHandle, index);
     return errorCode;
+}
+
+int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index)
+{
+    if (node == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(
+        node->uiNodeHandle, index);
+    return errorCode;
+}
+
+int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index)
+{
+    if (node == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(
+        node->uiNodeHandle, index);
+    return errorCode;
+}
+
+int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
+    ArkUI_NodeHandle* subnode, uint32_t expandMode)
+{
+    if (node == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
+        node->uiNodeHandle, position, expandMode);
+    CHECK_NULL_RETURN(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *subnode = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 #ifdef __cplusplus

@@ -159,6 +159,11 @@ bool IsSafeAreaDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
 }
 
+bool IsVsyncModeDebugTraceEnabled()
+{
+    return system::GetBoolParameter("persist.ace.trace.vsyncMode.debug.enabled", false);
+}
+
 bool IsDeveloperModeOn()
 {
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
@@ -405,7 +410,8 @@ int32_t GetPageCountProp()
 bool IsTaskPriorityAdjustmentEnable()
 {
     int32_t appVsyncPriority = system::GetIntParameter("const.graphic.app_vsync_priority", -1);
-    return appVsyncPriority != -1;
+    bool isArkUIEnable = system::GetBoolParameter("persist.sys.arkui.task_priority.enabled", false);
+    return appVsyncPriority != -1 && isArkUIEnable;
 }
 
 int32_t ReadDragDropFrameworkStatus()
@@ -428,6 +434,7 @@ bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::syntaxTraceEnable_ = IsSyntaxTraceEnabled();
 bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
+bool SystemProperties::vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -625,6 +632,7 @@ void SystemProperties::InitDeviceInfo(
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
     safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
+    vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
@@ -962,6 +970,12 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
 {
     InitFoldScreenTypeBySystemProperty();
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
+}
+
+ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::BIG_FOLDER;
 }
 
 void SystemProperties::InitFoldScreenTypeBySystemProperty()

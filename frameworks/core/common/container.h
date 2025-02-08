@@ -38,6 +38,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
@@ -83,6 +84,14 @@ public:
     virtual void Initialize() = 0;
 
     virtual void Destroy() = 0;
+
+    virtual void SetAppRunningUniqueId(const std::string& uniqueId) {};
+
+    virtual const std::string& GetAppRunningUniqueId() const
+    {
+        static const std::string res;
+        return res;
+    }
 
     virtual bool IsKeyboard()
     {
@@ -675,6 +684,16 @@ public:
         return false;
     }
 
+    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    WeakPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
+    }
+
     void SetCurrentDisplayId(uint64_t displayId)
     {
         currentDisplayId_ = displayId;
@@ -686,6 +705,15 @@ public:
     }
 
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
+
+    void DestroySelectOverlaySubwindow(int32_t instanceId);
+
+    static bool IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node);
+
+    virtual bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+    {
+        return false;
+    }
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
@@ -704,6 +732,8 @@ protected:
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
+    // for common handler
+    WeakPtr<ContainerHandler> containerHandler_;
 
 private:
     std::string bundleName_;

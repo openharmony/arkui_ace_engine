@@ -161,6 +161,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
+#include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -625,6 +626,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SaveButton", JSSaveButton::JSBind },
     { "WithTheme", JSWithTheme::JSBind },
     { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
+    { "TextMenu", JSTextMenu::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -782,16 +784,19 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__CircleShape__", JSCircleShape::JSBind },
     { "__EllipseShape__", JSEllipseShape::JSBind },
     { "__PathShape__", JSPathShape::JSBind },
-#ifndef ARKUI_WEARABLE
     { "ContentSlot", JSContentSlot::JSBind },
     { "ArkUINativeNodeContent", JSNodeContent::JSBind },
-#endif
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
     { "PanRecognizer", JSPanRecognizer::JSBind },
     { "LinearIndicator", JSLinearIndicator::JSBind },
-    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind },
+    { "TapRecognizer", JSTapRecognizer::JSBind },
+    { "LongPressRecognizer", JSLongPressRecognizer::JSBind },
+    { "SwipeRecognizer", JSSwipeRecognizer::JSBind },
+    { "PinchRecognizer", JSPinchRecognizer::JSBind },
+    { "RotationRecognizer", JSRotationRecognizer::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)
@@ -901,6 +906,10 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
     }
     if (module == "OffscreenCanvas") {
         JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
+        return;
+    }
+    if (module == "Repeat") {
+        JSRepeat::JSBind(globalObj);
         return;
     }
     auto func = bindFuncs.find(module);

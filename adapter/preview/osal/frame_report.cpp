@@ -146,4 +146,10 @@ void FrameReport::DisableSelfRender()
 {
     disableSelfRenderFunc_ = nullptr;
 }
+
+void FrameReport::ReportSchedEvent(
+    FrameSchedEvent event, const std::unordered_map<std::string, std::string>& payLoad)
+{
+    reportSchedEventFunc_ = nullptr;
+}
 } // namespace OHOS::Ace

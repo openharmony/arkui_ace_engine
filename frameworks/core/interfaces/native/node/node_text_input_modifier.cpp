@@ -52,7 +52,6 @@ constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
 constexpr int CALL_ARG_3 = 3;
 constexpr int32_t DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT = 4;
-constexpr int32_t DEFAULT_MARGIN_VALUES_COUNT = 4;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -1811,7 +1810,6 @@ void GetTextInputMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_
     (*values)[CALL_ARG_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[CALL_ARG_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[CALL_ARG_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    length = DEFAULT_MARGIN_VALUES_COUNT;
 }
 
 void SetTextInputEnablePreviewText(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -1923,6 +1921,26 @@ void ResetStopBackPress(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetStopBackPress(frameNode, true);
 }
+
+void SetTextInputOnWillChange(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillChange = reinterpret_cast<std::function<bool(const ChangeValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(*onWillChange));
+    } else {
+        TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnWillChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -2055,6 +2073,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputFilter = ResetTextInputFilter,
         .setTextInputOnSubmitWithEvent = SetTextInputOnSubmitWithEvent,
         .resetTextInputOnSubmitWithEvent = ResetTextInputOnSubmitWithEvent,
+        .setTextInputOnWillChange = SetTextInputOnWillChange,
+        .resetTextInputOnWillChange = ResetTextInputOnWillChange,
         .setTextInputOnChange = SetTextInputOnChange,
         .resetTextInputOnChange = ResetTextInputOnChange,
         .setTextInputOnTextSelectionChange = SetTextInputOnTextSelectionChange,

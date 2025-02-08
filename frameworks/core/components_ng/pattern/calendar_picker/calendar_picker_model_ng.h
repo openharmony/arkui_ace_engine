@@ -35,6 +35,7 @@ public:
     void ClearBorder() override;
     void ClearBorderWidth() override;
     void ClearPadding() override;
+    void SetMarkToday(bool isMarkToday) override;
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
@@ -71,8 +72,15 @@ public:
     static DimensionOffset GetEdgeOffset(FrameNode* frameNode);
     static void SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange);
     static std::map<std::size_t, std::string> GetDateNodeOrder(const CalendarSettingData& settingData);
+    static void SetMarkToday(FrameNode* frameNode, bool isMarkToday);
+    static bool GetMarkToday(FrameNode* frameNode);
+    static void SetDisabledDateRange(
+        FrameNode* frameNode, const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange);
+    static std::string GetDisabledDateRange(FrameNode* frameNode);
+
 private:
     static void UpdateSelectedDateContent(FrameNode* frameNode, const PickerDate& selectedDate);
+    static std::string AddLeadingZeroToYear(uint32_t year);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

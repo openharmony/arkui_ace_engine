@@ -440,8 +440,20 @@ bool CalendarPickerPattern::IsInNodeRegion(const RefPtr<FrameNode>& node, const 
     return rect.IsInRegion(point);
 }
 
+bool CalendarPickerPattern::ReportChangeEvent(const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    PickerDate pickerDate;
+    CHECK_NULL_RETURN(CalendarDialogView::GetReportChangeEventDate(pickerDate, eventData), false);
+    CHECK_NULL_RETURN(CalendarDialogView::CanReportChangeEvent(reportedPickerDate_, pickerDate), false);
+    return CalendarDialogView::ReportChangeEvent(host->GetId(), compName, eventName, pickerDate);
+}
+
 void CalendarPickerPattern::FireChangeEvents(const std::string& info)
 {
+    ReportChangeEvent("CalendarPicker", "onChange", info);
     auto eventHub = GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateInputChangeEvent(info);
@@ -464,6 +476,7 @@ void CalendarPickerPattern::ShowDialog()
     auto changeId = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->ReportChangeEvent("CalendarPicker", "onChange", info);
         pattern->SetDate(info);
     };
     auto acceptId = [weak = WeakClaim(this)](const std::string& /* info */) {
@@ -481,6 +494,7 @@ void CalendarPickerPattern::ShowDialog()
     };
     dialogCancelEvent["cancelId"] = cancelId;
     calendarData_.entryNode = AceType::DynamicCast<FrameNode>(host);
+    calendarData_.markToday = isMarkToday_;
     DialogProperties properties;
     InitDialogProperties(properties);
     overlayManager->ShowCalendarDialog(properties, calendarData_, dialogEvent, dialogCancelEvent);
@@ -985,11 +999,15 @@ bool CalendarPickerPattern::IsAddOrSubButtonEnable(int32_t buttonIndex)
     PickerDate dateObj = calendarData_.selectedDate;
     if (buttonIndex == ADD_BUTTON_INDEX) {
         NextDateBySelectedType(dateObj);
+        dateObj = PickerDate::GetAvailableNextDay(
+            dateObj, calendarData_.startDate, calendarData_.endDate, calendarData_.disabledDateRange, true);
     }
     if (buttonIndex == SUB_BUTTON_INDEX) {
         PrevDateBySelectedType(dateObj);
+        dateObj = PickerDate::GetAvailableNextDay(
+            dateObj, calendarData_.startDate, calendarData_.endDate, calendarData_.disabledDateRange, false);
     }
-    return PickerDate::IsDateInRange(dateObj, calendarData_.startDate, calendarData_.endDate);
+    return dateObj.GetYear() > 0;
 }
 
 void CalendarPickerPattern::HandleButtonHoverEvent(bool state, int32_t index)
@@ -1114,7 +1132,9 @@ void CalendarPickerPattern::HandleAddButtonClick()
     auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
     PickerDate dateObj = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
     NextDateBySelectedType(dateObj);
-    if (PickerDate::IsDateInRange(dateObj, calendarData_.startDate, calendarData_.endDate)) {
+    dateObj = PickerDate::GetAvailableNextDay(
+        dateObj, calendarData_.startDate, calendarData_.endDate, calendarData_.disabledDateRange, true);
+    if (dateObj.GetYear() > 0) {
         if (GetSelectedType() != CalendarPickerSelectedType::YEAR &&
             GetSelectedType() != CalendarPickerSelectedType::MONTH) {
             SetSelectedType(CalendarPickerSelectedType::DAY);
@@ -1130,7 +1150,9 @@ void CalendarPickerPattern::HandleSubButtonClick()
     auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
     PickerDate dateObj = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
     PrevDateBySelectedType(dateObj);
-    if (PickerDate::IsDateInRange(dateObj, calendarData_.startDate, calendarData_.endDate)) {
+    dateObj = PickerDate::GetAvailableNextDay(
+        dateObj, calendarData_.startDate, calendarData_.endDate, calendarData_.disabledDateRange, false);
+    if (dateObj.GetYear() > 0) {
         if (GetSelectedType() != CalendarPickerSelectedType::YEAR &&
             GetSelectedType() != CalendarPickerSelectedType::MONTH) {
             SetSelectedType(CalendarPickerSelectedType::DAY);
@@ -1394,5 +1416,36 @@ void CalendarPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
     json->PutExtAttr("start", calendarData_.startDate.ToString(false).c_str(), filter);
     json->PutExtAttr("end", calendarData_.endDate.ToString(false).c_str(), filter);
+}
+
+void CalendarPickerPattern::SetMarkToday(bool isMarkToday)
+{
+    isMarkToday_ = isMarkToday;
+}
+
+bool CalendarPickerPattern::GetMarkToday()
+{
+    return isMarkToday_;
+}
+
+void CalendarPickerPattern::SetDisabledDateRange(
+    const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange)
+{
+    calendarData_.disabledDateRange = disabledDateRange;
+}
+
+std::string CalendarPickerPattern::GetDisabledDateRange()
+{
+    std::string disabledDateRangeStr;
+    for (const auto& range : calendarData_.disabledDateRange) {
+        disabledDateRangeStr += std::to_string(range.first.GetYear()) + "-" + std::to_string(range.first.GetMonth()) +
+                                "-" + std::to_string(range.first.GetDay()) + "," +
+                                std::to_string(range.second.GetYear()) + "-" + std::to_string(range.second.GetMonth()) +
+                                "-" + std::to_string(range.second.GetDay()) + ",";
+    }
+    if (!disabledDateRangeStr.empty() && disabledDateRangeStr.back() == ',') {
+        disabledDateRangeStr.pop_back(); // remove the last comma.
+    }
+    return disabledDateRangeStr;
 }
 } // namespace OHOS::Ace::NG

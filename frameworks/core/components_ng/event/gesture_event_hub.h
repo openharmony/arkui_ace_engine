@@ -91,6 +91,15 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> imageNode;
 };
 
+struct PreparedAsyncCtxForAnimate {
+    int32_t containerId = -1;
+    bool hasTouchPoint = false;
+    DragPointerEvent dragPointerEvent;
+    DragPreviewOption dragPreviewOption;
+    DimensionOffset touchPoint = DimensionOffset(0.0_vp, 0.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+};
+
 struct DragframeNodeInfo {
     WeakPtr<FrameNode> frameNode;
     std::vector<RefPtr<FrameNode>> gatherFrameNode;
@@ -107,6 +116,9 @@ struct DragDropInfo {
     // The inspectorId acts as a preview surrogate identifier which is used
     // to retrieve a preview image for the item being dragged.
     std::string inspectorId;
+    std::function<RefPtr<UINode>()> buildFunc;
+    bool onlyForLifting = false;
+    bool delayCreating = false;
 };
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
@@ -256,7 +268,8 @@ public:
     int32_t GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData);
     bool TryDoDragStartAnimation(const RefPtr<PipelineBase>& context, const RefPtr<Subwindow>& subwindow,
         const GestureEvent& info, PreparedInfoForDrag& data);
-    float GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
+    float GetDefaultPixelMapScale(
+        const RefPtr<FrameNode>& frameNode, const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;

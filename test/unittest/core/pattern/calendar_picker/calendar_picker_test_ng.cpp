@@ -2079,6 +2079,78 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest054, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarPickerPatternTest055
+ * @tc.desc: Test for SetMarkToday and GetMarkToday
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create calendar frameNode.
+     */
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetMarkToday.
+     * @tc.desc: set markToday.
+     * @tc.expected: GetMarkToday equals markToday.
+     */
+    bool markToday = true;
+    CalendarPickerModelNG::SetMarkToday(frameNode.GetRawPtr(), markToday);
+    EXPECT_EQ(CalendarPickerModelNG::GetMarkToday(frameNode.GetRawPtr()), markToday);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest056
+ * @tc.desc: Test for SetDisabledDateRange and GetDisabledDateRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest056, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetDisabledDateRange.
+     * @tc.desc: set disabledDateRange is empty.
+     * @tc.expected: GetDisabledDateRange is empty.
+     */
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    CalendarPickerModelNG::SetDisabledDateRange(frameNode.GetRawPtr(), disabledDateRange);
+    EXPECT_EQ(CalendarPickerModelNG::GetDisabledDateRange(frameNode.GetRawPtr()), "");
+    /**
+     * @tc.steps: step2. call SetDisabledDateRange.
+     * @tc.desc: set disabledDateRange.
+     * @tc.expected: GetDisabledDateRange equals disabledDateRange.
+     */
+    std::pair<PickerDate, PickerDate> pair;
+    PickerDate defaultDate;
+    pair.first = defaultDate;
+    pair.second = defaultDate;
+    disabledDateRange.emplace_back(pair);
+    CalendarPickerModelNG::SetDisabledDateRange(frameNode.GetRawPtr(), disabledDateRange);
+    std::string ret = std::to_string(pair.first.GetYear()) + "-" + std::to_string(pair.first.GetMonth()) + "-" +
+                      std::to_string(pair.first.GetDay()) + "," + std::to_string(pair.second.GetYear()) + "-" +
+                      std::to_string(pair.second.GetMonth()) + "-" + std::to_string(pair.second.GetDay());
+    EXPECT_EQ(CalendarPickerModelNG::GetDisabledDateRange(frameNode.GetRawPtr()), ret);
+}
+
+/**
  * @tc.name: CalendarDialogViewTest001
  * @tc.desc: Calendar Dialog Show Function Test
  * @tc.type: FUNC

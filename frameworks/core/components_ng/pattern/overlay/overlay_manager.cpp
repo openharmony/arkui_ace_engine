@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
@@ -149,6 +150,9 @@ constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
+
+const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
+    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 RefPtr<FrameNode> GetLastPage()
 {
@@ -1216,6 +1220,15 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
     overlayManager->SetIsMenuShow(false);
+    ToOpenMenuAtAnimationFinished();
+}
+
+void OverlayManager::ToOpenMenuAtAnimationFinished()
+{
+    if (openNextMenu_) {
+        openNextMenu_();
+        openNextMenu_ = nullptr;
+    }
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
@@ -1842,6 +1855,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     };
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
+    FireAutoSave(popupNode);
     RemovePixelMapAnimation(false, 0, 0);
     RemoveGatherNodeWithAnimation();
     RemoveFilter();
@@ -2188,6 +2202,27 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDr
             PopMenuAnimation(node, showPreviewAnimation, startDrag);
         }
     }
+}
+
+RefPtr<FrameNode> OverlayManager::GetMenuNodeWithExistContent(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto iter = menuMap_.begin();
+    while (iter != menuMap_.end()) {
+        auto menuNode = (*iter).second;
+        CHECK_NULL_RETURN(menuNode, nullptr);
+        auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+        auto menu = menuWrapperPattern->GetMenu();
+        CHECK_NULL_RETURN(menu, nullptr);
+        auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+        CHECK_NULL_RETURN(menuPattern, nullptr);
+        if (menuPattern->GetCustomNode() == node) {
+            return menuNode;
+        }
+        iter++;
+    }
+    return nullptr;
 }
 
 RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
@@ -3285,14 +3320,25 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (!InstanceOf<KeyboardPattern>(pattern)) {
-            if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
-                rootNode->RemoveChild(overlay);
-            }
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            return true;
+            return RemoveNonKeyboardOverlay(overlay);
         }
     }
     return false;
+}
+
+bool OverlayManager::RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode && overlay, true);
+    auto pattern = overlay->GetPattern();
+    if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        rootNode->RemoveChild(overlay);
+    }
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    CHECK_NULL_RETURN(overlay->GetTag() == V2::MAGNIFIER_TAG, true);
+    auto magnifierPattern = DynamicCast<MagnifierPattern>(pattern);
+    CHECK_NULL_RETURN(magnifierPattern, true);
+    return magnifierPattern->IsStopBackPress();
 }
 
 RefPtr<FrameNode> OverlayManager::GetOverlayFrameNode()
@@ -6644,12 +6690,16 @@ void OverlayManager::MarkDirtyOverlay()
     auto child = root->GetLastChild();
     CHECK_NULL_VOID(child);
     // sheetPage Node will MarkDirty when VirtualKeyboard Height Changes
-    auto sheetParent = DynamicCast<FrameNode>(child);
-    if (sheetParent && sheetParent->GetTag() == V2::SHEET_WRAPPER_TAG) {
-        auto sheet = sheetParent->GetChildAtIndex(0);
+    auto overlayNode = DynamicCast<FrameNode>(child);
+    CHECK_NULL_VOID(overlayNode);
+    if (overlayNode->GetTag() == V2::SHEET_WRAPPER_TAG) {
+        auto sheet = overlayNode->GetChildAtIndex(0);
         if (sheet) {
             sheet->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+    }
+    if (EMBEDDED_DIALOG_NODE_TAG.find(overlayNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end()) {
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -6708,6 +6758,7 @@ int32_t OverlayManager::GetMaskNodeIdWithDialogId(int32_t dialogId)
 void OverlayManager::MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
     const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
 {
+    CHECK_NULL_VOID(frameNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     frameNode->MountToParent(rootNode);
@@ -6996,6 +7047,11 @@ void OverlayManager::RemoveMenuNotInSubWindow(
         rootNode = overlayManager->FindWindowScene(menu);
     }
     CHECK_NULL_VOID(rootNode);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    if (menuWrapperPattern && menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper()) {
+        SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(
+            menuWrapperPattern->GetContainerId(), menu->GetId());
+    }
     RemoveChildWithService(rootNode, menu);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -7212,6 +7268,9 @@ RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& pare
     CHECK_NULL_RETURN(parentNode, nullptr);
     const auto& children = parentNode->GetChildren();
     for (const auto& childNode : children) {
+        if (childNode->GetTag() == V2::STAGE_ETS_TAG) {
+            continue;
+        }
         if (childNode && childNode->GetInspectorId().value_or("") == key) {
             return childNode;
         }
@@ -7313,41 +7372,43 @@ RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& 
 SafeAreaInsets OverlayManager::GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow)
 {
     auto pipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipeline, {});
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        return pipeline->GetSafeAreaWithoutProcess();
-    }
-
     if (useCurrentWindow) {
         CHECK_NULL_RETURN(frameNode, {});
         pipeline = frameNode->GetContextRefPtr();
-        CHECK_NULL_RETURN(pipeline, {});
     }
 
+    CHECK_NULL_RETURN(pipeline, {});
     auto containerId = pipeline->GetInstanceId();
     ContainerScope scope(containerId);
-    return pipeline->GetScbSafeArea();
+    return pipeline->GetSafeAreaWithoutProcess();
 }
 
 void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle,
     bool isLowerOnly, int32_t reason)
 {
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
     auto pipelineContext = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto navigationManager = pipelineContext->GetNavigationManager();
     CHECK_NULL_VOID(navigationManager);
-    if (node->GetTag() == V2::DIALOG_ETS_TAG) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(node);
-        CHECK_NULL_VOID(frameNode);
-        auto layoutProperty = frameNode->GetLayoutProperty<DialogLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto isShowInSubWindow = layoutProperty->GetShowInSubWindow().value_or(false);
-        if (isShowInSubWindow) {
+    auto pattern = frameNode->GetPattern();
+    if (InstanceOf<DialogPattern>(pattern)) {
+        auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_VOID(dialogPattern);
+        auto dialogProperties = dialogPattern->GetDialogProperties();
+        if (!dialogProperties.isUserCreatedDialog || dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
             return;
         }
-        auto dialogPattern = frameNode->GetPattern<DialogPattern>();
-        CHECK_NULL_VOID(dialogPattern);
-        if (dialogPattern->GetIsPickerDialog()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire dialog change to cause navdestination lifecycle: %{public}d",
+            static_cast<int32_t>(lifecycle));
+        if (dialogProperties.isShowInSubWindow) {
+            navigationManager->FireSubWindowLifecycle(node, lifecycle, reason);
+            return;
+        }
+    } else if (node->GetTag() == V2::SHEET_PAGE_TAG) {
+        auto layoutProperty = frameNode->GetLayoutProperty<SheetPresentationProperty>();
+        if (layoutProperty && layoutProperty->GetSheetStyleValue().showInPage.value_or(false)) {
             return;
         }
     }
@@ -7356,5 +7417,18 @@ void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t
         return;
     }
     navigationManager->FireOverlayLifecycle(node, lifecycle, reason);
+}
+
+bool OverlayManager::isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal)
+{
+    auto lastNode = GetLastChildNotRemoving(currentNode);
+    if (lastNode && EMBEDDED_DIALOG_NODE_TAG.find(lastNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog/%{public}d begin consumed backpressed event", lastNode->GetId());
+        return true;
+    }
+    if (!skipModal && !IsModalEmpty()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

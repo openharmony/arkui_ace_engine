@@ -1421,6 +1421,11 @@ void CalendarDialogPattern::UpdateCaretInfoToController()
     CalendarDialogView::SetPreviousOrientation();
 }
 
+bool CalendarDialogPattern::CanReportChangeEvent(const PickerDate& pickerDate)
+{
+    return CalendarDialogView::CanReportChangeEvent(reportedPickerDate_, pickerDate);
+}
+
 void CalendarDialogPattern::OnColorConfigurationUpdate()
 {
     auto titleNode = titleNode_.Upgrade();

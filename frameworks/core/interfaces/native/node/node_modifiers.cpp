@@ -279,11 +279,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
         .getParticleModifier = NodeModifier::GetParticleModifier,
-    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetNodeContentModifier,
-    #else
-        .getNodeContentModifier = nullptr,
-    #endif
         .getSymbolGlyphModifier = NodeModifier::GetSymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetSymbolSpanModifier,
     #ifdef MODEL_COMPONENT_SUPPORTED
@@ -297,7 +293,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(impl, 14, 0, 0); // don't move this line.  14: ifdef count.
+    CHECK_INITIALIZED_FIELDS_END(impl, 13, 0, 0); // don't move this line.  13: ifdef count.
     return &impl;
 }
 
@@ -455,11 +451,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getRichEditorControllerModifier = nullptr, // RichEditorControllerModifier
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
-    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetCJUINodeContentModifier,
-    #else
-        .getNodeContentModifier = nullptr,
-    #endif
         .getParticleModifier = NodeModifier::GetCJUIParticleModifier,
         .getSymbolGlyphModifier = NodeModifier::GetCJUISymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetCJUISymbolSpanModifier,
@@ -472,7 +464,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
 
         .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(modifiers, 14, 6, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifiers, 13, 6, 0); // don't move this line
     return &modifiers;
 }
 }

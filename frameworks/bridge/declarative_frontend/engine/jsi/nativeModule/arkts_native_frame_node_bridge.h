@@ -51,6 +51,8 @@ public:
     static ArkUINativeModuleValue ClearChildren(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetChildrenCount(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetFirstChildIndexWithoutExpand(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetLastChildIndexWithoutExpand(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFirst(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetNextSibling(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPreviousSibling(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -109,6 +111,8 @@ public:
     static ArkUINativeModuleValue SetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CheckIfCanCrossLanguageAttributeSetting(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue RemoveSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 
 } // namespace OHOS::Ace::NG

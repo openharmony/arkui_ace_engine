@@ -59,10 +59,8 @@ typedef enum {
 typedef enum {
     /** Mask covering the parent node. */
     ARKUI_IMMERSIVE_MODE_DEFAULT = 0,
-    /** Mask covering the page node. */
-    ARKUI_IMMERSIVE_MODE_PAGE,
-    /** Mask covering the root node. */
-    ARKUI_IMMERSIVE_MODE_FULL,
+    /** Mask extend safe area includes status bar and navigation bar. */
+    ARKUI_IMMERSIVE_MODE_EXTEND,
 } ArkUI_ImmersiveMode;
 
 /**

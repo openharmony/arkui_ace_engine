@@ -170,7 +170,11 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     linearLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     auto columnRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
-    columnRenderContext->UpdateClipEdge(tabBarRenderContext->GetClipEdgeValue(true));
+    if (tabTheme->GetIsChangeFocusTextStyle()) {
+        columnRenderContext->UpdateClipEdge(false);
+    } else {
+        columnRenderContext->UpdateClipEdge(tabBarRenderContext->GetClipEdgeValue(true));
+    }
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());

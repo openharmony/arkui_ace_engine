@@ -466,7 +466,7 @@ void JSRenderingContext::AddCallbackToList(
     }
 }
 
-void JSRenderingContext::DeleteCallbackFromList(int argc, napi_env env, napi_value cb, CanvasCallbackType type)
+void JSRenderingContext::DeleteCallbackFromList(uint32_t argc, napi_env env, napi_value cb, CanvasCallbackType type)
 {
     if (argc == 1) {
         if (type == CanvasCallbackType::ON_ATTACH) {

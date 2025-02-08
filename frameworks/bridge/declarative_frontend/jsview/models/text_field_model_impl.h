@@ -78,7 +78,6 @@ public:
     void SetForegroundColor(const Color& value) override {};
     void SetShowUnit(std::function<void()>&& unitAction) override {};
     void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override {};
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) override {};
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void ResetBackgroundColor() override {};

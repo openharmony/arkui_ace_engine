@@ -639,4 +639,7 @@ const char ARC_SCROLL_BAR_ETS_TAG[] = "ArcScrollBar";
 // ArcAlphabetIndexer
 const char ARC_INDEXER_COMPONENT_TAG[] = "ArcIndexerComponent";
 const char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
+
+// Magnifier
+const char MAGNIFIER_TAG[] = "Magnifier";
 } // namespace OHOS::Ace::V2

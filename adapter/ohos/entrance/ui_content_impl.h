@@ -75,6 +75,8 @@ public:
     void Background() override;
     void Focus() override;
     void UnFocus() override;
+    void ActiveWindow() override;
+    void UnActiveWindow() override;
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
@@ -295,6 +297,7 @@ public:
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
+    bool GetContainerModalTitleVisible() override;
     void SetContainerModalTitleHeight(int32_t height) override;
     void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
@@ -341,6 +344,8 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
 
     void SetFormRenderingMode(int8_t renderMode) override;
+
+    void SetFormEnableBlurBackground(bool enableBlurBackground) override;
 
     void SetContentNodeGrayScale(float grayscale) override;
 
@@ -390,6 +395,9 @@ public:
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
+    void SetTopWindowBoundaryByID(const std::string& stringId) override;
+    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
