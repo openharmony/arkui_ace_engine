@@ -126,7 +126,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         ++currentIndex;
         endPos = firstItemInfo_.value().second.endPos;
         SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
-        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
         firstItemInfo_.reset();
         return 1;
     } else if (firstItemInfo_) {
@@ -161,7 +160,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
-    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 
@@ -176,7 +174,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         --currentIndex;
         startPos = firstItemInfo_.value().second.startPos;
         SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
-        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
         firstItemInfo_.reset();
         return 1;
     } else if (firstItemInfo_) {
@@ -218,7 +215,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
-    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 

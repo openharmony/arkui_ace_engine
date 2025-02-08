@@ -396,8 +396,6 @@ public:
         return childLayoutConstraint_;
     }
 
-    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, int32_t index);
-
     void SetListChildrenMainSize(const RefPtr<ListChildrenMainSize>& childrenMainSize)
     {
         childrenSize_ = childrenMainSize;
@@ -490,6 +488,7 @@ private:
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    virtual void FixPredictSnapPos();
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignCenter();
     void FixPredictSnapOffsetAlignEnd();
