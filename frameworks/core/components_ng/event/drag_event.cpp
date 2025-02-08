@@ -2020,7 +2020,13 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto touchPoint = Point(
-        info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
+        info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY(),
+        info.GetTouches().front().GetScreenLocation().GetX(), info.GetTouches().front().GetScreenLocation().GetY());
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDragMoveLastPoint(touchPoint);
     if (isRestartDrag) {
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
@@ -2028,11 +2034,6 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
             HandleDragDampingMove(
                 touchPoint, info.GetTouches().front().GetFingerId(), isRestartDrag);
         }
-        auto pipeline = frameNode->GetContextRefPtr();
-        CHECK_NULL_VOID(pipeline);
-        auto dragDropManager = pipeline->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetDragMoveLastPoint(touchPoint);
         return;
     }
     auto focusHub = frameNode->GetFocusHub();
@@ -2048,11 +2049,6 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
         }
         HandleTouchMoveEvent();
     }
-    auto pipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetDragMoveLastPoint(touchPoint);
 }
 
 void DragEventActuator::HandleTouchUpEvent()

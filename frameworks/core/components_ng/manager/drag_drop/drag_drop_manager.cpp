@@ -92,6 +92,11 @@ void DragDropManager::SetDelayDragCallBack(const std::function<void()>& cb) noex
     DragDropGlobalController::GetInstance().SetAsyncDragCallback(cb);
 }
 
+const Point DragDropManager::GetDragMoveLastPoint() const
+{
+    return dragMoveLastPoint_;
+}
+
 void DragDropManager::ExecuteDeadlineTimer()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -900,6 +905,7 @@ void DragDropManager::DoDragReset()
     dampingOverflowCount_ = 0;
     isDragNodeNeedClean_ = false;
     isAnyDraggableHit_ = false;
+    dragMoveLastPoint_= Point(0, 0);
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
 

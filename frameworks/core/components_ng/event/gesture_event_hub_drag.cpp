@@ -615,6 +615,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         ContainerScope scope(id);
         auto gestureEventHub = weak.Upgrade();
         CHECK_NULL_VOID(gestureEventHub);
+        if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            gestureEventHub->SetMouseDragMonitorState(true);
+        }
         gestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     };
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -862,10 +865,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, container->GetInstanceId());
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+    auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPoint();
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        static_cast<int32_t>(info.GetSourceTool()), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
+        static_cast<int32_t>(info.GetSourceTool()), dragMoveLastPoint.GetScreenX(),
+        dragMoveLastPoint.GetScreenY(), info.GetTargetDisplayId(), windowId, true, false, summary };
     std::string summarys = DragDropFuncWrapper::GetSummaryString(summary);
     DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
