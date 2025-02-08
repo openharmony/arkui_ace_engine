@@ -98,8 +98,8 @@ struct TouchEvent final : public PointerEvent {
     float inputYDeltaSlope = 0.0f;
     bool isPassThroughMode = false;
     TimeStamp pressedTime;
-    int32_t width;
-    int32_t height;
+    int32_t width = 0;
+    int32_t height = 0;
     float targetPositionX;
     float targetPositionY;
     float targetGlobalPositionX;
@@ -285,8 +285,8 @@ private:
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
     TimeStamp pressedTime_;
-    int32_t width_;
-    int32_t height_;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
