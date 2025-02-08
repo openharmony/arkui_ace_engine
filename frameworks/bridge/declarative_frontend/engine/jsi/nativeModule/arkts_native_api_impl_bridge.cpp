@@ -231,7 +231,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
             Framework::JsConverter::ConvertNapiValueToJsVal(navDestinationResult->param)->GetLocalHandle(),
             panda::StringRef::NewFromUtf8(vm, navDestinationResult->navDestinationId.c_str()),
             panda::NumberRef::New(vm, static_cast<int32_t>(navDestinationResult->mode)),
-            panda::StringRef::NewFromUtf8(vm, navDestinationResult->uniqueId.c_str()) };
+            panda::NumberRef::New(vm, navDestinationResult->uniqueId) };
         const char* navDestinationKeys[] = { "navigationId", "name", "state", "index", "param", "navDestinationId",
             "mode", "uniqueId" };
         auto navDestinationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(navDestinationKeys),

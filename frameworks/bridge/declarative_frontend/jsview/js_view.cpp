@@ -1053,9 +1053,9 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
         obj->SetProperty<int32_t>("index", result->index);
         obj->SetPropertyObject("param", JsConverter::ConvertNapiValueToJsVal(result->param));
         obj->SetProperty<std::string>("navDestinationId", result->navDestinationId);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
             obj->SetProperty<int32_t>("mode", static_cast<int32_t>(result->mode));
-            obj->SetProperty<std::string>("uniqueId", result->uniqueId);
+            obj->SetProperty<int32_t>("uniqueId", result->uniqueId);
         }
         info.SetReturnValue(obj);
     }
