@@ -490,23 +490,27 @@ HWTEST_F(RatingModifierTest, setStarStyleTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Callback_Number_Void func{};
+    EXPECT_NE(modifier_->setOnChange0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    EXPECT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
         float index;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::ratingEventReceiver.onChange0 = [](Ark_Int32 nodeId, const Ark_Number index)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .index = Converter::Convert<float>(index),
-        };
+    Callback_Number_Void onChangeCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number index) {
+            checkEvent = CheckEvent{
+                .nodeId = nodeId,
+                .index = Converter::Convert<float>(index)
+            };
+        }
     };
-    modifier_->setOnChange0(node_, &func);
+    modifier_->setOnChange0(node_, &onChangeCallback);
     EXPECT_FALSE(checkEvent.has_value());
     eventHub->FireChangeEvent("55.5");
     ASSERT_EQ(checkEvent.has_value(), true);
