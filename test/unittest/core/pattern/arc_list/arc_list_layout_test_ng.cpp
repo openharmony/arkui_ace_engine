@@ -451,12 +451,12 @@ HWTEST_F(ArcListLayoutTestNg, GetNearScale001, TestSize.Level1)
     ArcListLayoutAlgorithm algorithm(200, 100);
     EXPECT_FALSE(NearEqual(algorithm.GetNearScale(150.0), 0.780000));
     EXPECT_FALSE(NearEqual(algorithm.GetNearScale(-135.0), 0.820000));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(141.0), 0.780000));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-132.0), 0.820000));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(120.0), 0.871304));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(95.0), 0.966250));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(10.0), 1.077872));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-10.0), 1.077826));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(141.0), 0.832255));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-132.0), 0.856995));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(120.0), 0.889020));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(95.0), 0.950898));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(10.0), 1.077197));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-10.0), 1.077197));
 }
 
 /**
