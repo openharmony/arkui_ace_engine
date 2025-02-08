@@ -403,7 +403,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0011, TestSize.Level1)
     /**
      * @tc.steps: step3. check pixelMap should not be null since this layeredDrawable is customized
      */
-    EXPECT_EQ(composedResult, nullptr);
+    EXPECT_NE(composedResult, nullptr);
 }
 
 /**
