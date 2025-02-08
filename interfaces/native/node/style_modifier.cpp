@@ -6705,11 +6705,24 @@ void ResetButtonLabel(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonLabel(node->uiNodeHandle);
 }
 
+bool IsLegelType(int type)
+{
+    switch (type) {
+        case ARKUI_BUTTON_TYPE_NORMAL:
+        case ARKUI_BUTTON_TYPE_CAPSULE:
+        case ARKUI_BUTTON_TYPE_CIRCLE:
+        case ARKUI_BUTTON_ROUNDED_RECTANGLE:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 int32_t SetButtonType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (LessNotEqual(actualSize, 0) ||
-        !InRegion(ARKUI_BUTTON_TYPE_NORMAL, ARKUI_BUTTON_ROUNDED_RECTANGLE, item->value[NUM_0].i32)) {
+    if (LessNotEqual(actualSize, 0) || !IsLegelType(item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
