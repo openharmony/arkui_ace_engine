@@ -351,9 +351,13 @@ void DatePickerPattern::OnModifyDone()
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
-    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false))) {
-        isFiredDateChange_ = false;
-        return;
+    if (isFiredDateChange_ && !isForceUpdate_) {
+        std::string language = Localization::GetInstance()->GetLanguage();
+        if ((lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false)) &&
+            (strcmp(language.c_str(), "zh") == 0)) {
+            isFiredDateChange_ = false;
+            return;
+        }
     }
     ClearFocus();
     isForceUpdate_ = false;
