@@ -3985,4 +3985,10 @@ Rect AceContainer::GetDisplayAvailableRect() const
 
     return DisplayInfoUtils::GetInstance().GetDisplayAvailableRect(uiWindow_->GetDisplayId());
 }
+
+void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)
+{
+    CHECK_NULL_VOID(uiWindow_);
+    uiWindow_->GetExtensionConfig(want);
+}
 } // namespace OHOS::Ace::Platform
