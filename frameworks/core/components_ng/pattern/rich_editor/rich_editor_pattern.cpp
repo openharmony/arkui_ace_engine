@@ -11448,7 +11448,9 @@ void RichEditorPattern::HandlePageScroll(bool isPageUp)
     auto visibleRect = selectOverlay_->GetVisibleRect();
     float distance = isPageUp ? visibleRect.Height() : -visibleRect.Height();
     RectF curCaretRect = GetCaretRect();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "PageScroll isPageUp:%{public}d distance:%{public}f", isPageUp, distance);
+    auto height = paragraphs_.GetHeight();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "PageScroll isPageUp:%{public}d distance:%{public}f paragraphsHeight:%{public}f",
+        isPageUp, distance, height);
     CloseSelectOverlay();
     ResetSelection();
     OnScrollCallback(distance, SCROLL_FROM_JUMP);
@@ -11457,6 +11459,12 @@ void RichEditorPattern::HandlePageScroll(bool isPageUp)
     auto localOffset = Offset(curCaretRect.GetX(), offsetY - paintOffset.GetY());
     auto textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
+    // If scrolling to the first or last line, move the cursor to the beginning or end of the line
+    if (isPageUp && LessOrEqual(textOffset.GetY(), 0)) {
+        positionWithAffinity = PositionWithAffinity(0, TextAffinity::DOWNSTREAM);
+    } else if (!isPageUp && GreatOrEqual(textOffset.GetY(), height)) {
+        positionWithAffinity = PositionWithAffinity(GetTextContentLength(), TextAffinity::UPSTREAM);
+    }
     SetCaretPositionWithAffinity(positionWithAffinity);
     IF_TRUE(isEditing_, StartTwinkling());
 }
