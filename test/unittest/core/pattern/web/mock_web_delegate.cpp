@@ -1213,4 +1213,8 @@ bool WebDelegate::IsActivePolicyDisable()
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
+std::string WebDelegate::GetCurrentLanguage()
+{
+    return "";
+}
 } // namespace OHOS::Ace

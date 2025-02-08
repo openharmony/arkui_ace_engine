@@ -7830,4 +7830,13 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
         delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
 }
+
+std::string WebPattern::GetCurrentLanguage()
+{
+    std::string result = "";
+    if (delegate_) {
+        result = delegate_->GetCurrentLanguage();
+    }
+    return result;
+}
 } // namespace OHOS::Ace::NG

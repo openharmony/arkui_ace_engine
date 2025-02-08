@@ -1176,6 +1176,8 @@ public:
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
+    std::string GetCurrentLanguage();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();

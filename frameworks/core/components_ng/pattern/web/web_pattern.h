@@ -773,6 +773,8 @@ public:
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
+    std::string GetCurrentLanguage() override;
+
 private:
     friend class WebContextSelectOverlay;
 

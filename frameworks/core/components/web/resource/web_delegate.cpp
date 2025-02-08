@@ -7636,4 +7636,11 @@ void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
 }
 
+std::string WebDelegate::GetCurrentLanguage()
+{
+    if (nweb_) {
+        return nweb_->GetCurrentLanguage();
+    }
+    return "";
+}
 } // namespace OHOS::Ace
