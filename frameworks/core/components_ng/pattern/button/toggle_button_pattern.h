@@ -84,11 +84,13 @@ public:
     void MarkIsSelected(bool isSelected);
     void SetButtonPress(bool value);
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;
     void InitParameters();
     void OnModifyDone() override;
+    void HandleEnabled();
     void OnAfterModifyDone() override;
     void InitClickEvent();
     void InitButtonAndText();

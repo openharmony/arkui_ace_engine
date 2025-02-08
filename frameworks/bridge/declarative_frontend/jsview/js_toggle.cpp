@@ -25,7 +25,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_toggle_theme.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -143,7 +142,6 @@ void JSToggle::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
     }
-    JSToggleTheme::ApplyTheme(NG::ToggleType(toggleType_));
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)
@@ -194,9 +192,7 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
 
 void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto switchTheme = GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto defaultHeight = switchTheme->GetHeight();
     auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
@@ -285,14 +281,12 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         return;
     }
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        auto theme = GetTheme<SwitchTheme>();
-        if (theme) {
-            color = theme->GetPointColor();
-        }
+    std::optional<Color> switchPointColor;
+    if (ParseJsColor(info[0], color)) {
+        switchPointColor = color;
     }
 
-    ToggleModel::GetInstance()->SetSwitchPointColor(color);
+    ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)

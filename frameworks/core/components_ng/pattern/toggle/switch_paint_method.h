@@ -48,12 +48,15 @@ public:
             auto pointOffset = isSelect_ ^ isRtl ? size.Width() - size.Height() : 0.0f;
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_RETURN(pipeline, nullptr);
-            auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+            auto themeScopeId = GetThemeScopeId(paintWrapper);
+            auto switchTheme = pipeline->GetTheme<SwitchTheme>(themeScopeId);
+            CHECK_NULL_RETURN(switchTheme, nullptr);
             auto boardColor = isSelect_ ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
                                         : switchTheme->GetInactivePointColor();
-            switchModifier_ =
-                AceType::MakeRefPtr<SwitchModifier>(size, offset, pointOffset, isSelect_, boardColor, dragOffsetX_);
-            switchModifier_->InitializeParam();
+            auto pointColor = paintProperty->GetSwitchPointColorValue(switchTheme->GetPointColor());
+            switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(
+                size, offset, pointOffset, isSelect_, boardColor, pointColor, dragOffsetX_);
+            switchModifier_->InitializeParam(themeScopeId);
         }
         return switchModifier_;
     }
@@ -94,21 +97,36 @@ public:
         switchModifier_->SetBoundsRect(boundsRect);
     }
 
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    void UpdateModifierColor(PaintWrapper* paintWrapper)
     {
-        CHECK_NULL_VOID(switchModifier_);
         auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
-        switchModifier_->SetUseContentModifier(useContentModifier_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto switchTheme = pipeline->GetTheme<SwitchTheme>(GetThemeScopeId(paintWrapper));
+        CHECK_NULL_VOID(switchTheme);
         if (paintProperty->HasUnselectedColor()) {
             switchModifier_->SetInactiveColor(paintProperty->GetUnselectedColor().value());
         }
         if (paintProperty->HasSelectedColor()) {
             switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
+        } else {
+            switchModifier_->SetUserActiveColor(switchTheme->GetActiveColor());
         }
         if (paintProperty->HasSwitchPointColor()) {
             switchModifier_->SetPointColor(paintProperty->GetSwitchPointColor().value());
+        } else {
+            switchModifier_->SetPointColor(switchTheme->GetPointColor());
         }
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(switchModifier_);
+        switchModifier_->SetUseContentModifier(useContentModifier_);
+        UpdateModifierColor(paintWrapper);
+        auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         auto pointRadius = SWITCH_ERROR_RADIUS;
         if (paintProperty->HasPointRadius()) {
             pointRadius = paintProperty->GetPointRadius().value().ConvertToPx();
@@ -223,6 +241,8 @@ private:
     RefPtr<SwitchModifier> switchModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintMethod);
+
+    int32_t GetThemeScopeId(PaintWrapper* paintWrapper) const;
 };
 } // namespace OHOS::Ace::NG
 

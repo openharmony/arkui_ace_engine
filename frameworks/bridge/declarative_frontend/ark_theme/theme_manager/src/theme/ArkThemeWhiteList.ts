@@ -40,7 +40,6 @@ class ArkThemeWhiteList {
         'Swiper',
         'Text',
         'TextClock',
-        'Toggle',
     ];
 
     /**

@@ -61,7 +61,6 @@ void ToggleButtonPattern::OnModifyDone()
     CheckLocalizedBorderRadiuses();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPositionProperty()) {
@@ -70,7 +69,6 @@ void ToggleButtonPattern::OnModifyDone()
     } else {
         layoutProperty->UpdateAlignment(Alignment::CENTER);
     }
-
     auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
     CHECK_NULL_VOID(buttonPaintProperty);
     if (!isOn_.has_value()) {
@@ -82,20 +80,22 @@ void ToggleButtonPattern::OnModifyDone()
         changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(toggleTheme);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
     if (!UseContentModifier()) {
-        if (isOn_.value()) {
-            auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(checkedColor_);
+        if (isOn_.value_or(false)) {
+            auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(toggleTheme->GetCheckedColor());
             renderContext->UpdateBackgroundColor(selectedColor);
         } else {
-            auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
+            auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(toggleTheme->GetBackgroundColor());
             renderContext->UpdateBackgroundColor(bgColor);
         }
         HandleOnOffStyle(!isOn_.value(), isFocus_);
     }
-
     if (changed) {
         auto toggleButtonEventHub = GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(toggleButtonEventHub);
@@ -103,19 +103,40 @@ void ToggleButtonPattern::OnModifyDone()
     }
     GetIsTextFade();
     FireBuilder();
-    InitButtonAndText();
-    HandleEnabled();
     InitEvent();
     SetAccessibilityAction();
 }
 
 void ToggleButtonPattern::InitEvent()
 {
+    InitButtonAndText();
+    HandleEnabled();
     InitClickEvent();
     HandleOverlayStyle();
     InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
+}
+
+void ToggleButtonPattern::HandleEnabled()
+{
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto* pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetDisabledAlpha();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void ToggleButtonPattern::GetIsTextFade()
@@ -735,11 +756,39 @@ void ToggleButtonPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(toggleTheme);
     checkedColor_ = toggleTheme->GetCheckedColor();
     unCheckedColor_ = toggleTheme->GetBackgroundColor();
     OnModifyDone();
+}
+
+bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto node = GetHost();
+    CHECK_NULL_RETURN(node, false);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(themeScopeId);
+    CHECK_NULL_RETURN(toggleTheme, false);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+
+    auto paintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+
+    if (isOn_.value_or(false) && !paintProperty->HasSelectedColor()) {
+        renderContext->UpdateBackgroundColor(toggleTheme->GetCheckedColor());
+        result = true;
+    }
+    if (!isOn_.value_or(false) && !paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(toggleTheme->GetBackgroundColor());
+        result = true;
+    }
+    node->MarkDirtyNode();
+    return result;
 }
 
 void ToggleButtonPattern::SetButtonPress(bool isSelected)
