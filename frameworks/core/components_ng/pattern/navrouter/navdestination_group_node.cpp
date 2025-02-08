@@ -966,6 +966,7 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 auto parent = navDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(navDestination);
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             } else if (navDestination->HasStandardBefore()) {
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);
