@@ -279,7 +279,8 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     return 0;
 }
 
-void DragDropFuncWrapper::HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
+void DragDropFuncWrapper::HandleOnDragEvent(
+    const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
 {
     CHECK_NULL_VOID(dragAction);
     auto pipelineContext = PipelineContext::GetContextByContainerId(dragAction->instanceId);
@@ -695,9 +696,9 @@ void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, Drag
     event.deviceId = touchPoint.deviceId;
     event.x = event.windowX;
     event.y = event.windowY;
-    event.pressedKeyCodes_.clear();
+    event.pressedKeyCodes.clear();
     for (const auto& curCode : touchPoint.pressedKeyCodes_) {
-        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+        event.pressedKeyCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
     GetPointerEventAction(touchPoint, event);
 }

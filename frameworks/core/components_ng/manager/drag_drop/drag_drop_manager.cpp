@@ -884,7 +884,7 @@ void DragDropManager::ResetDragEndOption(
     ResetDragPreviewInfo();
     HideDragPreviewWindow(currentId);
     CHECK_NULL_VOID(dragEvent);
-    dragEvent->SetPressedKeyCodes(GetDragDropPointerEvent().pressedKeyCodes_);
+    dragEvent->SetPressedKeyCodes(GetDragDropPointerEvent().pressedKeyCodes);
 }
 
 void DragDropManager::DoDragReset()
@@ -1716,7 +1716,7 @@ void DragDropManager::UpdateDragEvent(
     event->SetVelocity(velocityTracker_.GetVelocity());
     event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
-    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
     event->SetSourceTool(pointerEvent.sourceTool);
 }
 

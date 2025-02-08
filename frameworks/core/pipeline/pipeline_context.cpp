@@ -3115,7 +3115,7 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
         pageOffset_ = GetPageRect().GetOffset();
     }
 
-    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
 
     if (action != DragEventAction::DRAG_EVENT_END) {
         ProcessDragEvent(renderNode, event, globalPoint);
