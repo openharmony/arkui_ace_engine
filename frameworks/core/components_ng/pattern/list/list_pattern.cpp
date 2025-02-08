@@ -198,6 +198,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
+            } else {
+                scrollStop_ = false;
             }
         } else if (!snapTrigOnScrollStart_) {
             OnAnimateStop();
