@@ -544,9 +544,7 @@ template("declarative_js_engine") {
       ]
     }
     if (is_ohos_standard_system && !build_ohos_sdk) {
-      sources += [
-        "jsview/js_form_button.cpp",
-      ]
+      sources += [ "jsview/js_form_button.cpp" ]
     }
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -1046,9 +1044,7 @@ template("declarative_js_engine_ng") {
       }
     }
     if (is_ohos_standard_system && !build_ohos_sdk) {
-      sources += [
-        "jsview/js_form_button.cpp",
-      ]
+      sources += [ "jsview/js_form_button.cpp" ]
     }
     
     if (defined(config.enable_ability_component) &&
