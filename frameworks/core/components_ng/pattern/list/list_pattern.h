@@ -466,6 +466,7 @@ private:
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step, bool isScrollIndex);
     void VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param);
+    int32_t GetNextLineFocusIndex(int32_t currIndex);
 
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
