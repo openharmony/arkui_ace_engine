@@ -190,7 +190,7 @@ static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_VALIDITY, TextInputType::TEXT },
     { AceAutoFillType::ACE_ISSUE_AT, TextInputType::TEXT },
     { AceAutoFillType::ACE_ORGANIZATION, TextInputType::TEXT },
-    { AceAutoFillType::ACE_TAX_ID, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_TAX_ID, TextInputType::TEXT },
     { AceAutoFillType::ACE_ADDRESS_CITY_AND_STATE, TextInputType::TEXT },
     { AceAutoFillType::ACE_FLIGHT_NUMBER, TextInputType::TEXT },
     { AceAutoFillType::ACE_LICENSE_NUMBER, TextInputType::TEXT },
