@@ -316,6 +316,8 @@ public:
 
     void GetThumbnailPixelMap(bool isSync);
 
+    void FireCustomerOnDragEnd();
+
     virtual void NotifyTransDragWindowToFwk() {}
 
     virtual void NotifyMenuShow(bool isMenuShow) {}
