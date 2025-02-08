@@ -4900,7 +4900,8 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
     changeValueInfo.value = contentController_->GetTextUtf16Value();
-    changeValueInfo.rangeAfter = TextRange { offset, offset + contentController_->GetInsertValue().length() };
+    changeValueInfo.rangeAfter =
+        TextRange { offset, offset + static_cast<int32_t>(contentController_->GetInsertValue().length()) };
     bool isWillChange = FireOnWillChange(changeValueInfo);
     if (!isWillChange) {
         contentController_->SetTextValue(changeValueInfo.oldContent);
@@ -9091,7 +9092,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSelected()) {
             uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
             uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
-            if (startIndex < fullStr.length() && endIndex < fullStr.length()) {
+            if (startIndex < fullStr.length() && endIndex <= fullStr.length()) {
                 fullStr.erase(startIndex, endIndex - startIndex);
             }
         }
@@ -9192,7 +9193,8 @@ void TextFieldPattern::FinishTextPreviewOperation()
         originLength);
     selectController_->UpdateCaretIndex(start + caretMoveLength);
     UpdateEditingValueToRecord();
-    changeValueInfo.rangeAfter = TextRange { selectController_->GetCaretIndex(), selectController_->GetCaretIndex() };
+    changeValueInfo.rangeAfter =
+        TextRange { changeValueInfo.oldPreviewText.offset, selectController_->GetCaretIndex() };
     changeValueInfo.value = GetBodyTextValue();
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
@@ -10457,7 +10459,7 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
         }
         auto originLength = contentController_->GetTextUtf16Value().length();
         auto hasInsertValue = contentController_->InsertValue(caretIndex, info.insertValue);
-        insertLength = contentController_->GetTextUtf16Value().length() - originLength;
+        insertLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length() - originLength);
         caretIndex += insertLength;
 
         if (layoutProperty->HasMaxLength()) {
@@ -10487,6 +10489,16 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
 
 void TextFieldPattern::ClearTextContent()
 {
+    if (GetIsPreviewText()) {
+        PreviewTextInfo info = {
+            .text = u"",
+            .range = {-1, -1}
+        };
+        SetPreviewTextOperation(info);
+    }
+    if (contentController_->IsEmpty()) {
+        return;
+    }
     InputCommandInfo inputCommandInfo;
     inputCommandInfo.deleteRange = { 0, contentController_->GetTextUtf16Value().length() };
     inputCommandInfo.insertOffset = 0;
