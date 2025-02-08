@@ -119,7 +119,7 @@ void OnClickImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto OnClick = [arkCallback = CallbackHelper(*value, frameNode)](GestureEvent& info) {
+    auto onClick = [arkCallback = CallbackHelper(*value, frameNode)](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
 #ifdef SECURITY_COMPONENT_ENABLE
         auto secEventValue = info.GetSecCompHandleEvent();
@@ -136,7 +136,7 @@ void OnClickImpl(Ark_NativePointer node,
         arkCallback.Invoke(event.ArkValue(), arkResult);
     };
 
-    ViewAbstract::SetOnClick(frameNode, std::move(OnClick));
+    ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
 } // LocationButtonAttributeModifier
 const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()
