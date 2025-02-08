@@ -871,10 +871,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
-        "pointerId %{public}d, toolType %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s.",
+        "pointerId %{public}d, toolType %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s, "
+        "eventId %{public}d.",
         frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
         recordsSize, static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(),
-        static_cast<int32_t>(info.GetSourceTool()), info.GetTargetDisplayId(), windowId, summarys.c_str());
+        static_cast<int32_t>(info.GetSourceTool()), info.GetTargetDisplayId(), windowId, summarys.c_str(),
+        info.GetPointerEventId());
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");
