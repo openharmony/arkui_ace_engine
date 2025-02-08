@@ -30,7 +30,7 @@ public:
         action_ = action;
     }
 
-    std::string GetAction()
+    std::string GetAction() const
     {
         return action_;
     }
@@ -40,7 +40,7 @@ public:
         bundleName_ = bundleName;
     }
 
-    std::string GetBundleName()
+    std::string GetBundleName() const
     {
         return bundleName_;
     }
@@ -50,7 +50,7 @@ public:
         abilityName_ = abilityName;
     }
 
-    std::string GetAbilityName()
+    std::string GetAbilityName() const
     {
         return abilityName_;
     }
@@ -65,7 +65,7 @@ public:
         moduleName_ = moduleName;
     }
 
-    int32_t GetDimension()
+    int32_t GetDimension() const
     {
         return dimension_;
     }
@@ -75,7 +75,7 @@ public:
         dimension_ = dimension;
     }
 
-    std::string GetCardName()
+    std::string GetCardName() const
     {
         return cardName_;
     }
