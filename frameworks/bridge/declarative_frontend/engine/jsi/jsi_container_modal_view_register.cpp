@@ -113,6 +113,7 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
 
     BindingCustomBaseFromJS(object, vm, customNode);
     BindingCustomTitleFromJS(object, vm, customNode);
+    BindingCustomButtonFromJS(object, vm, customNode);
     NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
 }
 
