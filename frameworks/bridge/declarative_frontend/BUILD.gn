@@ -201,7 +201,6 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass",
       ":mock",
       ":prefetcher",
-      ":shape",
       ":statemanagement",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
@@ -230,7 +229,6 @@ template("declarative_js_engine") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
-      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -274,7 +272,6 @@ template("declarative_js_engine") {
       "jsview/js_button.cpp",
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
-      "jsview/js_calendar_picker.cpp",
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
@@ -297,7 +294,6 @@ template("declarative_js_engine") {
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
-      "jsview/js_form_button.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
@@ -316,7 +312,6 @@ template("declarative_js_engine") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
-      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -355,6 +350,7 @@ template("declarative_js_engine") {
       "jsview/js_polyline.cpp",
       "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
+      "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
       "jsview/js_rect_shape.cpp",
@@ -469,6 +465,7 @@ template("declarative_js_engine") {
       "jsview/models/picker_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/progress_model_impl.cpp",
+      "jsview/models/qrcode_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
@@ -502,13 +499,14 @@ template("declarative_js_engine") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
+        "jsview/js_calendar_picker.cpp",
         "jsview/js_column_split.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
-        "jsview/js_select.cpp",
         "jsview/js_side_bar.cpp",
         "jsview/js_stepper.cpp",
         "jsview/js_stepper_item.cpp",
+        "jsview/js_select.cpp",
         "jsview/js_water_flow.cpp",
         "jsview/js_water_flow_item.cpp",
         "jsview/js_water_flow_sections.cpp",
@@ -526,13 +524,6 @@ template("declarative_js_engine") {
       sources += [ "engine/functions/js_crown_function.cpp" ]
     }
 
-    if (qrcodegen_support) {
-      sources += [
-        "jsview/js_qrcode.cpp",
-        "jsview/models/qrcode_model_impl.cpp",
-      ]
-    }
-
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -542,6 +533,11 @@ template("declarative_js_engine") {
       external_deps += [
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
+      ]
+    }
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [
+        "jsview/js_form_button.cpp",
       ]
     }
 
@@ -671,12 +667,14 @@ template("declarative_js_engine") {
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
         if (is_arkui_x) {
-          deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
+          deps += [ "$ace_napi:ace_container_scope_static" ]
         } else {
-          deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+          external_deps += [ "napi:ace_container_scope" ]
         }
       }
     }
+
+    deps += [ ":shape" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -691,7 +689,7 @@ template("declarative_js_engine") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
-        "graphic_2d:librender_service_client",
+        "graphic_2d:librender_service_base",
         "napi:ace_napi",
       ]
     }
@@ -763,7 +761,6 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_proxyclass",
       ":mock",
       ":prefetcher",
-      ":shape",
       ":statemanagement",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
@@ -789,7 +786,6 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
-      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -815,6 +811,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
       "sharedata/js_share_data.cpp",
+      "view_stack_processor.cpp",
 
       # jsviews
       "interfaces/profiler/js_profiler.cpp",
@@ -844,7 +841,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_button.cpp",
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
-      "jsview/js_calendar_picker.cpp",
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
@@ -865,7 +861,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
-      "jsview/js_form_button.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
@@ -884,7 +879,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
-      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -974,6 +968,7 @@ template("declarative_js_engine_ng") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
+        "jsview/js_calendar_picker.cpp",
         "jsview/js_column_split.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
@@ -1003,11 +998,9 @@ template("declarative_js_engine_ng") {
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
       sources += [
         "jsview/js_pattern_lock.cpp",
+        "jsview/js_qrcode.cpp",
         "jsview/js_relative_container.cpp",
       ]
-      if (qrcodegen_support) {
-        sources += [ "jsview/js_qrcode.cpp" ]
-      }
     }
 
     if (defined(config.video_components_support) &&
@@ -1042,7 +1035,11 @@ template("declarative_js_engine_ng") {
         ]
       }
     }
-
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [
+        "jsview/js_form_button.cpp",
+      ]
+    }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       sources += [
@@ -1110,16 +1107,17 @@ template("declarative_js_engine_ng") {
       deps += [ "$ace_root/frameworks/bridge:framework_bridge_ng_$platform" ]
       defines += [ "BUILT_IN_JS_ENGINE" ]
     } else {
-      if (is_asan) {
+      if (is_asan || !ace_engine_feature_enable_libace) {
         deps += [ "$ace_root/build:libace_compatible" ]
       } else {
         deps += [ "$ace_root/build:libace" ]
       }
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+        external_deps += [ "napi:ace_container_scope" ]
       }
     }
+    include_dirs = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -1132,6 +1130,7 @@ template("declarative_js_engine_ng") {
         "jsview/menu/js_context_menu.cpp",
         "jsview/text_menu/js_text_menu.cpp",
       ]
+      include_dirs += [ "//commonlibrary/c_utils/base/include" ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [
         "$ace_graphic/rosen/modules/render_service_base:librender_service_base_static",
@@ -1144,10 +1143,12 @@ template("declarative_js_engine_ng") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
-        "graphic_2d:librender_service_client",
+        "graphic_2d:librender_service_base",
         "napi:ace_napi",
       ]
     }
+
+    deps += [ ":shape" ]
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {
