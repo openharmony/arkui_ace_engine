@@ -94,7 +94,6 @@ if (defined(global_parts_info.graphic_graphic_3d)) {
 
 window_scene_support = true
 dynamic_component_support = true
-form_button_component_support = false
 vsync_timeout_check = true
 use_fast_taskpool = false
 state_mgmt_use_aot = true
@@ -198,7 +197,7 @@ if (dynamic_component_support) {
   defines += [ "DYNAMIC_COMPONENT_SUPPORT" ]
 }
 
-if (form_button_component_support) {
+if (!build_ohos_sdk) {
   defines += [ "FORM_BUTTON_COMPONENT_SUPPORT" ]
 }
 
