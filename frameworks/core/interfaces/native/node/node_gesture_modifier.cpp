@@ -240,7 +240,9 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
         points[i].operatingHand = fingureIterator == fingureEnd ? 0 : fingureIterator->operatingHand_;
         i++;
-        fingureIterator++;
+        if (fingureIterator != fingureEnd) {
+            fingureIterator++;
+        }
     }
 }
 
