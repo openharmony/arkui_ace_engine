@@ -390,6 +390,8 @@ public:
 
     void SetDragMoveLastPoint(Point point) noexcept;
 
+    const Point GetDragMoveLastPoint() const;
+
     void SetDelayDragCallBack(const std::function<void()>& cb) noexcept;
 
     bool IsStartAnimationFInished() const
