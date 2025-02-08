@@ -1931,10 +1931,10 @@ void JSViewAbstract::MenuDefaultParam(NG::MenuParam& menuParam)
 void JSViewAbstract::ParseContentMenuCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam)
 {
-    CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
     if (!menuParam.placement.has_value()) {
         MenuDefaultParam(menuParam);
     }
+    CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
     ParseMenuParam(info, menuObj, menuParam);
     auto preview = menuObj->GetProperty("preview");
     if (preview->IsNumber() && preview->ToNumber<int32_t>() == 1) {
