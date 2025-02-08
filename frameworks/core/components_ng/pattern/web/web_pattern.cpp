@@ -1878,7 +1878,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
     TAG_LOGI(AceLogTag::ACE_WEB,
         "HandleDragStart DragDrop event gestureHub actionStart, isW3cDragEvent_:%{public}d, isMouseEvent_:%{public}d",
         (int)isW3cDragEvent_, (int)isMouseEvent_);
-    if (!isW3cDragEvent_ && !isMouseEvent_) {
+    if (!isDragStartFromWeb_ && !isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->SetDraggable(false);
@@ -1895,7 +1895,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         gestureHub->CancelDragForWeb();
     }
-    if (!isW3cDragEvent_ && isMouseEvent_) {
+    if (!isDragStartFromWeb_ && isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<WebEventHub>();
