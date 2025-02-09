@@ -1055,6 +1055,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::GetWindowWidthBreakpoint));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "getWindowHeightBreakpoint"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::GetWindowHeightBreakpoint));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "freezeUINodeById"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::FreezeUINodeById));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "freezeUINodeByUniqueId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::FreezeUINodeByUniqueId));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSystemBarEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSystemBarEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "postFrameCallback"),

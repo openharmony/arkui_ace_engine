@@ -5847,6 +5847,17 @@ void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
     ViewAbstract::SetSystemBarEffect(frameNode, enable);
 }
 
+void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)
+{
+    std::string idStr(id);
+    ViewAbstract::FreezeUINodeById(idStr, isFreeze);
+}
+
+void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
+{
+    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
+}
+
 ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -7075,6 +7086,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
@@ -7489,6 +7502,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
