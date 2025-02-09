@@ -914,7 +914,7 @@ float HandleTouchEventWindowY(const ArkUI_UIInputEvent* event)
 float HandleAxisEventWindowY(const ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
-    if (!axisEvent) {
+    if (axisEvent) {
         return axisEvent->y;
     }
     return 0.0f;
