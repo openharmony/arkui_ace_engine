@@ -875,7 +875,7 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
 
 bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t itemCnt)
 {
-    using std::abs, std::round, std::min, std::max;
+    using std::abs, std::round, std::clamp;
     const float offset = StartPos() + delta_;
     if (LessOrEqual(abs(offset), viewport * 2.0f)) {
         return false;
@@ -891,10 +891,9 @@ bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t i
     if (NearZero(average)) {
         return false;
     }
-    jumpIndex_ -= static_cast<int32_t>(round(offset * crossCnt / average));
 
-    jumpIndex_ = min(jumpIndex_, itemCnt);
-    jumpIndex_ = max(jumpIndex_, 0);
+    jumpIndex_ = startIdx - static_cast<int32_t>(round(offset * crossCnt / average));
+    jumpIndex_ = clamp(jumpIndex_, 0, itemCnt - 1);
     align_ = ScrollAlign::START;
     delta_ = 0.0f;
     return true;
