@@ -7300,6 +7300,7 @@ void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode)
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             rootNode->RemoveChild(node);
+            return;
         }
     }
 }
