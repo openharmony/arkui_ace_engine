@@ -1937,9 +1937,12 @@ void JSViewAbstract::ParseContentMenuCommonParam(
     }
     ParseMenuParam(info, menuObj, menuParam);
     auto preview = menuObj->GetProperty("preview");
-    if (preview->IsNumber() && preview->ToNumber<int32_t>() == 1) {
-        menuParam.previewMode = MenuPreviewMode::IMAGE;
-        ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
+    if (preview->IsNumber()) {
+        auto previewMode = preview->ToNumber<int32_t>();
+        if (previewMode == static_cast<int32_t>(MenuPreviewMode::IMAGE)) {
+            menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
+            ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
+        }
     }
 }
 

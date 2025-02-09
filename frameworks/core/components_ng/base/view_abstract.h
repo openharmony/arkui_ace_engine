@@ -381,7 +381,7 @@ public:
     static void DismissDialog();
     static void DismissPopup();
     static void ShowMenuPreview(
-        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, const NG::MenuParam& menuParam);
+        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, NG::MenuParam& menuParam);
     static int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId);
     static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
     static int32_t CloseMenu(const RefPtr<UINode>& customNode);
@@ -873,9 +873,6 @@ private:
     static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
     static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
     static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
-    static int32_t OpenMenuMode(const RefPtr<FrameNode>& targetNode, RefPtr<OverlayManager>& overlayManager,
-        std::function<int32_t()>&& openMenuFunc);
-    static void CheckMenuPreview(NG::MenuParam& menuParam);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
