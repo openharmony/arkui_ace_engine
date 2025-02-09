@@ -170,6 +170,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     cachedItemPosition_ = listLayoutAlgorithm->GetCachedItemPosition();
+    laneIdx4Divider_ = listLayoutAlgorithm->GetLaneIdx4Divider();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
@@ -371,6 +372,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     bool showCached = listLayoutProperty->GetShowCachedItemsValue(false);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
     paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached, clip);
+    paint->SetLaneIdx(laneIdx4Divider_);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);

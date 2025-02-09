@@ -524,6 +524,7 @@ private:
     std::map<int32_t, int32_t> lanesItemRange_;
     std::set<int32_t> pressedItem_;
     int32_t lanes_ = 1;
+    int32_t laneIdx4Divider_ = 0;
     float laneGutter_ = 0.0f;
     bool dragFromSpring_ = false;
     RefPtr<SpringProperty> springProperty_;

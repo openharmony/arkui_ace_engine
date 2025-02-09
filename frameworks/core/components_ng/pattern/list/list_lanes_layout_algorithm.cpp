@@ -661,7 +661,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
                 break;
             }
         }
-        auto startIndex = curIndex - cnt + 1;
+        auto startIndex = GetLanesFloor(layoutWrapper, curIndex);
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
@@ -679,6 +679,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             pos.second.startPos = endPos - mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
+        SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
         endPos = endPos - mainLen - GetSpaceWidth();
         curIndex -= cnt;
     }
