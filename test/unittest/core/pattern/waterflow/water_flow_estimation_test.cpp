@@ -203,4 +203,31 @@ HWTEST_F(WaterFlowTestNg, LargeOffset003, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 9);
 }
+
+/**
+ * @tc.name: heightSum001
+ * @tc.desc: test heightSum_
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, heightSum001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfoSW>(pattern_->layoutInfo_);
+    ASSERT_TRUE(info);
+    UpdateCurrentOffset(-1500.0f);
+    EXPECT_EQ(info->heightSum_, 1500.0f);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 9);
+
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 9);
+
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 9);
+}
 } // namespace OHOS::Ace::NG
