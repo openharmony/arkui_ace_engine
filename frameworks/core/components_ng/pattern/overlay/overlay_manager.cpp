@@ -1879,12 +1879,6 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
     if (!autoCancel) {
         return nullptr;
     }
-    popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-    CHECK_NULL_RETURN(popupInfo.isCurrentOnShow, nullptr);
-    popupMap_[targetId].isCurrentOnShow = false;
-    auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, nullptr);
     auto rootChildren = rootNode->GetChildren();
@@ -2447,6 +2441,11 @@ void OverlayManager::CleanPopupInSubWindow()
             SetDismissPopupId(target);
             bubblePattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
         } else {
+            auto bubbleEventHub = removeNode->GetEventHub<BubbleEventHub>();
+            CHECK_NULL_VOID(bubbleEventHub);
+            bubbleEventHub->FireChangeEvent(false);
+            popupMap_[target].isCurrentOnShow = false;
+            bubblePattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
             rootNode->RemoveChild(removeNode);
             auto subwindowMgr = SubwindowManager::GetInstance();
             subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId());
