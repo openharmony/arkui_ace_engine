@@ -68,9 +68,7 @@
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "bridge/declarative_frontend/engine/functions/js_crown_function.h"
 #endif
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED

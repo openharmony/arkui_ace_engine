@@ -5926,12 +5926,12 @@ void FrameNode::GetInspectorValue()
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (GetTag() == V2::WEB_ETS_TAG) {
-        UiSessionManager::GetInstance().WebTaskNumsChange(1);
+        UiSessionManager::GetInstance()->WebTaskNumsChange(1);
         auto pattern = GetPattern<NG::WebPattern>();
         CHECK_NULL_VOID(pattern);
         auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
-            UiSessionManager::GetInstance().AddValueForTree(webId, value->ToString());
-            UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+            UiSessionManager::GetInstance()->AddValueForTree(webId, value->ToString());
+            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
         };
         pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
     }
@@ -6035,7 +6035,7 @@ void FrameNode::NotifyWebPattern(bool isRegister)
         CHECK_NULL_VOID(pattern);
         if (isRegister) {
             auto callback = [](int64_t accessibilityId, const std::string data) {
-                UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+                UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data);
             };
             pattern->RegisterTextBlurCallback(callback);
         } else {

@@ -20,9 +20,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"

@@ -17,9 +17,7 @@
 
 #include <optional>
 #include <string>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -503,9 +501,7 @@ void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
                         const NG::RichEditorAbstractSpanResult& textSpanResult) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(textSpanResult);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onIMEInputComplete");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onIMEInputComplete");
     };
     RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(callback));
 }
@@ -519,9 +515,7 @@ void JSRichEditor::SetOnDidIMEInput(const JSCallbackInfo& args)
                         const TextRange& textRange) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(textRange);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDidIMEInput");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDidIMEInput");
     };
     RichEditorModel::GetInstance()->SetOnDidIMEInput(std::move(callback));
 }
@@ -1074,9 +1068,7 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onPaste");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
 }

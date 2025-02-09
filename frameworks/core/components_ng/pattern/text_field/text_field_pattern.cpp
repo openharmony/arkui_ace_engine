@@ -34,9 +34,7 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/pipeline/pipeline_base.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
@@ -5683,9 +5681,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (textInputBlurOnSubmit_) {
         HandleCloseKeyboard(forceCloseKeyboard);
     }
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Textfield.onSubmit");
-#endif
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Textfield.onSubmit");
 }
 
 void TextFieldPattern::TextFieldLostFocusToViewRoot()
@@ -9436,7 +9432,7 @@ bool TextFieldPattern::IsContentRectNonPositive()
 void TextFieldPattern::ReportEvent()
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
+    if (UiSessionManager::GetInstance()->GetSearchEventRegistered()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto data = JsonUtil::Create();
@@ -9447,7 +9443,7 @@ void TextFieldPattern::ReportEvent()
         data->Put("text", GetTextValue().data());
         data->Put("position", host->GetGeometryNode()->GetFrameRect().ToString().data());
         // report all use textfield component unfocus event,more than just the search box
-        UiSessionManager::GetInstance().ReportSearchEvent(data->ToString());
+        UiSessionManager::GetInstance()->ReportSearchEvent(data->ToString());
     }
 #endif
 }

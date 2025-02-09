@@ -19,9 +19,7 @@
 #include <unordered_map>
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow.h"
@@ -2347,9 +2345,7 @@ void ViewAbstract::DismissDialog()
     auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
     if (dialogPattern) {
         dialogPattern->OverlayDismissDialog(dialogNode);
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy");
     }
 }
 

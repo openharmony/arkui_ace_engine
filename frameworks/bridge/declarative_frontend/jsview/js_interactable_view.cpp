@@ -431,7 +431,7 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text)
 {
-    if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
+    if (UiSessionManager::GetInstance()->GetClickEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onClick");
         std::u16string content = text;
@@ -445,7 +445,7 @@ void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode
             data->Put("text", UtfUtils::Str16DebugToStr8(content).data());
             data->Put("position", node->GetGeometryNode()->GetFrameRect().ToString().data());
         }
-        UiSessionManager::GetInstance().ReportClickEvent(data->ToString());
+        UiSessionManager::GetInstance()->ReportClickEvent(data->ToString());
     }
 }
 #endif

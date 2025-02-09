@@ -2175,7 +2175,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // setLogFunc of current app
     AddAlarmLogFunc();
     InitUISessionManagerCallbacks(pipeline);
-    UiSessionManager::GetInstance().SaveBaseInfo(std::string("bundleName:")
+    UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
                                                      .append(moduleName)
@@ -4639,12 +4639,12 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
                 CHECK_NULL_VOID(pipeline);
                 ContainerScope scope(pipeline->GetInstanceId());
                 pipeline->GetInspectorTree();
-                UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+                UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
             },
             TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-    UiSessionManager::GetInstance().SaveInspectorTreeFunction(callback);
+    UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
     auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         CHECK_NULL_VOID(pipeline);
@@ -4659,7 +4659,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-    UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
+    UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
     auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         CHECK_NULL_VOID(pipeline);
@@ -4673,7 +4673,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             },
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
-    UiSessionManager::GetInstance().SaveGetPixelMapFunction(getPixelMapCallback);
+    UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)

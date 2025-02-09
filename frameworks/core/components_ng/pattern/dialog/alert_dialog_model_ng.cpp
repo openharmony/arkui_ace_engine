@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -90,9 +88,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                 dialog = overlayManager->ShowDialog(arg, nullptr, false);
                 CHECK_NULL_VOID(dialog);
             }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show");
             auto hub = dialog->GetEventHub<NG::DialogEventHub>();
             CHECK_NULL_VOID(hub);
             hub->SetOnCancel(arg.onCancel);

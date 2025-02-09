@@ -24,9 +24,7 @@
 #include <string>
 #include <utility>
 
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
@@ -5536,9 +5534,7 @@ bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length,
         DeleteByDeleteValueInfo(info);
         IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
         eventHub->FireOnDeleteComplete();
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "RichEditor.OnDeleteComplete");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.OnDeleteComplete");
     }
     return doDelete;
 }

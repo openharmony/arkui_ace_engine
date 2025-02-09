@@ -51,7 +51,7 @@ void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
         auto result = JsonUtil::Create();
         result->Put("nodeId", nodeId);
         result->Put("currentLanguage", currentLanguage.c_str());
-        UiSessionManager::GetInstance().SendCurrentLanguage(result->ToString());
+        UiSessionManager::GetInstance()->SendCurrentLanguage(result->ToString());
     }
 }
 
@@ -63,7 +63,7 @@ void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isCont
             continue;
         }
         int32_t nodeId = frameNode->GetId();
-        auto cb = [nodeId](std::string res) { UiSessionManager::GetInstance().SendWebTextToAI(nodeId, res); };
+        auto cb = [nodeId](std::string res) { UiSessionManager::GetInstance()->SendWebTextToAI(nodeId, res); };
         auto pattern = frameNode->GetPattern<NG::WebPattern>();
         if (!pattern) {
             continue;
@@ -121,7 +121,7 @@ void UiTranslateManagerImpl::ClearMap()
 
 void UiTranslateManagerImpl::SendPixelMap()
 {
-    UiSessionManager::GetInstance().SendPixelMap(pixelMap_);
+    UiSessionManager::GetInstance()->SendPixelMap(pixelMap_);
 }
 
 void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)

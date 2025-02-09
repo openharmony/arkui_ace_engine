@@ -24,9 +24,7 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
@@ -2278,11 +2276,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-        UiSessionManager::GetInstance().SaveTranslateManager(uiTranslateManager);
+        UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
         pipeline->SaveTranslateManager(uiTranslateManager);
-#endif
     } else {
         LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -2293,11 +2289,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    UiSessionManager::GetInstance().SaveTranslateManager(uiTranslateManager);
+    UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
     pipeline->SaveTranslateManager(uiTranslateManager);
-#endif
 #endif
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
