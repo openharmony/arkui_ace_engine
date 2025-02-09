@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2332,7 +2332,7 @@ void SwiperPattern::InitIndicator()
                 []() { return AceType::MakeRefPtr<ArcSwiperIndicatorPattern>(); });
         } else {
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
-                []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+                [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
         }
         swiperNode->AddChild(indicatorNode);
     } else {
