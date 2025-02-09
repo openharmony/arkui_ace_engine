@@ -221,13 +221,16 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!props->HasCachedCount()) {
         info_.UpdateDefaultCachedCount();
     }
+    int32_t cacheStart = 0;
+    int32_t cacheEnd = 0; // number of cache items at tail
+    const bool showCached = props->GetShowCachedItemsValue(false);
 
     const int32_t start = info_.startMainLineIndex_ - cacheCount;
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
     float mainPos = -info_.GetHeightInRange(start, info_.startMainLineIndex_, mainGap_);
     for (auto i = start; i <= end; ++i) {
         const bool inRange = i >= info_.startMainLineIndex_ && i <= info_.endMainLineIndex_;
-        const bool isCache = !props->GetShowCachedItemsValue(false) && !inRange;
+        const bool isCache = !showCached && !inRange;
         const auto& line = info_.gridMatrix_.find(i);
         if (line == info_.gridMatrix_.end()) {
             continue;
@@ -275,6 +278,11 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (frSize == itemsCrossSize_.end()) {
                 continue;
             }
+            if (i < info_.startMainLineIndex_) {
+                ++cacheStart;
+            } else if (i > info_.endMainLineIndex_) {
+                ++cacheEnd;
+            }
             SizeF blockSize = SizeF(frSize->second, lineHeight, axis_);
             auto translate = OffsetF(0.0f, 0.0f);
             auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -311,8 +319,11 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         startIndex = endIndex = info_.childrenCount_;
     }
     if (!info_.hasMultiLineItem_) {
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
-            props->GetShowCachedItemsValue(false));
+        if (!showCached || !info_.reachEnd_) {
+            cacheStart = cacheEnd = cacheCount * crossCount_; // only use counting method when last line not completely filled
+        }
+        layoutWrapper->SetActiveChildRange(
+            startIndex, endIndex, cacheStart, cacheEnd, showCached);
     }
 }
 
