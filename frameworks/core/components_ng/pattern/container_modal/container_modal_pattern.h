@@ -204,6 +204,8 @@ public:
         return false;
     }
 
+    void InitAllTitleRowLayoutProperty();
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
