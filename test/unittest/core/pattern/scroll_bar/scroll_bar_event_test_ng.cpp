@@ -1026,4 +1026,73 @@ HWTEST_F(ScrollBarEventTestNg, OnScrollStartStop001, TestSize.Level1)
     EXPECT_EQ(isScrollStopCalled, 1);
     EXPECT_EQ(stopHasStart, 1);
 }
+
+/**
+ * @tc.name: IsScrollSnapTrigger001
+ * @tc.desc: Test drag scrollbar with scroll snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, IsScrollSnapTrigger001, TestSize.Level1)
+{
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    scrollPattern_->SetEnablePaging(ScrollPagingStatus::VALID);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. scroll set enablePaging and scrollBar dragStart
+     * @tc.expected: IsScrollSnapTrigger should be true.
+     */
+    GestureEvent info;
+    pattern_->scrollBar_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+
+    /**
+     * @tc.steps: step2. scrollBar dragEnd.
+     * @tc.expected: trigger scroll snap animation.
+     */
+    info.SetMainDelta(10.f);
+    info.SetMainVelocity(1000.f);
+    pattern_->scrollBar_->HandleDragEnd(info);
+    auto scrollable = scrollPattern_->GetScrollable();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SNAP);
+}
+
+/**
+ * @tc.name: IsScrollSnapTrigger002
+ * @tc.desc: Test drag scrollbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, IsScrollSnapTrigger002, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateScrollBarChild();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. scroll set enablePaging and scrollBar dragStart
+     * @tc.expected: IsScrollSnapTrigger should be true.
+     */
+    GestureEvent info;
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+    info.SetMainDelta(10.f);
+    info.SetMainVelocity(0.f);
+    pattern_->HandleDragEnd(info);
+    EXPECT_FALSE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+
+    /**
+     * @tc.steps: step2. scrollBar dragEnd.
+     * @tc.expected: trigger scroll snap animation.
+     */
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+    info.SetMainVelocity(1000.f);
+    pattern_->HandleDragEnd(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+}
 } // namespace OHOS::Ace::NG
