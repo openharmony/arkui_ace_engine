@@ -522,7 +522,7 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache004, TestSize.Level1)
 HWTEST_F(GridCacheLayoutTestNg, ShowCache005, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetColumnsTemplate("1fr 1fr");
     model.SetCachedCount(2, true);
     model.SetLayoutOptions({});
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -550,7 +550,7 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache005, TestSize.Level1)
 HWTEST_F(GridCacheLayoutTestNg, ShowCache006, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
+    model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetCachedCount(2, true);
     model.SetLayoutOptions({});
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -566,8 +566,8 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache006, TestSize.Level1)
     EXPECT_TRUE(GetItem(8, true)->IsActive());
     EXPECT_TRUE(GetItem(7, true)->IsActive());
     EXPECT_TRUE(GetItem(6, true)->IsActive());
-    EXPECT_FALSE(GetItem(3, true)->IsActive());
-    EXPECT_FALSE(GetItem(2, true)->IsActive());
+    EXPECT_FALSE(GetItem(5, true)->IsActive());
+    EXPECT_FALSE(GetItem(4, true)->IsActive());
 }
 
 /**
