@@ -1172,6 +1172,18 @@
         "name": "OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_TouchRecognizer_GetNodeHandle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_TouchRecognizer_CancelTouch"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetDrawableDescriptorFromNapiValue"
     },
