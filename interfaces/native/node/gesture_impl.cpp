@@ -194,6 +194,40 @@ int32_t OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType(const ArkUI_Gestur
     return -1;
 }
 
+int32_t OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers(
+    const ArkUI_GestureInterruptInfo* info, ArkUI_TouchRecognizerHandleArray* recognizers, int32_t* size)
+{
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(recognizers, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(size, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *recognizers = reinterpret_cast<ArkUI_TouchRecognizerHandleArray>(info->interruptData.touchRecognizers);
+    *size = info->interruptData.touchRecognizerCnt;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_NodeHandle OH_ArkUI_TouchRecognizer_GetNodeHandle(const ArkUI_TouchRecognizerHandle recognizer)
+{
+    CHECK_NULL_RETURN(recognizer, nullptr);
+    auto node =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->touchRecognizerGetNodeHandle(
+            static_cast<void*>(recognizer));
+
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
+    impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
+    return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
+}
+
+int32_t OH_ArkUI_TouchRecognizer_CancelTouch(ArkUI_TouchRecognizerHandle recognizer, ArkUI_GestureInterruptInfo* info)
+{
+    CHECK_NULL_RETURN(recognizer, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    bool ret =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->touchRecognizerCancelTouch(
+            static_cast<void*>(recognizer));
+    return ret ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
 int32_t OH_ArkUI_GetResponseRecognizersFromInterruptInfo(
     const ArkUI_GestureInterruptInfo* event, ArkUI_GestureRecognizerHandleArray* responseChain, int32_t* count)
 {
