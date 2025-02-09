@@ -320,10 +320,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     if (!info_.hasMultiLineItem_) {
         if (!showCached || !info_.reachEnd_) {
-            cacheStart = cacheEnd = cacheCount * crossCount_; // only use counting method when last line not completely filled
+            cacheStart = cacheEnd =
+                cacheCount * crossCount_; // only use counting method when last line not completely filled
         }
-        layoutWrapper->SetActiveChildRange(
-            startIndex, endIndex, cacheStart, cacheEnd, showCached);
+        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
     }
 }
 
@@ -1942,7 +1942,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
-            for (uint32_t i = line->second.size() ; i < crossCount_; i++) {
+            for (uint32_t i = line->second.size(); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
