@@ -12,26 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef FOUNDATION_ACE_TRANSLATE_MANAGER_H
-#define FOUNDATION_ACE_TRANSLATE_MANAGER_H
 #include <cstdint>
-#include <vector>
-
-#include "ui_session_json_util.h"
 
 #include "base/utils/macros.h"
+#include "core/common/ace_translate_manager.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT UiTranslateManager {
-public:
-    virtual ~UiTranslateManager() = default;
-    virtual void GetWebViewCurrentLanguage() {};
-    virtual void GetTranslateText(std::string extraData, bool isContinued) {};
-    virtual void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) {};
-    virtual void SendTranslateResult(int32_t nodeId, std::string res) {};
-    virtual void ResetTranslate(int32_t nodeId);
-    virtual void ClearMap();
-};
+void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap) {}
 } // namespace OHOS::Ace
-#endif

@@ -2602,4 +2602,16 @@ void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         json->Put("currentLoadImageState", currentLoadImageState.c_str());
     }
 }
+
+void ImagePattern::AddPixelMapToUiManager()
+{
+    CHECK_NULL_VOID(image_);
+    auto pixmap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixmap);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddPixelMap(host->GetId(), pixmap);
+}
 } // namespace OHOS::Ace::NG

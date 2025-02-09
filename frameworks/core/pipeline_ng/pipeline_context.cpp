@@ -5605,4 +5605,11 @@ RefPtr<Kit::UIContext> PipelineContext::GetUIContext()
     uiContextImpl_ = AceType::MakeRefPtr<Kit::UIContextImpl>(this);
     return uiContextImpl_;
 }
+
+void PipelineContext::GetAllPixelMap()
+{
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    uiTranslateManager_->GetAllPixelMap(pageNode);
+}
 } // namespace OHOS::Ace::NG

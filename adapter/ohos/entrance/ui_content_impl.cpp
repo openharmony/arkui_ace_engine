@@ -4660,6 +4660,20 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
+    auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline)]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetAllPixelMap();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
+    };
+    UiSessionManager::GetInstance().SaveGetPixelMapFunction(getPixelMapCallback);
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
