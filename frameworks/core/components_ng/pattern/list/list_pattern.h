@@ -465,6 +465,9 @@ private:
     bool HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex);
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step, bool isScrollIndex);
+    ScrollAlign CalcAlignForFocusToGroupItem(int32_t moveStep, FocusStep step) const;
+    int32_t CalcNextIndexInGroup(int32_t nextIndex, int32_t curIndex, int32_t curIndexInGroup, int32_t moveStep,
+        ListItemGroupPara& nextListItemGroupPara) const;
     void VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param);
 
     SizeF GetContentSize() const;

@@ -1390,11 +1390,11 @@ std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
-    auto isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
-    auto groupIndexInGroup = ScrollListItemGroupForFocus(
+    bool isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
+    bool needFindNextFocusNode = ScrollListItemGroupForFocus(
         nextIndex, curIndex, nextIndexInGroup, curIndexInGroup, moveStep, step, isScrollIndex);
 
-    return groupIndexInGroup ? GetChildFocusNodeByIndex(nextIndex, nextIndexInGroup) : nullptr;
+    return needFindNextFocusNode ? GetChildFocusNodeByIndex(nextIndex, nextIndexInGroup) : nullptr;
 }
 
 bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup)
@@ -1453,44 +1453,59 @@ bool ListPattern::HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex)
     return false;
 }
 
+ScrollAlign ListPattern::CalcAlignForFocusToGroupItem(int32_t moveStep, FocusStep step) const
+{
+    // Extract method only for ScrollListItemGroupForFocus.
+    ScrollAlign scrollAlign = ScrollAlign::END;
+    if ((step == FocusStep::UP_END) || (step == FocusStep::LEFT_END) || (step == FocusStep::DOWN_END) ||
+        (step == FocusStep::RIGHT_END)) {
+        scrollAlign = moveStep < 0 ? ScrollAlign::END : ScrollAlign::START;
+    } else {
+        scrollAlign = moveStep < 0 ? ScrollAlign::START : ScrollAlign::END;
+    }
+    return scrollAlign;
+}
+
+int32_t ListPattern::CalcNextIndexInGroup(int32_t nextIndex, int32_t curIndex, int32_t curIndexInGroup,
+    int32_t moveStep, ListItemGroupPara& nextListItemGroupPara) const
+{
+    // Extract method only for ScrollListItemGroupForFocus.
+    int32_t nextIndexInGroup = -1;
+    if (nextIndex != curIndex) {
+        nextIndexInGroup = moveStep < 0 ? nextListItemGroupPara.itemEndIndex : 0;
+    }
+    if (moveStep == -1) {
+        if (curIndexInGroup == -1 && nextListItemGroupPara.hasFooter) {
+            nextIndexInGroup = nextListItemGroupPara.itemEndIndex + 1;
+        }
+    } else if (moveStep == 1) {
+        if (!nextListItemGroupPara.hasHeader) {
+            nextIndexInGroup = 0;
+        } else {
+            nextIndexInGroup = -1;
+        }
+    }
+    return nextIndexInGroup;
+}
+
 bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step, bool isScrollIndex)
 {
-    auto groupIndexInGroup = true;
     auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, groupIndexInGroup);
+    CHECK_NULL_RETURN(pipeline, true);
     RefPtr<FrameNode> nextIndexNode;
     auto isNextInGroup = IsListItemGroup(nextIndex, nextIndexNode);
     if (!isNextInGroup || !nextIndexNode) {
         nextIndexInGroup = -1;
-        return groupIndexInGroup;
+        return true;
     }
     auto nextListItemGroupPara = GetListItemGroupParameter(nextIndexNode);
     if (nextIndexInGroup == -1) {
-        auto scrollAlign = ScrollAlign::END;
-        if (nextIndex != curIndex) {
-            nextIndexInGroup = moveStep < 0 ? nextListItemGroupPara.itemEndIndex : 0;
-        }
-        if (moveStep == -1) {
-            if (curIndexInGroup == -1 && nextListItemGroupPara.hasFooter) {
-                nextIndexInGroup = nextListItemGroupPara.itemEndIndex + 1;
-            }
-        } else if (moveStep == 1) {
-            if (!nextListItemGroupPara.hasHeader) {
-                nextIndexInGroup = 0;
-            } else {
-                nextIndexInGroup = -1;
-            }
-        }
-        if ((step == FocusStep::UP_END) || (step == FocusStep::LEFT_END) || (step == FocusStep::DOWN_END) ||
-            (step == FocusStep::RIGHT_END)) {
-            scrollAlign = moveStep < 0 ? ScrollAlign::END : ScrollAlign::START;
-        } else {
-            scrollAlign = moveStep < 0 ? ScrollAlign::START : ScrollAlign::END;
-        }
+        nextIndexInGroup = CalcNextIndexInGroup(nextIndex, curIndex, curIndexInGroup, moveStep, nextListItemGroupPara);
         if ((nextIndexInGroup < nextListItemGroupPara.displayStartIndex) ||
             (nextIndexInGroup > nextListItemGroupPara.displayEndIndex) || (isScrollIndex)) {
-            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, scrollAlign);
+            ScrollAlign align = CalcAlignForFocusToGroupItem(moveStep, step);
+            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, align);
             pipeline->FlushUITasks();
         }
     } else if (nextIndexInGroup > nextListItemGroupPara.itemEndIndex) {
@@ -1499,18 +1514,16 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curInde
             pipeline->FlushUITasks();
         } else {
             nextIndexInGroup = -1;
-            groupIndexInGroup = false;
+            return false;
         }
-    } else {
-        if ((nextIndexInGroup < curIndexInGroup) && (nextIndexInGroup < nextListItemGroupPara.displayStartIndex)) {
-            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::START);
-            pipeline->FlushUITasks();
-        } else if ((nextIndexInGroup > curIndexInGroup) && (nextIndexInGroup > nextListItemGroupPara.displayEndIndex)) {
-            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::END);
-            pipeline->FlushUITasks();
-        }
+    } else if ((nextIndexInGroup < curIndexInGroup) && (nextIndexInGroup < nextListItemGroupPara.displayStartIndex)) {
+        ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::START);
+        pipeline->FlushUITasks();
+    } else if ((nextIndexInGroup > curIndexInGroup) && (nextIndexInGroup > nextListItemGroupPara.displayEndIndex)) {
+        ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::END);
+        pipeline->FlushUITasks();
     }
-    return groupIndexInGroup;
+    return true;
 }
 
 void ListPattern::OnAnimateStop()
