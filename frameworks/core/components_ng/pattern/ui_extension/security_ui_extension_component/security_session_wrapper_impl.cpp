@@ -24,6 +24,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
 #include "want_params.h"
+#include "want_params_wrapper.h"
 #include "wm/wm_common.h"
 #include "wm/data_handler_interface.h"
 
@@ -59,6 +60,7 @@ constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
 constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out processing the key event.";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
+constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
 } // namespace
 
 class SecurityUIExtensionLifecycleListener : public Rosen::ILifecycleListener {
@@ -330,6 +332,11 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto wantPtr = std::make_shared<Want>(want);
+    AAFwk::WantParams configParam;
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(wantPtr->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    wantPtr->SetParams(wantParam);
     if (sessionType_ != SessionType::SECURITY_UI_EXTENSION_ABILITY) {
         PLATFORM_LOGE("The UIExtensionComponent does not allow nested pulling of another.");
         auto pattern = hostPattern_.Upgrade();
@@ -497,6 +504,17 @@ void SecuritySessionWrapperImpl::NotifyForeground()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
+    auto wantPtr = session_->EditSessionInfo().want;
+    if (wantPtr) {
+        AAFwk::WantParams configParam;
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (container) {
+            container->GetExtensionConfig(configParam);
+            AAFwk::WantParams wantParam(wantPtr->GetParams());
+            wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+            wantPtr->SetParams(wantParam);
+        }
+    }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
@@ -765,7 +783,7 @@ void SecuritySessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& p
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;
@@ -773,12 +791,15 @@ bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
     CHECK_NULL_RETURN(session_, false);
     auto dataHandler = session_->GetExtensionDataHandler();
     CHECK_NULL_RETURN(dataHandler, false);
-    auto result = dataHandler->SendDataSync(subSystemId_, static_cast<uint32_t>(code), data, reply);
+    auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
+        static_cast<uint32_t>(code), data, reply);
     if (result != Rosen::DataHandlerErr::OK) {
-        PLATFORM_LOGW("SendBusinessDataSyncReply Fail, businessCode=%{public}u, result=%{public}u.", code, result);
+        PLATFORM_LOGW("SendBusinessDataSyncReply Fail, businessCode=%{public}u, "
+            "result=%{public}u, subSystemId=%{public}hhu.", code, result, subSystemId);
         return false;
     }
-    PLATFORM_LOGI("SendBusinessDataSyncReply Success, businessCode=%{public}u.", code);
+    PLATFORM_LOGI("SendBusinessDataSyncReply Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
+        code, subSystemId);
     return true;
 }
 
@@ -798,7 +819,7 @@ int32_t SecuritySessionWrapperImpl::GetInstanceIdFromHost() const
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessData(
-    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;
@@ -807,16 +828,21 @@ bool SecuritySessionWrapperImpl::SendBusinessData(
     auto dataHandler = session_->GetExtensionDataHandler();
     CHECK_NULL_RETURN(dataHandler, false);
     if (type == BusinessDataSendType::ASYNC) {
-        dataHandler->SendDataAsync(subSystemId_, static_cast<uint32_t>(code), data);
-        PLATFORM_LOGW("SendBusinessData ASYNC Success, businessCode=%{public}u.", code);
+        dataHandler->SendDataAsync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
+            static_cast<uint32_t>(code), data);
+        PLATFORM_LOGW("SendBusinessData ASYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
+            code, subSystemId);
         return true;
     }
-    auto result = dataHandler->SendDataSync(subSystemId_, static_cast<uint32_t>(code), data);
+    auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
+        static_cast<uint32_t>(code), data);
     if (result != Rosen::DataHandlerErr::OK) {
-        PLATFORM_LOGW("SendBusinessData SYNC Fail, businessCode=%{public}u, result=%{public}u.", code, result);
+        PLATFORM_LOGW("SendBusinessData SYNC Fail, businessCode=%{public}u, "
+            "result=%{public}u, subSystemId=%{public}hhu.", code, result, subSystemId);
         return false;
     }
-    PLATFORM_LOGI("SendBusinessData SYNC Success, businessCode=%{public}u.", code);
+    PLATFORM_LOGI("SendBusinessData SYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
+        code, subSystemId);
     return true;
 }
 

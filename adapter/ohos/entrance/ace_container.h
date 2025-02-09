@@ -804,6 +804,8 @@ public:
 
     Rect GetDisplayAvailableRect() const override;
 
+    void GetExtensionConfig(AAFwk::WantParams& want);
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

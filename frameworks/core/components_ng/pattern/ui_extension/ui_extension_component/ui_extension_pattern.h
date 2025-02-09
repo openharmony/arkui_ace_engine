@@ -222,8 +222,10 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
     int32_t GetInstanceIdFromHost() const;
-    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
-    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
+    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
     void OnUIExtBusinessReceiveReply(
         UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
@@ -245,6 +247,7 @@ public:
 
     void TransferAccessibilityRectInfo();
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, AAFwk::Want data, RSSubsystemId subSystemId);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
