@@ -95,6 +95,10 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
 
 void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
 
+void EventReport::ReportScrollableErrorEvent(
+    const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
+{}
+
 void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
 {}
 
