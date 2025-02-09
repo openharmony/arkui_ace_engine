@@ -552,7 +552,6 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache006, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetCachedCount(2, true);
-    model.SetLayoutOptions({});
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateItemsInLazyForEach(10, [](uint32_t idx) { return 50.0f; });
     CreateDone();
