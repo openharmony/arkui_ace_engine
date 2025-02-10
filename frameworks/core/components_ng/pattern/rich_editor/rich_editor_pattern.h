@@ -441,9 +441,9 @@ public:
     bool CursorMoveRight();
     bool CursorMoveUp();
     bool CursorMoveDown();
-
-    bool CursorMoveLeftWord();
-    bool CursorMoveRightWord();
+    void CursorMoveToNextWord(CaretMoveIntent direction);
+    int32_t GetLeftWordIndex();
+    int32_t GetRightWordIndex();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
@@ -467,6 +467,8 @@ public:
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
+    void DeleteBackwardWord();
+    void DeleteForwardWord();
     int32_t GetLeftWordPosition(int32_t caretPosition);
     int32_t GetRightWordPosition(int32_t caretPosition);
     int32_t GetParagraphBeginPosition(int32_t caretPosition);
@@ -870,6 +872,7 @@ public:
     void UpdateSelector(int32_t start, int32_t end);
     void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+    SpanItemType GetSpanType(int32_t index);
 
     void DumpAdvanceInfo() override {}
 
@@ -925,6 +928,10 @@ public:
     bool InsertOrDeleteSpace(int32_t index) override;
 
     void DeleteRange(int32_t start, int32_t end) override;
+
+    void HandleOnPageUp() override;
+    void HandleOnPageDown() override;
+    void HandlePageScroll(bool isPageUp);
 
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
@@ -1081,6 +1088,7 @@ private:
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);
     void HandleMouseLeftButtonPress(const MouseInfo& info);
+    void HandleShiftSelect(int32_t position);
     void HandleMouseLeftButtonRelease(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
@@ -1300,6 +1308,7 @@ private:
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
+    bool AdjustIndexSkipSpace(int32_t& currentPosition, const MoveDirection direction);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
     {
@@ -1334,6 +1343,7 @@ private:
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
     const bool isAPI14Plus;
+    bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;
