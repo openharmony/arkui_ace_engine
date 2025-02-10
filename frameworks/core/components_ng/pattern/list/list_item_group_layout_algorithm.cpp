@@ -1034,7 +1034,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
 
 void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
 {
-    if (itemPosition_.empty() && cachedItemPosition_.empty()) {
+    if (itemPosition_.empty()) {
         return;
     }
     int32_t startIndex = INT_MAX;
@@ -1046,12 +1046,6 @@ void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
         endIndex = itemPosition_.rbegin()->first;
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
-    }
-    if (!cachedItemPosition_.empty()) {
-        startIndex = std::min(startIndex, cachedItemPosition_.begin()->first);
-        endIndex = std::max(endIndex, cachedItemPosition_.rbegin()->first);
-        startPos = std::min(startPos, cachedItemPosition_.begin()->second.startPos);
-        endPos = std::max(endPos, cachedItemPosition_.rbegin()->second.endPos);
     }
     if (layoutedItemInfo_.has_value()) {
         auto& itemInfo = layoutedItemInfo_.value();
