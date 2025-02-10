@@ -142,6 +142,24 @@ void TimePickerRowPattern::ColumnPatternInitHapticController()
     }
 }
 
+void TimePickerRowPattern::ColumnPatternStopHaptic()
+{
+    if (!isEnableHaptic_) {
+        return;
+    }
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (!columnNode) {
+            continue;
+        }
+        auto timePickerColumnPattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (!timePickerColumnPattern) {
+            continue;
+        }
+        timePickerColumnPattern->StopHaptic();
+    }
+}
+
 bool TimePickerRowPattern::IsCircle()
 {
     auto host = GetHost();

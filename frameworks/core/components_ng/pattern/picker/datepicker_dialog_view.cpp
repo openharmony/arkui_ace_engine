@@ -1787,11 +1787,14 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
             timePickerPattern->SetFocusEnable();
         }
         datePickerPattern->SetFocusDisable();
+        datePickerPattern->ColumnPatternStopHaptic();
         monthDaysPickerPattern->SetFocusEnable();
         monthDaysNode->MarkModifyDone();
     } else {
         monthDaysPickerPattern->SetFocusDisable();
+        monthDaysPickerPattern->ColumnPatternStopHaptic();
         timePickerPattern->SetFocusDisable();
+        timePickerPattern->ColumnPatternStopHaptic();
         datePickerPattern->SetFocusEnable();
         if (NeedAdaptForAging()) {
             SwitchDatePickerPage(dateNode, true);
@@ -1803,6 +1806,12 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
     SetAnimationProperty(pickerStack, contentColumn, animationController);
     switchFlag_ = !switchFlag_;
     animationController->Play(switchFlag_);
+    ToggleTitleDisplay(datePickerPattern, monthDaysPickerPattern);
+}
+
+void DatePickerDialogView::ToggleTitleDisplay(
+    RefPtr<DatePickerPattern>& datePickerPattern, RefPtr<DatePickerPattern>& monthDaysPickerPattern)
+{
     if (!switchFlag_) {
         monthDaysPickerPattern->ShowTitle(monthDaysPickerPattern->GetTitleId());
     } else {

@@ -327,6 +327,27 @@ void DatePickerPattern::ColumnPatternInitHapticController(const RefPtr<FrameNode
     columnPattern->InitHapticController();
 }
 
+void DatePickerPattern::ColumnPatternStopHaptic()
+{
+    if (!isEnableHaptic_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = blendNode->GetLastChild();
+        CHECK_NULL_VOID(childNode);
+        auto datePickerColumnPattern = DynamicCast<FrameNode>(childNode)->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(datePickerColumnPattern);
+        datePickerColumnPattern->StopHaptic();
+    }
+}
+
 void DatePickerPattern::InitFocusKeyEvent()
 {
     auto host = GetHost();
