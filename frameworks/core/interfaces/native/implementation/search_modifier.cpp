@@ -218,10 +218,10 @@ void OnEditChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEditEvent = [frameNode](const bool value) {
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onEditChange(frameNode->GetId(), value);
+    auto onEditChange = [arkCallback = CallbackHelper(*value, frameNode)](bool value) {
+        arkCallback.Invoke(value);
     };
-    SearchModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
+    SearchModelNG::SetOnEditChange(frameNode, std::move(onEditChange));
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
                                  const Ark_ResourceColor* value)
@@ -284,10 +284,12 @@ void OnSubmit0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSubmit = [frameNode](const std::u16string& value, NG::TextFieldCommonEvent&) {
+    auto onSubmit = [arkCallback = CallbackHelper(*value, frameNode)](const std::u16string& value,
+        NG::TextFieldCommonEvent&
+    ) {
         Converter::ConvContext ctx;
         auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onSubmit0(frameNode->GetId(), arkStringValue);
+        arkCallback.Invoke(arkStringValue);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
@@ -306,12 +308,13 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const std::u16string& text, PreviewText& prevText) {
+    auto onChange = [arkCallback = CallbackHelper(*value, frameNode)](const std::u16string& text,
+        PreviewText& prevText
+    ) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(text, &ctx);
         auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText, &ctx);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onChange(frameNode->GetId(),
-            textArkString, textArkPrevText);
+        arkCallback.Invoke(textArkString, textArkPrevText);
     };
     SearchModelNG::SetOnChange(frameNode, std::move(onChange));
 }
@@ -321,11 +324,12 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onTextSelectionChange = [frameNode](int32_t selectionStart, int32_t selectionEnd) {
+    auto onTextSelectionChange = [arkCallback = CallbackHelper(*value, frameNode)](
+        int32_t selectionStart, int32_t selectionEnd
+    ) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
         auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onTextSelectionChange(frameNode->GetId(),
-            arkSelectionStart, arkSelectionEnd);
+        arkCallback.Invoke(arkSelectionStart, arkSelectionEnd);
     };
     SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
@@ -335,12 +339,10 @@ void OnContentScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onContentScroll = [frameNode](float totalOffsetX, float totalOffsetY) {
+    auto onContentScroll = [arkCallback = CallbackHelper(*value, frameNode)](float totalOffsetX, float totalOffsetY) {
         auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
         auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onContentScroll(frameNode->GetId(),
-            arkTotalOffsetX,
-            arkTotalOffsetY);
+        arkCallback.Invoke(arkTotalOffsetX, arkTotalOffsetY);
     };
     SearchModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
@@ -350,10 +352,10 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [frameNode](const std::u16string& value) {
+    auto onCopy = [arkCallback = CallbackHelper(*value, frameNode)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onCopy(frameNode->GetId(), textArkString);
+        arkCallback.Invoke(textArkString);
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
@@ -363,10 +365,10 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCut = [frameNode](const std::u16string& value) {
+    auto onCut = [arkCallback = CallbackHelper(*value, frameNode)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onCut(frameNode->GetId(), textArkString);
+        arkCallback.Invoke(textArkString);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -547,13 +549,13 @@ void OnDidInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onDidInsert = [frameNode](const InsertValueInfo& value) {
+    auto onDidInsert = [arkCallback = CallbackHelper(*value)](const InsertValueInfo& value) {
         Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onDidInsert(frameNode->GetId(), insertValue);
+        arkCallback.Invoke(insertValue);
     };
     SearchModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
@@ -581,14 +583,14 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onDidDelete = [frameNode](const DeleteValueInfo& value) {
+    auto onDidDelete = [arkCallback = CallbackHelper(*value)](const DeleteValueInfo& value) {
         Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onDidDelete(frameNode->GetId(), deleteValue);
+        arkCallback.Invoke(deleteValue);
     };
     SearchModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
