@@ -279,6 +279,8 @@ struct DialogProperties {
     WeakPtr<NG::UINode> windowScene;
     std::optional<DimensionRect> maskRect;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr; // Used for AlertDialog and ActionSheet transition
+    RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
 
     WeakPtr<NG::UINode> contentNode;
     std::function<void()> onDidAppear;
@@ -328,6 +330,8 @@ struct PromptDialogAttr {
     bool customStyle = false;
     std::optional<Color> maskColor;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
     std::function<void()> onDidAppear;
     std::function<void()> onDidDisappear;
     std::function<void()> onWillAppear;

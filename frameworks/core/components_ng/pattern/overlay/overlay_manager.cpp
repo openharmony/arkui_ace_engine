@@ -2666,8 +2666,9 @@ void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
 
     callback(showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId());
 
-    if (dialogProps.transitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, dialogProps.levelOrder);
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog);
     } else {
         OpenDialogAnimation(dialog, dialogProps.levelOrder);
     }
@@ -3210,8 +3211,10 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    auto dialogTransitionEffect = dialogPattern->GetDialogProperties().dialogTransitionEffect;
+    auto maskTransitionEffect = dialogPattern->GetDialogProperties().maskTransitionEffect;
     dialogNode->MarkRemoving();
-    if (transitionEffect != nullptr) {
+    if (transitionEffect != nullptr || dialogTransitionEffect != nullptr || maskTransitionEffect != nullptr) {
         CloseDialogMatchTransition(dialogNode);
     } else {
         CloseDialogAnimation(dialogNode);
