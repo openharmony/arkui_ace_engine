@@ -417,6 +417,8 @@ struct GridLayoutInfo {
     bool hasMultiLineItem_;
     // false when offset is updated but layout hasn't happened, so data is out of sync
     bool synced_ = false;
+    // set to true when items are not ready during layout
+    bool needRecompose_ = false;
 
     std::optional<int32_t> targetIndex_;
 

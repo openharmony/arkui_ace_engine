@@ -108,10 +108,10 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     return pendingNode;
 }
 
-void ScrollWindowAdapter::UpdateSlidingOffset(float delta)
+bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
 {
     if (NearZero(delta)) {
-        return;
+        return false;
     }
     fillAlgorithm_->OnSlidingOffsetUpdate(delta);
     if (rangeMode_) {
@@ -120,22 +120,23 @@ void ScrollWindowAdapter::UpdateSlidingOffset(float delta)
             auto range = fillAlgorithm_->GetRange();
             updater_(range.first, nullptr); // placeholder
         }
-        return;
+        return res;
     }
 
     if (Negative(delta)) {
         if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
-            return;
+            return false;
         }
     } else {
         if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::START)) {
-            return;
+            return false;
         }
     }
     LOGD("need to load");
     markIndex_ = fillAlgorithm_->GetMarkIndex();
 
     RequestRecompose();
+    return true;
 }
 
 void ScrollWindowAdapter::RequestRecompose()
@@ -145,9 +146,24 @@ void ScrollWindowAdapter::RequestRecompose()
         updater_(markIndex_, nullptr);
     }
 }
+
 void ScrollWindowAdapter::Prepare()
 {
     filled_.clear();
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
+}
+
+void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
+{
+    if (size == size_ && axis == axis_) {
+        return;
+    }
+    size_ = size;
+    axis_ = axis;
+
+    if (fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
+        markIndex_ = fillAlgorithm_->GetMarkIndex();
+        RequestRecompose();
+    }
 }
 } // namespace OHOS::Ace::NG

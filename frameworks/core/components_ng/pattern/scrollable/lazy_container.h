@@ -50,8 +50,9 @@ protected:
 
     /**
      * @brief Pass scroll offset to adapter.
+     * @return true if adapter requests a recompose
      */
-    void UpdateOffset(float delta);
+    bool UpdateOffset(float delta);
 
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;

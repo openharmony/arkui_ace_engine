@@ -39,7 +39,8 @@ public:
     void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
     void OnSlidingOffsetUpdate(float delta) override;
-    bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta) override; // for parallel mode
+    /* for parallel mode */
+    bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta) override;
 
     bool IsReady() const override
     {
@@ -52,7 +53,7 @@ public:
 
     int32_t GetMarkIndex() override
     {
-        return range_.startIdx;
+        return info_.startIndex_;
     }
 
     std::pair<int32_t, int32_t> GetRange() const override
@@ -89,8 +90,8 @@ private:
         int32_t startLine = 0; // first line in viewport
         float offset = 0.0f;   // main-axis offset of the first line in viewport
         int32_t endLine = 0;   // last line in viewport
-        int32_t startIdx = 0;
-        int32_t endIdx = 0;
+        int32_t startIdx = 0; // only used in range mode
+        int32_t endIdx = 0; // only used in range mode
     };
     LayoutRange range_;
     GridIrregularFiller::FillParameters params_;

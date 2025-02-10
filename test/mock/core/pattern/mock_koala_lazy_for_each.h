@@ -38,11 +38,11 @@ public:
     MockKoalaLazyForEach(FrameNode* parent, int32_t totalCnt, std::function<RefPtr<FrameNode>(int32_t)>&& itemCreator)
         : itemCreator_(itemCreator), parent_(parent), totalCnt_(totalCnt)
     {}
-    void Update(int32_t s, int32_t e, void* pointer);
+    void Update(int32_t s, void* pointer);
 
     void RangeModeUpdate(int32_t s, int32_t e);
 
-    void NormalModeUpdate(int32_t s, int32_t e, void* pointer);
+    void NormalModeUpdate(int32_t s, void* pointer);
 
     RefPtr<FrameNode> CreateItem(int32_t idx);
 
@@ -50,7 +50,17 @@ public:
      * @brief mock trigger frontend update
      *
      */
-    void Increment();
+    void Increment(int32_t lineNumber);
+
+    bool NeedRecompose() const
+    {
+        return !taskQ_.empty();
+    }
+
+    std::pair<int32_t, int32_t> GetRange() const
+    {
+        return range_;
+    }
 
 private:
     std::function<RefPtr<FrameNode>(int32_t)> itemCreator_;
@@ -58,5 +68,6 @@ private:
     FrameNode* parent_;
     int32_t totalCnt_;
     std::queue<std::function<void()>> taskQ_;
+    std::pair<int32_t, int32_t> range_ { 0, 0 };
 };
 } // namespace OHOS::Ace::NG
