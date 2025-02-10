@@ -122,6 +122,8 @@ public:
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT std::optional<double> GetTopOrder();
+    ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);

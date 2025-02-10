@@ -620,6 +620,30 @@ void SubwindowManager::UpdateCustomDialogNG(
     }
 }
 
+std::optional<double> SubwindowManager::GetTopOrder()
+{
+    auto containerId = Container::CurrentIdSafelyWithCheck();
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, std::nullopt);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetTopOrder();
+}
+
+std::optional<double> SubwindowManager::GetBottomOrder()
+{
+    auto containerId = Container::CurrentIdSafelyWithCheck();
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, std::nullopt);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetBottomOrder();
+}
+
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");

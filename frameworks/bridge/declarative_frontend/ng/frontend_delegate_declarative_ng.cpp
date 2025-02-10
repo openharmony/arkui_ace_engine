@@ -726,6 +726,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
+        .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
@@ -766,6 +767,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .isModal = dialogAttr.isModal,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
+        .levelOrder = dialogAttr.levelOrder,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -792,6 +794,7 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
         .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
         .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
+        .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
@@ -919,6 +922,28 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
             overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
         },
         TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog", PriorityType::VIP);
+}
+
+std::optional<double> FrontendDelegateDeclarativeNG::GetTopOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetTopOrder();
+}
+
+std::optional<double> FrontendDelegateDeclarativeNG::GetBottomOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetBottomOrder();
 }
 
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
@@ -1337,6 +1362,18 @@ void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(
         overlayManager->AddFrameNodeToOverlay(node, index);
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode", nullptr);
+}
+
+void FrontendDelegateDeclarativeNG::AddFrameNodeWithOrder(
+    const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder)
+{
+    auto task = [node, levelOrder, containerId = Container::CurrentId()](
+        const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->AddFrameNodeWithOrder(node, levelOrder);
+    };
+    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNodeWithOrder", nullptr);
 }
 
 void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)

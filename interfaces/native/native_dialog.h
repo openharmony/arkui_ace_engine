@@ -320,6 +320,19 @@ typedef struct {
      * @since 16
      */
     int32_t (*setImmersiveMode)(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode immersiveMode);
+
+    /**
+     * @brief Sets the display order for a custom dialog box.
+     *
+     * @note This method must be called before the <b>show</b> method.
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param levelOrder Indicates the display order. The valid range is [-100000.0, 100000.0].
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*setLevelOrder)(ArkUI_NativeDialogHandle handle, double levelOrder);
 } ArkUI_NativeDialogAPI_2;
 
 /**
