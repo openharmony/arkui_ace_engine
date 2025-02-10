@@ -61,6 +61,7 @@ constexpr float DEL_SPRING_RESPONSE = 0.005f;
 constexpr int32_t RESERVED_DEVICEID_1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID_2 = 0xAAAAAAFE;
 constexpr uint32_t TASK_DELAY_TIME = 5 * 1000;
+constexpr uint32_t DROP_DELAY_TIME = 2 * 1000;
 } // namespace
 
 RefPtr<RenderContext> GetMenuRenderContextFromMenuWrapper(const RefPtr<FrameNode>& menuWrapperNode)
@@ -1150,7 +1151,24 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     CHECK_NULL_VOID(eventHub);
     UpdateDragEvent(event, pointerEvent);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
+    if (event->IsDragEndPending() && event->GetRequestIdentify() != -1) {
+        if (PostStopDrag(dragFrameNode, pointerEvent, event, extraParams)) {
+            return;
+        }
+    }
+    HandleStopDrag(dragFrameNode, pointerEvent, event, extraParams);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+}
+
+void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
+    const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
+{
+    auto point = pointerEvent.GetPoint();
+    CHECK_NULL_VOID(dragFrameNode);
+    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->HandleInternalOnDrop(event, extraParams);
     ClearVelocityInfo();
     SetIsDragged(false);
@@ -1178,6 +1196,51 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     ResetPullId();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     pipeline->RequestFrame();
+}
+
+bool DragDropManager::PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
+    const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
+{
+    CHECK_NULL_RETURN(dragFrameNode, false);
+    CHECK_NULL_RETURN(event, false);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskScheduler, false);
+    taskScheduler->PostDelayedTask(
+        [pointerEvent, event, extraParams, nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
+            weakManager = WeakClaim(this)]() {
+            if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase() || !event) {
+                return;
+            }
+            auto dragDropManager = weakManager.Upgrade();
+            if (dragDropManager) {
+                auto frameNode = nodeWeak.Upgrade();
+                event->SetResult(DragRet::DRAG_FAIL);
+                dragDropManager->HandleStopDrag(frameNode, pointerEvent, event, extraParams);
+            }
+            DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+        },
+        TaskExecutor::TaskType::UI, DROP_DELAY_TIME, "ArkUIStopDragDeadlineTimer");
+    return DragDropGlobalController::GetInstance().RequestDragEndCallback(event->GetRequestIdentify(),
+        event->GetResult(), GetStopDragCallBack(dragFrameNode, pointerEvent, event, extraParams));
+}
+
+std::function<void(const DragRet&)> DragDropManager::GetStopDragCallBack(const RefPtr<FrameNode>& dragFrameNode,
+    const DragPointerEvent& pointerEvent, const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
+{
+    auto callback = [id = Container::CurrentId(), pointerEvent, event, extraParams,
+        nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
+        weakManager = WeakClaim(this)] (const DragRet& dragResult) {
+        ContainerScope scope(id);
+        auto dragDropManager = weakManager.Upgrade();
+        CHECK_NULL_VOID(dragDropManager);
+        CHECK_NULL_VOID(event);
+        event->SetResult(dragResult);
+        auto frameNode = nodeWeak.Upgrade();
+        dragDropManager->HandleStopDrag(frameNode, pointerEvent, event, extraParams);
+    };
+    return callback;
 }
 
 void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event, DragRet dragResult,

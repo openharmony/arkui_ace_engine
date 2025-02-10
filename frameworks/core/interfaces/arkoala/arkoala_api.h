@@ -319,6 +319,8 @@ struct ArkUIDragEvent {
     ArkUI_CharPtr* dataTypes;
     ArkUI_Int32 dataTypesMaxStrLength;
     ArkUI_CharPtr key;
+    ArkUI_Int32 requestId;
+    bool isDragEndPending;
 };
 
 struct ArkUIFocusAxisEvent {
@@ -6041,6 +6043,9 @@ typedef struct {
     void (*setDragPreview)(ArkUINodeHandle node, void* dragPreview);
     void (*setDragEventStrictReportingEnabledWithNode)(bool enabled);
     void (*setDragEventStrictReportingEnabledWithContext)(ArkUI_Int32 instanceId, bool enabled);
+    ArkUI_Int32 (*requestDragEndPending)();
+    ArkUI_Int32 (*notifyDragResult)(ArkUI_Int32 requestId, ArkUI_Int32 result);
+    ArkUI_Int32 (*notifyDragEndPendingDone)(ArkUI_Int32 requestId);
 } ArkUIDragAdapterAPI;
 
 struct ArkUISnapshotOptions {

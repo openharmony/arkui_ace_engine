@@ -23,6 +23,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -306,6 +307,32 @@ void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPoint
     CHECK_NULL_VOID(manager);
     manager->SetDraggingPointer(currentPointerId);
     manager->SetDraggingPressedState(true);
+}
+
+int32_t DragDropFuncWrapper::RequestDragEndPending()
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    static std::atomic<int32_t> gDragDropDelayEndRequestId;
+    int32_t id = gDragDropDelayEndRequestId.fetch_add(1);
+    return id;
+}
+
+int32_t DragDropFuncWrapper::NotifyDragResult(int32_t requestId, int32_t result)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDragResult(requestId, result);
+}
+
+int32_t DragDropFuncWrapper::NotifyDragEndPendingDone(int32_t requestId)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
 }
 
 void DragDropFuncWrapper::DecideWhetherToStopDragging(

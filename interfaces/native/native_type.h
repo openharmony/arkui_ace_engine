@@ -2239,6 +2239,11 @@ typedef enum {
      * @since 16
      */
     ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
+    /**
+     * @error operation is not allowed for current drag drop phase.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED = 190004,
 } ArkUI_ErrorCode;
 
 /**
