@@ -28,16 +28,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-struct EventsTracker {
-    static inline GENERATED_ArkUIDatePickerEventsReceiver eventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getDatePickerEventsReceiver = []() -> const GENERATED_ArkUIDatePickerEventsReceiver* {
-            return &eventsReceiver;
-        }
-    };
-}; // EventsTracker
-
 // Attribute names
 const auto ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME = "disappearTextStyle";
 const auto ATTRIBUTE_TEXT_STYLE_NAME = "textStyle";
@@ -270,8 +260,6 @@ class DatePickerModifierTest : public ModifierTestBase<GENERATED_ArkUIDatePicker
         AddResource(RES_COLOR_ID, RES_COLOR_ID_VALUE);
         AddResource(RES_COLOR_NAME, RES_COLOR_NAME_VALUE);
         AddResource(RES_COLOR_INVALID_ID, RES_COLOR_INVALID_ID_VALUE);
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -976,14 +964,18 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextColor, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
-    Callback_DatePickerResult_Void func = {};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    static PickerDate selectedDate;
-    EventsTracker::eventsReceiver.onChange = [](Ark_Int32 nodeId, Ark_DatePickerResult arkResult) {
+    struct CheckEvent {
+        int32_t resourceId;
+        PickerDate selectedDate;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onChange = [](Ark_Int32 nodeId, Ark_DatePickerResult arkResult) {
+        PickerDate selectedDate;
         if (auto opt = Converter::OptConvert<int32_t>(arkResult.year); opt) {
             selectedDate.SetYear(*opt);
         }
@@ -993,18 +985,23 @@ HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
         if (auto opt = Converter::OptConvert<int32_t>(arkResult.day); opt) {
             selectedDate.SetDay(*opt);
         }
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(nodeId),
+            .selectedDate = selectedDate,
+        };
     };
-
-    modifier_->setOnChange(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_DatePickerResult_Void>(onChange, frameNode->GetId());
+    modifier_->setOnChange(node_, &arkCallback);
 
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(testValue.first.ToString(true));
 
         eventHub->FireChangeEvent(&event);
-
-        EXPECT_EQ(selectedDate.GetYear(), testValue.second.GetYear());
-        EXPECT_EQ(selectedDate.GetMonth(), testValue.second.GetMonth());
-        EXPECT_EQ(selectedDate.GetDay(), testValue.second.GetDay());
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->selectedDate.GetYear(), testValue.second.GetYear());
+        EXPECT_EQ(checkEvent->selectedDate.GetMonth(), testValue.second.GetMonth());
+        EXPECT_EQ(checkEvent->selectedDate.GetDay(), testValue.second.GetDay());
     };
 }
 

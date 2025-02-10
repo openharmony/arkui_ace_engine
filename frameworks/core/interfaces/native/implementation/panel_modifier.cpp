@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -173,12 +174,12 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const BaseEventInfo* info) {
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* info) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
         auto width = Converter::ArkValue<Ark_Number>(eventInfo->GetWidth());
         auto height = Converter::ArkValue<Ark_Number>(eventInfo->GetHeight());
         auto mode = Converter::ArkValue<Ark_PanelMode>(eventInfo->GetMode());
-        GetFullAPI()->getEventsAPI()->getPanelEventsReceiver()->onChange(frameNode->GetId(), width, height, mode);
+        arkCallback.Invoke(width, height, mode);
     };
     SlidingPanelModelNG::SetOnSizeChange(frameNode, std::move(onEvent));
 }
@@ -188,9 +189,9 @@ void OnHeightChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const int32_t value) {
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const int32_t value) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(value);
-        GetFullAPI()->getEventsAPI()->getPanelEventsReceiver()->onHeightChange(frameNode->GetId(), arkIndex);
+        arkCallback.Invoke(arkIndex);
     };
     SlidingPanelModelNG::SetOnHeightChange(frameNode, std::move(onEvent));
 }

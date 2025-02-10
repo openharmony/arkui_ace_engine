@@ -29,16 +29,6 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-struct EventsTracker {
-    static inline GENERATED_ArkUITimePickerEventsReceiver timePickerEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getTimePickerEventsReceiver = []() -> const GENERATED_ArkUITimePickerEventsReceiver* {
-            return &timePickerEventReceiver;
-        }
-    };
-}; // EventsTracker
-
 // Prop names
 const auto PROP_NAME_USE_MILITARY_TIME = "useMilitaryTime";
 const auto PROP_NAME_LOOP = "loop";
@@ -195,8 +185,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<PickerTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -853,31 +841,48 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextColor, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
-    Callback_TimePickerResult_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    static PickerTime selectedTime;
-    EventsTracker::timePickerEventReceiver.onChange = [](Ark_Int32 nodeId, Ark_TimePickerResult arkResult) {
-        selectedTime.SetHour(Converter::Convert<int32_t>(arkResult.hour));
-        selectedTime.SetMinute(Converter::Convert<int32_t>(arkResult.minute));
-        selectedTime.SetSecond(Converter::Convert<int32_t>(arkResult.second));
+    struct CheckEvent {
+        int32_t resourceId;
+        PickerTime selectedTime;
     };
-    modifier_->setOnChange(node_, &func);
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onChange = [](const Ark_Int32 resourceId, const Ark_TimePickerResult value) {
+        PickerTime selectedTime;
+        selectedTime.SetHour(Converter::Convert<int32_t>(value.hour));
+        selectedTime.SetMinute(Converter::Convert<int32_t>(value.minute));
+        selectedTime.SetSecond(Converter::Convert<int32_t>(value.second));
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .selectedTime = selectedTime
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_TimePickerResult_Void>(onChange, frameNode->GetId());
+    modifier_->setOnChange(node_, &arkCallback);
 
     for (const auto time : CHANGE_EVENT_TEST_PLAN) {
+        checkEvent = std::nullopt;
+        EXPECT_FALSE(checkEvent);
         DatePickerChangeEvent event(time.ToString(true, true));
         eventHub->FireChangeEvent(&event);
-        EXPECT_EQ(selectedTime.GetHour(), time.GetHour());
-        EXPECT_EQ(selectedTime.GetMinute(), time.GetMinute());
-        EXPECT_EQ(selectedTime.GetSecond(), time.GetSecond());
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->selectedTime.GetHour(), time.GetHour());
+        EXPECT_EQ(checkEvent->selectedTime.GetMinute(), time.GetMinute());
+        EXPECT_EQ(checkEvent->selectedTime.GetSecond(), time.GetSecond());
 
+        checkEvent = std::nullopt;
+        EXPECT_FALSE(checkEvent);
         DatePickerChangeEvent eventWithoutSeconds(time.ToString(true, false));
         eventHub->FireChangeEvent(&eventWithoutSeconds);
-        EXPECT_EQ(selectedTime.GetHour(), time.GetHour());
-        EXPECT_EQ(selectedTime.GetMinute(), time.GetMinute());
-        EXPECT_EQ(selectedTime.GetSecond(), 0);
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->selectedTime.GetHour(), time.GetHour());
+        EXPECT_EQ(checkEvent->selectedTime.GetMinute(), time.GetMinute());
+        EXPECT_EQ(checkEvent->selectedTime.GetSecond(), 0);
     };
 }
 

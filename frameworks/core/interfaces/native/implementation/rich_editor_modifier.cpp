@@ -26,7 +26,6 @@
 #include "rich_editor_styled_string_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
-
 void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src)
 {
     if (src.GetType() == "SelectionInfo") {
@@ -37,6 +36,7 @@ void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src)
             dst.selection.value1 = Converter::ArkValue<Ark_Number>(selection.selection[1]);
         }
     }
+    LOGE("Arkkoala converter to Ark_RichEditorSelection not fully implemented");
 }
 
 void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
@@ -156,7 +156,6 @@ void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderSty
     ret.fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(src.font.value.style);
     dst = ret;
 }
-
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -221,8 +220,8 @@ void OnReadyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onReady(frameNode->GetId());
+    auto onCallback = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     RichEditorModelNG::SetOnReady(frameNode, std::move(onCallback));
 }
@@ -232,11 +231,11 @@ void OnSelectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const BaseEventInfo* event) {
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
         CHECK_NULL_VOID(event);
         auto selection = Converter::ArkValue<Ark_RichEditorSelection>(*event);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onSelect(
-            frameNode->GetId(), selection);
+        LOGW("OnSelectImpl :: Ark_RichEditorSelection don't fully filled from BaseEventInfo");
+        arkCallback.Invoke(selection);
     };
     RichEditorModelNG::SetOnSelect(frameNode, std::move(onCallback));
 }
@@ -246,10 +245,10 @@ void OnSelectionChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const BaseEventInfo* event) {
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
         CHECK_NULL_VOID(event);
         auto range = Converter::ArkValue<Ark_RichEditorRange>(*event);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onSelectionChange(frameNode->GetId(), range);
+        arkCallback.Invoke(range);
     };
     RichEditorModelNG::SetOnSelectionChange(frameNode, std::move(onCallback));
 }
@@ -259,11 +258,11 @@ void AboutToIMEInputImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const RichEditorInsertValue& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode),
+        frameNode](const RichEditorInsertValue& param) -> bool {
         Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->aboutToIMEInput(frameNode->GetId(), data);
-        LOGW("Richeditor modifier, AboutToIMEInputImpl :: callback should return bool value back to the aceEngine");
-        return true;
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
     };
     RichEditorModelNG::SetAboutToIMEInput(frameNode, std::move(onCallback));
 }
@@ -273,10 +272,10 @@ void OnIMEInputCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const RichEditorAbstractSpanResult& param) {
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const RichEditorAbstractSpanResult& param) {
         Converter::ConvContext ctx;
         auto data = Converter::ArkValue<Ark_RichEditorTextSpanResult>(param, &ctx);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onIMEInputComplete(frameNode->GetId(), data);
+        arkCallback.Invoke(data);
     };
     RichEditorModelNG::SetOnIMEInputComplete(frameNode, std::move(onCallback));
 }
@@ -286,9 +285,9 @@ void OnDidIMEInputImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const TextRange& param) {
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const TextRange& param) {
         auto data = Converter::ArkValue<Ark_TextRange>(param);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onDidIMEInput(frameNode->GetId(), data);
+        arkCallback.Invoke(data);
     };
     RichEditorModelNG::SetOnDidIMEInput(frameNode, std::move(onCallback));
 }
@@ -298,11 +297,11 @@ void AboutToDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const RichEditorDeleteValue& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value,
+        frameNode), frameNode](const RichEditorDeleteValue& param) -> bool {
         auto data = Converter::ArkValue<Ark_RichEditorDeleteValue>(param);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->aboutToDelete(frameNode->GetId(), data);
-        LOGW("AboutToDeleteImpl :: callback should return bool value back to the aceEngine");
-        return true;
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
     };
     RichEditorModelNG::SetAboutToDelete(frameNode, std::move(onCallback));
 }
@@ -312,8 +311,8 @@ void OnDeleteCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onDeleteComplete(frameNode->GetId());
+    auto onCallback = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     RichEditorModelNG::SetOnDeleteComplete(frameNode, std::move(onCallback));
 }
@@ -333,12 +332,17 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](NG::TextCommonEvent& param) {
-        auto event = Converter::ArkValue<Opt_PasteEvent>(Ark_Empty());
-        LOGW("RichEditor modifier:: Opt_PasteEvent usage is not implemented yet.");
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onPaste(frameNode->GetId(), event);
+    auto onPaste = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) -> void {
+        Converter::ConvContext ctx;
+        auto keeper = CallbackKeeper::Claim([&event]() {
+            event.SetPreventDefault(true);
+        });
+        Ark_PasteEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
+        arkCallback.InvokeSync(Converter::ArkValue<Opt_PasteEvent>(arkEvent));
     };
-    RichEditorModelNG::SetOnPaste(frameNode, std::move(onCallback));
+    RichEditorModelNG::SetOnPaste(frameNode, std::move(onPaste));
 }
 void EnableDataDetectorImpl(Ark_NativePointer node,
                             Ark_Boolean value)
@@ -389,9 +393,9 @@ void OnEditingChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const bool& param) {
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const bool& param) {
         Ark_Boolean flag = Converter::ArkValue<Ark_Boolean>(param);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onEditingChange(frameNode->GetId(), flag);
+        arkCallback.Invoke(flag);
     };
     RichEditorModelNG::SetOnEditingChange(frameNode, std::move(onCallback));
 }
@@ -409,11 +413,11 @@ void OnSubmitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](int32_t param1, NG::TextFieldCommonEvent& param2) {
-        Ark_EnterKeyType enterKey = static_cast<Ark_EnterKeyType>(param1);
+    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode), frameNode](int32_t param1,
+        NG::TextFieldCommonEvent& param2) {
+        auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
         const auto event = Converter::ArkSubmitEventSync(param2);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onSubmit(frameNode->GetId(), enterKey,
-            event.ArkValue());
+        arkCallback.InvokeSync(enterKey, event.ArkValue());
     };
     RichEditorModelNG::SetOnSubmit(frameNode, std::move(onCallback));
 }
@@ -423,11 +427,12 @@ void OnWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const RichEditorChangeValue& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode),
+        frameNode](const RichEditorChangeValue& param) -> bool {
         auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onWillChange(frameNode->GetId(), data);
-        LOGW("OnWillChangeImpl :: callback should return bool value back to the aceEngine");
-        return true;
+        LOGW("OnWillChangeImpl :: Ark_RichEditorChangeValue don't fully filled from RichEditorChangeValue");
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
     };
     RichEditorModelNG::SetOnWillChange(frameNode, std::move(onCallback));
 }
@@ -437,13 +442,12 @@ void OnDidChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](const RichEditorChangeValue& param) {
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const RichEditorChangeValue& param) {
         TextRange inBefore = param.GetRangeBefore();
         TextRange inAfter = param.GetRangeAfter();
         Ark_TextRange rangeBefore = Converter::ArkValue<Ark_TextRange>(inBefore);
         Ark_TextRange rangeAfter = Converter::ArkValue<Ark_TextRange>(inAfter);
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onDidChange(
-            frameNode->GetId(), rangeBefore, rangeAfter);
+        arkCallback.Invoke(rangeBefore, rangeAfter);
     };
     RichEditorModelNG::SetOnDidChange(frameNode, std::move(onCallback));
 }
@@ -453,12 +457,17 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](NG::TextCommonEvent& param) {
-        Ark_CutEvent event;
-        LOGW("RichEditor modifier :: Ark_CutEvent conversion is not implemented yet.");
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onCut(frameNode->GetId(), event);
+    auto onCut = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) {
+        Converter::ConvContext ctx;
+        auto keeper = CallbackKeeper::Claim([&event]() {
+            event.SetPreventDefault(true);
+        });
+        Ark_CutEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
+        arkCallback.InvokeSync(arkEvent);
     };
-    RichEditorModelNG::SetOnCut(frameNode, std::move(onCallback));
+    RichEditorModelNG::SetOnCut(frameNode, std::move(onCut));
 }
 void OnCopyImpl(Ark_NativePointer node,
                 const Callback_CopyEvent_Void* value)
@@ -466,12 +475,17 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [frameNode](NG::TextCommonEvent& param) {
-        Ark_CopyEvent event;
-        LOGW("RichEditor modifier :: Ark_CopyEvent conversion is not implemented yet.");
-        GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onCopy(frameNode->GetId(), event);
+    auto onCopy = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) {
+        Converter::ConvContext ctx;
+        auto keeper = CallbackKeeper::Claim([&event]() {
+            event.SetPreventDefault(true);
+        });
+        Ark_CopyEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
+        arkCallback.InvokeSync(arkEvent);
     };
-    RichEditorModelNG::SetOnCopy(frameNode, std::move(onCallback));
+    RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_EditMenuOptions* value)

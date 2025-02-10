@@ -21,6 +21,19 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
+{
+    switch (src) {
+        case static_cast<int32_t>(ARK_SELECT_STATUS_ALL): dst = ARK_SELECT_STATUS_ALL; break;
+        case static_cast<int32_t>(ARK_SELECT_STATUS_PART): dst = ARK_SELECT_STATUS_PART; break;
+        case static_cast<int32_t>(ARK_SELECT_STATUS_NONE): dst = ARK_SELECT_STATUS_NONE; break;
+        default: dst = static_cast<Ark_SelectStatus>(-1);
+            LOGE("Unexpected enum value in SelectStatus: %{public}d", src);
+    }
+}
+} // namespace OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CheckboxGroupModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -99,13 +112,17 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const BaseEventInfo* info) {
-        Ark_CheckboxGroupResult result;
-        GetFullAPI()->getEventsAPI()->getCheckboxGroupEventsReceiver()->onChange(frameNode->GetId(), result);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* info) {
+        auto eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        CHECK_NULL_VOID(eventInfo);
+        Converter::ArkArrayHolder<Array_String> vecHolder(eventInfo->GetNameList());
+        Ark_CheckboxGroupResult result {
+            .name = vecHolder.ArkValue(),
+            .status = Converter::ArkValue<Ark_SelectStatus>(eventInfo->GetStatus())
+        };
+        arkCallback.Invoke(result);
     };
-    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onEvent));
+    CheckBoxGroupModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 void CheckboxShapeImpl(Ark_NativePointer node,
                        Ark_CheckBoxShape value)

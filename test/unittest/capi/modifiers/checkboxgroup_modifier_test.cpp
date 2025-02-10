@@ -27,27 +27,29 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-static bool g_isCheckedTest = false;
 static constexpr int SIZE1 = 111;
 static constexpr int SIZE2 = 222;
 
-static void onChangeCallback(Ark_Int32 nodeId, const Ark_CheckboxGroupResult event)
-{
-    g_isCheckedTest = !g_isCheckedTest;
-};
-static GENERATED_ArkUICheckboxGroupEventsReceiver recv {
-    .onChange = onChangeCallback
-};
-static const GENERATED_ArkUICheckboxGroupEventsReceiver* getEventsReceiverTest()
-{
-    return &recv;
-};
-
-static const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { .getCheckboxGroupEventsReceiver = getEventsReceiverTest };
-    return &eventsImpl;
-};
+namespace Converter {
+    template<>
+    void AssignCast(std::optional<int32_t>& dst, const Ark_SelectStatus& src)
+    {
+        switch (src) {
+            case ARK_SELECT_STATUS_ALL: dst = static_cast<int32_t>(ARK_SELECT_STATUS_ALL); break;
+            case ARK_SELECT_STATUS_PART: dst = static_cast<int32_t>(ARK_SELECT_STATUS_PART); break;
+            case ARK_SELECT_STATUS_NONE: dst = static_cast<int32_t>(ARK_SELECT_STATUS_NONE); break;
+            default:
+                LOGE("Unexpected enum value in SelectStatus: %{public}d", src);
+        }
+    }
+    template<>
+    CheckboxGroupResult Convert(const Ark_CheckboxGroupResult& src)
+    {
+        CheckboxGroupResult result(Converter::Convert<std::vector<std::string>>(src.name),
+            Converter::OptConvert<int32_t>(src.status).value_or(static_cast<int32_t>(ARK_SELECT_STATUS_NONE)));
+        return result;
+    }
+}
 
 class CheckboxGroupModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxGroupModifier,
     &GENERATED_ArkUINodeModifiers::getCheckboxGroupModifier, GENERATED_ARKUI_CHECKBOX_GROUP> {
@@ -57,8 +59,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<CheckboxTheme>();
-
-        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 };
 
@@ -163,24 +163,34 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestS
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest006
+ * @tc.name: SetOnChangeTest
  * @tc.desc: onChange event test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest006, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, SetOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnCheckboxGroupChangeCallback func{};
-    modifier_->setOnChange(node_, &func);
-    EXPECT_EQ(g_isCheckedTest, false);
+    struct CheckEvent {
+        int32_t resourceId;
+        CheckboxGroupResult result;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](const Ark_Int32 resourceId, const Ark_CheckboxGroupResult result) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .result = Converter::Convert<CheckboxGroupResult>(result),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<OnCheckboxGroupChangeCallback>(testCallback, frameNode->GetId());
+    modifier_->setOnChange(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
-
-    CheckboxGroupResult info({}, 0);
-    eventHub->UpdateChangeEvent(&info);
-    EXPECT_EQ(g_isCheckedTest, true);
     ASSERT_NE(eventHub, nullptr);
+    CheckboxGroupResult info({"test1", "test2"}, 2);
     eventHub->UpdateChangeEvent(&info);
-    EXPECT_EQ(g_isCheckedTest, false);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->result.GetNameList(), info.GetNameList());
+    EXPECT_EQ(checkEvent->result.GetStatus(), info.GetStatus());
 }
 
 /*

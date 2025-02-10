@@ -16,12 +16,12 @@
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "frameworks/base/utils/time_util.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,7 +51,6 @@ void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptio
     }
     dst = options;
 }
-
 } // namespace  OHOS::Ace:NG:Converter
 } // namespace  OHOS::Ace:NG
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -144,14 +143,13 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto onChange = [frameNode](const BaseEventInfo* event) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
         CHECK_NULL_VOID(event);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
         CHECK_NULL_VOID(eventInfo);
         auto selectedStr = eventInfo->GetSelectedStr();
         auto result = Converter::ArkValue<Ark_DatePickerResult>(selectedStr);
-        GetFullAPI()->getEventsAPI()->getDatePickerEventsReceiver()->onChange(
-            frameNode->GetId(), result);
+        arkCallback.Invoke(result);
     };
     DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }

@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -147,8 +148,8 @@ void OnStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onStart = [frameNode](const std::string& param) {
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onStart(frameNode->GetId());
+    auto onStart = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        arkCallback.Invoke();
     };
     VideoModelNG::SetOnStart(frameNode, onStart);
 }
@@ -158,8 +159,8 @@ void OnPauseImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPause = [frameNode](const std::string& param) {
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onPause(frameNode->GetId());
+    auto onPause = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        arkCallback.Invoke();
     };
     VideoModelNG::SetOnPause(frameNode, onPause);
 }
@@ -169,8 +170,8 @@ void OnFinishImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onFinish = [frameNode](const std::string& param) {
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onFinish(frameNode->GetId());
+    auto onFinish = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        arkCallback.Invoke();
     };
     VideoModelNG::SetOnFinish(frameNode, onFinish);
 }
@@ -180,13 +181,13 @@ void OnFullscreenChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onFullscreenChange = [frameNode](const std::string& param) {
+    auto onFullscreenChange = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto fullscreen = data->GetValue("fullscreen")->GetBool();
         Ark_FullscreenInfo event = {
             .fullscreen = Converter::ArkValue<Ark_Boolean>(fullscreen)
         };
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onFullscreenChange(frameNode->GetId(), event);
+        arkCallback.Invoke(event);
     };
     VideoModelNG::SetOnFullScreenChange(frameNode, onFullscreenChange);
 }
@@ -196,13 +197,13 @@ void OnPreparedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPrepared = [frameNode](const std::string& param) {
+    auto onPrepared = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto duration = data->GetValue("duration")->GetDouble();
         Ark_PreparedInfo event = {
             .duration = Converter::ArkValue<Ark_Number>(static_cast<float>(duration))
         };
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onPrepared(frameNode->GetId(), event);
+        arkCallback.Invoke(event);
     };
     VideoModelNG::SetOnPrepared(frameNode, onPrepared);
 }
@@ -212,13 +213,13 @@ void OnSeekingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSeeking = [frameNode](const std::string& param) {
+    auto onSeeking = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onSeeking(frameNode->GetId(), event);
+        arkCallback.Invoke(event);
     };
     VideoModelNG::SetOnSeeking(frameNode, onSeeking);
 }
@@ -228,13 +229,13 @@ void OnSeekedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSeeked = [frameNode](const std::string& param) {
+    auto onSeeked = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onSeeked(frameNode->GetId(), event);
+        arkCallback.Invoke(event);
     };
     VideoModelNG::SetOnSeeked(frameNode, onSeeked);
 }
@@ -244,13 +245,13 @@ void OnUpdateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onUpdate = [frameNode](const std::string& param) {
+    auto onUpdate = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onUpdate(frameNode->GetId(), event);
+        arkCallback.Invoke(event);
     };
     VideoModelNG::SetOnUpdate(frameNode, onUpdate);
 }
@@ -260,8 +261,8 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onError = [frameNode](const std::string& param) {
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onError(frameNode->GetId());
+    auto onError = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        arkCallback.Invoke();
     };
     VideoModelNG::SetOnError(frameNode, onError);
 }
@@ -271,8 +272,8 @@ void OnStopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onStop = [frameNode](const std::string& param) {
-        GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onStop(frameNode->GetId());
+    auto onStop = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        arkCallback.Invoke();
     };
     VideoModelNG::SetOnStop(frameNode, onStop);
 }
