@@ -618,3 +618,30 @@ HWTEST_F(DialogModelTest, DialogModelTest040, TestSize.Level1)
     Dispose(nativeDialogHandle);
     nativeDialogHandle = nullptr;
 }
+
+/**
+ * @tc.name: DialogModelTest041
+ * @tc.desc: Test SetLevelOrder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest041, TestSize.Level1)
+{
+    int32_t ret = SetLevelOrder(nullptr, 0.0f);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DialogModelTest042
+ * @tc.desc: Test SetLevelOrder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest042, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelOrder(nativeDialogHandle, 0.0f);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}

@@ -5911,6 +5911,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*setLevelMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
     ArkUI_Int32 (*setLevelUniqueId)(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
     ArkUI_Int32 (*setImmersiveMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
+    ArkUI_Int32 (*setLevelOrder)(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder);
 };
 
 struct ArkUIBasicNodeAPI {

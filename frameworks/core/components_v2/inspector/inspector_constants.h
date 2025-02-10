@@ -61,6 +61,7 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // overlay view
 ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
+ACE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 

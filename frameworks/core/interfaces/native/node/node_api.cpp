@@ -1962,6 +1962,11 @@ ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
     return CustomDialog::SetImmersiveMode(handle, mode);
 }
 
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
+{
+    return CustomDialog::SetLevelOrder(handle, levelOrder);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -1988,6 +1993,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setLevelMode = SetDialogLevelMode,
         .setLevelUniqueId = SetDialogLevelUniqueId,
         .setImmersiveMode = SetDialogImmersiveMode,
+        .setLevelOrder = SetLevelOrder,
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;

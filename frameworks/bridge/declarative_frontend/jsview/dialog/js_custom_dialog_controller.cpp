@@ -19,12 +19,14 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -66,6 +68,35 @@ constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 
 } // namespace
+
+void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    if (properties.isShowInSubWindow) {
+        return;
+    }
+
+    auto levelOrderValue = obj->GetProperty("levelOrder");
+    if (!levelOrderValue->IsObject()) {
+        return;
+    }
+    napi_value levelOrderApi = JsConverter::ConvertJsValToNapiValue(levelOrderValue);
+    CHECK_NULL_VOID(levelOrderApi);
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    NG::LevelOrder* levelOrder = nullptr;
+    napi_status status = napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
+    if (status != napi_ok || !levelOrder) {
+        LOGE("Failed to unwrap LevelOrder.");
+        return;
+    }
+
+    double order = levelOrder->GetOrder();
+    properties.levelOrder = std::make_optional(order);
+}
 
 static std::atomic<int32_t> controllerId = 0;
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
@@ -276,6 +307,9 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         if (isModalValue->IsBoolean()) {
             instance->dialogProperties_.isModal = isModalValue->ToBoolean();
         }
+
+        // Parse levelOrder.
+        ParseCustomDialogLevelOrder(instance->dialogProperties_, constructorArg);
 
         instance->dialogProperties_.controllerId = controllerId.fetch_add(1, std::memory_order_relaxed);
         JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);
