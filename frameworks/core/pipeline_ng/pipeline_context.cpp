@@ -2016,6 +2016,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         context->SetKeyboardAction(KeyboardAction::NONE);
     };
     FlushUITasks();
+    // flush ui tasks when dirty layout nodes exist: the previous ui tasks may generate dirty nodes.
+    // if dirty nodes exist, they will be carried into the keyboard avoid animation, causing abnormal animation.
+    FlushDirtyPropertyNodesWhenExist();
     SetIsLayouting(true);
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 
@@ -2024,6 +2027,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::FlushDirtyPropertyNodesWhenExist()
+{
+    if ((!IsDirtyLayoutNodesEmpty() || !dirtyPropertyNodes_.empty()) && !IsLayouting()) {
+        FlushUITasks();
+    }
 }
 
 bool PipelineContext::UsingCaretAvoidMode()
