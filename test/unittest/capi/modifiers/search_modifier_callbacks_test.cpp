@@ -80,16 +80,6 @@ const std::vector<ArkNumberFloatTest> FLOAT_NUMBER_TEST_PLAN = {
     { AFLT32_POS, AFLT32_POS },
     { AFLT32_NEG, AFLT32_NEG },
 };
-
-struct EventsTracker {
-    static inline GENERATED_ArkUISearchEventsReceiver eventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getSearchEventsReceiver = [] () -> const GENERATED_ArkUISearchEventsReceiver* {
-            return &eventsReceiver;
-        }
-    };
-}; // EventsTracker
 } // namespace
 
 namespace Converter {
@@ -107,8 +97,6 @@ public:
         SetupTheme<SearchTheme>();
         SetupTheme<TextFieldTheme>();
         SetupTheme<IconTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -508,27 +496,32 @@ HWTEST_F(SearchModifierCallbackTest, setOnWillInsertTest, TestSize.Level1)
  */
 HWTEST_F(SearchModifierCallbackTest, setOnDidInsertTest, TestSize.Level1)
 {
-    g_EventTestString = u"";
-    g_EventTestOffset = 0;
-    EventsTracker::eventsReceiver.onDidInsert = [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-        g_EventTestString = Convert<std::u16string>(data.insertValue);
-        g_EventTestOffset = Convert<int32_t>(data.insertOffset);
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    EXPECT_NE(textFieldChild, nullptr);
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
+    EXPECT_NE(textFieldEventHub, nullptr);
+    static std::u16string eventTestString = u"";
+    static int32_t eventTestOffset = 0;
+    Callback_InsertValue_Void onDidInsert = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call =[](Ark_Int32 nodeId, const Ark_InsertValue data) {
+            eventTestString = Convert<std::u16string>(data.insertValue);
+            eventTestOffset = Convert<int32_t>(data.insertOffset);
+        }
+    };
+
     InsertValueInfo checkValueDefault;
     textFieldEventHub->FireOnDidInsertValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    Callback_InsertValue_Void func{};
-    modifier_->setOnDidInsert(node_, &func);
+    EXPECT_EQ(eventTestString, EMPTY_TEXT);
+    EXPECT_EQ(eventTestOffset, 0);
+    modifier_->setOnDidInsert(node_, &onDidInsert);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
         textFieldEventHub->FireOnDidInsertValueEvent(checkValue);
-        EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-        EXPECT_EQ(g_EventTestOffset, expectVal);
+        EXPECT_EQ(eventTestString, CHECK_TEXT);
+        EXPECT_EQ(eventTestOffset, expectVal);
     }
 }
 

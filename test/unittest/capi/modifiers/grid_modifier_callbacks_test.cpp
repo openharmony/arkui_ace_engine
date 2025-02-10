@@ -30,26 +30,12 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
-    struct EventsTracker {
-        static inline GENERATED_ArkUIGridEventsReceiver gridEventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getGridEventsReceiver = [] () -> const GENERATED_ArkUIGridEventsReceiver* {
-                return &gridEventsReceiver;
-            }
-        };
-    }; // EventsTracker
-} // namespace
-
 class GridModifierCallbacksTest : public ModifierTestBase<GENERATED_ArkUIGridModifier,
     &GENERATED_ArkUINodeModifiers::getGridModifier, GENERATED_ARKUI_GRID> {
 public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -89,9 +75,10 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollBarUpdateTest, TestSize.Level1)
 HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, TestSize.Level1)
 {
     // test is disabled because onScrollBarUpdate callback should return value
-    Callback_Number_Number_ComputedBarAttribute func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    EXPECT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -99,17 +86,20 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
         Dimension offset;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridEventsReceiver.onScrollBarUpdate =
-        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_Number offset)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .index = Converter::Convert<int32_t>(index),
-            .offset = Converter::Convert<Dimension>(offset)
-        };
+    Callback_Number_Number_ComputedBarAttribute onScrollBarUpdate = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](const Ark_Int32 resourceId,
+            const Ark_Number index, const Ark_Number offset, const Callback_ComputedBarAttribute_Void continuation)
+            {
+                checkEvent = {
+                    .nodeId = resourceId,
+                    .index = Converter::Convert<int32_t>(index),
+                    .offset = Converter::Convert<Dimension>(offset)
+                };
+        }
     };
 
-    modifier_->setOnScrollBarUpdate(node_, &func);
+    modifier_->setOnScrollBarUpdate(node_, &onScrollBarUpdate);
 
     // index: 11, offset: 12 invalid
     EXPECT_EQ(checkEvent.has_value(), false);

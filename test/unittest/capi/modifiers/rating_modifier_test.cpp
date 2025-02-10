@@ -76,14 +76,6 @@ namespace  {
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_FOREGROUND_URI_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_NAME = "secondaryUri";
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_DEFAULT_VALUE = "";
-    struct EventsTracker {
-        static inline GENERATED_ArkUIRatingEventsReceiver ratingEventReceiver {};
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getRatingEventsReceiver = [] () -> const GENERATED_ArkUIRatingEventsReceiver* {
-                return &ratingEventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class RatingModifierTest : public ModifierTestBase<GENERATED_ArkUIRatingModifier,
@@ -92,7 +84,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

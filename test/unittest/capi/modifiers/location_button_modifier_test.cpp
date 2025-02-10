@@ -35,16 +35,6 @@ namespace  {
     const auto ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE = ButtonType::CAPSULE;
 
     const auto DEFAULT_JSON_INT = -1;
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUILocationButtonEventsReceiver eventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-            .getLocationButtonEventsReceiver = [] () -> const GENERATED_ArkUILocationButtonEventsReceiver* {
-                return &eventReceiver;
-            }
-        };
-    };
 } // namespace
 
 class LocationButtonModifierTest : public ModifierTestBase<GENERATED_ArkUILocationButtonModifier,
@@ -55,8 +45,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<SecurityComponentTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

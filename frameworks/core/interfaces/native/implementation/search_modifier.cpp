@@ -540,13 +540,13 @@ void OnDidInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onDidInsert = [frameNode](const InsertValueInfo& value) {
+    auto onDidInsert = [arkCallback = CallbackHelper(*value)](const InsertValueInfo& value) {
         Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onDidInsert(frameNode->GetId(), insertValue);
+        arkCallback.Invoke(insertValue);
     };
     SearchModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }

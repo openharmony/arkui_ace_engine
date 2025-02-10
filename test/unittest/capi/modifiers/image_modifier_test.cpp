@@ -75,16 +75,6 @@ namespace  {
         {"true", ArkValue<Ark_Boolean>(true), "true"},
         {"false", ArkValue<Ark_Boolean>(false), "false"},
     };
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUIImageEventsReceiver getImageEventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getImageEventsReceiver = [] () -> const GENERATED_ArkUIImageEventsReceiver* {
-                return &getImageEventsReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
@@ -103,7 +93,6 @@ public:
             AddResource(id, res);
             AddResource(strid, res);
         }
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 /*

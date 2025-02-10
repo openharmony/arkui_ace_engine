@@ -44,16 +44,6 @@ namespace  {
     const auto ATTRIBUTE_SELECTABLE_DEFAULT_VALUE = "true";
     const auto ATTRIBUTE_SELECTED_NAME = "selected";
     const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE = "false";
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUIGridItemEventsReceiver gridItemEventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getGridItemEventsReceiver = [] () -> const GENERATED_ArkUIGridItemEventsReceiver* {
-                return &gridItemEventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class GridItemModifierTest : public ModifierTestBase<GENERATED_ArkUIGridItemModifier,
@@ -64,8 +54,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<GridItemTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
