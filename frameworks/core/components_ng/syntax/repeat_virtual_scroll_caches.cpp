@@ -21,11 +21,6 @@ namespace OHOS::Ace::NG {
 
 using CacheItem = RepeatVirtualScrollCaches::CacheItem;
 
-bool KeySorterClass::operator()(const std::string& left, const std::string& right) const
-{
-    return virtualScroll_->CompareKeyByIndexDistance(left, right);
-}
-
 RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
     const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
     const std::function<void(uint32_t)>& onCreateNode,

@@ -30,25 +30,13 @@
 
 namespace OHOS::Ace::NG {
 
-// custom sorting for std::set only works with struct
-// with operator() inside
-class RepeatVirtualScrollCaches;
-struct KeySorterClass {
-    const RepeatVirtualScrollCaches* virtualScroll_;
-
-    explicit KeySorterClass(const RepeatVirtualScrollCaches* virtualScroll) : virtualScroll_(virtualScroll) {}
-    bool operator()(const std::string& left, const std::string& right) const;
-};
-
 class RepeatVirtualScrollCaches {
-    friend struct KeySorterClass;
 public:
     struct CacheItem {
         bool isValid = false;
         RefPtr<UINode> item;
     };
 
-public:
     RepeatVirtualScrollCaches(const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
