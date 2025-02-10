@@ -114,7 +114,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onEvent = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* info) {
         CHECK_NULL_VOID(info);
-        auto eventInfo = reinterpret_cast<const CheckboxGroupResult*>(info);
+        auto eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
         Converter::ArkArrayHolder<Array_String> vecHolder(eventInfo->GetNameList());
         Ark_CheckboxGroupResult result {
             .name = vecHolder.ArkValue(),
