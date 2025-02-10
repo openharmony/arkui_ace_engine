@@ -141,6 +141,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_offscreen_canvas_ffi.cpp",
       "interfaces/cj_ffi/cj_page_transition_ffi.cpp",
       "interfaces/cj_ffi/cj_panel_ffi.cpp",
+      "interfaces/cj_ffi/cj_particle_ffi.cpp",
       "interfaces/cj_ffi/cj_path_ffi.cpp",
       "interfaces/cj_ffi/cj_pattern_lock.cpp",
       "interfaces/cj_ffi/cj_pixel_unit_convert_ffi.cpp",

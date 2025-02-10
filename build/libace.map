@@ -154,6 +154,7 @@
       OHOS::Ace::NavigationModel::*;
       OHOS::Ace::NavigatorModel::*;
       OHOS::Ace::SlidingPanelModel::*;
+      OHOS::Ace::ParticleModel::*;
       OHOS::Ace::PathModel::*;
       OHOS::Ace::PatternLockModel::*;
       OHOS::Ace::PolygonModel::*;
