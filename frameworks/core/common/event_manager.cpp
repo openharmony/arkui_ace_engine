@@ -966,6 +966,26 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
     }
 }
 
+void EventManager::DispatchTouchCancelToRecognizer(
+    RefPtr<TouchEventTarget>& touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items)
+{
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::CANCEL;
+    touchEvent.isFalsified = true;
+    for (auto& item : items) {
+        touchEvent.originalId = item.first;
+        touchEvent.id = item.first;
+        touchEventTarget->HandleMultiContainerEvent(touchEvent);
+        eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(touchEventTarget)), "",
+            std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+
+        touchTestResults_[item.first].erase(item.second);
+        if (touchTestResults_[item.first].empty()) {
+            touchTestResults_.erase(item.first);
+        }
+    }
+}
+
 bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
 {
     ContainerScope scope(instanceId_);
