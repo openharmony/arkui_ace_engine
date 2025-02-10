@@ -913,7 +913,6 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
             return;
         }
     }
-    sheetStyle.instanceId = Container::CurrentId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "paramCnt: %{public}d, contentId: %{public}d, targetId: %{public}d",
         paramCnt, sheetContentNode->GetId(), targetId);
     auto ret = ViewContextModel::GetInstance()->OpenBindSheet(sheetContentNode,
