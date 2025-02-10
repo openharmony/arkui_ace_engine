@@ -5727,7 +5727,7 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, 0.0f);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     if (safeAreaManager) {
-        safeAreaManager->SetRawKeyboardHeight(0.0f);
+        safeAreaManager->SetKeyboardInfo(0.0f);
     }
     pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
 }
