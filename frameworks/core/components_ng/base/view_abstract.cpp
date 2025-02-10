@@ -2452,8 +2452,26 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
     wrapperPattern->SetMenuParam(menuParam);
     MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
     MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    auto pipeline = menuWrapperNode->GetContextRefPtr();
+    if (pipeline) {
+        wrapperPattern->SetForceUpdateEmbeddedMenu(true);
+    }
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+    CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto embeddedMenuItems = menuPattern->GetEmbeddedMenuItems();
+    for (auto iter = embeddedMenuItems.begin(); iter != embeddedMenuItems.end(); ++iter) {
+        auto menuItemPattern = (*iter)->GetPattern<MenuItemPattern>();
+        if (!menuItemPattern) {
+            continue;
+        }
+        menuItemPattern->HideEmbedded();
+    }
+    wrapperPattern->HideSubMenu();
     menuWrapperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    wrapperPattern->ClearAllSubMenu();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+        wrapperPattern->SetForceUpdateEmbeddedMenu(false);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 

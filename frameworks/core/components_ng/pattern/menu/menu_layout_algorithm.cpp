@@ -3004,8 +3004,10 @@ bool MenuLayoutAlgorithm::HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(innerMenuPattern, false);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, false);
-    return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED &&
-           menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0;
+    auto isEmbeddedMenu =
+        layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED;
+    return isEmbeddedMenu && menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0 &&
+           !menuWrapperPattern->GetForceUpdateEmbeddedMenu();
 }
 
 std::string MenuLayoutAlgorithm::MoveTo(double x, double y)
