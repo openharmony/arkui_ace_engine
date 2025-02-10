@@ -21,6 +21,10 @@ const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 
+const o = 10003;
+const t = 10002;
+const u = 10007;
+
 export const e1 = {
     icon: {
         size: { width: 32, height: 32 },
@@ -148,6 +152,42 @@ export function Popup(options, parent = null) {
         }, { name: "PopupComponent" });
     }
 }
+function i(dimension, t1) {
+    const matches = dimension.match(t1);
+    if (!matches || matches.length < 3) {
+      return false;
+    }
+    const value = Number.parseFloat(matches[1]);
+    return value >= 0;
+  }
+  function j(dimension) {
+    return i(
+      dimension,
+      new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i')
+    );
+  }
+  function m(context, value) {
+    const resourceManager = context?.resourceManager;
+    if (value === void 0 || value === null || resourceManager === void 0) {
+      return false;
+    }
+    if (value.type !== o && value.type !== u && value.type !== t) {
+      return false;
+    }
+    if (value.type === u || value.type === t) {
+      if (resourceManager.getNumber(value.id) >= 0) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    if (value.type === o && !j(resourceManager.getStringSync(value.id))) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
 export class g1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -164,6 +204,7 @@ export class g1 extends ViewPU {
         this.__buttons = new SynchedPropertyObjectOneWayPU(params.buttons, this, "buttons");
         this.__maxWidth = new SynchedPropertyObjectOneWayPU(params.maxWidth, this, 'maxWidth');
         this.textHeight = 0;
+        this.__messageMaxWidth = new ObservedPropertySimplePU(0, this, "messageMaxWidth");
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
         this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
@@ -524,7 +565,7 @@ export class g1 extends ViewPU {
         }
         if (this.showClose || this.showClose === void (0)) {
             if (this.messageMaxWidth !== undefined) {
-                if (this.maxWidth > px2vp(v1.width)) {
+                if (this.maxWidth != undefined && this.maxWidth > px2vp(v1.width)) {
                     u1 = px2vp(v1.width);
                 } else {
                     u1 = this.maxWidth;
@@ -675,6 +716,16 @@ export class g1 extends ViewPU {
     }
     toVp(value) {
         let q1 = display.getDefaultDisplaySync();
+        try {
+            q1 = display.getDefaultDisplaySync();
+        }
+        catch (error) {
+            console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+            return Number.NEGATIVE_INFINITY;
+        }
+        if (value === void 0) {
+            return Number.NEGATIVE_INFINITY;
+        }
         if (value === void 0) {
             return Number.NEGATIVE_INFINITY;
         }
