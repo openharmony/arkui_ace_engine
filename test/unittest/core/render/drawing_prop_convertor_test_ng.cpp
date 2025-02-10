@@ -618,4 +618,21 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg016, TestSize.Lev
     textStyle.SetTextDecorationStyle(TextDecorationStyle::INHERIT);
     EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::SOLID);
 }
+
+/**
+ * @tc.name: DrawingPropConvertorTestNg017
+ * @tc.desc: Test cast to DrawingPropConvertorTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: call ToRSWordBreakType and set input testWordBreak is HYPHENATION.
+     * @tc.expected: the return retWordBreakType is the same as RSWordBreakType::WordBreakTypeHyphenation.
+     */
+    auto testWordBreak = static_cast<WordBreak>(3);
+
+    RSWordBreakType retWordBreakType = ToRSWordBreakType(testWordBreak);
+    EXPECT_EQ(retWordBreakType, RSWordBreakType::WordBreakTypeHyphenation);
+}
 } // namespace OHOS::Ace

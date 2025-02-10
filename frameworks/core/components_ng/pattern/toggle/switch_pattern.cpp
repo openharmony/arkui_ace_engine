@@ -23,6 +23,7 @@ namespace {
 constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr double NUMBER_TWO = 2.0;
+constexpr int32_t  HOTZONE_SPACE = 2;
 } // namespace
 
 void SwitchPattern::OnAttachToFrameNode()
@@ -278,6 +279,8 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
+    hotZoneHorizontalSize_ = switchTheme->GetHotZoneHorizontalSize();
+    hotZoneVerticalSize_ = switchTheme->GetHotZoneVerticalSize();
     if (layoutProperty->GetPositionProperty()) {
         layoutProperty->UpdateAlignment(
             layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
@@ -532,17 +535,11 @@ void SwitchPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH &&
-            (info.IsPreventDefault() || switchPattern->isTouchPreventDefault_)) {
-            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "swich preventDefault successfully");
-            switchPattern->isTouchPreventDefault_ = false;
-            return;
-        }
         switchPattern->OnClick();
     };
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickAfterEvent(clickListener_);
+    gesture->AddClickEvent(clickListener_);
 }
 
 void SwitchPattern::InitTouchEvent()
@@ -557,9 +554,6 @@ void SwitchPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
-            switchPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             switchPattern->OnTouchDown();
         }
@@ -569,7 +563,7 @@ void SwitchPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchAfterEvent(touchListener_);
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void SwitchPattern::InitMouseEvent()
@@ -602,6 +596,24 @@ void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+    auto onKeyCallbackFunc = [wp = WeakClaim(this)](const KeyEvent& keyEventInfo) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(keyEventInfo);
+        }
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "InitOnKeyEvent return false");
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyCallbackFunc));
+}
+
+bool SwitchPattern::OnKeyEvent(const KeyEvent& keyEventInfo)
+{
+    if (keyEventInfo.action == KeyAction::DOWN && keyEventInfo.code == KeyCode::KEY_FUNCTION) {
+        this->OnClick();
+        return true;
+    }
+    return false;
 }
 
 void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -705,10 +717,10 @@ bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 // Set the default hot zone for the component.
 void SwitchPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalSize_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalSize_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + HOTZONE_SPACE * hotZoneHorizontalSize_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + HOTZONE_SPACE * hotZoneVerticalSize_.ConvertToPx());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));

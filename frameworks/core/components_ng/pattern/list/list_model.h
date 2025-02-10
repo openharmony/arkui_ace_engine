@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ public:
     static ListModel* GetInstance();
     virtual ~ListModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(bool isCreateArc = false) = 0;
     virtual void SetSpace(const Dimension& space) = 0;
     virtual void SetInitialIndex(int32_t initialIndex) = 0;
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
@@ -87,7 +87,11 @@ public:
     }
 
     virtual DisplayMode GetDisplayMode() const = 0;
-
+    virtual void SetHeader(const RefPtr<NG::FrameNode>& headerNode) {}
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
+#endif
+    virtual void ResetListChildrenMainSize() {}
 private:
     static std::unique_ptr<ListModel> instance_;
     static std::mutex mutex_;

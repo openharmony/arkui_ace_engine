@@ -76,4 +76,9 @@ void DividerModelNG::SetVertical(FrameNode* frameNode, const bool& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, Vertical, value, frameNode);
 }
+
+void DividerModelNG::ResetDividerColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(DividerRenderProperty, DividerColor, PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

@@ -224,7 +224,7 @@ void NavigationModelImpl::SetNavBarPosition(NG::NavBarPosition mode)
     return;
 }
 
-void NavigationModelImpl::SetNavBarWidth(const Dimension& value)
+void NavigationModelImpl::SetNavBarWidth(const Dimension& value, bool isDoubleBind)
 {
     return;
 }

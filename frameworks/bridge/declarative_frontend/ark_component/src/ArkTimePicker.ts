@@ -22,6 +22,10 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     modifierWithKey(this._modifiersWithKeys, TimepickerLoopModifier.identity, TimepickerLoopModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value: Optional<CrownSensitivity>): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDigitalCrownSensitivityModifier.identity, TimepickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   useMilitaryTime(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity,
       TimepickerUseMilitaryTimeModifier, value);
@@ -52,6 +56,11 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
   }
   enableHapticFeedback(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  enableCascade(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableCascadeModifier.identity,
+      TimepickerEnableCascadeModifier, value);
     return this;
   }
 }
@@ -174,6 +183,20 @@ class TimepickerLoopModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TimepickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerDigitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerDigitalCrownSensitivity(node, this.value);
+    }
+  }
+}
+
 class TimepickerDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> {
   constructor(value: DateTimeOptions) {
     super(value);
@@ -198,6 +221,20 @@ class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
       getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
     } else {
       getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+
+class TimepickerEnableCascadeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerEnableCascade');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableCascade(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerEnableCascade(node, this.value);
     }
   }
 }

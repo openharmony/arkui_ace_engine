@@ -120,6 +120,15 @@ enum class OverlayType {
     RESET = 3,
 };
 
+typedef enum {
+    FOCUS_MOVE_FORWARD = 0,
+    FOCUS_MOVE_BACKWARD,
+    FOCUS_MOVE_UP,
+    FOCUS_MOVE_DOWN,
+    FOCUS_MOVE_LEFT,
+    FOCUS_MOVE_RIGHT,
+} FocusMoveDirection;
+
 typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* effect);
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -137,13 +146,14 @@ public:
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
     static void SetLayoutWeight(float value);
-    static void SetLayoutWeight(const NG::LayoutWeightPair& value);
+    static void SetChainWeight(const NG::ChainWeightPair& value);
     static void SetPixelRound(uint16_t value);
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color &color);
     static void SetBackgroundImage(const ImageSourceInfo &src);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
+    static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
@@ -208,7 +218,7 @@ public:
     static void SetHasBorderImageOutset(bool tag);
     static void SetHasBorderImageRepeat(bool tag);
     static void SetBorderImageGradient(const NG::Gradient &gradient);
-
+    static void NotifyDragStartRequest(DragStartRequestStatus dragStatus);
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
 
@@ -285,6 +295,7 @@ public:
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
+    static void SetOnAxisEvent(OnAxisEventFunc &&onAxisEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
     static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
@@ -302,6 +313,8 @@ public:
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
+    static void SetNextFocus(FocusIntension key, const std::string& nextFocus);
+    static void ResetNextFocus();
     static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
@@ -339,6 +352,9 @@ public:
         FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
+    static int32_t CancelDataLoading(const std::string& key);
+    static void SetDisableDataPrefetch(bool disableDataPrefetch);
+    static void SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
@@ -356,8 +372,19 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
+    static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
+    static int32_t ClosePopup(const RefPtr<UINode>& customNode);
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static void DismissDialog();
     static void DismissPopup();
+    static void ShowMenuPreview(
+        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, NG::MenuParam& menuParam);
+    static int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId);
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+    static int32_t CloseMenu(const RefPtr<UINode>& customNode);
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(std::function<void()>&& buildFunc, const RefPtr<FrameNode>& targetNode,
@@ -405,6 +432,7 @@ public:
     static void DisableOnClick();
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
+    static void DisableOnKeyEventDispatch();
 #ifdef SUPPORT_DIGITAL_CROWN
     static void DisableOnCrownEvent();
 #endif
@@ -419,6 +447,8 @@ public:
     static void DisableOnFocus();
     static void DisableOnBlur();
     static void DisableOnFocusAxisEvent();
+    static void DisableOnAxisEvent();
+    static void DisableOnAxisEvent(FrameNode* frameNode);
     static void DisableOnFocusAxisEvent(FrameNode* frameNode);
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnDragStart(FrameNode* frameNode);
@@ -429,6 +459,7 @@ public:
     static void DisableOnDragEnd(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
+    static void DisableOnKeyEventDispatch(FrameNode* frameNode);
 #ifdef SUPPORT_DIGITAL_CROWN
     static void DisableOnCrownEvent(FrameNode* frameNode);
 #endif
@@ -522,6 +553,7 @@ public:
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
@@ -551,6 +583,7 @@ public:
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
+    static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
@@ -595,7 +628,7 @@ public:
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
     static void SetLayoutWeight(FrameNode* frameNode, float value);
-    static void SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value);
+    static void SetChainWeight(FrameNode* frameNode, const NG::ChainWeightPair& value);
     static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
     static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
     static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
@@ -665,8 +698,12 @@ public:
     static void SetOnDragLeave(FrameNode* frameNode,
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
+    static void SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
+    static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void DispatchKeyEvent(FrameNode* frameNode, KeyEvent& keyEvent);
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
@@ -678,6 +715,9 @@ public:
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
     static void SetLayoutEvent(FrameNode* frameNode, std::function<void()>&& onLayout);
+    static void SetNextFocus(
+        FrameNode* frameNode, FocusIntension key, const std::variant<WeakPtr<AceType>, std::string> nextFocus);
+    static void ResetNextFocus(FrameNode* frameNode);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
@@ -685,6 +725,7 @@ public:
     static void SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback);
 #endif
 
+    static ImageResizableSlice GetBackgroundImageResizableSlice(FrameNode* frameNode);
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
@@ -692,6 +733,10 @@ public:
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
     static void SetNeedFocus(FrameNode* frameNode, bool value);
     static bool GetNeedFocus(FrameNode* frameNode);
+    static int RequestFocus(FrameNode* frameNode);
+    static void ClearFocus(int32_t instanceId);
+    static void FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive);
+    static void SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer);
     static double GetOpacity(FrameNode* frameNode);
     static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
     static BorderWidthProperty GetLayoutBorderWidth(FrameNode* frameNode);
@@ -794,6 +839,12 @@ public:
     static void ResetAlignRules(FrameNode* frameNode);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList);
+    static void SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
+        const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+        int32_t expectedUpdateInterval = 1000);
+    static void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval = 1000);
+
     static Color GetColorBlend(FrameNode* frameNode);
     static void ResetAreaChanged(FrameNode* frameNode);
     static void ResetVisibleChange(FrameNode* frameNode);
@@ -805,6 +856,8 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void FreezeUINodeById(const std::string& id, bool isFreeze);
+    static void FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
     static void SetOffsetLocalizedEdges(bool needLocalized);
@@ -819,6 +872,9 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
+    static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

@@ -124,6 +124,10 @@ ACE_EXPORT extern const char SWIPER_RIGHT_ARROW_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_LEFT_CAPTURE_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_RIGHT_CAPTURE_ETS_TAG[];
 
+// indicator
+ACE_EXPORT extern const char INDICATOR_COMPONENT_TAG[];
+ACE_EXPORT extern const char INDICATOR_ETS_TAG[];
+
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];
 ACE_EXPORT extern const char TABS_ETS_TAG[];
@@ -350,6 +354,12 @@ ACE_EXPORT extern const char FORM_ETS_TAG[];
 // formLink
 ACE_EXPORT extern const char FORM_LINK_TAG[];
 ACE_EXPORT extern const char FORM_LINK_ETS_TAG[];
+
+// formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+ACE_EXPORT extern const char FORM_BUTTON_TAG[];
+ACE_EXPORT extern const char FORM_BUTTON_ETS_TAG[];
+#endif
 
 // PluginComponent
 ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];
@@ -628,5 +638,24 @@ ACE_EXPORT extern const char CUSTOM_SPAN_NODE_ETS_TAG[];
 // LinearIndicator
 ACE_EXPORT extern const char LINEARINDICATOR_COMPONENT_TAG[];
 ACE_EXPORT extern const char LINEARINDICATOR_ETS_TAG[];
+
+// ArcList
+ACE_EXPORT extern const char ARC_LIST_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ETS_TAG[];
+
+// ArcListItem
+ACE_EXPORT extern const char ARC_LIST_ITEM_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ITEM_ETS_TAG[];
+
+// ArcScrollBar
+ACE_EXPORT extern const char ARC_SCROLL_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_SCROLL_BAR_ETS_TAG[];
+
+// ArcAlphabetIndexer
+ACE_EXPORT extern const char ARC_INDEXER_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
+
+// Magnifier
+ACE_EXPORT extern const char MAGNIFIER_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

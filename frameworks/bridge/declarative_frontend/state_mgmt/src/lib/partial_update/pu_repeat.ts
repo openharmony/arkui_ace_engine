@@ -146,6 +146,7 @@ interface __RepeatConfig<T> {
     templateOptions?: { [type: string]: RepeatTemplateImplOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
+    reusable?: boolean;
 };
 
 // __Repeat implements ForEach with child re-use for both existing state observation
@@ -164,6 +165,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
+        this.config.reusable = true;
 
         // to be used with ViewV2
         const mkRepeatItemV2 = (item: T, index?: number): __RepeatItemFactoryReturn<T> =>
@@ -188,7 +190,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         return this;
     }
 
-    public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
+    public virtualScroll(options? : { totalCount?: number, reusable?: boolean }): RepeatAPI<T> {
         if (Number.isInteger(options?.totalCount)) {
             this.config.totalCount = options.totalCount;
             this.config.totalCountSpecified = true;
@@ -196,6 +198,14 @@ class __Repeat<T> implements RepeatAPI<T> {
             this.config.totalCountSpecified = false;
         }
         this.isVirtualScroll = true;
+
+        if (typeof options?.reusable === 'boolean') {
+            this.config.reusable = options.reusable;
+        } else {
+            this.config.reusable = true;
+            stateMgmtConsole.warn(
+                `Repeat.reusable is not set or not a boolean value. Use default setting: reusable = true`);
+        }
         return this;
     }
 

@@ -58,6 +58,7 @@ void ScrollTestNg::SetUp() {}
 
 void ScrollTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -97,8 +98,8 @@ ScrollModelNG ScrollTestNg::CreateScroll()
     model.Create();
     auto proxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(proxy);
-    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     GetScroll();
     return model;
 }
@@ -131,6 +132,6 @@ void ScrollTestNg::CreateContentChild(int32_t childNumber)
 void ScrollTestNg::ScrollBy(double pixelX, double pixelY, bool smooth)
 {
     pattern_->ScrollBy(pixelX, pixelY, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 } // namespace OHOS::Ace::NG

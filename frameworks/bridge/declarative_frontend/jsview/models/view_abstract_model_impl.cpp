@@ -1092,6 +1092,8 @@ void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     box->SetOnMouseId(onMouseId);
 }
 
+void ViewAbstractModelImpl::SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) {}
+
 void ViewAbstractModelImpl::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -1650,6 +1652,12 @@ void ViewAbstractModelImpl::SetOnAccessibilityFocus(
 {}
 
 void ViewAbstractModelImpl::ResetOnAccessibilityFocus()
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityDefaultFocus()
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityUseSamePage(bool isFullSilent)
 {}
 
 } // namespace OHOS::Ace::Framework

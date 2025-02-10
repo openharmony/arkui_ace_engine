@@ -156,7 +156,7 @@ void PluginPattern::InitPluginManagerDelegate()
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
-            [id, data, weak] {
+            [data, weak] {
                 auto plugin = weak.Upgrade();
                 CHECK_NULL_VOID(plugin);
                 plugin->GetPluginSubContainer()->UpdatePlugin(data);

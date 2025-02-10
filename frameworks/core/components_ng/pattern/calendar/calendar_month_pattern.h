@@ -59,7 +59,12 @@ public:
         if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             InitCurrentVirtualNode();
         }
-        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, isCalendarDialog_);
+        CalendarPaintParams params;
+        params.startDate = startDate_;
+        params.endDate = endDate_;
+        params.markToday = markToday_;
+        params.disabledDateRange = disabledDateRange_;
+        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, params, isCalendarDialog_);
     }
 
     const ObtainedMonth& GetMonthData() const
@@ -89,6 +94,26 @@ public:
                 }
             }
         }
+    }
+
+    void SetStartDate(const PickerDate& startDate)
+    {
+        startDate_ = startDate;
+    }
+
+    void SetEndDate(const PickerDate& endDate)
+    {
+        endDate_ = endDate;
+    }
+
+    void SetMarkToday(bool markToday)
+    {
+        markToday_ = markToday;
+    }
+
+    void SetDisabledDateRange(const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange)
+    {
+        disabledDateRange_ = disabledDateRange;
     }
 
     bool IsCalendarDialog() const
@@ -194,6 +219,7 @@ private:
     void SetLineNodeSize(RefPtr<FrameNode> lineNode);
     void SetFocusNode(int32_t index, bool isDeviceOrientation = false);
     float GetWidth(const RefPtr<FrameNode>& host);
+    bool IsDateInRange(const CalendarDay& day);
     std::string GetDayStr(int32_t index);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
@@ -214,6 +240,10 @@ private:
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     bool isInitVirtualNode_ = false;
     CalendarDay calendarDay_;
+    PickerDate startDate_;
+    PickerDate endDate_;
+    bool markToday_ = false;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange_;
     CalendarDay focusedCalendarDay_;
     ObtainedMonth obtainedMonth_;
     MonthState monthState_ = MonthState::CUR_MONTH;

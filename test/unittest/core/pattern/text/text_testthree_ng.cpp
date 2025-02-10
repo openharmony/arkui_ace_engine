@@ -121,7 +121,7 @@ HWTEST_F(TextTestThreeNg, BetweenSelectedPosition001, TestSize.Level1)
     auto [host, pattern] = Init();
     pattern->copyOption_ = CopyOptions::Distributed;
     host->draggable_ = true;
-    host->eventHub_->SetOnDragStart(
+    host->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
@@ -442,12 +442,10 @@ HWTEST_F(TextTestThreeNg, OnColorConfigurationUpdate001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-    auto theme = context->GetTheme<TextTheme>();
-    ASSERT_NE(theme, nullptr);
-    theme->textStyle_.textColor_ = Color::BLACK;
-    textPattern->OnColorConfigurationUpdate();
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextColorByRender(Color::BLACK);
+    textPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }
 
@@ -871,15 +869,58 @@ HWTEST_F(TextTestThreeNg, BindSelectionMenu001, TestSize.Level1)
 
     std::function<void()> nullFunc = nullptr;
 
-    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, nullFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, nullFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_TRUE(pattern->selectionMenuMap_.empty());
 
     pattern->selectionMenuMap_[key] = params1;
-    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(pattern->selectionMenuMap_.empty());
 
-    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(pattern->selectionMenuMap_.empty());
+    pattern->selectionMenuMap_.clear();
+
+    pattern->BindSelectionMenu(
+        TextSpanType::TEXT, TextResponseType::NONE, buildFunc, { .onAppear = onAppear, .onDisappear = onDisappear });
+    pattern->BindSelectionMenu(TextSpanType::NONE, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    auto params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::RIGHT_CLICK);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(params, nullptr);
+
+    pattern->selectionMenuMap_.clear();
+    pattern->BindSelectionMenu(TextSpanType::TEXT, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(params, nullptr);
+
+    pattern->selectionMenuMap_.clear();
+    pattern->BindSelectionMenu(
+        TextSpanType::NONE, TextResponseType::NONE, buildFunc, { .onAppear = onAppear, .onDisappear = onDisappear });
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::RIGHT_CLICK);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::NONE);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::MIXED, TextResponseType::SELECTED_BY_MOUSE);
+    EXPECT_NE(params, nullptr);
 }
 
 /**
@@ -913,7 +954,8 @@ HWTEST_F(TextTestThreeNg, CloseSelectionMenu001, TestSize.Level1)
         callBack3 = 3;
         return;
     };
-    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::LONG_PRESS, buildFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     GestureEvent info;
     info.localLocation_ = Offset(1, 1);
     // copyOption = None
@@ -2229,5 +2271,104 @@ HWTEST_F(TextTestThreeNg, UpdateFontFeature001, TestSize.Level1)
     textLayoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
     TextModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
     EXPECT_EQ(textLayoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: UpdateMarqueeOptions001
+ * @tc.desc: test MarqueeOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateMarqueeOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test property.
+     * @tc.expect： expect property as expect.
+     */
+    TextMarqueeOptions options;
+    options.UpdateTextMarqueeStart(true);
+    options.UpdateTextMarqueeStep(3);
+    options.UpdateTextMarqueeLoop(3);
+    options.UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
+    options.UpdateTextMarqueeDelay(3);
+    options.UpdateTextMarqueeFadeout(false);
+    options.UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+    textModelNG.SetMarqueeOptions(options);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStart().value(), true);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStep().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeLoop().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDirection().value(), MarqueeDirection::RIGHT);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDelay().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeFadeout().value(), false);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStartPolicy().value(), MarqueeStartPolicy::ON_FOCUS);
+}
+
+/**
+ * @tc.name: TextMarqueeEvents001
+ * @tc.desc: Test initializing focus and hover events for marquee.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMarqueeEvents001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set the TextOverflow value to Marquee.
+     */
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+
+    /**
+     * @tc.steps: step3. call OnModifyDone function.
+     * @tc.expected: The focus and hover events are initialized.
+     */
+    textPattern->OnModifyDone();
+    EXPECT_EQ(textPattern->focusInitialized_, true);
+    EXPECT_EQ(textPattern->hoverInitialized_, true);
+}
+
+/**
+ * @tc.name: TextMarqueeEvents002
+ * @tc.desc: Test initializing focus and hover events for marquee.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMarqueeEvents002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnModifyDone function.
+     * @tc.expected: The focus and hover events are initialized.
+     */
+    textPattern->OnModifyDone();
+    EXPECT_EQ(textPattern->focusInitialized_, false);
+    EXPECT_EQ(textPattern->hoverInitialized_, false);
 }
 } // namespace OHOS::Ace::NG

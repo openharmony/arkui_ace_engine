@@ -21,10 +21,13 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 import { HashMap } from '@kit.ArkTS';
+import { KeyCode } from '@kit.InputKit';
 
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
+// 字体字重缩放等数值
+const DEFAULT_FONT_SCALE: number = 1;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
 const DOUBLE_LINE_NUM: number = 2;
@@ -63,6 +66,7 @@ export declare class OperationOption {
   public accessibilityLevel?: string;
   public accessibilityText?: ResourceStr;
   public accessibilityDescription?: ResourceStr;
+  public defaultFocus?: boolean;
 }
 
 export declare class SelectOptions {
@@ -70,6 +74,7 @@ export declare class SelectOptions {
   public selected?: number;
   public value?: string;
   public onSelect?: (index: number, value?: string) => void;
+  public defaultFocus?: boolean;
 }
 
 export declare class SymbolOptions {
@@ -93,6 +98,7 @@ class ContentIconOption {
   public accessibilityLevel?: string;
   public accessibilityText?: ResourceStr;
   public accessibilityDescription?: ResourceStr;
+  public defaultFocus?: boolean;
 }
 
 class FontStyle {
@@ -266,6 +272,19 @@ export struct SubHeader {
 
   @Styles
   private rightAreaClickEvent() {
+    .onKeyEvent((event: KeyEvent) => {
+      if (!event) {
+        return;
+      }
+      if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
+        event.type === KeyType.Down) {
+        if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
+        this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
+          this.operationItem[0].action();
+        }
+        event.stopPropagation();
+      }
+    })
     .onClick(() => {
       if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
       this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
@@ -295,7 +314,7 @@ export struct SubHeader {
   updateFontScale(): number {
     try {
       let uiContext: UIContext = this.getUIContext();
-      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -509,7 +528,7 @@ export struct SubHeader {
   @Builder
   rightAreaParent(): void {
     if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
-      Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Button({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false }) {
         this.rightArea();
       }
       .focusable(this.operationItem ? true : false)
@@ -744,6 +763,7 @@ export struct SubHeader {
       .width('auto')
       .selected(this.selectedIndex)
       .value(this.selectValue)
+      .defaultFocus(selectParam.defaultFocus)
       .onSelect((index: number, value?: string) => {
         this.selectedIndex = index;
         if (value) {
@@ -782,6 +802,7 @@ export struct SubHeader {
             maxLines: DOUBLE_LINE_NUM,
             fontColor: this.subHeaderTheme.fontButtonColor,
           })
+          .defaultFocus(button.defaultFocus)
           .focusable(true)
       }
       .focusable(true)
@@ -848,6 +869,8 @@ export struct SubHeader {
             alignment: Alignment.End,
             fontColor: this.subHeaderTheme.fontSecondaryColor,
           })
+          .focusable(true)
+          .defaultFocus(textArrow.defaultFocus)
           .margin({
             end: this.getTextArrowMarginRight(),
           })
@@ -867,13 +890,13 @@ export struct SubHeader {
   @Builder
   ArrowStyle(): void {
     Row() {
-      Image($r('sys.media.ohos_ic_public_arrow_right'))
-        .fillColor(this.subHeaderTheme.iconArrowColor)
+      SymbolGlyph($r('sys.symbol.chevron_right'))
+        .fontSize(RIGHT_SINGLE_ICON_SIZE)
+        .fontColor([this.subHeaderTheme.iconArrowColor])
+        .draggable(false)
+        .focusable(true)
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
-        .focusable(true)
-        .draggable(false)
-        .matchTextDirection(true)
     }
     .justifyContent(FlexAlign.End)
   }
@@ -882,7 +905,7 @@ export struct SubHeader {
   TextArrowStyle(textArrow: OperationOption): void {
     if (textArrow && textArrow.value && textArrow.value.toString().length > 0) {
       Stack() {
-        Button({ type: ButtonType.Normal, stateEffect: false }) {
+        Button({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false }) {
           TextArrowLayout() {
             ForEach([INDEX_ZERO, INDEX_ONE], (index: number) => {
               if (index === INDEX_ZERO) {
@@ -925,13 +948,13 @@ export struct SubHeader {
     } else {
       Row() {
         Button({ type: ButtonType.Normal, stateEffect: false }) {
-          Image($r('sys.media.ohos_ic_public_arrow_right'))
-            .fillColor(this.subHeaderTheme.iconArrowColor)
+          SymbolGlyph($r('sys.symbol.chevron_right'))
+            .fontSize(RIGHT_SINGLE_ICON_SIZE)
+            .fontColor([this.subHeaderTheme.iconArrowColor])
+            .draggable(false)
+            .focusable(true)
             .width(ARROW_ICON_WIDTH)
             .height(OPERATE_ITEM_LENGTH)
-            .focusable(true)
-            .draggable(false)
-            .matchTextDirection(true)
         }
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
@@ -981,6 +1004,7 @@ export struct SubHeader {
                   this.operationSymbolOptions[index] : null,
                 },
                 action: item.action,
+                defaultFocus: item.defaultFocus,
                 accessibilityLevel: item.accessibilityLevel,
                 accessibilityText: item.accessibilityText,
                 accessibilityDescription: item.accessibilityDescription,
@@ -1079,6 +1103,7 @@ struct SingleIconStyle {
         this.IconZone();
       }
       .focusable(true)
+      .defaultFocus(this.item.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
       .align(Alignment.Center)

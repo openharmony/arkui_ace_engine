@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_partial_update_model.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
@@ -38,7 +39,7 @@ public:
     ~JSView() override = default;
     virtual void Destroy(JSView* parentCustomView) = 0;
 
-    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false)
+    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false)
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -92,7 +93,11 @@ public:
         LOGE("jsViewFunction_ is null");
     }
 
-    void RenderJSExecution();
+    void RenderJSExecution(int64_t deadline, bool& isTimeout);
+
+    virtual void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
+
+    virtual void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) {};
 
     virtual void MarkNeedUpdate() = 0;
 
@@ -165,6 +170,7 @@ public:
 
     virtual void OnDumpInfo(const std::vector<std::string>& params) {}
 
+    static JSView* GetNativeView(JSRef<JSObject> obj);
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -188,6 +194,8 @@ private:
     std::array<int32_t, PRIMARY_ID_STACK_SIZE> primaryIdStack_{};
     bool isStatic_ = false;
     std::function<void()> notifyRenderDone_;
+    bool executedAboutToRender_ = false;
+    bool executedOnRenderDone_ = false;
 };
 
 class JSViewFullUpdate : public JSView {
@@ -202,7 +210,7 @@ public:
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<AceType> InternalRender();
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     void MarkNeedUpdate() override;
 
@@ -306,9 +314,15 @@ public:
 
     void Destroy(JSView* parentCustomView) override;
 
-    RefPtr<AceType> InitialRender();
+    void DoRenderJSExecution(int64_t deadline, bool& isTimeout) override;
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    RefPtr<AceType> InitialRender(int64_t deadline, bool& isTimeout);
+
+    void PrebuildComponentsInMultiFrame(int64_t deadline, bool& isTimeout);
+
+    void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) override;
+
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     static void Create(const JSCallbackInfo& info);
     static void CreateRecycle(const JSCallbackInfo& info);
@@ -421,6 +435,7 @@ public:
 
     void JSGetDialogController(const JSCallbackInfo& info);
 
+    bool JSAllowReusableV2Descendant();
 private:
     void MarkNeedUpdate() override;
 
@@ -428,6 +443,7 @@ private:
     // used for code branching in lambda given to ComposedComponent
     // render callback
     bool isFirstRender_ = true;
+    PrebuildPhase prebuildPhase_ = PrebuildPhase::NONE;
 
     /* list of update function result is a triple (tuple with three entries)
     <0> elmtId
@@ -453,6 +469,7 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
+    bool executedRender_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -36,7 +36,7 @@ struct OptionValueInfo {
 public:
     static void BindImageNodeToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
         const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode);
-   
+
     // create menu with menuItems
     static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params, int32_t targetId,
         const std::string& targetTag = "", MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam());
@@ -51,6 +51,12 @@ public:
         const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag);
 
     static void ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode);
+    static void GetMenuPixelMap(
+        const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam, const RefPtr<FrameNode>& wrapperNode);
+    static void UpdateMenuParam(
+        const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
+        const MenuParam& menuParam, const MenuType& type);
 
     static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
@@ -82,6 +88,9 @@ private:
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
     static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
+    static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+        const MenuParam& menuParam, RefPtr<FrameNode> column);
+    static void UpdateMenuBackgroundColor(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

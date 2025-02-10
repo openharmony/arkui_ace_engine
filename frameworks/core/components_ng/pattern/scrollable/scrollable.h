@@ -33,6 +33,11 @@
 #include "core/gestures/raw_recognizer.h"
 #include "core/gestures/timeout_recognizer.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#include "core/common/vibrator/vibrator_utils.h"
+#endif
+
 namespace OHOS::Ace::NG {
 enum class NestedState {
     GESTURE = 0,
@@ -68,6 +73,7 @@ using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus
 using IsReverseCallback = std::function<bool()>;
 using RemainVelocityCallback = std::function<bool(float)>;
 using GetSnapTypeCallback = std::function<SnapType()>;
+using FixScrollParamCallback = std::function<void(float mainPos, float& correctVelocity, float& finalPos)>;
 
 class FrameNode;
 class PipelineContext;
@@ -89,14 +95,18 @@ public:
         IDLE,
     };
 
-    static void SetVelocityScale(double sVelocityScale);
     static double GetVelocityScale();
-    static void SetFriction(double sFriction);
 
     void Initialize(const RefPtr<FrameNode>& host);
 
     void InitAxisAnimator();
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void ListenDigitalCrownEvent(const RefPtr<FrameNode>& frameNode);
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+    {
+        crownSensitivity_ = sensitivity;
+    }
+#endif
     bool IsMotionStop() const
     {
         return state_ != AnimationState::SPRING && state_ != AnimationState::FRICTION && !moved_;
@@ -169,6 +179,12 @@ public:
     float GetRatio() const
     {
         return ratio_;
+    }
+
+    void SetUnstaticVelocityScale(double scale)
+    {
+        flingVelocityScale_ = scale;
+        springVelocityScale_ = scale;
     }
 
     void HandleTouchDown();
@@ -357,6 +373,8 @@ public:
         getSnapTypeCallback_ = getSnapTypeCallback;
     }
 
+    std::optional<float> GetPredictSnapOffset() const;
+
     void SetHandleScrollCallback(NestableScrollCallback&& func)
     {
         handleScrollCallback_ = std::move(func);
@@ -485,6 +503,11 @@ public:
         return maxFlingVelocity_;
     }
 
+    void RegisterFixScrollParamCallback(const FixScrollParamCallback& callback)
+    {
+        fixScrollParamCallback_ = callback;
+    }
+
     void StopFrictionAnimation();
     void StopSpringAnimation(bool reachFinalPosition = false);
     void StopSnapAnimation();
@@ -510,6 +533,23 @@ public:
     {
         return nestedScrolling_;
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool GetCrownEventDragging() const
+    {
+        return isCrownEventDragging_;
+    }
+
+    void SetCrownEventDragging(bool draging)
+    {
+        isCrownEventDragging_ = draging;
+    }
+
+    void SetReachBoundary(bool flag)
+    {
+        reachBoundary_ = flag;
+    }
+#endif
 
     void SetOverScrollOffsetCallback(std::function<double()> overScrollOffsetCallback)
     {
@@ -553,6 +593,17 @@ private:
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
     void InitFriction(double friction);
     void CalcOverScrollVelocity();
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownEvent(const CrownEvent& event, const OffsetF& center);
+    void HandleCrownActionBegin(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info);
+    void HandleCrownActionUpdate(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info);
+    void HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info);
+    void HandleCrownActionCancel(GestureEvent& info);
+    double GetCrownRotatePx(const CrownEvent& event) const;
+    void UpdateCrownVelocity(const TimeStamp& timeStamp, double mainDelta, bool end);
+    void StartVibrateFeedback();
+#endif
 
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
@@ -598,8 +649,6 @@ private:
     // The tag of UINode
     std::string nodeTag_ = "Scrollable";
     double slipFactor_ = 0.0;
-    static std::optional<double> sFriction_;
-    static std::optional<double> sVelocityScale_;
     bool continuousDragStatus_ = false;
     CancelableCallback<void()> task_;
     int32_t dragCount_ = 0;
@@ -634,7 +683,7 @@ private:
     std::list<GestureEventFunc> panActionEndEvents_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
-
+    FixScrollParamCallback fixScrollParamCallback_;
     uint64_t lastVsyncTime_ = 0;
     uint64_t lastAxisVsyncTime_ = 0; // only used in mouse wheel scenes
     AnimationState state_ = AnimationState::IDLE;
@@ -665,6 +714,16 @@ private:
     SnapDirection snapDirection_ = SnapDirection::NONE;
 
     RefPtr<AxisAnimator> axisAnimator_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    VelocityTracker crownVelocityTracker_;
+    Offset accumulativeCrownPx_;
+    bool isCrownEventDragging_ = false;
+
+    int crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+    CancelableCallback<void()> crownTask_;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

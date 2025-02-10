@@ -94,6 +94,22 @@ void CalendarPattern::OnModifyDone()
     currentPattern->SetCalendarDay(calendarDay_);
     nextPattern->SetCalendarDay(calendarDay_);
 
+    // Set the startDate and endDate.
+    prePattern->SetStartDate(startDate_);
+    currentPattern->SetStartDate(startDate_);
+    nextPattern->SetStartDate(startDate_);
+    prePattern->SetEndDate(endDate_);
+    currentPattern->SetEndDate(endDate_);
+    nextPattern->SetEndDate(endDate_);
+
+    prePattern->SetMarkToday(markToday_);
+    currentPattern->SetMarkToday(markToday_);
+    nextPattern->SetMarkToday(markToday_);
+
+    prePattern->SetDisabledDateRange(disabledDateRange_);
+    currentPattern->SetDisabledDateRange(disabledDateRange_);
+    nextPattern->SetDisabledDateRange(disabledDateRange_);
+
     // Flush the focus.
     FlushFocus(preMonth_);
     FlushFocus(currentMonth_);

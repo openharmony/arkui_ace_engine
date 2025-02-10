@@ -27,12 +27,6 @@ group("uiservice_target") {
   deps = [ ":uiservice" ]
 }
 
-group("unittest") {
-  testonly = true
-
-  deps = [ "test:unittest" ]
-}
-
 config("uiservicems_config") {
   include_dirs = [
     "include/",

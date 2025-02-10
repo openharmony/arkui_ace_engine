@@ -762,7 +762,7 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
+                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::VIP);
         }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());
@@ -1205,7 +1205,7 @@ void JSMutableSpanString::ReplaceSpanString(const JSCallbackInfo& info)
     auto thisObj = info.This();
     auto newIndex = spanStringStoreIndex_.fetch_add(1);
     std::string key = "STYLED_STRING_SPANSTRING_STORE_" + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), info[0]);
+    thisObj->SetPropertyObject(key.c_str(), info[2]);
     controller->ReplaceSpanString(start, length, spanStringController);
 }
 
@@ -1235,7 +1235,7 @@ void JSMutableSpanString::InsertSpanString(const JSCallbackInfo& info)
     auto thisObj = info.This();
     auto newIndex = spanStringStoreIndex_.fetch_add(1);
     std::string key = "STYLED_STRING_SPANSTRING_STORE_" + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), info[0]);
+    thisObj->SetPropertyObject(key.c_str(), info[1]);
     controller->InsertSpanString(start, spanStringController);
 }
 

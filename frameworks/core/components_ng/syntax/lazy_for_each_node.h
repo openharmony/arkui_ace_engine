@@ -125,11 +125,17 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
     {
         if (builder_) {
             builder_->SetJSViewActive(active);
             isActive_ = active;
+        }
+    }
+    void SetDestroying(bool isDestroying = true, bool cleanStatus = true) override
+    {
+        if (builder_) {
+            builder_->SetDestroying(isDestroying, cleanStatus);
         }
     }
     void PaintDebugBoundaryTreeAll(bool flag) override
@@ -230,7 +236,7 @@ private:
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
     std::optional<LayoutConstraintF> itemConstraint_;
-    bool requestLongPredict_ = false;
+    bool requestLongPredict_ = true;
     bool isRegisterListener_ = false;
     bool isLoop_ = false;
 

@@ -52,6 +52,8 @@ const std::uint32_t CREATE_VALUE = 983041;
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 std::uint32_t RENDER_STRATEGY = 1;
 std::uint32_t EFFECT_STRATEGY = 1;
+constexpr float MIN_FONT_SCALE = 0.5f;
+constexpr float MAX_FONT_SCALE = 2.5f;
 SymbolEffectOptions SYMBOL_EFFECT_OPTIONS =
     SymbolEffectOptions(OHOS::Ace::SymbolEffectType::BOUNCE, OHOS::Ace::ScopeType::WHOLE, OHOS::Ace::CommonSubType::UP);
 std::vector<Color> SYMBOL_COLOR_LIST = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
@@ -404,5 +406,73 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest007, TestSize.Level1)
     EXPECT_EQ(effectOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
     EXPECT_EQ(effectOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
     EXPECT_EQ(effectOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest008
+ * @tc.desc: test symbol minFontScale property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get minFontScale property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    EXPECT_EQ(textStyle.GetMinFontScale(), MIN_FONT_SCALE);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest009
+ * @tc.desc: test symbol maxFontScale property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get minFontScale property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    EXPECT_EQ(textStyle.GetMaxFontScale(), MAX_FONT_SCALE);
 }
 } // namespace OHOS::Ace::NG

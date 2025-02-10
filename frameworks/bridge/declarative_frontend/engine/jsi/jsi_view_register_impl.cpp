@@ -59,6 +59,9 @@
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+#include "bridge/declarative_frontend/jsview/js_form_button.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
@@ -72,6 +75,7 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
@@ -107,7 +111,9 @@
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
@@ -155,8 +161,11 @@
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
+#include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -249,7 +258,7 @@ void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -473,7 +482,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
     { "Radio", JSRadio::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
@@ -481,6 +492,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
@@ -499,6 +511,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+    { "FormButton", JSFormButton::JSBind },
+#endif
     { "SymbolSpan", JSSymbolSpan::JSBind },
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
@@ -554,6 +569,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
@@ -586,10 +602,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
-#endif
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
 #ifndef ARKUI_WEARABLE
@@ -613,19 +627,25 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
     { "FormLink", JSFormLink::JSBind },
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+    { "FormButton", JSFormButton::JSBind },
+#endif
     { "LocationButton", JSLocationButton::JSBind },
     { "PasteButton", JSPasteButton::JSBind },
     { "Particle", JSParticle::JSBind },
     { "SaveButton", JSSaveButton::JSBind },
     { "WithTheme", JSWithTheme::JSBind },
     { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
+    { "TextMenu", JSTextMenu::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },
@@ -683,9 +703,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
-#ifndef ARKUI_WEARABLE
+    { "IndicatorController", JSIndicatorController::JSBind },
     { "TabsController", JSTabsController::JSBind },
-#endif
     { "CalendarController", JSCalendarController::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityController", JSAbilityComponentController::JSBind },
@@ -775,16 +794,19 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__CircleShape__", JSCircleShape::JSBind },
     { "__EllipseShape__", JSEllipseShape::JSBind },
     { "__PathShape__", JSPathShape::JSBind },
-#ifndef ARKUI_WEARABLE
     { "ContentSlot", JSContentSlot::JSBind },
     { "ArkUINativeNodeContent", JSNodeContent::JSBind },
-#endif
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
     { "PanRecognizer", JSPanRecognizer::JSBind },
     { "LinearIndicator", JSLinearIndicator::JSBind },
-    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind },
+    { "TapRecognizer", JSTapRecognizer::JSBind },
+    { "LongPressRecognizer", JSLongPressRecognizer::JSBind },
+    { "SwipeRecognizer", JSSwipeRecognizer::JSBind },
+    { "PinchRecognizer", JSPinchRecognizer::JSBind },
+    { "RotationRecognizer", JSRotationRecognizer::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)
@@ -814,9 +836,8 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
+    JSIndicatorController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
-#endif
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -867,6 +888,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSIndicatorController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -894,6 +916,10 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
     }
     if (module == "OffscreenCanvas") {
         JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
+        return;
+    }
+    if (module == "Repeat") {
+        JSRepeat::JSBind(globalObj);
         return;
     }
     auto func = bindFuncs.find(module);
@@ -927,10 +953,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     }
     if ((*func).first == "Swiper") {
         JSSwiperController::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     } else if ((*func).first == "Tabs") {
         JSTabsController::JSBind(globalObj);
-#endif
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "AbilityComponent") {
@@ -1081,6 +1105,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSContainerModal::JSBind(globalObj);
+    JSAppBar::JSBind(globalObj);
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {

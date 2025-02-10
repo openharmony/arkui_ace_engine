@@ -162,7 +162,7 @@ private:
     double GetTextMaxWidth();
     int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
 
-    void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight);
+    void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom);
     NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     RefPtr<FrameNode> textNode_;
@@ -170,12 +170,12 @@ private:
     std::optional<int32_t> halfFoldHoverChangedCallbackId_;
     ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
-    double toastBottom_;
     Dimension defaultBottom_;
     Rect wrapperRect_;
     bool isHoverMode_ = false;
     bool expandDisplay_ = false;
     Rect uiExtensionHostWindowRect_;
+    Dimension limitPos_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H

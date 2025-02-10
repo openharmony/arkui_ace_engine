@@ -23,15 +23,8 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace {
-const std::vector<FlexAlign> FLEX_ALIGNS = {
-    FlexAlign::AUTO,
-    FlexAlign::FLEX_START,
-    FlexAlign::CENTER,
-    FlexAlign::FLEX_END,
-    FlexAlign::SPACE_BETWEEN,
-    FlexAlign::SPACE_AROUND,
-    FlexAlign::SPACE_EVENLY
-};
+const std::vector<FlexAlign> FLEX_ALIGNS = { FlexAlign::AUTO, FlexAlign::FLEX_START, FlexAlign::CENTER,
+    FlexAlign::FLEX_END, FlexAlign::SPACE_BETWEEN, FlexAlign::SPACE_AROUND, FlexAlign::SPACE_EVENLY };
 } // namespace
 
 extern "C" {

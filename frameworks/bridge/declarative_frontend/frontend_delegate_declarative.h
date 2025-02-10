@@ -180,7 +180,7 @@ public:
     size_t GetComponentsCount() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
-    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priority) override;
 
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
@@ -285,8 +285,22 @@ public:
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param) override;
 
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(
+        RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options) override;
+
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
         const NG::SnapshotOptions& options) override;
+
+    void GetSnapshotByUniqueId(int32_t uniqueId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options) override;
+
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
+        const NG::SnapshotOptions& options) override;
+        
+    void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector, const NG::SnapshotParam& param) override;
 
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
@@ -370,6 +384,8 @@ public:
         return manifestParser_;
     }
 
+    std::string GetPagePathByUrl(const std::string& url) const;
+
 protected:
     bool isCardDelegate_ = false;
 
@@ -415,8 +431,8 @@ private:
     uint64_t GetSystemRealTime();
 
     // Page lifecycle
-    void OnPageShow();
-    void OnPageHide();
+    void OnPageShow(bool isFromWindow = false);
+    void OnPageHide(bool isFromWindow = false);
     void OnPageDestroy(int32_t pageId);
 
     int32_t GetRunningPageId() const;

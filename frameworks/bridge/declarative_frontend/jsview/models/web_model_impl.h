@@ -119,6 +119,7 @@ public:
     void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) override;
+    void SetOptimizeParserBudgetEnabled(bool enable) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

@@ -141,6 +141,16 @@ public:
         return static_cast<int32_t>(images_.size());
     }
 
+    bool CheckIfNeedVisibleAreaChange()
+    {
+        return isAutoMonitorInvisibleArea_;
+    }
+
+    void SetAutoMonitorInvisibleArea(bool isAutoMonitorInvisibleArea)
+    {
+        isAutoMonitorInvisibleArea_ = isAutoMonitorInvisibleArea;
+    }
+
 private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
@@ -166,6 +176,8 @@ private:
     void ResetFormAnimationFlag();
     void RunAnimatorByStatus(int32_t index);
     void UpdateBorderRadius();
+    void RegisterVisibleAreaChange();
+    void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
     int32_t iteration_ = 1;
     RefPtr<Animator> animator_;
@@ -185,6 +197,8 @@ private:
     int32_t formAnimationRemainder_ = 0;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
+    bool isAutoMonitorInvisibleArea_ = false; // Controls whether the system's onVisibleAreaChange callback is used to
+                                              // manage the play and stop behavior of ImageAnimator.
 };
 
 } // namespace OHOS::Ace::NG

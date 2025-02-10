@@ -59,8 +59,6 @@ public:
     static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
     static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
 
-private:
-    void AddDragFrameNodeToManager() const;
 };
 
 } // namespace OHOS::Ace::NG

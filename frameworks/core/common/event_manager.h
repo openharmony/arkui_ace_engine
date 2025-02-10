@@ -96,6 +96,8 @@ public:
     bool OnNonPointerEvent(const NonPointerEvent& event);
     bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
     bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
+    void DispatchTouchCancelToRecognizer(RefPtr<TouchEventTarget>& touchEventTarget,
+        const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items);
     bool PostEventDispatchTouchEvent(const TouchEvent& point);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
     void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
@@ -162,7 +164,7 @@ public:
 
     RefPtr<NG::GestureReferee> GetGestureRefereeNG(const RefPtr<NG::NGGestureRecognizer>& recognizer)
     {
-        if (recognizer->IsPostEventResult()) {
+        if (recognizer && recognizer->IsPostEventResult()) {
             return postEventRefereeNG_;
         }
         return refereeNG_;
@@ -297,6 +299,11 @@ public:
         return idToTouchPoints_;
     }
 
+    inline void EraseFingerId(int32_t id)
+    {
+        idToTouchPoints_.erase(id);
+    }
+
     inline void SetIdToTouchPoint(std::unordered_map<int32_t, TouchEvent>&& idToTouchPoint)
     {
         idToTouchPoints_ = std::move(idToTouchPoint);
@@ -317,6 +324,12 @@ public:
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
 
     void CleanHoverStatusForDragBegin();
+
+    void RegisterDragTouchEventListener(int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback);
+
+    void UnRegisterDragTouchEventListener(int32_t uniqueIdentify);
+
+    void NotifyDragTouchEventListener(const TouchEvent& dragPointerEvent);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
@@ -375,6 +388,12 @@ private:
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
     std::unordered_map<size_t, TouchTestResult> axisTouchTestResults_;
+    /**
+     * One mechanism to let someone can receive all touch events beyond the controllers and recognizers' dispatching
+     * process. This only can be used for some models which have global status, such as drag and drop manager, it's
+     * handling does not belong to any controller in general
+     */
+    std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> dragTouchEventListener_;
     MouseHoverTestList mouseHoverTestResults_;
     MouseHoverTestList mouseHoverTestResultsPre_;
     WeakPtr<RenderNode> mouseHoverNodePre_;

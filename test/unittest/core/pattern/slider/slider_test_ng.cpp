@@ -145,7 +145,7 @@ void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContent
     sliderContentModifier.SetStepColor(TEST_COLOR);
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(TEST_COLOR);
+    sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
@@ -378,6 +378,7 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     sliderTheme->tipFontSize_ = Dimension(16.0);
     sliderTheme->tipTextColor_ = Color::BLACK;
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step3. get sliderPattern and test init parameter.
      */

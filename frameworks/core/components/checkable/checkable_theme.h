@@ -195,7 +195,7 @@ public:
     {
         return dotResourceId_;
     }
-    
+
     const Color& GetFocusLineColor() const
     {
         return focusLineColor_;
@@ -224,6 +224,16 @@ public:
     const Color& GetFocusedBgUnchecked() const
     {
         return focusedBgUnchecked_;
+    }
+
+    const Dimension& GetHotZoneHorizontalSize() const
+    {
+        return hotZoneHorizontalSize_;
+    }
+
+    const Dimension& GetHotZoneVerticalSize() const
+    {
+        return hotZoneVerticalSize_;
     }
 
 protected:
@@ -271,6 +281,8 @@ protected:
     const float ratio_ = 1.8f;
     InternalResource::ResourceId tickResourceId_ = InternalResource::ResourceId::RADIO_TICK_SVG;
     InternalResource::ResourceId dotResourceId_ = InternalResource::ResourceId::RADIO_DOT_SVG;
+    Dimension hotZoneHorizontalSize_;
+    Dimension hotZoneVerticalSize_;
 };
 
 class CheckboxTheme : public CheckableTheme {
@@ -297,9 +309,14 @@ public:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
 
         void SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
-        
+
         void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
     };
+
+    const Dimension& GetHoverPaddingSize() const
+    {
+        return hoverPaddingSize_;
+    }
 
     const Dimension& GetBorderRadius() const
     {
@@ -321,11 +338,18 @@ public:
         return colorAnimationDuration_;
     }
 
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
 private:
     Dimension borderRadius_;
     Dimension whiteBorderRadius_;
     Dimension checkStroke_;
+    Dimension hoverPaddingSize_;
     double colorAnimationDuration_ = 0.0;
+    bool showCircleDial_ = false;
 };
 
 class SwitchTheme : public CheckableTheme {
@@ -470,6 +494,7 @@ public:
                 theme->sizeHoverBg_ = radioPattern->GetAttr<Dimension>("radio_hover_bg_size", 2.0_vp);
                 theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
                 theme->defaultHeight_ = theme->defaultWidth_;
+                theme->showCircleDial_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_circle_dial", 0.0));
             }
             theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
             theme->needFocus_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_need_focus", 0.0));
@@ -520,6 +545,14 @@ public:
             theme->sizeFocusBg_ = radioPattern->GetAttr<Dimension>("size_focused_bg", 0.0_vp);
         }
     };
+
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
+private:
+    bool showCircleDial_ = false;
 };
 
 } // namespace OHOS::Ace

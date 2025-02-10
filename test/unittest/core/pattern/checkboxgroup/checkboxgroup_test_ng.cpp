@@ -48,6 +48,7 @@
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -94,6 +95,7 @@ constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
 constexpr Dimension SHADOW_WIDTH_FORUPDATE = Dimension(6.0);
 constexpr float CHECKBOX_GROUP_LENGTH_ZERO = 0.0f;
 constexpr Dimension PADDING_SIZE = Dimension(2.0);
+const int32_t VERSION_TWELVE = 12;
 } // namespace
 
 class CheckBoxGroupTestNG : public testing::Test {
@@ -125,7 +127,8 @@ CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
     CheckBoxGroupModifier::Parameters parameters = { BORDER_WIDTH, BORDER_RADIUS, CHECK_STROKE, CHECKMARK_PAINTSIZE,
         HOVER_DURATION, HOVER_TO_TOUCH_DURATION, POINT_COLOR, ACTIVE_COLOR, INACTIVE_COLOR, SHADOW_COLOR,
         CLICK_EFFECT_COLOR, HOVER_COLOR, INACTIVE_POINT_COLOR, HOVER_RADIUS, HORIZONTAL_PADDING, VERTICAL_PADDING,
-        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, PADDING_SIZE, CheckBoxGroupPaintProperty::SelectStatus::NONE };
+        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, PADDING_SIZE, PADDING_SIZE, false,
+        CheckBoxGroupPaintProperty::SelectStatus::NONE };
 
     return parameters;
 }
@@ -846,7 +849,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxPatternTest014, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     EXPECT_NE(pattern, nullptr);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     pattern->InitOnKeyEvent(focusHub);
     RoundRect paintRect;
     pattern->GetInnerFocusPaintRect(paintRect);
@@ -1780,7 +1784,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
      * @tc.expected: Get successfully.
      */
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     checkBoxGroupPattern->InitOnKeyEvent(focusHub);
     auto getInnerPaintRectCallback = focusHub->getInnerFocusRectFunc_;
 
@@ -2038,5 +2043,148 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest031, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");
+}
+
+/**
+ * @tc.name: CheckBoxGroupNGTest032
+ * @tc.desc: Test retrieval of group、selectall、selectedcolor、unselectedcoulor、mark and shape values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest032, TestSize.Level1)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    CheckBoxGroupModelNG::SetCheckboxGroupName(node, GROUP_NAME);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckboxGroupName(node), GROUP_NAME);
+
+    CheckBoxGroupModelNG::SetSelectAll(node, SELECTED);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetSelect(node), SELECTED);
+
+    CheckBoxGroupModelNG::SetSelectedColor(node, SELECTED_COLOR);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetSelectedColor(node), SELECTED_COLOR);
+
+    CheckBoxGroupModelNG::SetUnSelectedColor(node, UNSELECTED_COLOR);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetUnSelectedColor(node), UNSELECTED_COLOR);
+
+    CheckBoxGroupModelNG::SetCheckMarkColor(node, CHECK_MARK_COLOR);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckMarkColor(node), CHECK_MARK_COLOR);
+
+    CheckBoxGroupModelNG::SetCheckMarkSize(node, CHECK_MARK_SIZE);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckMarkSize(node), CHECK_MARK_SIZE);
+
+    CheckBoxGroupModelNG::SetCheckMarkWidth(node, CHECK_MARK_WIDTH);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckMarkWidth(node), CHECK_MARK_WIDTH);
+
+    CheckBoxGroupModelNG::SetCheckboxGroupStyle(node, CheckBoxStyle::SQUARE_STYLE);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckboxGroupStyle(node),  CheckBoxStyle::SQUARE_STYLE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupNGTest033
+ * @tc.desc: Test CheckBoxGroupPattern InitOnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupPattern.
+     * @tc.expected: Create successfully.
+     */
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(checkBoxGroupPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get onKeyEventCallback.
+     * @tc.expected: Get successfully.
+     */
+    RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
+    checkBoxGroupPattern->InitOnKeyEvent(focusHub);
+
+    /**
+     * test event.action != KeyAction::DOWN
+     */
+    KeyEvent keyEventOne(KeyCode::KEY_FUNCTION, KeyAction::UP);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventOne));
+    /**
+     * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventTwo));
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventThr(KeyCode::KEY_FUNCTION, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventThr));
+}
+
+/**
+ * @tc.name: CheckBoxGroupNGTest034
+ * @tc.desc: Test CheckBoxGroupModifier PaintCheckBox method in different situation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. MockContainer.apiTargetVersion_ = VERSION_TWELVE.
+     */
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
+
+    /**
+     * @tc.steps: step2. Create CheckBoxGroupModifier.
+     * @tc.expected: Create successfully.
+     */
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier = AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    ASSERT_NE(checkBoxGroupModifier, nullptr);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
+
+    /**
+     * @tc.steps: step3. Call PaintCheckBox method.
+     * @tc.expected: Call method successfully.
+     */
+    checkBoxGroupModifier->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+    checkBoxGroupModifier->SetEnabled(false);
+    checkBoxGroupModifier->SetCheckStroke(CHECKBOX_GROUP_LENGTH_ZERO);
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    checkBoxGroupModifier->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: CheckBoxGroupEventTest003
+ * @tc.desc: Test CheckBoxGroup onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupEventTest003, TestSize.Level1)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    bool isSelected = false;
+    auto onChange = [&isSelected](bool select) { isSelected = select; };
+    CheckBoxGroupModelNG::SetOnChange(node, onChange);
+
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    CheckboxGroupResult groupResult(
+        std::vector<std::string> {}, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
+    eventHub->UpdateChangeEvent(&groupResult);
+    EXPECT_EQ(isSelected, true);
 }
 } // namespace OHOS::Ace::NG

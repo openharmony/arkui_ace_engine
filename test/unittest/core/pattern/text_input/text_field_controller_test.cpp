@@ -18,6 +18,7 @@
 
 #include "text_input_base.h"
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -451,7 +452,9 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText001, TestSize.Level1)
      * tc.expected: step2. Check the CreateDisplayText return.
      */
     GetFocus();
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TWELVE);
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     std::u16string inputPartOne = u"tes";
     std::u16string inputPartTwo = u"t";
     std::u16string input = inputPartOne + inputPartTwo;
@@ -467,6 +470,7 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText001, TestSize.Level1)
     outputTwo += inputPartTwo;
     res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, false));
     EXPECT_EQ(StringUtils::Str16ToStr8(outputTwo), res);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -480,7 +484,9 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
     std::u16string inputPart2 = u"t";
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_THIRTEEN);
+    int32_t setApiVersion = 13;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     std::u16string inputPart1 = u"tes";
     std::u16string input = inputPart1 + inputPart2;
     auto output1 = StringUtils::Str16ToStr8(pattern_->CreateObscuredText(static_cast<int32_t>(input.length())));
@@ -490,6 +496,7 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText002, TestSize.Level1)
     output2 += inputPart2;
     res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, false));
     EXPECT_EQ(StringUtils::Str16ToStr8(output2), res);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -902,21 +909,25 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction002, TestSize.Level1)
     // change line to aviod the line length exceed 120
     std::string result = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
         .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(88);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 14) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(0);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(44);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 }
 
 /**
@@ -1074,16 +1085,19 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction006, TestSize.Level1)
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     std::string result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(77);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(0);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 }
 
 /**

@@ -34,10 +34,12 @@ namespace Rosen {
 class AvoidArea;
 enum class WSError;
 class OccupiedAreaChangeInfo;
+enum class WindowMode : uint32_t;
 } // namespace Rosen
 } // namespace OHOS
 
 namespace OHOS::Ace::NG {
+class UIExtensionPattern;
 namespace {
 constexpr int32_t UI_EXTENSION_UNKNOW_ID = 0;
 constexpr int32_t UI_EXTENSION_ID_FIRST_MAX = 10;
@@ -47,9 +49,15 @@ constexpr int64_t UI_EXTENSION_OFFSET_MIN = 10000000000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
 constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
+using UIExtBusinessDataSendCallback = std::function<std::optional<AAFwk::Want>(WeakPtr<FrameNode>)>;
+using UIExtBusinessDataConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
+using UIExtBusinessDataConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
+
+using UIExtBusinessSendToHostReplyFunc = std::function<bool(uint32_t, AAFwk::Want&&, AAFwk::Want&)>;
+using UIExtBusinessSendToHostFunc = std::function<bool(uint32_t, AAFwk::Want&&, BusinessDataSendType)>;
+
 }; // namespace
 
-class UIExtensionPattern;
 class SecurityUIExtensionPattern;
 class ACE_FORCE_EXPORT UIExtensionIdUtility : public Singleton<UIExtensionIdUtility> {
     DECLARE_SINGLETON(UIExtensionIdUtility);
@@ -127,13 +135,54 @@ public:
 
     void DumpUIExt();
 
+    // host send data to provider
+    void RegisterBusinessDataSendCallback(
+            UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback,
+            RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
+    void UnRegisterBusinessDataSendCallback(UIContentBusinessCode code);
+    bool TriggerBusinessDataSend(UIContentBusinessCode code);
+
+    // provider consume data
+    void RegisterBusinessDataConsumeReplyCallback(
+            UIContentBusinessCode code, UIExtBusinessDataConsumeReplyCallback callback);
+    void UnRegisterBusinessDataConsumeReplyCallback(UIContentBusinessCode code);
+    void DispatchBusinessDataConsumeReply(
+        UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+
+    // provider send data to host, called by framework
+    void RegisterBusinessDataConsumeCallback(UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback);
+    void UnRegisterBusinessDataConsumeCallback(UIContentBusinessCode code);
+    void DispatchBusinessDataConsume(UIContentBusinessCode code, const AAFwk::Want& data);
+
+    // register provider send data to host, called by framework
+    void RegisterBusinessSendToHostReply(UIExtBusinessSendToHostReplyFunc func);
+    // register provider send data to host, called by framework
+    void RegisterBusinessSendToHost(UIExtBusinessSendToHostFunc func);
+
+    // provider send to host, consumer is in ui_extension_pattern
+    bool SendBusinessToHost(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    // provider send to host sync reply, only used in uiextension init, not allowd used by other
+    bool SendBusinessToHostSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+
+    void NotifyWindowMode(Rosen::WindowMode mode);
+
+    void SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline);
+    void TransferAccessibilityRectInfo();
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, AAFwk::Want data, RSSubsystemId subSystemId);
 private:
+    bool UIExtBusinessDataSendValid();
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     WeakPtr<SecurityUIExtensionPattern> securityUiExtensionFocused_;
     WeakPtr<SessionWrapper> sessionWrapper_;
     std::mutex aliveUIExtensionMutex_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::map<int32_t, OHOS::Ace::WeakPtr<SecurityUIExtensionPattern>> aliveSecurityUIExtensions_;
+    std::map<UIContentBusinessCode,
+        std::tuple<BusinessDataSendType, UIExtBusinessDataSendCallback, RSSubsystemId>> businessDataSendCallbacks_;
+    std::map<UIContentBusinessCode, UIExtBusinessDataConsumeCallback> businessDataConsumeCallbacks_;
+    std::map<UIContentBusinessCode, UIExtBusinessDataConsumeReplyCallback> businessDataConsumeReplyCallbacks_;
+    UIExtBusinessSendToHostReplyFunc businessSendToHostReplyFunc_;
+    UIExtBusinessSendToHostFunc businessSendToHostFunc_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MANAGER_H

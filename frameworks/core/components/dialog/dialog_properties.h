@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -102,6 +103,16 @@ enum class DialogButtonDirection {
 enum class KeyboardAvoidMode {
     DEFAULT = 0,
     NONE,
+};
+
+enum class LevelMode {
+    OVERLAY = 0,
+    EMBEDDED,
+};
+
+enum class ImmersiveMode {
+    DEFAULT = 0,
+    EXTEND,
 };
 
 class DialogAlignmentUtils {
@@ -260,6 +271,7 @@ struct DialogProperties {
     // These attributes is used for CustomDialog.
     RefPtr<AceType> customComponent;         // Used for CustomDialog in declarative.
     std::function<void(bool)> onStatusChanged; // Called when dialog appear or disappear.
+    bool isUserCreatedDialog = false; // used for user create dialog for navdestination lifecycle
 
     // These attributes is used for ActionSheet.
     std::vector<ActionSheetInfo> sheetsInfo;
@@ -279,6 +291,10 @@ struct DialogProperties {
 
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 struct PromptDialogAttr {
@@ -288,6 +304,7 @@ struct PromptDialogAttr {
     bool showInSubWindow = false;
     bool isModal = false;
     bool enableHoverMode = false;
+    bool isUserCreatedDialog = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::function<void(const int32_t& info, const int32_t& instanceId)> customOnWillDismiss;
@@ -317,6 +334,10 @@ struct PromptDialogAttr {
     std::function<void(DialogProperties&)> onLanguageChange;
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 } // namespace OHOS::Ace

@@ -701,7 +701,7 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
     let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
     if (nodeController) {
         nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-        nodeController._value = -1;
+        nodeController._nodeContainerId._value = -1;
         NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
     }
 };
@@ -763,6 +763,12 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var ExpandMode;
+(function (ExpandMode) {
+    ExpandMode[ExpandMode["EXPAND"] = 0] = "EXPAND";
+    ExpandMode[ExpandMode["NOT_EXPAND"] = 1] = "NOT_EXPAND";
+    ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
+})(ExpandMode || (ExpandMode = {}));
 class FrameNode {
     constructor(uiContext, type, options) {
         if (uiContext === undefined) {
@@ -998,8 +1004,27 @@ class FrameNode {
         __JSScopeUtil__.restoreInstanceId();
         this._childList.clear();
     }
-    getChild(index, isExpanded) {
-        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
+    moveTo(targetParent, index) {
+        if (targetParent === undefined || targetParent === null) {
+            return;
+        }
+        if (index === undefined || index === null) {
+            index = -1;
+        }
+        const oldParent = this.getParent();
+        if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
+        __JSScopeUtil__.restoreInstanceId();
+        if (oldParent) {
+            oldParent._childList.delete(this._nodeId);
+        }
+        targetParent._childList.set(this._nodeId, this);
+    }
+    getChild(index, expandMode) {
+        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -1009,6 +1034,12 @@ class FrameNode {
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
+    getFirstChildIndexWithoutExpand() {
+        return getUINativeModule().frameNode.getFirstChildIndexWithoutExpand(this.getNodePtr());
+    }
+    getLastChildIndexWithoutExpand() {
+        return getUINativeModule().frameNode.getLastChildIndexWithoutExpand(this.getNodePtr());
     }
     getFirstChild(isExpanded) {
         const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), isExpanded);
@@ -1216,6 +1247,26 @@ class FrameNode {
     setNeedsLayout() {
         getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
     }
+    setCrossLanguageOptions(options) {
+        if (!this.isModifiable()) {
+            throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false);
+        __JSScopeUtil__.restoreInstanceId();
+        if (result !== 0) {
+            throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+        }
+    }
+    getCrossLanguageOptions() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        return { attributeSetting: attributeSetting ?? false };
+    }
+    checkIfCanCrossLanguageAttributeSetting() {
+        return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
+    }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
@@ -1239,6 +1290,9 @@ class FrameNode {
             this._gestureEvent.setNodePtr(this.nodePtr_);
             let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
             this._gestureEvent.setWeakNodePtr(weakPtr);
+            __JSScopeUtil__.syncInstanceId(this.instanceId_);
+            this._gestureEvent.registerFrameNodeDeletedCallback(this.nodePtr_);
+            __JSScopeUtil__.restoreInstanceId();
         }
         return this._gestureEvent;
     }
@@ -1251,6 +1305,12 @@ class FrameNode {
     }
     triggerOnRecycle() {
         getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
+    }
+    reuse() {
+        this.triggerOnReuse();
+    }
+    recycle() {
+        this.triggerOnRecycle();
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -1314,6 +1374,9 @@ class ProxyFrameNode extends ImmutableFrameNode {
         this._nodeId = -1;
         this._nativeRef = undefined;
         this.nodePtr_ = undefined;
+    }
+    moveTo(targetParent, index) {
+        throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
 }
 class FrameNodeUtils {
@@ -1588,6 +1651,18 @@ const __creatorMap__ = new Map([
             }, options);
         }],
 ]);
+const __attributeMap__ = new Map([
+    ['Scroll', (node) => {
+            if (node._componentAttribute) {
+                return node._componentAttribute;
+            }
+            if (!node.getNodePtr()) {
+                return undefined;
+            }
+            node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+            return node._componentAttribute;
+        }],
+]);
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -1595,6 +1670,29 @@ class typeNode {
             return undefined;
         }
         return creator(context, options);
+    }
+    static getAttribute(node, nodeType) {
+        if (node === undefined || node === null || node.getNodeType() != nodeType) {
+            return undefined;
+        }
+        if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+            return undefined;
+        }
+        let attribute = __attributeMap__.get(nodeType);
+        if (attribute === undefined || attribute == null) {
+            return undefined;
+        }
+        return attribute(node);
+    }
+    static bindController(node, controller, nodeType) {
+        if (node === undefined || node === null || controller === undefined || controller === null ||
+            node.getNodeType() != nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+            throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+        }
+        if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
+        getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
     }
 }
 /*
@@ -1729,7 +1827,10 @@ class ColorMetrics {
             const green = chanels[1];
             const blue = chanels[2];
             const alpha = chanels[3];
-            return new ColorMetrics(red, green, blue, alpha);
+            const resourceId = chanels[4];
+            const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+            colorMetrics.setResourceId(resourceId);
+            return colorMetrics;
         }
         else if (typeof color === 'number') {
             return ColorMetrics.numeric(color);
@@ -1812,6 +1913,12 @@ class ColorMetrics {
     }
     get alpha() {
         return this.alpha_;
+    }
+    setResourceId(resourceId) {
+      this.resourceId_ = resourceId;
+    }
+    getResourceId() {
+      return this.resourceId_;
     }
 }
 class BaseShape {
@@ -2557,5 +2664,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter
+    typeNode, NodeAdapter, ExpandMode
 };

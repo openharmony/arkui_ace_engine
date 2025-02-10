@@ -695,7 +695,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     // pan gesture disabled, not dispatch move event, not concat serialized gesture
     auto pointAction = pointerEvent->GetPointerAction();
     if (pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE ||
-        OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
+        pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
@@ -1076,7 +1076,7 @@ void FormManagerDelegate::ProcessEnableForm(bool enable)
     HandleEnableFormCallback(enable);
 }
 
-void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo)
+void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
 {
     wantCache_.SetElementName(info.bundleName, info.abilityName);
 
@@ -1105,7 +1105,11 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const App
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, info.renderingMode);
+}
 
+void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo)
+{
+    this->SetParamForWant(info);
     if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
         CHECK_NULL_VOID(renderDelegate_);
         wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
@@ -1113,6 +1117,8 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const App
         wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
     }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
+        formInfo.enableBlurBackground);
 }
 
 

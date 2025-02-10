@@ -86,6 +86,20 @@ const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
 const std::vector<std::string> DEFAULT_VALUE = { "1", "2", "3" };
 const std::vector<std::string> CUSTOM_VALUE = { "appCustomFont" };
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TextPickerColumnTestNg : public testing::Test {
@@ -193,16 +207,10 @@ void TextPickerColumnTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1771,7 +1779,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest008, TestSize.Level1
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->CalcAlgorithmOffset(DISTANCE);
+    textPickerColumnPattern->CalcAlgorithmOffset(ScrollDirection::UP, DISTANCE);
     EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 5);
 }
 
@@ -1871,6 +1879,35 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest012, TestSize.Level1
     for (uint32_t i = 0; i < counts; i++) {
         EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.emplace_back(i), i);
     }
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest013
+ * @tc.desc: Test TextPickerColumnPattern ScrollOption and HandleEnterSelectedArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest013, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 4;
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern->SetOptions(range);
+    textPickerColumnPattern->SetCurrentIndex(SELECTED_INDEX_2);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->ScrollOption(10.0f);
+    EXPECT_EQ(textPickerColumnPattern->GetEnterIndex(), 1);
 }
 
 /**
@@ -1978,4 +2015,49 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternSetCanLoop001, TestSize.
     textPickerColumnPattern_->SetCanLoop(false);
     EXPECT_EQ(textPickerColumnPattern_->overscroller_.loopTossOffset_, 0.0);
 }
+
+#ifdef ARKUI_WEARABLE
+/**
+ * @tc.name: TextPickerColumnPatternTest014
+ * @tc.desc: Test TextPickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest014, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    EXPECT_NE(textPickerColumnPattern->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    textPickerColumnPattern->SetDigitalCrownSensitivity(2);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), 2);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest015
+ * @tc.desc: Test TextPickerColumnPattern ToUpdateSelectedTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest015, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    auto textPickerPattern = frameNode_->GetPattern<TextPickerPattern>();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    RefPtr<TextLayoutProperty> textLayoutProperty = columnPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_FALSE(textLayoutProperty);
+    textPickerColumnPattern->ToUpdateSelectedTextProperties(theme);
+    EXPECT_EQ(textPickerColumnPattern->GetEnterIndex(), 0);
+    EXPECT_EQ(textPickerColumnPattern->GetSelected(), 0);
+    EXPECT_EQ(textPickerColumnPattern->selectorTextFocusColor_, Color::WHITE);
+}
+#endif
 } // namespace OHOS::Ace::NG

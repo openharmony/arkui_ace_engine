@@ -134,7 +134,8 @@ void RosenRenderListItem::PaintUniversalBackground(RenderContext& context, const
 void RosenRenderListItem::PaintWithFocusEffect(RenderContext& context, const Offset& offset)
 {
     if (focusController_) {
-        if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+        if (SystemProperties::GetDeviceType() == DeviceType::WATCH ||
+            SystemProperties::GetDeviceType() == DeviceType::WEARABLE) {
             if (supportScale_) {
                 scale_ = GetScaleFactor();
             }

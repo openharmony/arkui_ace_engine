@@ -59,6 +59,7 @@ export struct IconPalette {
         .backgroundColor(Color.Transparent)
         .width(32)
         .height(32)
+        .enabled(this.isEnabled)
         .onClick(() => {
           this.onChange?.(icon, index);
         })

@@ -53,9 +53,11 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<DividerTheme>();
+        auto theme = pipelineContext->GetTheme<DividerTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         json->PutExtAttr("color", propDividerColor_.value_or(theme->GetColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("lineCap",

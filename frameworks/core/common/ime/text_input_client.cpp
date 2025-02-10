@@ -189,10 +189,17 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     }
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {
+        this->ResetOriginCaretPosition();
         return iterFunctionKeys->second(this);
     }
     auto iterKeyboardShortCuts = keyboardShortCuts_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterKeyboardShortCuts != keyboardShortCuts_.end()) {
+        if (KeyComb(keyEvent.code, modKeyFlags) == KeyComb(KeyCode::KEY_DPAD_UP, KEY_SHIFT) ||
+            KeyComb(keyEvent.code, modKeyFlags) == KeyComb(KeyCode::KEY_DPAD_DOWN, KEY_SHIFT)) {
+            this->RecordOriginCaretPosition();
+        } else {
+            this->ResetOriginCaretPosition();
+        }
         iterKeyboardShortCuts->second(this);
         return true;
     }

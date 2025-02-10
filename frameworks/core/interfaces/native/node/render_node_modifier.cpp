@@ -527,10 +527,22 @@ void SetMarkNodeGroup(ArkUINodeHandle node, ArkUI_Bool isNodeGroup)
     renderContext->RequestNextFrame();
 }
 
+void SetTransformScale(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    VectorF scaleValue = VectorF(xF, yF);
+    renderContext->UpdateTransformScale(scaleValue);
+    renderContext->RequestNextFrame();
+}
+
 namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIRenderNodeModifier modifier = {
         .appendChild = AppendChild,
         .insertChildAfter = InsertChildAfter,
@@ -568,22 +580,16 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         .setCommandPathClip = SetCommandPathClip,
         .setPosition = SetPosition,
         .setMarkNodeGroup = SetMarkNodeGroup,
+        .setTransformScale = SetTransformScale,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIRenderNodeModifier* GetCJUIRenderNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIRenderNodeModifier modifier = {
         .appendChild = AppendChild,
         .insertChildAfter = InsertChildAfter,
@@ -616,14 +622,7 @@ const CJUIRenderNodeModifier* GetCJUIRenderNodeModifier()
         .setPosition = SetPosition,
         .setMarkNodeGroup = SetMarkNodeGroup,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

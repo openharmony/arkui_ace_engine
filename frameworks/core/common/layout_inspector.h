@@ -36,9 +36,13 @@ public:
     static void SetlayoutInspectorStatus(int32_t containerId);
     static void GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId);
     static void CreateLayoutInfo(int32_t containerId);
+    static void CreateContainerLayoutInfo(RefPtr<Container>& container);
+    static void CreateLayoutInfoByWinId(uint32_t windId);
     static void SetCallback(int32_t instanceId);
     static void SetStatus(bool layoutInspectorStatus);
     static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
+    static void RegisterConnectCallback();
+    static void ProcessMessages(const std::string& message);
 
     // state profiler
     static bool GetStateProfilerStatus();

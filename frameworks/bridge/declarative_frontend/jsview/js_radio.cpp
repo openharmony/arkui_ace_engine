@@ -29,6 +29,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace {
 
@@ -157,15 +158,25 @@ void JSRadio::Checked(const JSCallbackInfo& info)
     if (info.Length() < 1 || info.Length() > 2) {
         return;
     }
-
-    if (info.Length() > 0 && info[0]->IsBoolean()) {
-        RadioModel::GetInstance()->SetChecked(info[0]->ToBoolean());
-    } else {
-        RadioModel::GetInstance()->SetChecked(false);
+    bool checked = false;
+    JSRef<JSVal> changeEventVal;
+    auto checkedVal = info[0];
+    if (checkedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(checkedVal);
+        checkedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
     }
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        ParseCheckedObject(info, info[1]);
+    if (checkedVal->IsBoolean()) {
+        checked = checkedVal->ToBoolean();
+    }
+
+    RadioModel::GetInstance()->SetChecked(checked);
+
+    if (changeEventVal->IsFunction()) {
+        ParseCheckedObject(info, changeEventVal);
     }
 }
 
@@ -307,6 +318,12 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         if (!JSRadioTheme::ObtainUncheckedBorderColor(uncheckedBorderColorVal)) {
             uncheckedBorderColorVal = theme->GetInactiveColor();
         }
+    } else {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::RadioPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsUserSetUncheckBorderColor(true);
     }
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
     Color indicatorColorVal;

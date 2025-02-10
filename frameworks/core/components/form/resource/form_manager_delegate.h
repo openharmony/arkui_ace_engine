@@ -44,6 +44,7 @@ class FormManagerDelegate : public FormManagerResource {
 
 public:
 #ifdef OHOS_STANDARD_SYSTEM
+    void SetParamForWant(const RequestFormInfo& info);
     void SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo);
 #endif
     using onFormAcquiredCallbackForJava =
@@ -156,6 +157,10 @@ public:
     void ProcessLockForm(bool lock);
 #endif
     void HandleCachedClickEvents();
+    std::mutex& GetRecycleMutex()
+    {
+        return this->recycleMutex_;
+    }
 
 private:
     void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);

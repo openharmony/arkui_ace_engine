@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class TabBarLayoutTestNg : public TabsTestNg {
-public:
-};
+class TabBarLayoutTestNg : public TabsTestNg {};
 
 /**
  * @tc.name: TabBarPatternOnDirtyLayoutWrapperSwap001
@@ -387,8 +382,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Le
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
@@ -397,7 +391,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Le
         auto columnNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
         RefPtr<LayoutWrapperNode> columnLayoutWrapper =
             AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
         columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
@@ -428,8 +422,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Le
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
@@ -438,7 +431,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Le
         auto columnNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
         RefPtr<LayoutWrapperNode> columnLayoutWrapper =
             AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
         columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
@@ -470,8 +463,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmGetContentMainSize001, TestSiz
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    auto tabBarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
@@ -928,10 +920,10 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.
 }
 
 /**
-* @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarLayoutTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize.Level1)
 {
     /**
@@ -943,6 +935,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize
     model.SetDivider(divider);
     CreateTabsDone(model);
     tabBarPattern_->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -969,7 +962,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, Test
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
 
     auto itemWidth = (TABS_WIDTH - margin * 2) / TABCONTENT_NUMBER;
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
@@ -987,14 +980,14 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, Test
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     itemWidth = TABS_WIDTH / 2 / TABCONTENT_NUMBER;
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER + itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos,
-        TABS_WIDTH / TABCONTENT_NUMBER * 3 - itemWidth);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER * 3 - itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER * 3);
 
     /**
@@ -1005,14 +998,14 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, Test
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
-    auto startPos = (TABS_WIDTH - BARITEM_SIZE * TABCONTENT_NUMBER) / 2;
+    FlushUITasks();
+    auto startPos = (TABS_WIDTH - BAR_ITEM_SIZE * TABCONTENT_NUMBER) / 2;
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, startPos);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, startPos + BARITEM_SIZE);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, startPos + BAR_ITEM_SIZE);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, startPos + BARITEM_SIZE * 3);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, startPos + BARITEM_SIZE * 4);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, startPos + BAR_ITEM_SIZE * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, startPos + BAR_ITEM_SIZE * 4);
 }
 
 /**
@@ -1043,7 +1036,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode002, Test
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, margin);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
@@ -1059,7 +1052,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode002, Test
     ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(60.0f));
     ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(70.0f));
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 70.0f);
 
     /**
@@ -1074,7 +1067,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode002, Test
     }
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 1);
@@ -1113,7 +1106,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureTargetIndex001, TestSiz
     tabBarPattern_->visibleItemPosition_[2] = { itemWidth * 2, itemWidth * 3 };
     tabBarPattern_->targetIndex_ = 3;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
@@ -1129,7 +1122,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureTargetIndex001, TestSiz
     tabBarPattern_->visibleItemPosition_[3] = { TABS_WIDTH - itemWidth, TABS_WIDTH };
     tabBarPattern_->targetIndex_ = 0;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 4);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
@@ -1165,7 +1158,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureJumpIndex001, TestSize.
     tabBarPattern_->jumpIndex_ = 0;
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
@@ -1178,7 +1171,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureJumpIndex001, TestSize.
     tabBarPattern_->jumpIndex_ = 1;
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, (TABS_WIDTH - itemWidth) / 2 - itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
@@ -1192,7 +1185,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureJumpIndex001, TestSize.
     tabBarPattern_->jumpIndex_ = 3;
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 3);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
@@ -1223,7 +1216,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset001, TestSize
 
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
@@ -1237,7 +1230,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset001, TestSize
     auto currentDelta1 = 100.0f;
     tabBarPattern_->currentDelta_ = currentDelta1;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, currentDelta1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
@@ -1247,18 +1240,18 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset001, TestSize
     auto currentDelta2 = -300.0f;
     tabBarPattern_->currentDelta_ = currentDelta2;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, currentDelta1 + currentDelta2);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos,
-        itemWidth * 4 + currentDelta1 + currentDelta2);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 4 + currentDelta1 + currentDelta2);
 
     tabBarPattern_->canOverScroll_ = true;
     auto currentDelta3 = -300.0f;
     tabBarPattern_->currentDelta_ = currentDelta3;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos,
         itemWidth + currentDelta1 + currentDelta2 + currentDelta3);
@@ -1298,7 +1291,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset002, TestSize
     auto currentDelta1 = 100.0f;
     tabBarPattern_->currentDelta_ = currentDelta1;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
@@ -1308,7 +1301,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset002, TestSize
     auto currentDelta2 = -500.0f;
     tabBarPattern_->currentDelta_ = currentDelta2;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 3);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
@@ -1318,10 +1311,10 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset002, TestSize
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     tabBarPattern_->currentDelta_ = currentDelta1;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos,
-        TABS_WIDTH - itemWidth * 3 - currentDelta1);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 3 - currentDelta1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH - currentDelta1);
 }
@@ -1355,7 +1348,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureOverLengthItem001, Test
     tabBarPattern_->jumpIndex_ = 1;
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, itemWidth);
@@ -1366,7 +1359,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureOverLengthItem001, Test
      */
     tabBarPattern_->targetIndex_ = 2;
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, itemWidth);
@@ -1394,7 +1387,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode001, TestSize.
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER);
@@ -1412,7 +1405,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode001, TestSize.
     ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(60.0f));
     ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(70.0f));
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 70.0f);
 
     /**
@@ -1422,7 +1415,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode001, TestSize.
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_HEIGHT / TABCONTENT_NUMBER);
@@ -1466,7 +1459,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode002, TestSize.
 
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 220.0f);
@@ -1482,7 +1475,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode002, TestSize.
     ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(60.0f));
     ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(70.0f));
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 70.0f);
 
     /**

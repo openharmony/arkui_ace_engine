@@ -54,6 +54,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
@@ -442,7 +443,11 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     arkRuntime->SetPkgAliasList(pkgAliasMap_);
     arkRuntime->SetpkgContextInfoList(pkgContextInfoMap_);
 #endif
-
+    auto container = Container::Current();
+    if (container) {
+        auto uid = container->GetAppRunningUniqueId();
+        runtime_->SetUniqueId(uid);
+    }
     runtime_->SetLogPrint(PrintLog);
     std::string libraryPath = "";
     if (debuggerMode) {
@@ -846,7 +851,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
             return;
         }
         panda::Local<panda::ObjectRef> rootView = iter->second.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
+        auto* jsView = JsiObjectTemplate::GetNativeView(rootView, arkRuntime->GetEcmaVm());
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -866,7 +871,7 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
+        auto* jsView = JsiObjectTemplate::GetNativeView(rootView, arkRuntime->GetEcmaVm());
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -889,7 +894,7 @@ void JsiDeclarativeEngineInstance::FlushReload()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
+        auto* jsView = JsiObjectTemplate::GetNativeView(rootView, arkRuntime->GetEcmaVm());
         if (jsView != nullptr) {
             jsView->MarkNeedUpdate();
         }
@@ -1033,7 +1038,7 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
 }
 
 void JsiDeclarativeEngineInstance::PostJsTask(
-    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name)
+    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name, PriorityType priority)
 {
     if (runtime == nullptr) {
         return;
@@ -1042,7 +1047,7 @@ void JsiDeclarativeEngineInstance::PostJsTask(
     if (engineInstance == nullptr) {
         return;
     }
-    engineInstance->GetDelegate()->PostJsTask(std::move(task), name);
+    engineInstance->GetDelegate()->PostJsTask(std::move(task), name, priority);
 }
 
 void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>& runtime)
@@ -1085,7 +1090,8 @@ void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
         if (delegate == nullptr) {
             return;
         }
-        delegate->PostJsTask(std::move(task), "ArkUIDebuggerTask");
+        delegate->PostJsTask(
+            std::move(task), "ArkUIDebuggerTask", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -1280,7 +1286,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
                 ContainerScope scope(id);
                 nativeEngine->Loop(LOOP_NOWAIT, needSync);
             },
-            "ArkUISetNativeEngineLoop");
+            "ArkUISetNativeEngineLoop", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -1293,7 +1299,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         if (nativeEngine == nullptr) {
             return;
         }

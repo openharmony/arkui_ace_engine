@@ -253,7 +253,7 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSelect, keycode %{public}d, cursor move skip %{public}d(ignored)",
         keyCode, cursorMoveSkip);
-    auto task = [textField = pattern_, keyCode, cursorMoveSkip] {
+    auto task = [textField = pattern_, keyCode] {
         auto client = textField.Upgrade();
         if (!client) {
             return;
@@ -304,7 +304,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, 
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name, PriorityType::VIP);
 }
 
 void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)

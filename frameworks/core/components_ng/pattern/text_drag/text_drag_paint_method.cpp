@@ -54,7 +54,8 @@ void TextDragPaintMethod::UpdateHandleInfo(const TextDragInfo& info)
         pattern->GetFrameWidth() + (screenWdith + handleDiameter) * CONSTANT_DOUBLE,
         pattern->GetFrameHeight() + (screenHeight + handleDiameter) * CONSTANT_DOUBLE);
     modifier->SetBoundsRect(boundsRect);
-    modifier->SetIsHandleAnimation(info.isHandleAnimation);
+    modifier->SetIsFirstHandleAnimated(info.isFirstHandleAnimation);
+    modifier->SetIsSecondHandleAnimated(info.isSecondHandleAnimation);
     auto textTheme = pipleline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     auto selectorColor = info.selectedBackgroundColor.value_or(textTheme->GetSelectedColor());

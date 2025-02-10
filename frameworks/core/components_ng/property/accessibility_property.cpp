@@ -384,7 +384,8 @@ bool AccessibilityProperty::HoverTestRecursive(
     }
 
     if (shouldSearchChildren) {
-        PointF noOffsetPoint = selfPoint - rect.GetOffset();
+        auto orginRect = renderContext->GetPaintRectWithoutTransform();
+        PointF noOffsetPoint = selfPoint - orginRect.GetOffset();
         RecursiveParam recursiveParam;
         recursiveParam.hitTarget = hitTarget;
         recursiveParam.ancestorGroupFlag = currentGroupFlag;
@@ -699,6 +700,21 @@ bool AccessibilityProperty::HasAccessibilityCustomRole()
 std::string AccessibilityProperty::GetAccessibilityCustomRole() const
 {
     return accessibilityCustomRole_.value_or("");
+}
+
+void AccessibilityProperty::SetAccessibilitySamePage(const std::string& pageMode)
+{
+    accessibilityUseSamePage_ = pageMode;
+}
+
+bool AccessibilityProperty::HasAccessibilitySamePage()
+{
+    return accessibilityUseSamePage_.has_value();
+}
+
+std::string AccessibilityProperty::GetAccessibilitySamePage()
+{
+    return accessibilityUseSamePage_.value_or("");
 }
 
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)

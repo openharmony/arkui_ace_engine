@@ -32,6 +32,7 @@ public:
     void SetStartDate(const PickerDate& value) override;
     void SetEndDate(const PickerDate& value) override;
     void SetSelectedDate(const PickerDate& value) override;
+    void SetMode(const DatePickerMode& value) override;
     void SetShowLunar(bool lunar) override;
     void SetOnChange(DateChangeEvent&& onChange) override;
     void SetOnDateChange(DateChangeEvent&& onChange) override;
@@ -45,12 +46,15 @@ public:
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void HasUserDefinedOpacity() override;
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
     static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
     static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetMode(FrameNode* frameNode, const DatePickerMode& value);
     static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetChangeEvent(DateChangeEvent&& onChange) override;
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(
@@ -66,9 +70,13 @@ public:
     static LunarDate getStartDate(FrameNode* frameNode);
     static LunarDate getEndDate(FrameNode* frameNode);
     static LunarDate getSelectedDate(FrameNode* frameNode);
+    static DatePickerMode getMode(FrameNode* frameNode);
     static uint32_t getBackgroundColor(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

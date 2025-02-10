@@ -44,9 +44,11 @@ public:
         CHECK_NULL_VOID(dividerModifier_);
         auto dividerRenderProperty = DynamicCast<DividerRenderProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(dividerRenderProperty);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = paintWrapper->GetRenderContext()->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<DividerTheme>();
+        auto theme = pipeline->GetTheme<DividerTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         dividerColor_ = dividerRenderProperty->GetDividerColor().value_or(theme->GetColor());
         lineCap_ = dividerRenderProperty->GetLineCap().value_or(LineCap::BUTT);

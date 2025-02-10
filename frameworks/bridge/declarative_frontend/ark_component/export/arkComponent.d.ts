@@ -179,7 +179,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
     draggable(value: boolean): this;
-    dragPreview(value: CustomBuilder | DragItemInfo | string): this;
+    dragPreview(preview: CustomBuilder | DragItemInfo | string): this;
     overlay(value: string | CustomBuilder, options?: {
         align?: Alignment;
         offset?: {
@@ -388,6 +388,7 @@ declare class ArkImageAnimatorComponent extends ArkComponent implements CommonMe
     preDecode(value: number): ImageAnimatorAttribute;
     fillMode(value: FillMode): ImageAnimatorAttribute;
     iterations(value: number): ImageAnimatorAttribute;
+    monitorInvisibleArea(value: boolean): ImageAnimatorAttribute;
     onStart(event: () => void): ImageAnimatorAttribute;
     onPause(event: () => void): ImageAnimatorAttribute;
     onRepeat(event: () => void): ImageAnimatorAttribute;
@@ -983,6 +984,7 @@ declare class ArkTimePickerComponent extends ArkComponent implements TimePickerA
     textStyle(value: PickerTextStyle): this;
     selectedTextStyle(value: PickerTextStyle): this;
     onChange(callback: (value: TimePickerResult) => void): this;
+    digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this;
 }
 declare class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -996,6 +998,7 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
     onCancel(callback: () => void): this;
     onChange(callback: (value: string | string[], index: number | number[]) => void): this;
     selectedIndex(value: number | number[]): this;
+    digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this;
 }
 declare class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1181,6 +1184,7 @@ declare class ArkDatePickerComponent extends ArkComponent implements DatePickerA
     onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute;
     onDateChange(callback: (value: Date) => void): DatePickerAttribute;
     backgroundColor(value: ResourceColor): this;
+    digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): DatePickerAttribute;
 }
 declare class ArkFormComponentComponent extends ArkComponent implements FormComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1730,6 +1734,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onDestroy(event: () => void): this;
     enableSecure(value: boolean): this;
     hdrBrightness(value: number): this;
+    enableTransparentLayer(value: boolean): this;
 }
 declare class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1848,6 +1853,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     disableSwipe(value: boolean): this;
     curve(value: string | Curve | ICurve): this;
     onChange(event: (index: number) => void): this;
+    onUnselected(event: (index: number) => void): this;
     indicatorStyle(value?: IndicatorStyle | undefined): this;
     prevMargin(value: Length): this;
     nextMargin(value: Length): this;
@@ -1860,6 +1866,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     customContentTransition(transition: SwiperContentAnimatedTransition): this;
     onContentDidScroll(handler: ContentDidScrollCallback): this;
     pageFlipMode(value: PageFlipMode): this;
+    onContentWillScroll(handler: ContentWillScrollCallback): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1876,6 +1883,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     animationMode(value: AnimationMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
+    onUnselected(event: (index: number) => void): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;

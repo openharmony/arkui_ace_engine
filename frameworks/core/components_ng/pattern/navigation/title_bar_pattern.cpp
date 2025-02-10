@@ -20,6 +20,7 @@
 #include "base/i18n/localization.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -1546,10 +1547,20 @@ void TitleBarPattern::InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHu
         auto totalCount = menuNode->TotalChildCount();
         auto dialogNode = pattern->GetLargeFontPopUpDialogNode();
         if (dialogNode && index >= 0 && index < totalCount) {
+            auto pipeline = menuNode->GetContextWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+            CHECK_NULL_VOID(buttonTheme);
+            auto buttonPattern = menuItemNode->GetPattern<ButtonPattern>();
+            CHECK_NULL_VOID(buttonPattern);
+            buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
             if (!pattern->GetMoveIndex().has_value()) {
                 pattern->SetMoveIndex(index);
             }
             if (pattern->GetMoveIndex().value() != index) {
+                auto renderContext = menuItemNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateBackgroundColor(buttonTheme->GetClickedColor());
                 pattern->HandleMenuLongPressActionEnd();
                 pattern->SetMoveIndex(index);
                 pattern->SetLargeFontPopUpDialogNode(
@@ -1624,6 +1635,18 @@ void TitleBarPattern::HandleMenuLongPressActionEnd()
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto menuNode = AceType::DynamicCast<FrameNode>(hostNode->GetMenu());
+    CHECK_NULL_VOID(menuNode);
+    if (moveIndex_.has_value()) {
+        auto menuItemNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(moveIndex_.value()));
+        CHECK_NULL_VOID(menuItemNode);
+        auto renderContext = menuItemNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
+        renderContext->ResetBlendBgColor();
+    }
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseDialog(dialogNode);

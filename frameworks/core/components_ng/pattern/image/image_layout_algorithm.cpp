@@ -113,10 +113,6 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
 void ImageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::Measure(layoutWrapper);
-    auto ctx = loadingCtx_.Upgrade();
-    CHECK_NULL_VOID(ctx);
-    ctx->FinishMearuse();
-    ctx->CallbackAfterMeasureIfNeed();
 }
 
 void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -130,6 +126,10 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     BoxLayoutAlgorithm::Layout(layoutWrapper);
+    auto ctx = loadingCtx_.Upgrade();
+    CHECK_NULL_VOID(ctx);
+    ctx->FinishMearuse();
+    ctx->CallbackAfterMeasureIfNeed();
 }
 
 void ImageLayoutAlgorithm::PerformImageAnimationLayout(LayoutWrapper* layoutWrapper)

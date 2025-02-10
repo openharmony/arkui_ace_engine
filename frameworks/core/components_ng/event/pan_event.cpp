@@ -16,6 +16,7 @@
 #include "core/components_ng/event/pan_event.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -137,6 +138,9 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
 
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    if (isExcludedAxis_ && touchRestrict.inputEventType == InputEventType::AXIS) {
+        return;
+    }
     result.emplace_back(panRecognizer_);
     responseLinkResult.emplace_back(panRecognizer_);
 }

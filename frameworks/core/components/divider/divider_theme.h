@@ -63,8 +63,6 @@ public:
 
 protected:
     DividerTheme() = default;
-
-private:
     Color color_;
     Dimension stokeWidth_;
 };

@@ -66,6 +66,8 @@ protected:
 
     void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
         const TextStyle& textStyle);
+    void ConstructTextStyles(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        TextStyle& textStyle, bool& needRemain);
     void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
@@ -81,7 +83,7 @@ protected:
             ss << "[";
             for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
                 ss << "[" << item->interval.first << "," << item->interval.second << ":"
-                   << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << "], ";
+                   << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
             });
             ss << "], ";
         }

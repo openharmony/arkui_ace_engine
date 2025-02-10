@@ -120,6 +120,9 @@ public:
 
     void UpdateBarItemActiveStatusResource();
 
+    void UpdateBarItemTextAndIconStatusResource(const RefPtr<BarItemNode>& barItemNode,
+        const RefPtr<FrameNode>& iconNode);
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:

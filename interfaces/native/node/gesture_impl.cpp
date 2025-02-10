@@ -194,6 +194,40 @@ int32_t OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType(const ArkUI_Gestur
     return -1;
 }
 
+int32_t OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers(
+    const ArkUI_GestureInterruptInfo* info, ArkUI_TouchRecognizerHandleArray* recognizers, int32_t* size)
+{
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(recognizers, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(size, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *recognizers = reinterpret_cast<ArkUI_TouchRecognizerHandleArray>(info->interruptData.touchRecognizers);
+    *size = info->interruptData.touchRecognizerCnt;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_NodeHandle OH_ArkUI_TouchRecognizer_GetNodeHandle(const ArkUI_TouchRecognizerHandle recognizer)
+{
+    CHECK_NULL_RETURN(recognizer, nullptr);
+    auto node =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->touchRecognizerGetNodeHandle(
+            static_cast<void*>(recognizer));
+
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
+    impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
+    return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
+}
+
+int32_t OH_ArkUI_TouchRecognizer_CancelTouch(ArkUI_TouchRecognizerHandle recognizer, ArkUI_GestureInterruptInfo* info)
+{
+    CHECK_NULL_RETURN(recognizer, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    bool ret =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->touchRecognizerCancelTouch(
+            static_cast<void*>(recognizer));
+    return ret ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
 int32_t OH_ArkUI_GetResponseRecognizersFromInterruptInfo(
     const ArkUI_GestureInterruptInfo* event, ArkUI_GestureRecognizerHandleArray* responseChain, int32_t* count)
 {
@@ -214,6 +248,18 @@ int32_t OH_ArkUI_SetGestureRecognizerEnabled(ArkUI_GestureRecognizer* recognizer
         ->getNodeModifiers()
         ->getGestureModifier()
         ->setGestureRecognizerEnabled(gestureRecognizer, enabled);
+}
+
+int32_t OH_ArkUI_SetGestureRecognizerLimitFingerCount(ArkUI_GestureRecognizer* recognizer, bool limitFingerCount)
+{
+    auto* gesture = reinterpret_cast<ArkUIGesture*>(recognizer->gesture);
+    if (!gesture) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->setGestureRecognizerLimitFingerCount(gesture, limitFingerCount);
 }
 
 bool OH_ArkUI_GetGestureRecognizerEnabled(ArkUI_GestureRecognizer* recognizer)
@@ -336,6 +382,14 @@ void* OH_ArkUI_ParallelInnerGestureEvent_GetUserData(ArkUI_ParallelInnerGestureE
     return event->userData;
 }
 
+void* OH_ArkUI_GestureInterrupter_GetUserData(ArkUI_GestureInterruptInfo* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return event->interruptData.userData;
+}
+
 ArkUI_GestureRecognizer* OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(ArkUI_ParallelInnerGestureEvent* event)
 {
     return reinterpret_cast<ArkUI_GestureRecognizer*>(event->current);
@@ -366,6 +420,236 @@ int32_t OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(
     return 0;
 }
 
+int32_t OH_ArkUI_GetGestureParam_DirectMask(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureDirectionMask* directMask)
+{
+    if (!recognizer || !directMask) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case SWIPE_GESTURE: {
+            ArkUISwipeGestureDirection direction = ArkUISwipeGestureDirection::ArkUI_SWIPE_GESTURE_DIRECTION_ALL;
+            auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                              ->getNodeModifiers()
+                              ->getGestureModifier()
+                              ->getSwipeGestureDirectionMask(gestureRecognizer, &direction);
+            *directMask = static_cast<ArkUI_GestureDirectionMask>(direction);
+            return result;
+        }
+        case PAN_GESTURE: {
+            ArkUIGestureDirection direction = ArkUIGestureDirection::ArkUI_GESTURE_DIRECTION_ALL;
+            auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                              ->getNodeModifiers()
+                              ->getGestureModifier()
+                              ->getPanGestureDirectionMask(gestureRecognizer, &direction);
+            *directMask = static_cast<ArkUI_GestureDirectionMask>(direction);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
+int32_t OH_ArkUI_GetGestureParam_FingerCount(ArkUI_GestureRecognizer* recognizer, int* finger)
+{
+    if (!recognizer || !finger) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case TAP_GESTURE:
+        case LONG_PRESS_GESTURE:
+        case PINCH_GESTURE:
+        case ROTATION_GESTURE:
+        case SWIPE_GESTURE:
+        case PAN_GESTURE: {
+            auto result =
+                OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getGestureFingerCount(
+                    gestureRecognizer, finger);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
+int32_t OH_ArkUI_GetGestureParam_limitFingerCount(ArkUI_GestureRecognizer* recognizer, bool* isLimited)
+{
+    if (!recognizer || !isLimited) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case TAP_GESTURE:
+        case LONG_PRESS_GESTURE:
+        case PINCH_GESTURE:
+        case ROTATION_GESTURE:
+        case SWIPE_GESTURE:
+        case PAN_GESTURE: {
+            auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                              ->getNodeModifiers()
+                              ->getGestureModifier()
+                              ->getGestureLimitFingerCount(gestureRecognizer, isLimited);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
+int32_t OH_ArkUI_GetGestureParam_repeat(ArkUI_GestureRecognizer* recognizer, bool* isRepeat)
+{
+    if (!recognizer || !isRepeat) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case LONG_PRESS_GESTURE: {
+            auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                              ->getNodeModifiers()
+                              ->getGestureModifier()
+                              ->getLongPressGestureRepeat(gestureRecognizer, isRepeat);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
+int32_t OH_ArkUI_GetGestureParam_distance(ArkUI_GestureRecognizer* recognizer, double* distance)
+{
+    if (!recognizer || !distance) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case PINCH_GESTURE: {
+            auto result =
+                OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getPinchGestureDistance(
+                    gestureRecognizer, distance);
+            return result;
+        }
+        case PAN_GESTURE: {
+            auto result =
+                OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getPanGestureDistance(
+                    gestureRecognizer, distance);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
+int32_t OH_ArkUI_GetGestureParam_speed(ArkUI_GestureRecognizer* recognizer, double* speed)
+{
+    if (!recognizer || !speed) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case SWIPE_GESTURE: {
+            auto result =
+                OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getSwipeGestureSpeed(
+                    gestureRecognizer, speed);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
+int32_t OH_ArkUI_GetGestureParam_duration(ArkUI_GestureRecognizer* recognizer, int* duration)
+{
+    if (!recognizer || !duration) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case LONG_PRESS_GESTURE: {
+            auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                              ->getNodeModifiers()
+                              ->getGestureModifier()
+                              ->getLongPressGestureDuration(gestureRecognizer, duration);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
+int32_t OH_ArkUI_GetGestureParam_angle(ArkUI_GestureRecognizer* recognizer, double* angle)
+{
+    if (!recognizer || !angle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case ROTATION_GESTURE: {
+            auto result =
+                OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getRotationGestureAngle(
+                    gestureRecognizer, angle);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
+int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* recognizer, double* distanceThreshold)
+{
+    if (!recognizer || !distanceThreshold) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (recognizer->type) {
+        case TAP_GESTURE: {
+            auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                              ->getNodeModifiers()
+                              ->getGestureModifier()
+                              ->getTapGestureDistanceThreshold(gestureRecognizer, distanceThreshold);
+            return result;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
 namespace OHOS::Ace::GestureModel {
 
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
@@ -388,18 +672,19 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
     fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
     auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
-        count, fingers, ndkGesture);
+        count, fingers, false, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
 
-ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, int32_t fingers, double distanceThreshold)
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(
+    int32_t count, int32_t fingers, double distanceThreshold)
 {
     count = std::max(count, DEFAULT_TAP_COUNT);
     fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
     auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->
-        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, ndkGesture);
+        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, false, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
@@ -409,7 +694,7 @@ ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResu
     auto* ndkGesture = new ArkUI_GestureRecognizer{ LONG_PRESS_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createLongPressGesture(fingers,
-        repeatResult, duration, ndkGesture);
+        repeatResult, duration, false, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
@@ -424,7 +709,7 @@ ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
     auto* ndkGesture = new ArkUI_GestureRecognizer{ PINCH_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers,
-        distanceNum, ndkGesture);
+        distanceNum, false, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
@@ -434,12 +719,13 @@ ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingers, double angle)
     auto* ndkGesture = new ArkUI_GestureRecognizer{ ROTATION_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers,
-        angle, ndkGesture);
+        angle, false, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
 
-ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirectionMask directions, double speed)
+ArkUI_GestureRecognizer* CreateSwipeGesture(
+    int32_t fingers, ArkUI_GestureDirectionMask directions, double speed)
 {
     if (LessOrEqual(speed, 0.0f)) {
         speed = DEFAULT_SWIPE_SPEED;
@@ -449,7 +735,7 @@ ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirect
     auto* ndkGesture = new ArkUI_GestureRecognizer{ SWIPE_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGesture(fingers,
-        directions, speedNum, ndkGesture);
+        directions, speedNum, false, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
@@ -464,7 +750,7 @@ ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirec
     }
     auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, mask, distanceNum, ndkGesture);
+        fingers, mask, distanceNum, false, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
@@ -576,6 +862,18 @@ int32_t SetGestureInterrupterToNode(
     auto callback = reinterpret_cast<int32_t (*)(ArkUIGestureInterruptInfo*)>(interrupter);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setGestureInterrupterToNode(
         node->uiNodeHandle, callback);
+    return 0;
+}
+
+int32_t SetGestureInterrupterToNodeWithUserData(ArkUI_NodeHandle node, void* userData,
+    ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info))
+{
+    auto callback = reinterpret_cast<int32_t (*)(ArkUIGestureInterruptInfo*)>(interrupter);
+    auto nodeModel = OHOS::Ace::NodeModel::GetFullImpl();
+    if (nodeModel) {
+        nodeModel->getNodeModifiers()->getGestureModifier()->setGestureInterrupterToNodeWithUserData(
+            node->uiNodeHandle, userData, callback);
+    }
     return 0;
 }
 

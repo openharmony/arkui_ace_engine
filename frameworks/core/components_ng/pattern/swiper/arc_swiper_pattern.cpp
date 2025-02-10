@@ -80,6 +80,11 @@ constexpr int32_t VERTICAL_ANIMATION_SIZE = 9;
 constexpr int32_t NO_ANIMAION_DEFAULT_DURATION = 400;
 constexpr int32_t VERTICAL_ANIMAION_DEFAULT_DURATION = 330;
 constexpr int32_t HORIZONTAL_ANIMAION_DEFAULT_DURATION = 750;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr int32_t COUNT_TWO_INDEX = 2;
+constexpr const char* HAPTIC_STRENGTH4 = "watchhaptic.feedback.crown.strength4";
+constexpr const char* HAPTIC_IMPACT = "watchhaptic.feedback.crown.impact";
+#endif
 
 float GetHorizontalExitScaleValue(bool rollBack)
 {
@@ -243,13 +248,13 @@ void ArcSwiperPattern::PlayVerticalAnimation(const OffsetF& offset, int32_t inde
 bool ArcSwiperPattern::IsPreItem(int32_t index, float translate, bool rollback)
 {
     if (translate < 0) {
-        if (index < itemPosition_.size() / HALF) {
+        if (index < static_cast<int32_t>(itemPosition_.size() / HALF)) {
             return !rollback;
         } else {
             return rollback;
         }
     } else {
-        if (index < itemPosition_.size() / HALF) {
+        if (index < static_cast<int32_t>(itemPosition_.size() / HALF)) {
             return rollback;
         } else {
             return !rollback;
@@ -1518,13 +1523,16 @@ void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
         if (std::abs(offsetLen) >= length * theme->GetCrownTranslocationRatio()) {
             isCrownSpring_ = true;
             HandleDragEnd(crownTurnVelocity_);
+            StartVibrator(degree > 0);
             HandleTouchUp();
         }
     } else {
         isCrownSpring_ = true;
         HandleDragEnd(crownVelocity_);
+        StartVibrator(degree > 0);
         HandleTouchUp();
     }
+    oldCurrentIndex_ = currentIndex_;
 }
 
 void ArcSwiperPattern::HandleCrownActionEnd(
@@ -1548,6 +1556,7 @@ void ArcSwiperPattern::HandleCrownActionEnd(
         double offsetLen = direction_ == Axis::VERTICAL ? accumulativeCrownPx_.GetY() : accumulativeCrownPx_.GetX();
         if (std::abs(offsetLen) >= length * theme->GetCrownTranslocationRatio()) {
             HandleDragEnd(crownTurnVelocity_);
+            StartVibrator(degree > 0);
             HandleTouchUp();
         } else {
             HandleDragEnd(0.0);
@@ -1555,8 +1564,29 @@ void ArcSwiperPattern::HandleCrownActionEnd(
         }
     } else {
         HandleDragEnd(crownVelocity_);
+        StartVibrator(degree > 0);
         HandleTouchUp();
     }
+    oldCurrentIndex_ = currentIndex_;
+}
+
+void ArcSwiperPattern::StartVibrator(bool isLeft)
+{
+    if (oldCurrentIndex_ != -1 &&
+        oldCurrentIndex_ == currentIndex_ &&
+        ((isLeft && currentIndex_ == 1) || (!isLeft && currentIndex_ == TotalCount() - COUNT_TWO_INDEX))) {
+        return;
+    }
+    if ((isLeft && currentIndex_ == 0) || (!isLeft && currentIndex_ == TotalCount() - 1)) {
+        return;
+    }
+    // Perform HAPTIC_STRENGTH4 vibration when switching between each item
+    // Perform HAPTIC_IMPACT vibration when reaching the boundary
+    const char* effectId = ((currentIndex_ == 1 && isLeft) ||
+        (currentIndex_ == TotalCount() - COUNT_TWO_INDEX && (!isLeft)))
+                               ? HAPTIC_IMPACT
+                               : HAPTIC_STRENGTH4;
+    VibratorUtils::StartVibraFeedback(effectId);
 }
 
 void ArcSwiperPattern::HandleCrownActionCancel()

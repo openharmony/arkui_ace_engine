@@ -26,10 +26,10 @@ class TabBarPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TabBarPaintMethod, NodePaintMethod)
 
 public:
-    TabBarPaintMethod(const RefPtr<TabBarModifier>& tabBarModifier,
+    TabBarPaintMethod(const RefPtr<TabBarModifier>& tabBarModifier, const RectF& frameRect,
         const std::vector<bool>& gradientRegions, const Color& backgroundColor,
         const IndicatorStyle& indicatorStyle, const OffsetF& indicatorOffset, bool hasIndicator)
-        : tabBarModifier_(tabBarModifier), gradientRegions_(gradientRegions),
+        : tabBarModifier_(tabBarModifier), frameRect_(frameRect), gradientRegions_(gradientRegions),
         backgroundColor_(backgroundColor), indicatorStyle_(indicatorStyle),
         indicatorOffset_(indicatorOffset), hasIndicator_(hasIndicator) {}
     ~TabBarPaintMethod() override = default;
@@ -53,6 +53,7 @@ private:
         const RSPoint& startPoint, const RSPoint& endPoint, float shadowMargin, float gradientWidth);
 
     RefPtr<TabBarModifier> tabBarModifier_;
+    RectF frameRect_;
     std::vector<bool> gradientRegions_;
     Color backgroundColor_;
     IndicatorStyle indicatorStyle_;

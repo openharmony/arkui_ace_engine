@@ -16,9 +16,7 @@
 #include "list_test_ng.h"
 
 namespace OHOS::Ace::NG {
-class ListScrollVisibleContentTestNg : public ListTestNg {
-public:
-};
+class ListScrollVisibleContentTestNg : public ListTestNg {};
 
 /**
  * @tc.name: OnScrollVisibleContentChange001

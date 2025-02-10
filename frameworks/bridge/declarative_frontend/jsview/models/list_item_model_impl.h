@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,9 @@ public:
     ListItemModelImpl() = default;
     ~ListItemModelImpl() override = default;
 
-    void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) override;
-    void Create() override;
+    void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle,
+        bool isCreateArc = false) override;
+    void Create(bool isCreateArc = false) override;
     void OnDidPop() override {}
     void SetBorderRadius(const Dimension& borderRadius) override;
     void SetType(const std::string& type) override;

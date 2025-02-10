@@ -193,7 +193,7 @@ private:
     void UpdateSwitchPaintProperty();
     void UpdateSwitchLayoutProperty();
     void FireBuilder();
-
+    bool OnKeyEvent(const KeyEvent& keyEventInfo);
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -227,8 +227,9 @@ private:
     bool isDragEvent_ = false;
     RefPtr<SwitchPaintMethod> paintMethod_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
-    bool isTouchPreventDefault_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
+    Dimension hotZoneHorizontalSize_;
+    Dimension hotZoneVerticalSize_;
 };
 } // namespace OHOS::Ace::NG
 

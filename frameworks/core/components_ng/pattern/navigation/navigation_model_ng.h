@@ -52,13 +52,15 @@ public:
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
+    void SetHideItemText(bool isHideItemText) override;
+    void SetEnableToolBarAdaptation(bool enable) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
-    void SetNavBarWidth(const Dimension& value) override;
+    void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) override;
     void SetMinNavBarWidth(const Dimension& value) override;
     void SetMaxNavBarWidth(const Dimension& value) override;
     void SetMinContentWidth(const Dimension& value) override;
@@ -68,6 +70,7 @@ public:
     RefPtr<NG::NavigationStack> GetNavigationStack() override;
     void SetMenuCount(int32_t menuCount) override;
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
+    void SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetRecoverable(bool recoverable) override;
@@ -92,6 +95,7 @@ public:
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
+    static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
@@ -103,6 +107,14 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
+    static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
+    static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
+    static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
+    static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
+    static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
+    static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
+    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
+    static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
@@ -112,6 +124,7 @@ private:
     static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
+    static bool navBarWidthDoubleBind_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H

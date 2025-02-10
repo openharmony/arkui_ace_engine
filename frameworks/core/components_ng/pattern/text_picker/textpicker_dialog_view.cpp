@@ -86,6 +86,10 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     textPickerPattern->SetIsShowInDialog(true);
     textPickerPattern->SetPickerTag(false);
     textPickerPattern->SetTextProperties(settingData.properties);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        textPickerPattern->SetIsEnableHaptic(settingData.isEnableHapticFeedback);
+        textPickerPattern->ColumnPatternInitHapticController();
+    }
     auto context = textPickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
@@ -109,6 +113,8 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     SetDialogChange(textPickerNode, std::move(changeEvent));
     auto scrollStopEvent = dialogEvent["scrollStopId"];
     SetDialogScrollStop(textPickerNode, std::move(scrollStopEvent));
+    auto enterSelectedAreaEvent = dialogEvent["enterSelectedAreaId"];
+    SetDialogEnterSelectedArea(textPickerNode, std::move(enterSelectedAreaEvent));
     ViewStackProcessor::GetInstance()->Finish();
     textPickerNode->MountToParent(contentColumn);
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
@@ -266,6 +272,8 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     SetDialogChange(textPickerNode, std::move(changeEvent));
     auto scrollStopEvent = dialogEvent["scrollStopId"];
     SetDialogScrollStop(textPickerNode, std::move(scrollStopEvent));
+    auto enterSelectedAreaEvent = dialogEvent["enterSelectedAreaId"];
+    SetDialogEnterSelectedArea(textPickerNode, std::move(enterSelectedAreaEvent));
 
     ViewStackProcessor::GetInstance()->Finish();
     textPickerNode->MountToParent(contentColumn);
@@ -1067,6 +1075,15 @@ void TextPickerDialogView::SetDialogScrollStop(const RefPtr<FrameNode>& frameNod
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogScrollStop(std::move(onScrollStop));
+}
+
+void TextPickerDialogView::SetDialogEnterSelectedArea(
+    const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onEnterSelectedArea)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDialogEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
 void TextPickerDialogView::SetDefaultPickerItemHeight(const Dimension& value)

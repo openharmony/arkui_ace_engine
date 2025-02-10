@@ -53,6 +53,11 @@ enum class ScrollSnapAlign {
     END,
 };
 
+enum class ScrollBarShape {
+    RECT = 0,
+    ARC,
+};
+
 enum class ScrollPagingStatus {
     // no enablePaging set
     NONE = 0,
@@ -202,6 +207,7 @@ constexpr int32_t SCROLL_FROM_START = 10; // from drag start
 constexpr int32_t SCROLL_FROM_AXIS = 11;
 constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
+constexpr int32_t SCROLL_FROM_CROWN = 14;
 
 inline std::string GetSourceStr(int32_t scrollSource)
 {

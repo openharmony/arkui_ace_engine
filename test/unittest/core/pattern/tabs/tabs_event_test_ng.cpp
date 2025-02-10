@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,12 @@
  */
 
 #include "tabs_test_ng.h"
+#include "test/mock/base/mock_task_executor.h"
 
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/base/mock_task_executor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,49 +36,6 @@ public:
         return AssertionFailure() << "Actual: " << actualColor.ToString() << " Expected: " << expectColor.ToString();
     }
 };
-
-void FocusTest(const RefPtr<TabBarLayoutProperty>& tabBarLayoutProperty, const RefPtr<TabBarPattern>& tabBarPattern)
-{
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-
-    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
-    event.code = KeyCode::KEY_DPAD_RIGHT;
-    tabBarPattern->focusIndicator_ = 1;
-    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
-    tabBarPattern->focusIndicator_ = 0;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-    event.code = KeyCode::KEY_SPACE;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-    event.code = KeyCode::KEY_DPAD_LEFT;
-    tabBarPattern->focusIndicator_ = 0;
-    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
-    tabBarPattern->focusIndicator_ = 1;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-    event.code = KeyCode::KEY_ENTER;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-    event.code = KeyCode::KEY_MOVE_HOME;
-    tabBarPattern->focusIndicator_ = 1;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-    event.code = KeyCode::KEY_MOVE_END;
-    tabBarPattern->focusIndicator_ = 0;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-    event.code = KeyCode::KEY_TAB;
-    tabBarPattern->focusIndicator_ = 0;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-
-    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
-    event.code = KeyCode::KEY_DPAD_DOWN;
-    tabBarPattern->focusIndicator_ = 1;
-    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
-    tabBarPattern->focusIndicator_ = 0;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-    event.code = KeyCode::KEY_DPAD_UP;
-    tabBarPattern->focusIndicator_ = 0;
-    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
-    tabBarPattern->focusIndicator_ = 1;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
-}
 
 /**
  * @tc.name: TabsController001
@@ -309,7 +266,7 @@ HWTEST_F(TabsEventTestNg, HandleClick001, TestSize.Level1)
     tabBarPattern_->HandleClick(info.GetSourceDevice(), 1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushUITasks();
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
 }
 
 /**
@@ -892,7 +849,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
      * @tc.steps: step2. first display.
      * @tc.expected: isShowCount and isHideCount equal to 0.
      */
-    EXPECT_EQ(isShowCount, 0);
+    EXPECT_EQ(isShowCount, 1);
     EXPECT_EQ(isHideCount, 0);
 
     /**
@@ -902,7 +859,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
     swiperController_->SwipeTo(2);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushUITasks();
-    EXPECT_EQ(isShowCount, 1);
+    EXPECT_EQ(isShowCount, 2);
     EXPECT_EQ(isHideCount, 1);
 
     /**
@@ -912,78 +869,8 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
     swiperController_->SwipeToWithoutAnimation(3);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushUITasks();
-    EXPECT_EQ(isShowCount, 2);
+    EXPECT_EQ(isShowCount, 3);
     EXPECT_EQ(isHideCount, 2);
-}
-
-/**
- * @tc.name: OnAppearAndOnDisappearTest001
- * @tc.desc: test OnAppear and OnDisappear
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps1. Create tabs
-     */
-    TabsModelNG model = CreateTabs();
-    TabContentModelNG tabContentModel = CreateTabContent();
-    CreateTabsDone(model);
-
-    auto isOnAppear = false;
-    auto isOnDisappear = false;
-    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
-    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
-    eventHub->SetOnAppear(std::move(appearEvent));
-    eventHub->SetOnDisappear(std::move(disappearEvent));
-    auto pipeline = frameNode_->GetContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-
-    EXPECT_FALSE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step2. trigger OnAttachToMainTree.
-     * @tc.expected: isOnAppear is true.
-     */
-    tabContentFrameNode->OnAttachToMainTree(true);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step3. trigger OnDetachFromMainTree.
-     * @tc.expected: isOnDisappear is true.
-     */
-    tabContentFrameNode->OnDetachFromMainTree(true, pipeline);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_TRUE(isOnDisappear);
-}
-
-/**
- * @tc.name: TabBarPatternOnKeyEvent001
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    EXPECT_EQ(swiperNode_->TotalChildCount(), 4);
-    auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
-
-    /**
-     * @tc.steps: steps2. OnKeyEvent
-     * @tc.expected: steps2. Check the result of OnKeyEvent
-     */
-    KeyEvent event;
-    event.code = KeyCode::KEY_DPAD_RIGHT;
-    tabBarLayoutProperty_->UpdateIndicator(2);
-    EXPECT_FALSE(tabBarPattern_->OnKeyEvent(event));
 }
 
 /**
@@ -1064,174 +951,6 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitHoverEvent001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternInitOnKeyEvent001
- * @tc.desc: test InitOnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternInitOnKeyEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step2. Test function InitOnKeyEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto focusHub = tabBarNode_->GetOrCreateFocusHub();
-    auto event = KeyEvent();
-    auto paintRect = RoundRect();
-    tabBarPattern_->InitOnKeyEvent(focusHub);
-    focusHub->ProcessOnKeyEventInternal(event);
-    focusHub->getInnerFocusRectFunc_(paintRect);
-}
-
-/**
- * @tc.name: TabBarPatternOnKeyEvent003
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step2. Test function OnKeyEvent.
-     * @tc.expected: Related functions run ok.
-     */
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    KeyCode code = KeyCode::KEY_DPAD_LEFT;
-    KeyAction action = KeyAction::DOWN;
-    std::vector<KeyCode> pressedCodes;
-    pressedCodes.emplace_back(KeyCode::KEY_0);
-    pressedCodes.emplace_back(KeyCode::KEY_1);
-    int32_t repeatTime = 1;
-    int64_t timeStamp = 0;
-    std::chrono::milliseconds milliseconds(timeStamp);
-    TimeStamp time(milliseconds);
-    int32_t metaKey = 1;
-    int64_t deviceId = 1;
-    SourceType sourceType = SourceType::NONE;
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarLayoutProperty_->UpdateIndicator(1);
-    auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType, {});
-    tabBarPattern_->OnKeyEvent(event);
-}
-
-/**
- * @tc.name: TabBarPatternOnKeyEvent004
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent004, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
-    CreateTabsDone(model);
-    auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
-
-    /**
-     * @tc.steps: steps2. OnKeyEvent
-     * @tc.expected: steps2. Check the result of OnKeyEvent
-     */
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_MOVE_HOME;
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::NOSTYLE);
-    tabBarPattern_->focusIndicator_ = 1;
-    EXPECT_TRUE(tabBarPattern_->OnKeyEvent(event));
-
-    event.code = KeyCode::KEY_MOVE_END;
-    tabBarPattern_->focusIndicator_ = 0;
-    EXPECT_TRUE(tabBarPattern_->OnKeyEvent(event));
-
-    layoutProperty_->UpdateTabBarPosition(BarPosition::START);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    FocusTest(tabBarLayoutProperty_, tabBarPattern_);
-}
-
-/**
- * @tc.name: TabBarPatternOnKeyEvent005
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent005, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs(BarPosition::END);
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
-    CreateTabsDone(model);
-    auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
-
-    /**
-     * @tc.steps: steps2. OnKeyEvent
-     * @tc.expected: steps2. Check the result of OnKeyEvent
-     */
-    layoutProperty_->UpdateTabBarPosition(BarPosition::END);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-    FocusTest(tabBarLayoutProperty_, tabBarPattern_);
-}
-
-/**
- * @tc.name: TabBarPatternOnKeyEvent006
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent006, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs(BarPosition::END);
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
-    CreateTabsDone(model);
-    auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
-
-    /**
-     * @tc.steps: steps2. OnKeyEvent
-     * @tc.expected: steps2. Check the result of OnKeyEvent
-     */
-    layoutProperty_->UpdateTabBarPosition(BarPosition::END);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-    tabBarPattern_->SetFirstFocus(true);
-    FocusTest(tabBarLayoutProperty_, tabBarPattern_);
-}
-
-/**
- * @tc.name: TabBarPatternOnKeyEvent007
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent007, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs(BarPosition::END);
-    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
-    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: steps2. OnKeyEvent
-     * @tc.expected: steps2. Check the result of OnKeyEvent
-     */
-    layoutProperty_->UpdateTabBarPosition(BarPosition::END);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = false;
-    event.code = KeyCode::KEY_DPAD_RIGHT;
-    tabBarPattern_->focusIndicator_ = 0;
-    EXPECT_FALSE(tabBarPattern_->OnKeyEvent(event));
-
-    pipeline->isFocusActive_ = true;
-    event.code = KeyCode::KEY_A;
-    tabBarPattern_->focusIndicator_ = 0;
-    EXPECT_FALSE(tabBarPattern_->OnKeyEvent(event));
-}
-
-/**
  * @tc.name: TabBarPatternInitTurnPageRateEvent001
  * @tc.desc: test InitTurnPageRateEvent
  * @tc.type: FUNC
@@ -1261,6 +980,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent001, TestSize.Level1
     tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
     tabBarPattern_->turnPageRate_ = 0.5f;
     tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1303,6 +1023,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern_->turnPageRate_ = -1.0f;
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1554,5 +1275,144 @@ HWTEST_F(TabsEventTestNg, ObserverTestNg001, TestSize.Level1)
     swiperController_->SwipeTo(1);
     FlushUITasks();
     UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(nullptr);
+}
+
+/**
+ * @tc.name: SetOnUnselectedEvent001
+ * @tc.desc: test SetOnUnselectedEvent, event will be triggered when index unselected
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnUnselectedEvent001, TestSize.Level1)
+{
+    int32_t currentIndex;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnUnselected(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Change swiper index
+     * @tc.expected: Event was triggered
+     */
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 0);
+
+    SwipeToWithoutAnimation(3);
+    EXPECT_EQ(currentIndex, 1);
+}
+
+/**
+ * @tc.name: SetOnUnselectedEvent002
+ * @tc.desc: test SetOnUnselectedEvent, swap event
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnUnselectedEvent002, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnUnselected(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Swap event
+     * @tc.expected: Event was swap
+     */
+    bool currentIndex2;
+    auto event2 = [&currentIndex2](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex2 = tabInfo->GetIndex();
+    };
+    pattern_->SetOnUnselectedEvent(std::move(event2));
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 0);
+    EXPECT_EQ(currentIndex2, 0);
+    SwipeToWithoutAnimation(3);
+    EXPECT_EQ(currentIndex2, 1);
+}
+
+/**
+ * @tc.name: SetOnSelectedEvent001
+ * @tc.desc: test SetOnSelectedEvent, event will be triggered when index selected
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnSelectedEvent001, TestSize.Level1)
+{
+    int32_t currentIndex;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnSelected(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Change swiper index to 1
+     * @tc.expected: currentIndex is 1
+     */
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 1);
+
+    /**
+     * @tc.steps: step2. Change swiper index to 3
+     * @tc.expected: currentIndex is 3
+     */
+    SwipeToWithoutAnimation(3);
+    EXPECT_EQ(currentIndex, 3);
+}
+
+/**
+ * @tc.name: OnAppearAndOnDisappearTest001
+ * @tc.desc: test OnAppear and OnDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabs
+     */
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    CreateTabsDone(model);
+
+    auto isOnAppear = false;
+    auto isOnDisappear = false;
+    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
+    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
+    eventHub->SetOnAppear(std::move(appearEvent));
+    eventHub->SetOnDisappear(std::move(disappearEvent));
+    auto pipeline = frameNode_->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    EXPECT_FALSE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step2. trigger OnAttachToMainTree.
+     * @tc.expected: isOnAppear is true.
+     */
+    tabContentFrameNode->OnAttachToMainTree(true);
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step3. trigger OnDetachFromMainTree.
+     * @tc.expected: isOnDisappear is true.
+     */
+    tabContentFrameNode->OnDetachFromMainTree(true, pipeline);
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_TRUE(isOnDisappear);
 }
 } // namespace OHOS::Ace::NG

@@ -183,16 +183,10 @@ void CheckBoxPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH &&
-            (info.IsPreventDefault() || checkboxPattern->isTouchPreventDefault_)) {
-            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox preventDefault successfully");
-            checkboxPattern->isTouchPreventDefault_ = false;
-            return;
-        }
         checkboxPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickAfterEvent(clickListener_);
+    gesture->AddClickEvent(clickListener_);
 }
 
 void CheckBoxPattern::InitTouchEvent()
@@ -210,9 +204,6 @@ void CheckBoxPattern::InitTouchEvent()
         if (info.GetTouches().empty()) {
             return;
         }
-        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
-            checkboxPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             checkboxPattern->OnTouchDown();
         }
@@ -222,7 +213,7 @@ void CheckBoxPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchAfterEvent(touchListener_);
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void CheckBoxPattern::InitMouseEvent()
@@ -418,7 +409,9 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    auto group = GetGroupNameWithNavId();
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto group = eventHub->GetGroupName() + currentNavId_.value_or(groupManager->GetLastNavId());
     groupManager->RemoveCheckBoxFromGroup(group, frameNode->GetId());
     auto groupNode = groupManager->GetCheckboxGroup(group);
     CHECK_NULL_VOID(groupNode);
@@ -721,6 +714,7 @@ void CheckBoxPattern::InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupN
 
 void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    CHECK_NULL_VOID(focusHub);
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -728,6 +722,24 @@ void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool CheckBoxPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action == KeyAction::DOWN && event.code == KeyCode::KEY_FUNCTION) {
+        OnClick();
+        return true;
+    }
+    return false;
 }
 
 bool CheckBoxPattern::IsSquareStyleBox()

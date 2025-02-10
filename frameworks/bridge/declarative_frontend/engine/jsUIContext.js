@@ -116,6 +116,36 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return pixelmap;
     }
+
+    getWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_componentSnapshot.getWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
+
+    getSyncWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSyncWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
+
+    createFromComponent(content, delay, checkImageStatus, options) {
+        if (content === undefined || content === null) {
+            let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_componentSnapshot.createFromComponent(content.getFrameNode(), delay, checkImageStatus, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
 }
 
 class DragController {
@@ -159,6 +189,18 @@ class DragController {
     setDragEventStrictReportingEnabled(enable) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         JSViewAbstract.setDragEventStrictReportingEnabled(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    notifyDragStartRequest(request) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.notifyDragStartRequest(request);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    cancelDataLoading(key) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.cancelDataLoading(key);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
@@ -484,6 +526,13 @@ class UIContext {
         return keyBoardAvoidMode;
     }
 
+    dispatchKeyEvent(node, event) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = JSViewAbstract.dispatchKeyEvent(node, event);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+
     getAtomicServiceBar() {
         const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
         if (!bundleMgr || !bundleMgr.BundleFlag) {
@@ -739,6 +788,23 @@ class UIContext {
         Context.enableSwipeBack(enabled);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getTextMenuController() {
+        if (this.textMenuController_ == null) {
+            this.textMenuController_ = new TextMenuController(this.instanceId_);
+        }
+        return this.textMenuController_;
+    }
+
+    freezeUINode(idOrUniqueId, isFreeze) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof idOrUniqueId === "string") {
+            getUINativeModule().common.freezeUINodeById(idOrUniqueId, isFreeze);
+        } else if (typeof idOrUniqueId === "number") {
+            getUINativeModule().common.freezeUINodeByUniqueId(idOrUniqueId, isFreeze);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {
@@ -836,6 +902,7 @@ class FocusController {
         this.instanceId_ = instanceId;
         this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
     }
+
     clearFocus() {
         if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
             return;
@@ -877,6 +944,24 @@ class FocusController {
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.setAutoFocusTransfer(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    configWindowMask(enable) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.configWindowMask(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setKeyProcessingMode(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setKeyProcessingMode(value);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
@@ -1235,6 +1320,128 @@ class PromptAction {
         }
     }
 
+    openPopup(content, target, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || target === null || target === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.openPopup(content.getNodePtr(), target);
+        } else {
+            result_ = Context.openPopup(content.getNodePtr(), target, options);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    updatePopup(content, options, partialUpdate) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || options === null || options === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.updatePopup(content.getNodePtr(), options);
+        } else {
+            result_ = Context.updatePopup(content.getNodePtr(), options, partialUpdate);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closePopup(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        const paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength !== 1 || content === null || content === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_ = Context.closePopup(content.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    openMenu(content, target, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || target === null || target === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.openMenu(content.getNodePtr(), target);
+        } else {
+            result_ = Context.openMenu(content.getNodePtr(), target, options);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    updateMenu(content, options, partialUpdate) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || options === null || options === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.updateMenu(content.getNodePtr(), options);
+        } else {
+            result_ = Context.updateMenu(content.getNodePtr(), options, partialUpdate);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closeMenu(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        const paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength !== 1 || content === null || content === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_ = Context.closeMenu(content.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     showActionMenu(options, callback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof callback !== 'undefined') {
@@ -1289,6 +1496,13 @@ class AtomicServiceBar {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_atomicServiceBar.setIconColor(color);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getBarRect() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let rect = this.ohos_atomicServiceBar.getBarRect();
+        __JSScopeUtil__.restoreInstanceId();
+        return rect;
     }
 }
 
@@ -1358,6 +1572,25 @@ class OverlayManager {
         __JSScopeUtil__.restoreInstanceId();
     }
 }
+
+class TextMenuController {
+    /**
+     * Construct new instance of TextMenuController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 16
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    setMenuOptions(textMenuOptions) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        TextMenu.setMenuOptions(textMenuOptions);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
 /**
  * Get UIContext instance.
  * @param instanceId obtained on the c++ side.

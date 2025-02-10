@@ -36,6 +36,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_accessibility.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -55,6 +56,7 @@ constexpr int NUM_8 = 8;
 constexpr int NUM_9 = 9;
 constexpr int NUM_10 = 10;
 constexpr int NUM_11 = 11;
+constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
 constexpr int SIZE_OF_TWO = 2;
 constexpr int SIZE_OF_THREE = 3;
@@ -1487,6 +1489,9 @@ bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue
     }
     return false;
 }
+
+const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
+    AccessibilitySamePageMode::FULL_SILENT };
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -3176,6 +3181,24 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImageSize(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+bool ParseJsBackgroundImageOptions(
+    const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& repeatIndex, bool& syncMode)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    auto jsObj = value->ToObject(vm);
+    auto repeat = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "repeat"));
+    if (repeat->IsNumber()) {
+        repeatIndex = repeat->ToNumber(vm)->Value();
+    }
+    auto syncLoad = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "syncLoad"));
+    if (syncLoad->IsBoolean()) {
+        syncMode = syncLoad->ToBoolean(vm)->Value();
+    }
+    return true;
+}
+
 ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -3188,9 +3211,15 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
     std::string bundle;
     std::string module;
     int32_t repeatIndex = 0;
+    bool syncMode = false;
     RefPtr<PixelMap> pixmap = nullptr;
     if (repeatArg->IsNumber()) {
         repeatIndex = repeatArg->ToNumber(vm)->Value();
+    }
+    if (ParseJsBackgroundImageOptions(vm, repeatArg, repeatIndex, syncMode)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageSyncMode(nativeNode, syncMode);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     }
     if (srcArg->IsString(vm)) {
         src = srcArg->ToString(vm)->ToString(vm);
@@ -3225,6 +3254,7 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImage(ArkUIRuntimeCallInfo *
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImage(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -3967,6 +3997,101 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityLevel(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetAccessibilityRoleType(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() < NUM_2) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "set role params num is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!firstArg->IsNativePointer(vm)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "set role first param is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsInt()) {
+        auto index = secondArg->Int32Value(vm);
+        AccessibilityRoleType roleType = static_cast<AccessibilityRoleType>(index);
+        std::string role = JSAccessibilityAbstract::GetRoleByType(roleType);
+        if (!role.empty()) {
+            GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityCustomRole(nativeNode, role.c_str());
+        } else {
+            GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityCustomRole(nativeNode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityCustomRole(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityRoleType(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() < NUM_1) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "reset role params num is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "reset role first param is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityCustomRole(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAccessibilityFocusCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() < NUM_2) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "set focus callback params num is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsFunction(vm)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "set focus callback params is invalid, reset callback");
+        ViewAbstractModelNG::ResetOnAccessibilityFocus(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto obj = secondArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto focusCallback = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode),
+        containerId](bool isFocus) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = panda::BooleanRef::New(vm, isFocus);
+        panda::Local<panda::JSValueRef> params[] = { newJSVal };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(focusCallback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityFocusCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() < NUM_1) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "reset focus callback params num is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstractModelNG::ResetOnAccessibilityFocus(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetAccessibilityDescription(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -4076,10 +4201,10 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
 
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension rightDimen(0, DimensionUnit::VP);
@@ -4374,10 +4499,10 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
     CalcDimension maxWidth;
     CalcDimension minHeight;
     CalcDimension maxHeight;
-    struct ArkUISizeType minWidthValue = { 0.0, 0, "" };
-    struct ArkUISizeType maxWidthValue = { 0.0, 0, "" };
-    struct ArkUISizeType minHeightValue = { 0.0, 0, "" };
-    struct ArkUISizeType maxHeightValue = { 0.0, 0, "" };
+    struct ArkUISizeType minWidthValue = {0.0, 0};
+    struct ArkUISizeType maxWidthValue = {0.0, 0};
+    struct ArkUISizeType minHeightValue = {0.0, 0};
+    struct ArkUISizeType maxHeightValue = {0.0, 0};
 
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth, false)) {
@@ -5209,19 +5334,16 @@ ArkUINativeModuleValue CommonBridge::ResetForegroundBrightness(ArkUIRuntimeCallI
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+void ParseDragPreViewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValueRef>& valueObj,
+    ArkUIDragPreViewOptions& preViewOptions, int32_t* modeIntArray)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> mode = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> numberBadge = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> isMultiSelectionEnabled = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> defaultAnimationBeforeLifting = runtimeCallInfo->GetCallArgRef(NUM_4);
- 
-    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
-    int32_t* modeIntArray = nullptr;
+    CHECK_NULL_VOID(vm);
+    if (!valueObj->IsObject(vm)) {
+        return;
+    }
+    auto obj = valueObj->ToObject(vm);
+    auto mode = obj->Get(vm, "mode");
     if (mode->IsNumber()) {
         preViewOptions.isModeArray = false;
         preViewOptions.mode = mode->Int32Value(vm);
@@ -5240,7 +5362,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.modeArray = modeIntArray;
         preViewOptions.modeArrayLength = static_cast<ArkUI_Int32>(arrLength);
     }
-
+    auto numberBadge = obj->Get(vm, "numberBadge");
     if (numberBadge->IsBoolean()) {
         preViewOptions.isBadgeNumber = false;
         preViewOptions.isShowBadge = numberBadge->ToBoolean(vm)->Value();
@@ -5248,14 +5370,54 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.isBadgeNumber = true;
         preViewOptions.badgeNumber = numberBadge->Int32Value(vm);
     }
+}
 
-    struct ArkUIDragInteractionOptions interactionOptions = { false, false };
+void ParseDragInteractionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValueRef>& valueObj,
+    ArkUIDragInteractionOptions& interactionOptions)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    if (!valueObj->IsObject(vm)) {
+        return;
+    }
+    auto obj = valueObj->ToObject(vm);
+
+    Local<JSValueRef> isMultiSelectionEnabled = obj->Get(vm, "isMultiSelectionEnabled");
     if (isMultiSelectionEnabled->IsBoolean()) {
         interactionOptions.isMultiSelectionEnabled = isMultiSelectionEnabled->ToBoolean(vm)->Value();
     }
+    Local<JSValueRef> defaultAnimationBeforeLifting = obj->Get(vm, "defaultAnimationBeforeLifting");
     if (defaultAnimationBeforeLifting->IsBoolean()) {
         interactionOptions.defaultAnimationBeforeLifting = defaultAnimationBeforeLifting->ToBoolean(vm)->Value();
     }
+    Local<JSValueRef> enableEdgeAutoScroll = obj->Get(vm, "enableEdgeAutoScroll");
+    if (enableEdgeAutoScroll->IsBoolean()) {
+        interactionOptions.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean(vm)->Value();
+    }
+    Local<JSValueRef> enableHapticFeedback = obj->Get(vm, "enableHapticFeedback");
+    if (enableHapticFeedback->IsBoolean()) {
+        interactionOptions.enableHapticFeedback = enableHapticFeedback->ToBoolean(vm)->Value();
+    }
+    Local<JSValueRef> isLiftingDisabled = obj->Get(vm, "isLiftingDisabled");
+    if (isLiftingDisabled->IsBoolean()) {
+        interactionOptions.isLiftingDisabled = isLiftingDisabled->ToBoolean(vm)->Value();
+    }
+}
+
+ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+
+    Local<JSValueRef> valueObj = runtimeCallInfo->GetCallArgRef(NUM_1);
+    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
+    struct ArkUIDragInteractionOptions interactionOptions = { false, false, true, false, false };
+    int32_t* modeIntArray = nullptr;
+    ParseDragPreViewOptions(runtimeCallInfo, valueObj, preViewOptions, modeIntArray);
+    ParseDragInteractionOptions(runtimeCallInfo, valueObj, interactionOptions);
+
     GetArkUINodeModifiers()->getCommonModifier()->setDragPreviewOptions(
         nativeNode, preViewOptions, interactionOptions);
     delete[] modeIntArray;
@@ -5278,17 +5440,39 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> inspectorId = runtimeCallInfo->GetCallArgRef(NUM_1);
-
+    Local<JSValueRef> valueObj = runtimeCallInfo->GetCallArgRef(NUM_1);
     struct ArkUIDragPreview dragPreview = { "" };
     std::string stringValue;
-    if (inspectorId->IsString(vm)) {
-        stringValue = inspectorId->ToString(vm)->ToString(vm);
-        dragPreview.inspectorId = stringValue.c_str();
+    std::string extraInfoValue;
+    RefPtr<PixelMap> pixmap = nullptr;
+    if (valueObj->IsObject(vm)) {
+        auto obj = valueObj->ToObject(vm);
+        auto inspectorId = obj->Get(vm, "inspetorId");
+        if (inspectorId->IsString(vm)) {
+            stringValue = inspectorId->ToString(vm)->ToString(vm);
+            dragPreview.inspectorId = stringValue.c_str();
+        }
+        auto onlyForLifting = obj->Get(vm, "onlyForLifting");
+        if (onlyForLifting->IsBoolean()) {
+            dragPreview.onlyForLifting = onlyForLifting->ToBoolean(vm)->Value();
+        }
+        auto extraInfo = obj->Get(vm, "extraInfo");
+        if (extraInfo->IsString(vm)) {
+            extraInfoValue = extraInfo->ToString(vm)->ToString(vm);
+            dragPreview.extraInfo = extraInfoValue.c_str();
+        }
+        auto pixelMap = obj->Get(vm, "pixelMap");
+        if (!pixelMap->IsUndefined()) {
+#if defined(PIXEL_MAP_SUPPORTED)
+            pixmap = ArkTSUtils::CreatePixelMapFromNapiValue(vm, pixelMap);
+#endif
+            if (pixmap) {
+                auto pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
+                dragPreview.pixelMap = &pixelMapSharedPtr;
+            }
+        }
     }
-
-    GetArkUINodeModifiers()->getCommonModifier()->setDragPreview(
-        nativeNode, dragPreview);
+    GetArkUINodeModifiers()->getCommonModifier()->setDragPreview(nativeNode, dragPreview);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5806,6 +5990,90 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityGroup(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetAccessibilityNextFocusId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString(vm)) {
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityNextFocusId(nativeNode, stringValue.c_str());
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityNextFocusId(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityNextFocusId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityNextFocusId(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAccessibilityDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool boolValue = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityDefaultFocus(nativeNode, boolValue);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityDefaultFocus(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityDefaultFocus(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAccessibilityUseSamePage(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+
+    if (secondArg->IsUndefined() || !secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityUseSamePage(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t intValue = secondArg->Int32Value(vm);
+    if (intValue >= 0 && intValue < static_cast<int32_t>(PAGE_MODE_TYPE.size())) {
+        bool isFullSilent = static_cast<bool>(PAGE_MODE_TYPE[intValue]);
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityUseSamePage(nativeNode, isFullSilent);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityUseSamePage(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityUseSamePage(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityUseSamePage(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetHoverEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -5972,9 +6240,9 @@ bool ParseLightPosition(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUI
 
 void ParseLightSource(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUINodeHandle& nativeNode)
 {
-    struct ArkUISizeType dimPosX = { 0.0, 0, "" };
-    struct ArkUISizeType dimPosY = { 0.0, 0, "" };
-    struct ArkUISizeType dimPosZ = { 0.0, 0, "" };
+    struct ArkUISizeType dimPosX = { 0.0, 0 };
+    struct ArkUISizeType dimPosY = { 0.0, 0 };
+    struct ArkUISizeType dimPosZ = { 0.0, 0 };
     bool success = ParseLightPosition(runtimeCallInfo, vm, dimPosX, dimPosY, dimPosZ);
     if (success) {
         GetArkUINodeModifiers()->getCommonModifier()->setPointLightPosition(nativeNode, &dimPosX, &dimPosY, &dimPosZ);
@@ -6014,7 +6282,7 @@ ArkUINativeModuleValue CommonBridge::SetPointLightStyle(ArkUIRuntimeCallInfo *ru
     if (illuminatedArg->IsNumber() || !resourceWrapper) {
         auto illuminatedValue = static_cast<ArkUI_Uint32>(illuminatedArg->ToNumber(vm)->Value());
         Dimension illuminatedBorderWidth = resourceWrapper->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
-        struct ArkUISizeType illuminatedBorderWidthValue = { 0.0, 0, "" };
+        struct ArkUISizeType illuminatedBorderWidthValue = { 0.0, 0 };
         illuminatedBorderWidthValue.value = illuminatedBorderWidth.Value();
         illuminatedBorderWidthValue.unit = static_cast<int8_t>(illuminatedBorderWidth.Unit());
         GetArkUINodeModifiers()->getCommonModifier()->setPointLightIlluminated(
@@ -6095,11 +6363,51 @@ FrameNode* CommonBridge::GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, nullptr);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), nullptr);
+    CHECK_NULL_RETURN(!firstArg.IsNull() && firstArg->IsNativePointer(vm), nullptr);
     auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(nativeNode, nullptr);
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     return frameNode;
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateChangeValueInfoObj(EcmaVM* vm, const ChangeValueInfo& changeValueInfo)
+{
+    const char* previewTextKeys[] = { "value", "offset" };
+    Local<JSValueRef> previewTextValues[] = {
+        panda::StringRef::NewFromUtf16(vm, changeValueInfo.previewText.value.c_str()),
+        panda::NumberRef::New(vm, changeValueInfo.previewText.offset) };
+    auto previewTextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(previewTextKeys),
+        previewTextKeys, previewTextValues);
+
+    const char* rangeKeys[] = { "start", "end" };
+    Local<JSValueRef> rangeBeforeValues[] = {
+        panda::NumberRef::New(vm, changeValueInfo.rangeBefore.start),
+        panda::NumberRef::New(vm, changeValueInfo.rangeBefore.end) };
+    auto rangeBeforeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(rangeKeys),
+        rangeKeys, rangeBeforeValues);
+    Local<JSValueRef> rangeAfterValues[] = {
+        panda::NumberRef::New(vm, changeValueInfo.rangeAfter.start),
+        panda::NumberRef::New(vm, changeValueInfo.rangeAfter.end) };
+    auto rangeAfterObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(rangeKeys),
+        rangeKeys, rangeAfterValues);
+    Local<JSValueRef> oldPreviewTextValues[] = {
+        panda::StringRef::NewFromUtf16(vm, changeValueInfo.oldPreviewText.value.c_str()),
+        panda::NumberRef::New(vm, changeValueInfo.oldPreviewText.offset) };
+    auto oldPreviewTextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(previewTextKeys),
+        previewTextKeys, oldPreviewTextValues);
+
+    const char* optionsKeys[] = { "rangeBefore", "rangeAfter", "oldContent", "oldPreviewText" };
+    Local<JSValueRef> optionsValues[] = { rangeBeforeObj, rangeAfterObj,
+        panda::StringRef::NewFromUtf16(vm, changeValueInfo.oldContent.c_str()), oldPreviewTextObj };
+    auto optionsObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(optionsKeys),
+        optionsKeys, optionsValues);
+
+    const char* changeValueInfoKeys[] = { "content", "previewText", "options" };
+    Local<JSValueRef> changeValueInfoValues[] = { panda::StringRef::NewFromUtf16(vm, changeValueInfo.value.c_str()),
+        previewTextObj, optionsObj };
+    auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(changeValueInfoKeys),
+        changeValueInfoKeys, changeValueInfoValues);
+    return eventObject;
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateGestureInfo(EcmaVM* vm, const RefPtr<NG::GestureInfo>& gestureInfo)
@@ -6136,6 +6444,8 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceTool())));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "deviceId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetTargetDisplayId())));
 
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
@@ -6230,14 +6540,47 @@ Local<panda::ObjectRef> CommonBridge::CreateRecognizerObject(EcmaVM* vm, const R
     if (panRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSPanRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSPanRecognizer>());
-        currentRecognizer->SetRecognizer(panRecognizer);
-        currentRecognizer->SetPanGestureOptions(
-            panRecognizer->GetFingers(), panRecognizer->GetDistance(), panRecognizer->GetDirection());
+        currentRecognizer->Update(panRecognizer);
+        return recognizerObj->GetLocalHandle();
+    }
+    auto pinchRecognizer = AceType::DynamicCast<NG::PinchRecognizer>(target);
+    if (pinchRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSPinchRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSPinchRecognizer>());
+        currentRecognizer->Update(pinchRecognizer);
+        return recognizerObj->GetLocalHandle();
+    }
+    auto tapRecognizer = AceType::DynamicCast<NG::ClickRecognizer>(target);
+    if (tapRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSTapRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSTapRecognizer>());
+        currentRecognizer->Update(tapRecognizer);
+        return recognizerObj->GetLocalHandle();
+    }
+    auto longPressRecognizer = AceType::DynamicCast<NG::LongPressRecognizer>(target);
+    if (longPressRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSLongPressRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSLongPressRecognizer>());
+        currentRecognizer->Update(longPressRecognizer);
+        return recognizerObj->GetLocalHandle();
+    }
+    auto rotationRecognizer = AceType::DynamicCast<NG::RotationRecognizer>(target);
+    if (rotationRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSRotationRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSRotationRecognizer>());
+        currentRecognizer->Update(rotationRecognizer);
+        return recognizerObj->GetLocalHandle();
+    }
+    auto swipeRecognizer = AceType::DynamicCast<NG::SwipeRecognizer>(target);
+    if (swipeRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSSwipeRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSSwipeRecognizer>());
+        currentRecognizer->Update(swipeRecognizer);
         return recognizerObj->GetLocalHandle();
     }
     JSRef<JSObject> recognizerObj = JSClass<JSGestureRecognizer>::NewInstance();
     auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSGestureRecognizer>());
-    currentRecognizer->SetRecognizer(target);
+    currentRecognizer->Update(target);
     return recognizerObj->GetLocalHandle();
 }
 
@@ -6247,14 +6590,15 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
     double density = PipelineBase::GetCurrentDensity();
-    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY", "displayX", "displayY" };
+    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY", "displayX", "displayY", "hand" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, fingerInfo.fingerId_),
         panda::NumberRef::New(vm, globalLocation.GetX() / density),
         panda::NumberRef::New(vm, globalLocation.GetY() / density),
         panda::NumberRef::New(vm, localLocation.GetX() / density),
         panda::NumberRef::New(vm, localLocation.GetY() / density),
         panda::NumberRef::New(vm, screenLocation.GetX() / density),
-        panda::NumberRef::New(vm, screenLocation.GetY() / density) };
+        panda::NumberRef::New(vm, screenLocation.GetY() / density),
+        panda::NumberRef::New(vm, fingerInfo.operatingHand_) };
         return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
@@ -6280,6 +6624,12 @@ Local<panda::ObjectRef> CommonBridge::CreateEventTargetObject(EcmaVM* vm, const 
     auto area = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfArea), keysOfArea, valuesOfArea);
     auto target = panda::ObjectRef::New(vm);
     target->Set(vm, panda::StringRef::NewFromUtf8(vm, "area"), area);
+    if (info->GetTarget().id.empty()) {
+        target->Set(vm, panda::StringRef::NewFromUtf8(vm, "id"), panda::JSValueRef().Undefined(vm));
+    } else {
+        target->Set(vm, panda::StringRef::NewFromUtf8(vm, "id"),
+            panda::StringRef::NewFromUtf8(vm, info->GetTarget().id.c_str()));
+    }
     return target;
 }
 
@@ -6355,7 +6705,7 @@ void CommonBridge::SetGestureAllowedTypes(ArkUIRuntimeCallInfo* runtimeCallInfo,
 }
 
 void CommonBridge::GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers,
-    int32_t& count, double& distanceThreshold, uint32_t argNumber)
+    int32_t& count, double& distanceThreshold, bool& limitFingerCount, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -6370,15 +6720,15 @@ void CommonBridge::GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int
         auto countValue = static_cast<int32_t>(countArg->ToNumber(vm)->Value());
         count = countValue < DEFAULT_TAP_COUNT ? DEFAULT_TAP_COUNT : countValue;
     }
-    Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber + 2); // 2: get the third arg
-    if (!distanceArg.IsNull() && !distanceArg->IsUndefined()) {
-        auto distanceValue = static_cast<int32_t>(distanceArg->ToNumber(vm)->Value());
-        distanceThreshold = distanceValue < 0 ? DEFAULT_TAP_DISTANCE : distanceValue;
+    Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 2); // 2: get the third arg
+    if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
+        limitFingerCount = limitFingerCountArg->ToBoolean(vm)->Value();
     }
 }
 
 void CommonBridge::GetLongPressGestureValue(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration, uint32_t argNumber)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
+    bool& limitFingerCount, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -6398,10 +6748,15 @@ void CommonBridge::GetLongPressGestureValue(
         auto durationValue = static_cast<int32_t>(durationArg->ToNumber(vm)->Value());
         duration = durationValue <= 0 ? DEFAULT_LONG_PRESS_DURATION : durationValue;
     }
+    Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 3); // 3: get the fourth arg
+    if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
+        limitFingerCount = limitFingerCountArg->ToBoolean(vm)->Value();
+    }
 }
 
 void CommonBridge::GetPanGestureValue(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& distance, uint32_t argNumber)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& distance,
+    bool& limitFingerCount, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -6420,10 +6775,15 @@ void CommonBridge::GetPanGestureValue(
         auto distanceValue = static_cast<double>(distanceArg->ToNumber(vm)->Value());
         distance = distanceValue < 0.0f ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceValue;
     }
+    Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 3); // 3: get the fourth arg
+    if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
+        limitFingerCount = limitFingerCountArg->ToBoolean(vm)->Value();
+    }
 }
 
 void CommonBridge::GetSwipeGestureValue(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed, uint32_t argNumber)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed,
+    bool& limitFingerCount, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -6442,10 +6802,15 @@ void CommonBridge::GetSwipeGestureValue(
         auto speedValue = static_cast<double>(speedArg->ToNumber(vm)->Value());
         speed = LessOrEqual(speedValue, 0.0) ? DEFAULT_SLIDE_SPEED : speedValue;
     }
+    Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 3); // 3: get the fourth arg
+    if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
+        limitFingerCount = limitFingerCountArg->ToBoolean(vm)->Value();
+    }
 }
 
 void CommonBridge::GetPinchGestureValue(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& distance, uint32_t argNumber)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& distance,
+    bool& limitFingerCount, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -6461,10 +6826,15 @@ void CommonBridge::GetPinchGestureValue(
         auto distanceValue = static_cast<double>(distanceArg->ToNumber(vm)->Value());
         distance = distanceValue <= 0.0 ? DEFAULT_PINCH_DISTANCE : distanceValue;
     }
+    Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 2); // 2: get the third arg
+    if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
+        limitFingerCount = limitFingerCountArg->ToBoolean(vm)->Value();
+    }
 }
 
 void CommonBridge::GetRotationGestureValue(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& angle, uint32_t argNumber)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& angle,
+    bool& limitFingerCount, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -6479,6 +6849,10 @@ void CommonBridge::GetRotationGestureValue(
     if (!angleArg.IsNull() && !angleArg->IsUndefined()) {
         auto angleValue = static_cast<double>(angleArg->ToNumber(vm)->Value());
         angle = (angleValue <= 0 || angleValue > DEFAULT_MAX_ROTATION_ANGLE) ? DEFAULT_ROTATION_ANGLE : angleValue;
+    }
+    Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 2); // 2: get the third arg
+    if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
+        limitFingerCount = limitFingerCountArg->ToBoolean(vm)->Value();
     }
 }
 
@@ -6559,7 +6933,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "repeat", "offsetX", "offsetY", "scale", "angle", "speed", "timestamp", "pinchCenterX",
         "pinchCenterY", "source", "pressure", "sourceTool", "velocityX", "velocityY", "velocity",
-        "getModifierKeyState", "deviceId" };
+        "deviceId", "getModifierKeyState" };
     Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, info.GetRepeat()),
         panda::NumberRef::New(vm, info.GetOffsetX() / density), panda::NumberRef::New(vm, info.GetOffsetY() / density),
         panda::NumberRef::New(vm, info.GetScale()), panda::NumberRef::New(vm, info.GetAngle()),
@@ -7273,14 +7647,24 @@ ArkUINativeModuleValue CommonBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCal
             "source",
             "target",
             "deviceId",
+            "targetDisplayId",
         };
         Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
             panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
             panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
             panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceDevice())),
             FrameNodeBridge::CreateEventTargetObject(vm, hoverInfo),
-            panda::NumberRef::New(vm, hoverInfo.GetDeviceId()) };
+            panda::NumberRef::New(vm, hoverInfo.GetDeviceId()),
+            panda::NumberRef::New(vm, hoverInfo.GetTargetDisplayId()) };
         auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltX().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltY().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(
+            vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
@@ -7573,12 +7957,13 @@ ArkUINativeModuleValue CommonBridge::AddTapGesture(ArkUIRuntimeCallInfo* runtime
     int32_t fingers = DEFAULT_TAP_FINGER;
     int32_t count = DEFAULT_TAP_COUNT;
     double distanceThreshold = DEFAULT_TAP_DISTANCE;
-    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, NUM_5);
+    bool limitFingerCount = false;
+    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, limitFingerCount, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->
-        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, nullptr);
+        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_8, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -7598,14 +7983,15 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGesture(ArkUIRuntimeCallInfo* r
     int32_t fingers = DEFAULT_LONG_PRESS_FINGER;
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
-    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, NUM_5);
+    bool limitFingerCount = false;
+    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
-        fingers, repeat, duration, nullptr);
+        fingers, repeat, duration, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_8, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_9, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_9, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_11, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -7625,15 +8011,16 @@ ArkUINativeModuleValue CommonBridge::AddPanGesture(ArkUIRuntimeCallInfo* runtime
     int32_t fingers = DEFAULT_PAN_FINGER;
     int32_t direction = PanDirection::ALL;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
-    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, NUM_5);
+    bool limitFingerCount = false;
+    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, limitFingerCount, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, direction, distance, nullptr);
+        fingers, direction, distance, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_8, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_9, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_10, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_11, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_9, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_11, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_12, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -7653,12 +8040,14 @@ ArkUINativeModuleValue CommonBridge::AddSwipeGesture(ArkUIRuntimeCallInfo* runti
     int32_t fingers = DEFAULT_SLIDE_FINGER;
     int32_t direction = SwipeDirection::ALL;
     double speed = DEFAULT_SLIDE_SPEED;
-    GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_5);
+    bool limitFingerCount = false;
+    GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, limitFingerCount, NUM_5);
     auto* gesture =
-        GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(fingers, direction, speed);
+        GetArkUINodeModifiers()->getGestureModifier()-> createSwipeGestureByModifier(
+            fingers, direction, speed, limitFingerCount);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_9, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -7677,14 +8066,16 @@ ArkUINativeModuleValue CommonBridge::AddPinchGesture(ArkUIRuntimeCallInfo* runti
     GetGestureCommonValue(runtimeCallInfo, priority, mask);
     int32_t fingers = DEFAULT_PINCH_FINGER;
     double distance = DEFAULT_PINCH_DISTANCE;
-    GetPinchGestureValue(runtimeCallInfo, fingers, distance, NUM_5);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, nullptr);
+    bool limitFingerCount = false;
+    GetPinchGestureValue(runtimeCallInfo, fingers, distance, limitFingerCount, NUM_5);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(
+        fingers, distance, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_8, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_9, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_9, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_11, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -7703,14 +8094,16 @@ ArkUINativeModuleValue CommonBridge::AddRotationGesture(ArkUIRuntimeCallInfo* ru
     GetGestureCommonValue(runtimeCallInfo, priority, mask);
     int32_t fingers = DEFAULT_ROTATION_FINGER;
     double angle = DEFAULT_ROTATION_ANGLE;
-    GetRotationGestureValue(runtimeCallInfo, fingers, angle, NUM_5);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, nullptr);
+    bool limitFingerCount = false;
+    GetRotationGestureValue(runtimeCallInfo, fingers, angle, limitFingerCount, NUM_5);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(
+        fingers, angle, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_8, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_9, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_9, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_11, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -7739,13 +8132,14 @@ ArkUINativeModuleValue CommonBridge::AddTapGestureToGroup(ArkUIRuntimeCallInfo* 
     int32_t fingers = DEFAULT_TAP_FINGER;
     int32_t count = DEFAULT_TAP_COUNT;
     double distanceThreshold = DEFAULT_TAP_DISTANCE;
-    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, NUM_3);
+    bool limitFingerCount = false;
+    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, limitFingerCount, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->
-        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, nullptr);
+        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_5, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_6);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_6, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_7);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7757,15 +8151,16 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGestureToGroup(ArkUIRuntimeCall
     int32_t fingers = DEFAULT_LONG_PRESS_FINGER;
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
-    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, NUM_3);
+    bool limitFingerCount = false;
+    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
-        fingers, repeat, duration, nullptr);
+        fingers, repeat, duration, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_8, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_9);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_9, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_10);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7777,16 +8172,17 @@ ArkUINativeModuleValue CommonBridge::AddPanGestureToGroup(ArkUIRuntimeCallInfo* 
     int32_t fingers = DEFAULT_PAN_FINGER;
     int32_t direction = PanDirection::ALL;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
-    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, NUM_3);
+    bool limitFingerCount = false;
+    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, limitFingerCount, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, direction, distance, nullptr);
+        fingers, direction, distance, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_8, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_9, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_10);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_9, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_10, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_11);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7798,13 +8194,15 @@ ArkUINativeModuleValue CommonBridge::AddSwipeGestureToGroup(ArkUIRuntimeCallInfo
     int32_t fingers = DEFAULT_SLIDE_FINGER;
     int32_t direction = SwipeDirection::ALL;
     double speed = DEFAULT_SLIDE_SPEED;
-    GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_3);
+    bool limitFingerCount = false;
+    GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, limitFingerCount, NUM_3);
     auto* gesture =
-        GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(fingers, direction, speed);
+        GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(
+            fingers, direction, speed, limitFingerCount);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_6, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_7);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_7, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_8);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7815,15 +8213,17 @@ ArkUINativeModuleValue CommonBridge::AddPinchGestureToGroup(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t fingers = DEFAULT_PINCH_FINGER;
     double distance = DEFAULT_PINCH_DISTANCE;
-    GetPinchGestureValue(runtimeCallInfo, fingers, distance, NUM_3);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, nullptr);
+    bool limitFingerCount = false;
+    GetPinchGestureValue(runtimeCallInfo, fingers, distance, limitFingerCount, NUM_3);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(
+        fingers, distance, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_5, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_8, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_9);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_6, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_9, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_10);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7834,15 +8234,17 @@ ArkUINativeModuleValue CommonBridge::AddRotationGestureToGroup(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t fingers = DEFAULT_ROTATION_FINGER;
     double angle = DEFAULT_ROTATION_ANGLE;
-    GetRotationGestureValue(runtimeCallInfo, fingers, angle, NUM_3);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, nullptr);
+    bool limitFingerCount = false;
+    GetRotationGestureValue(runtimeCallInfo, fingers, angle, limitFingerCount, NUM_3);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(
+        fingers, angle, limitFingerCount, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_5, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_8, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_9);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_6, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_9, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_10);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7974,6 +8376,46 @@ ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallI
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
 }
 
+ArkUINativeModuleValue CommonBridge::FreezeUINodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> isFreezeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!idArg->IsString(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string id = idArg->ToString(vm)->ToString(vm);
+    bool isFreeze = false;
+    if (isFreezeArg->IsBoolean()) {
+        isFreeze = isFreezeArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeById(id.c_str(), isFreeze);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeById(id.c_str(), false);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::FreezeUINodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> uniqueIdArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> isFreezeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!uniqueIdArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t uniqueId = uniqueIdArg->IntegerValue(vm);
+    bool isFreeze = false;
+    if (isFreezeArg->IsBoolean()) {
+        isFreeze = isFreezeArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeByUniqueId(uniqueId, isFreeze);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeByUniqueId(uniqueId, false);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetSystemBarEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -8015,8 +8457,8 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     FrameCallbackFunc onIdleCallbackFunc = nullptr;
 
     if (frameCallback->Get(vm, "onFrame")->IsFunction(vm)) {
-        onFrameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback)](
-                                  int64_t nanoTimestamp) -> void {
+        onFrameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
+                                  delayMillis](int64_t nanoTimestamp) -> void {
             LocalScope scope(vm);
             Local<FunctionRef> onFrameFunc = frameCallbackObj->Get(vm, "onFrame");
 
@@ -8027,8 +8469,8 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     }
 
     if (frameCallback->Get(vm, "onIdle")->IsFunction(vm)) {
-        onIdleCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback)](
-                                 int64_t nanoTimestamp) -> void {
+        onIdleCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
+                                 delayMillis](int64_t nanoTimestamp) -> void {
             LocalScope scope(vm);
             Local<FunctionRef> onIdleFunc = frameCallbackObj->Get(vm, "onIdle");
 
@@ -8251,6 +8693,67 @@ ArkUINativeModuleValue CommonBridge::ResetFocusBox(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetNextFocus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    ArkUI_Uint32 hasValue = 0;
+    std::string nextFocusArray[NUM_6];
+    auto forward = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto backward = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto up = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto down = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto left = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto right = runtimeCallInfo->GetCallArgRef(NUM_6);
+    if (forward->IsString(vm)) {
+        nextFocusArray[NUM_0] = forward->ToString(vm)->ToString(vm);
+        hasValue = 1;
+    }
+    hasValue = hasValue << 1;
+    if (backward->IsString(vm)) {
+        nextFocusArray[NUM_1] = backward->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (up->IsString(vm)) {
+        nextFocusArray[NUM_2] = up->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (down->IsString(vm)) {
+        nextFocusArray[NUM_3] = down->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (left->IsString(vm)) {
+        nextFocusArray[NUM_4] = left->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    hasValue = hasValue << 1;
+    if (right->IsString(vm)) {
+        nextFocusArray[NUM_5] = right->ToString(vm)->ToString(vm);
+        hasValue += 1;
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setNextFocus(nativeNode,
+        nextFocusArray[NUM_0].c_str(), nextFocusArray[NUM_1].c_str(),
+        nextFocusArray[NUM_2].c_str(), nextFocusArray[NUM_3].c_str(),
+        nextFocusArray[NUM_4].c_str(), nextFocusArray[NUM_5].c_str(), hasValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetNextFocus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetNextFocus(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info)
 {
     auto axisMap = panda::MapRef::New(vm);
@@ -8271,7 +8774,7 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT0Y)),
         panda::NumberRef::New(vm, info.GetAbsHat0YValue()));
     const char* keys[] = { "axisMap", "target", "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool",
-        "deviceId", "getModifierKeyState", "stopPropagation" };
+        "deviceId", "getModifierKeyState", "stopPropagation", "targetDisplayId" };
     Local<JSValueRef> values[] = { axisMap, FrameNodeBridge::CreateEventTargetObject(vm, info),
         panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
@@ -8280,7 +8783,8 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))),
         panda::NumberRef::New(vm, info.GetDeviceId()), panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-        panda::FunctionRef::New(vm, Framework::JsStopPropagation) };
+        panda::FunctionRef::New(vm, Framework::JsStopPropagation),
+        panda::NumberRef::New(vm, (info.GetTargetDisplayId()))};
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
@@ -8319,6 +8823,109 @@ ArkUINativeModuleValue CommonBridge::ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo*
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::DisableOnFocusAxisEvent(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::RegisterFrameNodeDestructorCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        frameNode->SetFrameNodeDestructorCallback(nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = obj;
+    auto frameNodeDestructorCallback = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)),
+                                           node = AceType::WeakClaim(frameNode), containerId](int32_t frameNodeId) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        auto frameNodeIdParam = panda::NumberRef::New(vm, frameNodeId);
+        panda::Local<panda::JSValueRef> params[] = { frameNodeIdParam };
+        function->Call(vm, function.ToLocal(), params, 1);
+    };
+    frameNode->SetFrameNodeDestructorCallback(std::move(frameNodeDestructorCallback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& info)
+{
+    const Offset& globalOffset = info.GetGlobalLocation();
+    const Offset& localOffset = info.GetLocalLocation();
+    const Offset& screenOffset = info.GetScreenLocation();
+    double density = PipelineBase::GetCurrentDensity();
+    const char* keys[] = { "action", "displayX", "displayY", "windowX", "windowY", "x", "y", "scrollStep",
+        "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "target", "timestamp", "source", "pressure",
+        "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
+        panda::NumberRef::New(vm, screenOffset.GetX() / density),
+        panda::NumberRef::New(vm, screenOffset.GetY() / density),
+        panda::NumberRef::New(vm, globalOffset.GetX() / density),
+        panda::NumberRef::New(vm, globalOffset.GetY() / density),
+        panda::NumberRef::New(vm, localOffset.GetX() / density),
+        panda::NumberRef::New(vm, localOffset.GetY() / density), panda::NumberRef::New(vm, info.GetScrollStep()),
+        panda::FunctionRef::New(vm, Framework::JsPropagation),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetHorizontalAxisValue),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetVerticalAxisValue),
+        FrameNodeBridge::CreateEventTargetObject(vm, info),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
+        panda::NumberRef::New(vm, info.GetForce()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))),
+        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))),
+        panda::NumberRef::New(vm, info.GetDeviceId()), panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    return obj;
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto onAxisEvent = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
+                           AxisInfo& info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        PipelineContext::SetCallBackNode(node);
+        auto obj = CreateAxisEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[] = { obj };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    NG::ViewAbstract::SetOnAxisEvent(frameNode, std::move(onAxisEvent));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnAxisEvent(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

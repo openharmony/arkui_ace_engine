@@ -34,7 +34,7 @@ public:
 
     virtual RefPtr<ScrollProxy> GetScrollBarProxy(const RefPtr<ScrollProxy>& scrollProxy) = 0;
     virtual void Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
-        int directionValue, int stateValue) = 0;
+        int directionValue, int stateValue, bool isCreateArc = false) = 0;
     virtual void SetEnableNestedScroll(bool enableNestedSroll) = 0;
 private:
     static std::unique_ptr<ScrollBarModel> instance_;

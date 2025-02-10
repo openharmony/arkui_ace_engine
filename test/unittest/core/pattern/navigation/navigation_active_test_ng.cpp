@@ -79,7 +79,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationActiveTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. create a navdestination with custom node inside.
      */
-    mockNavPathStack->MockPushPath(MockNavPathInfo("dest"));
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"));
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     ASSERT_NE(navigationPattern, nullptr);
     RunNavigationStackSync(navigationPattern);
@@ -93,7 +93,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationActiveTest001, TestSize.Level1)
     /**
      * @tc.steps: step3. mock push without animation.
      */
-    mockNavPathStack->MockPushPath(MockNavPathInfo("dest2"), false);
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest2"), false);
     RunNavigationStackSync(navigationPattern);
     ASSERT_EQ(customNode->GetJsActive(), false);
 }

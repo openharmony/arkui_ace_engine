@@ -30,12 +30,18 @@ public:
     static RefPtr<SvgNode> Create();
 
     RSRecordingPath AsPath(const Size& viewPort) const override;
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
 
     Size GetSize() const;
 
     Rect GetViewBox() const;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
     void AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort) override;
+    void AdjustContentAreaSvgSizeValid(RSCanvas& canvas, const Size& viewPort, const Size& svgSize,
+        const Rect& viewBox);
+    void AdjustContentAreaSvgSizeInvalid(RSCanvas& canvas, const Size& viewPort, const Size& svgSize,
+        const Rect& viewBox);
+    SvgPreserveAspectRatio GetPreserveAspectRatio() const;
 
 private:
     SvgAttributes svgAttr_;

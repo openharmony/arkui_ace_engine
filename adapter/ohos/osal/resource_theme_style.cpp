@@ -106,6 +106,10 @@ static const std::unordered_set<std::string> stringAttrs = {
     "calendar_picker_fri",
     "calendar_picker_sat",
     "calendar_picker_sun",
+    "filter_accessibility_expand",
+    "filter_accessibility_collapse",
+    "filter_accessibility_collapsed",
+    "filter_accessibility_expanded",
     "slider_accessibility_selected",
     "slider_accessibility_unselected",
     "slider_accessibility_unselectedDesc",
@@ -117,15 +121,19 @@ static const std::unordered_set<std::string> stringAttrs = {
     "textfield_writting_is_support",
     "rich_editor_writting_is_support",
     "ai_write_menu_name",
+    "menu_translate_is_support",
     "text_menu_search_is_support",
     "textfield_menu_search_is_support",
+    "richeditor_menu_search_is_support",
     "textfield_accessibility_clear",
     "pass_point",
     "side_length",
     "general_next_year",
     "general_next_month",
     "general_pre_year",
-    "general_pre_month"
+    "general_pre_month",
+    "prev_arrow_accessibility_text",
+    "next_arrow_accessibility_text",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

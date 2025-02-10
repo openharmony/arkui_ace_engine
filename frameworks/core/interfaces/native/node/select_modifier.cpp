@@ -24,6 +24,7 @@ const char* ERR_CODE = "-1";
 const int32_t SIZE_OF_FONT_INFO = 3;
 const int32_t SIZE_OF_TWO = 2;
 const int32_t DEFAULT_SELECT = 0;
+constexpr TextDirection DEFAULT_SELECT_DIRECTION = TextDirection::AUTO;
 
 void SetSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
@@ -602,10 +603,24 @@ void ResetSelectDividerNull(ArkUINodeHandle node)
     SelectModelNG::SetDivider(frameNode, divider);
 }
 
+void SetSelectDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetLayoutDirection(frameNode, static_cast<TextDirection>(direction));
+}
+
+void ResetSelectDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetLayoutDirection(frameNode, DEFAULT_SELECT_DIRECTION);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISelectModifier modifier = {
         .setSpace = SetSpace,
         .setValue = SetValue,
@@ -655,22 +670,17 @@ const ArkUISelectModifier* GetSelectModifier()
         .setSelectDivider = SetSelectDivider,
         .resetSelectDivider = ResetSelectDivider,
         .resetSelectDividerNull = ResetSelectDividerNull,
+        .setSelectDirection = SetSelectDirection,
+        .resetSelectDirection = ResetSelectDirection,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUISelectModifier* GetCJUISelectModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISelectModifier modifier = {
         .setSpace = SetSpace,
         .setValue = SetValue,
@@ -720,15 +730,10 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .setSelectDivider = SetSelectDivider,
         .resetSelectDivider = ResetSelectDivider,
         .resetSelectDividerNull = ResetSelectDividerNull,
+        .setSelectDirection = SetSelectDirection,
+        .resetSelectDirection = ResetSelectDirection,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

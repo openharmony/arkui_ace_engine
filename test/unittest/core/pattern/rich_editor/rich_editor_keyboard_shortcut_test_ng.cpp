@@ -144,10 +144,10 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestS
     richEditorPattern->CursorMove(CaretMoveIntent::Left);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 17);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::RightWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 21);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::ParagraghBegin);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
@@ -332,9 +332,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts201, TestS
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleOnDeleteComb(true);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->HandleOnDeleteComb(false);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
 }
 
 /**
@@ -900,6 +900,34 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseEvent001
+ * @tc.desc: test HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto scrollBar = richEditorPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    scrollBar->isHover_ = true;
+    scrollBar->isPressed_ = true;
+    MouseInfo info;
+    richEditorPattern->HandleMouseEvent(info);
+    auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
+    EXPECT_TRUE(mouseStyleManager->mouseStyleNodeId_.has_value());
+}
+
+/**
  * @tc.name: HandleMouseLeftButtonRelease001
  * @tc.desc: test HandleMouseLeftButtonRelease
  * @tc.type: FUNC
@@ -1042,13 +1070,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     RichEditorAbstractSpanResult span2;
     changeValue.originalSpans_.emplace_back(span2);
     RichEditorAbstractSpanResult& firstInfo = changeValue.originalSpans_.front();
-    firstInfo.SetValue("test123\n");
+    firstInfo.SetValue(u"test123\n");
     /**
      * @tc.steps: step2. change parameter and call function.
      */
     std::u16string originalStr;
     int32_t originalPos = 0;
-    int32_t firstLength = static_cast<int32_t>(StringUtils::ToWstring(firstInfo.GetValue()).length());
+    int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
     firstInfo.SetEraseLength(firstLength);
     auto ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
     EXPECT_NE(ret, nullptr);
@@ -1087,7 +1115,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level1)
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = INIT_U16VALUE_3;
+    it->content = INIT_VALUE_3;
     it->position = 0;
     richEditorPattern->caretPosition_ = 1;
 
@@ -1123,7 +1151,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
     richEditorPattern->textSelector_ = TextSelector(0, 6);
     richEditorPattern->contentRect_ = { 0.0, 10.0, 500.0, 500.0 };
     richEditorPattern->isShowPlaceholder_ = true;
-    auto res = richEditorPattern->GetSelectArea();
+    auto res = richEditorPattern->GetSelectArea(SelectRectsType::ALL_LINES);
+    EXPECT_TRUE(res.IsValid());
+    res = richEditorPattern->GetSelectArea(SelectRectsType::LEFT_TOP_POINT);
     EXPECT_TRUE(res.IsValid());
 }
 
@@ -1477,7 +1507,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts206, TestS
     /**
      * @tc.steps: step2. add text span without setting style
      */
-    AddSpan(INIT_U16VALUE_2);
+    AddSpan(INIT_VALUE_2);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
     richEditorPattern->textSelector_.Update(0, 6);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
@@ -1515,9 +1545,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
     /**
      * @tc.steps: step2. add different type span and select
      */
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     AddImageSpan();
-    AddSpan(INIT_U16VALUE_2);
+    AddSpan(INIT_VALUE_2);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
 
     richEditorPattern->textSelector_.Update(4, 10);

@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
@@ -140,6 +141,30 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
 }
 
+void JSTabs::SetOnUnselected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto unselectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onUnselected = [executionContext = info.GetExecutionContext(), func = std::move(unselectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onUnselected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onUnselected");
+        ACE_SCOPED_TRACE("Tabs.onUnselected index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnUnselected(std::move(onUnselected));
+}
+
 void JSTabs::SetOnAnimationStart(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -190,6 +215,30 @@ void JSTabs::SetOnGestureSwipe(const JSCallbackInfo& info)
         func->Execute(index, info);
     };
     TabsModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
+}
+
+void JSTabs::SetOnSelected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto selectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onSelected = [executionContext = info.GetExecutionContext(), func = std::move(selectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onSelected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onSelected");
+        ACE_SCOPED_TRACE("Tabs.onSelected index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnSelected(std::move(onSelected));
 }
 
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -269,6 +318,9 @@ void JSTabs::Create(const JSCallbackInfo& info)
 
 void JSTabs::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSTabs][pop]", &JSTabs::Pop);
+    }
     TabsModel::GetInstance()->Pop();
 }
 
@@ -538,8 +590,10 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 
     auto nonScrollableLayoutStyle = optionParam->GetProperty("nonScrollableLayoutStyle");
     int32_t layoutStyle;
-    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle)) {
-        option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle) ||
+        layoutStyle < static_cast<int32_t>(LayoutStyle::ALWAYS_CENTER) ||
+        layoutStyle > static_cast<int32_t>(LayoutStyle::SPACE_BETWEEN_OR_CENTER)) {
+        option.nonScrollableLayoutStyle = std::nullopt;
     } else {
         option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
     }
@@ -738,6 +792,30 @@ void JSTabs::SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& 
     TabsModel::GetInstance()->SetBarModifier(std::move(onApply));
 }
 
+void JSTabs::SetCachedMaxCount(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 1) {
+        return;
+    }
+
+    std::optional<int32_t> cachedMaxCount;
+    if (info[0]->IsNumber()) {
+        auto count = info[0]->ToNumber<int32_t>();
+        if (count >= 0) {
+            cachedMaxCount = count;
+        }
+    }
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (info[1]->IsNumber()) {
+        auto mode = info[1]->ToNumber<int32_t>();
+        if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+            mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+            cacheMode = static_cast<TabsCacheMode>(mode);
+        }
+    }
+    TabsModel::GetInstance()->SetCachedMaxCount(cachedMaxCount, cacheMode);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -758,6 +836,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
+    JSClass<JSTabs>::StaticMethod("onUnselected", &JSTabs::SetOnUnselected);
     JSClass<JSTabs>::StaticMethod("onAnimationStart", &JSTabs::SetOnAnimationStart);
     JSClass<JSTabs>::StaticMethod("onAnimationEnd", &JSTabs::SetOnAnimationEnd);
     JSClass<JSTabs>::StaticMethod("onGestureSwipe", &JSTabs::SetOnGestureSwipe);
@@ -782,6 +861,8 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
     JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
+    JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
+    JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

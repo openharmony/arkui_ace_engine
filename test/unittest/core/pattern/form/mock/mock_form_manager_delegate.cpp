@@ -118,6 +118,7 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
     return true;
 }
 
+void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info) {}
 void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo) {}
 #endif
 

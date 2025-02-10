@@ -32,6 +32,10 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme)
 {
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
+#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
+    const std::vector<std::string> defaultFontFamily = { "sans-serif" };
+    textStyle.SetFontFamilies(defaultFontFamily);
+#endif
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
     return textStyle;
 }
@@ -110,6 +114,18 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
         fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
     }
     std::string fontFamily = fontFamilyVector.at(0);
+    for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+        fontFamily += ',' + fontFamilyVector.at(i);
+    }
+    return fontFamily;
+}
+std::string GetFontFamilyInJson(const std::vector<std::string>& fontFamilyVector)
+{
+    std::string fontFamily;
+    if (fontFamilyVector.empty()) {
+        return fontFamily;
+    }
+    fontFamily = fontFamilyVector.at(0);
     for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
         fontFamily += ',' + fontFamilyVector.at(i);
     }

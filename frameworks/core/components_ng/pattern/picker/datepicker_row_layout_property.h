@@ -45,9 +45,11 @@ public:
         value->propLunar_ = CloneLunar();
         value->propStartDate_ = CloneStartDate();
         value->propEndDate_ = CloneEndDate();
+        value->propMode_ = CloneMode();
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
+        value->propDigitalCrownSensitivity_ = CloneDigitalCrownSensitivity();
         return value;
     }
 
@@ -57,10 +59,12 @@ public:
         ResetSelectedDate();
         ResetStartDate();
         ResetEndDate();
+        ResetMode();
         ResetLunar();
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
+        ResetDigitalCrownSensitivity();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -71,13 +75,25 @@ public:
             return;
         }
         json->PutExtAttr("lunar", V2::ConvertBoolToString(GetLunar().value_or(false)).c_str(), filter);
-
+        Color defaultDisappearColor = Color::BLACK;
+        Color defaultNormalColor = Color::BLACK;
+        Color defaultSelectColor = Color::BLACK;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = GetHost();
+        if (pipeline && frameNode) {
+            auto pickerTheme = pipeline->GetTheme<PickerTheme>(frameNode->GetThemeScopeId());
+            if (pickerTheme) {
+                defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();
+                defaultNormalColor = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+                defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+            }
+        }
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
         disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
         auto disappearTextStyle = JsonUtil::Create(true);
-        disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
+        disappearTextStyle->Put("color", GetDisappearColor().value_or(defaultDisappearColor).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
         json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
@@ -85,7 +101,7 @@ public:
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
         normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
         auto normalTextStyle = JsonUtil::Create(true);
-        normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
+        normalTextStyle->Put("color", GetColor().value_or(defaultNormalColor).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
         json->PutExtAttr("textStyle", normalTextStyle, filter);
 
@@ -94,9 +110,12 @@ public:
         selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
         auto selectedTextStyle = JsonUtil::Create(true);
-        selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
+        selectedTextStyle->Put("color", GetSelectedColor().value_or(defaultSelectColor).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
+        auto crownSensitivity = GetDigitalCrownSensitivity();
+        json->PutExtAttr("digitalCrownSensitivity",
+            std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
     }
 
     std::string GetDateStart() const
@@ -141,10 +160,26 @@ public:
         return "";
     }
 
+    std::string GetDatePickerMode() const
+    {
+        std::string mode = "";
+        if (HasMode()) {
+            if (GetMode() == DatePickerMode::DATE) {
+                mode = "DatePickerMode.DATE";
+            } else if (GetMode() == DatePickerMode::YEAR_AND_MONTH) {
+                mode = "DatePickerMode.YEAR_AND_MONTH";
+            } else if (GetMode() == DatePickerMode::MONTH_AND_DAY) {
+                mode = "DatePickerMode.MONTH_AND_DAY";
+            }
+        }
+        return mode;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDate, LunarDate, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Lunar, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartDate, LunarDate, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndDate, LunarDate, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Mode, DatePickerMode, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
@@ -181,6 +216,7 @@ public:
         SelectedTextStyle, FontFamily, SelectedFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         SelectedTextStyle, ItalicFontStyle, SelectedFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DigitalCrownSensitivity, int32_t, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DataPickerRowLayoutProperty);
 };

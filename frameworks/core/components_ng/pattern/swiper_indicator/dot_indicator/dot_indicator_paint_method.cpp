@@ -53,21 +53,14 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    totalItemCount_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
-        totalItemCount_ : itemCount_;
-    if (isHorizontalAndRightToLeft_) {
-        if (isSwipeByGroup_) {
-            currentIndex_ = totalItemCount_ - 1 - currentIndex_;
-        } else {
-            currentIndex_ = itemCount_ - 1 - currentIndex_;
-        }
-    }
+
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
-    dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
-    dotIndicatorModifier_->SetCurrentIndexActual(currentIndexActual_);
+    auto [currentIndex, currentIndexActual] = CalCurrentIndex();
+    dotIndicatorModifier_->SetCurrentIndex(currentIndex);
+    dotIndicatorModifier_->SetCurrentIndexActual(currentIndexActual);
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
@@ -95,23 +88,51 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 }
 
+std::pair<int32_t, int32_t> DotIndicatorPaintMethod::CalCurrentIndex()
+{
+    totalItemCount_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+        totalItemCount_ : itemCount_;
+    if (isHorizontalAndRightToLeft_) {
+        if (isSwipeByGroup_) {
+            currentIndex_ = totalItemCount_ - 1 - currentIndex_;
+        } else {
+            currentIndex_ = itemCount_ - 1 - currentIndex_;
+        }
+    }
+    auto currentIndex = currentIndex_;
+    auto currentIndexActual = currentIndexActual_;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isSwipeByGroup_ &&
+        displayCount_ != 0) {
+        currentIndex = currentIndex_ / displayCount_;
+        currentIndexActual = currentIndexActual_ / displayCount_;
+    }
+    return { currentIndex, currentIndexActual };
+}
+
 bool DotIndicatorPaintMethod::NeedBottomAnimation() const
 {
-    auto firstIndex = isHorizontalAndRightToLeft_ ? itemCount_ - 1 - firstIndex_ : firstIndex_;
+    auto currentIndexActual = currentIndexActual_;
+    auto firstIndex = firstIndex_;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isSwipeByGroup_ &&
+        displayCount_ != 0) {
+        firstIndex /= displayCount_;
+        currentIndexActual /= displayCount_;
+    }
+    firstIndex = isHorizontalAndRightToLeft_ ? itemCount_ - 1 - firstIndex : firstIndex;
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
         if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
             if (NearZero(touchBottomPageRate_)) {
                 return true;
             }
 
-            if (currentIndexActual_ != firstIndex && std::abs(touchBottomPageRate_) < FIFTY_PERCENT) {
+            if (currentIndexActual != firstIndex && std::abs(touchBottomPageRate_) < FIFTY_PERCENT) {
                 return false;
             }
 
             return true;
         }
 
-        if (currentIndexActual_ == firstIndex && firstIndex == itemCount_ - 1 &&
+        if (currentIndexActual == firstIndex && firstIndex == itemCount_ - 1 &&
             std::abs(touchBottomPageRate_) > FIFTY_PERCENT) {
             return true;
         }
@@ -119,14 +140,14 @@ bool DotIndicatorPaintMethod::NeedBottomAnimation() const
 
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
-            if (currentIndexActual_ == firstIndex && std::abs(touchBottomPageRate_) > FIFTY_PERCENT) {
+            if (currentIndexActual == firstIndex && std::abs(touchBottomPageRate_) > FIFTY_PERCENT) {
                 return false;
             }
 
             return true;
         }
 
-        if (currentIndexActual_ == 0 && firstIndex == itemCount_ - 1 &&
+        if (currentIndexActual == 0 && firstIndex == itemCount_ - 1 &&
             std::abs(touchBottomPageRate_) < FIFTY_PERCENT) {
             return true;
         }
@@ -351,7 +372,7 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
         if (isSwipeByGroup_ && displayCount_ != 0) {
             index /= displayCount_;
         }
-        if (isPressed_ && isHorizontalAndRightToLeft_ && isSwipeByGroup_ && currentIndex_ <= displayCount_) {
+        if (isPressed_ && isSwipeByGroup_) {
             touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         }
     }
@@ -572,7 +593,7 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndexOnRTL(int32_t index
 {
     auto actualTurnPageRate = turnPageRate_;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
-        isSwipeByGroup_ && groupTurnPageRate_ != 0) {
+        isSwipeByGroup_ && !NearZero(groupTurnPageRate_)) {
         actualTurnPageRate = groupTurnPageRate_;
     }
 
@@ -667,8 +688,10 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetStartAndEndIndex(int32_t
         return { startCurrentIndex, endCurrentIndex };
     }
 
-    if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE && Negative(turnPageRate_)) {
-        if (std::abs(turnPageRate_) >= FIFTY_PERCENT) {
+    auto actualTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        isSwipeByGroup_ ? groupTurnPageRate_ : turnPageRate_;
+    if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE && Negative(actualTurnPageRate)) {
+        if (std::abs(actualTurnPageRate) >= FIFTY_PERCENT) {
             return { endCurrentIndex, endCurrentIndex };
         }
 
@@ -721,6 +744,10 @@ void DotIndicatorPaintMethod::AdjustPointCenterXForTouchBottom(StarAndEndPointCe
 {
     if (AdjustPointCenterXForTouchBottomNew(
         pointCenter, endVectorBlackPointCenterX, endCurrentIndex, selectedItemWidth)) {
+        return;
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isSwipeByGroup_ && !isLoop_) {
         return;
     }
 

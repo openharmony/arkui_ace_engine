@@ -186,7 +186,7 @@ std::string PlatformEventProxy::GetCurEventProxyToString()
     }
 
     if (panEvent_) {
-        for (const auto item : PAN_GESTURE_MAP) {
+        for (const auto& item : PAN_GESTURE_MAP) {
             if (!(panDirection_ & item.first)) {
                 continue;
             }

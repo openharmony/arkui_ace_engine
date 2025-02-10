@@ -30,6 +30,9 @@ constexpr float DIVIDE_NUM = 0.5f; // The number 0.5 represents equal division
 bool ArcSwiperIndicatorPattern::SetArcIndicatorHotRegion(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (isAccessibilityFocusd_) {
+        return true;
+    }
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
@@ -41,6 +44,19 @@ bool ArcSwiperIndicatorPattern::SetArcIndicatorHotRegion(
         return false;
     }
     return CalculateArcIndicatorHotRegion(frameRect, indicatorGeometryNode->GetContentOffset());
+}
+
+void ArcSwiperIndicatorPattern::InitAccessibilityFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
+        auto indicator = weak.Upgrade();
+        CHECK_NULL_VOID(indicator);
+        indicator->SetAccessibilityFocusd(focus);
+    });
 }
 
 bool ArcSwiperIndicatorPattern::CalculateArcIndicatorHotRegion(const RectF& frameRect, const OffsetF& contentOffset)

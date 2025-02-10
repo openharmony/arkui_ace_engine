@@ -77,6 +77,17 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerDefaultTextStyleModifier.identity, TextpickerDefaultTextStyleModifier, value);
     return this;
   }
+
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextpickerEnableHapticFeedbackModifier.identity, TextpickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
+
+  digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDigitalCrownSensitivityModifier.identity, TextpickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -89,6 +100,20 @@ class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
       getUINativeModule().textpicker.resetCanLoop(node);
     } else {
       getUINativeModule().textpicker.setCanLoop(node, this.value);
+    }
+  }
+}
+
+class TextpickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDigitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().textpicker.setDigitalCrownSensitivity(node, this.value);
     }
   }
 }
@@ -302,6 +327,20 @@ class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey<number |
       getUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
     } else {
       getUINativeModule().textpicker.setDefaultPickerItemHeight(node, this.value);
+    }
+  }
+}
+
+class TextpickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetTextpickerEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().textpicker.setTextpickerEnableHapticFeedback(node, this.value!);
     }
   }
 }

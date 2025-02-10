@@ -1902,4 +1902,60 @@ HWTEST_F(ToggleTestNg, ToggleModelTest012, TestSize.Level1)
     ASSERT_NE(paintProperty, nullptr);
     EXPECT_EQ(paintProperty->GetCheckBoxSelectValue(), true);
 }
+
+/**
+ * @tc.name: ToggleModelTest013
+ * @tc.desc: Test InitOnKeyEvent().
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+    auto eventHub = switchFrameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. test event.action != KeyAction::DOWN and event.code == KeyCode::KEY_FUNCTION
+     * @tc.expected: step3. check the switch checked status
+     */
+    KeyEvent keyEventOne(KeyCode::KEY_FUNCTION, KeyAction::UP);
+    bool ret = eventHub->ProcessOnKeyEventInternal(keyEventOne);
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_FALSE(ret);
+    bool isChecked = pattern->IsChecked();
+    EXPECT_EQ(isChecked, IS_ON);
+    /**
+     * @tc.steps: step4. test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_FUNCTION
+     * @tc.expected: step5. check the checked status
+     */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    ret = eventHub->ProcessOnKeyEventInternal(keyEventTwo);
+    EXPECT_FALSE(ret);
+    isChecked = pattern->IsChecked();
+    EXPECT_EQ(isChecked, IS_ON);
+    /**
+     * @tc.steps: step4. test event.action != KeyAction::DOWN and event.code != KeyCode::KEY_FUNCTION
+     * @tc.expected: step5. check the checked status
+     */
+    KeyEvent keyEventThree(KeyCode::KEY_F1, KeyAction::UP);
+    ret = eventHub->ProcessOnKeyEventInternal(keyEventThree);
+    EXPECT_FALSE(ret);
+    isChecked = pattern->IsChecked();
+    EXPECT_EQ(isChecked, IS_ON);
+    /**
+     * @tc.steps: step4. test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_FUNCTION
+     * @tc.expected: step5. check the checked status
+     */
+    KeyEvent keyEventFour(KeyCode::KEY_FUNCTION, KeyAction::DOWN);
+    ret = eventHub->ProcessOnKeyEventInternal(keyEventFour);
+    EXPECT_TRUE(ret);
+    isChecked = pattern->IsChecked();
+    EXPECT_EQ(isChecked, !IS_ON);
+}
 } // namespace OHOS::Ace::NG

@@ -91,6 +91,8 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
     std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
     bool syncLoad = false;
+    std::optional<std::vector<float>> colorFilterMatrix;
+    std::optional<RefPtr<DrawingColorFilter>> drawingColorFilter;
 
     bool operator==(const ImageSpanAttribute& attribute) const
     {
@@ -115,6 +117,8 @@ struct SpanOptionBase {
     std::optional<int32_t> offset;
     UserGestureOptions userGestureOption;
     UserMouseOptions userMouseOption;
+    std::optional<Color> dragBackgroundColor;
+    bool isDragShadowNeeded = true;
 
     std::string ToString() const
     {

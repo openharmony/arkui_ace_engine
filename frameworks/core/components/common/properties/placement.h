@@ -18,8 +18,8 @@
 
 namespace OHOS::Ace {
 
-enum class Placement {
-    LEFT,
+enum class Placement : int32_t {
+    LEFT = 0,
     RIGHT,
     TOP,
     BOTTOM,

@@ -275,6 +275,7 @@ private:
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool IsSquareStyleBox();
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -325,7 +326,6 @@ private:
 
     RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };
 } // namespace OHOS::Ace::NG

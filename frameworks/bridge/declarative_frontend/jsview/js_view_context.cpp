@@ -39,6 +39,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -83,7 +84,7 @@ constexpr int32_t LENGTH_TWO = 2;
 constexpr int32_t LENGTH_THREE = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
 
-std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
+std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
     { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
     { ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST, "The bindSheetContent already exists." },
     { ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND, "The bindSheetContent cannot be found." },
@@ -93,7 +94,12 @@ std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
         "The node of targetId is not a child of the page node or NavDestination node." },
     { ERROR_CODE_INTERNAL_ERROR, "Internal error." },
     { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
-        "2. Incorrect parameter types; 3. Parameter verification failed." }
+        "2. Incorrect parameter types; 3. Parameter verification failed." },
+    { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
+    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
+    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
+    { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The target does not exist. " },
+    { ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE, "The target node is not in the component tree. " }
 };
 
 void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
@@ -403,7 +409,7 @@ napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& er
     return error;
 }
 
-RefPtr<NG::FrameNode> ParseSheeetContentNode(const JSCallbackInfo& info)
+RefPtr<NG::FrameNode> ParseContentNode(const JSCallbackInfo& info)
 {
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_RETURN(vm, nullptr);
@@ -426,7 +432,7 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
     napi_create_promise(env, &deferred, &promise);
 
     if (errCode != ERROR_CODE_NO_ERROR) {
-        napi_value result = CreateErrorValue(env, errCode, BIND_SHEET_ERROR_MAP[errCode]);
+        napi_value result = CreateErrorValue(env, errCode, UICONTEXT_ERROR_MAP[errCode]);
         napi_reject_deferred(env, deferred, result);
     } else {
         napi_value result = nullptr;
@@ -704,6 +710,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
+    auto iterations = option.GetIteration();
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     std::optional<int32_t> count;
@@ -713,8 +721,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count]() mutable {
-            RecordAnimationFinished(count.value_or(1));
+                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count,
+                            iterations]() mutable {
+            RecordAnimationFinished(iterations);
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -728,13 +737,12 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
-        onFinishEvent = [traceStreamPtr, count]() {
-            RecordAnimationFinished(count.value_or(1));
+        onFinishEvent = [traceStreamPtr, iterations]() {
+            RecordAnimationFinished(iterations);
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     }
 
-    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
@@ -862,7 +870,7 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
         return;
     }
 
-    auto sheetContentNode = ParseSheeetContentNode(info);
+    auto sheetContentNode = ParseContentNode(info);
     if (sheetContentNode == nullptr) {
         ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
         return;
@@ -870,7 +878,7 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
 
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
@@ -926,7 +934,7 @@ void JSViewContext::JSUpdateBindSheet(const JSCallbackInfo& info)
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
     }
-    auto sheetContentNode = ParseSheeetContentNode(info);
+    auto sheetContentNode = ParseContentNode(info);
     if (sheetContentNode == nullptr) {
         ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
         return;
@@ -947,7 +955,7 @@ void JSViewContext::JSUpdateBindSheet(const JSCallbackInfo& info)
         JSViewAbstract::ParseSheetStyle(info[INDEX_ONE], sheetStyle, isPartialUpdate);
         JSViewAbstract::ParseSheetTitle(info[INDEX_ONE], sheetStyle, titleBuilderFunction);
     } else {
-        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.showDragBar = true;
         sheetStyle.showInPage = false;
         isPartialUpdate = false;
@@ -968,7 +976,7 @@ void JSViewContext::JSCloseBindSheet(const JSCallbackInfo& info)
         return;
     }
 
-    auto sheetContentNode = ParseSheeetContentNode(info);
+    auto sheetContentNode = ParseContentNode(info);
     if (sheetContentNode == nullptr) {
         ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
         return;
@@ -980,6 +988,289 @@ void JSViewContext::JSCloseBindSheet(const JSCallbackInfo& info)
     ReturnPromise(info, ret);
     return;
 }
+
+int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
+{
+    CHECK_EQUAL_RETURN(obj->IsEmpty(), true, ERROR_CODE_PARAM_INVALID);
+    auto targetInfoID = obj->GetProperty("id");
+    if (targetInfoID->IsNumber()) {
+        targetId = targetInfoID->ToNumber<int32_t>();
+    } else if (targetInfoID->IsString()) {
+        std::string targetIdString = targetInfoID->ToString();
+        auto targetInfoComponentId = obj->GetProperty("componentId");
+        if (targetInfoComponentId->IsNumber()) {
+            auto componentId = targetInfoComponentId->ToNumber<int32_t>();
+            auto targetComponentIdNode =
+                ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(componentId);
+            CHECK_NULL_RETURN(targetComponentIdNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
+            CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            targetId = targetNode->GetId();
+        } else {
+            auto targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(targetIdString);
+            CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            targetId = targetNode->GetId();
+        }
+    }
+    if (targetId < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void JSViewContext::JSOpenPopup(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto popupContentNode = ParseContentNode(info);
+    if (popupContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_VOID(popupParam);
+    popupParam->SetIsShow(true);
+    popupParam->SetUseCustomComponent(true);
+    if (info[INDEX_ONE]->IsObject()) {
+        auto popupObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        int32_t targetId = INVALID_ID;
+        auto result = ParseTargetInfo(popupObj, targetId);
+        if (result == ERROR_CODE_NO_ERROR) {
+            popupParam->SetTargetId(std::to_string(targetId));
+        } else {
+            ReturnPromise(info, result);
+            return;
+        }
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
+        auto popupObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
+        JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
+    }
+    auto ret = JSViewAbstract::OpenPopup(popupParam, popupContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+bool UpdateParsePopupParam(const JSCallbackInfo& info, RefPtr<PopupParam>& popupParam,
+    const RefPtr<NG::UINode>& customNode, bool isPartialUpdate)
+{
+    if ((!popupParam) || (!customNode)) {
+        return false;
+    }
+    auto paramCnt = info.Length();
+    if (!(paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject())) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_RETURN(param, false);
+    auto result = JSViewAbstract::GetPopupParam(param, customNode);
+    if (result == ERROR_CODE_NO_ERROR) {
+        if (isPartialUpdate) {
+            popupParam = param;
+        } else {
+            popupParam->SetTargetId(param->GetTargetId());
+        }
+    } else {
+        if (result != ERROR_CODE_INTERNAL_ERROR) {
+            ReturnPromise(info, result);
+        }
+        return false;
+    }
+    auto isShowInSubWindow = param->IsShowInSubWindow();
+    auto focusable = param->GetFocusable();
+    popupParam->SetIsShow(true);
+    popupParam->SetUseCustomComponent(true);
+    popupParam->SetIsPartialUpdate(isPartialUpdate);
+    auto popupObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+    JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
+    popupParam->SetShowInSubWindow(isShowInSubWindow);
+    popupParam->SetFocusable(focusable);
+    return true;
+}
+
+void JSViewContext::JSUpdatePopup(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto popupContentNode = ParseContentNode(info);
+    if (popupContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_VOID(popupParam);
+    bool isPartialUpdate = false;
+    if (paramCnt == LENGTH_THREE) {
+        if (!info[INDEX_TWO]->IsBoolean()) {
+            ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+            return;
+        }
+        isPartialUpdate = info[INDEX_TWO]->ToBoolean();
+    }
+    auto result = UpdateParsePopupParam(info, popupParam, popupContentNode, isPartialUpdate);
+    if (!result) {
+        return;
+    }
+    auto ret = JSViewAbstract::UpdatePopup(popupParam, popupContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSClosePopup(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_ONE) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto popupContentNode = ParseContentNode(info);
+    if (popupContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto ret = JSViewAbstract::ClosePopup(popupContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+int32_t GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)
+{
+    if (!node) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto context = node->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, ERROR_CODE_INTERNAL_ERROR);
+    auto overlayManager = context->GetOverlayManager();
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuNode = overlayManager->GetMenuNodeWithExistContent(node);
+    if (!menuNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "GetMenuParam failed because cannot find menuNode.");
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    auto wrapperPattern = AceType::DynamicCast<NG::MenuWrapperPattern>(menuNode->GetPattern());
+    CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto menuProperties = wrapperPattern->GetMenuParam();
+    menuParam = menuProperties;
+    return ERROR_CODE_NO_ERROR;
+}
+
+void JSViewContext::JSOpenMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    int32_t targetId = INVALID_ID;
+    if (info[INDEX_ONE]->IsObject()) {
+        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        auto result = ParseTargetInfo(menuObj, targetId);
+        if (result != ERROR_CODE_NO_ERROR) {
+            ReturnPromise(info, result);
+            return;
+        }
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    NG::MenuParam menuParam;
+    JSRef<JSObject> menuObj;
+    if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
+        menuObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
+    }
+    JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+    auto ret = JSViewAbstract::OpenMenu(menuParam, menuContentNode, targetId);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSUpdateMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    bool isPartialUpdate = false;
+    if (paramCnt == LENGTH_THREE) {
+        if (!info[INDEX_TWO]->IsBoolean()) {
+            ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+            return;
+        }
+        isPartialUpdate = info[INDEX_TWO]->ToBoolean();
+    }
+    NG::MenuParam menuParam;
+    if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
+        if (isPartialUpdate) {
+            auto result = GetMenuParam(menuParam, menuContentNode);
+            if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+                ReturnPromise(info, result);
+                return;
+            }
+        }
+        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto ret = JSViewAbstract::UpdateMenu(menuParam, menuContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSCloseMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_ONE) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto ret = JSViewAbstract::CloseMenu(menuContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
 void JSViewContext::IsFollowingSystemFontScale(const JSCallbackInfo& info)
 {
     auto container = Container::CurrentSafely();
@@ -1030,15 +1321,19 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("openBindSheet", JSOpenBindSheet);
     JSClass<JSViewContext>::StaticMethod("updateBindSheet", JSUpdateBindSheet);
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
+    JSClass<JSViewContext>::StaticMethod("openPopup", JSOpenPopup);
+    JSClass<JSViewContext>::StaticMethod("updatePopup", JSUpdatePopup);
+    JSClass<JSViewContext>::StaticMethod("closePopup", JSClosePopup);
+    JSClass<JSViewContext>::StaticMethod("openMenu", JSOpenMenu);
+    JSClass<JSViewContext>::StaticMethod("updateMenu", JSUpdateMenu);
+    JSClass<JSViewContext>::StaticMethod("closeMenu", JSCloseMenu);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
-#ifndef ARKUI_WEARABLE
     JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);
     JSClass<JSViewContext>::StaticMethod("unbindTabsFromScrollable", JSTabsFeature::UnbindTabsFromScrollable);
     JSClass<JSViewContext>::StaticMethod("bindTabsToNestedScrollable", JSTabsFeature::BindTabsToNestedScrollable);
     JSClass<JSViewContext>::StaticMethod(
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
-#endif
     JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }

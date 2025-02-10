@@ -18,8 +18,8 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 
 namespace OHOS::Ace::Framework {
 class JSUIExtension : public JSViewAbstract, public JSInteractableView {
@@ -32,6 +32,7 @@ public:
     static void OnResult(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
+    static void OnDrawReady(const JSCallbackInfo& info);
 private:
     static void ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
         std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap);
@@ -64,7 +65,7 @@ private:
         CallbackFuncPairList& callbackFuncPairList);
     void AddCallbackToList(napi_env env, napi_value cb, napi_handle_scope scope, RegisterType type,
         const std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onFunc);
-    void DeleteCallbackFromList(int argc, napi_env env, napi_value cb, RegisterType type);
+    void DeleteCallbackFromList(uint32_t argc, napi_env env, napi_value cb, RegisterType type);
     std::list<std::function<void(const RefPtr<NG::UIExtensionProxy>&)>> GetOnFuncList(RegisterType type);
     RegisterType GetRegisterType(const std::string& strType);
 

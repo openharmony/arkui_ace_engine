@@ -95,7 +95,13 @@ UIContentErrorCode FormFrontendDeclarative::InnerRunDynamicPage(
     CHECK_NULL_RETURN(delegate_, UIContentErrorCode::NULL_POINTER);
     auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
     CHECK_NULL_RETURN(delegate, UIContentErrorCode::NULL_POINTER);
-    return delegate->RunCard(url, params, "", cardId_, entryPoint);
+    auto errorCode = delegate->RunCard(url, params, "", cardId_, entryPoint);
+    if (errorCode == NO_ERRORS) {
+        auto jsAccessibility = delegate_->GetJSAccessibilityManager();
+        CHECK_NULL_RETURN(jsAccessibility, errorCode);
+        jsAccessibility->InitializeCallback();
+    }
+    return errorCode;
 }
 
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)

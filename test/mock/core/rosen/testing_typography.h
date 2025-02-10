@@ -22,7 +22,12 @@
 #include "testing_typography_properties.h"
 
 namespace OHOS::Ace::Testing {
-enum class WordBreakType { WordBreakTypeNormal = 0, WordBreakTypeBreakAll, WordBreakTypeBreakWord };
+enum class WordBreakType {
+    WordBreakTypeNormal = 0,
+    WordBreakTypeBreakAll,
+    WordBreakTypeBreakWord,
+    WordBreakTypeHyphenation,
+};
 
 enum class TextAlign {
     LEFT = 0,

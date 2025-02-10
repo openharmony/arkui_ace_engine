@@ -72,6 +72,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/recognizer_group.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/sequenced_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/layout/box_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",

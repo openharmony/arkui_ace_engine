@@ -50,6 +50,8 @@ public:
         Dimension shadowWidth;
         UIStatus uiStatus;
         Dimension defaultPaddingSize;
+        Dimension hoverPaddingSize;
+        bool showCircleDial;
         CheckBoxGroupPaintProperty::SelectStatus status;
     };
 
@@ -264,6 +266,8 @@ private:
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     Dimension defaultPaddingSize_;
+    Dimension hoverPaddingSize_;
+    bool showCircleDial_;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupModifier);
 };
 } // namespace OHOS::Ace::NG

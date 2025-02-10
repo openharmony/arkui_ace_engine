@@ -88,6 +88,7 @@ public:
     virtual void SetTrackBackgroundColor(const Color& value) = 0;
     virtual void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetSelectColor(const Color& value) = 0;
+    virtual void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
     virtual void SetMinResponsiveDistance(float value) {};
@@ -126,6 +127,10 @@ public:
     virtual void ResetSliderInteractionMode() = 0;
     virtual void ResetMinResponsiveDistance() = 0;
     virtual void ResetValidSlideRange() = 0;
+    virtual void ResetBlockColor() {};
+    virtual void ResetTrackColor() {};
+    virtual void ResetSelectColor() {};
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void ResetDigitalCrownSensitivity() = 0;
 #endif

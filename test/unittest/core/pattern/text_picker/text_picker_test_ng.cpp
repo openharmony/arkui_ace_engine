@@ -98,6 +98,20 @@ const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
 const Dimension ICON_TEXT_SPACE = 8.0_vp;
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -204,16 +218,10 @@ void TextPickerTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1074,19 +1082,18 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Le
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    ASSERT_TRUE(pickerProperty->HasSelectedColor());
+    ASSERT_FALSE(pickerProperty->HasSelectedColor());
 
-    EXPECT_EQ(Color(0x007DFF), pickerProperty->GetSelectedColor().value());
     double fontSize = pickerProperty->GetSelectedFontSize().value().Value();
     EXPECT_EQ(20, fontSize);
     EXPECT_EQ(FontWeight::MEDIUM, pickerProperty->GetSelectedWeight().value());
 
-    EXPECT_EQ(Color(0xff182431), pickerProperty->GetColor().value());
+    ASSERT_FALSE(pickerProperty->HasColor());
     fontSize = pickerProperty->GetFontSize().value().Value();
     EXPECT_EQ(16, fontSize);
     EXPECT_EQ(FontWeight::REGULAR, pickerProperty->GetWeight().value());
 
-    EXPECT_EQ(Color(0xff182431), pickerProperty->GetDisappearColor().value());
+    ASSERT_FALSE(pickerProperty->HasDisappearColor());
     fontSize = pickerProperty->GetDisappearFontSize().value().Value();
     EXPECT_EQ(14, fontSize);
     EXPECT_EQ(FontWeight::REGULAR, pickerProperty->GetDisappearWeight().value());
@@ -1880,6 +1887,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
     std::function<void(const std::string&)> onAccept = [](const std::string&) {};
     std::function<void(const std::string&)> onChange = [](const std::string&) {};
     std::function<void(const std::string&)> onScrollStop = [](const std::string&) {};
+    std::function<void(const std::string&)> onEnterSelectedArea = [](const std::string&) {};
     TextPickerDialog textPickerDialog;
     textPickerDialog.alignment = DialogAlignment::CENTER;
     TextPickerDialogEvent textPickerDialogEvent;
@@ -1889,8 +1897,8 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
      * test method SetTextPickerDialogShow.
      */
     textPickerDialogModel.SetTextPickerDialogShow(pickerText, settingData, std::move(onCancel),
-        std::move(onAccept), std::move(onChange), std::move(onScrollStop), textPickerDialog, textPickerDialogEvent,
-        buttonInfos);
+        std::move(onAccept), std::move(onChange), std::move(onScrollStop), std::move(onEnterSelectedArea),
+        textPickerDialog, textPickerDialogEvent, buttonInfos);
     EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
 }
 

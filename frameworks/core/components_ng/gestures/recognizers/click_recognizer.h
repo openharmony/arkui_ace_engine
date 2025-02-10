@@ -35,7 +35,8 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity());
+    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity(),
+    bool isLimitFingerCount_ = false);
 
     ~ClickRecognizer() override = default;
 
@@ -73,6 +74,11 @@ public:
     int GetCount()
     {
         return count_;
+    }
+
+    double GetDistanceThreshold() const
+    {
+        return distanceThreshold_;
     }
 
     GestureEventFunc GetTapActionFunc()
@@ -151,6 +157,7 @@ private:
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
     std::vector<RectF> responseRegionBuffer_;
+    RectF paintRect_;
 
     int32_t currentTouchPointsNum_ = 0;
 

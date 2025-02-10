@@ -193,6 +193,7 @@ private:
     void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode, bool select);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -228,7 +229,6 @@ private:
     SizeF hotZoneSize_;
     bool initSelected_ = false;
     std::optional<std::string> currentNavId_ = std::nullopt;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -39,7 +39,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef SUPPORT_DIGITAL_CROWN
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -53,13 +53,14 @@ constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
+const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
 constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
-constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
+constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 #endif
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
@@ -117,6 +118,41 @@ void SliderPattern::OnModifyDone()
     AccessibilityVirtualNodeRenderTask();
     InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
+    InitHapticController();
+}
+
+void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldValue)
+{
+    if (!hapticController_ || !isEnableHaptic_) {
+        return;
+    }
+    if (isShowSteps || NearEqual(valueRatio_, 1) || NearEqual(valueRatio_, 0)) {
+        hapticController_->PlayOnce();
+    }
+}
+
+void SliderPattern::InitHapticController()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (GetEnableHapticFeedback()) {
+        if (!hapticController_) {
+            auto context = host->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
+            });
+        }
+    } else {
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
 }
 
 void SliderPattern::HandleEnabled()
@@ -831,7 +867,7 @@ void SliderPattern::InitializeBubble()
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(sliderTheme);
     valueRatio_ = std::clamp(valueRatio_, 0.0f, 1.0f);
     std::string content = std::to_string(static_cast<int>(std::round(valueRatio_ * 100.0f))) + '%';
@@ -929,7 +965,7 @@ OffsetF SliderPattern::CalculateGlobalSafeOffset()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
-    auto overlayGlobalOffset = host->GetPaintRectOffset();
+    auto overlayGlobalOffset = host->GetPaintRectOffset(false, true);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto safeAreaManger = pipelineContext->GetSafeAreaManager();
@@ -987,7 +1023,9 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    const auto& content = host->GetGeometryNode()->GetContent();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    const auto& content = geometryNode->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
@@ -1010,6 +1048,10 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     value_ = std::clamp(value_, min, max);
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
+    bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
+    if (valueChangeFlag_) {
+        PlayHapticFeedback(isShowSteps, step, oldValue);
+    }
     UpdateCircleCenterOffset();
 }
 
@@ -1554,7 +1596,7 @@ Axis SliderPattern::GetDirection() const
 #ifdef SUPPORT_DIGITAL_CROWN
 double SliderPattern::GetCrownRotatePx(const CrownEvent& event) const
 {
-    double px = event.degree * crownDisplayControlRatio_;
+    double px = -event.degree * crownDisplayControlRatio_;
     switch (crownSensitivity_) {
         case CrownSensitivity::LOW:
             px *= CROWN_SENSITIVITY_LOW;
@@ -1585,8 +1627,9 @@ void SliderPattern::HandleCrownAction(double mainDelta)
     crownMovingLength_ += mainDelta;
     crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
     valueRatio_ = crownMovingLength_ / sliderLength_;
-    CHECK_NULL_VOID(stepRatio_ != 0);
-    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    auto stepRatio = sliderPaintProperty->GetStepRatio();
+    CHECK_NULL_VOID(stepRatio != 0);
+    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio) * stepRatio;
     float oldValue = value_;
     value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
     sliderPaintProperty->UpdateValue(value_);
@@ -1603,13 +1646,11 @@ void SliderPattern::StartVibrateFeedback()
 {
     crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
     if (valueChangeFlag_ && reachBoundary_) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_STRONG, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_STRONG);
     } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_WEAK, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_WEAK);
     }
 }
 #endif
@@ -1625,11 +1666,11 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     CHECK_NULL_RETURN(paintProperty, SliderContentModifier::Parameters());
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, SliderContentModifier::Parameters());
-    auto theme = pipeline->GetTheme<SliderTheme>();
+    auto theme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
     auto stepRatio = paintProperty->GetStepRatio();
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio, hotBlockShadowWidth_,
-        mouseHoverFlag_, mousePressedFlag_, PointF(), PointF(), PointF(), PointF(), PointF(), Color::TRANSPARENT,
+        mouseHoverFlag_, mousePressedFlag_, PointF(), PointF(), PointF(), PointF(), PointF(), Gradient(),
         Gradient(), Color::TRANSPARENT };
     auto contentSize = GetHostContentSize();
     CHECK_NULL_RETURN(contentSize, SliderContentModifier::Parameters());
@@ -1650,7 +1691,8 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     if (sliderMode == SliderModel::SliderMode::NONE) {
         trackColor = theme->GetNoneModeSelectedTrackColor();
     }
-    parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
+    Gradient defaultSelectGradientColor = SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor());
+    parameters.selectGradientColor = paintProperty->GetSelectGradientColor().value_or(defaultSelectGradientColor);
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
     parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
@@ -1769,6 +1811,7 @@ void SliderPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
+    CHECK_NULL_VOID(info);
     if (!info->IsValid() || !info->IsObject()) {
         return;
     }
@@ -1920,6 +1963,7 @@ void SliderPattern::UpdateValue(float value)
 void SliderPattern::OnAttachToFrameNode()
 {
     RegisterVisibleAreaChange();
+    InitHapticController();
 }
 
 void SliderPattern::StartAnimation()
@@ -1938,6 +1982,9 @@ void SliderPattern::StartAnimation()
 
 void SliderPattern::StopAnimation()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     CHECK_NULL_VOID(sliderContentModifier_);
     if (!sliderContentModifier_->GetVisible()) {
         return;
@@ -2100,6 +2147,9 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2135,5 +2185,19 @@ void SliderPattern::InitOrRefreshSlipFactor()
     CHECK_NULL_VOID(theme);
     auto sliderPPI = theme->GetSliderPPI();
     slipfactor_ = sliderPPI * SLIP_FACTOR_COEFFICIENT / totalStepCount;
+}
+
+bool SliderPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, result);
+    result = !paintProperty->HasBlockColor() ||
+        !paintProperty->HasTrackBackgroundColor() ||
+        !paintProperty->HasSelectColor() ||
+        !paintProperty->HasStepColor();
+    return result;
 }
 } // namespace OHOS::Ace::NG

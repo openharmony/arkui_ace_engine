@@ -14,7 +14,7 @@
  */
 #define private public
 #define protected public
-#include "core/components_ng/pattern/ui_extension/security_session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
 
 #include <cmath>
 #include <memory>
@@ -273,5 +273,17 @@ uint32_t SecuritySessionWrapperImpl::GetReasonDump() const
 void SecuritySessionWrapperImpl::NotifyUieDump(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+}
+
+bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
+{
+    return false;
+}
+
+bool SecuritySessionWrapperImpl::SendBusinessData(
+    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type, RSSubsystemId subSystemId)
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG

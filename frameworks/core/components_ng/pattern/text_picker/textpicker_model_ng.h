@@ -33,6 +33,7 @@ public:
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetGradientHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override;
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
@@ -45,6 +46,7 @@ public:
     void SetIsCascade(bool isCascade) override;
     void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override;
     void SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop) override;
+    void SetOnEnterSelectedArea(TextCascadeChangeEvent&& onEnterSelectedArea) override;
     void SetValues(const std::vector<std::string>& values) override;
     void SetSelecteds(const std::vector<uint32_t>& values) override;
     void SetBackgroundColor(const Color& color) override;
@@ -91,11 +93,14 @@ public:
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
     void SetDivider(const ItemDivider& divider) override;
     void HasUserDefinedOpacity() override;
+    void SetColumnWidths(const std::vector<Dimension>& widths) override;
 
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);
@@ -132,6 +137,7 @@ public:
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop);
     static int32_t GetSelectedSize(FrameNode* frameNode);
+    static int32_t GetColumnWidthsSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);
     static std::vector<uint32_t> getTextPickerSelecteds(FrameNode* frameNode);
     static int32_t GetCanLoop(FrameNode* frameNode);
@@ -139,6 +145,11 @@ public:
     static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
     static int32_t GetTextPickerRangeType(FrameNode* frameNode);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static void SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths);
+    static std::vector<Dimension> GetColumnWidths(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
@@ -164,8 +175,8 @@ public:
     void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onScrollStop,
-        TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
-        const std::vector<ButtonInfo>& buttonInfos) override;
+        std::function<void(const std::string&)>&& onEnterSelectedArea, TextPickerDialog& textPickerDialog,
+        TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) override;
 };
 } // namespace OHOS::Ace::NG
 

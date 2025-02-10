@@ -19,6 +19,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -27,6 +28,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
@@ -58,7 +60,10 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
+const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
+constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 
 } // namespace
 
@@ -71,7 +76,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSObject> ownerObj = JSRef<JSObject>::Cast(info[1]);
 
         // check if owner object is set
-        JSView* ownerView = ownerObj->Unwrap<JSView>();
+        auto* ownerView = JSView::GetNativeView(ownerObj);
         auto instance = AceType::MakeRefPtr<JSCustomDialogController>(ownerView);
         if (ownerView == nullptr) {
             instance->IncRefCount();
@@ -132,7 +137,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         auto alignmentValue = constructorArg->GetProperty("alignment");
         if (alignmentValue->IsNumber()) {
             auto alignment = alignmentValue->ToNumber<int32_t>();
-            if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
                 instance->dialogProperties_.alignment = DIALOG_ALIGNMENT[alignment];
             }
         }
@@ -143,6 +148,27 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             auto avoidMode = avoidModeValue->ToNumber<int32_t>();
             if (avoidMode >= 0 && avoidMode < static_cast<int32_t>(KEYBOARD_AVOID_MODE.size())) {
                 instance->dialogProperties_.keyboardAvoidMode = KEYBOARD_AVOID_MODE[avoidMode];
+            }
+        }
+
+        // Parse keyboardAvoidDistance
+        auto avoidDistance = constructorArg->GetProperty("keyboardAvoidDistance");
+        if (avoidDistance->IsObject()) {
+            JSRef<JSObject> avoidDistanceobj = JSRef<JSObject>::Cast(avoidDistance);
+            auto avoidDisValue = avoidDistanceobj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+            auto jsAvoidDisUnit = avoidDistanceobj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+            DimensionUnit avoidDisUnit = OHOS::Ace::DimensionUnit::VP;
+            if (jsAvoidDisUnit->IsNumber()) {
+                avoidDisUnit = static_cast<DimensionUnit>(jsAvoidDisUnit->ToNumber<int32_t>());
+            }
+            if (avoidDisValue->IsNumber() && avoidDisValue->ToNumber<double>() >= 0 &&
+                avoidDisUnit >= OHOS::Ace::DimensionUnit::PX && avoidDisUnit <= OHOS::Ace::DimensionUnit::CALC &&
+                avoidDisUnit != OHOS::Ace::DimensionUnit::PERCENT) {
+                Dimension avoidDistanceDimension(avoidDisValue->ToNumber<double>(), avoidDisUnit);
+                instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
+            } else {
+                Dimension avoidDistanceDimension(DEFAULT_AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+                instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
             }
         }
 
@@ -222,6 +248,27 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 #else
             instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
 #endif
+        }
+
+        auto dialogLevelMode = constructorArg->GetProperty("levelMode");
+        if (dialogLevelMode->IsNumber() && !instance->dialogProperties_.isShowInSubWindow) {
+            auto levelMode = dialogLevelMode->ToNumber<int32_t>();
+            if (levelMode >= 0 && levelMode < static_cast<int32_t>(DIALOG_LEVEL_MODE.size())) {
+                instance->dialogProperties_.dialogLevelMode = DIALOG_LEVEL_MODE[levelMode];
+            }
+        }
+
+        auto dialogLevelUniqueId = constructorArg->GetProperty("levelUniqueId");
+        if (dialogLevelUniqueId->IsNumber()) {
+            instance->dialogProperties_.dialogLevelUniqueId = dialogLevelUniqueId->ToNumber<int32_t>();
+        }
+
+        auto immersiveMode = constructorArg->GetProperty("immersiveMode");
+        if (immersiveMode->IsNumber()) {
+            auto immersiveVal = immersiveMode->ToNumber<int32_t>();
+            if (immersiveVal >= 0 && immersiveVal < static_cast<int32_t>(DIALOG_IMMERSIVE_MODE.size())) {
+                instance->dialogProperties_.dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[immersiveVal];
+            }
         }
 
         // Parse isModal.

@@ -397,6 +397,8 @@ private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
+    void CleanParentMenuItemBgColor();
+    void SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type);
     virtual void OnTouch(const TouchEventInfo& info);
     virtual bool OnKeyEvent(const KeyEvent& event);
     virtual bool IsCustomMenuItem()
@@ -411,6 +413,7 @@ private:
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
+    void SetRowAccessibilityLevel();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
     void UpdateTextMarquee(bool isMarqueeStart);
     void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
@@ -440,6 +443,7 @@ private:
     void SetAccessibilityAction();
     bool IsSelectOverlayMenu();
     void RecordChangeEvent() const;
+    bool ParseMenuBlurStyleEffect(MenuParam& param, const RefPtr<RenderContext>& parseMenuBlurStyleEffect);
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 

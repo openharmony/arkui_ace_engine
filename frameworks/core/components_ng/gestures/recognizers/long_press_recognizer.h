@@ -46,7 +46,7 @@ class ACE_FORCE_EXPORT LongPressRecognizer : public MultiFingersRecognizer {
 public:
     explicit LongPressRecognizer() = default;
     LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat,
-        bool isForDrag = false, bool isDisableMouseLeft = false);
+        bool isForDrag = false, bool isDisableMouseLeft = false, bool isLimitFingerCount = false);
 
     LongPressRecognizer(bool isForDrag = false, bool isDisableMouseLeft = false)
         : isForDrag_(isForDrag), isDisableMouseLeft_(isDisableMouseLeft)
@@ -82,6 +82,16 @@ public:
     int32_t GetDuration() const
     {
         return duration_;
+    }
+
+    void SetIsRepeat(bool repeat)
+    {
+        repeat_ = repeat;
+    }
+
+    bool GetIsRepeat() const
+    {
+        return repeat_;
     }
 
     void SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
@@ -149,6 +159,7 @@ private:
     DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
+    bool hasRepeated_ = false;
 };
 
 } // namespace OHOS::Ace::NG

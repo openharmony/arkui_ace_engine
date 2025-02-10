@@ -622,6 +622,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg013, TestSize.Level1)
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
+    auto layoutWrapper1 = LayoutWrapperNode(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -633,7 +634,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg013, TestSize.Level1)
     layoutAlgorithm->defaultMinSideBarWidth_ = DEFAULT_MIN_SIDEBAR;
     layoutAlgorithm->defaultMaxSideBarWidth_ = DEFAULT_MAX_SIDEBAR;
     layoutAlgorithm->SetPattern(AceType::WeakClaim(AceType::RawPtr(sideBarContainerPattern)));
-    layoutAlgorithm->GetAllPropertyValue(layoutProperty, parentWidth);
+    layoutAlgorithm->GetAllPropertyValue(layoutProperty, &layoutWrapper1, parentWidth);
 
     /**
      * @tc.steps: step2. realSideBarWidth_ > maxSideBarWidth_
@@ -681,7 +682,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg014, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 12;
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     sideBarLayoutProperty->UpdateMinSideBarWidth(DEFAULT_MIN_SIDE_BAR_WIDTH);
     sideBarLayoutProperty->UpdateMaxSideBarWidth(DEFAULT_MAX_SIDE_BAR_WIDTH);
     layoutAlgorithm->AdjustMinAndMaxSideBarWidth(&layoutWrapper);
@@ -943,7 +944,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg021, TestSize.Level1)
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 7;
@@ -970,6 +971,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg022, TestSize.Level1)
     EXPECT_FALSE(geometryNode == nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    auto layoutWrapper1 = LayoutWrapperNode(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
@@ -983,7 +985,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg022, TestSize.Level1)
     layoutAlgorithm->defaultMaxSideBarWidth_ = DEFAULT_MAX_SIDEBAR;
     layoutAlgorithm->SetPattern(AceType::WeakClaim(AceType::RawPtr(sideBarContainerPattern)));
     layoutAlgorithm->preSideBarWidth_ = Dimension(1.0f, DimensionUnit::PX);
-    layoutAlgorithm->GetAllPropertyValue(layoutProperty, parentWidth);
+    layoutAlgorithm->GetAllPropertyValue(layoutProperty, &layoutWrapper1, parentWidth);
 }
 
 /**
@@ -1036,7 +1038,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0023, TestSize.Level1)
     layoutAlgorithm->defaultMaxSideBarWidth_ = DEFAULT_MAX_SIDEBAR;
     layoutAlgorithm->SetPattern(AceType::WeakClaim(AceType::RawPtr(sideBarContainerPattern)));
     layoutAlgorithm->preSideBarWidth_ = DEFAULT_MIN;
-    layoutAlgorithm->GetAllPropertyValue(layoutProperty, parentWidth);
+    layoutAlgorithm->GetAllPropertyValue(layoutProperty, &layoutWrapper, parentWidth);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->minPlatformVersion_ = 12;
@@ -1108,7 +1110,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg025, TestSize.Level1)
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 12;
@@ -1254,7 +1256,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg029, TestSize.Level1)
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->minPlatformVersion_ = 12;

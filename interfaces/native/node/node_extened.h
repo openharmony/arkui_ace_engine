@@ -163,9 +163,22 @@ struct ArkUI_CustomProperty {
     char* value;
 };
 
+struct ArkUI_HostWindowInfo {
+    char* name;
+};
+
 struct ArkUI_ActiveChildrenInfo {
     ArkUI_NodeHandle* nodeList;
     int32_t nodeCount;
+};
+
+struct ArkUI_CrossLanguageOption {
+    bool attributeSetting;
+};
+
+struct ArkUI_VisibleAreaEventOptions {
+    std::vector<float> ratios;
+    int32_t expectedUpdateInterval;
 };
 
 #ifdef __cplusplus

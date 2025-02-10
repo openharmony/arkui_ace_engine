@@ -514,7 +514,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove002, TestSize.Lev
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_1);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
     Offset touchOffset(20.0f, 20.0f);
     richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
     ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
@@ -535,7 +535,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove003, TestSize.Lev
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_1);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
     Offset touchOffset(20.0f, 20.0f);
     richEditorPattern->magnifierController_ = nullptr;
     richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
@@ -555,67 +555,10 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove004, TestSize.Lev
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->textSelector_.Update(0, 10);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_1);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
     Offset touchOffset(20.0f, 20.0f);
     richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
     EXPECT_TRUE(richEditorPattern->isShowMenu_);
-}
-
-/**
- * @tc.name: GetSelectedMaxWidth001
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_EQ(ret, 0.0f);
-}
-
-/**
- * @tc.name: GetSelectedMaxWidth002
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    std::vector<RectF> rectList;
-    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    overlayMod->SetSelectedRects(rectList);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-}
-
-/**
- * @tc.name: GetSelectedMaxWidth003
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    std::vector<RectF> rectList;
-    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
-    rectList.push_back(RectF(10.0f, 10.0f, 50.0f, 100.f));
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    overlayMod->SetSelectedRects(rectList);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
 }
 
 /**
@@ -947,7 +890,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection001, TestSize.Level1)
     EXPECT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
 
-    richEditorPattern->previewTextRecord_.previewContent = "test";
+    richEditorPattern->previewTextRecord_.previewContent = u"test";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 1;
     richEditorPattern->previewTextRecord_.endOffset = 10;
@@ -1453,7 +1396,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, GetParagraphInfo001, TestSize.Level1)
     ClearSpan();
     auto size = richEditorPattern->GetParagraphInfo(start, end).size();
     AddSpan(INIT_VALUE_2);
-    AddSpan(INIT_VALUE_2 + "\n");
+    AddSpan(INIT_VALUE_2 + u"\n");
     AddSpan(INIT_VALUE_2);
     AddSpan(INIT_VALUE_2);
     EXPECT_NE(size, richEditorPattern->GetParagraphInfo(start, end).size());

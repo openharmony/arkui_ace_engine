@@ -73,7 +73,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     PaddingProperty padding;
     if (isShow && customTitleSettedShow_) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
+            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
     }
     layoutProperty->UpdatePadding(padding);
     BorderWidthProperty borderWidth;
@@ -275,6 +275,9 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
         auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
+            auto currentWindowMode = windowManager->GetCurrentWindowMaximizeMode();
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "container window pan recognized. currentWindowMode = %{public}d",
+                currentWindowMode);
             if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
                 (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
                 windowManager->WindowStartMove();
@@ -297,12 +300,12 @@ void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButto
     eventHub->RemovePanEvent(panEvent_);
 }
 
-void ContainerModalPattern::OnWindowFocused()
+void ContainerModalPattern::OnWindowActivated()
 {
     WindowFocus(true);
 }
 
-void ContainerModalPattern::OnWindowUnfocused()
+void ContainerModalPattern::OnWindowDeactivated()
 {
     WindowFocus(false);
 }
@@ -586,6 +589,8 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     TrimFloatingWindowLayout();
 }
 
+bool ContainerModalPattern::GetContainerModalTitleVisible() { return customTitleSettedShow_; }
+
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModal SetContainerModalTitleHeight height=%{public}d", height);
@@ -699,10 +704,12 @@ void ContainerModalPattern::CallButtonsRectChange()
     GetContainerModalButtonsRect(containerModal, buttons);
     NotifyButtonsRectChange(containerModal, buttons);
     CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
-    if (isInitButtonsRect_ && buttonsRect_ == buttons) {
-        return;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (isInitButtonsRect_ && buttonsRect_ == buttons) {
+            return;
+        }
+        isInitButtonsRect_ = true;
     }
-    isInitButtonsRect_ = true;
     buttonsRect_ = buttons;
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -911,7 +918,7 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
     auto customTitleRowProp = customtitleRow->GetLayoutProperty();
     if (customTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
+            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
     }
     hostProp->UpdatePadding(padding);
 }

@@ -125,6 +125,27 @@ public:
     virtual std::string GetUserAgent(void* object) = 0;
 };
 
+class WebRefreshAccessedHistoryObject : public Referenced {
+public:
+    virtual std::string GetUrl(void* object) = 0;
+    virtual bool GetIsRefreshed(void* object) = 0;
+};
+
+class WebFullScreenEnterObject : public Referenced {
+public:
+    virtual int GetWidths(void* object) = 0;
+    virtual int GetHeights(void* object) = 0;
+    virtual void ExitFullScreen(void* object, int index) {};
+    virtual int AddObject(void* object)
+    {
+        return 0;
+    };
+    virtual void DelObject(int index) {};
+};
+
+class WebFullScreenExitObject : public Referenced {
+};
+
 class WebFileChooserObject : public Referenced {
 public:
     virtual std::string GetTitle(void* object) = 0;
@@ -250,6 +271,36 @@ public:
     {
         return resourceResponseObject_;
     }
+	
+    const RefPtr<WebRefreshAccessedHistoryObject>& GetRefreshAccessedHistoryObject()
+    {
+        return refreshAccessedHistoryObject_;
+    }
+
+    void SetRefreshAccessedHistoryObject(const RefPtr<WebRefreshAccessedHistoryObject>& object)
+    {
+        refreshAccessedHistoryObject_ = object;
+    }
+
+    const RefPtr<WebFullScreenEnterObject>& GetFullScreenEnterObject()
+    {
+        return fullScreenEnterObject_;
+    }
+
+    void SetFullScreenEnterObject(const RefPtr<WebFullScreenEnterObject>& object)
+    {
+        fullScreenEnterObject_ = object;
+    }
+
+    const RefPtr<WebFullScreenExitObject>& GetFullScreenExitObject()
+    {
+        return fullScreenExitObject_;
+    }
+
+    void SetFullScreenExitObject(const RefPtr<WebFullScreenExitObject>& object)
+    {
+        fullScreenExitObject_ = object;
+    }
 
     void SetResourceResponseObject(const RefPtr<WebResourceResponseObject>& object)
     {
@@ -340,6 +391,9 @@ private:
     RefPtr<WebFileChooserObject> fileChooserObject_;
     RefPtr<WebGeolocationObject> GeolocationObject_;
     std::unordered_map<std::string, EventObJectCallback> eventObjectMap_;
+    RefPtr<WebRefreshAccessedHistoryObject> refreshAccessedHistoryObject_;
+    RefPtr<WebFullScreenEnterObject> fullScreenEnterObject_;
+    RefPtr<WebFullScreenExitObject> fullScreenExitObject_;
     std::unordered_map<std::string, EventObjectWithBoolReturnCallback> eventObjectWithBoolReturnMap_;
 };
 inline WebObjectEventManager::WebObjectEventManager() = default;

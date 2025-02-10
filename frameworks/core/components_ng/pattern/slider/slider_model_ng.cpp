@@ -29,8 +29,6 @@ const float DEFAULT_STEP = 1.0f;
 const float DEFAULT_MIN_VALUE = 0.0f;
 const float DEFAULT_MAX_VALUE = 100.0f;
 constexpr uint32_t BLOCK_COLOR = 0xffffffff;
-constexpr uint32_t TRACK_COLOR = 0x19182431;
-constexpr uint32_t SELECTED_COLOR = 0xff007dff;
 
 void SliderModelNG::Create(float value, float step, float min, float max)
 {
@@ -83,6 +81,11 @@ void SliderModelNG::SetTrackBackgroundColor(const Gradient& value, bool isResour
 void SliderModelNG::SetSelectColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value);
+}
+void SliderModelNG::SetSelectColor(const Gradient& value, bool isResourceColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor);
 }
 void SliderModelNG::SetMinLabel(float value)
 {
@@ -417,9 +420,10 @@ void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
-void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Color& value)
+void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor, frameNode);
 }
 void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
 {
@@ -623,17 +627,28 @@ Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
 Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
 {
     Gradient value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         SliderPaintProperty, TrackBackgroundColor, value, frameNode,
-        SliderModelNG::CreateSolidGradient(Color(TRACK_COLOR)));
+        SliderModelNG::CreateSolidGradient(Color(theme->GetTrackBgColor())));
     return value;
 }
 
-Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
+Gradient SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
-    Color value;
+    Gradient value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
+        SliderPaintProperty, SelectGradientColor, value, frameNode,
+        SliderModelNG::CreateSolidGradient(Color(theme->GetTrackSelectedColor())));
     return value;
 }
 
@@ -766,6 +781,29 @@ void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t m
     pattern->SetSliderValue(value, mode);
 }
 
+bool SliderModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_RETURN(sliderPattern, true);
+    return sliderPattern->GetEnableHapticFeedback();
+}
+
+void SliderModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void SliderModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(sliderPattern);
+    sliderPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
+
 Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
 {
     Dimension defaultTrackThickness = Dimension(0.0f);
@@ -812,5 +850,42 @@ void SliderModelNG::ResetMinResponsiveDistance(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
         SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetBlockColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetSelectColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectGradientColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        SelectIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        SelectGradientColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetTrackColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetTrackColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

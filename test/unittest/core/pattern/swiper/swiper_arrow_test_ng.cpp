@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -853,13 +853,13 @@ HWTEST_F(SwiperArrowTestNg, ClickArrowRTL001, TestSize.Level1)
      */
     leftArrowPattern->ButtonClickEvent();
     FlushUITasks();
-    EXPECT_EQ(pattern_->currentIndex_, 1);
+    EXPECT_TRUE(CurrentIndex(1));
     /**
      * @tc.steps: step2. Click the right arrow in RTL layout.
      */
     rightArrowPattern->ButtonClickEvent();
     FlushUITasks();
-    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -1042,5 +1042,99 @@ HWTEST_F(SwiperArrowTestNg, ArrowButtonType001, TestSize.Level1)
     ASSERT_EQ(rightButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
     auto rightButtonType = rightButtonNode->GetLayoutProperty<ButtonLayoutProperty>()->GetType();
     EXPECT_EQ(rightButtonType, ButtonType::CIRCLE);
+}
+
+/**
+ * @tc.name: Arrow005
+ * @tc.desc: Test arrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. swiper type is DOT, BIND mode and Show set value arrow
+     * @tc.expected: check properties
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    swiperArrowParameters.isShowBackground = true;
+    swiperArrowParameters.isSidebarMiddle = false;
+    swiperArrowParameters.backgroundSize = Dimension(32.f);
+    swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
+    swiperArrowParameters.arrowSize = Dimension(24.f);
+    swiperArrowParameters.arrowColor = Color::GREEN;
+    /**
+     * @tc.steps: step2. VERTICAL and isShowIndicatorArrow
+     * @tc.expected: check arrow rect
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetBindIndicator(true);
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(swiperArrowParameters);
+    model.SetShowIndicator(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_EQ(indicatorNode_, nullptr);
+    indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
+    EXPECT_NE(indicatorNode_, nullptr);
+    EXPECT_NE(rightArrowNode_, nullptr);
+    auto swiperArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+    EXPECT_NE(swiperArrowPattern, nullptr);
+    EXPECT_EQ(swiperArrowPattern->TotalCount(), 3);
+    KeyEvent keyEvent(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    swiperArrowPattern->OnKeyEvent(keyEvent);
+    swiperArrowPattern->DumpAdvanceInfo();
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto controller = indicatorPattern->GetIndicatorController();
+    ASSERT_NE(controller, nullptr);
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
+    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
+    controller->SetSwiperNode(targetNode, indicatorNode);
+    EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.f, 0.f, 0.f, 0.f)));
+    indicatorPattern->SaveDotIndicatorProperty();
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.0f, 0.f, 31.98f, 87.9f)));
+}
+
+/**
+ * @tc.name: InitAccessibilityText001
+ * @tc.desc: Test clicking the left arrows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitAccessibilityText001, TestSize.Level1)
+{
+    CreateWithArrow();
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    ASSERT_NE(buttonNode, nullptr);
+    leftArrowPattern->InitAccessibilityText();
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
+    buttonAccessibilityProperty->SetAccessibilityText("left");
+    auto text = buttonAccessibilityProperty->GetAccessibilityText();
+    EXPECT_EQ(text, "left");
+}
+
+/**
+ * @tc.name: InitAccessibilityText002
+ * @tc.desc: Test clicking the right arrows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitAccessibilityText002, TestSize.Level1)
+{
+    CreateWithArrow();
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto buttonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
+    ASSERT_NE(buttonNode, nullptr);
+    rightArrowPattern->InitAccessibilityText();
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
+    buttonAccessibilityProperty->SetAccessibilityText("right");
+    auto text = buttonAccessibilityProperty->GetAccessibilityText();
+    EXPECT_EQ(text, "right");
 }
 } // namespace OHOS::Ace::NG

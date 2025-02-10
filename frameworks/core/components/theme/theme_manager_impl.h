@@ -113,6 +113,12 @@ public:
         return themeConstants_->GetResourceLimitKeys();
     }
 
+    void RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func) override;
+
+    RefPtr<Theme> GetThemeOrigin(ThemeType type);
+
+    RefPtr<Theme> GetThemeKit(ThemeType type);
+
 private:
     using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;

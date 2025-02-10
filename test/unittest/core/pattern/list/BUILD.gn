@@ -19,6 +19,7 @@ ace_unittest("list_test_ng") {
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+    "list_accessibility_test_ng.cpp",
     "list_attr_test_ng.cpp",
     "list_common_test_ng.cpp",
     "list_controller_test_ng.cpp",

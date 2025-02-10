@@ -22,6 +22,10 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value: Optional<CrownSensitivity>): DatePickerAttribute {
+    modifierWithKey(this._modifiersWithKeys, DatePickerDigitalCrownSensitivityModifier.identity, DatePickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   disappearTextStyle(value: PickerTextStyle): DatePickerAttribute {
     modifierWithKey(this._modifiersWithKeys, DatePickerDisappearTextStyleModifier.identity,
       DatePickerDisappearTextStyleModifier, value);
@@ -47,6 +51,10 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
     return this;
   }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity, DatePickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 
 class DatePickerLunarModifier extends ModifierWithKey<boolean> {
@@ -59,6 +67,20 @@ class DatePickerLunarModifier extends ModifierWithKey<boolean> {
       getUINativeModule().datePicker.resetLunar(node);
     } else {
       getUINativeModule().datePicker.setLunar(node, this.value);
+    }
+  }
+}
+
+class DatePickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('digitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().datePicker.resetDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().datePicker.setDigitalCrownSensitivity(node, this.value);
     }
   }
 }
@@ -165,6 +187,19 @@ class DatePickerBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('datePickerEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().datePicker.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().datePicker.setEnableHapticFeedback(node, this.value);
+    }
   }
 }
 

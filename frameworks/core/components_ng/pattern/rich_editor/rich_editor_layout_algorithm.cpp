@@ -135,6 +135,33 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContentSize(
     return SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
 }
 
+LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
+    SizeF& textSize, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto newContentConstraint = contentConstraint;
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_RETURN(pattern, newContentConstraint);
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, newContentConstraint);
+    if (pattern->GetMaxLinesHeight() != FLT_MAX && layoutProperty->GetMaxLinesValue(INT32_MAX) == INT32_MAX) {
+        newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
+        return newContentConstraint;
+    }
+    if (pattern->GetMaxLines() == INT32_MAX || pManager_->GetHeight() <= 0.0f) {
+        return newContentConstraint;
+    }
+    pattern->SetMaxLinesHeight(pManager_->GetHeight());
+    newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
+    layoutProperty->UpdateMaxLines(INT32_MAX);
+    TextStyle textStyle;
+    ConstructTextStyles(newContentConstraint, layoutWrapper, textStyle);
+    layoutProperty->UpdateMaxLines(pattern->GetMaxLines());
+    CHECK_NULL_RETURN(BuildParagraph(textStyle, layoutProperty, newContentConstraint, layoutWrapper), {});
+    pManager_->SetParagraphs(GetParagraphs());
+    textSize = SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
+    return newContentConstraint;
+}
+
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -144,12 +171,13 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     auto optionalTextSize = spans_.empty()
         ? MeasureEmptyContentSize(contentConstraint, layoutWrapper)
         : MeasureContentSize(contentConstraint, layoutWrapper);
-    CHECK_NULL_RETURN(optionalTextSize, {});
+    CHECK_NULL_RETURN(optionalTextSize.has_value(), {});
+    auto newContentConstraint = ReMeasureContent(optionalTextSize.value(), contentConstraint, layoutWrapper);
     SizeF res = optionalTextSize.value();
     res.AddHeight(spans_.empty() ? 0 : shadowOffset_);
     CHECK_NULL_RETURN(res.IsNonNegative(), {});
     UpdateRichTextRect(optionalTextSize.value(), layoutWrapper);
-    auto maxHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto maxHeight = newContentConstraint.selfIdealSize.Height().value_or(newContentConstraint.maxSize.Height());
     auto contentHeight = std::min(res.Height(), maxHeight);
     return SizeF(res.Width(), contentHeight);
 }
@@ -240,6 +268,7 @@ void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     MultipleParagraphLayoutAlgorithm::Measure(layoutWrapper);
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
     OptionalSizeF idealSize =
         CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (layoutConstraint->maxSize.Width() < layoutConstraint->minSize.Width()) {
@@ -291,12 +320,13 @@ void RichEditorLayoutAlgorithm::HandleEmptyParagraph(RefPtr<Paragraph> paragraph
     auto content = spanItem->GetSpanContent(spanItem->GetSpanContent());
     CHECK_NULL_VOID(content.empty());
     auto textStyle = spanItem->GetTextStyle();
-    CHECK_NULL_VOID(textStyle);
+    CHECK_NULL_VOID(textStyle.has_value());
     paragraph->PushStyle(textStyle.value());
 }
 
 RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
 {
+    CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
     auto it = spanGroup.begin();
     while (it != spanGroup.end()) {
         if (!AceType::DynamicCast<PlaceholderSpanItem>(*it)) {
@@ -314,7 +344,7 @@ std::string RichEditorLayoutAlgorithm::SpansToString()
         ss << "[";
         for_each(list.begin(), list.end(), [&ss](const RefPtr<SpanItem>& item) {
 #ifndef IS_RELEASE_VERSION
-            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << ")";
+            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << ")";
 #endif
             ss << "[" << item->rangeStart << ":" << item->position << "],";
         });

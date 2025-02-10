@@ -31,6 +31,12 @@ namespace {
     const char* VIBRATOR_TYPE_INVALID = "vibrator.type.invalid";
     const char* GetVibratorType(const std::string& vibratorType)
     {
+#ifdef SUPPORT_DIGITAL_CROWN
+        std::string watchhaptic = "watchhaptic.feedback.crown";
+        if (vibratorType.find(watchhaptic) != std::string::npos) {
+            return vibratorType.c_str();
+        }
+#endif
         if (vibratorType == "longPress.light") {
             return VIBRATOR_TYPE_LONG_PRESS_LIGHT;
         } else if (vibratorType == "slide") {
@@ -89,5 +95,12 @@ bool VibratorUtils::StartExclusiveVibraFeedback(const char* effectId)
         Sensors::StartVibrator(effectId);
     }
     return state;
+}
+
+void VibratorUtils::StartViratorDirectly(const std::string& vibratorType)
+{
+    if (!vibratorType.empty()) {
+        Sensors::StartVibrator(vibratorType.c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

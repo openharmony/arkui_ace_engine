@@ -34,7 +34,7 @@ void InspectProgress::PackAttrAndStyle()
         styles_.insert(std::make_pair("color", "#ff007dff"));
     } else if (deviceType == DeviceType::TV) {
         styles_.insert(std::make_pair("color", "#e5ffffff"));
-    } else if (deviceType == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) {
         styles_.insert(std::make_pair("color", "#ff45a5ff"));
     }
     styles_.insert(std::make_pair("stroke-width", "4px"));

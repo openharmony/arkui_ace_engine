@@ -64,10 +64,7 @@ template("libace_static") {
         }
         module_name = string_replace(module_path, "_", "")
 
-        # prompt and promptaction uses same sourcefile, remove it in static compile
-        if (module_name != "prompt") {
-          deps += [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
-        }
+        deps += [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
       }
     } else {
       deps += [

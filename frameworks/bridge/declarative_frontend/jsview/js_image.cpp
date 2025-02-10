@@ -579,6 +579,16 @@ void JSImage::SetSourceSize(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetImageSourceSize(JSViewAbstract::ParseSize(info));
 }
 
+bool JSImage::ParseColorContent(const JSRef<JSVal>& jsValue)
+{
+    if (jsValue.IsEmpty() || jsValue->IsNull() || !jsValue->IsObject()) {
+        return false;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("colorContent_");
+    return !typeVal.IsEmpty() && typeVal->IsString() && typeVal->ToString() == "ORIGIN";
+}
+
 void JSImage::SetImageFill(const JSCallbackInfo& info)
 {
     if (ImageModel::GetInstance()->GetIsAnimation()) {
@@ -590,6 +600,10 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
+        if (ParseColorContent(info[0])) {
+            ImageModel::GetInstance()->ResetImageFill();
+            return;
+        }
         if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
             return;
         }
@@ -904,7 +918,11 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
-    JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
+    } else {
+        JSClass<JSImage>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
+    }
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
     JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);

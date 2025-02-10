@@ -130,6 +130,8 @@ const RIGHT_ONLY_RADIO_WIDTH = '30vp';
 const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
 const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
 const ACCESSIBILITY_LEVEL_AUTO = 'auto';
+const ACCESSIBILITY_LEVEL_YES = 'yes';
+const ACCESSIBILITY_LEVEL_NO = 'no';
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
@@ -281,8 +283,9 @@ struct ContentItemStruct {
     if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
       if (this.symbolStyle != null) {
         SymbolGlyph()
+          .fontColor([this.getContentItemIconFillColor()])
           .attributeModifier(this.symbolStyle)
-          .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+          .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .borderRadius($r('sys.float.composeListItem_Image_Radius'))
@@ -292,7 +295,7 @@ struct ContentItemStruct {
       } else if (this.icon != null) {
         if (Util.isSymbolResource(this.icon)) {
           SymbolGlyph(this.icon as Resource)
-            .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+            .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`)
             .fontColor([this.getContentItemIconFillColor()])
             .borderRadius($r('sys.float.composeListItem_Image_Radius'))
             .focusable(false)
@@ -335,7 +338,6 @@ struct ContentItemStruct {
       Text(this.primaryText)
         .fontSize(this.primaryTextSize)
         .fontColor(this.primaryTextColors)
-        .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
         .textOverflow({
           overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
           TextOverflow.Ellipsis
@@ -344,37 +346,41 @@ struct ContentItemStruct {
         .focusable(true)
         .draggable(false)
         .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-          this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
-            newValue.height as number);
+          if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+            this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
+              newValue.height as number);
+          }
         })
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.secondaryTextColors)
-          .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
           .textOverflow({
             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
             TextOverflow.Ellipsis
           })
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
-              newValue.height as number);
+            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+              this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
+                newValue.height as number);
+            }
           })
       }
       if (this.description != null) {
         Text(this.description)
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.descriptionColors)
-          .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
           .textOverflow({
             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
             TextOverflow.Ellipsis
           })
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
-              newValue.height as number);
+            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+              this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
+                newValue.height as number);
+            }
           })
       }
     }
@@ -565,8 +571,9 @@ struct OperateItemStruct {
     Button({ type: ButtonType.Normal }) {
       if (param.icon?.symbolStyle) {
         SymbolGlyph()
+          .fontColor([this.iconColor])
           .attributeModifier(param.icon?.symbolStyle)
-          .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
@@ -574,7 +581,7 @@ struct OperateItemStruct {
       } else {
         if (Util.isSymbolResource(param.icon?.value)) {
           SymbolGlyph(param.icon?.value as Resource)
-            .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
             .fontColor([this.iconColor])
             .focusable(true)
             .draggable(false)
@@ -611,7 +618,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
-    .accessibilityLevel(param.icon?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
     .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
     .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
@@ -621,7 +628,7 @@ struct OperateItemStruct {
   createImage() {
     if (Util.isSymbolResource(this.image)) {
       SymbolGlyph(this.image as Resource)
-        .fontSize(OPERATEITEM_IMAGE_SIZE)
+        .fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`)
         .draggable(false)
         .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     } else {
@@ -637,7 +644,7 @@ struct OperateItemStruct {
   createSymbol() {
     SymbolGlyph()
       .attributeModifier(this.symbolStyle)
-      .fontSize(OPERATEITEM_IMAGE_SIZE)
+      .fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`)
       .effectStrategy(SymbolEffectStrategy.NONE)
       .symbolEffect(new SymbolEffect(), false)
       .draggable(false)
@@ -669,8 +676,9 @@ struct OperateItemStruct {
     Button({ type: ButtonType.Normal }) {
       if (this.arrow?.symbolStyle) {
         SymbolGlyph()
+          .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
           .attributeModifier(this.arrow?.symbolStyle)
-          .fontSize(OPERATEITEM_ARROW_WIDTH)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
@@ -678,7 +686,7 @@ struct OperateItemStruct {
       } else {
         if (Util.isSymbolResource(this.arrow?.value)) {
           SymbolGlyph(this.arrow?.value as Resource)
-            .fontSize(OPERATEITEM_ARROW_WIDTH)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
             .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
             .focusable(true)
             .draggable(false)
@@ -721,7 +729,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
-    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
     .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
     .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
@@ -734,11 +742,12 @@ struct OperateItemStruct {
       .radioStyle({
         uncheckedBorderColor: this.getUnselectedColor()
       })
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
+      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
+      Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
-        this.radioState = isCheck;
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+          this.radioState = isCheck;
           this.isChecked = isCheck;
         }
         if (this.radio?.onChange) {
@@ -766,7 +775,7 @@ struct OperateItemStruct {
           }
         }
       })
-      .accessibilityLevel(this.radio?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
       .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
       .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
@@ -776,12 +785,13 @@ struct OperateItemStruct {
     Checkbox()
       .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
       .unselectedColor(this.getUnselectedColor())
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
+      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
+      Color.Transparent)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange((isCheck: boolean) => {
-        this.checkBoxState = isCheck;
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+          this.checkBoxState = isCheck;
           this.isChecked = isCheck;
         }
         if (this.checkBox?.onChange) {
@@ -809,7 +819,7 @@ struct OperateItemStruct {
           }
         }
       })
-      .accessibilityLevel(this.checkBox?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
       .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
       .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
@@ -819,8 +829,10 @@ struct OperateItemStruct {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
         .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-        .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
-        .switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ? OPERATE_ITEM_COLOR : UNUSUAL)
+        .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
+        Color.Transparent)
+        .switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ? OPERATE_ITEM_COLOR :
+          UNUSUAL)
         .onChange((isCheck: boolean) => {
           this.switchState = isCheck;
           if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
@@ -834,7 +846,7 @@ struct OperateItemStruct {
           this.switchState = !this.switchState;
         })
         .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
-        .accessibilityLevel(this.switch?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+        .accessibilityLevel(getAccessibilityLevelOnChange(this.switch?.accessibilityLevel, this.switch?.onChange))
         .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
         .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
     }
@@ -875,8 +887,9 @@ struct OperateItemStruct {
             })
           if (this.arrow?.symbolStyle) {
             SymbolGlyph()
+              .fontColor([$r('sys.color.ohos_id_color_fourth')])
               .attributeModifier(this.arrow?.symbolStyle)
-              .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
@@ -884,7 +897,7 @@ struct OperateItemStruct {
           } else {
             if (Util.isSymbolResource(this.arrow?.value)) {
               SymbolGlyph(this.arrow?.value as Resource)
-                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
                 .fontColor([$r('sys.color.ohos_id_color_fourth')])
                 .focusable(false)
                 .draggable(false)
@@ -926,8 +939,9 @@ struct OperateItemStruct {
             .margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH })
           if (this.arrow?.symbolStyle) {
             SymbolGlyph()
+              .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor])
               .attributeModifier(this.arrow?.symbolStyle)
-              .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
@@ -935,7 +949,7 @@ struct OperateItemStruct {
           } else {
             if (Util.isSymbolResource(this.arrow?.value)) {
               SymbolGlyph(this.arrow?.value as Resource)
-                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
                 .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor])
                 .focusable(false)
                 .draggable(false)
@@ -992,7 +1006,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
-    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
     .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
     .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
@@ -1066,6 +1080,40 @@ function getAccessibilityText(resource: ResourceStr): string {
   }
 }
 
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (value: boolean) => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onChange) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
+}
+
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: () => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onAction) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
+}
+
 @Component
 export struct ComposeListItem {
   @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
@@ -1127,11 +1175,12 @@ export struct ComposeListItem {
           (LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value);
       }
     } else if (this.contentItem.description === undefined) {
+      let iconStyle = this.contentItem.iconStyle as number;
       if (this.contentItem.icon === undefined ||
-        (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
+        (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT;
       } else {
-        this.itemHeight = APPICON_ITEMLENGTH;
+        this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
       }
     } else {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT;
@@ -1174,7 +1223,19 @@ export struct ComposeListItem {
 
   private envCallback: EnvironmentCallback = {
     onConfigurationUpdated: (config) => {
-      this.fontSizeScale = this.decideFontSizeScale();
+      if (config === undefined || !this.isFollowingSystemFontScale) {
+        this.fontSizeScale = 1;
+        return;
+      }
+      try {
+        this.fontSizeScale = Math.min(
+          this.maxFontScale, config.fontSizeScale ?? 1);
+      } catch (paramError) {
+        let code = (paramError as BusinessError).code;
+        let message = (paramError as BusinessError).message;
+        hilog.error(0x3900, 'Ace',
+          `ComposeListItem environmentCallback error: ${code}, ${message}`);
+      }
     },
     onMemoryLevel: (level) => {
     }
@@ -1320,19 +1381,19 @@ export struct ComposeListItem {
     )
   }
 
-  getPadding(): Padding {
-    let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
-    let compareSize = paddingNum > LISTITEM_PADDING;
-    let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
-    if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isWrapText) {
+  getPadding(): Padding | undefined {
+    if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+      let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
+      let compareSize = paddingNum > LISTITEM_PADDING;
+      let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
       return {
-        top: paddingNum,
-        bottom: paddingNum,
+        top: this.isWrapText ? paddingNum : 0,
+        bottom: this.isWrapText ? paddingNum : 0,
         left: horizontalPadding,
         right: horizontalPadding
       };
     } else {
-      return { left: horizontalPadding, right: horizontalPadding };
+      return undefined;
     }
   }
 
@@ -1452,7 +1513,7 @@ export struct ComposeListItem {
       this.isFocus = false;
       this.frontColor = NORMAL_BG_COLOR;
     })
-    .borderRadius($r('sys.float.composeListItem_radius'))
+    .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
     .onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
       this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
       if (this.operateItem?.icon && this.operateItem.icon?.action) {
@@ -1466,13 +1527,17 @@ export struct ComposeListItem {
       }
     })
     .scale({
-      x: this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE,
-      y: this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE),
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE)
     })
-    .shadow(this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW)
+    .shadow(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW))
     .margin({
-      left: STACK_PADDING,
-      right: STACK_PADDING
+      left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
+      right: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined
+    })
+    .padding({
+      left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
+      right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
     })
   }
 }

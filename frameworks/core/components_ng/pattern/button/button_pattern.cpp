@@ -787,10 +787,19 @@ void ButtonPattern::UpdateTextFontScale(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
-        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+    if (layoutProperty->GetMaxFontScale().has_value()) {
+        textLayoutProperty->UpdateMaxFontScale(layoutProperty->GetMaxFontScale().value());
     } else {
-        textLayoutProperty->ResetMaxFontScale();
+        if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+            textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+        } else {
+            textLayoutProperty->ResetMaxFontScale();
+        }
+    }
+    if (layoutProperty->GetMinFontScale().has_value()) {
+        textLayoutProperty->UpdateMinFontScale(layoutProperty->GetMinFontScale().value());
+    } else {
+        textLayoutProperty->ResetMinFontScale();
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -857,7 +857,7 @@ class ArkThemeScopeManager {
         }
         else {
             const scope = this.themeScopes.find(item => item.getWithThemeId() === withThemeId);
-            scope.updateWithThemeOptions(withThemeOptions, theme);
+            scope === null || scope === void 0 ? void 0 : scope.updateWithThemeOptions(withThemeOptions, theme);
             this.forceRerenderScope(scope);
         }
     }
@@ -1081,8 +1081,6 @@ ArkThemeWhiteList.whiteList = [
     'CheckboxGroup',
     'Counter',
     'DataPanel',
-    'DatePicker',
-    'Divider',
     'LoadingProgress',
     'Menu',
     'MenuItem',
@@ -1091,14 +1089,9 @@ ArkThemeWhiteList.whiteList = [
     'QRCode',
     'Radio',
     'Scroll',
-    'Search',
     'Select',
-    'Slider',
     'Swiper',
     'Text',
     'TextClock',
-    'TextInput',
-    'TextPicker',
-    'TimePicker',
     'Toggle',
 ];

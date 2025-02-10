@@ -48,7 +48,8 @@ std::vector<TextCase> TEXTCASE = {
 std::vector<WordBreak> WORDBREAK = {
     WordBreak::NORMAL,
     WordBreak::BREAK_ALL,
-    WordBreak::BREAK_WORD
+    WordBreak::BREAK_WORD,
+    WordBreak::HYPHENATION
 };
 
 MeasureContext FromCJCreateMeasureContext(CJMeasureContextToC context)

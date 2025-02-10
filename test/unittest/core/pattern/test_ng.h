@@ -45,6 +45,9 @@ public:
     void FlushUITasks();
     void CreateDone();
     RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty = false);
+    RefPtr<FrameNode> GetStageNode();
+    void MountToStageNode(const RefPtr<FrameNode>& frameNode);
+    void RemoveFromStageNode();
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
@@ -219,11 +222,10 @@ public:
 
     void ResetElmtId()
     {
-        elmtId_ = ElementRegister::UndefinedElementId;
+        elmtId_ = 10000;
     }
 
-    ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
-    RefPtr<FrameNode> rootNode_;
+    ElementIdType elmtId_ = 10000;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H

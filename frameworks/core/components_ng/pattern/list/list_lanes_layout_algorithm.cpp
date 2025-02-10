@@ -121,7 +121,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         ++currentIndex;
         endPos = firstItemInfo_.value().second.endPos;
         SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
-        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
         firstItemInfo_.reset();
         return 1;
     } else if (firstItemInfo_) {
@@ -156,7 +155,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
-    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 
@@ -171,7 +169,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         --currentIndex;
         startPos = firstItemInfo_.value().second.startPos;
         SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
-        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
         firstItemInfo_.reset();
         return 1;
     } else if (firstItemInfo_) {
@@ -213,7 +210,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
-    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 
@@ -665,7 +661,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
                 break;
             }
         }
-        auto startIndex = curIndex - cnt + 1;
+        auto startIndex = GetLanesFloor(layoutWrapper, curIndex);
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
@@ -683,6 +679,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             pos.second.startPos = endPos - mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
+        SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
         endPos = endPos - mainLen - GetSpaceWidth();
         curIndex -= cnt;
     }

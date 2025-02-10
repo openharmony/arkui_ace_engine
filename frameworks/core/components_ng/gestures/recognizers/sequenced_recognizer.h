@@ -56,7 +56,11 @@ public:
     RefereeState CheckStates(size_t touchId) override;
 
     bool CheckGroupState() override;
-    
+
+    void CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer) override;
+
+    void CleanRecognizerStateVoluntarily() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};

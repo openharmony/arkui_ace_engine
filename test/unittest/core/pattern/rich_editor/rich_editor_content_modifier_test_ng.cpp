@@ -26,9 +26,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string INIT_STRING_1 = "初始属性字符串";
-const std::string INIT_STRING_2 = "Hellow World";
-const std::string INIT_STRING_3 = "123456";
+const std::u16string INIT_STRING_1 = u"初始属性字符串";
+const std::u16string INIT_STRING_2 = u"Hellow World";
+const std::u16string INIT_STRING_3 = u"123456";
 const std::string TEST_IMAGE_SOURCE = "src/image.png";
 const int32_t TEST_MAX_LINE = 10;
 const Dimension TEST_BASELINE_OFFSET = Dimension(5, DimensionUnit::PX);

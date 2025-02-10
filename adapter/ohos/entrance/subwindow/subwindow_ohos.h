@@ -55,8 +55,9 @@ public:
     explicit SubwindowOhos(int32_t instanceId);
     ~SubwindowOhos() = default;
 
-    bool InitContainer() override;
+    void InitContainer() override;
     void ResizeWindow() override;
+    void ResizeWindowForMenu() override;
     NG::RectF GetRect() override;
     void SetRect(const NG::RectF& rect) override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
@@ -140,6 +141,7 @@ public:
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
     NG::RectF GetWindowRect() const override;
+    bool CheckHostWindowStatus() const override;
     bool IsFreeMultiWindow() const override;
     void OnFreeMultiWindowSwitch(bool enable) override;
     int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
@@ -161,6 +163,9 @@ public:
 
     void ResizeDialogSubwindow() override;
     uint64_t GetDisplayId() override;
+
+    void InitializeSafeArea();
+    bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
 private:
     RefPtr<StackElement> GetStack();

@@ -24,7 +24,9 @@
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
@@ -56,6 +58,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -136,6 +141,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
@@ -143,7 +149,9 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
 #include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
@@ -194,6 +202,7 @@
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
+#include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
@@ -221,7 +230,7 @@ void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -366,11 +375,12 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSCalendarPicker::JSBind(globalObj);
+    JSCalendarPickerDialog::JSBind(globalObj);
 #endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
@@ -388,6 +398,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRichEditorStyledStringController::JSBind(globalObj);
     JSLayoutManager::JSBind(globalObj);
     JSContainerModal::JSBind(globalObj);
+    JSAppBar::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -546,12 +557,16 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSContainerSpan::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
+#ifdef QRCODEGEN_SUPPORT
     JSBindLibs("arkui.qrcode", "QRCode");
+#endif
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
     JSBindLibs("arkui.patternlock", "PatternLock");
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
+#ifdef QRCODEGEN_SUPPORT
     JSQRCode::JSBind(globalObj);
+#endif
     JSRelativeContainer::JSBind(globalObj);
     JSPatternLock::JSBind(globalObj);
     JSPatternLockController::JSBind(globalObj);
@@ -560,10 +575,14 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #ifndef CROSS_PLATFORM
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
+    JSTextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);
 #endif
     JSFormLink::JSBind(globalObj);
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+    JSFormButton::JSBind(globalObj);
+#endif
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
@@ -576,14 +595,17 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
-#endif
     JSGestureRecognizer::JSBind(globalObj);
     JSEventTargetInfo::JSBind(globalObj);
     JSScrollableTargetInfo::JSBind(globalObj);
     JSPanRecognizer::JSBind(globalObj);
+    JSTapRecognizer::JSBind(globalObj);
+    JSLongPressRecognizer::JSBind(globalObj);
+    JSSwipeRecognizer::JSBind(globalObj);
+    JSPinchRecognizer::JSBind(globalObj);
+    JSRotationRecognizer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

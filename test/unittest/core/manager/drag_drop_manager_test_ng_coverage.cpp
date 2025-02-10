@@ -17,6 +17,8 @@
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_render_context.h"
+#define private public
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1772,5 +1774,56 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage064, TestSi
     dragDropManager->isWindowConsumed_ = false;
     container->isScenceBoardWindow_ = false;
     EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage065
+ * @tc.desc: Test OnDragMoveOut
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragPointerEvent point;
+    bool isExecuted = false;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, false, 0, DragBehavior::UNKNOWN, point);
+    EXPECT_FALSE(isExecuted);
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, true, 0, DragBehavior::UNKNOWN, point);
+    EXPECT_FALSE(isExecuted);
+    auto dropAnimationFun = [&isExecuted]() { isExecuted = true; };
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, true, 0, DragBehavior::UNKNOWN, point);
+    EXPECT_TRUE(isExecuted);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage066
+ * @tc.desc: Test HandleOnDragEnd
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage066, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragPointerEvent point;
+    point.x = 1;
+    point.y = 1;
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isScenceBoardWindow_ = true;
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDisableDataPrefetch(true);
+    dragDropManager->HandleOnDragEnd(point, EXTRA_INFO, frameNode);
+    EXPECT_NE(DragDropBehaviorReporter::GetInstance().stopResult_, DragStopResult::GET_UDKEY_FAIL);
+    eventHub->SetDisableDataPrefetch(false);
+    dragDropManager->HandleOnDragEnd(point, EXTRA_INFO, frameNode);
+    EXPECT_EQ(DragDropBehaviorReporter::GetInstance().stopResult_, DragStopResult::GET_UDKEY_FAIL);
 }
 } // namespace OHOS::Ace::NG

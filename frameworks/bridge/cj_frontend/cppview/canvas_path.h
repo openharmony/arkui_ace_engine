@@ -20,6 +20,8 @@
 
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/decoration.h"
+#include "bridge/cj_frontend/cppview/matrix2d.h"
+#include "frameworks/core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -30,6 +32,7 @@ public:
     ~NativeCanvasPath() override;
 
     void AddPath(const sptr<NativeCanvasPath>& path);
+    void AddPathWithMatrix(const sptr<NativeCanvasPath>& path, const sptr<NativeMatrix2d>& matrix2d);
     void SetTransform(double scaleX, double skewX, double skewY, double scaleY, double translateX, double translateY);
     void MoveTo(double x, double y);
     void LineTo(double x, double y);
@@ -46,9 +49,28 @@ public:
         return path2d_;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        double density = PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
+    }
+
 protected:
     RefPtr<CanvasPath2D> path2d_;
+
+private:
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 
-} // namespace OHOS::Ace::Framework
+} //  namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_CJ_FRONTEND_CPP_VIEW_CAVANS_PATH_H

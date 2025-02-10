@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "ui/properties/dirty_flag.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -33,6 +35,7 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
 
+
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
@@ -41,15 +44,6 @@ class AccessibilityEventInfo;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
-
-struct DirtySwapConfig {
-    bool frameSizeChange = false;
-    bool frameOffsetChange = false;
-    bool contentSizeChange = false;
-    bool contentOffsetChange = false;
-    bool skipMeasure = false;
-    bool skipLayout = false;
-};
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -460,6 +454,8 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnWindowActivated() {}
+    virtual void OnWindowDeactivated() {}
     virtual void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) {}
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
@@ -668,6 +664,18 @@ public:
         CHECK_NULL_RETURN(host, 0);
         return host->GetThemeScopeId();
     }
+
+    virtual void OnFocusNodeChange(FocusReason focusReason) {}
+    virtual void OnCollectRemoved() {}
+    virtual std::string GetCurrentLanguage()
+    {
+        return nullptr;
+    };
+    virtual void GetTranslateText(
+        std::string extraData, std::function<void(std::string)> callback, bool isContinued) {};
+    virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
+    virtual void EndTranslate() {};
+    virtual void SendTranslateResult(std::string results) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

@@ -150,7 +150,6 @@ export class Index extends ViewPU {
       Text.fontWeight(TITLE_TEXT_FONT_WEIGHT);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Start);
-      Text.layoutWeight(1.0);
       Text.opacity(this.iconOpacity);
       Text.minFontScale(0.85);
       Text.maxFontScale(1.45);
@@ -852,7 +851,7 @@ class c3 extends ViewPU {
         ContainerModal.callNative(t1);
     }
     onMenuWidthChange() {
-        ContainerModal.callNative(u1,"125833961");
+        ContainerModal.callNative(u1,'125833961');
     }
     setHideSplit(j3) {
         this.hideSplit = j3;
@@ -935,7 +934,6 @@ class c3 extends ViewPU {
         if (!this.hideSplit && this.isFocused) {
             this.showMenuTimeoutId = setTimeout(() => {
                 this.isShowMenu = true;
-                this.menuDisappearTimer(i1);
             }, h1);
         }
     }
@@ -1076,7 +1074,7 @@ class c3 extends ViewPU {
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
+            Row.create({ space: this.buttonSpacing });
             Row.id('containerModalButtonRowId');
             Row.height('100%');
             Row.padding({ left: m, right: this.buttonRightOffset + 'vp' });
@@ -1097,7 +1095,6 @@ class c3 extends ViewPU {
             Button.type(ButtonType.Normal);
             Button.borderRadius('4vp');
             Button.hoverEffect(HoverEffect.None);
-            Button.margin({ right: this.buttonSpacing + 'vp' });
             Button.responseRegion({
                 x: t,
                 y: u,
@@ -1117,6 +1114,7 @@ class c3 extends ViewPU {
             LongPressGesture.onAction(() => {
                 this.onMenuWidthChange();
                 this.isShowMenu = !this.hideSplit;
+                this.menuDisappearTimer(i1);
             });
             LongPressGesture.pop();
             TapGesture.create();
@@ -1131,9 +1129,11 @@ class c3 extends ViewPU {
                 if (isHover) {
                     this.onMenuWidthChange();
                     this.onShowMenuWithTimer();
+                    this.cancelMenuDisappearTimer();
                 }
                 else {
                     this.onCancelMenuTimer();
+                    this.menuDisappearTimer(j1);
                 }
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
@@ -1163,7 +1163,6 @@ class c3 extends ViewPU {
             Button.height(this.buttonSize + 'vp');
             Button.type(ButtonType.Normal);
             Button.borderRadius('4vp');
-            Button.margin({ right: this.buttonSpacing + 'vp' });
             Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
                 x: t,

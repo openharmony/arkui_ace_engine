@@ -480,6 +480,11 @@ private:
         return true;
     }
 
+    bool IsContains(const std::string& url) override
+    {
+        return Request::Preload::GetInstance()->Contains(url);
+    }
+
     void AddDownloadTask(const std::string& url, const std::shared_ptr<NetStackTask>& task, int32_t nodeId)
     {
         std::scoped_lock lock(httpTaskMutex_);

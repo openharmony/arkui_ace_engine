@@ -34,10 +34,13 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam);
 void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam);
 void SetOnHover(ArkUINodeHandle node, void* extraParam);
 void SetOnMouse(ArkUINodeHandle node, void* extraParam);
+void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam);
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam);
 void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam);
 void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam);
 void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam);
+void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam);
+
 
 void ResetOnAppear(ArkUINodeHandle node);
 void ResetOnDisappear(ArkUINodeHandle node);
@@ -52,6 +55,7 @@ void ResetOnTouch(ArkUINodeHandle node);
 void ResetOnTouchIntercept(ArkUINodeHandle node);
 void ResetOnHover(ArkUINodeHandle node);
 void ResetOnMouse(ArkUINodeHandle node);
+void ResetOnAxisEvent(ArkUINodeHandle node);
 void ResetOnKeyEvent(ArkUINodeHandle node);
 void ResetOnKeyPreIme(ArkUINodeHandle node);
 void ResetOnFocusAxisEvent(ArkUINodeHandle node);

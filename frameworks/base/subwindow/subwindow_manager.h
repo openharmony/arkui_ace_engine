@@ -80,7 +80,6 @@ public:
     // Get the subwindow of instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId, uint64_t displayId);
-    const RefPtr<Subwindow> GetOrCreateSubwindow(int32_t instanceId);
 
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
@@ -158,19 +157,31 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
     const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
-    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
     bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
     void SetRect(const NG::RectF& rect, int32_t instanceId);
+    void FlushSubWindowUITasks(int32_t instanceId);
+
+    int32_t ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode);
+    void HideSelectOverlay(const int32_t instanceId);
+    const RefPtr<Subwindow> GetSelectOverlaySubwindow(int32_t instanceId);
+    void AddSelectOverlaySubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
+    RefPtr<Subwindow> GetOrCreateSelectOverlayWindow(
+        int32_t containerId, const ToastWindowType& windowType, uint32_t mainWindowId);
+    void SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId);
+    void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
+    bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
 
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow();
+    RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
@@ -201,6 +212,8 @@ private:
     std::mutex systemToastMutex_;
     SubwindowMixMap systemToastWindowMap_;
     Rect uiExtensionWindowRect_;
+    std::mutex selectOverlayMutex_;
+    SubwindowMixMap selectOverlayWindowMap_;
 };
 
 } // namespace OHOS::Ace

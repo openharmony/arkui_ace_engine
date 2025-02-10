@@ -33,7 +33,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SwiperCalculateIndicatorStartIndex001, 
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -58,7 +58,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SwiperCalculateIndicatorStartIndex002, 
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -83,7 +83,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SwiperCalculateIndicatorStartIndex003, 
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -108,7 +108,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SwiperCalculateIndicatorStartIndex004, 
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -133,7 +133,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SwiperCalculateIndicatorStartIndex005, 
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -158,7 +158,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SwiperCalculateIndicatorStartIndex006, 
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -183,7 +183,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SwiperCalculateIndicatorStartIndex007, 
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -208,7 +208,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculatePointRadius001, TestSize.Level
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -235,7 +235,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculatePointRadius002, TestSize.Level
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -262,7 +262,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateStartPointRadius001, TestSize.
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -286,7 +286,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateStartPointRadius002, TestSize.
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -310,7 +310,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateStartPointRadius003, TestSize.
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -334,7 +334,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateStartPointRadius004, TestSize.
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -358,7 +358,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateStartPointRadius005, TestSize.
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -382,7 +382,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateStartPointRadius006, TestSize.
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -406,7 +406,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateRemainPointRadius001, TestSize
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -432,7 +432,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateRemainPointRadius002, TestSize
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -458,7 +458,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateRemainPointRadius003, TestSize
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -484,7 +484,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateRemainPointRadius004, TestSize
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -510,7 +510,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateRemainPointRadius005, TestSize
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -536,7 +536,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateBlackPointRotateAngle001, Test
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -562,7 +562,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateInitIndicatorPosition001, Test
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -592,7 +592,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, SetFadeOutState001, TestSize.Level1)
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -622,7 +622,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculateLongPointCenterAngle001, TestS
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -646,7 +646,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculatePointAngle001, TestSize.Level1
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -671,7 +671,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculatePointAngle002, TestSize.Level1
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -696,7 +696,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, CalculatePointAngle003, TestSize.Level1
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -722,7 +722,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, GetAllPointArcAngle001, TestSize.Level1
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -753,7 +753,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, GetBlackPointAngle001, TestSize.Level1)
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -784,7 +784,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, GetFadeOutPadding001, TestSize.Level1)
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -824,7 +824,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, GetFadeOutPadding002, TestSize.Level1)
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -948,7 +948,7 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, GetAngleWithPoint001, TestSize.Level1)
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();

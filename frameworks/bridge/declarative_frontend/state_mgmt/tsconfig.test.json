@@ -75,6 +75,7 @@
     "src/lib/v2/v2_decorators.ts",
     "src/lib/v2/v2_json_coder.ts",
     "src/lib/v2/v2_make_observed.ts",
+    "src/lib/v2/v2_recycle_pool.ts",
     "src/lib/common/sendable_type.ts",
 
     

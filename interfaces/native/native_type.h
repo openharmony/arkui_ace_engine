@@ -201,6 +201,13 @@ typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
 typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
 
 /**
+ * @brief Define the information of the HostWindowInfo class for window properties.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_HostWindowInfo ArkUI_HostWindowInfo;
+
+/**
  * @brief Define ActiveChildenInfo class information.
  *
  * @since 14
@@ -213,6 +220,13 @@ typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
  * @since 16
  */
 typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
+
+/**
+ * @brief The cross-language option.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
@@ -523,6 +537,20 @@ typedef enum {
     /** Blur. */
     ARKUI_SHADOW_TYPE_BLUR
 } ArkUI_ShadowType;
+
+/**
+ * @brief Enumerates the modes of the date picker.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** A mode that displays the date in months, days of month, and years. */
+    ARKUI_DATEPICKER_MODE_DATE = 0,
+    /** A mode that displays the date in months and years. */
+    ARKUI_DATEPICKER_YEAR_AND_MONTH = 1,
+    /** A mode that displays the date in months and days of the month. */
+    ARKUI_DATEPICKER_MONTH_AND_DAY = 2,
+} ArkUI_DatePickerMode;
 
 /**
  * @brief Enumerates the types of the text picker.
@@ -1602,6 +1630,8 @@ typedef enum {
      *  lines at appropriate characters (for example, spaces) whenever possible.
         CJK text behavior is the same as for <b>NORMAL</b>. */
     ARKUI_WORD_BREAK_BREAK_WORD,
+    /** For supported languages, line breaks can be performed by syllables. */
+    ARKUI_WORD_BREAK_HYPHENATION,
 } ArkUI_WordBreak;
 
 /**
@@ -1871,6 +1901,77 @@ typedef enum {
     /** Standard address. The scenario-based autofill feature, when enabled, can automatically save and fill in standard
      *  addresses. */
     ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS,
+    /**
+     * Passport number. The scenario-based autofill feature, when enabled, can automatically save and fill in passport
+     * numbers.
+     * @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PASSPORT_NUMBER,
+    /**
+     *  Passport validity. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  passport validities.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_VALIDITY,
+    /**
+     *  Place of issue. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  place of issues.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ISSUE_AT,
+    /**
+     *  Tax organization. The scenario-based autofill feature, when enabled, can automatically save and fill in tax
+     *  organizations.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ORGANIZATION,
+    /**
+     *  Tax id. The scenario-based autofill feature, when enabled, can automatically save and fill in standard Tax ids.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_TAX_ID,
+    /**
+     *  City name and state name or state code. The scenario-based autofill feature, when enabled, can automatically
+     *  save and fill in city names and state names or state codes.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ADDRESS_CITY_AND_STATE,
+    /**
+     *  Flight number. The scenario-based autofill feature, when enabled, can automatically save and fill in flight
+     *  numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_FLIGHT_NUMBER,
+    /**
+     *  License number. The scenario-based autofill feature, when enabled, can automatically save and fill in license
+     *  numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_NUMBER,
+    /**
+     *  License file number. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  license file numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_FILE_NUMBER,
+    /**
+     *  License plate number. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  license plate numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_PLATE,
+    /**
+     *  Engine number. The scenario-based autofill feature, when enabled, can automatically save and fill in engine
+     *  numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ENGINE_NUMBER,
+    /**
+     *  License chassis number. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  license chassis numbers.
+     *  @since 16
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_LICENSE_CHASSIS_NUMBER,
 }ArkUI_TextInputContentType;
 
 /**
@@ -1885,6 +1986,34 @@ typedef enum {
     /** Inline input style. The background height of the selected text is the same as the height of the text box. */
     ARKUI_TEXTINPUT_STYLE_INLINE
 } ArkUI_TextInputStyle;
+
+/**
+ * @brief Defines the keyboard style of input box
+ *
+ * @since 16
+ */
+typedef enum {
+    /**
+     * Default appearance mode, won't adopt immersive styles.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE = 0,
+    /**
+     * Immersive mode.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_IMMERSIVE = 1,
+    /**
+     * Light immersive style.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE = 2,
+    /**
+     * Dark immersive style.
+     * @since 16
+     */
+    ARKUI_KEYBOARD_APPEARANCE_DARK_IMMERSIVE = 3,
+} ArkUI_KeyboardAppearance;
 
 /**
  * @brief Defines the state of the NavDestination component.
@@ -1958,6 +2087,11 @@ typedef enum {
     ARKUI_BUTTON_TYPE_CAPSULE,
     /** Circle button. */
     ARKUI_BUTTON_TYPE_CIRCLE,
+    /**
+     * Rounded rectangle button.
+     * @since 16
+     */
+    ARKUI_BUTTON_ROUNDED_RECTANGLE = 8
 } ArkUI_ButtonType;
 
 /**
@@ -2046,6 +2180,12 @@ typedef enum {
     ARKUI_ERROR_CODE_PARAM_INVALID = 401,
     /** CAPI init error. */
     ARKUI_ERROR_CODE_CAPI_INIT_ERROR = 500,
+    /**
+     * @error Internal error occurs, such as failure occurs because of the internal environment error,
+     * or operation failed because of the internal execution failed.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_INTERNAL_ERROR = 100001,
     /** The component does not support specific attributes or events. */
     ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
     /** The specific operation is not allowed on the node created by ArkTS. */
@@ -2062,6 +2202,28 @@ typedef enum {
     ARKUI_ERROR_CODE_GET_INFO_FAILED = 106201,
     /** The buffer size is not large enough. */
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
+    /**
+     * @error The snapshot taking is timeout.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
+    /** The node is not on main tree. */
+    ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
+    /**
+     * @error The node requesting focus is not focusable.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE = 150001,
+    /**
+     * @error The node requesting focus has unfocusable ancestor.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE_ANCESTOR = 150002,
+    /**
+     * @error The node requesting focus does not exists.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT = 150003,
     /** The component is not a scroll container. */
     ARKUI_ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001,
     /** The buffer is not large enough. */
@@ -2072,6 +2234,16 @@ typedef enum {
     ARKUI_ERROR_CODE_UI_CONTEXT_INVALID = 190001,
     /** The callback function is invalid. */
     ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
+    /** 
+     * @error The gesture recognizer type is not supported. 
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
+    /**
+     * @error operation is not allowed for current drag drop phase.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED = 190004,
 } ArkUI_ErrorCode;
 
 /**
@@ -2089,10 +2261,28 @@ typedef enum {
 } ArkUI_SafeAreaType;
 
 /**
+ * @brief Define an enum for the areas of the <b>ListItemGroup</b> component.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Outside the area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_GROUP_AREA_OUTSIDE = 0,
+    /** Area when the <b>ListItemGroup</b> component does not have the header, footer, or list item. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_NONE,
+    /** List item area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_ITEM,
+    /** Header area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_HEADER,
+    /** Footer area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_FOOTER,
+} ArkUI_ListItemGroupArea;
+
+/**
  * @brief defines the enumerated value of the direction of the extended security zone.
  *
  * @since 12
-*/
+ */
 typedef enum {
     /** Upper area. */
     ARKUI_SAFE_AREA_EDGE_TOP = 1,
@@ -2105,11 +2295,52 @@ typedef enum {
 } ArkUI_SafeAreaEdge;
 
 /**
+ * @brief Enumerates the expand modes.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Expand. */
+    ARKUI_EXPAND = 0,
+    /** Not expand. */
+    ARKUI_NOT_EXPAND = 1,
+    /** Lazy expand. Expand the children of node if needed. */
+    ARKUI_LAZY_EXPAND = 2,
+} ArkUI_ExpandMode;
+
+/**
+ * @brief Define an enum for the focus movement directions.
+ *
+ * @since 16
+*/
+typedef enum {
+    /** Move focus forward. */
+    ARKUI_FOCUS_MOVE_FORWARD = 0,
+    /** Move focus backward. */
+    ARKUI_FOCUS_MOVE_BACKWARD,
+    /** Move focus up. */
+    ARKUI_FOCUS_MOVE_UP,
+    /** Move focus down. */
+    ARKUI_FOCUS_MOVE_DOWN,
+    /** Move focus left. */
+    ARKUI_FOCUS_MOVE_LEFT,
+    /** Move focus right. */
+    ARKUI_FOCUS_MOVE_RIGHT,
+} ArkUI_FocusMove;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12
  */
 typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
+
+/**
+ * @brief Defines the options for taking snapshot.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
 typedef struct {
     float x;
@@ -3895,6 +4126,23 @@ void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle);
 const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle);
 
 /**
+ * @brief Get window name from HostWindowInfo.
+ *
+ * @param info HostWindowInfo object pointer.
+ * @return Window name in HostWindowInfo.
+ * @since 16
+ */
+const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info);
+
+/**
+ * @brief Destroy the instance of HostWindowInfo.
+ *
+ * @param info Instance of HostWindowInfo to be destroyed.
+ * @since 16
+ */
+void OH_ArkUI_HostWindowInfo_Destroy(ArkUI_HostWindowInfo* info);
+
+/**
  * @brief Destroy ActiveChildenInfo instance.
  *
  * @param handle ActiveChild instance to be destroyed.
@@ -4012,6 +4260,151 @@ float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyl
  * @since 16
  */
 float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Creates an option for taking snapshot, the returned value must be released through
+ *        {@link OH_ArkUI_DestroySnapshotOptions} when it's not used anymore.
+ *
+ * @return Returns the pointer to the created snapshot options object.If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 16
+ */
+ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions();
+
+/**
+ * @brief Dispose a snapshot option object.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @since 16
+ */
+void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
+
+/**
+ * @brief Config the snapshot option with scale.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param scale Indicates the scale property to take the snapshot.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
+
+/**
+ * @brief Create a cross-language option instance.
+ *
+ * @return Returns a cross-language option instance. If the result is a null pointer, it may be out of memory.
+ * @since 16
+ */
+ArkUI_CrossLanguageOption* OH_ArkUI_CrossLanguageOption_Create(void);
+
+/**
+ * @brief Destroy the cross-language option instance.
+ *
+ * @param option The cross-language option instance.
+ * @since 16
+ */
+void OH_ArkUI_CrossLanguageOption_Destroy(ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Enable the attribute setting in the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @param enable The attribute setting in the cross-language option.
+ * Default value: false.
+ * @since 16
+ */
+void OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(ArkUI_CrossLanguageOption* option, bool enable);
+
+/**
+ * @brief Get the attribute setting enable of the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @return The attribute setting enable of the cross-language option.
+ * @since 16
+ */
+bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Defines the parameters for visible area change events.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
+
+/**
+* @brief Creates an instance of visible area change event parameters
+*
+* @return Returns the created instance of visible area change event parameters.
+* @since 16
+*/
+ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
+
+/**
+* @brief Disposes of an instance of visible area change event parameters.
+*
+* @param option Instance to be destroyed.
+* @since 16
+*/
+void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option);
+
+/**
+* @brief Sets the threshold ratios for visible area changes.
+*
+* @param option Instance of visible area change event parameters.
+* @param value Array of threshold ratios. Each element represents the ratio of the visible area of a component to
+* its total area. The visible area is calculated within the parent component's bounds; any area outside the parent
+* component is not considered. Each value must be within the [0.0, 1.0] range.
+* Values outside this range will be handled as 0.0 or 1.0.
+* @param size Size of the threshold array.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+*         If an error code is returned, it may be due to a failure in parameter validation;
+*         the parameter must not be null.
+* @since 16
+*/
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t size);
+
+/**
+* @brief Sets the expected update interval for visible area changes.
+*
+* @param option Instance of visible area change event parameters.
+* @param value Expected update interval, in ms.  Default value: <b>1000</b>.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+*         If an error code is returned, it may be due to a failure in parameter validation;
+*         the parameter must not be null.
+* @since 16
+*/
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
+    ArkUI_VisibleAreaEventOptions *option, int32_t value);
+
+/**
+ * @brief Obtains the threshold ratios for visible area changes.
+ *
+ * @param option Instance of visible area change event parameters.
+ * @param value Array of threshold ratios.
+ * @param size Size of the threshold array.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
+ *         If an error code is returned, it may be due to a failure in parameter validation;
+ *         the parameter must not be null.
+ * @since 16
+ */
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size);
+
+/**
+ * @brief Obtains the expected update interval for visible area changes.
+ *
+ * @param option Instance of visible area change event parameters.
+ * @return Returns the expected update interval, in ms.  Default value: <b>1000</b>.
+ * @since 16
+ */
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option);
 #ifdef __cplusplus
 };
 #endif
