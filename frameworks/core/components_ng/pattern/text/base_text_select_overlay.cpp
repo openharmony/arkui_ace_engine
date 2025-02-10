@@ -1123,7 +1123,6 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
 {
     auto host = GetOwner();
     CHECK_NULL_RETURN(host, false);
-    
     if (HasUnsupportedTransform()) {
         return false;
     }
@@ -1160,7 +1159,6 @@ bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
     contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
     return true;
 }
-
 
 bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& contentRect)
 {
