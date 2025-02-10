@@ -640,6 +640,9 @@ void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
 bool StageManager::CheckPageFocus()
 {
     auto pageNode = GetLastPage();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        pageNode = GetLastPageWithTransition();
+    }
     CHECK_NULL_RETURN(pageNode, true);
     return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
