@@ -2950,6 +2950,9 @@ void SelectOverlayNode::OnCustomSelectMenuAppear()
     auto info = pattern->GetSelectOverlayInfo();
     CHECK_NULL_VOID(info);
     bool isHideMenu = info->menuInfo.menuDisable || !info->menuInfo.menuIsShow;
+    if (isHideMenu) {
+        eventHub->FireMenuVisibilityChangeEvent(true);
+    }
     eventHub->FireMenuVisibilityChangeEvent(!isHideMenu);
 }
 
