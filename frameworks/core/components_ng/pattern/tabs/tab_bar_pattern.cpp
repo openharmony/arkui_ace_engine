@@ -421,6 +421,7 @@ void TabBarPattern::SetTabBarFinishCallback()
             pattern->UpdateSubTabBoard(currentIndex);
             pattern->UpdateTextColorAndFontWeight(currentIndex);
             pattern->UpdateIndicator(currentIndex);
+            pattern->UpdatePaintIndicator(currentIndex, true);
             pattern->SetChangeByClick(false);
         }
     });
@@ -886,7 +887,6 @@ RefPtr<FocusHub> TabBarPattern::GetCurrentFocusNode()
     if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE || tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
         focusIndicator_ = indicator;
     }
-    FocusCurrentOffset(indicator);
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(indicator));
     CHECK_NULL_RETURN(childNode, nullptr);
     auto childFocusHub = childNode->GetFocusHub();
@@ -996,17 +996,12 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     CHECK_NULL_VOID(tabsNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
-    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
 
-    changeByClick_ = true;
-    clickRepeat_ = true;
     SetSwiperCurve(DurationCubicCurve);
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
-        tabBarLayoutProperty->UpdateIndicator(index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             tabContentWillChangeFlag_ = true;
@@ -1015,8 +1010,11 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
         }
-        tabBarLayoutProperty->UpdateIndicator(index);
     }
+
+    UpdateIndicator(index);
+    changeByClick_ = true;
+    clickRepeat_ = true;
     UpdateTextColorAndFontWeight(index);
     UpdateSubTabBoard(index);
     if (duration > 0 && CanScroll()) {
@@ -1360,6 +1358,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             focusIndicator_ = indicator_;
             UpdateSubTabBoard(indicator_);
             UpdateIndicator(indicator_);
+            UpdatePaintIndicator(indicator_, true);
             windowSizeChangeReason_.reset();
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
@@ -1518,7 +1517,6 @@ void TabBarPattern::HandleClick(SourceType type, int32_t index)
         return;
     }
     ClickTo(host, index);
-    layoutProperty->UpdateIndicator(index);
 }
 
 void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
@@ -1549,6 +1547,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
         }
     }
 
+    UpdateIndicator(index);
     changeByClick_ = true;
     clickRepeat_ = true;
     if (duration > 0 && CanScroll()) {
@@ -1912,8 +1911,6 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         return;
     }
     swiperController_->FinishAnimation();
-    changeByClick_ = true;
-    clickRepeat_ = true;
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
@@ -1927,6 +1924,10 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
             swiperController_->SwipeToWithoutAnimation(index);
         }
     }
+
+    UpdateIndicator(index);
+    changeByClick_ = true;
+    clickRepeat_ = true;
     if (duration > 0 && CanScroll()) {
         targetIndex_ = index;
     } else if (duration <= 0) {
@@ -1938,7 +1939,6 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     animationTargetIndex_ = index;
     UpdateTextColorAndFontWeight(index);
     UpdateSubTabBoard(index);
-    layoutProperty->UpdateIndicator(index);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
@@ -2129,7 +2129,7 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->UpdateTextColorAndFontWeight(index);
         if (!tabBarPattern->GetClickRepeat() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
-            tabBarLayoutProperty->UpdateIndicator(index);
+            tabBarPattern->UpdateIndicator(index);
         }
         tabBarPattern->isTouchingSwiper_ = false;
         tabBarPattern->SetClickRepeat(false);
@@ -2164,6 +2164,7 @@ void TabBarPattern::UpdateCurrentOffset(float offset)
     currentDelta_ = offset;
     UpdateSubTabBoard(indicator_);
     UpdateIndicator(indicator_);
+    UpdatePaintIndicator(indicator_, true);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
@@ -2174,7 +2175,16 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     layoutProperty->UpdateIndicator(indicator);
     clickRepeat_ = false;
 
-    UpdatePaintIndicator(indicator, true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (focusHub->IsCurrentFocus()) {
+        return;
+    }
+    auto childFocusHub = GetCurrentFocusNode();
+    CHECK_NULL_VOID(childFocusHub);
+    focusHub->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(childFocusHub)));
 }
 
 void TabBarPattern::UpdateGradientRegions(bool needMarkDirty)
@@ -3002,8 +3012,6 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
     if (!info->IsValid() || !info->IsObject()) {
         return;
@@ -3018,8 +3026,7 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsFrameNode);
     auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
-    tabBarLayoutProperty->UpdateIndicator(index);
-    clickRepeat_ = false;
+    UpdateIndicator(index);
     UpdateAnimationDuration();
     if (GetAnimationDuration().has_value()
         && (!tabsPattern || tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION)) {
@@ -3102,6 +3109,7 @@ void TabBarPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(layoutProperty);
     auto indicatorValue = layoutProperty->GetIndicatorValue(0);
     UpdateIndicator(indicatorValue);
+    UpdatePaintIndicator(indicatorValue, true);
     Pattern::FromJson(json);
 }
 
@@ -3591,6 +3599,10 @@ void TabBarPattern::UpdateFocusToSelectedNode(bool isFocusActive)
     if (!childFocusNode->IsCurrentFocus()) {
         childFocusNode->RequestFocusImmediately();
     }
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto indicator = layoutProperty->GetIndicatorValue(0);
+    FocusCurrentOffset(indicator);
 }
 
 void TabBarPattern::UpdateFocusTabBarPageState()
@@ -3609,6 +3621,10 @@ void TabBarPattern::HandleFocusEvent()
     if (context->GetIsFocusActive()) {
         SetTabBarFocusActive(true);
         UpdateFocusTabBarPageState();
+        auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto indicator = layoutProperty->GetIndicatorValue(0);
+        FocusCurrentOffset(indicator);
     }
 }
 

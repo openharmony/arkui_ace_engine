@@ -27,6 +27,7 @@
 #include "transaction/rs_transaction.h"
 #include "ui/rs_surface_node.h"
 #include "want_params.h"
+#include "want_params_wrapper.h"
 #include "wm/wm_common.h"
 #include "wm/data_handler_interface.h"
 
@@ -64,6 +65,7 @@ constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out pr
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 // Set the UIExtension type of the EmbeddedComponent.
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
+constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
@@ -375,6 +377,11 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     CHECK_NULL_VOID(pipeline);
     auto realHostWindowId = pipeline->GetRealHostWindowId();
     auto wantPtr = std::make_shared<Want>(want);
+    AAFwk::WantParams configParam;
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(wantPtr->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    wantPtr->SetParams(wantParam);
     if (sessionType_ == SessionType::UI_EXTENSION_ABILITY) {
         if (wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
             UIEXT_LOGE("The UIExtensionComponent is not allowed to start the EmbeddedUIExtensionAbility.");
@@ -663,6 +670,14 @@ void SessionWrapperImpl::NotifyForeground()
     if (pattern->IsViewportConfigChanged()) {
         pattern->SetViewportConfigChanged(false);
         UpdateSessionViewportConfig();
+    }
+    auto wantPtr = session_->EditSessionInfo().want;
+    if (wantPtr) {
+        AAFwk::WantParams configParam;
+        container->GetExtensionConfig(configParam);
+        AAFwk::WantParams wantParam(wantPtr->GetParams());
+        wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+        wantPtr->SetParams(wantParam);
     }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
@@ -1063,7 +1078,8 @@ int32_t SessionWrapperImpl::GetFrameNodeId() const
     return frameNode->GetId();
 }
 
-bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+    RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;
@@ -1071,18 +1087,20 @@ bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, A
     CHECK_NULL_RETURN(session_, false);
     auto dataHandler = session_->GetExtensionDataHandler();
     CHECK_NULL_RETURN(dataHandler, false);
-    auto result = dataHandler->SendDataSync(subSystemId_, static_cast<uint32_t>(code), data, reply);
+    auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
+        static_cast<uint32_t>(code), data, reply);
     if (result != Rosen::DataHandlerErr::OK) {
         UIEXT_LOGW("SendBusinessDataSyncReply Fail, businesCode=%{public}u, result=%{public}u, compontId=%{public}d.",
             code, result, GetFrameNodeId());
         return false;
     }
-    UIEXT_LOGI("SendBusinessDataSyncReply Success, businessCode=%{public}u, componentId=%{public}d.",
+    UIEXT_LOGI("SendBusinessDataSyncReply Success, businessCode=%{public}u, compontId=%{public}d.",
         code, GetFrameNodeId());
     return true;
 }
 
-bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+    RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;
@@ -1091,12 +1109,14 @@ bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Wan
     auto dataHandler = session_->GetExtensionDataHandler();
     CHECK_NULL_RETURN(dataHandler, false);
     if (type == BusinessDataSendType::ASYNC) {
-        dataHandler->SendDataAsync(subSystemId_, static_cast<uint32_t>(code), data);
-        UIEXT_LOGI("SendBusinessData ASYNC Success, businessCode=%{public}u, componentId=%{public}d.",
+        dataHandler->SendDataAsync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
+            static_cast<uint32_t>(code), data);
+        UIEXT_LOGI("SendBusinessData ASYNC Success, businessCode=%{public}u, compontId=%{public}d.",
             code, GetFrameNodeId());
         return true;
     }
-    auto result = dataHandler->SendDataSync(subSystemId_, static_cast<uint32_t>(code), data);
+    auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
+        static_cast<uint32_t>(code), data);
     if (result != Rosen::DataHandlerErr::OK) {
         UIEXT_LOGW("SendBusinessData Sync Fail, businesCode=%{public}u, result=%{public}u, compontId=%{public}d.",
             code, result, GetFrameNodeId());

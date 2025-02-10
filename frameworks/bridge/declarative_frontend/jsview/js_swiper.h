@@ -87,34 +87,9 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSSwiperController* scroller);
 
-    void SwipeTo(const JSCallbackInfo& args)
-    {
-        ContainerScope scope(instanceId_);
-        if (args.Length() < 1 || !args[0]->IsNumber()) {
-            LOGE("Param is not valid");
-            return;
-        }
-        if (controller_) {
-            controller_->SwipeTo(args[0]->ToNumber<int32_t>());
-        }
-    }
-
-    void ShowNext(const JSCallbackInfo& args)
-    {
-        ContainerScope scope(instanceId_);
-        if (controller_) {
-            controller_->ShowNext();
-        }
-    }
-
-    void ShowPrevious(const JSCallbackInfo& args)
-    {
-        ContainerScope scope(instanceId_);
-        if (controller_) {
-            controller_->ShowPrevious();
-        }
-    }
-
+    void SwipeTo(const JSCallbackInfo& args);
+    void ShowNext(const JSCallbackInfo& args);
+    void ShowPrevious(const JSCallbackInfo& args);
     void ChangeIndex(const JSCallbackInfo& args);
 
     void FinishAnimation(const JSCallbackInfo& args);

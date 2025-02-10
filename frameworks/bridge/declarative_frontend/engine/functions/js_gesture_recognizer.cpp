@@ -286,6 +286,8 @@ void JSPanRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSPanRecognizer>::Declare("PanRecognizer");
     JSClass<JSPanRecognizer>::CustomMethod("getTag", &JSGestureRecognizer::GetTag);
     JSClass<JSPanRecognizer>::CustomMethod("getType", &JSGestureRecognizer::GetType);
+    JSClass<JSPanRecognizer>::CustomMethod("getFingerCount", &JSGestureRecognizer::GetFingers);
+    JSClass<JSPanRecognizer>::CustomMethod("isFingerCountLimit", &JSGestureRecognizer::IsFingerCountLimit);
     JSClass<JSPanRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
     JSClass<JSPanRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
     JSClass<JSPanRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);

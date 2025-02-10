@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class TabBarLayoutTestNg : public TabsTestNg {
-public:
-};
+class TabBarLayoutTestNg : public TabsTestNg {};
 
 /**
  * @tc.name: TabBarPatternOnDirtyLayoutWrapperSwap001
@@ -387,8 +382,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Le
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
@@ -397,7 +391,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Le
         auto columnNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
         RefPtr<LayoutWrapperNode> columnLayoutWrapper =
             AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
         columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
@@ -428,8 +422,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Le
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
@@ -438,7 +431,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Le
         auto columnNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
         RefPtr<LayoutWrapperNode> columnLayoutWrapper =
             AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
         columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
@@ -470,8 +463,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmGetContentMainSize001, TestSiz
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    auto tabBarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
@@ -928,10 +920,10 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.
 }
 
 /**
-* @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarLayoutTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize.Level1)
 {
     /**
@@ -994,8 +986,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, Test
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER + itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos,
-        TABS_WIDTH / TABCONTENT_NUMBER * 3 - itemWidth);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER * 3 - itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER * 3);
 
     /**
@@ -1007,13 +999,13 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, Test
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    auto startPos = (TABS_WIDTH - BARITEM_SIZE * TABCONTENT_NUMBER) / 2;
+    auto startPos = (TABS_WIDTH - BAR_ITEM_SIZE * TABCONTENT_NUMBER) / 2;
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, startPos);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, startPos + BARITEM_SIZE);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, startPos + BAR_ITEM_SIZE);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, startPos + BARITEM_SIZE * 3);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, startPos + BARITEM_SIZE * 4);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, startPos + BAR_ITEM_SIZE * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, startPos + BAR_ITEM_SIZE * 4);
 }
 
 /**
@@ -1252,8 +1244,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset001, TestSize
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, currentDelta1 + currentDelta2);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos,
-        itemWidth * 4 + currentDelta1 + currentDelta2);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 4 + currentDelta1 + currentDelta2);
 
     tabBarPattern_->canOverScroll_ = true;
     auto currentDelta3 = -300.0f;
@@ -1321,8 +1313,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset002, TestSize
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos,
-        TABS_WIDTH - itemWidth * 3 - currentDelta1);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 3 - currentDelta1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH - currentDelta1);
 }

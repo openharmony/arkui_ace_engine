@@ -147,35 +147,33 @@ static napi_value JSSetOverlayManagerOptions(napi_env env, napi_callback_info in
     if (valueType == napi_object) {
         napi_get_named_property(env, argv, "renderRootOverlay", &renderRootOverlayNApi);
         napi_get_value_bool(env, renderRootOverlayNApi, &overlayInfo.renderRootOverlay);
-    } else if (valueType != napi_undefined) {
+    } else if (valueType != napi_undefined && valueType != napi_null) {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
 
+    napi_value result = nullptr;
+    napi_get_boolean(env, false, &result);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
-        return nullptr;
+        return result;
     }
-    napi_value result = nullptr;
     if (delegate->SetOverlayManagerOptions(overlayInfo)) {
         napi_get_boolean(env, true, &result);
         return result;
     }
-    napi_get_boolean(env, false, &result);
     return result;
 }
 
 static napi_value JSGetOverlayManagerOptions(napi_env env, napi_callback_info info)
 {
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
-        return nullptr;
+        return result;
     }
-    napi_value result = nullptr;
     std::optional<NG::OverlayManagerInfo> options = delegate->GetOverlayManagerOptions();
-    napi_create_object(env, &result);
     if (options.has_value()) {
         napi_value renderRootOverlay = nullptr;
         napi_get_boolean(env, options.value().renderRootOverlay, &renderRootOverlay);

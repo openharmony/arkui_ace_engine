@@ -465,7 +465,11 @@ private:
     bool HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex);
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step, bool isScrollIndex);
+    ScrollAlign CalcAlignForFocusToGroupItem(int32_t moveStep, FocusStep step) const;
+    int32_t CalcNextIndexInGroup(int32_t nextIndex, int32_t curIndex, int32_t curIndexInGroup, int32_t moveStep,
+        ListItemGroupPara& nextListItemGroupPara) const;
     void VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param);
+    int32_t GetNextLineFocusIndex(int32_t currIndex);
 
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
@@ -473,6 +477,7 @@ private:
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     bool IsScrollSnapAlignCenter() const;
+    void SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm);
     void SetChainAnimationCallback();
     bool NeedScrollSnapAlignEffect() const;
     ScrollAlign GetInitialScrollAlign() const;
@@ -523,6 +528,7 @@ private:
     std::map<int32_t, int32_t> lanesItemRange_;
     std::set<int32_t> pressedItem_;
     int32_t lanes_ = 1;
+    int32_t laneIdx4Divider_ = 0;
     float laneGutter_ = 0.0f;
     bool dragFromSpring_ = false;
     RefPtr<SpringProperty> springProperty_;

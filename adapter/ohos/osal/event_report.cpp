@@ -67,6 +67,7 @@ constexpr char EVENT_KEY_MAX_HITCH_TIME_SINCE_START[] = "MAX_HITCH_TIME_SINCE_ST
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
+constexpr char ACTION_NAME[] = "ACTION_NAME";
 constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
 constexpr char EVENT_KEY_REAL_SKIPPED_FRAME_TIME[] = "REAL_SKIPPED_FRAME_TIME";
@@ -84,6 +85,11 @@ constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
 constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
 constexpr char EVENT_KEY_NON_MANUAL_POSTCARD_ACTION[] = "NON_MANUAL_POSTCARD_ACTION";
+constexpr char EVENT_KEY_TEXTFIELD_ERROR[] = "TEXTFIELD_ERROR";
+constexpr char EVENT_KEY_TEXTFIELD_ERROR_TYPE[] = "TEXTFIELD_ERROR_TYPE";
+constexpr char EVENT_KEY_CLIPBOARD_FAIL_TYPE[] = "EVENT_KEY_CLIPBOARD_FAIL_TYPE";
+constexpr char EVENT_KEY_FRAME_NODE_ID[] = "FRAME_NODE_ID";
+constexpr char EVENT_KEY_CLIPBOARD_FAIL[] = "CLIPBOARD_FAIL";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
 constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
 constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
@@ -108,6 +114,7 @@ constexpr char EVENT_KEY_WINDOW_ID[] = "WINDOW_ID";
 constexpr char EVENT_KEY_INSTANCE_ID[] = "INSTANCE_ID";
 constexpr char EVENT_KEY_VSYNC_TIMESTAMP[] = "VSYNC_TIMESTAMP";
 #endif
+constexpr char ACCESSIBILITY_FAIL[] = "ACCESSIBILITY_FAIL";
 constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
@@ -248,6 +255,19 @@ void EventReport::SendAccessibilityException(AccessibilityExcepType type)
     };
 
     SendEventInner(eventInfo);
+}
+
+void EventReport::ReportAccessibilityFailEvent(const std::string& actionName)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    auto processName = AceApplicationInfo::GetInstance().GetProcessName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, ACCESSIBILITY_FAIL,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PROCESS_NAME, processName,
+        ACTION_NAME, actionName);
 }
 
 void EventReport::SendFormException(FormExcepType type)
@@ -701,5 +721,21 @@ void EventReport::ReportScrollableErrorEvent(
         EVENT_KEY_TARGET_API_VERSION, target_api_version,
         EVENT_KEY_VERSION_CODE, app_version_code,
         EVENT_KEY_VERSION_NAME, app_version_name);
+}
+
+void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_TEXTFIELD_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_FRAME_NODE_ID,
+        frameNodeId, EVENT_KEY_PAGE_DEPTH, depth, EVENT_KEY_TEXTFIELD_ERROR_TYPE, errorType);
+}
+
+void EventReport::ReportClipboardFailEvent(const std::string& errorType)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_CLIPBOARD_FAIL,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_CLIPBOARD_FAIL_TYPE, errorType);
 }
 } // namespace OHOS::Ace

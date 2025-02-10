@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "gesture_recognizer.h"
+#include "pan_recognizer.h"
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -752,11 +754,19 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    UpdateCallbackState(callback);
     if (callback && *callback && IsEnabled() && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+    }
+}
+
+void PanRecognizer::CheckCallbackState()
+{
+    if (callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) {
+        SendCallbackMsg(onActionEnd_);
     }
 }
 

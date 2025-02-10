@@ -749,8 +749,9 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
                 renderContext->UpdateTranslateInXY({ 0.0f, 0.0f });
             }
         };
-        auto option = BuildAnimationOption(
-            MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f), BuildTransitionFinishCallback());
+        RefPtr<Curve> curve = isRight ? MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f)
+            : MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
+        auto option = BuildAnimationOption(curve, BuildTransitionFinishCallback());
         if (!isEnter) {
             GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         } else {
@@ -965,6 +966,7 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 auto parent = navDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(navDestination);
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             } else if (navDestination->HasStandardBefore()) {
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);

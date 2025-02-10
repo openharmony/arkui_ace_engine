@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "ui/base/utils/utils.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/event_constants.h"
@@ -979,6 +980,8 @@ void PipelineContext::FlushFocusView()
     CHECK_NULL_VOID(lastFocusView);
     auto lastFocusViewHub = lastFocusView->GetFocusHub();
     CHECK_NULL_VOID(lastFocusViewHub);
+    ACE_SCOPED_TRACE("FlushFocusView:[%s][enable:%d][show:%d]", lastFocusViewHub->GetFrameName().c_str(),
+        lastFocusViewHub->IsEnabled(), lastFocusViewHub->IsShow());
     auto container = Container::Current();
     if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender()) &&
         (!lastFocusView->IsRootScopeCurrentFocus())) {
@@ -1653,6 +1656,10 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootNode_->GetGeometryNode()->ResetParentLayoutConstraint();
         rootNode_->MarkForceMeasure();
         isDensityChanged_ = false;
+    }
+    if (window_ && !window_->isRootInitialize() && !NearZero(width) && !NearZero(height)) {
+        window_->SetIsRootInitialize(true);
+        RequestFrame();
     }
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     // For cross-platform build, flush tasks when first resize, speed up for fisrt frame.
@@ -5604,5 +5611,12 @@ RefPtr<Kit::UIContext> PipelineContext::GetUIContext()
     }
     uiContextImpl_ = AceType::MakeRefPtr<Kit::UIContextImpl>(this);
     return uiContextImpl_;
+}
+
+void PipelineContext::GetAllPixelMap()
+{
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    uiTranslateManager_->GetAllPixelMap(pageNode);
 }
 } // namespace OHOS::Ace::NG

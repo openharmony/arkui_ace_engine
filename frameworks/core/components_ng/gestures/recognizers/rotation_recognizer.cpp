@@ -383,6 +383,13 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
     }
 }
 
+void RotationRecognizer::CheckCallbackState()
+{
+    if (callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) {
+        SendCallbackMsg(onActionEnd_);
+    }
+}
+
 GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();

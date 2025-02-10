@@ -999,7 +999,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
         position = GetAdjustPosition(currentPlacementStates, step, childSize, topPosition, bottomPosition, ArrowOffset);
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
             showArrow_ = false;
-            if (avoidKeyboard_) {
+            if (avoidKeyboard_ && !isHalfFoldHover_) {
                 placement_ = originPlacement;
                 position = AdjustPositionNew(originPosition, childSize.Width(), childSize.Height());
             } else {

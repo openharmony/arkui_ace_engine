@@ -151,7 +151,23 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
         const CrownEvent& crownEvent = static_cast<const CrownEvent&>(focusEvent.event);
         return HandleCrownEvent(crownEvent);
     }
+
+    auto keyProcessingMode = static_cast<KeyProcessingMode>(GetKeyProcessingMode());
+    if (keyProcessingMode == KeyProcessingMode::ANCESTOR_EVENT) {
+        return ret;
+    }
     return ret ? true : HandleFocusTravel(focusEvent);
+}
+
+int32_t FocusEventHandler::GetKeyProcessingMode()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    return static_cast<int32_t>(focusManager->GetKeyProcessingMode());
 }
 
 bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension intension)

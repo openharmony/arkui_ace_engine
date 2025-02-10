@@ -171,16 +171,24 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
 #if defined(PIXEL_MAP_SUPPORTED)
     auto callback = [id = Container::CurrentId(), pipeline, info, host, gridItem, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
-                        const std::function<void()>& /*unused*/) {
+                        const std::function<void()>& finishCallback) {
         ContainerScope scope(id);
         if (!mediaPixelMap) {
             TAG_LOGE(AceLogTag::ACE_DRAG, "gridItem drag start failed, custom component screenshot is empty.");
             return;
         }
-        auto pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
-        CHECK_NULL_VOID(pixelMap);
+        CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIGridItemDragRemoveCustomNode");
+        auto pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
+        CHECK_NULL_VOID(pixelMap);
         taskScheduler->PostTask(
             [weak, pipeline, info, pixelMap, host, gridItem]() {
                 auto eventHub = weak.Upgrade();

@@ -44,6 +44,7 @@ enum class FoldScreenType: int32_t {
     BIG_FOLDER = 1,
     SMALL_FOLDER = 2,
     OUTER_FOLDER = 3,
+    SUPER_FOLDER = 5,
 };
 
 constexpr int32_t MCC_UNDEFINED = 0;
@@ -626,6 +627,8 @@ public:
 
     static bool IsSmallFoldProduct();
 
+    static bool IsBigFoldProduct();
+
     static std::string GetWebDebugRenderMode();
 
     static std::string GetDebugInspectorId();
@@ -646,6 +649,8 @@ public:
     }
 
     static int32_t GetDragDropFrameworkStatus();
+
+    static bool IsSuperFoldDisplayDevice();
 
 private:
     static bool opincEnabled_;

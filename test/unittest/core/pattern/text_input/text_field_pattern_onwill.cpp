@@ -25,32 +25,54 @@ class TextFieldPatternOnWillTest : public TextInputBases {
         int didDelete;
         int willChange;
         int onChange;
+
+        bool operator==(const OnWillOrder& other) const
+        {
+            return (time == other.time) && (willInsert == other.willInsert) && (didInsert == other.didInsert) &&
+                   (willDelete == other.willDelete) && (didDelete == other.didDelete) &&
+                   (willChange == other.willChange) && (onChange == other.onChange);
+        }
+
+        bool operator!=(const OnWillOrder& other) const
+        {
+            return !(*this == other);
+        }
     };
+
+    friend std::ostream& operator<<(std::ostream& os, const OnWillOrder& order)
+    {
+        os << "OnWillOrder{time: " << order.time << ", willInsert: " << order.willInsert
+           << ", didInsert: " << order.didInsert << ", willDelete: " << order.willDelete
+           << ", didDelete: " << order.didDelete << ", willChange: " << order.willChange
+           << ", onChange: " << order.onChange << "}";
+        return os;
+    }
+
     void CreateTextFieldWithCallback(OnWillOrder& order, const std::string& text = "")
     {
         auto callbackWillInsert = [&order](const InsertValueInfo& info) mutable {
             order.willInsert = ++order.time;
-            return order.time;
+            return true;
         };
         auto callbackDidInsert = [&order](const InsertValueInfo& info) mutable {
             order.didInsert = ++order.time;
-            return order.time;
+            return true;
         };
         auto callbackWillDelete = [&order](const DeleteValueInfo& info) mutable {
             order.willDelete = ++order.time;
-            return order.time;
+            return true;
         };
         auto callbackDidDelete = [&order](const DeleteValueInfo& info) mutable {
             order.didDelete = ++order.time;
-            return order.time;
+            return true;
         };
         auto callbackWillChange = [&order](const ChangeValueInfo& info) mutable {
             order.willChange = ++order.time;
-            return order.time;
+            return true;
         };
         auto callbackChange = [&order](const ChangeValueInfo& info) mutable {
             order.onChange = ++order.time;
-            return order.time;
+            return true;
         };
         CreateTextField(text, "",
             [&callbackWillInsert, &callbackDidInsert, &callbackWillDelete, &callbackDidDelete, &callbackWillChange,
@@ -85,11 +107,13 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent001, TestSize.Level1)
      */
     pattern_->InsertValue("1", true);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 4);
-    EXPECT_EQ(order.willInsert, 1);
-    EXPECT_EQ(order.willChange, 2);
-    EXPECT_EQ(order.didInsert, 3);
-    EXPECT_EQ(order.onChange, 4);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 4;
+    expectOrder.willInsert = 1;
+    expectOrder.willChange = 2;
+    expectOrder.didInsert = 3;
+    expectOrder.onChange = 4;
+    EXPECT_EQ(order, expectOrder);
 }
 
 /**
@@ -111,11 +135,13 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent002, TestSize.Level1)
      */
     pattern_->DeleteBackward(1);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 5);
-    EXPECT_EQ(order.willDelete, 2);
-    EXPECT_EQ(order.willChange, 3);
-    EXPECT_EQ(order.didDelete, 4);
-    EXPECT_EQ(order.onChange, 5);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 5;
+    expectOrder.willDelete = 2;
+    expectOrder.willChange = 3;
+    expectOrder.didDelete = 4;
+    expectOrder.onChange = 5;
+    EXPECT_EQ(order, expectOrder);
 }
 
 /**
@@ -138,11 +164,13 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent003, TestSize.Level1)
     pattern_->HandleSetSelection(1, 1, false);
     pattern_->InsertValue("a", true);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 5);
-    EXPECT_EQ(order.willDelete, 0);
-    EXPECT_EQ(order.willChange, 3);
-    EXPECT_EQ(order.didDelete, 0);
-    EXPECT_EQ(order.onChange, 5);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 5;
+    expectOrder.willInsert = 2;
+    expectOrder.willChange = 3;
+    expectOrder.didInsert = 4;
+    expectOrder.onChange = 5;
+    EXPECT_EQ(order, expectOrder);
 }
 
 /**
@@ -165,11 +193,15 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent004, TestSize.Level1)
     pattern_->HandleSetSelection(1, 3, false);
     pattern_->InsertValue("a", true);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 7);
-    EXPECT_EQ(order.willDelete, 3);
-    EXPECT_EQ(order.willChange, 4);
-    EXPECT_EQ(order.didDelete, 5);
-    EXPECT_EQ(order.onChange, 7);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 7;
+    expectOrder.willInsert = 2;
+    expectOrder.willDelete = 3;
+    expectOrder.willChange = 4;
+    expectOrder.didInsert = 6;
+    expectOrder.didDelete = 5;
+    expectOrder.onChange = 7;
+    EXPECT_EQ(order, expectOrder);
 }
 
 /**
@@ -192,11 +224,13 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent005, TestSize.Level1)
     pattern_->HandleSetSelection(1, 1, false);
     pattern_->DeleteBackward(1);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 5);
-    EXPECT_EQ(order.willDelete, 2);
-    EXPECT_EQ(order.willChange, 3);
-    EXPECT_EQ(order.didDelete, 4);
-    EXPECT_EQ(order.onChange, 5);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 5;
+    expectOrder.willDelete = 2;
+    expectOrder.willChange = 3;
+    expectOrder.didDelete = 4;
+    expectOrder.onChange = 5;
+    EXPECT_EQ(order, expectOrder);
 }
 
 /**
@@ -219,11 +253,13 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent006, TestSize.Level1)
     pattern_->HandleSetSelection(1, 3, false);
     pattern_->DeleteBackward(1);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 5);
-    EXPECT_EQ(order.willDelete, 2);
-    EXPECT_EQ(order.willChange, 3);
-    EXPECT_EQ(order.didDelete, 4);
-    EXPECT_EQ(order.onChange, 5);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 5;
+    expectOrder.willDelete = 2;
+    expectOrder.willChange = 3;
+    expectOrder.didDelete = 4;
+    expectOrder.onChange = 5;
+    EXPECT_EQ(order, expectOrder);
 }
 
 /**
@@ -246,11 +282,13 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent007, TestSize.Level1)
     pattern_->HandleSetSelection(1, 1, false);
     pattern_->DeleteForward(1);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 5);
-    EXPECT_EQ(order.willDelete, 2);
-    EXPECT_EQ(order.willChange, 3);
-    EXPECT_EQ(order.didDelete, 4);
-    EXPECT_EQ(order.onChange, 5);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 5;
+    expectOrder.willDelete = 2;
+    expectOrder.willChange = 3;
+    expectOrder.didDelete = 4;
+    expectOrder.onChange = 5;
+    EXPECT_EQ(order, expectOrder);
 }
 
 /**
@@ -273,10 +311,143 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent008, TestSize.Level1)
     pattern_->HandleSetSelection(1, 3, false);
     pattern_->DeleteForward(1);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(order.time, 5);
-    EXPECT_EQ(order.willDelete, 2);
-    EXPECT_EQ(order.willChange, 3);
-    EXPECT_EQ(order.didDelete, 4);
-    EXPECT_EQ(order.onChange, 5);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 5;
+    expectOrder.willDelete = 2;
+    expectOrder.willChange = 3;
+    expectOrder.didDelete = 4;
+    expectOrder.onChange = 5;
+    EXPECT_EQ(order, expectOrder);
+}
+
+/**
+ * @tc.name: OnWillEvent009
+ * @tc.desc: Test TextPattern select words, copy, move cursor, then paste, the order of onWillEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode textInput and add onWillEvent callback
+     */
+    OnWillOrder order = { 0, 0, 0, 0, 0, 0, 0 };
+    CreateTextFieldWithCallback(order, "123456");
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. insert text, trigger callbacks
+     */
+    pattern_->HandleSetSelection(1, 3, false);
+    pattern_->HandleOnCopy();
+    FlushLayoutTask(frameNode_);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 1;
+    expectOrder.onChange = 1;
+    EXPECT_EQ(order, expectOrder);
+
+    pattern_->SetCaretPosition(0);
+    pattern_->HandleOnPaste();
+    FlushLayoutTask(frameNode_);
+    expectOrder.time = 3;
+    expectOrder.willChange = 2;
+    expectOrder.onChange = 3;
+    EXPECT_EQ(order, expectOrder);
+}
+
+/**
+ * @tc.name: OnWillEvent010
+ * @tc.desc: Test TextPattern select words, copy, then select words, paste. The order of onWillEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode textInput and add onWillEvent callback
+     */
+    OnWillOrder order = { 0, 0, 0, 0, 0, 0, 0 };
+    CreateTextFieldWithCallback(order, "123456");
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. insert text, trigger callbacks
+     */
+    pattern_->HandleSetSelection(1, 3, false);
+    pattern_->HandleOnCopy();
+    FlushLayoutTask(frameNode_);
+
+    pattern_->HandleSetSelection(4, 6, false);
+    pattern_->HandleOnPaste();
+    FlushLayoutTask(frameNode_);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 3;
+    expectOrder.willChange = 2;
+    expectOrder.onChange = 3;
+    EXPECT_EQ(order, expectOrder);
+}
+
+/**
+ * @tc.name: OnWillEvent011
+ * @tc.desc: Test TextPattern select words, cut, then select words, paste. The order of onWillEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode textInput and add onWillEvent callback
+     */
+    OnWillOrder order = { 0, 0, 0, 0, 0, 0, 0 };
+    CreateTextFieldWithCallback(order, "123456");
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. insert text, trigger callbacks
+     */
+    pattern_->HandleSetSelection(4, 6, false);
+    pattern_->HandleOnCut();
+    FlushLayoutTask(frameNode_);
+
+    pattern_->HandleSetSelection(1, 3, false);
+    pattern_->HandleOnPaste();
+    FlushLayoutTask(frameNode_);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 7;
+    expectOrder.willDelete = 2;
+    expectOrder.willChange = 6;
+    expectOrder.didDelete = 4;
+    expectOrder.onChange = 7;
+    EXPECT_EQ(order, expectOrder);
+}
+
+/**
+ * @tc.name: OnWillEvent012
+ * @tc.desc: Test TextPattern is empty, delete backward. The order of onWillEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode textInput and add onWillEvent callback
+     */
+    OnWillOrder order = { 0, 0, 0, 0, 0, 0, 0 };
+    CreateTextFieldWithCallback(order, "");
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. insert text, trigger callbacks
+     */
+    pattern_->DeleteBackward(1);
+    FlushLayoutTask(frameNode_);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 2;
+    expectOrder.willDelete = 1;
+    expectOrder.didDelete = 2;
+    EXPECT_EQ(order, expectOrder);
+
+    pattern_->DeleteForward(1);
+    FlushLayoutTask(frameNode_);
+    expectOrder.time = 4;
+    expectOrder.willDelete = 3;
+    expectOrder.didDelete = 4;
+    EXPECT_EQ(order, expectOrder);
 }
 } // namespace OHOS::Ace::NG

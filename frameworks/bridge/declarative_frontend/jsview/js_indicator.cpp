@@ -110,8 +110,14 @@ void JSIndicator::SetVertical(const JSCallbackInfo& info)
 
 void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
-    JSRef<JSVal> size = obj->GetProperty("size");
+    JSRef<JSVal> size;
+    JSRef<JSVal> weight;
+    if (font->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
+        size = obj->GetProperty("size");
+        weight = obj->GetProperty("weight");
+    }
+
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -131,7 +137,7 @@ void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, Swip
     } else {
         digitalParameters.fontSize = fontSize;
     }
-    JSRef<JSVal> weight = obj->GetProperty("weight");
+    
     if (!weight->IsNull()) {
         std::string weightValue;
         if (weight->IsNumber()) {

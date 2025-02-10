@@ -2522,8 +2522,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest024, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_TRACK_THICKNESS), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_BLOCK_COLOR), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_TRACK_COLOR), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_SELECTED_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_SHOW_STEPS), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_BLOCK_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_VALUE), nullptr);

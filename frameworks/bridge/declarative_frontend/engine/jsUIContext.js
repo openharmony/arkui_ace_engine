@@ -795,6 +795,16 @@ class UIContext {
         }
         return this.textMenuController_;
     }
+
+    freezeUINode(idOrUniqueId, isFreeze) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof idOrUniqueId === "string") {
+            getUINativeModule().common.freezeUINodeById(idOrUniqueId, isFreeze);
+        } else if (typeof idOrUniqueId === "number") {
+            getUINativeModule().common.freezeUINodeByUniqueId(idOrUniqueId, isFreeze);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {
@@ -943,6 +953,15 @@ class FocusController {
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.configWindowMask(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setKeyProcessingMode(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setKeyProcessingMode(value);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
@@ -1358,6 +1377,67 @@ class PromptAction {
             });
         }
         let result_ = Context.closePopup(content.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    openMenu(content, target, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || target === null || target === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.openMenu(content.getNodePtr(), target);
+        } else {
+            result_ = Context.openMenu(content.getNodePtr(), target, options);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    updateMenu(content, options, partialUpdate) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || options === null || options === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.updateMenu(content.getNodePtr(), options);
+        } else {
+            result_ = Context.updateMenu(content.getNodePtr(), options, partialUpdate);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closeMenu(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        const paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength !== 1 || content === null || content === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_ = Context.closeMenu(content.getNodePtr());
         __JSScopeUtil__.restoreInstanceId();
         return result_;
     }

@@ -102,7 +102,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
 #if defined(PIXEL_MAP_SUPPORTED)
     auto callback = [weakHost = WeakClaim(RawPtr(host)), info, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
-                        const std::function<void()>& /*unused*/) {
+                        const std::function<void()>& finishCallback) {
         auto host = weakHost.Upgrade();
         CHECK_NULL_VOID(host);
         ContainerScope scope(host->GetInstanceId());
@@ -112,10 +112,17 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
         }
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        DragDropInfo dragDropInfo;
-        dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIListItemDragRemoveCustomNode");
+        DragDropInfo dragDropInfo;
+        dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
         taskScheduler->PostTask(
             [weak, info, dragDropInfo]() {
                 auto eventHub = weak.Upgrade();

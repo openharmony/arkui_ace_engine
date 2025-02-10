@@ -44,6 +44,7 @@ class FormManagerDelegate : public FormManagerResource {
 
 public:
 #ifdef OHOS_STANDARD_SYSTEM
+    void SetParamForWant(const RequestFormInfo& info);
     void SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo);
 #endif
     using onFormAcquiredCallbackForJava =

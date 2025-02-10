@@ -862,6 +862,48 @@ ArkUI_DragEvent* OH_ArkUI_DragAndDropInfo_GetDragEvent(ArkUI_DragAndDropInfo* dr
  */
 int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction);
 
+/**
+ * @brief Request to delay the drop end handling for a while to wait until the process result
+ *        is really conformed by application, the result need to be notified back to system through
+ *        {@link OH_ArkUI_NotifyDragResult} interface. And when all the handling done, the
+ *        {@link OH_ArkUI_NotifyDragEndPendingDone} should be called.
+ *        Please be aware, the maximum pending time is 2 seconds;
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param requestIdentify Indicates the Identify for the request initiated by this method, it's a number generated
+            by system automatically, and it's an out parameter too, so one valid address needed.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if current is not during the drop handing.
+ * @since 16
+ */
+int32_t OH_ArkUI_DragEvent_RequestDragEndPending(ArkUI_DragEvent* event, int32_t* requestIdentify);
+
+/**
+ * @brief Notify the system final drag result, the request identify will be checked, it should be the same
+ *        as the one returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending} interface, if it's not,
+ *        the calling will be ignored.
+ *
+ * @param requestIdentify The identify returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending} interface.
+ * @param event Indicates the drag result.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult result);
+
+/**
+ * @brief Notify the system all handling done, the drag end pending can be finished.
+ *
+ * @param requestIdentify The identify returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending} interface.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify);
 #ifdef __cplusplus
 };
 #endif

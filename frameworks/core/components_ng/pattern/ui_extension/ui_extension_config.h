@@ -19,6 +19,8 @@
 #include "core/common/window_animation_config.h"
 
 namespace OHOS::Ace::NG {
+enum class RSSubsystemId : uint8_t { WM_UIEXT = 0, ARKUI_UIEXT, ABILITY_UIEXT, INVALID };
+
 enum class PlaceholderType : int32_t {
     NONE = 0,
     UNDEFINED = 1,

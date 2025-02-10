@@ -150,6 +150,8 @@ constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
+constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
     V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
@@ -2193,6 +2195,27 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDr
             PopMenuAnimation(node, showPreviewAnimation, startDrag);
         }
     }
+}
+
+RefPtr<FrameNode> OverlayManager::GetMenuNodeWithExistContent(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto iter = menuMap_.begin();
+    while (iter != menuMap_.end()) {
+        auto menuNode = (*iter).second;
+        CHECK_NULL_RETURN(menuNode, nullptr);
+        auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+        auto menu = menuWrapperPattern->GetMenu();
+        CHECK_NULL_RETURN(menu, nullptr);
+        auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+        CHECK_NULL_RETURN(menuPattern, nullptr);
+        if (menuPattern->GetCustomNode() == node) {
+            return menuNode;
+        }
+        iter++;
+    }
+    return nullptr;
 }
 
 RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
@@ -4284,10 +4307,16 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange,
     std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode)
 {
-    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    auto parentId = Container::CurrentId();
+    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : parentId;
     ContainerScope scope(instanceId);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    if (sheetStyle.instanceId.has_value()) {
+        auto container = Container::GetContainer(sheetStyle.instanceId.value());
+        CHECK_NULL_VOID(container);
+        container->SetParentId(parentId);
+    }
     auto bindSheetTask = [weak = AceType::WeakClaim(this), isShow, callback = std::move(callback),
                              buildNodeFunc = std::move(buildNodeFunc),
                              buildtitleNodeFunc = std::move(buildtitleNodeFunc), sheetStyle,
@@ -7300,6 +7329,7 @@ void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode)
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             rootNode->RemoveChild(node);
+            return;
         }
     }
 }
@@ -7400,5 +7430,45 @@ bool OverlayManager::isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& 
         return true;
     }
     return false;
+}
+
+Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(mainPipeline, Rect());
+
+    auto rect = mainPipeline->GetDisplayAvailableRect();
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return rect;
+    }
+
+    CHECK_NULL_RETURN(frameNode, rect);
+    auto pipeContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeContext, rect);
+    auto container = AceEngine::Get().GetContainer(pipeContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, rect);
+    if (!container->IsSubContainer()) {
+        return rect;
+    }
+
+    rect = container->GetDisplayAvailableRect();
+    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
+        return rect;
+    }
+
+    // foldStatus need exclude crease area
+    auto foldCreaseRects = container->GetCurrentFoldCreaseRegion();
+    if (foldCreaseRects.empty()) {
+        return rect;
+    }
+
+    auto foldCreaseRect = foldCreaseRects.front();
+    if (container->GetDisplayId() == DEFAULT_DISPLAY_ID) {
+        return Rect(rect.Left(), rect.Top(), rect.Width(), std::min(rect.Bottom(), foldCreaseRect.Top()) - rect.Top());
+    } else if (container->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+        return Rect(rect.Left(), 0.0, rect.Width(), rect.Bottom() - std::max(rect.Top(), foldCreaseRect.Bottom()));
+    } else {
+        return rect;
+    }
 }
 } // namespace OHOS::Ace::NG

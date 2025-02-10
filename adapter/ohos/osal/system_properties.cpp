@@ -972,6 +972,12 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
 }
 
+ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::BIG_FOLDER;
+}
+
 void SystemProperties::InitFoldScreenTypeBySystemProperty()
 {
     if (foldScreenType_ != FoldScreenType::UNKNOWN) {
@@ -1027,5 +1033,11 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SUPER_FOLDER;
 }
 } // namespace OHOS::Ace

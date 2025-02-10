@@ -43,7 +43,8 @@ enum class CJWidthType : uint32_t {
     END_MARGIN,
 };
 
-const std::vector<SideBarContainerType> SIDE_BAR_TYPE = { SideBarContainerType::EMBED, SideBarContainerType::OVERLAY };
+const std::vector<SideBarContainerType> SIDE_BAR_TYPE = { SideBarContainerType::EMBED, SideBarContainerType::OVERLAY,
+    SideBarContainerType::AUTO };
 const std::vector<SideBarPosition> SIDE_BAR_POSITION = { SideBarPosition::START, SideBarPosition::END };
 
 void ParseAndSetWidth(Dimension dimension, CJWidthType widthType)
@@ -180,9 +181,9 @@ void FfiOHOSAceFrameworkSideBarDivider(CJDividerStyle info)
     Color color = info.hasColor ? Color(info.color) : DEFAULT_DIVIDER_COLOR;
     SideBarContainerModel::GetInstance()->SetDividerColor(color);
     ParseAndSetWidth(Dimension(info.startMargin, static_cast<DimensionUnit>(info.startMarginUnit)),
-        CJWidthType::STROKE_WIDTH);
+        CJWidthType::START_MARGIN);
     ParseAndSetWidth(Dimension(info.endMargin, static_cast<DimensionUnit>(info.endMarginUnit)),
-        CJWidthType::STROKE_WIDTH);
+        CJWidthType::END_MARGIN);
 }
 
 void FfiOHOSAceFrameworkSideBarMinContentWidth(double width, int32_t unit)

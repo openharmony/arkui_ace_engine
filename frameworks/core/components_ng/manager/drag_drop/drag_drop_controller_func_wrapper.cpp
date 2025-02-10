@@ -526,6 +526,7 @@ void DragControllerFuncWrapper::DoDragStartAnimation(
 
     dragDropManager->SetCurrentAnimationCnt(0);
     dragDropManager->SetAllAnimationCnt(0);
+    dragDropManager->SetStartAnimation(false);
     DragAnimationHelper::DragStartAnimation(
         newOffset, overlayManager, gatherNodeCenter, point, asyncCtxData.containerId);
 }
@@ -580,5 +581,16 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     dragPreviewInfo.originScale = imageNode->GetTransformScale();
     dragDropManager->SetDragPreviewInfo(dragPreviewInfo);
     return true;
+}
+
+void DragControllerFuncWrapper::HideDragPreviewWindow(int32_t containerId)
+{
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (!dragDropManager->IsDragFwkShow()) {
+        dragDropManager->HideDragPreviewWindow(containerId);
+    }
 }
 } // namespace OHOS::Ace::NG
