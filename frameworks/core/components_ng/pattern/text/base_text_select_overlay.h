@@ -294,7 +294,7 @@ protected:
     }
     virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
     bool GetClipHandleViewPort(RectF& rect);
-
+    bool CalculateClippedRect(RectF& rect);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
     virtual bool IsClipHandleWithViewPort()
