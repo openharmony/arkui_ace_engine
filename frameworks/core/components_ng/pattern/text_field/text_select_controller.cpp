@@ -110,7 +110,11 @@ void TextSelectController::FitCaretMetricsToTouchPoint(CaretMetricsF& caretMetri
 
 void TextSelectController::FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics)
 {
-    if (GreatNotEqual(caretMetrics.height, contentRect_.Height())) {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    if (GreatNotEqual(caretMetrics.height, contentRect_.Height()) && !textField->IsTextArea()) {
         caretMetrics.offset.SetY(caretMetrics.offset.GetY() + caretMetrics.height - contentRect_.Height());
         caretMetrics.height = contentRect_.Height();
     }
