@@ -2842,5 +2842,9 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_HoverEvent_IsHovered"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusSetKeyProcessingMode"
     }
 ]
