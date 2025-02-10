@@ -543,6 +543,33 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShowCache006
+ * @tc.desc: Test cached items when last line isn't filled
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCache006, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    for (int i = 0; i < 20; ++i) {
+        UpdateCurrentOffset(-300.0f);
+    }
+    EXPECT_TRUE(GetItem(9, true)->IsActive());
+    EXPECT_LT(GetChildY(frameNode_, 9), -50.0f);
+    EXPECT_TRUE(GetItem(8, true)->IsActive());
+    EXPECT_TRUE(GetItem(7, true)->IsActive());
+    EXPECT_TRUE(GetItem(6, true)->IsActive());
+    EXPECT_FALSE(GetItem(5, true)->IsActive());
+    EXPECT_FALSE(GetItem(4, true)->IsActive());
+}
+
+/**
  * @tc.name: LayoutCachedItem001
  * @tc.desc: Test LayoutCachedItem
  * @tc.type: FUNC

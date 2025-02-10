@@ -126,6 +126,14 @@ public:
      * @description: report whole inspectorTree for SA
      */
     void SendBaseInfo(const std::string& data) override;
+    void RegisterGetShowingImageCallback(
+        const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& eventCallback);
+    void RegisterGetWebViewCurrentLanguage(const EventCallback& eventCallback);
+    void RegisterGetTranslateTextCallback(const std::function<void(int32_t, std::string)>& eventCallback);
+    void SendCurrentLanguage(const std::string& data) override;
+    void SendWebText(int32_t nodeId, std::string res) override;
+    void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
+    void ClearAshmem(sptr<Ashmem>& optMem);
 
 private:
     EventCallback clickEventCallback_;
@@ -133,8 +141,11 @@ private:
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
     EventCallback sendBaseInfoCallback_;
+    EventCallback getWebViewCurrentLanguageCallback_;
+    std::function<void(int32_t, std::string)> getTranslateTextCallback_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
+    std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)> getShowingImageCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

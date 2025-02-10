@@ -50,6 +50,10 @@ void EventHub::OnDetachContext(PipelineContext *context)
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
+    auto eventManager = context->GetEventManager();
+    if (eventManager) {
+        eventManager->DelKeyboardShortcutNode(host->GetId());
+    }
 }
 
 RefPtr<FrameNode> EventHub::GetFrameNode() const
@@ -71,6 +75,22 @@ void EventHub::SetSupportedStates(UIState state)
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
     stateStyleMgr_->SetSupportedStates(state);
+}
+
+void EventHub::AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)> callback, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner);
+}
+
+void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->RemoveSupportedUIState(state, isInner);
 }
 
 void EventHub::SetCurrentUIState(UIState state, bool flag)

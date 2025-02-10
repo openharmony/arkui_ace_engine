@@ -87,6 +87,7 @@ void MultiFingersRecognizer::OnFinishGestureReferee(int32_t touchId, bool isBloc
     if (IsNeedResetStatus()) {
         ResetStatusOnFinish(isBlocked);
     }
+    CheckCallbackState();
 }
 
 void MultiFingersRecognizer::CleanRecognizerState()

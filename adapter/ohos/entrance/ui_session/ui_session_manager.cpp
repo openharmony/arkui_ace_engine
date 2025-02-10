@@ -14,13 +14,14 @@
  */
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "ui_report_proxy.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
 std::shared_mutex UiSessionManager::reportObjectMutex_;
-constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 4096;
+constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
 UiSessionManager& UiSessionManager::GetInstance()
 {
     static UiSessionManager instance_;
@@ -76,7 +77,7 @@ void UiSessionManager::ReportComponentChangeEvent(const std::string& key, const 
             data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
-            LOGW("report component event failed,process id:%{public}d", pair.first);
+            LOGW("report component change event failed,process id:%{public}d", pair.first);
         }
     }
 }
@@ -286,6 +287,102 @@ void UiSessionManager::SendBaseInfo(int32_t processId)
     if (reportService != nullptr) {
         std::unique_lock<std::mutex> lock(mutex_);
         reportService->SendBaseInfo(baseInfo_);
+    }
+}
+
+void UiSessionManager::SaveGetPixelMapFunction(GetPixelMapFunction&& function)
+{
+    getPixelMapFunction_ = std::move(function);
+}
+
+void UiSessionManager::SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager)
+{
+    translateManager_ = uiTranslateManager;
+}
+
+void UiSessionManager::GetWebViewLanguage()
+{
+    if (translateManager_) {
+        translateManager_->GetWebViewCurrentLanguage();
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
+    }
+}
+
+void UiSessionManager::SaveProcessId(std::string key, int32_t id)
+{
+    processMap_[key] = id;
+}
+
+void UiSessionManager::SendCurrentLanguage(std::string result)
+{
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["translate"]]);
+    if (reportService) {
+        reportService->SendCurrentLanguage(result);
+    } else {
+    }
+}
+void UiSessionManager::GetWebTranslateText(std::string extraData, bool isContinued)
+{
+    if (translateManager_) {
+        translateManager_->GetTranslateText(extraData, isContinued);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
+    }
+}
+
+void UiSessionManager::SendWebTextToAI(int32_t nodeId, std::string res)
+{
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["translate"]]);
+    if (reportService != nullptr) {
+        reportService->SendWebText(nodeId, res);
+    } else {
+        LOGW("report component event failed,process id:%{public}d", processMap_["translate"]);
+    }
+}
+
+void UiSessionManager::SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
+{
+    if (translateManager_) {
+        translateManager_->SendTranslateResult(nodeId, results, ids);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
+    }
+}
+
+void UiSessionManager::SendTranslateResult(int32_t nodeId, std::string res)
+{
+    if (translateManager_) {
+        translateManager_->SendTranslateResult(nodeId, res);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
+    }
+}
+
+void UiSessionManager::ResetTranslate(int32_t nodeId)
+{
+    if (translateManager_) {
+        translateManager_->ResetTranslate(nodeId);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
+    }
+}
+
+void UiSessionManager::GetPixelMap()
+{
+    if (getPixelMapFunction_) {
+        getPixelMapFunction_();
+    }
+}
+
+void UiSessionManager::SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
+{
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["pixel"]]);
+    if (reportService != nullptr && translateManager_) {
+        reportService->SendShowingImage(maps);
+        translateManager_->ClearMap();
+    } else {
+        LOGW("report component event failed,process id:%{public}d", processMap_["pixel"]);
     }
 }
 } // namespace OHOS::Ace

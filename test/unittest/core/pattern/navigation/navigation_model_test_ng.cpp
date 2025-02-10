@@ -1987,4 +1987,29 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions003, TestSize.Level1)
     float offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
     EXPECT_NE(offsetY, 0.0f);
 }
+
+/**
+ * @tc.name: SetEnableToolBarAdaptationTest001
+ * @tc.desc: Test set enable tool bar adaptation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationModelTestNg, SetEnableToolBarAdaptation, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    EXPECT_TRUE(toolbarNode->enableToolBarAdaptation_);
+    navigationModel.SetEnableToolBarAdaptation(false);
+    EXPECT_FALSE(toolbarNode->enableToolBarAdaptation_);
+}
 } // namespace OHOS::Ace::NG

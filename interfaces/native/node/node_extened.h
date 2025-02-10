@@ -176,6 +176,11 @@ struct ArkUI_CrossLanguageOption {
     bool attributeSetting;
 };
 
+struct ArkUI_VisibleAreaEventOptions {
+    std::vector<float> ratios;
+    int32_t expectedUpdateInterval;
+};
+
 #ifdef __cplusplus
 };
 #endif

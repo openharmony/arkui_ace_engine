@@ -207,6 +207,11 @@ void DatePickerColumnPattern::OnWindowShow()
     isShow_ = true;
 }
 
+void DatePickerColumnPattern::StopHaptic()
+{
+    stopHaptic_ = true;
+}
+
 void DatePickerColumnPattern::ParseTouchListener()
 {
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
@@ -298,6 +303,7 @@ RefPtr<TouchEventImpl> DatePickerColumnPattern::CreateItemTouchEventListener()
     auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->stopHaptic_ = false;
         auto isToss = pattern->GetTossStatus();
         if (info.GetTouches().empty()) {
             return;
@@ -345,7 +351,7 @@ void DatePickerColumnPattern::OnTouchDown()
 
 void DatePickerColumnPattern::OnTouchUp()
 {
-    SetSelectedMarkFocus();
+    SetSelectedMark();
     if (hoverd_) {
         PlayPressAnimation(GetButtonHoverColor());
     } else {
@@ -865,7 +871,7 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-    if (selectedMarkPaint_ && (index == showCount / PICKER_SELECT_AVERAGE)) {
+    if (selectedMarkPaint_ && (index == (showCount / PICKER_SELECT_AVERAGE))) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -930,7 +936,7 @@ bool DatePickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    if (hapticController_ && isEnableHaptic_) {
+    if (hapticController_ && isEnableHaptic_ && !stopHaptic_) {
         hapticController_->PlayOnce();
     }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
@@ -982,7 +988,7 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    SetSelectedMarkFocus();
+    SetSelectedMark();
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -1333,7 +1339,7 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
     if (hapticController_ && isShow_) {
-        if (isEnableHaptic_) {
+        if (isEnableHaptic_ && !stopHaptic_) {
             hapticController_->HandleDelta(dragDelta);
         }
     }
@@ -1348,6 +1354,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                                                                 : optionProperties_[midIndex].nextDistance;
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
@@ -1461,7 +1470,7 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
         pipeline->RequestFrame();
     }
 
-    SetSelectedMarkFocus();
+    SetSelectedMark();
 }
 
 void DatePickerColumnPattern::PlayRestAnimation()
@@ -1538,26 +1547,37 @@ void DatePickerColumnPattern::AddHotZoneRectToText()
     }
 }
 
-void DatePickerColumnPattern::SetSelectedMarkFocus()
+void DatePickerColumnPattern::SetSelectedMarkListener(std::function<void(std::string& selectedColumnId)>& listener)
+{
+    focusedListerner_ = listener;
+    if (!circleUtils_) {
+        circleUtils_ = new PickerColumnPatternCircleUtils<DatePickerColumnPattern>();
+    }
+}
+
+void DatePickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     if (pickerTheme->IsCircleDial()) {
-#ifdef ARKUI_WEARABLE
-        SetSelectedMark(pickerTheme, true);
-#endif
+        CHECK_NULL_VOID(circleUtils_);
+        circleUtils_->SetSelectedMark(this, pickerTheme, focus, notify, reRender);
     }
 }
 
-#ifdef ARKUI_WEARABLE
+void DatePickerColumnPattern::SetSelectedMarkId(const std::string &strColumnId)
+{
+    selectedColumnId_ = strColumnId;
+}
+
 void DatePickerColumnPattern::SetSelectedMarkPaint(bool paint)
 {
     selectedMarkPaint_ = paint;
 }
 
-void DatePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
+void DatePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1585,26 +1605,42 @@ void DatePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<Picker
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
-#else
-void DatePickerColumnPattern::SetSelectedMarkListener(std::function<void(std::string& focusId)>& listener)
-{
-    (void)listener;
-}
-
-void DatePickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
-{
-    (void)focus;
-    (void)notify;
-    (void)reRender;
-}
-
-void DatePickerColumnPattern::SetSelectedMarkId(const std::string &strColumnId)
-{
-    (void)strColumnId;
-}
-#endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
+std::string& DatePickerColumnPattern::GetSelectedColumnId()
+{
+    return selectedColumnId_;
+}
+
+bool DatePickerColumnPattern::IsCrownEventEnded()
+{
+    return isCrownEventEnded_;
+}
+
+int32_t DatePickerColumnPattern::GetDigitalCrownSensitivity()
+{
+    if (crownSensitivity_ == INVALID_CROWNSENSITIVITY) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, DEFAULT_CROWNSENSITIVITY);
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_RETURN(pickerTheme, DEFAULT_CROWNSENSITIVITY);
+        crownSensitivity_ = pickerTheme->GetDigitalCrownSensitivity();
+    }
+
+    return crownSensitivity_;
+}
+
+void DatePickerColumnPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    crownSensitivity_ = crownSensitivity;
+}
+
+bool DatePickerColumnPattern::OnCrownEvent(const CrownEvent& event)
+{
+    CHECK_NULL_RETURN(circleUtils_, false);
+    return circleUtils_->OnCrownEvent(this, event);
+}
+
 void DatePickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
 {
     auto toss = GetToss();
@@ -1613,6 +1649,7 @@ void DatePickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
     toss->SetStart(offsetY);
     yLast_ = offsetY;
     pressed_ = true;
+    isCrownEventEnded_ = false;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.angularVelocity, SceneStatus::START);
@@ -1622,11 +1659,12 @@ void DatePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 {
     SetMainVelocity(event.angularVelocity);
     animationBreak_ = false;
+    isCrownEventEnded_ = false;
     CHECK_NULL_VOID(pressed_);
     auto toss = GetToss();
     CHECK_NULL_VOID(toss);
-    auto offsetY = GetCrownRotatePx(event);
-
+    CHECK_NULL_VOID(circleUtils_);
+    auto offsetY = circleUtils_->GetCrownRotatePx(event, GetDigitalCrownSensitivity());
     offsetY += yLast_;
     toss->SetEnd(offsetY);
     UpdateColumnChildPosition(offsetY);
@@ -1639,6 +1677,7 @@ void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 {
     SetMainVelocity(event.angularVelocity);
     pressed_ = false;
+    isCrownEventEnded_ = true;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
 

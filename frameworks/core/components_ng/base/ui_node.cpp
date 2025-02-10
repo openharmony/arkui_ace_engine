@@ -33,6 +33,11 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         nodeInfo_->codeRow = pos.first;
         nodeInfo_->codeCol = pos.second;
     }
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        depth_ = 1;
+        hostPageId_ = INT32_MAX;
+    }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -243,7 +248,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
 
     // the node set isInDestroying state when destroying in pop animation
     // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return children_.end();
     }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
@@ -364,7 +369,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
-    if (parent->GetPageId() != 0) {
+    if (parent->GetPageId() != 0 && parent->GetPageId() != INT32_MAX) {
         SetHostPageId(parent->GetPageId());
     }
     AfterMountToParent();
@@ -386,7 +391,7 @@ void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationC
 
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return false;
     }
     // The recursive flag will used by RenderContext, if recursive flag is false,
@@ -402,7 +407,11 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    SetDepth(1);
+    depth_ = -1;
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        SetDepth(1);
+        SetHostPageIdByParent(INT32_MAX);
+    }
     UpdateThemeScopeId(0);
 }
 
@@ -495,6 +504,9 @@ void UINode::DoAddChild(
         child->UpdateThemeScopeId(themeScopeId);
     }
     child->SetDepth(GetDepth() + 1);
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        child->SetHostPageIdByParent(hostPageId_);
+    }
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
     }
@@ -721,7 +733,7 @@ void UINode::DetachFromMainTree(bool recursive)
     if (!onMainTree_) {
         return;
     }
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return;
     }
     onMainTree_ = false;
@@ -1947,7 +1959,7 @@ void UINode::SetDestroying(bool isDestroying, bool cleanStatus)
 
     isInDestroying_ = isDestroying;
     for (const auto& child : GetChildren()) {
-        if (child->GetTag() == "BuilderProxyNode") {
+        if (child->IsReusableNode()) {
             child->SetDestroying(isDestroying, false);
         } else {
             child->SetDestroying(isDestroying, cleanStatus);

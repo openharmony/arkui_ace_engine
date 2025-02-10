@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
@@ -862,6 +863,14 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto* toNode = reinterpret_cast<UINode*>(target_parent);
     CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::STACK_ETS_TAG,
+        OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto pipeline = moveNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGF("MoveNodeTo doesn't run on UI thread");
@@ -883,6 +892,15 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);
     return ERROR_CODE_NO_ERROR;
+}
+
+void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto delegate = EngineHelper::GetDelegateByContainer(container);
+    CHECK_NULL_VOID(delegate);
+    delegate->SetKeyProcessingMode(mode);
 }
 
 namespace NodeModifier {
@@ -960,6 +978,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setCrossLanguageOptions = SetCrossLanguageOptions,
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
+        .setKeyProcessingMode = SetKeyProcessingMode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -3732,6 +3732,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
     option.enableEdgeAutoScroll = dragInteractionOptions.enableEdgeAutoScroll;
     option.enableHapticFeedback = dragInteractionOptions.enableHapticFeedback;
+    option.isLiftingDisabled = dragInteractionOptions.isLiftingDisabled;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3739,8 +3740,7 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, true, false, true, false, false, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode, NG::DragPreviewOption());
 }
 
 void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
@@ -5847,6 +5847,17 @@ void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
     ViewAbstract::SetSystemBarEffect(frameNode, enable);
 }
 
+void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)
+{
+    std::string idStr(id);
+    ViewAbstract::FreezeUINodeById(idStr, isFreeze);
+}
+
+void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
+{
+    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
+}
+
 ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6276,6 +6287,13 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
     CHECK_NULL_VOID(frameNode);
     NG::DragDropInfo dragPreviewInfo;
     dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    dragPreviewInfo.onlyForLifting = dragPreview.onlyForLifting;
+    if (dragPreview.extraInfo) {
+        dragPreviewInfo.extraInfo = dragPreview.extraInfo;
+    }
+    if (dragPreview.pixelMap) {
+        dragPreviewInfo.pixelMap = PixelMap::CreatePixelMap(dragPreview.pixelMap);
+    }
     ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
 }
 
@@ -6350,6 +6368,70 @@ ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, -1);
     return frameNode->GetId();
+}
+
+void SetNextFocus(ArkUINodeHandle node, ArkUI_CharPtr forward, ArkUI_CharPtr backward,
+    ArkUI_CharPtr up, ArkUI_CharPtr down, ArkUI_CharPtr left, ArkUI_CharPtr right, ArkUI_Uint32 hasValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if ((hasValue >> 5) & 1) { // 5: forward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, forward);
+    }
+    if ((hasValue >> 4) & 1) { // 4: backward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::SHIFT_TAB, backward);
+    }
+    if ((hasValue >> 3) & 1) { // 3: up
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::UP, up);
+    }
+    if ((hasValue >> 2) & 1) { // 2: down
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::DOWN, down);
+    }
+    if ((hasValue >> 1) & 1) { // 1: left
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::LEFT, std::string(left));
+    }
+    if ((hasValue >> 0) & 1) { // 0: right
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::RIGHT, std::string(right));
+    }
+}
+
+void SetNextFocusOneByOne(ArkUINodeHandle node, ::FocusMove idx, ArkUINodeHandle focusNode)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* focusFrameNode = reinterpret_cast<FrameNode*>(focusNode);
+    auto nodePtr = AceType::WeakClaim<AceType>(focusFrameNode);
+    FocusIntension key;
+    switch (idx) {
+        case ::FocusMove::FOCUS_MOVE_FORWARD:
+            key = FocusIntension::TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_BACKWARD:
+            key = FocusIntension::SHIFT_TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_UP:
+            key = FocusIntension::UP;
+            break;
+        case ::FocusMove::FOCUS_MOVE_DOWN:
+            key = FocusIntension::DOWN;
+            break;
+        case ::FocusMove::FOCUS_MOVE_LEFT:
+            key = FocusIntension::LEFT;
+            break;
+        case ::FocusMove::FOCUS_MOVE_RIGHT:
+            key = FocusIntension::RIGHT;
+            break;
+        default:
+            return;
+    }
+    ViewAbstract::SetNextFocus(frameNode, key, nodePtr);
+}
+
+void ResetNextFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetNextFocus(frameNode);
 }
 
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
@@ -6608,6 +6690,26 @@ ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
         backdropBlur.darkeningBlur = propBackdropBlurOption->grayscale[NUM_1];
     }
     return backdropBlur;
+}
+
+void SetOnVisibleAreaApproximateChange(
+    ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    std::vector<double> ratioList(values, values + size);
+    auto onEvent = [nodeId, extraParam](bool visible, double ratio) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = static_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_VISIBLE_AREA_APPROXIMATE_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = visible;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
+        SendArkUISyncEvent(&event);
+    };
+    ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, interval);
 }
 } // namespace
 
@@ -6984,6 +7086,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
@@ -7009,6 +7113,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .setDragPreview = SetDragPreview,
         .resetDragPreview = ResetDragPreview,
         .getNodeUniqueId = GetNodeUniqueId,
+        .setNextFocus = SetNextFocus,
+        .setNextFocusOneByOne = SetNextFocusOneByOne,
+        .resetNextFocus = ResetNextFocus,
         .setFocusBoxStyle = SetFocusBoxStyle,
         .resetFocusBoxStyle = ResetFocusBoxStyle,
         .setClickDistance = SetClickDistance,
@@ -7031,6 +7138,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setNodeBackdropBlur = SetNodeBackdropBlur,
         .getNodeBackdropBlur = GetNodeBackdropBlur,
         .setDisableDataPrefetch = SetDisableDataPrefetch,
+        .setOnVisibleAreaApproximateChange = SetOnVisibleAreaApproximateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7394,6 +7502,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
@@ -7567,6 +7677,70 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
 }
 
+void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    event.clickEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.clickEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.clickEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.clickEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.clickEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.clickEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // tiltX tiltY
+    event.clickEvent.tiltX =
+        usePx ? info.GetTiltX().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltX().value_or(0.0f));
+    event.clickEvent.tiltY =
+        usePx ? info.GetTiltY().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltY().value_or(0.0f));
+    //pressure
+    event.clickEvent.pressure = info.GetForce();
+    // sourcetool
+    event.clickEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // deviceid
+    event.clickEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    event.clickEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    if (!info.GetFingerList().empty()) {
+        event.clickEvent.clickPointSize =
+            info.GetFingerList().size() < MAX_POINTS ? info.GetFingerList().size() : MAX_POINTS;
+    } else {
+        event.clickEvent.clickPointSize = 0;
+    }
+}
+
+void TriggerOnClickEvent(void* extraParam, int32_t nodeId, bool usePx, GestureEvent& info)
+{
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+    ArkUINodeEvent event;
+    event.kind = ArkUIEventCategory::CLICK_EVENT;
+    event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+    event.nodeId = nodeId;
+    event.clickEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    event.clickEvent.localX = usePx ? localOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+    event.clickEvent.localY = usePx ? localOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+    event.clickEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+    event.clickEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    event.clickEvent.windowX = usePx ? globalOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+    event.clickEvent.windowY = usePx ? globalOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+    event.clickEvent.displayX =
+        usePx ? screenOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
+    event.clickEvent.displayY =
+        usePx ? screenOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+    SetOnClickInfo(event, info, usePx);
+    SendArkUISyncEvent(&event);
+}
+
 void SetOnClick(ArkUINodeHandle node, void* extraParam)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -7613,6 +7787,7 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[7].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
         SendArkUISyncEvent(&event);
+        TriggerOnClickEvent(extraParam, nodeId, usePx, info);
     };
     if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
@@ -7641,6 +7816,8 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
         event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        // modifierkeystates
+        event.keyEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
 
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
@@ -7753,6 +7930,19 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.focusAxisEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
         event.focusAxisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
         event.focusAxisEvent.deviceId = info.GetDeviceId();
+        const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+        const auto& targetOrigin = info.GetTarget().origin;
+        // width height x y globalx globaly
+        event.focusAxisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        event.focusAxisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        event.focusAxisEvent.targetGlobalPositionX =
+            targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        event.focusAxisEvent.targetGlobalPositionY =
+            targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        event.focusAxisEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+        event.focusAxisEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+        // modifierkeystates
+        event.focusAxisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
         event.focusAxisEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
@@ -7865,6 +8055,27 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         auto target = eventInfo.GetTarget();
         event.touchEvent.target.id = target.id.c_str();
         event.touchEvent.target.type = target.type.c_str();
+        const auto& targetLocalOffset = eventInfo.GetTarget().area.GetOffset();
+        const auto& targetOrigin = eventInfo.GetTarget().origin;
+        // width height x y globalx globaly
+        event.touchEvent.targetPositionX =
+            usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+        event.touchEvent.targetPositionY =
+            usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+        event.touchEvent.targetGlobalPositionX =
+            usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+                  : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+        event.touchEvent.targetGlobalPositionY =
+            usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+                  : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+        event.touchEvent.width = usePx ? eventInfo.GetTarget().area.GetWidth().ConvertToPx()
+                                       : eventInfo.GetTarget().area.GetWidth().ConvertToVp();
+        event.touchEvent.height = usePx ? eventInfo.GetTarget().area.GetHeight().ConvertToPx()
+                                        : eventInfo.GetTarget().area.GetHeight().ConvertToVp();
+        // deviceid
+        event.touchEvent.deviceId = eventInfo.GetDeviceId();
+        //modifierkeystates
+        event.touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(eventInfo.GetPressedKeyCodes());
         event.touchEvent.target.area = {
             static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
             static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
@@ -8004,6 +8215,51 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
 }
 
+void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverInfo& info)
+{
+    ArkUINodeEvent event;
+    event.kind = ArkUIEventCategory::HOVER_EVENT;
+    event.nodeId = nodeId;
+    event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+    event.hoverEvent.subKind = ON_HOVER_EVENT;
+    event.hoverEvent.isHover = isHover;
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+    // width height x y globalx globaly
+    event.hoverEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.hoverEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.hoverEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.hoverEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.hoverEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.hoverEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // deviceid
+    event.hoverEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    event.hoverEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    // timestamp
+    event.hoverEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+    // sourcetool
+    event.hoverEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // source
+    event.hoverEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    // tiltX tiltY
+    event.hoverEvent.tiltX = info.GetTiltX().value_or(0.0f);
+    event.hoverEvent.tiltY = info.GetTiltX().value_or(0.0f);
+    // stoppropagation
+    event.hoverEvent.stopPropagation = false;
+    SendArkUISyncEvent(&event);
+    info.SetStopPropagation(event.hoverEvent.stopPropagation);
+}
+
 void SetOnHover(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -8017,8 +8273,42 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_HOVER;
         event.componentAsyncEvent.data[0].i32 = isHover;
         SendArkUISyncEvent(&event);
+        TriggerOnHoverEvent(extraParam, nodeId, isHover, info);
     };
     ViewAbstract::SetOnHover(frameNode, onEvent);
+}
+
+void SetOnMouseInfo(ArkUINodeEvent& event, MouseInfo& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    event.mouseEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.mouseEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.mouseEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.mouseEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.mouseEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.mouseEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // deviceid
+    event.mouseEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    event.mouseEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    // pressure
+    event.mouseEvent.actionTouchPoint.pressure = info.GetForce();
+    // toolType
+    event.mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // source
+    event.mouseEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    // stoppropagation
+    event.mouseEvent.stopPropagation = false;
 }
 
 void SetOnMouse(ArkUINodeHandle node, void* extraParam)
@@ -8054,9 +8344,46 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
             pressedButtonList.push_back(static_cast<int32_t>(*it));
         }
         event.mouseEvent.pressedButtons = pressedButtonList.data();
+        SetOnMouseInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.mouseEvent.stopPropagation);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);
+}
+
+void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](AxisInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
+        event.axisEvent.subKind = ON_AXIS;
+        event.axisEvent.action = static_cast<int32_t>(info.GetAction());
+        event.axisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.axisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.axisEvent.verticalAxis = static_cast<double>(info.GetVerticalAxis());
+        event.axisEvent.horizontalAxis = static_cast<double>(info.GetHorizontalAxis());
+        event.axisEvent.pinchAxisScale = static_cast<double>(info.GetPinchAxisScale());
+        event.axisEvent.scrollStep = static_cast<int32_t>(info.GetScrollStep());
+        event.axisEvent.propagation = false;
+        event.axisEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(!event.axisEvent.propagation);
+    };
+    ViewAbstract::SetOnAxisEvent(frameNode, onEvent);
 }
 
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
@@ -8174,6 +8501,13 @@ void ResetOnMouse(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnMouse(frameNode);
+}
+
+void ResetOnAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAxisEvent(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

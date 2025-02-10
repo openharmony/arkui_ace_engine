@@ -34,6 +34,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
@@ -45,7 +46,6 @@
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
 
@@ -161,7 +161,7 @@ public:
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(float value) = 0;
-    virtual void SetLayoutWeight(const NG::LayoutWeightPair& value) = 0;
+    virtual void SetChainWeight(const NG::ChainWeightPair& value) = 0;
     virtual void SetPixelRound(uint16_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
@@ -273,6 +273,7 @@ public:
     virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
     virtual void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
+    virtual void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
@@ -300,6 +301,8 @@ public:
     virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
     virtual void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
+    virtual void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) = 0;
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
@@ -324,6 +327,7 @@ public:
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;
     virtual void DisableOnFocusAxisEvent() = 0;
+    virtual void DisableOnAxisEvent() = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void DisableOnCrownEvent() = 0;
 #endif
@@ -340,6 +344,8 @@ public:
     virtual void SetFocusOnTouch(bool isSet) = 0;
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
+    virtual void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) {}
+    virtual void ResetNextFocus() {}
     virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
     virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) {}
     virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
@@ -372,6 +378,10 @@ public:
     virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
     virtual int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void DismissPopup() = 0;
+    virtual int32_t OpenMenu(
+        NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) = 0;
+    virtual int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,

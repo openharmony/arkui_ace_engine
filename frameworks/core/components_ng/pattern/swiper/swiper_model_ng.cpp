@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,6 @@ void SwiperModelNG::SetShowIndicator(bool showIndicator)
 
 void SwiperModelNG::SetIndicatorType(SwiperIndicatorType indicatorType)
 {
-    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType);
 }
 
@@ -762,7 +761,6 @@ void SwiperModelNG::SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDig
 
 void SwiperModelNG::SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType)
 {
-    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType, frameNode);
 }
 

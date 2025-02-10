@@ -164,7 +164,7 @@ private:
     {
         return text_.length() + placeholderCnt_;
     }
-    float MakeEmptyOffsetX();
+    float MakeEmptyOffsetX(bool isLtr);
     bool HandleCaretWhenEmpty(CaretMetricsF& result);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);

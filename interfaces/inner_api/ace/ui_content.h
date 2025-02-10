@@ -500,7 +500,16 @@ public:
         return nullptr;
     }
 
+    virtual void ActiveWindow() {};
+
+    virtual void UnActiveWindow() {};
+
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
+
+    virtual bool SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

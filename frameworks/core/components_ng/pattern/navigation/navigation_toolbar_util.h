@@ -28,12 +28,22 @@ struct FieldProperty {
     std::string parentId;
     std::string field;
 };
+struct ToolBarItemParam {
+    bool needMoreButton;
+    bool enableStatus;
+    bool hideItemText;
+};
+struct BarItemNodeParam {
+    bool enabled;
+    bool hideText;
+};
 class NavigationToolbarUtil {
 public:
     static void CreateToolBarDividerNodeIfNeeded(const RefPtr<NavDestinationNodeBase>& nodeBase);
     static void SetToolbarConfiguration(const RefPtr<NavDestinationNodeBase>& nodeBase,
         std::vector<NG::BarItem>&& toolBarItems, bool enabled, const FieldProperty& fieldProperty);
     static void SetCustomToolBar(const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<AceType>& customNode);
+    static void SetHideItemText(const RefPtr<NavDestinationNodeBase>& nodeBase, bool isHideItemText);
     static void SetToolbarOptions(const RefPtr<NavDestinationNodeBase>& nodeBase, NavigationToolbarOptions&& opt);
     static void MountToolBar(
         const RefPtr<NavDestinationNodeBase>& nodeBase, bool& needRunToolBarAnimation);

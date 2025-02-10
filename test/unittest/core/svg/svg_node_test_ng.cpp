@@ -78,7 +78,17 @@ const std::string CIRCLE_SVG_LABEL =
     "stroke-opacity=\"0.3\" id=\"circleId\"/></svg>";
 } // namespace
 
-class SvgNodeTestNg : public testing::Test {};
+class SvgNodeTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        MockContainer::SetUp();
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::TearDown();
+    }
+};
 
 class MockSvgGraphic : public SvgGraphic {
 public:
@@ -286,6 +296,441 @@ HWTEST_F(SvgNodeTestNg, svgSvgTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(svgSvg->svgAttr_.height.Value(), 300);
     EXPECT_FLOAT_EQ(svgSvg->svgAttr_.x.Value(), 30);
     EXPECT_FLOAT_EQ(svgSvg->svgAttr_.y.Value(), 30);
+}
+
+/**
+ * @tc.name: svgSvgTest002
+ * @tc.desc: test svg width < 0 height < 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgSvgTest002, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->ParseAndSetSpecializedAttr("height", "-100");
+    svgSvg->ParseAndSetSpecializedAttr("width", "-100");
+    Size size(300, 400);
+    svgSvg->AsPath(size);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgSvgViewBoxTest001
+ * @tc.desc: test viewBox
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgSvgViewBoxTest001, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    svgSvg->ParseAndSetSpecializedAttr("height", "300");
+    svgSvg->ParseAndSetSpecializedAttr("width", "300");
+    svgSvg->ParseAndSetSpecializedAttr("x", "30");
+    svgSvg->ParseAndSetSpecializedAttr("y", "30");
+    svgSvg->ParseAndSetSpecializedAttr("viewbox", "");
+    Size size(300, 400);
+    svgSvg->AsPath(size);
+    EXPECT_FLOAT_EQ(svgSvg->svgAttr_.width.Value(), 300);
+    EXPECT_FLOAT_EQ(svgSvg->svgAttr_.height.Value(), 300);
+    EXPECT_FLOAT_EQ(svgSvg->svgAttr_.x.Value(), 30);
+    EXPECT_FLOAT_EQ(svgSvg->svgAttr_.y.Value(), 30);
+}
+
+/**
+ * @tc.name: svgSvgPreserveAspectRatioTest001
+ * @tc.desc: test Parse preserveAspectRatio Invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgSvgPreserveAspectRatioTest001, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "none");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_NONE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xx xx");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xx xx xx");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "   ");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+}
+
+/**
+ * @tc.name: svgSvgPreserveAspectRatioTest002
+ * @tc.desc: test Parse preserveAspectRatio MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgSvgPreserveAspectRatioTest002, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMinYMin meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMIN_YMIN);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMinYMid meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMIN_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMinYMax meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMIN_YMAX);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMidYMin meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMIN);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMidYMid meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMidYMax meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMAX);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMaxYMin meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMAX_YMIN);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMaxYMid meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMAX_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMaxYMax meet");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMAX_YMAX);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::MEET);
+}
+
+/**
+ * @tc.name: svgSvgPreserveAspectRatioTest003
+ * @tc.desc: test Parse preserveAspectRatio SLICE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgSvgPreserveAspectRatioTest003, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMinYMin slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMIN_YMIN);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMinYMid slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMIN_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMinYMax slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMIN_YMAX);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMidYMin slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMIN);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMidYMid slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMidYMax slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMID_YMAX);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMaxYMin slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMAX_YMIN);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMaxYMid slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMAX_YMID);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+
+    svgSvg->ParseAndSetSpecializedAttr("preserveAspectRatio", "xMaxYMax slice");
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.svgAlign, SvgAlign::ALIGN_XMAX_YMAX);
+    EXPECT_EQ(svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice, SvgMeetOrSlice::SLICE);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio01
+ * @tc.desc: test AdjustContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio01, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMIN_YMIN;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio02
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMIN_YMID MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio02, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMIN_YMID;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio03
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMIN_YMAX MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio03, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMIN_YMAX;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio04
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMID_YMIN MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio04, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMID_YMIN;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio05
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMID_YMID MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio05, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMID_YMID;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio06
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMID_YMAX MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio06, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMID_YMAX;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio07
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMAX_YMIN MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio07, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMAX_YMIN;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio08
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMAX_YMID MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio08, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMAX_YMID;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio09
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMAX_YMAX MEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio09, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMAX_YMAX;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::MEET;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio10
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_XMIN_YMIN SLICE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio10, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_XMIN_YMIN;
+    svgSvg->svgAttr_.preserveAspectRatio.meetOrSlice = SvgMeetOrSlice::SLICE;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: svgAdjustContentAreaPreserveAspectRatio11
+ * @tc.desc: test AdjustContent preserveAspectRatio ALIGN_NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgAdjustContentAreaPreserveAspectRatio11, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    svgSvg->svgAttr_.width = Dimension(100);
+    svgSvg->svgAttr_.height = Dimension(100);
+    svgSvg->svgAttr_.viewBox = Rect(20, 30, 100, 100);
+    svgSvg->svgAttr_.preserveAspectRatio.svgAlign = SvgAlign::ALIGN_NONE;
+    Testing::MockCanvas rSCanvas;
+    Size viewPort(100, 200);
+    EXPECT_CALL(rSCanvas, ClipRect(_, _, _));
+    EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
+    EXPECT_CALL(rSCanvas, Scale(_, _));
+    svgSvg->AdjustContentAreaByViewBox(rSCanvas, viewPort);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

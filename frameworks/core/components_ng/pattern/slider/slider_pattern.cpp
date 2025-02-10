@@ -867,7 +867,7 @@ void SliderPattern::InitializeBubble()
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(sliderTheme);
     valueRatio_ = std::clamp(valueRatio_, 0.0f, 1.0f);
     std::string content = std::to_string(static_cast<int>(std::round(valueRatio_ * 100.0f))) + '%';
@@ -1666,7 +1666,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     CHECK_NULL_RETURN(paintProperty, SliderContentModifier::Parameters());
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, SliderContentModifier::Parameters());
-    auto theme = pipeline->GetTheme<SliderTheme>();
+    auto theme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
     auto stepRatio = paintProperty->GetStepRatio();
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio, hotBlockShadowWidth_,
@@ -2185,5 +2185,19 @@ void SliderPattern::InitOrRefreshSlipFactor()
     CHECK_NULL_VOID(theme);
     auto sliderPPI = theme->GetSliderPPI();
     slipfactor_ = sliderPPI * SLIP_FACTOR_COEFFICIENT / totalStepCount;
+}
+
+bool SliderPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, result);
+    result = !paintProperty->HasBlockColor() ||
+        !paintProperty->HasTrackBackgroundColor() ||
+        !paintProperty->HasSelectColor() ||
+        !paintProperty->HasStepColor();
+    return result;
 }
 } // namespace OHOS::Ace::NG

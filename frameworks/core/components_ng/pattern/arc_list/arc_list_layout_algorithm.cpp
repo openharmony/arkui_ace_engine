@@ -175,9 +175,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineForward(
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
 
     endPos = startPos + mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos };
-
-    OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
+    itemPosition_[currentIndex] = { id, startPos, endPos, false };
     return 1;
 }
 
@@ -200,9 +198,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineBackward(
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
 
     startPos = endPos - mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos };
-
-    OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
+    itemPosition_[currentIndex] = { id, startPos, endPos, false };
     return 1;
 }
 
@@ -216,6 +212,24 @@ float ArcListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float ch
         return 0.0f;
     }
     return delta / FLOAT_TWO;
+}
+
+void ArcListLayoutAlgorithm::FixPredictSnapPos()
+{
+    if (!predictSnapEndPos_.has_value()) {
+        return;
+    }
+    float predictEndPos = predictSnapEndPos_.value();
+    int32_t predictIndex = -1;
+    int32_t curIndex = -1; // here invalid.
+    FindPredictSnapIndexInItemPositionsCenter(predictEndPos + currentOffset_, predictIndex, curIndex);
+    if (GetStartIndex() <= predictIndex && predictIndex <= GetEndIndex()) {
+        predictEndPos = CalculatePredictSnapEndPositionByIndex(predictIndex, predictEndPos + currentOffset_);
+        predictEndPos -= currentOffset_;
+    }
+    if (!NearEqual(predictEndPos, predictSnapEndPos_.value())) {
+        predictSnapEndPos_ = predictEndPos;
+    }
 }
 
 void ArcListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty)
@@ -370,31 +384,6 @@ float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t in
     predictPos = LessNotEqual(snapHigh, predictPos) ? snapHigh : predictPos;
     predictSnapEndPos = totalOffset_ + predictPos - contentMainSize_ / FLOAT_TWO;
     return predictSnapEndPos;
-}
-
-void ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index)
-{
-    if (!predictSnapEndPos_.has_value()) {
-        return;
-    }
-
-    float startPos = 0.0f;
-    float endPos = 0.0f;
-    startPos = totalOffset_ + itemPosition_[index].startPos - spaceWidth_ / FLOAT_TWO;
-    endPos = totalOffset_ + itemPosition_[index].endPos + spaceWidth_ / FLOAT_TWO;
-
-    float predictSnapEndPos = predictSnapEndPos_.value();
-    float stopOnScreen = contentMainSize_ / FLOAT_TWO;
-    if (GreatOrEqual(predictSnapEndPos + stopOnScreen, startPos) &&
-        LessNotEqual(predictSnapEndPos + stopOnScreen, endPos)) {
-        predictSnapEndPos = CalculatePredictSnapEndPositionByIndex(index, predictSnapEndPos);
-    } else {
-        return;
-    }
-
-    if (!NearEqual(predictSnapEndPos, predictSnapEndPos_.value())) {
-        predictSnapEndPos_ = predictSnapEndPos;
-    }
 }
 
 float ArcListLayoutAlgorithm::GetItemSnapSize()

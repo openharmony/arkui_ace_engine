@@ -485,14 +485,7 @@ HWTEST_F(CalendarPaintMethTest, DrawCalendarPickerBackgroundAreaTest009, TestSiz
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
-    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(calendarPaintProperty, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. call DrawCalendarPickerBackgroundArea.
      * @tc.desc: set today is disabled and isSelected is true and markToday is false.
@@ -520,170 +513,41 @@ HWTEST_F(CalendarPaintMethTest, DrawCalendarPickerBackgroundAreaTest009, TestSiz
     params.disabledDateRange = disabledDateRange;
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
     ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
     RSCanvas rsCanvas;
     calendarDay.isKeyFocused = false;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
-    EXPECT_EQ(calendarDay.month.year, paintMethod->obtainedMonth_.year);
-}
-
-/**
- * @tc.name: DrawCalendarPickerBackgroundAreaTest010
- * @tc.desc: Test CalendarPaintMethod DrawCalendarPickerBackgroundArea Function
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPaintMethTest, DrawCalendarPickerBackgroundAreaTest010, TestSize.Level1)
-{
     /**
-     * @tc.steps: step1. create calendar frameNode.
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
-    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(calendarPaintProperty, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    /**
-     * @tc.steps: step2. call DrawCalendarPickerBackgroundArea.
-     * @tc.desc: set today is disabled and isSelected is true and markToday is true.
+     * @tc.steps: step3. call DrawCalendarPickerBackgroundArea.
+     * @tc.desc: set markToday is true.
      * @tc.expected: calendarDay.month.year equals obtainedMonth_.year.
      */
-    ObtainedMonth obtainedMonth;
-    CalendarDay calendarDay;
-    calendarDay.month.month = 1;
-    calendarDay.day = 1;
-    obtainedMonth.year = calendarDay.month.year;
-    obtainedMonth.month = 1;
-    calendarDay.isSelected = true;
-    PickerDate startDate = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
-    PickerDate endDate = PickerDate(calendarDay.month.year, calendarDay.month.month,
-        PickerDate::GetMaxDay(calendarDay.month.year, calendarDay.month.month));
-    CalendarPaintParams params;
-    params.startDate = startDate;
-    params.endDate = endDate;
     params.markToday = true;
-    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
-    std::pair<PickerDate, PickerDate> pair;
-    pair.first = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
-    pair.second = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
-    disabledDateRange.emplace_back(pair);
-    params.disabledDateRange = disabledDateRange;
-    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
     ASSERT_NE(paintMethod, nullptr);
-    RSCanvas rsCanvas;
-    calendarDay.isKeyFocused = false;
-    paintMethod->calendarDay_ = calendarDay;
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
     paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
-    EXPECT_EQ(calendarDay.month.year, paintMethod->obtainedMonth_.year);
-}
-
-/**
- * @tc.name: DrawCalendarPickerBackgroundAreaTest011
- * @tc.desc: Test CalendarPaintMethod DrawCalendarPickerBackgroundArea Function
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPaintMethTest, DrawCalendarPickerBackgroundAreaTest011, TestSize.Level1)
-{
     /**
-     * @tc.steps: step1. create calendar frameNode.
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
-    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(calendarPaintProperty, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    /**
-     * @tc.steps: step2. call DrawCalendarPickerBackgroundArea.
-     * @tc.desc: set today is not disabled and isSelected is false and markToday is true.
+     * @tc.steps: step4. call DrawCalendarPickerBackgroundArea.
+     * @tc.desc: set isSelected is false.
      * @tc.expected: calendarDay.month.year equals obtainedMonth_.year.
      */
-    ObtainedMonth obtainedMonth;
-    CalendarDay calendarDay;
-    calendarDay.month.month = 1;
-    calendarDay.day = 1;
-    obtainedMonth.year = calendarDay.month.year;
-    obtainedMonth.month = 1;
     calendarDay.isSelected = false;
-    PickerDate startDate = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
-    PickerDate endDate = PickerDate(calendarDay.month.year, calendarDay.month.month,
-        PickerDate::GetMaxDay(calendarDay.month.year, calendarDay.month.month));
-    CalendarPaintParams params;
-    params.startDate = startDate;
-    params.endDate = endDate;
-    params.markToday = true;
-    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
-    std::pair<PickerDate, PickerDate> pair;
-    pair.first = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
-    pair.second = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
-    disabledDateRange.emplace_back(pair);
-    params.disabledDateRange = disabledDateRange;
-    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
     ASSERT_NE(paintMethod, nullptr);
-    RSCanvas rsCanvas;
-    calendarDay.isKeyFocused = false;
-    paintMethod->calendarDay_ = calendarDay;
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
     paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
-    EXPECT_EQ(calendarDay.month.year, paintMethod->obtainedMonth_.year);
-}
-
-/**
- * @tc.name: DrawCalendarPickerBackgroundAreaTest012
- * @tc.desc: Test CalendarPaintMethod DrawCalendarPickerBackgroundArea Function
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPaintMethTest, DrawCalendarPickerBackgroundAreaTest012, TestSize.Level1)
-{
     /**
-     * @tc.steps: step1. create calendar frameNode.
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
-    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(calendarPaintProperty, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    /**
-     * @tc.steps: step2. call DrawCalendarPickerBackgroundArea.
-     * @tc.desc: set today is not disabled and isSelected is false and markToday is true.
+     * @tc.steps: step5. call DrawCalendarPickerBackgroundArea.
+     * @tc.desc: set today is not disabled.
      * @tc.expected: calendarDay.month.year equals obtainedMonth_.year.
      */
-    ObtainedMonth obtainedMonth;
-    CalendarDay calendarDay;
-    calendarDay.month.month = 1;
-    calendarDay.day = 1;
-    obtainedMonth.year = calendarDay.month.year;
-    obtainedMonth.month = 1;
-    calendarDay.isSelected = false;
-    PickerDate startDate = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
-    PickerDate endDate = PickerDate(calendarDay.month.year, calendarDay.month.month,
-        PickerDate::GetMaxDay(calendarDay.month.year, calendarDay.month.month));
-    CalendarPaintParams params;
-    params.startDate = startDate;
-    params.endDate = endDate;
-    params.markToday = true;
-    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    params.disabledDateRange.clear();
+    paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
     ASSERT_NE(paintMethod, nullptr);
-    RSCanvas rsCanvas;
-    calendarDay.isKeyFocused = false;
-    paintMethod->calendarDay_ = calendarDay;
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
     paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
-    EXPECT_EQ(calendarDay.month.year, paintMethod->obtainedMonth_.year);
 }
 
 /**

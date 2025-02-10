@@ -95,9 +95,7 @@ public:
         IDLE,
     };
 
-    static void SetVelocityScale(double sVelocityScale);
     static double GetVelocityScale();
-    static void SetFriction(double sFriction);
 
     void Initialize(const RefPtr<FrameNode>& host);
 
@@ -375,6 +373,8 @@ public:
         getSnapTypeCallback_ = getSnapTypeCallback;
     }
 
+    std::optional<float> GetPredictSnapOffset() const;
+
     void SetHandleScrollCallback(NestableScrollCallback&& func)
     {
         handleScrollCallback_ = std::move(func);
@@ -649,8 +649,6 @@ private:
     // The tag of UINode
     std::string nodeTag_ = "Scrollable";
     double slipFactor_ = 0.0;
-    static std::optional<double> sFriction_;
-    static std::optional<double> sVelocityScale_;
     bool continuousDragStatus_ = false;
     CancelableCallback<void()> task_;
     int32_t dragCount_ = 0;

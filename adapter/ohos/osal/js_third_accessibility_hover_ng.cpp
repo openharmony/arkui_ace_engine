@@ -51,6 +51,7 @@ bool AccessibilityHoverManagerForThirdNG::GetElementInfoForThird(
     AccessibilityElementInfo& info,
     int64_t hostElementId)
 {
+    // this function only for third party hover process
     auto jsThirdProviderOperator =
         GetJsThirdProviderInteractionOperation(hostElementId).lock();
     if (jsThirdProviderOperator == nullptr) {
@@ -62,7 +63,7 @@ bool AccessibilityHoverManagerForThirdNG::GetElementInfoForThird(
 
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = jsThirdProviderOperator->FindAccessibilityNodeInfosByIdFromProvider(
-        elementId, 0, 0, infos);
+        elementId, 0, 0, infos, true); // offset in hover no need fix host offset
     if ((!ret) || (infos.size() == 0)) {
         TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY,
             "cannot get third elementinfo :%{public}" PRId64 ", ret: %{public}d",
@@ -162,8 +163,7 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
     const int64_t hostElementId,
     const NG::PointF& hoverPoint,
     const AccessibilityElementInfo& nodeInfo,
-    AccessibilityHoverTestPathForThird& path,
-    NG::OffsetF hostOffset)
+    AccessibilityHoverTestPathForThird& path)
 {
     bool hitTarget = false;
     auto [shouldSearchSelf, shouldSearchChildren]
@@ -174,7 +174,6 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
     auto width = rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion();
     auto height = rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion();
     NG::RectF rect { left, right, width, height };
-    rect = rect - hostOffset;
     bool hitSelf = rect.IsInnerRegion(hoverPoint);
     if (hitSelf && shouldSearchSelf) {
         hitTarget = true;
@@ -192,7 +191,7 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
                 break;
             }
             if (HoverPathForThirdRecursive(
-                hostElementId, hoverPoint, childInfo, path, hostOffset)) {
+                hostElementId, hoverPoint, childInfo, path)) {
                 return true;
             }
         }
@@ -203,12 +202,11 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
 AccessibilityHoverTestPathForThird AccessibilityHoverManagerForThirdNG::HoverPathForThird(
     const int64_t hostElementId,
     const NG::PointF& point,
-    AccessibilityElementInfo& rootInfo,
-    NG::OffsetF hostOffset)
+    AccessibilityElementInfo& rootInfo)
 {
     AccessibilityHoverTestPathForThird path;
     HoverPathForThirdRecursive(
-        hostElementId, point, rootInfo, path, hostOffset);
+        hostElementId, point, rootInfo, path);
     return path;
 }
 
@@ -232,9 +230,8 @@ void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThird(
         if (GetElementInfoForThird(-1, rootInfo, config.hostElementId) == false) {
             return;
         }
-        auto [displayOffset, err] = config.hostNode->GetPaintRectGlobalOffsetWithTranslate();
         AccessibilityHoverTestPathForThird path =
-            HoverPathForThird(config.hostElementId, config.point, rootInfo, displayOffset);
+            HoverPathForThird(config.hostElementId, config.point, rootInfo);
         for (const auto& node: path) {
             currentNodesHovering.push_back(node);
         }
@@ -298,10 +295,9 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
         return true;
     }
     renderContext->UpdateAccessibilityFocus(false);
-    auto [displayOffset, err] = hostNode->GetPaintRectGlobalOffsetWithTranslate();
     auto rectInScreen = nodeInfo.GetRectInScreen();
-    auto left = rectInScreen.GetLeftTopXScreenPostion() - static_cast<int32_t>(displayOffset.GetX());
-    auto right = rectInScreen.GetLeftTopYScreenPostion() - static_cast<int32_t>(displayOffset.GetY());
+    auto left = rectInScreen.GetLeftTopXScreenPostion();
+    auto right = rectInScreen.GetLeftTopYScreenPostion();
     auto width = rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion();
     auto height = rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion();
     NG::RectT<int32_t> rectInt { static_cast<int32_t>(left), static_cast<int32_t>(right),
@@ -329,17 +325,6 @@ void AccessibilityHoverManagerForThirdNG::DeregisterJsThirdProviderInteractionOp
 }
 
 namespace {
-struct DumpInfoArgument {
-    bool useWindowId = false;
-    DumpMode mode = DumpMode::TREE;
-    bool isDumpSimplify = false;
-    bool verbose = false;
-    int64_t rootId = -1;
-    int32_t pointX = 0;
-    int32_t pointY = 0;
-    int64_t nodeId = -1;
-    int32_t action = 0;
-};
 
 bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {

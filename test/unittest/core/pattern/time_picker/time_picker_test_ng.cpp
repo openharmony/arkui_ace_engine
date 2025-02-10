@@ -27,6 +27,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
@@ -5729,5 +5730,119 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPatternScrollOption001, TestSi
     columnPattern_->SetCurrentIndex(2);
     columnPattern_->ScrollOption(10.0f);
     EXPECT_EQ(columnPattern_->GetEnterIndex(), 1);
+}
+
+#ifdef ARKUI_WEARABLE
+/**
+ * @tc.name: TimePickerPaintTest001
+ * @tc.desc: Test GetForegroundDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerPattern, nullptr);
+    auto timePickerPaintMethod =
+        AceType::MakeRefPtr<TimePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(timePickerPattern)));
+    ASSERT_NE(timePickerPaintMethod, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    auto renderContext = frameNode->GetRenderContext();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto canvasDrawFunction = timePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    canvasDrawFunction(rsCanvas);
+}
+
+/**
+ * @tc.name: TimePickerPaintTest002
+ * @tc.desc: Test TimePickerColumnPattern ToUpdateSelectedTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    auto child = minuteColumn->GetChildren();
+    auto iter = child.begin();
+    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
+    ASSERT_TRUE(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_TRUE(textPattern);
+    RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_TRUE(textLayoutProperty);
+    minuteColumnPattern->ToUpdateSelectedTextProperties(theme);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
+}
+
+/**
+ * @tc.name: TimePickerPaintTest003
+ * @tc.desc: Test TimePickerColumnPattern SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    EXPECT_NE(minuteColumnPattern->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    EXPECT_EQ(minuteColumnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    TimePickerModelNG::GetInstance()->SetDigitalCrownSensitivity(2);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, 2);
+    EXPECT_EQ(minuteColumnPattern->GetDigitalCrownSensitivity(), 2);
+}
+#endif
+
+/**
+ * @tc.name: TimePickerPaintTest004
+ * @tc.desc: Test InitOnCrownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest004, TestSize.Level1)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+
+    CrownEvent crownEvent;
+    crownEvent.action = OHOS::Ace::CrownAction::BEGIN;
+    EXPECT_FALSE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::UPDATE;
+    EXPECT_FALSE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::END;
+    EXPECT_FALSE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+#endif
 }
 } // namespace OHOS::Ace::NG

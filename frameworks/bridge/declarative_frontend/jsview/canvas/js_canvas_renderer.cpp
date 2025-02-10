@@ -1113,7 +1113,7 @@ void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
     if (!info.GetStringArg(0, colorStr)) {
         return;
     }
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         if (!ProcessColorFromString(colorStr, color)) {
             return;
         }

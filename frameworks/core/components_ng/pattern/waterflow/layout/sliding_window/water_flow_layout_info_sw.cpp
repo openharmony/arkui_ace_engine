@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "base/log/event_report.h"
 
 #include <numeric>
 
@@ -39,7 +40,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     endPos_ = EndPos();
 
     prevItemStart_ = itemStart_;
-    itemStart_ = OverScrollTop();
+    itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
         itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
@@ -52,7 +53,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     }
 
     const float contentEnd = endPos_ + footerHeight_ + BotMargin();
-    offsetEnd_ = OverScrollBottom();
+    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(contentEnd, mainSize, 0.1f);
     maxHeight_ = std::max(-totalOffset_ + contentEnd, maxHeight_);
 
     newStartIndex_ = EMPTY_NEW_START_INDEX;
@@ -60,12 +61,12 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     synced_ = true;
 }
 
-bool WaterFlowLayoutInfoSW::OverScrollTop()
+bool WaterFlowLayoutInfoSW::IsAtTopWithDelta()
 {
-    return startIndex_ == 0 && NonNegative(startPos_ + delta_ - TopMargin());
+    return AtStartPos(startIndex_) && NonNegative(startPos_ + delta_ - TopMargin());
 }
 
-bool WaterFlowLayoutInfoSW::OverScrollBottom()
+bool WaterFlowLayoutInfoSW::IsAtBottomWithDelta()
 {
     return itemEnd_ && LessOrEqualCustomPrecision(endPos_ + delta_ + footerHeight_ + BotMargin(), lastMainSize_, 0.1f);
 }
@@ -144,7 +145,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         return res;
     }
     delta += delta_;
-    if (startIndex_ == 0 || startIndex_ == Infinity<int32_t>()) {
+    if (AtStartPos(startIndex_)) {
         float disToTop = -StartPosWithMargin();
         if (!itemStart_) {
             res.start = std::max(0.0f, delta - disToTop);
@@ -221,7 +222,7 @@ float WaterFlowLayoutInfoSW::EndPos() const
     if (synced_) {
         return endPos_;
     }
-    if (startIndex_ > endIndex_) {
+    if (StartIndex() > EndIndex()) {
         // when lanes_ is empty, the endPos of all section is same.
         return lanes_[0][0].endPos;
     }
@@ -239,7 +240,7 @@ float WaterFlowLayoutInfoSW::StartPos() const
     if (synced_) {
         return startPos_;
     }
-    if (startIndex_ > endIndex_) {
+    if (StartIndex() > EndIndex()) {
         // when lanes_ is empty, the startPos of all section is same.
         return lanes_[0][0].startPos;
     }
@@ -875,7 +876,7 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
 
 bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t itemCnt)
 {
-    using std::abs, std::round, std::min, std::max;
+    using std::abs, std::round, std::clamp;
     const float offset = StartPos() + delta_;
     if (LessOrEqual(abs(offset), viewport * 2.0f)) {
         return false;
@@ -891,10 +892,9 @@ bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t i
     if (NearZero(average)) {
         return false;
     }
-    jumpIndex_ -= static_cast<int32_t>(round(offset * crossCnt / average));
 
-    jumpIndex_ = min(jumpIndex_, itemCnt);
-    jumpIndex_ = max(jumpIndex_, 0);
+    jumpIndex_ = startIdx - static_cast<int32_t>(round(offset * crossCnt / average));
+    jumpIndex_ = clamp(jumpIndex_, 0, itemCnt - 1);
     align_ = ScrollAlign::START;
     delta_ = 0.0f;
     return true;
@@ -934,9 +934,9 @@ void WaterFlowLayoutInfoSW::SyncOnEmptyLanes(float mainSize)
 {
     startPos_ = StartPos();
     endPos_ = EndPos();
-    itemStart_ = NonNegative(startPos_ + delta_ - TopMargin());
+    itemStart_ = NonNegative(startPos_ - TopMargin());
     itemEnd_ = true;
-    offsetEnd_ = OverScrollBottom();
+    offsetEnd_ = LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin(), mainSize, 0.1f);
     maxHeight_ = footerHeight_;
     knowTotalHeight_ = true;
     newStartIndex_ = EMPTY_NEW_START_INDEX;
@@ -963,6 +963,8 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
 {
     if (!idxToLane_.count(itemIdx)) {
         TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d", itemIdx);
+        std::string subErrorType = "Inconsistent data found on item " + std::to_string(itemIdx);
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::INTERNAL_ERROR, subErrorType);
         return nullptr;
     }
     size_t laneIdx = idxToLane_.at(itemIdx);
@@ -974,6 +976,9 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
     if (lane.items_.empty()) {
         TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d when accessing lane %{public}zu", itemIdx,
             laneIdx);
+        std::string subErrorType = "Inconsistent data found on item " + std::to_string(itemIdx) +
+                                   " when accessing lane " + std::to_string(laneIdx);
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::INTERNAL_ERROR, subErrorType);
         return nullptr;
     }
     return &lane;

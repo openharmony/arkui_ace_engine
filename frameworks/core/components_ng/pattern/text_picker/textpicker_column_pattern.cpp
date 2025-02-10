@@ -436,9 +436,7 @@ void TextPickerColumnPattern::ParseTouchListener()
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-#ifdef ARKUI_WEARABLE
             pattern->SetSelectedMark(true);
-#endif
             pattern->OnMiddleButtonTouchUp();
             pattern->SetLocalDownDistance(0.0f);
             return;
@@ -1204,7 +1202,7 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     }
     Dimension updateSize = LinearFontSize(startFontSize, endFontSize, percent);
     textLayoutProperty->UpdateFontSize(updateSize);
-    isEqual = (idx == showCount / PICKER_SELECT_AVERAGE);
+    isEqual = (idx == (showCount / PICKER_SELECT_AVERAGE));
     SetSelectColor(textLayoutProperty, startColor, endColor, percent, isEqual);
     if (scale < FONTWEIGHT) {
         textLayoutProperty->UpdateFontWeight(animationProperties_[index].fontWeight);
@@ -1338,7 +1336,7 @@ RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() cons
 
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    SetSelectedMarkFocus();
+    SetSelectedMark();
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto offsetY = event.GetGlobalPoint().GetY();
@@ -2050,7 +2048,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
         CHECK_NULL_VOID(pipeline);
         pipeline->RequestFrame();
     }
-    SetSelectedMarkFocus();
+    SetSelectedMark();
 }
 
 void TextPickerColumnPattern::PlayResetAnimation()
@@ -2094,28 +2092,37 @@ void TextPickerColumnPattern::SetCanLoop(bool isLoop)
     }
 }
 
+void TextPickerColumnPattern::SetSelectedMarkListener(std::function<void(int& selectedColumnId)>& listener)
+{
+    focusedListerner_ = listener;
+    if (!circleUtils_) {
+        circleUtils_ = new PickerColumnPatternCircleUtils<TextPickerColumnPattern>();
+    }
+}
 
-void TextPickerColumnPattern::SetSelectedMarkFocus()
+void TextPickerColumnPattern::SetSelectedMarkId(const int strColumnId)
+{
+    selectedColumnId_ = strColumnId;
+}
+
+void TextPickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     if (pickerTheme->IsCircleDial()) {
-#ifdef ARKUI_WEARABLE
-        SetSelectedMark(pickerTheme, true);
-#endif
+        CHECK_NULL_VOID(circleUtils_);
+        circleUtils_->SetSelectedMark(this, pickerTheme, focus, notify, reRender);
     }
 }
-
-#ifdef ARKUI_WEARABLE
 
 void TextPickerColumnPattern::SetSelectedMarkPaint(bool paint)
 {
     selectedMarkPaint_ = paint;
 }
 
-void TextPickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
+void TextPickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2145,26 +2152,42 @@ void TextPickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<Picker
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
-#else
-void TextPickerColumnPattern::SetSelectedMarkListener(std::function<void(int& focusId)>& listener)
-{
-    (void)listener;
-}
-
-void TextPickerColumnPattern::SetSelectedMark(bool focus, bool notify, bool reRender)
-{
-    (void)focus;
-    (void)notify;
-    (void)reRender;
-}
-
-void TextPickerColumnPattern::SetSelectedMarkId(const int strColumnId)
-{
-    (void)strColumnId;
-}
-#endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
+int32_t& TextPickerColumnPattern::GetSelectedColumnId()
+{
+    return selectedColumnId_;
+}
+
+bool TextPickerColumnPattern::IsCrownEventEnded()
+{
+    return isCrownEventEnded_;
+}
+
+int32_t TextPickerColumnPattern::GetDigitalCrownSensitivity()
+{
+    if (crownSensitivity_ == INVALID_CROWNSENSITIVITY) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, DEFAULT_CROWNSENSITIVITY);
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_RETURN(pickerTheme, DEFAULT_CROWNSENSITIVITY);
+        crownSensitivity_ = pickerTheme->GetDigitalCrownSensitivity();
+    }
+
+    return crownSensitivity_;
+}
+
+void TextPickerColumnPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    crownSensitivity_ = crownSensitivity;
+}
+
+bool TextPickerColumnPattern::OnCrownEvent(const CrownEvent& event)
+{
+    CHECK_NULL_RETURN(circleUtils_, false);
+    return circleUtils_->OnCrownEvent(this, event);
+}
+
 void TextPickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
 {
     auto toss = GetToss();
@@ -2174,7 +2197,7 @@ void TextPickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
     yLast_ = offsetY;
     overscroller_.SetStart(offsetY);
     pressed_ = true;
-
+    isCrownEventEnded_ = false;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, yLast_, SceneStatus::START);
@@ -2195,10 +2218,12 @@ void TextPickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 {
     SetMainVelocity(event.angularVelocity);
     animationBreak_ = false;
+    isCrownEventEnded_ = false;
     CHECK_NULL_VOID(pressed_);
     auto toss = GetToss();
     CHECK_NULL_VOID(toss);
-    auto offsetY = GetCrownRotatePx(event);
+    CHECK_NULL_VOID(circleUtils_);
+    auto offsetY = circleUtils_->GetCrownRotatePx(event, GetDigitalCrownSensitivity());
     offsetY += yLast_;
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) { // if changing less than MOVE_THRESHOLD, no need to handle
         return;
@@ -2214,6 +2239,7 @@ void TextPickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 {
     SetMainVelocity(event.angularVelocity);
     pressed_ = false;
+    isCrownEventEnded_ = true;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (NotLoopOptions()) {

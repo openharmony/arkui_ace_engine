@@ -90,6 +90,7 @@
       OHOS::Ace::Dimension::*;
       OHOS::Ace::Matrix4::*;
       OHOS::Ace::NG::DragDropFuncWrapper::*;
+      OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
@@ -274,6 +275,7 @@
       OHOS::Ace::AceScoringLog::*;
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
+      "OHOS::Ace::NG::ViewAdvancedRegister::GetInstance()";
       OHOS::Ace::ImageAnalyzerAdapterImpl::*;
       OHOS::Ace::ImageAnalyzerLoader::*;
       OHOS::Ace::ImageAnalyzerManager::ImageAnalyzerManager*;

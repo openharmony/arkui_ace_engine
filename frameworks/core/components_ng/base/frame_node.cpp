@@ -22,7 +22,7 @@
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "frameworks/core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
@@ -1834,7 +1834,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(eventHub_);
-    ProcessThrottledVisibleCallback();
+    ProcessThrottledVisibleCallback(forceDisappear);
     auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
     auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
     if (!hasInnerCallback && !hasUserCallback) {
@@ -2001,11 +2001,18 @@ void FrameNode::ThrottledVisibleTask()
     }
 }
 
-void FrameNode::ProcessThrottledVisibleCallback()
+void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
 {
     CHECK_NULL_VOID(eventHub_);
     auto& visibleAreaUserCallback = eventHub_->GetThrottledVisibleAreaCallback();
     CHECK_NULL_VOID(visibleAreaUserCallback.callback);
+
+    if (forceDisappear) {
+        auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
+        ProcessAllVisibleCallback(
+            userRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastThrottledVisibleCbRatio_, true);
+        return;
+    }
 
     auto task = [weak = WeakClaim(this)]() {
         auto node = weak.Upgrade();
@@ -3217,7 +3224,7 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     CollectSelfAxisResult(
         globalPoint, localPoint, consumed, revertPoint, axisResult, preventBubbling, testResult, touchRestrict);
 
-    axisResult.splice(axisResult.end(), std::move(newComingTargets));
+    axisResult.splice(axisResult.begin(), std::move(newComingTargets));
     if (!consumed) {
         return testResult;
     }
@@ -3348,6 +3355,22 @@ void FrameNode::OnWindowUnfocused()
         renderContext_->UpdateWindowFocusState(false);
     }
     pattern_->OnWindowUnfocused();
+}
+
+void FrameNode::OnWindowActivated()
+{
+    if (renderContext_) {
+        renderContext_->UpdateWindowActiveState(true);
+    }
+    pattern_->OnWindowActivated();
+}
+
+void FrameNode::OnWindowDeactivated()
+{
+    if (renderContext_) {
+        renderContext_->UpdateWindowActiveState(false);
+    }
+    pattern_->OnWindowDeactivated();
 }
 
 std::pair<float, float> FrameNode::ContextPositionConvertToPX(
@@ -3898,7 +3921,7 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
 {
     // the node set isInDestroying state when destroying in pop animation
     // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return false;
     }
     // kick out transition animation if needed, wont re-entry if already detached.
@@ -6460,5 +6483,4 @@ const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
 }
-
 } // namespace OHOS::Ace::NG

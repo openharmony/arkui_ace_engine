@@ -33,6 +33,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_new_pipe_judgement.cpp",
       "$ace_root/adapter/ohos/entrance/ace_service_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_translate_manager.cpp",
       "$ace_root/adapter/ohos/entrance/ace_view_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/aps_monitor_impl.cpp",
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",

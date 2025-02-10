@@ -57,8 +57,8 @@ struct CommonProperty {
     int32_t windowId = 0;
     int32_t windowLeft = 0;
     int32_t windowTop = 0;
-    int32_t pageId = 0;
-    std::string pagePath;
+    std::vector<std::string> pagePaths;
+    std::vector<RefPtr<NG::FrameNode>> pageNodes;
     bool isReduceMode = false;
 };
 
@@ -99,7 +99,21 @@ enum class DumpMode {
     TREE,
     NODE,
     HANDLE_EVENT,
-    HOVER_TEST
+    HOVER_TEST,
+    EVENT_TEST
+};
+
+struct DumpInfoArgument {
+    bool useWindowId = false;
+    DumpMode mode = DumpMode::TREE;
+    bool isDumpSimplify = false;
+    bool verbose = false;
+    int64_t rootId = -1;
+    int32_t pointX = 0;
+    int32_t pointY = 0;
+    int64_t nodeId = -1;
+    int32_t action = 0;
+    int32_t eventId = -1;
 };
 
 class JsAccessibilityManager : public AccessibilityNodeManager,
@@ -308,6 +322,9 @@ public:
         const std::vector<std::string>& params,
         int64_t& actionAccessibilityId,
         ActionType& actionOp);
+    bool DumpProcessEventParameters(
+        AccessibilityEvent& event, const std::vector<std::string>& params);
+    bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument);
 
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
@@ -322,6 +339,11 @@ public:
     void RegisterGetParentRectHandler();
 
     bool IsScreenReaderEnabled() override;
+
+    void SetFocusMoveResultWithNode(
+        const WeakPtr<NG::FrameNode>& hostNode,
+        AccessibilityElementOperatorCallback& callback,
+        const int32_t requestId);
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -531,6 +553,8 @@ private:
     void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
+    void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
+
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 
@@ -619,7 +643,17 @@ private:
     void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
+
     void RegisterDynamicRenderGetParentRectHandler();
+
+    void GetCurrentWindowPages(
+        const RefPtr<NG::PipelineContext>& ngPipeline,
+        std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        std::vector<std::string>& pagePaths);
+    const std::string GetPagePathInPageNodes(
+        int32_t pageId,
+        const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        const std::vector<std::string> pagePaths);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

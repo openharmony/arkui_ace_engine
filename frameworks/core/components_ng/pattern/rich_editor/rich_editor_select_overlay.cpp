@@ -35,6 +35,7 @@ bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
     SetEnableHandleLevel(true);
+    SetEnableSubWindowMenu(true);
     CheckEnableContainerModal();
     return true;
 }
@@ -215,8 +216,8 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     isHandleMoving_ = false;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleRect=%{public}s, isFirstHandle=%{public}d",
-        handleRect.ToString().c_str(), isFirstHandle);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "handleRect=%{public}s, isFirstHandle=%{public}d, isSingle=%{public}d",
+        handleRect.ToString().c_str(), isFirstHandle, IsSingleHandle());
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     auto& textSelector = pattern->textSelector_;

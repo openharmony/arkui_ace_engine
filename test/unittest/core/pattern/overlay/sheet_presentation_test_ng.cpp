@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1223,6 +1224,61 @@ HWTEST_F(SheetPresentationTestNg, GetTopAreaInWindow001, TestSize.Level1)
     SystemProperties::SetDeviceOrientation(deviceOrientation);
     safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeAreaInsets.top_.Length(), sheetPattern->GetBottomSafeArea());
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetBottomSafeArea001
+ * @tc.desc: Branch: if (cutoutSafeArea.top_.IsValid())
+ *           Condition: cutoutSafeArea.top_.IsValid() == true && GetStatusBarHeight() == 300
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, GetBottomSafeArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step1. mock pipeline and window, set cutoutSafeArea.top_.IsValid() is true.
+     * @tc.expected: GetBottomSafeArea is 300.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    SafeAreaInsets::Inset insetleft;
+    SafeAreaInsets::Inset insetTop;
+    insetTop.start = 0;
+    insetTop.end = 1;
+    SafeAreaInsets::Inset insetRight;
+    SafeAreaInsets::Inset insetBottom;
+    pipelineContext->safeAreaManager_->cutoutSafeArea_ =
+        SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+    auto window = std::make_shared<MockWindow>();
+    EXPECT_CALL(*window, GetStatusBarHeight()).WillRepeatedly([]() -> uint32_t { return 300; });
+    pipelineContext->window_ = window;
+    EXPECT_EQ(sheetPattern->GetBottomSafeArea(), 300);
+
+    /**
+     * @tc.steps: step1. set cutoutSafeArea.top_.IsValid() is false.
+     * @tc.expected: GetBottomSafeArea is safeAreaInsets.top_.Length().
+     */
+    insetTop.end = 0;
+    pipelineContext->safeAreaManager_->cutoutSafeArea_ =
+        SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(sheetPattern->GetBottomSafeArea(), safeAreaInsets.top_.Length());
+
+    pipelineContext->window_.reset();
     SheetPresentationTestNg::TearDownTestCase();
 }
 

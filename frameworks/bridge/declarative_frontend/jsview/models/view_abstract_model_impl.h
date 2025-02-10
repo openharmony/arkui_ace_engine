@@ -93,7 +93,7 @@ public:
     void SetLayoutPriority(int32_t priority) override;
     void SetPixelRound(uint16_t value) override;
     void SetLayoutWeight(float value) override;
-    void SetLayoutWeight(const NG::LayoutWeightPair& value) override {};
+    void SetChainWeight(const NG::ChainWeightPair& value) override {};
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
@@ -195,6 +195,7 @@ public:
     void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override {};
 #endif
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
+    void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
@@ -219,6 +220,8 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override;
+    void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override {};
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override;
@@ -256,6 +259,7 @@ public:
     void DisableOnHover() override {};
     void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
+    void DisableOnAxisEvent() override {};
     void DisableOnAppear() override {};
     void DisableOnDisAppear() override {};
     void DisableOnAttach() override {};
@@ -290,6 +294,19 @@ public:
 
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
+
+    int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
+    {
+        return 0;
+    };
+    int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override {};
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,

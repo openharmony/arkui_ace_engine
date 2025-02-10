@@ -15,6 +15,7 @@
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -52,6 +53,8 @@ const RefPtr<InterpolatingSpring> DRAG_START_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 380.0f, 34.0f);
 const RefPtr<InterpolatingSpring> DRAG_END_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 228.0f, 29.0f);
+const RefPtr<Curve> DRAG_CONTROL_ANIMATION_CURVE =
+    AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
 }
 
 void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, CalcResult& calcResult, OffsetF gatherNodeCenter,
@@ -274,6 +277,7 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
     CHECK_NULL_VOID(textNode);
     auto textNodeContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textNodeContext);
+    textNodeContext->SetVisible(true);
     auto windowScale = dragDropManager->GetWindowScale();
     auto badgeScale = GreatNotEqual(windowScale, 0.0f) ? BADGE_ANIMATION_SCALE / windowScale : BADGE_ANIMATION_SCALE;
     if (!dragDropManager->IsShowBadgeAnimation()) {
@@ -870,5 +874,60 @@ void DragAnimationHelper::SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameN
     if (dragPreviewOption.options.shadow.has_value() && !dragPreviewOption.options.shadow->GetIsFilled()) {
         imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
     }
+}
+
+void DragAnimationHelper::PreLayout(const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto subwindowContext = imageNode->GetContext();
+    if (subwindowContext) {
+        subwindowContext->FlushSyncGeometryNodeTasks();
+        subwindowContext->PreLayout(subwindowContext->GetTimeFromExternalTimer(), 0);
+    }
+}
+
+void DragAnimationHelper::SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetVisible(visible);
+}
+
+void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
+    const OffsetF& gatherNodeCenter, Point point, int32_t containerId)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    AnimationOption option;
+    constexpr int32_t animateDuration = 300;
+    option.SetCurve(DRAG_CONTROL_ANIMATION_CURVE);
+    option.SetDuration(animateDuration);
+    option.SetOnFinishEvent([weakManager = AceType::WeakClaim(AceType::RawPtr(dragDropManager)), containerId]() {
+       auto dragDropManager = weakManager.Upgrade();
+       dragDropManager->SetStartAnimation(true);
+       if (dragDropManager && !dragDropManager->IsPullMoveReceivedForCurrentDrag()) {
+           DragControllerFuncWrapper::TransDragWindowToDragFwk(containerId);
+       }
+    });
+    auto imageNode = dragDropManager->GetDragPreviewInfo().imageNode;
+    CHECK_NULL_VOID(imageNode);
+    auto renderContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationUtils::Animate(
+        option,
+        [renderContext, info = dragDropManager->GetDragPreviewInfo(), newOffset, overlayManager,
+            dragDropManager, gatherNodeCenter]() {
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateTransformScale({ info.scale, info.scale });
+                renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
+                GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height,
+                    gatherNodeCenter, renderContext->GetBorderRadius() };
+                dragDropManager->UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+                dragDropManager->UpdateTextNodePosition(info.textNode, newOffset);
+        },
+        option.GetOnFinishEvent());
 }
 } // namespace OHOS::Ace::NG

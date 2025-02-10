@@ -128,6 +128,14 @@ public:
         hoverEventActuator_->RemoveInputEvent(onHoverEvent);
     }
 
+    void SetAxisEvent(OnAxisEventFunc&& onAxisEventFunc)
+    {
+        if (!axisEventActuator_) {
+            axisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        axisEventActuator_->ReplaceInputEvent(std::move(onAxisEventFunc));
+    }
+
     void AddOnAxisEvent(const RefPtr<InputEvent>& onAxisEvent)
     {
         if (!axisEventActuator_) {
@@ -190,6 +198,13 @@ public:
     {
         if (mouseEventActuator_) {
             mouseEventActuator_->ClearJSFrameNodeCallback();
+        }
+    }
+
+    void ClearUserOnAxisEvent()
+    {
+        if (axisEventActuator_) {
+            axisEventActuator_->ClearUserCallback();
         }
     }
 

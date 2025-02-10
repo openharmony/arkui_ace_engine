@@ -29,8 +29,6 @@ const float DEFAULT_STEP = 1.0f;
 const float DEFAULT_MIN_VALUE = 0.0f;
 const float DEFAULT_MAX_VALUE = 100.0f;
 constexpr uint32_t BLOCK_COLOR = 0xffffffff;
-constexpr uint32_t TRACK_COLOR = 0x19182431;
-constexpr uint32_t SELECTED_COLOR = 0xff007dff;
 
 void SliderModelNG::Create(float value, float step, float min, float max)
 {
@@ -629,18 +627,28 @@ Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
 Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
 {
     Gradient value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         SliderPaintProperty, TrackBackgroundColor, value, frameNode,
-        SliderModelNG::CreateSolidGradient(Color(TRACK_COLOR)));
+        SliderModelNG::CreateSolidGradient(Color(theme->GetTrackBgColor())));
     return value;
 }
 
 Gradient SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
     Gradient value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         SliderPaintProperty, SelectGradientColor, value, frameNode,
-        SliderModelNG::CreateSolidGradient(Color(SELECTED_COLOR)));
+        SliderModelNG::CreateSolidGradient(Color(theme->GetTrackSelectedColor())));
     return value;
 }
 
@@ -842,5 +850,42 @@ void SliderModelNG::ResetMinResponsiveDistance(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
         SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetBlockColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetSelectColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectGradientColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        SelectIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        SelectGradientColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetTrackColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetTrackColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

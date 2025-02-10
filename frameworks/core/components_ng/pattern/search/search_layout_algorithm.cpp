@@ -444,11 +444,12 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    UpdateClipBounds(layoutWrapper, searchHeight_);
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    UpdateClipBounds(layoutWrapper, searchHeight);
     // update search height
-    constraint->selfIdealSize.SetHeight(searchHeight_);
+    constraint->selfIdealSize.SetHeight(searchHeight);
     auto searchWidth = CalcSearchWidth(constraint.value(), layoutWrapper);
-    SizeF idealSize(searchWidth, searchHeight_);
+    SizeF idealSize(searchWidth, searchHeight);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         geometryNode->SetFrameSize(SizeF());
         return;
@@ -565,11 +566,18 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     maxFontScale_ = CalculateMaxFontScale(layoutWrapper);
     minFontScale_ = CalculateMinFontScale(layoutWrapper);
 
-    SearchButtonMeasure(layoutWrapper);
-    DividerMeasure(layoutWrapper);
+    auto searchPattern = host->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(searchPattern);
+    if (searchPattern->IsShowSearchButton()) {
+        SearchButtonMeasure(layoutWrapper);
+        DividerMeasure(layoutWrapper);
+    }
+    if (searchPattern->IsShowCancelButton()) {
+        CancelImageMeasure(layoutWrapper);
+        CancelButtonMeasure(layoutWrapper);
+    }
+
     ImageMeasure(layoutWrapper);
-    CancelImageMeasure(layoutWrapper);
-    CancelButtonMeasure(layoutWrapper);
     TextFieldMeasure(layoutWrapper);
     SelfMeasure(layoutWrapper);
 }
@@ -670,11 +678,18 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .searchFrameHeight = searchFrameHeight,
         .isRTL = isRTL
     };
+
+    auto searchPattern = host->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(searchPattern);
+    if (searchPattern->IsShowSearchButton()) {
+        LayoutSearchButton(params);
+        LayoutDivider(params);
+    }
+    if (searchPattern->IsShowCancelButton()) {
+        LayoutCancelButton(params);
+        LayoutCancelImage(params);
+    }
     LayoutSearchIcon(params);
-    LayoutSearchButton(params);
-    LayoutDivider(params);
-    LayoutCancelButton(params);
-    LayoutCancelImage(params);
     LayoutTextField(params);
 
     CalcChildrenHotZone(layoutWrapper);

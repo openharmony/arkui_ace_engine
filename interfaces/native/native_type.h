@@ -2234,6 +2234,16 @@ typedef enum {
     ARKUI_ERROR_CODE_UI_CONTEXT_INVALID = 190001,
     /** The callback function is invalid. */
     ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
+    /** 
+     * @error The gesture recognizer type is not supported. 
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
+    /**
+     * @error operation is not allowed for current drag drop phase.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED = 190004,
 } ArkUI_ErrorCode;
 
 /**
@@ -2297,6 +2307,26 @@ typedef enum {
     /** Lazy expand. Expand the children of node if needed. */
     ARKUI_LAZY_EXPAND = 2,
 } ArkUI_ExpandMode;
+
+/**
+ * @brief Define an enum for the focus movement directions.
+ *
+ * @since 16
+*/
+typedef enum {
+    /** Move focus forward. */
+    ARKUI_FOCUS_MOVE_FORWARD = 0,
+    /** Move focus backward. */
+    ARKUI_FOCUS_MOVE_BACKWARD,
+    /** Move focus up. */
+    ARKUI_FOCUS_MOVE_UP,
+    /** Move focus down. */
+    ARKUI_FOCUS_MOVE_DOWN,
+    /** Move focus left. */
+    ARKUI_FOCUS_MOVE_LEFT,
+    /** Move focus right. */
+    ARKUI_FOCUS_MOVE_RIGHT,
+} ArkUI_FocusMove;
 
 /**
  * @brief Defines parameter used by the system font style callback event.
@@ -4294,6 +4324,87 @@ void OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(ArkUI_CrossLanguageO
  * @since 16
  */
 bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Defines the parameters for visible area change events.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
+
+/**
+* @brief Creates an instance of visible area change event parameters
+*
+* @return Returns the created instance of visible area change event parameters.
+* @since 16
+*/
+ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
+
+/**
+* @brief Disposes of an instance of visible area change event parameters.
+*
+* @param option Instance to be destroyed.
+* @since 16
+*/
+void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option);
+
+/**
+* @brief Sets the threshold ratios for visible area changes.
+*
+* @param option Instance of visible area change event parameters.
+* @param value Array of threshold ratios. Each element represents the ratio of the visible area of a component to
+* its total area. The visible area is calculated within the parent component's bounds; any area outside the parent
+* component is not considered. Each value must be within the [0.0, 1.0] range.
+* Values outside this range will be handled as 0.0 or 1.0.
+* @param size Size of the threshold array.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+*         If an error code is returned, it may be due to a failure in parameter validation;
+*         the parameter must not be null.
+* @since 16
+*/
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t size);
+
+/**
+* @brief Sets the expected update interval for visible area changes.
+*
+* @param option Instance of visible area change event parameters.
+* @param value Expected update interval, in ms.  Default value: <b>1000</b>.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+*         If an error code is returned, it may be due to a failure in parameter validation;
+*         the parameter must not be null.
+* @since 16
+*/
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
+    ArkUI_VisibleAreaEventOptions *option, int32_t value);
+
+/**
+ * @brief Obtains the threshold ratios for visible area changes.
+ *
+ * @param option Instance of visible area change event parameters.
+ * @param value Array of threshold ratios.
+ * @param size Size of the threshold array.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
+ *         If an error code is returned, it may be due to a failure in parameter validation;
+ *         the parameter must not be null.
+ * @since 16
+ */
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size);
+
+/**
+ * @brief Obtains the expected update interval for visible area changes.
+ *
+ * @param option Instance of visible area change event parameters.
+ * @return Returns the expected update interval, in ms.  Default value: <b>1000</b>.
+ * @since 16
+ */
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option);
 #ifdef __cplusplus
 };
 #endif

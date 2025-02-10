@@ -347,6 +347,12 @@ const char FORM_ETS_TAG[] = "FormComponent";
 const char FORM_LINK_TAG[] = "FormLink";
 const char FORM_LINK_ETS_TAG[] = "FormLink";
 
+// formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+const char FORM_BUTTON_TAG[] = "FormButton";
+const char FORM_BUTTON_ETS_TAG[] = "FormButton";
+#endif
+
 // PluginComponent
 const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";
 const char PLUGIN_ETS_TAG[] = "PluginComponent";
@@ -639,4 +645,7 @@ const char ARC_SCROLL_BAR_ETS_TAG[] = "ArcScrollBar";
 // ArcAlphabetIndexer
 const char ARC_INDEXER_COMPONENT_TAG[] = "ArcIndexerComponent";
 const char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
+
+// Magnifier
+const char MAGNIFIER_TAG[] = "Magnifier";
 } // namespace OHOS::Ace::V2

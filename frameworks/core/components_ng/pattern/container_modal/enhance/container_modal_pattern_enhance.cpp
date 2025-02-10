@@ -264,24 +264,6 @@ RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
     return controlButtonsNode->GetChildAtIndex(originIndex);
 }
 
-void ContainerModalPatternEnhance::OnWindowFocused()
-{
-    ContainerModalPattern::OnWindowFocused();
-    isHoveredMenu_ = false;
-}
-
-void ContainerModalPatternEnhance::OnWindowUnfocused()
-{
-    if (SubwindowManager::GetInstance()->GetCurrentWindow() &&
-        SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
-        isFocus_ = false;
-        isHoveredMenu_ = true;
-        return;
-    }
-    ContainerModalPattern::OnWindowUnfocused();
-    isHoveredMenu_ = false;
-}
-
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 {
     if (!GetIsFocus()) {
@@ -498,7 +480,7 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_MAXIMIZE);
             windowManager->WindowMaximize(true);
         }
-        containerNode->OnWindowFocused();
+        containerNode->OnWindowActivated();
     });
     eventHub->AddGesture(tapGesture);
 }
@@ -529,7 +511,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowFocused();
+    GetHost()->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
@@ -777,7 +759,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick()
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowFocused();
+    GetHost()->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick()
@@ -839,6 +821,9 @@ void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name
     auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
     controlButtonsNode->FireCustomCallback(name, value);
+    auto customTitleNode = GetCustomTitleNode();
+    CHECK_NULL_VOID(customTitleNode);
+    customTitleNode->FireCustomCallback(name, value);
 }
 
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()

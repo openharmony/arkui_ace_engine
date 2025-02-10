@@ -15,6 +15,7 @@
 #include "style_modifier.h"
 
 #include <cstdlib>
+#include <utility>
 
 #include "frame_information.h"
 #include "native_type.h"
@@ -952,6 +953,26 @@ const ArkUI_AttributeItem* GetBackdropBlur(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetAreaChangeApproximateOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    node->visibleAreaEventOptions = item->object;
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAreaChangeApproximateOptions(ArkUI_NodeHandle node)
+{
+    g_attributeItem.object = node->visibleAreaEventOptions;
+    return &g_attributeItem;
+}
+
+void ResetAreaChangeApproximateOptions(ArkUI_NodeHandle node)
+{
+    node->visibleAreaEventOptions = nullptr;
+}
+
 int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if ((!item->string && !item->object) || (item->string && item->object)) {
@@ -1007,7 +1028,7 @@ int32_t SetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node, const ArkUI_
         // hasValue
         options[i * NUM_3] = { ONE_F, nullptr };
         // value
-        options[i * NUM_3 + NUM_1] = { item->value[i].f32, nullptr };
+        options[i * NUM_3 + NUM_1] = { (item->value[i].f32 < ZERO_F ? ZERO_F : item->value[i].f32), nullptr };
         // unit
         options[i * NUM_3 + NUM_2] = { UNIT_VP, nullptr };
     }
@@ -3834,6 +3855,27 @@ int32_t SetTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetNextFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    ArkUI_NodeHandle focusFrameNode = reinterpret_cast<ArkUI_NodeHandle>(item->object);
+    auto idx = static_cast<FocusMove>(item->value[0].i32);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setNextFocusOneByOne(
+        node->uiNodeHandle, idx, focusFrameNode->uiNodeHandle);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetNextFocus(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetNextFocus(node->uiNodeHandle);
+}
+
 int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size != NUM_3) {
@@ -6383,7 +6425,7 @@ void ResetListLanes(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetListLanes(ArkUI_NodeHandle node)
 {
     auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
-    g_numberValues[NUM_0].u32 = listModifier->getListLanes(node->uiNodeHandle);
+    g_numberValues[NUM_0].u32 = static_cast<uint32_t>(listModifier->getListLanes(node->uiNodeHandle));
     g_numberValues[NUM_1].f32 = listModifier->getlistLaneMinLength(node->uiNodeHandle);
     g_numberValues[NUM_2].f32 = listModifier->getListLaneMaxLength(node->uiNodeHandle);
     g_numberValues[NUM_3].f32 = listModifier->getListLaneGutter(node->uiNodeHandle);
@@ -14359,6 +14401,8 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetTabStop,
         SetBackdropBlur,
         SetBackgroundImageResizableWithSlice,
+        SetNextFocus,
+        SetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14471,6 +14515,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetTabStop,
         GetBackdropBlur,
         GetBackgroundImageResizableWithSlice,
+        nullptr,
+        GetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14587,6 +14633,8 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTabStop,
         ResetBackdropBlur,
         ResetBackgroundImageResizableWithSlice,
+        ResetNextFocus,
+        ResetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

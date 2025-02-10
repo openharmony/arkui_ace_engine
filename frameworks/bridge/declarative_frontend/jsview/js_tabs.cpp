@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
@@ -317,6 +318,9 @@ void JSTabs::Create(const JSCallbackInfo& info)
 
 void JSTabs::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSTabs][pop]", &JSTabs::Pop);
+    }
     TabsModel::GetInstance()->Pop();
 }
 

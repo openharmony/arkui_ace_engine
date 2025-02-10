@@ -1789,18 +1789,20 @@ void UIExtensionPattern::RegisterReplyPageModeCallback()
     RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::SEND_PAGE_MODE, callback);
 }
 
-bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+    RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SendBusinessDataSyncReply businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply, subSystemId);
 }
 
-bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+    RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type, subSystemId);
 }
 
 void UIExtensionPattern::OnUIExtBusinessReceiveReply(
@@ -1940,5 +1942,15 @@ void UIExtensionPattern::TransferAccessibilityRectInfo()
         "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
         parentRectInfo.scaleX, parentRectInfo.scaleY);
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), BusinessDataSendType::ASYNC);
+}
+
+void UIExtensionPattern::UpdateWMSUIExtProperty(
+    UIContentBusinessCode code, AAFwk::Want data, RSSubsystemId subSystemId)
+{
+    if (state_ != AbilityState::FOREGROUND) {
+        UIEXT_LOGI("UEC UpdatWMSUIExtProperty state=%{public}s.", ToString(state_));
+        return;
+    }
+    SendBusinessData(code, std::move(data), BusinessDataSendType::ASYNC, subSystemId);
 }
 } // namespace OHOS::Ace::NG

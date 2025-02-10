@@ -47,6 +47,14 @@
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
+namespace {
+enum class GestureStatus {
+    INIT = 0,
+    START,
+    END,
+};
+} // namespace
+
 enum class PageFlipMode {
     CONTINUOUS = 0,
     SINGLE,
@@ -708,7 +716,7 @@ public:
 
     bool IsTouchDownOnOverlong() const
     {
-        return isTouchDownOnOverlong_;
+        return isTouchDownOnOverlong_ || isDragging_;
     }
 
     bool IsAutoPlay() const;
@@ -736,6 +744,7 @@ public:
     }
 
     bool NeedFastAnimation() const;
+    bool IsInFastAnimation() const;
 
     float CalcCurrentTurnPageRate() const;
     int32_t GetFirstIndexInVisibleArea() const;
@@ -763,6 +772,12 @@ public:
     }
 
     bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
+    virtual RefPtr<Curve> GetCurve() const;
+
+    void SetGestureStatus(GestureStatus gestureStatus)
+    {
+        gestureStatus_ = gestureStatus;
+    }
 
 protected:
     void MarkDirtyNodeSelf();
@@ -933,7 +948,6 @@ private:
     int32_t CalculateCount(
         float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetInterval() const;
-    virtual RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
@@ -1193,6 +1207,8 @@ private:
         return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
     }
 
+    void CheckAndReportEvent();
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1370,6 +1386,7 @@ private:
     bool isBindIndicator_ = false;
 
     SwiperHoverFlag hoverFlag_ = HOVER_NONE;
+    GestureStatus gestureStatus_ = GestureStatus::INIT;
 };
 } // namespace OHOS::Ace::NG
 

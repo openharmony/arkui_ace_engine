@@ -230,6 +230,7 @@ template("declarative_js_engine") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -314,6 +315,7 @@ template("declarative_js_engine") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -540,6 +542,9 @@ template("declarative_js_engine") {
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
       ]
+    }
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
     }
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -786,6 +791,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -879,6 +885,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -1036,7 +1043,9 @@ template("declarative_js_engine_ng") {
         ]
       }
     }
-
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
+    }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       sources += [

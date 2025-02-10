@@ -881,6 +881,15 @@ void NavDestinationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
     NavigationToolbarUtil::SetCustomToolBar(navDestinationGroupNode, customNode);
 }
 
+void NavDestinationModelNG::SetHideItemText(bool isHideItemText)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetHideItemText(navDestinationGroupNode, isHideItemText);
+}
+
 void NavDestinationModelNG::SetToolBarOptions(NavigationToolbarOptions&& opt)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

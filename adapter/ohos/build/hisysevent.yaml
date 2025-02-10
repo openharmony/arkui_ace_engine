@@ -106,6 +106,13 @@ ACCESSIBILITY_EXCEPTION:
   ERROR_TYPE: { type: INT32, desc: error type }
   PACKAGE_NAME: { type: STRING, desc: package name }
 
+ACCESSIBILITY_FAIL: 
+  __BASE: {type: FAULT, level: CRITICAL, tag: performance, desc: accessibility execute action exception}
+  BUNDLE_NAME: {type: STRING, desc: package name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  ACTION_NAME: {type: STRING, desc: failed action name}
+
 FORM_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: form exception }
   ERROR_TYPE: { type: INT32, desc: error type }
@@ -208,3 +215,23 @@ NON_MANUAL_POSTCARD_ACTION:
   ABILITY_NAME: {type: STRING, desc: ability name}
   MODULE_NAME: {type: STRING, desc: module name}
   DIMENSION: {type: INT32, desc: dimension}
+
+SCROLLABLE_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: scrollable component error}
+  NODE_TYPE: {type: STRING, desc: node type}
+  ERROR_TYPE: {type: INT32, desc: error type}
+  SUB_ERROR_TYPE: {type: STRING, desc: sub error type}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  TARGET_API_VERSION: {type: INT32, desc: target api version}
+  VERSION_CODE: {type: INT32, desc: version code}
+  VERSION_NAME: {type: STRING, desc: version name}
+
+TEXTFIELD_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in textfield}
+  PACKAGE_NAME: {type: STRING, desc: application package name}
+  PAGE_URL: {type: STRING, desc: page url}
+
+CLIPBOARD_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in clipboard }
+  PACKAGE_NAME: {type: STRING, desc: application package name}
+  PAGE_URL: {type: STRING, desc: page url}

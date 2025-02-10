@@ -132,6 +132,25 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
+void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::function<bool(uint64_t)>* func = reinterpret_cast<std::function<bool(uint64_t)>*>(callback);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+}
+
+void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+}
+
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
@@ -139,6 +158,8 @@ const ArkUIStateModifier* GetUIStateModifier()
     static const ArkUIStateModifier modifier = {
         .getUIState = GetUIState,
         .setSupportedUIState = SetSupportedUIState,
+        .addSupportedUIState = AddSupportedUIState,
+        .removeSupportedUIState = RemoveSupportedUIState
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -388,6 +409,9 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
     NodeModifier::SetOnKeyEventDispatch,
+    NodeModifier::SetOnAxisEvent,
+    NodeModifier::SetOnClick,
+    NodeModifier::SetOnHover,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -606,6 +630,8 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnPreDrag,
     NodeModifier::ResetOnKeyPreIme,
     NodeModifier::ResetOnFocusAxisEvent,
+    nullptr,
+    NodeModifier::ResetOnAxisEvent,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

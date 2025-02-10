@@ -89,6 +89,11 @@ public:
         listContentModifier_ = modify;
     }
 
+    void SetLaneIdx(int32_t idx)
+    {
+        initLaneIdx_ = idx;
+    }
+
     void SetItemsPosition(const PositionMap& positionMap, const PositionMap& cachedPositionMap,
         const std::set<int32_t>& pressedItem, bool showCached, bool clip)
     {
@@ -137,6 +142,7 @@ public:
 private:
     V2::ItemDivider divider_;
     int32_t lanes_ = 1;
+    int32_t initLaneIdx_ = 0;
     int32_t totalItemCount_ = 0;
     float space_;
     float laneGutter_ = 0.0f;

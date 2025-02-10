@@ -261,7 +261,6 @@ private:
     RefPtr<RadioModifier> radioModifier_;
     bool focusEventInitialized_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
     bool isUserSetUncheckBorderColor_ = false;
 };

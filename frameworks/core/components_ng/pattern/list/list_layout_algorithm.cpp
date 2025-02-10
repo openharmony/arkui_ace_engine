@@ -1300,7 +1300,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>&
     if (GetStartIndex() <= endIndex && endIndex <= GetEndIndex()) {
         predictEndPos = CalculatePredictSnapEndPositionByIndex(endIndex, scrollSnapAlign_);
         predictSnapOffset_ = totalOffset_ - predictEndPos + currentOffset_;
-        predictSnapEndPos_.reset();
+        predictSnapEndPos_ = predictEndPos - currentOffset_;
     } else {
         if (IsUniformHeightProbably()) {
             if (scrollSnapAlign_ == ScrollSnapAlign::START) {
@@ -1358,9 +1358,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
                 break;
             }
         }
-        int32_t gap = index - itemPosition_.begin()->first;
-        predictEndPos = totalOffset_ - currentOffset_ + itemPosition_.begin()->second.startPos + gap * itemHeight -
-            startPos;
+        predictEndPos = index * itemHeight - startPos;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
         } else if (GreatNotEqual(predictEndPos, maxPos)) {
@@ -1398,9 +1396,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
                 break;
             }
         }
-        int32_t gap = index - itemPosition_.begin()->first;
-        predictEndPos = totalOffset_ - currentOffset_ + itemPosition_.begin()->second.startPos + gap * itemHeight +
-            itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        predictEndPos = index * itemHeight + itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
         if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
             predictEndPos = itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
         } else if (GreatNotEqual(
@@ -1442,9 +1438,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
                 break;
             }
         }
-        int32_t gap = index - itemPosition_.begin()->first;
-        predictEndPos = totalOffset_ - currentOffset_ + itemPosition_.begin()->second.startPos + gap * itemHeight -
-            endPos - spaceWidth_;
+        predictEndPos = index * itemHeight - endPos - spaceWidth_;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
         } else if (GreatNotEqual(predictEndPos, maxPos)) {
@@ -2522,7 +2516,7 @@ int32_t ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t oldCacheCoun
     if (itemCount <= 0) {
         return oldCacheCount;
     }
-    static float pageCount = SystemProperties::GetPageCount();
+    thread_local float pageCount = SystemProperties::GetPageCount();
     if (pageCount <= 0.0f) {
         return oldCacheCount;
     }

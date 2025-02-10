@@ -73,7 +73,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     PaddingProperty padding;
     if (isShow && customTitleSettedShow_) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
+            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
     }
     layoutProperty->UpdatePadding(padding);
     BorderWidthProperty borderWidth;
@@ -300,12 +300,12 @@ void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButto
     eventHub->RemovePanEvent(panEvent_);
 }
 
-void ContainerModalPattern::OnWindowFocused()
+void ContainerModalPattern::OnWindowActivated()
 {
     WindowFocus(true);
 }
 
-void ContainerModalPattern::OnWindowUnfocused()
+void ContainerModalPattern::OnWindowDeactivated()
 {
     WindowFocus(false);
 }
@@ -918,7 +918,7 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
     auto customTitleRowProp = customtitleRow->GetLayoutProperty();
     if (customTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
+            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
     }
     hostProp->UpdatePadding(padding);
 }

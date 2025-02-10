@@ -28,8 +28,8 @@ std::pair<int32_t, std::string> MockNavigationStack::FindInPopArray(const std::s
 {
     for (int32_t index = int(mockPopArray_.size()) - 1; index >= 0; --index) {
         auto info = mockPopArray_[index];
-        if (info.name == name) {
-            auto ret = std::make_pair(info.index, info.navDestinationId);
+        if (info->GetName() == name) {
+            auto ret = std::make_pair(info->index, info->GetNavDestinationId());
             auto iter = mockPopArray_.begin();
             std::advance(iter, index);
             mockPopArray_.erase(iter);
@@ -62,7 +62,7 @@ bool MockNavigationStack::CreateNodeByIndex(int32_t index, const OHOS::Ace::Weak
     auto frameNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     EXPECT_NE(frameNode, nullptr);
-    auto name = mockPathArray_[index].name;
+    auto name = mockPathArray_[index]->GetName();
     auto container = MockContainer::Current();
     auto navigationRoute = container->GetNavigationRoute();
     if (!navigationRoute) {
@@ -84,19 +84,19 @@ bool MockNavigationStack::CreateNodeByIndex(int32_t index, const OHOS::Ace::Weak
 
 void MockNavigationStack::Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo)
 {
-    MockPushPath(MockNavPathInfo(name));
+    MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(name));
 }
 
 void MockNavigationStack::Push(const std::string& name, int32_t index)
 {
-    MockPushPath(MockNavPathInfo(name));
+    MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(name));
 }
 
 std::vector<std::string> MockNavigationStack::GetAllPathName()
 {
     std::vector<std::string> pathNames;
     for (int32_t i = 0; i < static_cast<int32_t>(mockPathArray_.size()); i++) {
-        pathNames.emplace_back(mockPathArray_[i].name);
+        pathNames.emplace_back(mockPathArray_[i]->GetName());
     }
     return pathNames;
 }
@@ -122,7 +122,11 @@ void MockNavigationStack::Clear()
 void MockNavigationStack::Pop()
 {
     mockPopArray_.emplace_back(mockPathArray_.back());
+    auto info = mockPopArray_.back();
     mockPathArray_.pop_back();
+    if (info->GetOnPop()) {
+        info->GetOnPop();
+    }
 }
 
 void MockNavigationStack::PopToIndex(int32_t index)
@@ -136,8 +140,8 @@ void MockNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathN
 {
     mockPopArray_.clear();
     for (size_t index = 0; index < mockPathArray_.size() && index < pathNames.size(); index++) {
-        if (pathNames[index] == mockPathArray_[index].name && GetReplaceValue() != 1) {
-            mockPathArray_[index].index = index;
+        if (pathNames[index] == mockPathArray_[index]->GetName() && GetReplaceValue() != 1) {
+            mockPathArray_[index]->index = index;
         }
     }
 }
@@ -147,18 +151,18 @@ void MockNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::st
     if (index < 0 || index >= static_cast<int32_t>(mockPathArray_.size())) {
         return;
     }
-    mockPathArray_[index].navDestinationId = navDestinationId;
+    mockPathArray_[index]->SetNavDestinationId(navDestinationId);
 }
 
-void MockNavigationStack::MockPushPath(MockNavPathInfo info, bool animated, LaunchMode launchmode)
+void MockNavigationStack::MockPushPath(const RefPtr<MockNavPathInfo>& info, bool animated, LaunchMode launchmode)
 {
     if (launchmode == LaunchMode::NEW_INSTANCE) {
-        info.needBuildNewInstance = true;
+        info->needBuildNewInstance = true;
     }
-    auto indexAndId = FindInPopArray(info.name);
+    auto indexAndId = FindInPopArray(info->GetName());
     if (indexAndId.first != -1 && indexAndId.second != UNDEFINED_ID) {
-        info.index = indexAndId.first;
-        info.navDestinationId = indexAndId.second;
+        info->index = indexAndId.first;
+        info->SetNavDestinationId(indexAndId.second);
     }
     animated_ = animated;
     mockPathArray_.push_back(info);
@@ -169,7 +173,7 @@ bool MockNavigationStack::NeedBuildNewInstance(int32_t index)
     if (!CheckIndexValid(index, mockPathArray_.size())) {
         return false;
     }
-    return mockPathArray_[index].needBuildNewInstance;
+    return mockPathArray_[index]->needBuildNewInstance;
 }
 
 void MockNavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
@@ -177,16 +181,16 @@ void MockNavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
     if (!CheckIndexValid(index, mockPathArray_.size())) {
         return;
     }
-    mockPathArray_[index].needBuildNewInstance = need;
+    mockPathArray_[index]->needBuildNewInstance = need;
 }
 
 void MockNavigationStack::SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
-    std::vector<MockNavPathInfo> newPathArray;
+    std::vector<RefPtr<MockNavPathInfo>> newPathArray;
     for (auto recoveryInfo : navdestinationsInfo) {
-        MockNavPathInfo navPathInfo(recoveryInfo.name);
-        navPathInfo.mode = recoveryInfo.mode;
-        navPathInfo.fromRecovery = true;
+        auto navPathInfo = AceType::MakeRefPtr<MockNavPathInfo>(recoveryInfo.name);
+        navPathInfo->mode = recoveryInfo.mode;
+        navPathInfo->fromRecovery = true;
         newPathArray.push_back(navPathInfo);
     }
     mockPathArray_ = newPathArray;
@@ -197,7 +201,7 @@ void MockNavigationStack::SetFromRecovery(int32_t index, bool fromRecovery)
     if (!CheckIndexValid(index, mockPathArray_.size())) {
         return;
     }
-    mockPathArray_[index].fromRecovery = fromRecovery;
+    mockPathArray_[index]->fromRecovery = fromRecovery;
 }
 
 bool MockNavigationStack::IsFromRecovery(int32_t index)
@@ -205,13 +209,14 @@ bool MockNavigationStack::IsFromRecovery(int32_t index)
     if (!CheckIndexValid(index, mockPathArray_.size())) {
         return false;
     }
-    return mockPathArray_[index].fromRecovery;
+    return mockPathArray_[index]->fromRecovery;
 }
 
 bool MockNavigationStack::MockRemoveByNavDestinationId(const std::string& navDestinationId)
 {
     for (auto it = mockPathArray_.begin(); it != mockPathArray_.end(); ++ it) {
-        if (it->navDestinationId == navDestinationId) {
+        auto info = *it;
+        if (info->GetNavDestinationId() == navDestinationId) {
             mockPathArray_.erase(it);
             return true;
         }
@@ -223,7 +228,8 @@ int32_t MockNavigationStack::MockRemoveByInexes(std::vector<int32_t> indexes)
 {
     int32_t deleteCount = 0;
     for (auto it = mockPathArray_.begin(); it != mockPathArray_.end();) {
-        if (std::find(indexes.begin(), indexes.end(), it->index) != indexes.end()) {
+        auto info = *it;
+        if (std::find(indexes.begin(), indexes.end(), info->index) != indexes.end()) {
             mockPathArray_.erase(it);
             deleteCount++;
             continue;
@@ -237,7 +243,8 @@ int32_t MockNavigationStack::MockRemoveByName(const std::string& name)
 {
     int32_t deleteCount = 0;
     for (auto it = mockPathArray_.begin(); it != mockPathArray_.end();) {
-        if (it->name == name) {
+        auto info = *it;
+        if (info->GetName() == name) {
             mockPathArray_.erase(it);
             deleteCount++;
             continue;
@@ -252,14 +259,14 @@ std::string MockNavigationStack::GetNavDestinationIdByIndex(int32_t index)
     if (!CheckIndexValid(index, mockPathArray_.size())) {
         return "";
     }
-    return mockPathArray_[index].navDestinationId;
+    return mockPathArray_[index]->GetNavDestinationId();
 }
 
 int32_t MockNavigationStack::MockPopToName(const std::string& name)
 {
     int32_t candidateIndex = -1;
     for (int32_t index = 0; index < static_cast<int32_t>(mockPathArray_.size()); ++index) {
-        if (mockPathArray_[index].name == name) {
+        if (mockPathArray_[index]->GetName() == name) {
             candidateIndex = index;
             break;
         }
@@ -288,7 +295,7 @@ int32_t MockNavigationStack::MockMoveToTop(const std::string& name)
 {
     int32_t candidateIndex = -1;
     for (int32_t index = 0; index < static_cast<int32_t>(mockPathArray_.size()); ++index) {
-        if (mockPathArray_[index].name == name) {
+        if (mockPathArray_[index]->GetName() == name) {
             candidateIndex = index;
             break;
         }

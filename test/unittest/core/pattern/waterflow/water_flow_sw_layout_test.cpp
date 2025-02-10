@@ -2091,4 +2091,44 @@ HWTEST_F(WaterFlowSWTest, Illegal005, TestSize.Level1)
         info_->lanes_[1][0].ToString(), "{StartPos: 0.000000 EndPos: 800.000000 Items [18 19 20 21 22 23 24 25 ] }");
     EXPECT_EQ(info_->idxToLane_.size(), 8);
 }
+
+/**
+ * @tc.name: EdgeEffect001
+ * @tc.desc: only have footer, test Spring EdgeEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 50.0f);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    GestureEvent gesture;
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetMainVelocity(1000.0f);
+    gesture.SetMainDelta(100.0f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+    scrollable->HandleDragUpdate(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 22.279572);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 45.735794);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 22.867897);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+}
 } // namespace OHOS::Ace::NG

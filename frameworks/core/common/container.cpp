@@ -235,6 +235,11 @@ FoldStatus Container::GetCurrentFoldStatus()
     return DisplayInfoUtils::GetInstance().GetCurrentFoldStatus();
 }
 
+std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
+{
+    return DisplayInfoUtils::GetInstance().GetCurrentFoldCreaseRegion();
+}
+
 void Container::DestroyToastSubwindow(int32_t instanceId)
 {
     auto subwindow = SubwindowManager::GetInstance()->GetToastSubwindow(instanceId);

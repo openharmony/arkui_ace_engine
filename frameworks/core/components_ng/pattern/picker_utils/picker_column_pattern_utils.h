@@ -28,84 +28,31 @@ namespace OHOS::Ace::NG {
 template<class T>
 class PickerColumnPatternCircleUtils {
 public:
-    PickerColumnPatternCircleUtils(const T& init)
-    {
-        selectedColumnId_ = init;
-    }
+    PickerColumnPatternCircleUtils() {}
 
-    virtual ~PickerColumnPatternCircleUtils()
-    {
-    }
+    virtual ~PickerColumnPatternCircleUtils() {}
 
-    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true)
-    {
-        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(pickerTheme);
-        SetSelectedMark(pickerTheme, focus, notify, reRender);
-    }
-
-    void SetSelectedMark(RefPtr<PickerTheme>& pickerTheme, bool focus, bool notify = true, bool reRender = true)
+    void SetSelectedMark(
+        T* pickerColumn, RefPtr<PickerTheme>& pickerTheme, bool focus, bool notify = true, bool reRender = true)
     {
         CHECK_NULL_VOID(pickerTheme);
+        CHECK_NULL_VOID(pickerColumn);
         if (selectedMark_ == focus) {
             return;
         }
         selectedMark_ = focus;
-        bool IsCircleDial = pickerTheme->IsCircleDial();
-        if (IsCircleDial) {
-            SetSelectedMarkPaint(selectedMark_);
-        }
-        if (reRender && IsCircleDial) {
-            ToUpdateSelectedTextProperties(pickerTheme);
+        pickerColumn->SetSelectedMarkPaint(selectedMark_);
+        if (reRender) {
+            pickerColumn->UpdateSelectedTextColor(pickerTheme);
         }
 
-        if (focus && notify && focusedListerner_) {
-            focusedListerner_(selectedColumnId_);
+        if (focus && notify && pickerColumn->focusedListerner_) {
+            pickerColumn->focusedListerner_(pickerColumn->selectedColumnId_);
         }
-    }
-
-    void SetSelectedMarkId(const T& strColumnId)
-    {
-        selectedColumnId_ = strColumnId;
-    }
-
-    void SetSelectedMarkListener(const std::function<void(T&)>& listener)
-    {
-        focusedListerner_ = listener;
-    }
-
-    T& GetselectedColumnId() const
-    {
-        return const_cast<T&>(selectedColumnId_);
-    }
-
-    int32_t GetDigitalCrownSensitivity()
-    {
-        if (crownSensitivity_ == INVALID_CROWNSENSITIVITY) {
-            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_RETURN(pipeline, DEFAULT_CROWNSENSITIVITY);
-            auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-            CHECK_NULL_RETURN(pickerTheme, DEFAULT_CROWNSENSITIVITY);
-            crownSensitivity_ = pickerTheme->GetDigitalCrownSensitivity();
-        }
-
-        return crownSensitivity_;
-    }
-
-    void SetDigitalCrownSensitivity(int32_t crownSensitivity)
-    {
-        crownSensitivity_ = crownSensitivity;
     }
 
 #ifdef SUPPORT_DIGITAL_CROWN
-    bool IsCrownEventEnded() const
-    {
-        return isCrownEventEnded_;
-    }
-
-    double GetCrownRotatePx(const CrownEvent& event)
+    double GetCrownRotatePx(const CrownEvent& event, int32_t crownSensitivity)
     {
         float ration[][2] = {
             {PICKER_ANGULAR_VELOCITY_SLOW, PICKER_DISPLAY_CONTROL_RATIO_VERY_SLOW},
@@ -121,8 +68,6 @@ public:
             }
         }
 
-        // Recalculate offset based on sensitivity
-        int32_t crownSensitivity = GetDigitalCrownSensitivity();
         switch (crownSensitivity) {
             case static_cast<int32_t>(OHOS::Ace::CrownSensitivity::LOW):
                 px *= PICKER_CROWN_SENSITIVITY_LOW;
@@ -134,25 +79,29 @@ public:
                 px *= PICKER_CROWN_SENSITIVITY_HIGH;
                 break;
             default:
+                px *= PICKER_CROWN_SENSITIVITY_MEDIUM;
                 break;
         }
 
         return px;
     }
 
-    bool OnCrownEvent(const CrownEvent& event)
+    bool OnCrownEvent(T* pickerColumn, const CrownEvent& event)
     {
-        if (event.action == OHOS::Ace::CrownAction::BEGIN) {
-            HandleCrownBeginEvent(event);
-            isCrownEventEnded_ = false;
-        } else if (event.action == OHOS::Ace::CrownAction::UPDATE) {
-            HandleCrownMoveEvent(event);
-            isCrownEventEnded_ = false;
-        } else if (event.action == OHOS::Ace::CrownAction::END) {
-            HandleCrownEndEvent(event);
-            isCrownEventEnded_ = true;
-        } else {
-            return false;
+        CHECK_NULL_RETURN(pickerColumn, false);
+        switch (event.action) {
+            case OHOS::Ace::CrownAction::BEGIN:
+                pickerColumn->HandleCrownBeginEvent(event);
+                break;
+            case OHOS::Ace::CrownAction::UPDATE:
+                pickerColumn->HandleCrownMoveEvent(event);
+                break;
+            case OHOS::Ace::CrownAction::END:
+                pickerColumn->HandleCrownEndEvent(event);
+                break;
+            default:
+                return false;
+                break;
         }
 
         return true;
@@ -160,22 +109,7 @@ public:
 #endif
 
 private:
-    virtual void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) = 0;
-    virtual void SetSelectedMarkPaint(bool pait) = 0;
-#ifdef SUPPORT_DIGITAL_CROWN
-    virtual void HandleCrownBeginEvent(const CrownEvent& event)= 0;
-    virtual void HandleCrownMoveEvent(const CrownEvent& event) = 0;
-    virtual void HandleCrownEndEvent(const CrownEvent& event) = 0;
-#endif
-
-protected:
-#ifdef SUPPORT_DIGITAL_CROWN
-    bool isCrownEventEnded_ = true;
-#endif
     bool selectedMark_ = false;
-    T selectedColumnId_;
-    std::function<void(T&)> focusedListerner_ = nullptr;
-    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
 };
 
 }

@@ -562,9 +562,6 @@ void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, P
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    auto context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
     renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
@@ -581,9 +578,6 @@ void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect,
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
     renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    auto context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
 }
 
 RefPtr<PageTransitionEffect> PagePattern::GetDefaultPageTransition(PageTransitionType type)
@@ -911,10 +905,6 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
-    if (type == PageTransitionType::ENTER_PUSH) {
-        auto renderContext = inPage->GetRenderContext();
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
