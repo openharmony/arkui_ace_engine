@@ -170,6 +170,7 @@ public:
 
     virtual void OnDumpInfo(const std::vector<std::string>& params) {}
 
+    static JSView* GetNativeView(JSRef<JSObject> obj);
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
