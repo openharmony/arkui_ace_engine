@@ -416,9 +416,8 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](int32_t index) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onChange(frameNode->GetId(), arkIndex);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](int32_t index) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index));
     };
     SwiperModelNG::SetOnChange(frameNode, onEvent);
 }
@@ -442,7 +441,8 @@ void OnAnimationStartImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+    auto onEvent = [arkCallback = CallbackHelper(*value)](
+        int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         auto arkTargetIndex = Converter::ArkValue<Ark_Number>(targetIndex);
         Ark_SwiperAnimationEvent arkExtraInfo = {
@@ -450,9 +450,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
             .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
             .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
         };
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onAnimationStart(
-            frameNode->GetId(), arkIndex, arkTargetIndex, arkExtraInfo
-        );
+        arkCallback.Invoke(arkIndex, arkTargetIndex, arkExtraInfo);
     };
     SwiperModelNG::SetOnAnimationStart(frameNode, onEvent);
 }
@@ -461,16 +459,14 @@ void OnAnimationEndImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
+    auto onEvent = [arkCallback = CallbackHelper(*value)](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         Ark_SwiperAnimationEvent arkExtraInfo = {
             .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
             .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
             .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
         };
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onAnimationEnd(
-            frameNode->GetId(), arkIndex, arkExtraInfo
-        );
+        arkCallback.Invoke(arkIndex, arkExtraInfo);
     };
     SwiperModelNG::SetOnAnimationEnd(frameNode, onEvent);
 }
@@ -479,16 +475,14 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
+    auto onEvent = [arkCallback = CallbackHelper(*value)](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         Ark_SwiperAnimationEvent arkExtraInfo = {
             .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
             .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
             .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
         };
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onGestureSwipe(
-            frameNode->GetId(), arkIndex, arkExtraInfo
-        );
+        arkCallback.Invoke(arkIndex, arkExtraInfo);
     };
     SwiperModelNG::SetOnGestureSwipe(frameNode, onEvent);
 }
@@ -529,14 +523,13 @@ void OnContentDidScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+    auto onEvent = [arkCallback = CallbackHelper(*value)](
+        int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         auto arkSelectedIndex = Converter::ArkValue<Ark_Number>(selectedIndex);
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         auto arkPosition = Converter::ArkValue<Ark_Number>(position);
         auto arkMainAxisLength = Converter::ArkValue<Ark_Number>(mainAxisLength);
-        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onContentDidScroll(
-            frameNode->GetId(), arkSelectedIndex, arkIndex, arkPosition, arkMainAxisLength
-        );
+        arkCallback.Invoke(arkSelectedIndex, arkIndex, arkPosition, arkMainAxisLength);
     };
     SwiperModelNG::SetOnContentDidScroll(frameNode, onEvent);
 }

@@ -35,16 +35,6 @@ namespace  {
     const auto ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE = ButtonType::CAPSULE;
 
     const auto DEFAULT_JSON_INT = -1;
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUISaveButtonEventsReceiver eventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-            .getSaveButtonEventsReceiver = [] () -> const GENERATED_ArkUISaveButtonEventsReceiver* {
-                return &eventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class SaveButtonModifierTest : public ModifierTestBase<GENERATED_ArkUISaveButtonModifier,
@@ -55,8 +45,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<SecurityComponentTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -357,17 +345,17 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestTextAndIconEmpty, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SaveButtonModifierTest, DISABLED_setOnClickTest, TestSize.Level1)
+HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
 {
     static std::optional<Ark_SaveButtonOnClickResult> checkEvent;
+    void (*checkCallback)(const Ark_Int32, const Ark_ClickEvent, const Ark_SaveButtonOnClickResult) =
+        [](const Ark_Int32 resourceId, const Ark_ClickEvent event, const Ark_SaveButtonOnClickResult result) {
+            checkEvent = result;
+        };
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<Callback_ClickEvent_SaveButtonOnClickResult_Void>(checkCallback, contextId);
 
-    EventsTracker::eventReceiver.onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event,
-        const Ark_SaveButtonOnClickResult result)
-    {
-        checkEvent = result;
-    };
-
-    modifier_->setOnClick(node_, {});
+    modifier_->setOnClick(node_, &func);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

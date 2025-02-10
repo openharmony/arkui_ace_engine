@@ -35,18 +35,6 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-namespace {
-struct EventsTracker {
-    static inline GENERATED_ArkUIMenuItemEventsReceiver menuItemEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getMenuItemEventsReceiver = [] () -> const GENERATED_ArkUIMenuItemEventsReceiver* {
-            return &menuItemEventReceiver;
-        }
-    };
-}; // EventsTracker
-} // namespace
-
 const std::string COLOR_GRAY = "#FFC0C0C0";
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
@@ -207,7 +195,6 @@ public:
         SetupTheme<SelectTheme>();
         AddResource(ICON_OK_STR, "path_to_select_icon");
         AddResource(FAMILY_RES_ID, "aa.bb.cc");
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -732,7 +719,6 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest5, TestSize.Level1)
  */
 HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
 
@@ -741,13 +727,16 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
         bool selected;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::menuItemEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Boolean selected)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .selected = Converter::ArkValue<Ark_Boolean>(selected)
+
+    void (*checkCallback)(const Ark_Int32, const Ark_Boolean) =
+        [](const Ark_Int32 resourceId, const Ark_Boolean param) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .selected = Converter::Convert<bool>(param)
+            };
         };
-    };
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
     auto onChange = eventHub->GetOnChange();
     EXPECT_EQ(onChange, nullptr);
@@ -758,12 +747,12 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_FALSE(checkEvent.has_value());
     onChange(true);
     ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_TRUE(checkEvent->selected);
     // check false value
     onChange(false);
     ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_FALSE(checkEvent->selected);
 }
 
