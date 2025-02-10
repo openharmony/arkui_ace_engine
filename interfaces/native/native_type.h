@@ -2230,15 +2230,15 @@ typedef enum {
     ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002,
     /** invalid styled string */
     ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
+    /**
+     * @error The gesture recognizer type is not supported.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
     /** The uiContext is invalid. */
     ARKUI_ERROR_CODE_UI_CONTEXT_INVALID = 190001,
     /** The callback function is invalid. */
     ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
-    /** 
-     * @error The gesture recognizer type is not supported. 
-     * @since 16
-     */
-    ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
     /**
      * @error operation is not allowed for current drag drop phase.
      * @since 16
