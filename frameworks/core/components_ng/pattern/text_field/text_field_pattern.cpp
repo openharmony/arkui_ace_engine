@@ -5365,7 +5365,7 @@ bool TextFieldPattern::CursorMoveLeftWord()
 
 bool TextFieldPattern::CursorMoveLineBegin()
 {
-    if (selectController_->GetCaretIndex() == 0) {
+    if (selectController_->GetCaretIndex() == 0 && !IsSelected()) {
         return true;
     }
     int32_t textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
@@ -5513,14 +5513,14 @@ bool TextFieldPattern::CursorMoveEnd()
 
 bool TextFieldPattern::CursorMoveUpOperation()
 {
-    if (!IsTextArea()) {
+    if (!IsTextArea() && !IsSelected()) {
         return CursorMoveToParagraphBegin();
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
     auto offsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5f;
-    if (offsetY < textRect_.GetY()) {
+    if (offsetY < textRect_.GetY() && !IsSelected()) {
         return CursorMoveToParagraphBegin();
     }
     std::optional<Offset> offset;
