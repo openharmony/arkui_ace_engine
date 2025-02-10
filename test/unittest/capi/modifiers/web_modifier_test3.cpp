@@ -58,6 +58,14 @@ namespace Converter {
 namespace {
     const auto ATTRIBUTE_BIND_SELECTION_MENU_NAME = "bindSelectionMenu";
     const auto ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE = "";
+#ifdef WEB_SUPPORTED
+    const auto ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME = "defaultTextEncodingFormat";
+    const std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
+        { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
+        { "\"\"", Converter::ArkValue<Ark_String>(""), "UTF-8" },
+        { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
+    };
+#endif // WEB_SUPPORTED
 } // namespace
 
 class WebModifierTest3 : public ModifierTestBase<GENERATED_ArkUIWebModifier,
@@ -126,6 +134,32 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
     }
     std::string expectedValue = "";
     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+}
+
+/*
+ * @tc.name: setDefaultTextEncodingFormatValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setDefaultTextEncodingFormatValidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    Ark_String initValueDefaultTextEncodingFormat;
+    // Initial setup
+    initValueDefaultTextEncodingFormat = std::get<1>(testFixtureStringValidValues[0]);
+    auto checkValue = [this, &initValueDefaultTextEncodingFormat](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_String inputValueDefaultTextEncodingFormat = initValueDefaultTextEncodingFormat;
+        inputValueDefaultTextEncodingFormat = value;
+        modifier_->setDefaultTextEncodingFormat(node_, &inputValueDefaultTextEncodingFormat);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME);
+        EXPECT_EQ(resultStr, expectedStr);
+    };
+    for (auto& [input, value, expected] : testFixtureStringValidValues) {
+        checkValue(input, expected, value);
+    }
+#endif
 }
 
 } // namespace OHOS::Ace::NG
