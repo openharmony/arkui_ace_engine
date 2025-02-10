@@ -729,4 +729,38 @@ HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest004, TestSiz
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
 }
+
+/**
+ * @tc.name: AxisEventScrollStepTest001
+ * @tc.desc: Test OH_ArkUI_AxisEvent_GetScrollStep function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventScrollStepTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::AXIS_EVENT;
+    event.axisEvent.subKind = ArkUIEventSubKind::ON_AXIS;
+    event.axisEvent.timeStamp = ARKUI_TIME;
+    event.axisEvent.scrollStep = 3;
+    uiInputEvent.inputEvent = &event.axisEvent;
+    uiInputEvent.eventTypeId = C_AXIS_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.steps: step2. call functions.
+     */
+    auto scroll_step = OH_ArkUI_AxisEvent_GetScrollStep(inputEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(scroll_step, 3);
+}
 } // namespace OHOS::Ace

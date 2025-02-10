@@ -250,11 +250,11 @@ enum {
  */
 typedef enum {
     /** UnKnown. */
-    ARKUI_HAND_NONE = 0,
+    ARKUI_EVENT_HAND_NONE = 0,
     /** Left hand. */
-    ARKUI_HAND_LEFT = 1,
+    ARKUI_EVENT_HAND_LEFT = 1,
     /** Right hand. */
-    ARKUI_HAND_RIGHT = 2,
+    ARKUI_EVENT_HAND_RIGHT = 2,
 } ArkUI_InteractionHand;
 
 /**
