@@ -419,7 +419,7 @@ void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t
     NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
     auto currentLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
     NavigationPattern::FireNavigationLifecycle(node, currentLifecycle, activeReason);
-    NavDestinationLifecycle lowerLifecycle;
+    NavDestinationLifecycle lowerLifecycle = NavDestinationLifecycle::ON_ACTIVE;
     if (lifecycle == NavDestinationLifecycle::ON_ACTIVE) {
         lowerLifecycle = NavDestinationLifecycle::ON_INACTIVE;
     }
