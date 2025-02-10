@@ -413,7 +413,8 @@ void OnSubmitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode), frameNode](int32_t param1, NG::TextFieldCommonEvent& param2) {
+    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode), frameNode](int32_t param1,
+        NG::TextFieldCommonEvent& param2) {
         auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
         const auto event = Converter::ArkSubmitEventSync(param2);
         arkCallback.InvokeSync(enterKey, event.ArkValue());
