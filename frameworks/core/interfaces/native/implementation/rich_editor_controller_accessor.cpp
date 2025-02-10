@@ -371,20 +371,17 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, 0);
     int32_t result = 0;
-    std::optional<SpanOptionBase> locOptions;
-    if (options) {
-        locOptions = Converter::OptConvert<SpanOptionBase>(*options);
-    }
-    if (locOptions) {
-        auto controller = peerImpl->GetController().Upgrade();
-        auto pattern = controller->GetPattern().Upgrade();
-        auto frameNodePtr = pattern->GetHost();
-        if (!value || !controller || !pattern || !frameNodePtr) {
+    std::optional<SpanOptionBase> locOptions = options ? Converter::OptConvert<SpanOptionBase>(*options) : std::nullopt;
+    if (locOptions.has_value()) {
+        if (!value) {
             result = peerImpl->AddBuilderSpanImpl(locOptions.value());
         } else {
-            auto frameNode = frameNodePtr.GetRawPtr();
+            auto controller = peerImpl->GetController().Upgrade();
+            auto pattern = controller ? controller->GetPattern().Upgrade() : nullptr;
+            auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
+            auto frameNode = frameNodeWeakPtr ? frameNodeWeakPtr.GetRawPtr() : nullptr;
             auto customNode = CallbackHelper(*value, frameNode).BuildSync(frameNode);
-            auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
+            auto customFrameNode = reinterpret_cast<FrameNode*>(customNode.GetRawPtr());
             if (customFrameNode) {
                 result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
             }
