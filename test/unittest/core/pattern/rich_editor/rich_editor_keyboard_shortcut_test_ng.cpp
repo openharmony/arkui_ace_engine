@@ -132,7 +132,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestS
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::Left);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
-    
     richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 17);
     richEditorPattern->SetCaretPosition(20);
