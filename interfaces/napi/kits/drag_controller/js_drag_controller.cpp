@@ -940,6 +940,16 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     return true;
 }
 
+void HideDragPreviewWindow(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([asyncCtx]() { NG::DragControllerFuncWrapper::HideDragPreviewWindow(asyncCtx->instanceId); },
+        TaskExecutor::TaskType::UI, "ArkUIHideDragPreviewWindow", PriorityType::VIP);
+}
+
 void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& ret)
 {
     CHECK_NULL_VOID(asyncCtx);
@@ -970,6 +980,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
+        HideDragPreviewWindow(asyncCtx);
         HandleDragEnd(asyncCtx, dragNotifyMsg);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
@@ -1170,6 +1181,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         return false;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
+        HideDragPreviewWindow(asyncCtx);
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
