@@ -1119,9 +1119,6 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
 
 void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
@@ -2795,7 +2792,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         ContainerScope scope(containerId);
         std::shared_ptr<Media::PixelMap> pmap = std::move(pixmap);
         auto pixelmap = PixelMap::CreatePixelMap(&pmap);
-        auto task = [pixelmap, containerId = containerId, frameNode]() {
+        auto task = [pixelmap, frameNode]() {
             auto context = frameNode->GetRenderContext();
             if (context) {
                 context->UpdateBackgroundPixelMap(pixelmap);
@@ -2893,9 +2890,6 @@ void RosenRenderContext::PaintBorderImageGradient()
 
 void RosenRenderContext::OnModifyDone()
 {
-    auto frameNode = GetUnsafeHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
@@ -5463,7 +5457,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
     // transition effects should be initialized without animation.
-    RSNode::ExecuteWithoutAnimation([this, isOnTheTree, &frameNode]() {
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
         // transitionIn effects should be initialized as active if currently not on the tree.
         transitionEffect_->Attach(Claim(this), !isOnTheTree);
     });
