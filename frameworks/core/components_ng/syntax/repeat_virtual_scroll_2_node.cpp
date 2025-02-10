@@ -32,9 +32,9 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 // REPEAT
 RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
-    const std::function<void(IndexType, IndexType)> onRecycleItems,
-    const std::function<void(int32_t, int32_t, bool)> onActiveRange,
-    const std::function<void()> onPurge)
+    const std::function<void(IndexType, IndexType)>& onRecycleItems,
+    const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void()>& onPurge)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
     if (node) {
@@ -52,9 +52,9 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
 
 RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
-    const std::function<void(IndexType, IndexType)> onRecycleItems,
-    const std::function<void(int32_t, int32_t, bool)> onActiveRange,
-    const std::function<void()> onPurge)
+    const std::function<void(IndexType, IndexType)>& onRecycleItems,
+    const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void()>& onPurge)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount), caches_(onGetRid4Index),
       onRecycleItems_(onRecycleItems), onActiveRange_(onActiveRange), onPurge_(onPurge),
       postUpdateTaskHasBeenScheduled_(false)

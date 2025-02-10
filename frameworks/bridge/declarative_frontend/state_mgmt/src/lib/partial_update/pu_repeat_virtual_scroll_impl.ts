@@ -85,7 +85,7 @@ class __RepeatVirtualScrollImpl<T> {
         let ttype = RepeatEachFuncTtype;
         try {
             ttype = this.ttypeGenFunc_(item, index);
-        } catch(e) {
+        } catch (e) {
             stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl. Error generating ttype at index: ${index}`,
                 e?.message);
         }

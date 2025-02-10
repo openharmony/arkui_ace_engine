@@ -94,15 +94,15 @@ class ACE_EXPORT RepeatVirtualScroll2Node : public ForEachBaseNode {
 public:
     static RefPtr<RepeatVirtualScroll2Node> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
-        const std::function<void(IndexType, IndexType)> onRecycleItems,
-        const std::function<void(int32_t, int32_t, bool)> onActiveRange,
-        const std::function<void()> onPurge);
+        const std::function<void(IndexType, IndexType)>& onRecycleItems,
+        const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void()>& onPurge);
 
     RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
-        const std::function<void(IndexType, IndexType)> onRecycleItems,
-        const std::function<void(int32_t, int32_t, bool)> onActiveRange,
-        const std::function<void()> onPurge);
+        const std::function<void(IndexType, IndexType)>& onRecycleItems,
+        const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void()>& onPurge);
 
     ~RepeatVirtualScroll2Node() override = default;
 

@@ -152,22 +152,22 @@ class ActiveDataItem<T> {
 
     public toString(): string {
         return this.state === ActiveDataItem.UINodeExists
-            ? `[rid: ${this.rid}, ttype: ${this.ttype}${this.key ? ", key: " + this.key : ""}]`
+            ? `[rid: ${this.rid}, ttype: ${this.ttype}${this.key ? ', key: ' + this.key : ''}]`
             : `[no item]`;
     }
 
     public dump(): string {
         const state = this.state === ActiveDataItem.UINodeExists
-            ? "UINode exists"
+            ? 'UINode exists'
             : this.state === ActiveDataItem.UINodeRenderFailed
-                ? "UINode failed to render"
+                ? 'UINode failed to render'
                 : this.state === ActiveDataItem.UINodeToBeRendered
-                    ? "UINode to be rendered"
+                    ? 'UINode to be rendered'
                     : this.state === ActiveDataItem.NoValue
-                        ? "No data value"
-                        : "unknown state (error)";
-        const rid = this.rid ?? "no RID/not rendered";
-        const ttype = this.ttype ?? "ttype N/A";
+                        ? 'No data value'
+                        : 'unknown state (error)';
+        const rid = this.rid ?? 'no RID/not rendered';
+        const ttype = this.ttype ?? 'ttype N/A';
         return (this.state === ActiveDataItem.UINodeExists)
             ? `state: '${state}', RID: ${rid}, ttype: ${ttype}, key: ${this.key}`
             : `state: '${state}'`;
@@ -175,14 +175,14 @@ class ActiveDataItem<T> {
 
     public shortDump() : string {
         const state = this.state === ActiveDataItem.UINodeExists
-            ? "UINode exists"
+            ? 'UINode exists'
             : this.state === ActiveDataItem.UINodeRenderFailed
-                ? "UINode failed to render"
+                ? 'UINode failed to render'
                 : this.state === ActiveDataItem.NoValue
-                    ? "No data value"
-                    : "unknown state (error)";
-        const rid = this.rid ?? "no RID/not rendered";
-        const ttype = this.ttype ?? "ttype N/A";
+                    ? 'No data value'
+                    : 'unknown state (error)';
+        const rid = this.rid ?? 'no RID/not rendered';
+        const ttype = this.ttype ?? 'ttype N/A';
         return (this.state === ActiveDataItem.UINodeExists) 
             ? `state: '${state}', RID: ${rid}, ttype: ${ttype}`
             : `state: '${state}'`;
@@ -265,6 +265,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
 
+    // request container re-layout
+    private firstIndexChanged_: number = 0;
+
     // when access view model record dependency on 'this'.
     private startRecordDependencies(clearBindings: boolean = false): void {
         ObserveV2.getObserve().startRecordDependencies(this.owningViewV2_, this.repeatElmtId_, clearBindings);
@@ -309,7 +312,7 @@ class __RepeatVirtualScroll2Impl<T> {
         // so when array length changes, will update totalCount. use totalCountFunc_ for this
         this.totalCountFunc_ = config.totalCountSpecified ?
             (typeof config.totalCount === 'function' ? config.totalCount : undefined) :
-            () => this.arr_.length;
+            (): number => this.arr_.length;
         if (this.totalCountFunc_) {
             this.totalCount_ = this.totalCountFunc_();
             // Check legal totalCount value
@@ -410,14 +413,14 @@ class __RepeatVirtualScroll2Impl<T> {
 
         stateMgmtConsole.debug(`checking range ${activeRangeFrom} - ${activeRangeTo}`);
 
-        let firstIndexChanged = Math.min(activeRangeTo + 1, this.arr_.length);
+        this.firstIndexChanged_ = Math.min(activeRangeTo + 1, this.arr_.length);
 
         // replacement for this.activeDataItems_
         const newActiveDataItems: Array<ActiveDataItem<void | T>> = new Array<ActiveDataItem<void | T>>();
 
         // replacement for l1Rid4Index_ index -> rid map on C++ side
         // will send to C++ when done
-        const newL1Rid4Index = new Map<number, number>();
+        const newL1Rid4Index: Map<number, number> = new Map<number, number>();
 
         // clear keys for new rerender
         this.key4Index_.clear();
@@ -426,6 +429,46 @@ class __RepeatVirtualScroll2Impl<T> {
         // step 1. move data items to newActiveDataItems that are unchanged
         // (same item / same key, still at same index, same ttype)
         // create createMissingDataItem -type entries for all other new data items.
+        if (!this.moveItemsUnchanged(newActiveDataItems, newL1Rid4Index)) {
+            return;
+        }
+
+        // step 2. move retained data items
+        // these are items with same value / same key in new and old array: 
+        // their index has changed, ttype is unchanged
+        this.moveRetainedItems(newActiveDataItems, newL1Rid4Index);
+
+        // step 3. remaining old data items, i.e. data item removed from source array
+        // add their rid to spare
+        this.addRemovedItemsToSpare();
+
+        // step 4: data items in new source array that are either new in the array
+        // or have been there before but need to be rendered with different ttype
+        // if canUpdate then do the update.
+        // if need new render, do not do the new render right away. Wait for layout to ask
+        // for the item to render.
+        this.newItemsNeedToRender(newActiveDataItems, newL1Rid4Index);
+
+        // render all data changes in one go
+        ObserveV2.getObserve().updateDirty2(true);
+
+        this.activeDataItems_ = newActiveDataItems;
+
+        stateMgmtConsole.debug(`rerender result: `,
+            `\nspareRid : ${this.dumpSpareRid()}`,
+            `\nthis.dumpDataItems: ${this.activeDataItems_}`,
+            `\nnewL1Rid4Index: ${JSON.stringify(Array.from(newL1Rid4Index))}`,
+            `\nfirst item changed at index ${this.firstIndexChanged_} .`);
+
+        RepeatVirtualScroll2Native.updateL1Rid4Index(
+            this.repeatElmtId_, this.totalCount_, this.firstIndexChanged_, Array.from(newL1Rid4Index));
+
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
+            `${this.arr_.length}, totalCount: ${this.totalCount_} - done`);
+    }
+
+    private moveItemsUnchanged(
+        newActiveDataItems: Array<ActiveDataItem<void | T>>, newL1Rid4Index: Map<number, number>): boolean {
         let hasChanges = false;
         for (const indexS in this.activeDataItems_) {
             const activeIndex = parseInt(indexS);
@@ -458,7 +501,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 ((!this.useKeys_ && dataItemAtIndex === this.activeDataItems_[activeIndex].item) ||
                 (this.useKeys_ && key === this.activeDataItems_[activeIndex].key))) {
                     stateMgmtConsole.debug(
-                        `index ${activeIndex} ttype '${ttype}'${this.useKeys_ ? ", key " + key : ""} `,
+                        `index ${activeIndex} ttype '${ttype}'${this.useKeys_ ? ', key ' + key : ''} `,
                         `and dataItem unchanged.`);
                     newActiveDataItems[activeIndex] = this.activeDataItems_[activeIndex]; 
 
@@ -485,13 +528,15 @@ class __RepeatVirtualScroll2Impl<T> {
             // triggers layout to request FrameCount() / totalCount and if increased newly added source array items
             this.activeDataItems_ = newActiveDataItems;
             RepeatVirtualScroll2Native.requestContainerReLayout(
-                this.repeatElmtId_, this.totalCount_, Math.min(this.totalCount_ - 1, activeRangeTo + 1));
-            return;
+                this.repeatElmtId_, this.totalCount_, Math.min(this.totalCount_ - 1, this.activeRange_[1] + 1));
+            return false;
         }
 
-        // step 2. move retained data items
-        // these are items with same value / same key in new and old array: 
-        // their index has changed, ttype is unchanged
+        return true;
+    }
+
+    private moveRetainedItems(
+        newActiveDataItems: Array<ActiveDataItem<void | T>>, newL1Rid4Index: Map<number, number>): void {
         for (const indexS in newActiveDataItems) {
             const activeIndex = parseInt(indexS);
             const newActiveDataItemAtActiveIndex = newActiveDataItems[activeIndex];
@@ -503,7 +548,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
             if (newActiveDataItemAtActiveIndex.state === ActiveDataItem.NoValue) {
                 stateMgmtConsole.debug(`new index ${activeIndex} missing in updated source array.`);
-                firstIndexChanged = Math.min(firstIndexChanged, activeIndex);
+                this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
                 continue;
             }
 
@@ -532,7 +577,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(`new index ${activeIndex} / old index ${ridMeta.repeatItem_.index}: `,
                     `keep in L1: rid ${movedDataItem.rid}, unchanged ttype '${newActiveDataItemAtActiveIndex.ttype}'`);
                 ridMeta.repeatItem_.updateIndex(activeIndex);
-                firstIndexChanged = Math.min(firstIndexChanged, activeIndex);
+                this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
 
                 // the data item is handled, remove it from old active data range
                 // so we do not use it again
@@ -541,12 +586,12 @@ class __RepeatVirtualScroll2Impl<T> {
                 // update is needed for this data item
                 // either because dataItem is new, or new ttype needs to used
                 stateMgmtConsole.debug(`need update for index ${activeIndex}`);
-                firstIndexChanged = Math.min(firstIndexChanged, activeIndex);
+                this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
             }
         } // for new data items in active range
+    }
 
-        // step 3. remaining old data items, i.e. data item removed from source array
-        // add their rid to spare
+    private addRemovedItemsToSpare(): void {
         for (let oldIndex in this.activeDataItems_) {
             if (this.activeDataItems_[oldIndex].rid) {
                 this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
@@ -555,12 +600,10 @@ class __RepeatVirtualScroll2Impl<T> {
                 this.key4Index_.delete(index);
             }
         }
+    }
 
-        // step 4: data items in new source array that are either new in the array
-        // or have been there before but need to be rendered with different ttype
-        // if canUpdate then do the update.
-        // if need new render, do not do the new render right away. Wait for layout to ask
-        // for the item to render.
+    private newItemsNeedToRender(
+        newActiveDataItems: Array<ActiveDataItem<void | T>>, newL1Rid4Index: Map<number, number>): void {
         for (const indexS in newActiveDataItems) {
             const activeIndex = parseInt(indexS);
             const newActiveDataItemAtActiveIndex = newActiveDataItems[activeIndex];
@@ -570,56 +613,39 @@ class __RepeatVirtualScroll2Impl<T> {
             }
 
             const optRid = this.canUpdate(newActiveDataItemAtActiveIndex.ttype);
-            if (optRid > 0) {
-                const ridMeta = this.meta4Rid_.get(optRid);
-                if (ridMeta) {
-                    // found rid / repeatItem to update
-                    stateMgmtConsole.debug(`index ${activeIndex}: update rid ${optRid} / ttype `,
-                        `'${newActiveDataItemAtActiveIndex.ttype}'`);
-
-                    newActiveDataItemAtActiveIndex.rid = optRid;
-                    newActiveDataItemAtActiveIndex.state = ActiveDataItem.UINodeExists;
-
-                    if (this.useKeys_) {
-                        const key = this.computeKey(newActiveDataItemAtActiveIndex.item as T, activeIndex,
-                            /* monitor access already ongoing */ false, newActiveDataItems);
-                        newActiveDataItemAtActiveIndex.key = key;
-                        ridMeta.key_ = key;
-                    }
-    
-                    // spare rid is used
-                    this.spareRid_.delete(optRid);
-
-                    // add to index -> rid map to be sent to C++
-                    newL1Rid4Index.set(activeIndex, optRid);
-
-                    // don't need to call getItem here, the data item has been lazy loaded before
-                    ridMeta.repeatItem_.updateItem(newActiveDataItemAtActiveIndex.item as T);
-                    ridMeta.repeatItem_.updateIndex(activeIndex);
-
-                    firstIndexChanged = Math.min(firstIndexChanged, activeIndex);
-                }
-            } else {
+            if (optRid <= 0) {
                 stateMgmtConsole.debug(`active range index ${activeIndex}: no rid found to update`);
+                continue;
+            }
+            const ridMeta = this.meta4Rid_.get(optRid);
+            if (ridMeta) {
+                // found rid / repeatItem to update
+                stateMgmtConsole.debug(`index ${activeIndex}: update rid ${optRid} / ttype `,
+                    `'${newActiveDataItemAtActiveIndex.ttype}'`);
+
+                newActiveDataItemAtActiveIndex.rid = optRid;
+                newActiveDataItemAtActiveIndex.state = ActiveDataItem.UINodeExists;
+
+                if (this.useKeys_) {
+                    const key = this.computeKey(newActiveDataItemAtActiveIndex.item as T, activeIndex,
+                        /* monitor access already ongoing */ false, newActiveDataItems);
+                    newActiveDataItemAtActiveIndex.key = key;
+                    ridMeta.key_ = key;
+                }
+
+                // spare rid is used
+                this.spareRid_.delete(optRid);
+
+                // add to index -> rid map to be sent to C++
+                newL1Rid4Index.set(activeIndex, optRid);
+
+                // don't need to call getItem here, the data item has been lazy loaded before
+                ridMeta.repeatItem_.updateItem(newActiveDataItemAtActiveIndex.item as T);
+                ridMeta.repeatItem_.updateIndex(activeIndex);
+
+                this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
             }
         };
-
-        // render all data changes in one go
-        ObserveV2.getObserve().updateDirty2(true);
-
-        this.activeDataItems_ = newActiveDataItems;
-
-        stateMgmtConsole.debug(`rerender result: `,
-            `\nspareRid : ${this.dumpSpareRid()}`,
-            `\nthis.dumpDataItems: ${this.activeDataItems_}`,
-            `\nnewL1Rid4Index: ${JSON.stringify(Array.from(newL1Rid4Index))}`,
-            `\nfirst item changed at index ${firstIndexChanged} .`);
-
-        RepeatVirtualScroll2Native.updateL1Rid4Index(
-            this.repeatElmtId_, this.totalCount_, firstIndexChanged, Array.from(newL1Rid4Index));
-
-        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
-            `${this.arr_.length}, totalCount: ${this.totalCount_} - done`);
     }
 
     private computeTtype(item: T, index: number, monitorAccess: boolean): string {
@@ -631,7 +657,7 @@ class __RepeatVirtualScroll2Impl<T> {
         let ttype = RepeatEachFuncTtype;
         try {
             ttype = this.ttypeGenFunc_(item, index);
-        } catch(e) {
+        } catch (e) {
             stateMgmtConsole.applicationError(
                 `__RepeatVirtualScroll2Impl. Error generating ttype at index: ${index}`, e?.message);
         }
@@ -657,7 +683,7 @@ class __RepeatVirtualScroll2Impl<T> {
             } catch {
                 stateMgmtConsole.applicationError(`__RepeatVirtualScroll2Impl (${this.repeatElmtId_}):`,
                     `unstable key function. Fix the key gen function in your application!`);
-                key = this.mkRandomKey(index, "_key-gen-crashed_");
+                key = this.mkRandomKey(index, '_key-gen-crashed_');
             }
             monitorAccess && this.stopRecordDependencies();
 
@@ -1011,7 +1037,7 @@ class __RepeatVirtualScroll2Impl<T> {
         stateMgmtConsole.debug(this.dumpCachedCount());
     }
 
-    private onPurge() {
+    private onPurge(): void {
         stateMgmtConsole.debug(
             `${this.constructor.name}(${this.repeatElmtId_}) purge(), totalCount: ${this.totalCount_} - start`);
 
@@ -1056,15 +1082,15 @@ class __RepeatVirtualScroll2Impl<T> {
 
     private dumpDataItems(): string {
         let result = ``;
-        let sepa = "";
+        let sepa = '';
         let count = 0;
         for (const index in this.activeDataItems_) {
             const dataItemDump = this.activeDataItems_[index].dump();
             const repeatItemIndex = this.activeDataItems_[index].rid
                 ? this.meta4Rid_.get(this.activeDataItems_[index].rid)?.repeatItem_?.index
-                : "N/A";
+                : 'N/A';
             result += `${sepa}index ${index}, ${dataItemDump} (repeatItemIndex ${repeatItemIndex})`;
-            sepa = ", \n";
+            sepa = ', \n';
             count += 1;
         }
         return `activeDataItems(array): length: ${this.activeDataItems_.length}, ` +
@@ -1073,23 +1099,23 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     private dumpCachedCount(): string {
-        let result = "";
-        let sepa = "";
+        let result = '';
+        let sepa = '';
         Object.entries(this.templateOptions_).forEach((pair) => {
             const options: RepeatTemplateImplOptions = pair[1];
             result += `${sepa}'template ${pair[0]}': specified: ${options.cachedCountSpecified} ` +
                 `cachedCount: ${options.cachedCount}: `;
-            sepa = ", ";
+            sepa = ', ';
         });
         return result;
     }
 
     private dumpKeys(): string {
-        let result = "";
-        let sepa = "";
+        let result = '';
+        let sepa = '';
         this.key4Index_.forEach((key, index) => {
             result += `${sepa}${index}: ${key}`;
-            sepa = "\n";
+            sepa = '\n';
         });
         return result;
     }
