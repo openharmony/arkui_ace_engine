@@ -286,4 +286,10 @@ void FfiOHOSAceFrameworkDatePickerSetSelectedTextStyle(uint32_t color, double si
 
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
+
+void FfiOHOSAceFrameworkDatePickerSetOpacity(double opacity)
+{
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity);
+    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
+}
 }
