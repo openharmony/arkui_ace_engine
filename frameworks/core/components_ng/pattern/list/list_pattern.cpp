@@ -1213,7 +1213,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT)) {
             if (curIndexInGroup == -1) {
                 moveStep = lanes_;
-                nextIndex = curIndex + moveStep;
+                nextIndex = GetNextLineFocusIndex(curIndex);
                 nextIndexInGroup = -1;
             } else {
                 moveStep = curListItemGroupPara.lanes;
@@ -1292,9 +1292,34 @@ void ListPattern::VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup
         nextIndex--;
         nextIndexInGroup = -1;
     } else if (nextIndexInGroup > param.itemEndIndex) {
-        nextIndex++;
-        nextIndexInGroup = -1;
+        if (param.lanes > 1 &&
+            nextIndexInGroup <= param.itemEndIndex + param.lanes - param.itemEndIndex % param.lanes - 1) {
+            nextIndexInGroup = param.itemEndIndex;
+        } else {
+            nextIndex++;
+            nextIndexInGroup = -1;
+        }
     }
+}
+
+int32_t ListPattern::GetNextLineFocusIndex(int32_t currIndex)
+{
+    int32_t nextIndex = currIndex + lanes_;
+    if (nextIndex <= maxListItemIndex_) {
+        return nextIndex;
+    }
+    auto it1 = itemPosition_.find(currIndex);
+    if (it1 == itemPosition_.end()) {
+        return nextIndex;
+    }
+    auto it2 = itemPosition_.find(maxListItemIndex_);
+    if (it2 == itemPosition_.end()) {
+        return maxListItemIndex_;
+    }
+    if (NearEqual(it1->second.startPos, it2->second.startPos)) {
+        return nextIndex;
+    }
+    return maxListItemIndex_;
 }
 
 WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex)
