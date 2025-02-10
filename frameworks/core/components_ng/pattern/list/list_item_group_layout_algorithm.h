@@ -441,6 +441,7 @@ private:
     void CheckUpdateGroupAndItemPos(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void UpdateCachedItemPosition(int32_t cacheCount);
     void UpdateLayoutedItemInfo();
+    void ReportGetChildError(const std::string& funcName, int32_t index) const;
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
