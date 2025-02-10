@@ -1450,11 +1450,11 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
         }
     } else {
-        UpdateMenuBackgroundStyleSub(menuNode, menuParam);
+        UpdateMenuBackgroundColor(menuNode, menuParam);
     }
 }
 
-void MenuView::UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+void MenuView::UpdateMenuBackgroundColor(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     auto menuNodeRenderContext = menuNode->GetRenderContext();
     auto pipeLineContext = menuNode->GetContextWithCheck();
@@ -1463,12 +1463,6 @@ void MenuView::UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, c
     CHECK_NULL_VOID(selectTheme);
     menuNodeRenderContext->UpdateBackgroundColor(
         menuParam.backgroundColor.value_or(selectTheme->GetBackgroundColor()));
-    BlurStyleOption blurStyleOption;
-    blurStyleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
-    if (menuParam.backgroundBlurStyle.has_value()) {
-        blurStyleOption.blurStyle = static_cast<BlurStyle>(menuParam.backgroundBlurStyle.value());
-    }
-    menuNodeRenderContext->UpdateBackBlurStyle(blurStyleOption);
 }
 
 void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)

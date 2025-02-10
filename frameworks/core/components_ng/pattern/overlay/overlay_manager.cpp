@@ -1222,15 +1222,6 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
     overlayManager->SetIsMenuShow(false);
-    ToOpenMenuAtAnimationFinished();
-}
-
-void OverlayManager::ToOpenMenuAtAnimationFinished()
-{
-    if (openNextMenu_) {
-        openNextMenu_();
-        openNextMenu_ = nullptr;
-    }
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
