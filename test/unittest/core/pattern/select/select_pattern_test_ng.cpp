@@ -1682,6 +1682,8 @@ HWTEST_F(SelectPatternTestNg, SetItemSelected032, TestSize.Level1)
  */
 HWTEST_F(SelectPatternTestNg, SetControlSize001, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     SelectModelNG selectModelInstance;
     /**
      * @tc.steps: step1. Get frameNode and pattern.
@@ -1698,6 +1700,7 @@ HWTEST_F(SelectPatternTestNg, SetControlSize001, TestSize.Level1)
     selectPattern->SetControlSize(ControlSize::SMALL);
     auto controlSize = selectPattern->GetControlSize();
     EXPECT_EQ(ControlSize::SMALL, controlSize);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
