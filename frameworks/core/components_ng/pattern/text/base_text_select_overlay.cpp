@@ -1123,6 +1123,7 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
 {
     auto host = GetOwner();
     CHECK_NULL_RETURN(host, false);
+    
     if (HasUnsupportedTransform()) {
         return false;
     }

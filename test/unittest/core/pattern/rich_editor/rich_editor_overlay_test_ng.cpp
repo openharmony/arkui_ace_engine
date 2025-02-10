@@ -1645,6 +1645,7 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg004, TestSize.Level1)
     auto geometryNode = richEditorNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(BUILDER_WIDTH, BUILDER_HEIGHT));
+    
 
     richEditorPattern->selectOverlay_->enableHandleLevel_ = true;
     richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);

@@ -441,6 +441,7 @@ public:
     bool CursorMoveRight();
     bool CursorMoveUp();
     bool CursorMoveDown();
+
     bool CursorMoveLeftWord();
     bool CursorMoveRightWord();
     bool CursorMoveToParagraphBegin();

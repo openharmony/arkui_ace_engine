@@ -90,6 +90,7 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
 
     auto contentRect = pattern->GetTextContentRect();
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
+    
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset, contentRect.GetSize());
     auto parent = host->GetAncestorNodeOfFrame();
     visibleContentRect = GetVisibleContentRect();

@@ -77,6 +77,7 @@ public:
         return isHandleMoving_;
     }
     float GetHandleHotZoneRadius();
+    
 
 private:
     void RemoveAreaChangeInner();
