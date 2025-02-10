@@ -508,7 +508,10 @@ void ArcIndexerPattern::UpdateStartAndEndIndexbySelected()
         if (endIndex_ > arraySize) {
             endIndex_ = arraySize;
         }
-        if (selected_ >= endIndex_ - 1) {
+        if (selected_ >= startIndex_ && selected_ < endIndex_) {
+            selected_ -= startIndex_;
+            focusIndex_ = selected_;
+        } else if (selected_ >= endIndex_ - 1) {
             endIndex_ = selected_ + 1;
             if (endIndex_ > arraySize) {
                 endIndex_ = arraySize;
