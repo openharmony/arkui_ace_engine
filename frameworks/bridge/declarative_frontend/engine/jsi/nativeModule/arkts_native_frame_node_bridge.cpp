@@ -598,14 +598,14 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
-    if (info.GetTiltX().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value())));
-    }
-    if (info.GetTiltY().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value())));
-    }
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
@@ -996,14 +996,14 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& 
         panda::NumberRef::New(vm, info.GetTargetDisplayId()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    if (info.GetTiltX().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value())));
-    }
-    if (info.GetTiltY().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value())));
-    }
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
