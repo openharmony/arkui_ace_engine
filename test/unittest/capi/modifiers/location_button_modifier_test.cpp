@@ -35,16 +35,6 @@ namespace  {
     const auto ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE = ButtonType::CAPSULE;
 
     const auto DEFAULT_JSON_INT = -1;
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUILocationButtonEventsReceiver eventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-            .getLocationButtonEventsReceiver = [] () -> const GENERATED_ArkUILocationButtonEventsReceiver* {
-                return &eventReceiver;
-            }
-        };
-    };
 } // namespace
 
 class LocationButtonModifierTest : public ModifierTestBase<GENERATED_ArkUILocationButtonModifier,
@@ -55,8 +45,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<SecurityComponentTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -362,18 +350,19 @@ HWTEST_F(LocationButtonModifierTest, setLocationButtonOptions1TestTextAndIconEmp
  */
 HWTEST_F(LocationButtonModifierTest, DISABLED_setOnClickTest, TestSize.Level1)
 {
-    static std::optional<Ark_LocationButtonOnClickResult> checkEvent;
-
-    EventsTracker::eventReceiver.onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event,
-        const Ark_LocationButtonOnClickResult result)
-    {
-        checkEvent = result;
-    };
-
-    modifier_->setOnClick(node_, {});
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
+    static std::optional<Ark_LocationButtonOnClickResult> checkEvent;
+
+    Callback_ClickEvent_LocationButtonOnClickResult_Void OnClick = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_ClickEvent event, const Ark_LocationButtonOnClickResult result) {
+            checkEvent = result;
+        }
+    };
+
+    modifier_->setOnClick(node_, &OnClick);
+
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
 
