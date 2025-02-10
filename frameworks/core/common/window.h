@@ -221,24 +221,12 @@ public:
     {
         return false;
     }
-
-    void SetIsRootInitialize(bool isRootInitialize)
-    {
-        isRootInitialize_ = isRootInitialize;
-    }
-
-    bool isRootInitialize() const
-    {
-        return isRootInitialize_;
-    }
-
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
     MouseFormat cursor_ = MouseFormat::DEFAULT;
     bool isUserSetCursor_ = false;
-    bool isRootInitialize_ = false;
 
     struct VsyncCallback {
         AceVsyncCallback callback_ = nullptr;
