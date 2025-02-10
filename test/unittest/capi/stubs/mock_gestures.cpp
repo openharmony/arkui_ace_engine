@@ -50,4 +50,40 @@ PanGestureModel* PanGestureModel::GetInstance()
     return instance_;
 }
 
+PinchGestureModel* PinchGestureModel::instance_ = nullptr;
+PinchGestureModel* PinchGestureModel::GetInstance()
+{
+    if (!instance_) {
+        instance_ = new PinchGestureModel();
+    }
+    return instance_;
+}
+
+SwipeGestureModel* SwipeGestureModel::instance_ = nullptr;
+SwipeGestureModel* SwipeGestureModel::GetInstance()
+{
+    if (!instance_) {
+        instance_ = new SwipeGestureModel();
+    }
+    return instance_;
+}
+
+RotationGestureModel* RotationGestureModel::instance_ = nullptr;
+RotationGestureModel* RotationGestureModel::GetInstance()
+{
+    if (!instance_) {
+        instance_ = new RotationGestureModel();
+    }
+    return instance_;
+}
+
+GestureGroupModel* GestureGroupModel::instance_ = nullptr;
+GestureGroupModel* GestureGroupModel::GetInstance()
+{
+    if (!instance_) {
+        instance_ = new GestureGroupModel();
+    }
+    return instance_;
+}
+
 } // OHOS::Ace
