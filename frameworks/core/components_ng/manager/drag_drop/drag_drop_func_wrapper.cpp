@@ -971,6 +971,17 @@ void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
     auto overlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto menuWrapperNode = overlayManager->GetMenuNode(targetId);
+    if (!menuWrapperNode) {
+        auto rootNode = overlayManager->GetRootNode().Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        for (const auto& child : rootNode->GetChildren()) {
+            auto node = AceType::DynamicCast<FrameNode>(child);
+            if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+                menuWrapperNode = node;
+                break;
+            }
+        }
+    }
     CHECK_NULL_VOID(menuWrapperNode);
 
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1403,9 +1414,6 @@ float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_RETURN(frameNode, scale);
     auto pixelMap = frameNode->GetDragPixelMap();
     CHECK_NULL_RETURN(pixelMap, scale);
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        return scale;
-    }
     auto width = pixelMap->GetWidth();
     auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
     if (frameNode->GetDragPreviewOption().isScaleEnabled && width != 0 && width > maxWidth) {
