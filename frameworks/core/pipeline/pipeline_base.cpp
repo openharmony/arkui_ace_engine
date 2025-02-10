@@ -611,7 +611,7 @@ std::string PipelineBase::GetUnexecutedFinishCount() const
 std::function<void()> PipelineBase::GetWrappedAnimationCallback(
     const AnimationOption& option, const std::function<void()>& finishCallback, const std::optional<int32_t>& count)
 {
-    if (!IsFormRender() && !finishCallback) {
+    if (!IsFormRenderExceptDynamicComponent() && !finishCallback) {
         return nullptr;
     }
     auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
@@ -633,13 +633,13 @@ std::function<void()> PipelineBase::GetWrappedAnimationCallback(
             context->finishCount_.erase(count.value());
         }
         if (!(*finishPtr)) {
-            if (context->IsFormRender()) {
+            if (context->IsFormRenderExceptDynamicComponent()) {
                 TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
                 context->SetIsFormAnimation(false);
             }
             return;
         }
-        if (context->IsFormRender()) {
+        if (context->IsFormRenderExceptDynamicComponent()) {
             TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
             context->SetFormAnimationFinishCallback(true);
             (*finishPtr)();
@@ -708,7 +708,7 @@ void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const R
 {
 #ifdef ENABLE_ROSEN_BACKEND
     auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback, count);
-    if (IsFormRender()) {
+    if (IsFormRenderExceptDynamicComponent()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
             SetFormAnimationStartTime(GetMicroTickCount());

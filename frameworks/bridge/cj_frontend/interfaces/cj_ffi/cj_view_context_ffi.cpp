@@ -40,7 +40,7 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
 bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option)
 {
     CHECK_NULL_RETURN(pipelineContext, false);
-    return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
+    return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
 }
 
@@ -110,7 +110,8 @@ void FfiOHOSAceFrameworkViewContextAnimation(NativeOptionAnimateParam animateOpt
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
-    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+    if (pipelineContextBase->IsFormAnimationFinishCallback() &&
+        pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
         GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
         return;
     }
@@ -123,7 +124,8 @@ void FfiOHOSAceFrameworkViewContextAnimation(NativeOptionAnimateParam animateOpt
         return;
     }
     ParseCjAnimation(animateParam, animateOpt);
-    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+    if (pipelineContextBase->IsFormAnimationFinishCallback() &&
+        pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
         animateOpt.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
         animateOpt.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
         TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
@@ -146,7 +148,8 @@ void FfiOHOSAceFrameworkViewContextAnimationTo(NativeAnimateParam animateParam, 
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
-    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+    if (pipelineContextBase->IsFormAnimationFinishCallback() &&
+        pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
         GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
         return;
     }
