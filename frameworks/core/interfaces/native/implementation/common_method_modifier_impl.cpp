@@ -15,6 +15,9 @@
 
 #include "common_method_modifier_impl.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
+#include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -36,6 +39,23 @@ PanDirection DeterminePanDirection(float dx, float dy)
     }
     return result;
 };
+
+SwipeDirection DetermineSwipeDirection(float dx, float dy)
+{
+    SwipeDirection result;
+    const float epsilon = 1e-5;
+
+    if (std::abs(dx) < epsilon && std::abs(dy) < epsilon) {
+        result.type = SwipeDirection::NONE;
+    } else if (std::abs(dx) > epsilon && std::abs(dy) > epsilon) {
+        result.type = SwipeDirection::ALL;
+    } else if (std::abs(dx) > std::abs(dy)) {
+        result.type = SwipeDirection::HORIZONTAL;
+    } else {
+        result.type = SwipeDirection::VERTICAL;
+    }
+    return result;
+}
 
 void CreateGestureProcessor(GesturePriority priority, GestureMask gestureMask)
 {
@@ -97,38 +117,86 @@ void CreatePanGesture(PanGestureEventPeer* peer)
     model->Create(event->GetFingerList().size(), panDirection, 0);
 }
 
+void CreatePinchGesture(PinchGestureEventPeer* peer)
+{
+    CHECK_NULL_VOID(peer);
+    auto event = peer->GetEventInfo();
+    auto model = PinchGestureModelNG::GetInstance();
+    CHECK_NULL_VOID(event && model);
+    constexpr double distanceNum = std::numeric_limits<double>::infinity();
+    model->Create(event->GetFingerList().size(), distanceNum);
+}
+
+void CreateSwipeGesture(SwipeGestureEventPeer* peer)
+{
+    CHECK_NULL_VOID(peer);
+    auto event = peer->GetEventInfo();
+    auto model = SwipeGestureModelNG::GetInstance();
+    CHECK_NULL_VOID(event && model);
+    auto offset = event->GetTarget().origin;
+    SwipeDirection direction = DetermineSwipeDirection(
+        offset.GetX().ConvertToPx(), offset.GetY().ConvertToPx());
+    model->Create(event->GetFingerList().size(), direction, event->GetSpeed());
+}
+
+void CreateRotationGesture(RotationGestureEventPeer* peer)
+{
+    CHECK_NULL_VOID(peer);
+    auto event = peer->GetEventInfo();
+    auto model = RotationGestureModelNG::GetInstance();
+    CHECK_NULL_VOID(event && model);
+    model->Create(event->GetFingerList().size(), event->GetAngle());
+}
+
+void CreateGroupGesture(BaseGestureEventPeer* peer)
+{
+    CHECK_NULL_VOID(peer);
+    auto model = GestureGroupModelNG::GetInstance();
+    CHECK_NULL_VOID(model);
+    int32_t mode = static_cast<int32_t>(GestureMode::Sequence);
+    model->Create(mode);
+}
+
 void CreateGesture(FrameNode *frameNode,
-    const Ark_GestureType* gesture, const GestureMask& mask, const GesturePriority& priority)
+    const Ark_GestureType* gesture,
+    const GestureMask& mask, const GesturePriority& priority)
 {
     CHECK_NULL_VOID(gesture);
     CHECK_NULL_VOID(frameNode);
     CreateGestureProcessor(priority, mask);
 
     Converter::VisitUnion(*gesture,
-        [frameNode](const Ark_TapGestureInterface& value) {
+        [](const Ark_TapGestureInterface& value) {
             auto peer = reinterpret_cast<TapGestureEventPeer*>(value.handle);
             CreateTapGesture(peer);
         },
-        [frameNode](const Ark_LongPressGestureInterface& value) {
+        [](const Ark_LongPressGestureInterface& value) {
             auto peer = reinterpret_cast<LongPressGestureEventPeer*>(value.handle);
             CreateLongPressGesture(peer);
         },
-        [frameNode](const Ark_PanGestureInterface& value) {
+        [](const Ark_PanGestureInterface& value) {
             auto peer = reinterpret_cast<PanGestureEventPeer*>(value.handle);
             CreatePanGesture(peer);
         },
         [](const Ark_PinchGestureInterface& value) {
+            auto peer = reinterpret_cast<PinchGestureEventPeer*>(value.handle);
+            CreatePinchGesture(peer);
         },
         [](const Ark_SwipeGestureInterface& value) {
+            auto peer = reinterpret_cast<SwipeGestureEventPeer*>(value.handle);
+            CreateSwipeGesture(peer);
         },
         [](const Ark_RotationGestureInterface& value) {
+            auto peer = reinterpret_cast<RotationGestureEventPeer*>(value.handle);
+            CreateRotationGesture(peer);
         },
         [](const Ark_GestureGroupInterface& value) {
+            auto peer = reinterpret_cast<BaseGestureEventPeer*>(value.handle);
+            CreateGroupGesture(peer);
         },
         []() {});
 
-    auto gmodel = GestureModel::GetInstance();
-    if (gmodel) {
+    if (auto gmodel = GestureModel::GetInstance(); gmodel) {
         gmodel->Pop();
     }
     FinishGestureProcessor(frameNode);

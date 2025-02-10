@@ -60,13 +60,69 @@ class PanGestureModel {
 public:
     static PanGestureModel* GetInstance();
     virtual ~PanGestureModel() = default;
-    virtual void Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum) {};
+    virtual void Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum) {}
     static void SetMock(PanGestureModel* mock)
     {
         instance_ = mock;
     }
 private:
     static PanGestureModel* instance_;
+};
+
+class PinchGestureModel {
+public:
+    static PinchGestureModel* GetInstance();
+    virtual ~PinchGestureModel() = default;
+    virtual void Create(int32_t fingersNum, double distanceNum) {}
+    static void SetMock(PinchGestureModel* mock)
+    {
+        instance_ = mock;
+    }
+
+private:
+    static PinchGestureModel* instance_;
+};
+
+class SwipeGestureModel {
+public:
+    static SwipeGestureModel* GetInstance();
+    virtual ~SwipeGestureModel() = default;
+    virtual void Create(int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum) {}
+    static void SetMock(SwipeGestureModel* mock)
+    {
+        instance_ = mock;
+    }
+
+private:
+    static SwipeGestureModel* instance_;
+};
+
+class RotationGestureModel {
+public:
+    static RotationGestureModel* GetInstance();
+    virtual ~RotationGestureModel() = default;
+    virtual void Create(int32_t fingersNum, double angleNum) {}
+    static void SetMock(RotationGestureModel* mock)
+    {
+        instance_ = mock;
+    }
+
+private:
+    static RotationGestureModel* instance_;
+};
+
+class GestureGroupModel {
+public:
+    static GestureGroupModel* GetInstance();
+    virtual ~GestureGroupModel() = default;
+    virtual void Create(int32_t mode) {}
+    static void SetMock(GestureGroupModel* mock)
+    {
+        instance_ = mock;
+    }
+
+private:
+    static GestureGroupModel* instance_;
 };
 
 class TapGestureModelNG : public TapGestureModel {
@@ -80,10 +136,29 @@ public:
     void Create(int32_t fingersNum, bool repeatResult, int32_t durationNum) {}
 };
 
-class ACE_EXPORT PanGestureModelNG : public OHOS::Ace::PanGestureModel {
+class PanGestureModelNG : public PanGestureModel {
 public:
-    void Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum) {};
+    void Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum) {}
 };
 
-}
+class PinchGestureModelNG : public PinchGestureModel {
+public:
+    void Create(int32_t fingersNum, double distanceNum) {}
+};
+
+class SwipeGestureModelNG : public SwipeGestureModel {
+public:
+    void Create(int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum) {}
+};
+
+class RotationGestureModelNG : public RotationGestureModel {
+public:
+    void Create(int32_t fingersNum, double angleNum) {}
+};
+
+class GestureGroupModeNG : public GestureGroupModel {
+public:
+    void Create(int32_t mode) {}
+};
+} // namespace OHOS::Ace
 #endif //CAPI_STUBS_MOCK_GESTURES_H

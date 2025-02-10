@@ -4570,10 +4570,7 @@ void GestureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(gesture);
-    std::optional<GestureMask> maskOpt;
-    if (mask) {
-        maskOpt = Converter::OptConvert<GestureMask>(*mask);
-    }
+    std::optional<GestureMask> maskOpt = mask ? Converter::OptConvert<GestureMask>(*mask) : std::nullopt;
     CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::Low);
 }
 void PriorityGestureImpl(Ark_NativePointer node,
@@ -4583,10 +4580,7 @@ void PriorityGestureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(gesture);
-    std::optional<GestureMask> maskOpt;
-    if (mask) {
-        maskOpt = Converter::OptConvert<GestureMask>(*mask);
-    }
+    std::optional<GestureMask> maskOpt = mask ? Converter::OptConvert<GestureMask>(*mask) : std::nullopt;
     CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::High);
 }
 void ParallelGestureImpl(Ark_NativePointer node,
@@ -4596,10 +4590,7 @@ void ParallelGestureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(gesture);
-    std::optional<GestureMask> maskOpt;
-    if (mask) {
-        maskOpt = Converter::OptConvert<GestureMask>(*mask);
-    }
+    std::optional<GestureMask> maskOpt = mask ? Converter::OptConvert<GestureMask>(*mask) : std::nullopt;
     CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::Parallel);
 }
 void Blur0Impl(Ark_NativePointer node,
