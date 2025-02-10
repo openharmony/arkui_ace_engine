@@ -29,16 +29,6 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-struct EventsTracker {
-    static inline GENERATED_ArkUITimePickerEventsReceiver timePickerEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getTimePickerEventsReceiver = []() -> const GENERATED_ArkUITimePickerEventsReceiver* {
-            return &timePickerEventReceiver;
-        }
-    };
-}; // EventsTracker
-
 // Prop names
 const auto PROP_NAME_USE_MILITARY_TIME = "useMilitaryTime";
 const auto PROP_NAME_LOOP = "loop";
@@ -195,8 +185,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<PickerTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
