@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "base/log/event_report.h"
 
 #include <numeric>
 
@@ -962,6 +963,8 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
 {
     if (!idxToLane_.count(itemIdx)) {
         TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d", itemIdx);
+        std::string subErrorType = "Inconsistent data found on item " + std::to_string(itemIdx);
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::INTERNAL_ERROR, subErrorType);
         return nullptr;
     }
     size_t laneIdx = idxToLane_.at(itemIdx);
@@ -973,6 +976,9 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
     if (lane.items_.empty()) {
         TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d when accessing lane %{public}zu", itemIdx,
             laneIdx);
+        std::string subErrorType = "Inconsistent data found on item " + std::to_string(itemIdx) +
+                                   " when accessing lane " + std::to_string(laneIdx);
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::INTERNAL_ERROR, subErrorType);
         return nullptr;
     }
     return &lane;
