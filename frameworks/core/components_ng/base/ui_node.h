@@ -268,7 +268,7 @@ public:
 
     void SetHostPageIdByParent(int32_t id)
     {
-        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG) {
+        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
             return;
         }
         hostPageId_ = id;
