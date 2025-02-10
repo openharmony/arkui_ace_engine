@@ -20,6 +20,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 
 const o = 10003;
 const t = 10002;
@@ -86,7 +87,6 @@ export const a1 = {
     },
     i1: {
         size: { width: 22, height: 22 },
-        imageSize: { width: 18, height: 18 },
         padding: {
             top: LengthMetrics.vp(2),
             bottom: LengthMetrics.vp(2),
@@ -99,10 +99,11 @@ export const a1 = {
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
         },
-        image: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_cancel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        symbolStyle: new SymbolGlyphModifier({  "id": -1,  "type": 40000, params: ['sys.symbol.xmark'],"bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         f1: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        symbolSize: 18
     },
 };
 const b1 = () => {
@@ -506,9 +507,6 @@ export class d1 extends ViewPU {
     getCloseButtonHeight() {
         return this.theme.i1.size.height;
     }
-    getCloseButtonImage() {
-        return this.theme.i1.image;
-    }
     getCloseButtonFillColor() {
         return this.closeButtonFillColorWithTheme;
     }
@@ -521,11 +519,8 @@ export class d1 extends ViewPU {
     getCloseButtonPadding() {
         return this.theme.i1.padding;
     }
-    getCloseButtonImageWidth() {
-        return this.theme.i1.imageSize.width;
-    }
-    getCloseButtonImageHeight() {
-        return this.theme.i1.imageSize.height;
+    getCloseButtonSymbolSize() {
+        return this.theme.i1.symbolSize;
     }
     getMessageText() {
         return this.message.text;
@@ -924,14 +919,14 @@ export class d1 extends ViewPU {
                                     });
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.getCloseButtonImage());
-                                    Image.direction(this.popupDirection);
-                                    Image.focusable(true);
-                                    Image.width(this.getCloseButtonImageWidth());
-                                    Image.height(this.getCloseButtonImageHeight());
-                                    Image.fillColor(this.getCloseButtonFillColor());
-                                    Image.draggable(false);
-                                }, Image);
+                                    SymbolGlyph.create();
+                                    SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
+                                    SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
+                                    SymbolGlyph.direction(this.popupDirection);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.i1.symbolStyle);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
                                 Button.pop();
                             });
                         }
@@ -1150,14 +1145,14 @@ export class d1 extends ViewPU {
                                     });
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.getCloseButtonImage());
-                                    Image.direction(this.popupDirection);
-                                    Image.focusable(true);
-                                    Image.width(this.getCloseButtonImageWidth());
-                                    Image.height(this.getCloseButtonImageHeight());
-                                    Image.fillColor(this.getCloseButtonFillColor());
-                                    Image.draggable(false);
-                                }, Image);
+                                    SymbolGlyph.create();
+                                    SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
+                                    SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
+                                    SymbolGlyph.direction(this.popupDirection);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.i1.symbolStyle);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
                                 Button.pop();
                             });
                         }

@@ -17,6 +17,7 @@ import display from '@ohos.display';
 import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
+import { SymbolGlyphModifier } from '@kit.ArkUI';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -58,13 +59,13 @@ interface MessageTheme {
 
 interface CloseButtonTheme {
   size: SizeOptions;
-  image: ResourceStr;
-  imageSize: SizeOptions;
   margin: LocalizedMargin;
   padding: LocalizedPadding;
   fillColor: ResourceColor;
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
+  symbolStyle: SymbolGlyphModifier;
+  symbolSize: number;
 }
 
 interface WindowsTheme {
@@ -142,7 +143,6 @@ export const defaultTheme: PopupTheme = {
   },
   closeButton: {
     size: { width: 22, height: 22 },
-    imageSize: { width: 18, height: 18 },
     padding: {
       top: LengthMetrics.vp(2),
       bottom: LengthMetrics.vp(2),
@@ -155,10 +155,11 @@ export const defaultTheme: PopupTheme = {
       start: LengthMetrics.vp(12),
       end: LengthMetrics.vp(12)
     },
-    image: $r('sys.media.ohos_ic_public_cancel'),
+    symbolStyle: new SymbolGlyphModifier($r('sys.symbol.xmark')),
     fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
-    backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
+    backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
+    symbolSize: 18
   },
 };
 
@@ -345,10 +346,6 @@ export struct PopupComponent {
     return this.theme.closeButton.size.height
   }
 
-  private getCloseButtonImage(): ResourceStr {
-    return this.theme.closeButton.image
-  }
-
   private getCloseButtonFillColor(): ResourceColor {
     return this.closeButtonFillColorWithTheme;
   }
@@ -365,12 +362,8 @@ export struct PopupComponent {
     return this.theme.closeButton.padding
   }
 
-  private getCloseButtonImageWidth(): Length | undefined {
-    return this.theme.closeButton.imageSize.width
-  }
-
-  private getCloseButtonImageHeight(): Length | undefined {
-    return this.theme.closeButton.imageSize.height
+  private getCloseButtonSymbolSize(): Length | undefined {
+    return this.theme.closeButton.symbolSize
   }
 
   private getMessageText(): string | Resource {
@@ -717,14 +710,14 @@ export struct PopupComponent {
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
             if (this.showClose || this.showClose === void (0)) {
               Button() {
-                Image(this.getCloseButtonImage())
+               SymbolGlyph()
+                  .fontColor([this.getCloseButtonFillColor()])
+                  .fontSize(this.getCloseButtonSymbolSize())
                   .direction(this.popupDirection)
+                  .attributeModifier(this.theme.closeButton.symbolStyle)
                   .focusable(true)
-                  .width(this.getCloseButtonImageWidth())
-                  .height(this.getCloseButtonImageHeight())
-                  .fillColor(this.getCloseButtonFillColor())
                   .draggable(false)
-              }
+                  }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
               .height(this.getCloseButtonHeight())
@@ -877,12 +870,12 @@ export struct PopupComponent {
 
             if (this.showClose || this.showClose === void (0)) {
               Button() {
-                Image(this.getCloseButtonImage())
+                SymbolGlyph()
+                  .fontColor([this.getCloseButtonFillColor()])
+                  .fontSize(this.getCloseButtonSymbolSize())
                   .direction(this.popupDirection)
+                  .attributeModifier(this.theme.closeButton.symbolStyle)
                   .focusable(true)
-                  .width(this.getCloseButtonImageWidth())
-                  .height(this.getCloseButtonImageHeight())
-                  .fillColor(this.getCloseButtonFillColor())
                   .draggable(false)
               }
               .direction(this.popupDirection)
