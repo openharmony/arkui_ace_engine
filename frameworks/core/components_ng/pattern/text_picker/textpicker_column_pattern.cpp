@@ -1817,11 +1817,6 @@ void TextPickerColumnPattern::SpringCurveTailEndProcess(bool useRebound, bool st
 void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     double dragDelta = offsetY - yLast_;
-    if (hapticController_ && isShow_) {
-        if (isEnableHaptic_) {
-            hapticController_->HandleDelta(dragDelta);
-        }
-    }
     auto midIndex = GetShowOptionCount() / HALF_NUMBER;
     ScrollDirection dir = GreatNotEqual(dragDelta, 0.0) ? ScrollDirection::DOWN : ScrollDirection::UP;
     auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
@@ -1830,6 +1825,12 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     auto stopMove = SpringCurveTailMoveProcess(useRebound, dragDelta);
     offsetCurSet_ = 0.0;
 
+    if (hapticController_ && isShow_) {
+        if (isEnableHaptic_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
+    }
+    StopHapticController();
     // the abs of drag delta is less than jump interval.
     dragDelta = GetDragDeltaLessThanJumpInterval(offsetY, dragDelta, useRebound, shiftDistance);
 
@@ -1839,7 +1840,6 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     yOffset_ = dragDelta;
     yLast_ = offsetY;
 
-    StopHapticController();
     if (useRebound && !pressed_ && isTossStatus_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
         overscroller_.UpdateTossSpring(offsetY);
         if (overscroller_.ShouldStartRebound()) {
