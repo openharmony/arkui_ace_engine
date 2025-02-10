@@ -258,7 +258,8 @@ void AboutToIMEInputImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value)](const RichEditorInsertValue& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode),
+        frameNode](const RichEditorInsertValue& param) -> bool {
         Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param);
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
@@ -296,7 +297,8 @@ void AboutToDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value)](const RichEditorDeleteValue& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value,
+        frameNode), frameNode](const RichEditorDeleteValue& param) -> bool {
         auto data = Converter::ArkValue<Ark_RichEditorDeleteValue>(param);
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
@@ -330,7 +332,7 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPaste = [arkCallback = CallbackHelper(*value)](NG::TextCommonEvent& event) -> void {
+    auto onPaste = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
@@ -411,7 +413,7 @@ void OnSubmitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value)](int32_t param1, NG::TextFieldCommonEvent& param2) {
+    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode), frameNode](int32_t param1, NG::TextFieldCommonEvent& param2) {
         auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
         const auto event = Converter::ArkSubmitEventSync(param2);
         arkCallback.InvokeSync(enterKey, event.ArkValue());
@@ -424,7 +426,8 @@ void OnWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value)](const RichEditorChangeValue& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode),
+        frameNode](const RichEditorChangeValue& param) -> bool {
         auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param);
         LOGW("OnWillChangeImpl :: Ark_RichEditorChangeValue don't fully filled from RichEditorChangeValue");
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
@@ -453,7 +456,7 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCut = [arkCallback = CallbackHelper(*value)](NG::TextCommonEvent& event) {
+    auto onCut = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) {
         Converter::ConvContext ctx;
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
@@ -471,7 +474,7 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [arkCallback = CallbackHelper(*value)](NG::TextCommonEvent& event) {
+    auto onCopy = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) {
         Converter::ConvContext ctx;
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
