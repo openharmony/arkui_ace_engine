@@ -1712,6 +1712,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     }
     json->PutExtAttr("fontFeature", fontFeatureStr.c_str(), filter);
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback(), filter);
+    json->PutExtAttr("halfLeading", textFieldLayoutProperty->GetHalfLeading().value_or(false), filter);
 }
 
 std::string SearchPattern::TextInputActionToString(TextInputAction action) const
