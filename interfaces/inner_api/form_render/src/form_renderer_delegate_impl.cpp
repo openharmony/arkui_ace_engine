@@ -109,6 +109,16 @@ int32_t FormRendererDelegateImpl::OnGetRectRelativeToWindow(int32_t &top, int32_
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateImpl::OnCheckManagerDelegate(bool &checkFlag)
+{
+    if (!checkManagerDelegate_) {
+        HILOG_ERROR("checkManagerDelegate_ is null");
+        return ERR_INVALID_DATA;
+    }
+    checkManagerDelegate_(checkFlag);
+    return ERR_OK;
+}
+
 void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
     std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
         const AAFwk::Want&)>&& listener)
@@ -148,6 +158,11 @@ void FormRendererDelegateImpl::SetFormLinkInfoUpdateHandler(
 void FormRendererDelegateImpl::SetGetRectRelativeToWindowHandler(std::function<void(int32_t&, int32_t&)>&& listener)
 {
     getRectRelativeToWindowHandler_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetCheckManagerDelegate(std::function<void(bool&)>&& listener)
+{
+    checkManagerDelegate_ = std::move(listener);
 }
 } // namespace Ace
 } // namespace OHOS
