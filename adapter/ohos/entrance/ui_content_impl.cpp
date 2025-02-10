@@ -2737,6 +2737,12 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
+void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    UpdateConfiguration(config);
+}
+
 void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     CHECK_NULL_VOID(config);
