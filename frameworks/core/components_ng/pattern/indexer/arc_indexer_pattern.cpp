@@ -857,6 +857,7 @@ void ArcIndexerPattern::UpdateIndexerRender()
 
 std::string ArcIndexerPattern::GetChildNodeContent(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(arcArrayValue_.size()) - 1);
     auto nodeStr = autoCollapse_ && (arcArrayValue_[index].second != ArcIndexerBarState::INVALID) ?
         (arcArrayValue_[index].second == ArcIndexerBarState::COLLAPSED ?
         StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) :
@@ -983,7 +984,7 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
     childRenderContext->UpdateBackgroundColor(
-        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
+        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColorArc()));
     if (index != childFocusIndex_) {
         childRenderContext->ResetBlendBorderColor();
     }
