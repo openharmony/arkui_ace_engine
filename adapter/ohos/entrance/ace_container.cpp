@@ -486,6 +486,7 @@ void AceContainer::InitializeFrontend()
             auto cjFrontend = CJUtils::LoadCjFrontend(useNewPipeline_, useStageModel_);
             if (cjFrontend == nullptr) {
                 LOGE("Create cj frontend failed.");
+                return;
             }
             frontend_ = AceType::Claim(reinterpret_cast<Frontend*>(cjFrontend));
         } else {

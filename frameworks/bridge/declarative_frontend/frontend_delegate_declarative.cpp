@@ -1878,8 +1878,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
-        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog
+        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
