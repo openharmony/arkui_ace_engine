@@ -971,6 +971,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     auto errorCode = InitializeInner(window, name, storage, true);
     AddWatchSystemParameter();
     RegisterLinkJumpCallback();
+    UpdateWindowBlur();
     return errorCode;
 }
 
