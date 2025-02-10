@@ -80,7 +80,6 @@ public:
     // Get the subwindow of instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId, uint64_t displayId);
-    const RefPtr<Subwindow> GetOrCreateSubwindow(int32_t instanceId);
 
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
@@ -158,11 +157,12 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
     const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
-    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
     bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
@@ -181,7 +181,7 @@ public:
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
 
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow();
+    RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,

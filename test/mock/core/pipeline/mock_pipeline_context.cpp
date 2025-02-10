@@ -22,7 +22,6 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -287,45 +286,6 @@ void PipelineContext::SetupRootElement()
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
-}
-
-void PipelineContext::SetupSubRootElement()
-{
-    CHECK_RUN_ON(UI);
-    appBgColor_ = Color::TRANSPARENT;
-    rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
-    rootNode_->SetHostRootId(GetInstanceId());
-    rootNode_->SetHostPageId(-1);
-    rootNode_->SetActive(true);
-    CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = idealSize;
-    layoutConstraint.maxSize = idealSize;
-    rootNode_->UpdateLayoutConstraint(layoutConstraint);
-    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
-    rootFocusHub->SetFocusType(FocusType::SCOPE);
-    rootFocusHub->SetFocusable(true);
-    window_->SetRootFrameNode(rootNode_);
-    rootNode_->AttachToMainTree(false, this);
-    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
-    // the subwindow for overlay not need stage
-    stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(nullptr);
-    if (!stageManager_) {
-        stageManager_ = MakeRefPtr<StageManager>(nullptr);
-    }
-    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
-        auto frontend = weakFrontend.Upgrade();
-        CHECK_NULL_RETURN(frontend, "");
-        return frontend->GetPagePathByUrl(url);
-    };
-    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
-    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
-    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
-    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = GetOrCreateFocusManager();
-    postEventManager_ = MakeRefPtr<PostEventManager>();
 }
 
 void PipelineContext::SendEventToAccessibilityWithNode(
