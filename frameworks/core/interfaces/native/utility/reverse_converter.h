@@ -141,9 +141,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
-    void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
-    void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
     void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);

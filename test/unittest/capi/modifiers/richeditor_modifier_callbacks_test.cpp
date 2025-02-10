@@ -45,17 +45,6 @@ RichEditorDeleteDirection Convert(const Ark_RichEditorDeleteDirection& src)
     }
     return dst;
 }
-
-template<>
-NG::TextFieldCommonEvent Convert(const Ark_SubmitEvent& data)
-{
-    NG::TextFieldCommonEvent event;
-    const auto peer = reinterpret_cast<SubmitEventPeer*>(data.ptr);
-    if (peer && peer->GetEventInfo()) {
-        event = *peer->GetEventInfo();
-    }
-    return event;
-}
 } // Converter
 
 namespace OHOS::Ace::NG {
