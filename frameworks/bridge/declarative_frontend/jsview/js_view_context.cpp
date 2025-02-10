@@ -1198,10 +1198,11 @@ void JSViewContext::JSOpenMenu(const JSCallbackInfo& info)
         return;
     }
     NG::MenuParam menuParam;
+    JSRef<JSObject> menuObj;
     if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
-        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
-        JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+        menuObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
     }
+    JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
     auto ret = JSViewAbstract::OpenMenu(menuParam, menuContentNode, targetId);
     if (ret != ERROR_CODE_INTERNAL_ERROR) {
         ReturnPromise(info, ret);
