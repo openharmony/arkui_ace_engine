@@ -78,7 +78,6 @@ public:
     }
     float GetHandleHotZoneRadius();
     RectF GetVisibleRect();
-    
 
 private:
     void RemoveAreaChangeInner();
