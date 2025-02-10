@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "ui/base/utils/utils.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/event_constants.h"
@@ -1655,6 +1656,10 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootNode_->GetGeometryNode()->ResetParentLayoutConstraint();
         rootNode_->MarkForceMeasure();
         isDensityChanged_ = false;
+    }
+    if (window_ && !window_->isRootInitialize() && !NearZero(width) && !NearZero(height)) {
+        window_->SetIsRootInitialize(true);
+        RequestFrame();
     }
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     // For cross-platform build, flush tasks when first resize, speed up for fisrt frame.
