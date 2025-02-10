@@ -2909,14 +2909,40 @@ void SheetPresentationPattern::OverlaySheetSpringBack()
     overlayManager->SheetSpringBack();
 }
 
-float SheetPresentationPattern::GetBottomSafeArea()
+PipelineContext* SheetPresentationPattern::GetSheetMainPipeline() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, .0f);
+    CHECK_NULL_RETURN(host, nullptr);
     auto pipelineContext = host->GetContext();
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+
+    if (sheetStyle.instanceId.has_value()) {
+        // need to get mainWindow's pipeline, and get mainWindow's cutoutSafeArea
+        auto container = Container::GetContainer(sheetStyle.instanceId.value());
+        CHECK_NULL_RETURN(container, nullptr);
+        auto parentId = container->GetParentId();
+        TAG_LOGI(AceLogTag::ACE_SHEET, "mainWindow id : %{public}d", parentId);
+        auto parentContainer = Container::GetContainer(parentId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        auto parentPipelineBase = parentContainer->GetPipelineContext();
+        CHECK_NULL_RETURN(parentPipelineBase, nullptr);
+        auto parentPipelineContext = AceType::DynamicCast<PipelineContext>(parentPipelineBase);
+        pipelineContext = RawPtr(parentPipelineContext);
+    }
+    return pipelineContext;
+}
+
+float SheetPresentationPattern::GetBottomSafeArea()
+{
+    auto pipelineContext = GetSheetMainPipeline();
     CHECK_NULL_RETURN(pipelineContext, .0f);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+    auto manager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, .0f);
+    auto cutoutSafeArea = manager->GetCutoutSafeAreaWithoutProcess();
+    if (cutoutSafeArea.top_.IsValid()) {
         auto topAreaInWindow = GetTopAreaInWindow();
         TAG_LOGD(AceLogTag::ACE_SHEET, "rosen window sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
         return topAreaInWindow;

@@ -190,6 +190,13 @@ public:
         return 0;
     }
 
+    virtual void SetParentId(int32_t parentId) {}
+
+    virtual int32_t GetParentId() const
+    {
+        return 0;
+    }
+
     virtual void ProcessScreenOnEvents() {}
 
     virtual void ProcessScreenOffEvents() {}

@@ -408,7 +408,7 @@ public:
         return sharedRuntime_;
     }
 
-    void SetParentId(int32_t parentId)
+    void SetParentId(int32_t parentId) override
     {
         parentId_ = parentId;
     }
@@ -431,7 +431,7 @@ public:
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
-    int32_t GetParentId() const
+    int32_t GetParentId() const override
     {
         return parentId_;
     }

@@ -4316,10 +4316,16 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange,
     std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode)
 {
-    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    auto parentId = Container::CurrentId();
+    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : parentId;
     ContainerScope scope(instanceId);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    if (sheetStyle.instanceId.has_value()) {
+        auto container = Container::GetContainer(sheetStyle.instanceId.value());
+        CHECK_NULL_VOID(container);
+        container->SetParentId(parentId);
+    }
     auto bindSheetTask = [weak = AceType::WeakClaim(this), isShow, callback = std::move(callback),
                              buildNodeFunc = std::move(buildNodeFunc),
                              buildtitleNodeFunc = std::move(buildtitleNodeFunc), sheetStyle,
