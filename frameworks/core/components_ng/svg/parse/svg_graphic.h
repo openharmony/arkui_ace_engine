@@ -182,7 +182,7 @@ protected:
     void SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient);
     void SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& gradient, std::vector<RSScalar> pos,
         std::vector<RSColorQuad> colors);
-    uint32_t GetAlpha();
+    void ApplyTransform(RSRecordingPath& path);
 
     std::optional<RSRecordingPath> path_;
     RSBrush fillBrush_;
