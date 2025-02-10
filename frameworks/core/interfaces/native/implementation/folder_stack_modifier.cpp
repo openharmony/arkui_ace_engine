@@ -19,6 +19,7 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FolderStackModifier {
@@ -61,12 +62,10 @@ void OnFolderStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const FolderEventInfo& folderEventInfo) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const FolderEventInfo& folderEventInfo) {
         Ark_OnFoldStatusChangeInfo eventInfo;
         eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
-
-        GetFullAPI()->getEventsAPI()->getFolderStackEventsReceiver()->
-                      onFolderStateChange(frameNode->GetId(), eventInfo);
+        arkCallback.Invoke(eventInfo);
     };
     FolderStackModelNG::SetOnFolderStateChange(frameNode, std::move(onChange));
 }
@@ -76,12 +75,10 @@ void OnHoverStatusChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const FolderEventInfo& folderEventInfo) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const FolderEventInfo& folderEventInfo) {
         Ark_HoverEventParam eventInfo;
         eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
-
-        GetFullAPI()->getEventsAPI()->getFolderStackEventsReceiver()->
-                      onHoverStatusChange(frameNode->GetId(), eventInfo);
+        arkCallback.Invoke(eventInfo);
     };
     FolderStackModelNG::SetOnHoverStatusChange(frameNode, std::move(onChange));
 }

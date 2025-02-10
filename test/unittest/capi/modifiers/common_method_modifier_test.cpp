@@ -37,17 +37,6 @@ const auto OPT_INVALID_NUM = ArkValue<Opt_Number>(INVALID_NUMBER);
 const auto OPT_UNDEF_NUM = ArkValue<Opt_Number>();
 const auto ARK_EMPTY_STR = ArkValue<Ark_String>("");
 const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
-
-struct EventsTracker {
-    static inline GENERATED_ArkUICommonMethodEventsReceiver commonMethodsEventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getCommonMethodEventsReceiver = [] () -> const GENERATED_ArkUICommonMethodEventsReceiver* {
-            return &commonMethodsEventsReceiver;
-        }
-    };
-}; // EventsTracker
-
 const auto ATTRIBUTE_WIDTH_NAME = "width";
 const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_HEIGHT_NAME = "height";
@@ -170,7 +159,6 @@ public:
         ASSERT_NE(fnode, nullptr);
         render_ = fnode->GetRenderContext();
         ASSERT_NE(render_, nullptr);
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
         AddResource("bi_public_ok", "path_to_background_image");
     }
     void TearDown()
@@ -2268,24 +2256,22 @@ HWTEST_F(CommonMethodModifierTest, setIdInvalidValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest, setOnVisibleAreaChangeTest, TestSize.Level1)
 {
-    VisibleAreaChangeCallback func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-
     struct CheckEvent {
         int32_t nodeId;
         bool isExpanding;
         float currentRatio;
     };
     static std::vector<CheckEvent> checkEvent;
-    EventsTracker::commonMethodsEventsReceiver.onVisibleAreaChange =
-        [](Ark_Int32 nodeId, const Ark_Boolean isExpanding, const Ark_Number currentRatio)
-    {
-        checkEvent.push_back({
-            .nodeId = Converter::Convert<int32_t>(nodeId),
-            .isExpanding = Converter::Convert<bool>(isExpanding),
-            .currentRatio = Converter::Convert<float>(currentRatio)
-        });
-    };
+    void (*checkCallback)(const Ark_Int32, const Ark_Boolean, const Ark_Number) =
+        [](const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Number currentRatio) {
+            checkEvent.push_back({
+                .nodeId = resourceId,
+                .isExpanding = Converter::Convert<bool>(isExpanding),
+                .currentRatio = Converter::Convert<float>(currentRatio)
+            });
+        };
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<VisibleAreaChangeCallback>(checkCallback, contextId);
 
     std::vector<float> ratioVec;
     ratioVec.push_back(0.5f);
@@ -2307,8 +2293,8 @@ HWTEST_F(CommonMethodModifierTest, setOnVisibleAreaChangeTest, TestSize.Level1)
     modifier_->setOnVisibleAreaChange(node_, &numberArrayResult, &func);
 
     EXPECT_EQ(checkEvent.size(), 2);
-    EXPECT_EQ(checkEvent[0].nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent[1].nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent[0].nodeId, contextId);
+    EXPECT_EQ(checkEvent[1].nodeId, contextId);
     EXPECT_EQ(checkEvent[0].isExpanding, false);
     EXPECT_EQ(checkEvent[1].isExpanding, true);
     EXPECT_EQ(checkEvent[0].currentRatio, 0.0f);

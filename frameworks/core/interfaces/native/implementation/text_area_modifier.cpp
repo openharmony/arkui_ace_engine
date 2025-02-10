@@ -194,9 +194,9 @@ void OnSubmit0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSubmit = [frameNode](int32_t enterKey, NG::TextFieldCommonEvent& event) {
+    auto onSubmit = [arkCallback = CallbackHelper(*value)](int32_t enterKey, NG::TextFieldCommonEvent& event) {
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(enterKey));
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onSubmit0(frameNode->GetId(), enterKeyType);
+        arkCallback.Invoke(enterKeyType);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
@@ -215,12 +215,11 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const std::u16string& text, PreviewText& prevText) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const std::u16string& text, PreviewText& prevText) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(text, &ctx);
         auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText, &ctx);
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()
-            ->onChange(frameNode->GetId(), textArkString, textArkPrevText);
+        arkCallback.Invoke(textArkString, textArkPrevText);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
 }
@@ -230,11 +229,10 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onTextSelectionChange = [frameNode](int32_t selectionStart, int32_t selectionEnd) {
+    auto onTextSelectionChange = [arkCallback = CallbackHelper(*value)](int32_t selectionStart, int32_t selectionEnd) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
         auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onTextSelectionChange(
-            frameNode->GetId(), arkSelectionStart, arkSelectionEnd);
+        arkCallback.Invoke(arkSelectionStart, arkSelectionEnd);
     };
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
@@ -244,11 +242,10 @@ void OnContentScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onContentScroll = [frameNode](float totalOffsetX, float totalOffsetY) {
+    auto onContentScroll = [arkCallback = CallbackHelper(*value)](float totalOffsetX, float totalOffsetY) {
         auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
         auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onContentScroll(
-            frameNode->GetId(), arkTotalOffsetX, arkTotalOffsetY);
+        arkCallback.Invoke(arkTotalOffsetX, arkTotalOffsetY);
     };
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
@@ -258,8 +255,8 @@ void OnEditChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEditEvent = [frameNode](const bool value) {
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onEditChange(frameNode->GetId(), value);
+    auto onEditEvent = [arkCallback = CallbackHelper(*value)](const bool value) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
     };
     TextFieldModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
 }
@@ -269,10 +266,10 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [frameNode](const std::u16string& value) {
+    auto onCopy = [arkCallback = CallbackHelper(*value)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onCopy(frameNode->GetId(), textArkString);
+        arkCallback.Invoke(textArkString);
     };
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
@@ -282,10 +279,10 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCut = [frameNode](const std::u16string& value) {
+    auto onCut = [arkCallback = CallbackHelper(*value)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onCut(frameNode->GetId(), textArkString);
+        arkCallback.Invoke(textArkString);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -534,13 +531,13 @@ void OnDidInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onDidInsert = [frameNode](const InsertValueInfo& value) {
+    auto onDidInsert = [arkCallback = CallbackHelper(*value)](const InsertValueInfo& value) {
         Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onDidInsert(frameNode->GetId(), insertValue);
+        arkCallback.Invoke(insertValue);
     };
     TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
@@ -568,14 +565,14 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onDidDelete = [frameNode](const DeleteValueInfo& value) {
+    auto onDidDelete = [arkCallback = CallbackHelper(*value)](const DeleteValueInfo& value) {
         Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onDidDelete(frameNode->GetId(), deleteValue);
+        arkCallback.Invoke(deleteValue);
     };
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }

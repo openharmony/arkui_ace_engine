@@ -45,26 +45,12 @@ static std::optional<RefPtr<UINode>> uiNode_1 = std::nullopt;
 static std::optional<CheckEvent> checkEvent_2 = std::nullopt;
 static std::optional<RefPtr<UINode>> uiNode_2 = std::nullopt;
 
-namespace  {
-    struct EventsTracker {
-        static inline GENERATED_ArkUIListItemEventsReceiver listItemEventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getListItemEventsReceiver = [] () -> const GENERATED_ArkUIListItemEventsReceiver* {
-                return &listItemEventReceiver;
-            }
-        };
-    }; // EventsTracker
-} // namespace
-
 class ListItemModifierTest : public ModifierTestBase<GENERATED_ArkUIListItemModifier,
     &GENERATED_ArkUINodeModifiers::getListItemModifier, GENERATED_ARKUI_LIST_ITEM> {
 public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 
     CustomNodeBuilder getBuilderCb(bool start)
@@ -229,7 +215,6 @@ HWTEST_F(ListItemModifierTest, setEditableTest, TestSize.Level1)
  */
 HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
 {
-    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
 
@@ -238,25 +223,27 @@ HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
         bool isSelected;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::listItemEventReceiver.onSelect = [](Ark_Int32 nodeId, const Ark_Boolean isSelected)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .isSelected = Converter::ArkValue<Ark_Boolean>(isSelected)
+    void (*checkCallback)(const Ark_Int32, const Ark_Boolean) =
+        [](const Ark_Int32 resourceId, const Ark_Boolean param) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .isSelected = Converter::Convert<bool>(param)
+            };
         };
-    };
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
     modifier_->setOnSelect(node_, &func);
     // check true value
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireSelectChangeEvent(true);
     EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->isSelected, true);
     // check false value
     eventHub->FireSelectChangeEvent(false);
     EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->isSelected, false);
 }
 

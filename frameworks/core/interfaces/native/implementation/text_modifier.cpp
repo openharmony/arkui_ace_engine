@@ -532,10 +532,9 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [frameNode](const std::u16string& value) {
+    auto onCopy = [arkCallback = CallbackHelper(*value)](const std::u16string& param) {
         Converter::ConvContext ctx;
-        auto stringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-        GetFullAPI()->getEventsAPI()->getTextEventsReceiver()->onCopy(frameNode->GetId(), stringValue);
+        arkCallback.Invoke(Converter::ArkValue<Ark_String>(param, &ctx));
     };
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
@@ -589,11 +588,8 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSelectionChange = [frameNode](int32_t start, int32_t end) {
-        auto selectionStart = Converter::ArkValue<Ark_Number>(start);
-        auto selectionEnd = Converter::ArkValue<Ark_Number>(end);
-        GetFullAPI()->getEventsAPI()->getTextEventsReceiver()->onTextSelectionChange(frameNode->GetId(),
-            selectionStart, selectionEnd);
+    auto onSelectionChange = [arkCallback = CallbackHelper(*value)](int32_t start, int32_t end) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
     };
 
     TextModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));

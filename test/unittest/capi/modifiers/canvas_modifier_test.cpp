@@ -24,16 +24,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-struct EventsTracker {
-    static inline GENERATED_ArkUICanvasEventsReceiver eventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getCanvasEventsReceiver = []() -> const GENERATED_ArkUICanvasEventsReceiver* {
-            return &eventsReceiver;
-        }
-    };
-}; // EventsTracker
-
 // Attribute names
 const auto ATTRIBUTE_CANVAS_NAME = "canvas";
 const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";
@@ -60,8 +50,6 @@ class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -73,7 +61,6 @@ class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier
 HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnReady, nullptr);
-    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
@@ -83,17 +70,19 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onReady = [](Ark_Int32 nodeId) {
-        checkEvent = {
-            .nodeId = nodeId,
+    const int32_t contextId = 123;
+    void (*checkCallback)(const Ark_Int32) = [](const Ark_Int32 resourceId) {
+            checkEvent = {
+                .nodeId = resourceId,
+            };
         };
-    };
+    auto func = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
 
     EXPECT_FALSE(checkEvent.has_value());
     modifier_->setOnReady(node_, &func);
     eventHub->FireReadyEvent();
     EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
 }
 
 /*
