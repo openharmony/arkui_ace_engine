@@ -79,9 +79,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto contentModifier = pattern->GetContentModifier();
 
     auto themeScopeId = frameNode->GetThemeScopeId();
-    textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
-            pipeline->GetTheme<TextTheme>(themeScopeId));
+    textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
+        pipeline->GetTheme<TextTheme>(themeScopeId));
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
         !(textLayoutProperty->GetFontFamily().has_value())) {
