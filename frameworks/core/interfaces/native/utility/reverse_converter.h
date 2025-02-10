@@ -30,6 +30,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/components/image/image_event.h"
+#include "core/components/picker/picker_base_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
@@ -141,9 +142,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
+    void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
     void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
+    void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
@@ -217,6 +220,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
+    void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);

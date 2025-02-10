@@ -173,11 +173,11 @@ void OnChange0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const BaseEventInfo* event) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
         auto resultStr = eventInfo->GetSelectedStr();
         auto result = Converter::ArkValue<Ark_TimePickerResult>(resultStr);
-        GetFullAPI()->getEventsAPI()->getTimePickerEventsReceiver()->onChange0(frameNode->GetId(), result);
+        arkCallback.Invoke(result);
     };
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
