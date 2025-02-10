@@ -55,6 +55,7 @@ public:
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
+    virtual void SetEnableModeChangeAnimation(bool isEnable) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar, bool animated = false) = 0;
     virtual void SetHideNavBar(bool hideNavBar) = 0;
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
