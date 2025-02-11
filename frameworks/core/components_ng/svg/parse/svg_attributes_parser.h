@@ -242,7 +242,6 @@ struct SvgBaseAttribute {
         if (!hasOpacity) {
             if (parent.hasOpacity) {
                 opacity = parent.opacity;
-                hasOpacity = true;
             } else {
                 opacity = 1.0; // default opacity is 1.0
             }

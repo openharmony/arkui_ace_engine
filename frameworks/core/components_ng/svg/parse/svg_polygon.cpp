@@ -86,9 +86,7 @@ RSRecordingPath SvgPolygon::AsPath(const SvgLengthScaleRule& lengthRule)
     }
     ConvertPoints(rsPoints, lengthRule);
     path.AddPoly(rsPoints, rsPoints.size(), isClose_);
-    if (attributes_.clipState.IsEvenodd()) {
-        path.SetFillStyle(RSPathFillType::EVENTODD);
-    }
+
     if (attributes_.fillState.IsEvenodd()) {
         path.SetFillStyle(RSPathFillType::EVENTODD);
     }
