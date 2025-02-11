@@ -205,9 +205,11 @@ void VelocityTracker::DumpVelocityPoints() const
         const auto& xVal = axis.GetXVals();
         const auto& yVal = axis.GetYVals();
         int32_t i = static_cast<int32_t>(xVal.size());
+        auto baseVal = yVal[0];
         for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
             --i;
-            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i], yVal[i]);
+            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i],
+                yVal[i] - baseVal);
         }
     };
     func(xAxis_, "xAxis");
