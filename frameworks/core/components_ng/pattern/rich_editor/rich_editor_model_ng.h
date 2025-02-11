@@ -53,7 +53,8 @@ public:
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
     void SetEnableHapticFeedback(bool isEnabled) override;
     void SetBarState(DisplayMode mode) override;
-    void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam) override;
+    void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
+        const SelectMenuParam& menuParam) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -77,8 +78,9 @@ public:
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
-    static void SetImagePreviewMenuParam(FrameNode* frameNode,
-        std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
+    static void SetPreviewMenuParam(FrameNode* frameNode,
+        TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
+
 private:
     void SetDraggable(bool draggable);
     bool isStyledStringMode_ = false;
