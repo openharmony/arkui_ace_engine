@@ -4377,6 +4377,21 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
         manager->OnDragEnd(pointerEvent, extraInfo, node);
         return;
     }
+    if (action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
+        lastDragTime_ = GetTimeFromExternalTimer();
+        CompensatePointerMoveEvent(pointerEvent, node);
+        manager->OnDragPullCancel(pointerEvent, extraInfo, node);
+        return;
+    }
+    HandleOnDragEventMove(pointerEvent, action, node);
+}
+
+void PipelineContext::HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
+    const RefPtr<NG::FrameNode>& node)
+{
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    std::string extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
         manager->DoDragMoveAnimate(pointerEvent);
         dragEvents_[node].emplace_back(pointerEvent);

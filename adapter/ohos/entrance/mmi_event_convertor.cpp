@@ -590,6 +590,9 @@ void GetPointerEventAction(int32_t action, DragPointerEvent& event)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
             event.action = PointerAction::PULL_OUT_WINDOW;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL:
+            event.action = PointerAction::PULL_CANCEL;
+            break;
         default:
             event.action = PointerAction::UNKNOWN;
             break;
@@ -609,6 +612,9 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     }
     if (action == PointerAction::UP) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    }
+    if (action == PointerAction::PULL_CANCEL) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
     }
 }
 
