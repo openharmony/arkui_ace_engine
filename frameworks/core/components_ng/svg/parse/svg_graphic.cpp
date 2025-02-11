@@ -664,7 +664,6 @@ void SvgGraphic::SetPenColor(RSPen& rsPen)
 {
     auto curOpacity = GetStrokeOpacity();
     rsPen.SetColor(attributes_.strokeState.GetColor().BlendOpacity(curOpacity).GetValue());
-    AddColorFilterEffect(rsPen);
 }
 
 void SvgGraphic::AddColorFilterEffect(RSPen& rsPen)
