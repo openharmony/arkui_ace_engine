@@ -78,8 +78,8 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto cachedItemCnt = LayoutChildren(info.currentOffset_, cacheLines);
 
-    if (!info.offsetEnd_ || !props->GetShowCachedItemsValue(false)) {
-        // only use counting method when last line not completely filled
+    if (!props->GetShowCachedItemsValue(false)) {
+        // only use accurate counting method when cached items need to be shown
         cachedItemCnt.first = cachedItemCnt.second = cacheLines * info.crossCount_;
     }
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cachedItemCnt.first,
