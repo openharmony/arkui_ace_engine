@@ -262,7 +262,8 @@ void AboutToIMEInputImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onCallback = [arkCallback = CallbackHelper(*value, frameNode),
         frameNode](const RichEditorInsertValue& param) -> bool {
-        Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param);
+        Converter::ConvContext ctx;
+        Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param, &ctx);
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };

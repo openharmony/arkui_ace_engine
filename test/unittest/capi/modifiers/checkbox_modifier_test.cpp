@@ -53,9 +53,9 @@ namespace  {
     const auto ATTRIBUTE_MARK_SIZE_TEST_VALUE = "111.00vp";
     const auto ATTRIBUTE_MARK_STROKE_WIDTH_NAME = "strokeWidth";
     const auto ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE = "0.00px";
-    const auto ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE = "222.00px";
-    static constexpr int SIZE1 = 111;
-    static constexpr int SIZE2 = 222;
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE = "222.00vp";
+    static constexpr auto SIZE1 = 111.;
+    static constexpr auto SIZE2 = 222.;
 } // namespace
 
 class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier,
