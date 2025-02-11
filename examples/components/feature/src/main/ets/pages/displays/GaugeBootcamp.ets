@@ -70,31 +70,22 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 
-@Styles
-function cardPressedStyle() {
+@Styles function cardPressedStyle() {
   .backgroundColor('rgba(0,0,0,0.1)')
   .opacity(1)
-  .animation({
-    curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100
-  })
+  .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
 }
 
-@Styles
-function cardNormalStyle() {
+@Styles function cardNormalStyle() {
   .backgroundColor(Color.White)
   .opacity(1)
-  .animation({
-    curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100
-  })
+  .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
 }
 
-@Styles
-function cardDisabledStyle() {
+@Styles function cardDisabledStyle() {
   .backgroundColor('rgba(0,0,0,0)')
   .opacity(0.5)
-  .animation({
-    curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100
-  })
+  .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
 }
 
 class MyModifier implements AttributeModifier<TextAttribute> {
