@@ -253,6 +253,11 @@ public:
         return isStackSubmenuHeader_;
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
+    RefPtr<FrameNode> GetEmbeddedMenu() const
+    {
+        return embeddedMenu_;
+    }
+    void HideEmbedded();
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
     void SetBgColor(const Color& color);

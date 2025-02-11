@@ -449,6 +449,16 @@ public:
         return embeddedSubMenuExpandTotalCount_;
     }
 
+    void SetForceUpdateEmbeddedMenu(bool forceUpdate)
+    {
+        forceUpdateEmbeddedMenu_ = forceUpdate;
+    }
+
+    bool GetForceUpdateEmbeddedMenu()
+    {
+        return forceUpdateEmbeddedMenu_;
+    }
+
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetShowedSubMenu();
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
@@ -607,6 +617,7 @@ private:
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
     int embeddedSubMenuExpandTotalCount_ = 0;
+    bool forceUpdateEmbeddedMenu_ = false;
     LayoutConstraintF childLayoutConstraint_;
 
     AnimationOption animationOption_;

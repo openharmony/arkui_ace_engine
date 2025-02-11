@@ -779,6 +779,8 @@ void MenuItemPattern::HideSubMenu()
 void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
 {
     CHECK_NULL_VOID(expandableNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -788,11 +790,26 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
         embeddedMenu_ = expandableNode;
         ShowEmbeddedExpandMenu(embeddedMenu_);
         menuPattern->SetShowedSubMenu(embeddedMenu_);
+        menuPattern->AddEmbeddedMenuItem(host);
     } else {
-        HideEmbeddedExpandMenu(embeddedMenu_);
-        embeddedMenu_ = nullptr;
-        menuPattern->SetShowedSubMenu(nullptr);
+        HideEmbedded();
     }
+}
+
+void MenuItemPattern::HideEmbedded()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isExpanded_ = false;
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    CHECK_NULL_VOID(embeddedMenu_);
+    HideEmbeddedExpandMenu(embeddedMenu_);
+    embeddedMenu_ = nullptr;
+    menuPattern->SetShowedSubMenu(nullptr);
+    menuPattern->RemoveEmbeddedMenuItem(host);
 }
 
 Offset GetTransformCenter(SizeF size, Placement placement)

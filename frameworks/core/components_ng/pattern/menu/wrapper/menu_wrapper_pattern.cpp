@@ -595,6 +595,7 @@ void MenuWrapperPattern::MarkAllMenuNoDraggable()
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    forceUpdateEmbeddedMenu_ = false;
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
