@@ -1511,11 +1511,12 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 CHECK_NULL_VOID(preNode);
                 auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                 CHECK_NULL_VOID(preNavDesNode);
-                if (preNavDesNode->SystemTransitionPopCallback(preNavDesNode->GetAnimationId())) {
+                auto pattern = navigation->GetPattern<NavigationPattern>();
+                CHECK_NULL_VOID(pattern);
+                bool isIncurStack = pattern->FindInCurStack(preNode);
+                if (preNavDesNode->SystemTransitionPopCallback(preNavDesNode->GetAnimationId(), !isIncurStack)) {
                     auto parent = preNavDesNode->GetParent();
                     CHECK_NULL_VOID(parent);
-                    auto pattern = navigation->GetPattern<NavigationPattern>();
-                    bool isIncurStack = pattern->FindInCurStack(preNode);
                     if (!isIncurStack) {
                         parent->RemoveChild(preNavDesNode);
                     }
@@ -1638,6 +1639,11 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
         };
+    if (preNode) {
+        auto renderContext = preNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RemoveClipWithRRect();
+    }
     CreateAnimationWithDialogPush(callback, prevNavList, curNavList);
 }
 
@@ -1677,6 +1683,9 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         CHECK_NULL_VOID(navdestination);
         start = navdestination->GetIndex() + 1;
+        auto renderContext = preNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RemoveClipWithRRect();
     }
     // find the nodes need to do upward ENTER translation
     std::vector<WeakPtr<NavDestinationGroupNode>> curNavList;

@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -341,36 +341,57 @@ bool UIExtensionManager::UIExtBusinessDataSendValid()
 
 // host send data to provider
 void UIExtensionManager::RegisterBusinessDataSendCallback(
-    UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback)
+    UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback,
+    RSSubsystemId subsystemId)
 {
-    businessDataSendCallbacks_.try_emplace(
-        code, std::pair<BusinessDataSendType, UIExtBusinessDataSendCallback>(type, callback));
+    businessDataSendCallbacks_.try_emplace(code,
+        std::tuple<BusinessDataSendType, UIExtBusinessDataSendCallback, RSSubsystemId>(type, callback, subsystemId));
+}
+
+void UIExtensionManager::UnRegisterBusinessDataSendCallback(UIContentBusinessCode code)
+{
+    auto it = businessDataSendCallbacks_.find(code);
+    if (it == businessDataSendCallbacks_.end()) {
+        return;
+    }
+    businessDataSendCallbacks_.erase(it);
 }
 
 bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
 {
+    CHECK_RUN_ON(UI);
     auto it = businessDataSendCallbacks_.find(code);
     if (it == businessDataSendCallbacks_.end()) {
         return false;
     }
-    auto type = it->second.first;
-    auto callback = it->second.second;
+    auto type = std::get<0>(it->second);
+    auto callback = std::get<1>(it->second);
+    auto subsystemId = std::get<2>(it->second);
     CHECK_NULL_RETURN(callback, false);
     bool ret = false;
-    {
-        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
-        for (const auto& pattern : aliveUIExtensions_) {
-            auto uiExtension = pattern.second.Upgrade();
-            if (!uiExtension) {
-                continue;
-            }
-            // data is std::optional<AAFwk::Want>, if data has value then send it.
-            auto data = callback(uiExtension);
-            if (!data.has_value()) {
-                continue;
-            }
-            ret |= uiExtension->SendBusinessData(code, std::move(data.value()), type);
+    for (const auto& pattern : aliveUIExtensions_) {
+        auto uiExtension = pattern.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto frameNode = uiExtension->GetHost();
+        CHECK_NULL_CONTINUE(frameNode);
+        // data is std::optional<AAFwk::Want>, if data has value then send it.
+        auto data = callback(frameNode);
+        if (!data.has_value()) {
+            continue;
         }
+        ret |= uiExtension->SendBusinessData(code, std::move(data.value()), type, subsystemId);
+    }
+    for (const auto& pattern : aliveSecurityUIExtensions_) {
+        auto uiExtension = pattern.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto frameNode = uiExtension->GetHost();
+        CHECK_NULL_CONTINUE(frameNode);
+        // data is std::optional<AAFwk::Want>, if data has value then send it.
+        auto data = callback(frameNode);
+        if (!data.has_value()) {
+            continue;
+        }
+        ret |= uiExtension->SendBusinessData(code, std::move(data.value()), type, subsystemId);
     }
     return ret;
 }
@@ -380,6 +401,15 @@ void UIExtensionManager::RegisterBusinessDataConsumeCallback(
     UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback)
 {
     businessDataConsumeCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionManager::UnRegisterBusinessDataConsumeCallback(UIContentBusinessCode code)
+{
+    auto it = businessDataConsumeCallbacks_.find(code);
+    if (it == businessDataConsumeCallbacks_.end()) {
+        return;
+    }
+    businessDataConsumeCallbacks_.erase(it);
 }
 
 void UIExtensionManager::DispatchBusinessDataConsume(
@@ -398,6 +428,15 @@ void UIExtensionManager::RegisterBusinessDataConsumeReplyCallback(
     UIContentBusinessCode code, UIExtBusinessDataConsumeReplyCallback callback)
 {
     businessDataConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionManager::UnRegisterBusinessDataConsumeReplyCallback(UIContentBusinessCode code)
+{
+    auto it = businessDataConsumeReplyCallbacks_.find(code);
+    if (it == businessDataConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    businessDataConsumeReplyCallbacks_.erase(it);
 }
 
 void UIExtensionManager::DispatchBusinessDataConsumeReply(
@@ -486,6 +525,24 @@ void UIExtensionManager::TransferAccessibilityRectInfo()
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->TransferAccessibilityRectInfo();
+        }
+    }
+}
+
+void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, AAFwk::Want data,
+    RSSubsystemId subSystemId)
+{
+    CHECK_RUN_ON(UI);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
         }
     }
 }

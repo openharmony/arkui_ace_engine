@@ -72,6 +72,41 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             UnregisterWebUnfocusEventCallbackInner(data, reply, option);
             break;
         }
+        case RESET_ALL_TEXT: {
+            ResetTranslateTextAllInner(data, reply, option);
+            break;
+        }
+        case RESET_TEXT_BY_ID: {
+            ResetTranslateTextInner(data, reply, option);
+            break;
+        }
+        case GET_WEB_VIEW_LANGUAGE: {
+            GetWebViewCurrentLanguageInner(data, reply, option);
+            break;
+        }
+        case GET_WEB_TRANSLATE_TEXT: {
+            GetWebViewTranslateTextInner(data, reply, option);
+            break;
+        }
+        case CONTINUE_GET_WEB_TEXT: {
+            StartWebViewTranslateInner(data, reply, option);
+            break;
+        }
+        case SEND_TRANSLATE_RESULT: {
+            SendTranslateResultInner(data, reply, option);
+            break;
+        }
+        case END_WEB_TRANSLATE: {
+            EndWebViewTranslateInner(data, reply, option);
+            break;
+        }
+        case SEND_TRANSLATE_RESULT_STR: {
+            SendTranslateResultStrInner(data, reply, option);
+            break;
+        }
+        case GET_CURRENT_SHOWING_IMAGE: {
+            GetCurrentImagesShowingInner(data, reply, option);
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -165,6 +200,75 @@ int32_t UiContentStub::UnregisterWebUnfocusEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(UnregisterWebUnfocusEventCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::ResetTranslateTextAllInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(ResetTranslateTextAll());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::ResetTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t nodeId = data.ReadInt32();
+    reply.WriteInt32(ResetTranslateText(nodeId));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetWebViewCurrentLanguageInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance().SaveProcessId("translate", processId);
+    reply.WriteInt32(GetWebViewCurrentLanguage(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetWebViewTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string extraData = data.ReadString();
+    reply.WriteInt32(GetWebViewTranslateText(extraData, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::StartWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string extraData = data.ReadString();
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance().SaveProcessId("translate", processId);
+    reply.WriteInt32(StartWebViewTranslate(extraData, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::SendTranslateResultInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t nodeId = data.ReadInt32();
+    std::vector<std::string> results;
+    data.ReadStringVector(&results);
+    std::vector<int32_t> ids;
+    data.ReadInt32Vector(&ids);
+    reply.WriteInt32(SendTranslateResult(nodeId, results, ids));
+    return NO_ERROR;
+}
+int32_t UiContentStub::EndWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(EndWebViewTranslate());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::SendTranslateResultStrInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t nodeId = data.ReadInt32();
+    std::string result = data.ReadString();
+    reply.WriteInt32(SendTranslateResult(nodeId, result));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance().SaveProcessId("pixel", processId);
+    reply.WriteInt32(GetCurrentImagesShowing(nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

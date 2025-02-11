@@ -19,6 +19,7 @@ build_component_ng("manager_ng") {
     "display_sync/ui_display_sync.cpp",
     "display_sync/ui_display_sync_manager.cpp",
     "drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
+    "drag_drop/drag_drop_controller_func_wrapper.cpp",
     "drag_drop/drag_drop_func_wrapper.cpp",
     "drag_drop/drag_drop_global_controller.cpp",
     "drag_drop/drag_drop_initiating/drag_drop_initiating_handler.cpp",

@@ -19,6 +19,8 @@
 #include "ui/animation/anticipate_curve.h"
 #include "ui/animation/cubic_curve.h"
 #include "ui/animation/curve.h"
+#include "ui/base/macros.h"
+
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT Curves {

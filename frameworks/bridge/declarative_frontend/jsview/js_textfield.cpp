@@ -1722,8 +1722,8 @@ void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
         return;
     }
     auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
-    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
-        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+    if (keyboardAppearance < static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
         TextFieldModel::GetInstance()->SetKeyboardAppearance(
             static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;

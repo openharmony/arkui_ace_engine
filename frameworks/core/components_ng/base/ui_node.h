@@ -94,6 +94,7 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
+    void MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
@@ -266,6 +267,17 @@ public:
         }
     }
 
+    void SetHostPageIdByParent(int32_t id)
+    {
+        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
+            return;
+        }
+        hostPageId_ = id;
+        for (auto& child : children_) {
+            child->SetHostPageIdByParent(id);
+        }
+    }
+
     void SetRemoveSilently(bool removeSilently)
     {
         removeSilently_ = removeSilently;
@@ -299,6 +311,11 @@ public:
     bool IsInDestroying() const
     {
         return isInDestroying_;
+    }
+
+    bool IsDestroyingState() const
+    {
+        return isDestroyingState_;
     }
 
     void SetChildrenInDestroying();
@@ -350,6 +367,10 @@ public:
     virtual void OnWindowFocused() {}
 
     virtual void OnWindowUnfocused() {}
+
+    virtual void OnWindowActivated() {}
+
+    virtual void OnWindowDeactivated() {}
 
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
@@ -808,6 +829,11 @@ public:
         isCNode_ = createByCapi;
     }
 
+    bool IsReusableNode() const
+    {
+        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_;
+    }
+
     virtual RefPtr<UINode> GetCurrentPageRootNode()
     {
         return nullptr;
@@ -846,8 +872,15 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus) {}
+    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+    {
+        isDestroyingState_ = isDestroying;
+    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
+    {
+        return apiVersion_ >= static_cast<int32_t>(version);
+    }
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -909,6 +942,10 @@ protected:
     void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
         std::list<int32_t>& removedElmtId, bool isEntry);
     void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
+    void CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
+        std::list<int32_t>& reservedElmtId, bool isEntry);
+    void CollectReservedChildren(std::list<int32_t>& reservedElmtId);
+    virtual void OnCollectRemoved() {}
 
     bool needCallChildrenUpdate_ = true;
 
@@ -927,7 +964,6 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
-
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -939,7 +975,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = 1;
+    int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
@@ -961,6 +997,7 @@ private:
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
+    int32_t apiVersion_ = 0;
     uint32_t nodeFlag_ { 0 };
 
     int32_t restoreId_ = -1;
@@ -968,6 +1005,7 @@ private:
     bool useOffscreenProcess_ = false;
 
     bool isCNode_ = false;
+    bool isDestroyingState_ = false;
     bool isAllowAddChildBelowModalUec_ = true;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;

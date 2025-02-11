@@ -2015,4 +2015,49 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternSetCanLoop001, TestSize.
     textPickerColumnPattern_->SetCanLoop(false);
     EXPECT_EQ(textPickerColumnPattern_->overscroller_.loopTossOffset_, 0.0);
 }
+
+#ifdef ARKUI_WEARABLE
+/**
+ * @tc.name: TextPickerColumnPatternTest014
+ * @tc.desc: Test TextPickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest014, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    EXPECT_NE(textPickerColumnPattern->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    textPickerColumnPattern->SetDigitalCrownSensitivity(2);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), 2);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest015
+ * @tc.desc: Test TextPickerColumnPattern ToUpdateSelectedTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest015, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    auto textPickerPattern = frameNode_->GetPattern<TextPickerPattern>();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    RefPtr<TextLayoutProperty> textLayoutProperty = columnPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_FALSE(textLayoutProperty);
+    textPickerColumnPattern->ToUpdateSelectedTextProperties(theme);
+    EXPECT_EQ(textPickerColumnPattern->GetEnterIndex(), 0);
+    EXPECT_EQ(textPickerColumnPattern->GetSelected(), 0);
+    EXPECT_EQ(textPickerColumnPattern->selectorTextFocusColor_, Color::WHITE);
+}
+#endif
 } // namespace OHOS::Ace::NG

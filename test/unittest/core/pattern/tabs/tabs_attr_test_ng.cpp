@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,86 +44,6 @@ public:
         return frameNode;
     }
 };
-
-/**
- * @tc.name: Interface001
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Interface001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: BarPosition is default, index is default, vertical is default
-     * @tc.expected: TabBar is at top, show first tabContent(size > 0), swiper is HORIZONTAL
-     */
-    TabsModelNG model = CreateTabs(BarPosition::START, 0);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetY(), 0);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
-    EXPECT_GT(GetChildWidth(swiperNode_, 0), 0);
-    EXPECT_EQ(swiperPattern_->GetDirection(), Axis::HORIZONTAL);
-}
-
-/**
- * @tc.name: Interface002
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Interface002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: BarPosition is END, index is 1, vertical is default
-     * @tc.expected: TabBar is at bottom, show second tabContent(size > 0)
-     */
-    TabsModelNG model = CreateTabs(BarPosition::END, 1);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetY(), TABS_HEIGHT - TABBAR_DEFAULT_HEIGHT);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
-    EXPECT_GT(GetChildWidth(swiperNode_, 1), 0);
-}
-
-/**
- * @tc.name: Interface003
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Interface003, TestSize.Level1)
-{
-    /**
-     * @tc.cases: BarPosition is default, index is -1, vertical is true
-     * @tc.expected: TabBar is at left, show third tabContent(size > 0), swiper is VERTICAL
-     */
-    TabsModelNG model = CreateTabs(BarPosition::START, 2);
-    model.SetIsVertical(true);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetX(), 0);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 2);
-    EXPECT_GT(GetChildWidth(swiperNode_, 2), 0);
-    EXPECT_EQ(swiperPattern_->GetDirection(), Axis::VERTICAL);
-}
-
-/**
- * @tc.name: Interface004
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Interface004, TestSize.Level1)
-{
-    /**
-     * @tc.cases: BarPosition is END, index is TABCONTENT_NUMBER, vertical is true
-     * @tc.expected: TabBar is at right, show fourth tabContent(size > 0)
-     */
-    TabsModelNG model = CreateTabs(BarPosition::END, 3);
-    model.SetIsVertical(true);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetX(), TABS_WIDTH - TABBAR_DEFAULT_WIDTH);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 3);
-    EXPECT_GT(GetChildWidth(swiperNode_, 3), 0);
-}
 
 /**
  * @tc.name: Interface005
@@ -188,234 +108,6 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
-}
-
-/**
- * @tc.name: Bar001
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Bar001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: BarMode is default
-     * @tc.expected: TabBarItem width is average of TABS_WIDTH, barWidth is TABS_WIDTH
-     */
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(GetChildWidth(tabBarNode_, 0), TABS_WIDTH / TABCONTENT_NUMBER);
-    EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, TABBAR_DEFAULT_HEIGHT)));
-}
-
-/**
- * @tc.name: Bar002
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Bar002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: BarMode is SCROLLABLE
-     * @tc.expected: TabBarItem width is its actual width
-     */
-    TabsModelNG model = CreateTabs();
-    model.SetTabBarMode(TabBarMode::SCROLLABLE);
-    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(GetChildWidth(tabBarNode_, 0), 10.f);
-    EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, TABBAR_DEFAULT_HEIGHT)));
-}
-
-/**
- * @tc.name: Bar003
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Bar003, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set BarWidth 10, set barHeight 10
-     * @tc.expected: TabBarItem width is average of 10, barWidth is 10, barHeight is 10
-     */
-    TabsModelNG model = CreateTabs();
-    model.SetTabBarWidth(Dimension(10.f));
-    model.SetTabBarHeight(Dimension(10.f));
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(GetChildWidth(tabBarNode_, 0), 10.f / TABCONTENT_NUMBER);
-    EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(10.f, 10.f)));
-}
-
-/**
- * @tc.name: Divider001
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Divider001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: No set divider
-     * @tc.expected: No show divider
-     */
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, 0.f))); // (720.f, 0.f)
-}
-
-/**
- * @tc.name: Divider002
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Divider002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set Divider
-     * @tc.expected: Has divider
-     */
-    TabsItemDivider divider;
-    divider.strokeWidth = Dimension(4);
-    divider.startMargin = Dimension(5);
-    divider.endMargin = Dimension(5);
-    divider.color = Color::BLUE;
-    divider.isNull = false;
-    TabsModelNG model = CreateTabs();
-    model.SetDivider(divider);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(710.f, 4.f)));
-}
-
-/**
- * @tc.name: Divider003
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, Divider003, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set Divider and isNull is true
-     * @tc.expected: Has divider and create a new divider replace
-     */
-    TabsItemDivider divider;
-    divider.strokeWidth = Dimension(4);
-    divider.startMargin = Dimension(5);
-    divider.endMargin = Dimension(5);
-    divider.color = Color::BLUE;
-    divider.isNull = true;
-    TabsModelNG model = CreateTabs();
-    model.SetDivider(divider);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(720.f, 1.f)));
-}
-
-/**
- * @tc.name: BarGridAlign001
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, BarGridAlign001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Default
-     * @tc.expected: TabBarItem position is default
-     */
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(GetChildX(tabBarNode_, 0), TABS_WIDTH / TABCONTENT_NUMBER * 0);
-    EXPECT_EQ(GetChildX(tabBarNode_, 1), TABS_WIDTH / TABCONTENT_NUMBER * 1);
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), TABS_WIDTH / TABCONTENT_NUMBER * 2);
-    EXPECT_EQ(GetChildX(tabBarNode_, 3), TABS_WIDTH / TABCONTENT_NUMBER * 3);
-}
-
-/**
- * @tc.name: BarGridAlign002
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, BarGridAlign002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set BarGridColumnOptions
-     * @tc.expected: TabBarItem position changed
-     */
-    BarGridColumnOptions options;
-    options.md = 4;
-    options.gutter = Dimension(5);
-    options.margin = Dimension(10);
-    TabsModelNG model = CreateTabs();
-    model.SetBarGridAlign(options);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(GetChildX(tabBarNode_, 0), 186.25);
-    EXPECT_EQ(GetChildX(tabBarNode_, 1), 273.125);
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), 360);
-    EXPECT_EQ(GetChildX(tabBarNode_, 3), 446.875);
-}
-
-/**
- * @tc.name: TabsModelOnUpdateShowDivider001
- * @tc.desc: Test tabs OnUpdateShowDivider.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider001, TestSize.Level1)
-{
-    Color color = Color::RED;
-    TabsItemDivider divider;
-    divider.color = color;
-    TabsModelNG model = CreateTabs();
-    model.SetDivider(divider);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    pattern_->OnUpdateShowDivider();
-    auto dividerColor = dividerRenderProperty_->GetDividerColor();
-    EXPECT_EQ(dividerColor.value().ColorToString(), color.ColorToString());
-}
-
-/**
- * @tc.name: TabsModelOnUpdateShowDivider002
- * @tc.desc: Test tabs OnUpdateShowDivider when pattern_ without host
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider002, TestSize.Level2)
-{
-    auto pattern = AceType::MakeRefPtr<TabsPattern>();
-    pattern->OnUpdateShowDivider();
-    EXPECT_EQ(pattern->GetHostFrameSize(), std::nullopt);
-}
-
-/**
- * @tc.name: TabsModelOnUpdateShowDivider003
- * @tc.desc: Test tabs OnUpdateShowDivider when pattern_ without host
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider003, TestSize.Level2)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    pattern_->OnUpdateShowDivider();
-    EXPECT_EQ(frameNode_->GetTotalChildCount(), 3);
-}
-
-/**
- * @tc.name: TabsModelOnUpdateShowDivider004
- * @tc.desc: Test tabs OnUpdateShowDivider when pattern_ without host
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider004, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    pattern_->OnUpdateShowDivider();
-    auto childNode = frameNode_->GetChildAtIndex(1);
-    EXPECT_EQ(childNode->GetTag(), V2::DIVIDER_ETS_TAG);
 }
 
 /**
@@ -1078,10 +770,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level
     CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     float halfTabsWidth = TABS_WIDTH / 2;
-    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
-    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BAR_ITEM_SIZE * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BAR_ITEM_SIZE);
     EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
-    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BAR_ITEM_SIZE);
 
     /**
      * @tc.steps: steps2. Set margin and ALWAYS_AVERAGE_SPLIT
@@ -1120,44 +812,16 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level
      */
     option.margin = Dimension(0.f);
     option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
-    const float tabsWidth = BARITEM_SIZE * (TABCONTENT_NUMBER + 1);
+    const float tabsWidth = BAR_ITEM_SIZE * (TABCONTENT_NUMBER + 1);
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(tabsWidth));
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     halfTabsWidth = tabsWidth / 2;
-    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
-    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BAR_ITEM_SIZE * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BAR_ITEM_SIZE);
     EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
-    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BARITEM_SIZE);
-}
-
-/**
- * @tc.name: TabsModelSetBarGridAlign001
- * @tc.desc: Test the SetBarGridAlign function in the TabsModel class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelSetBarGridAlign001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps2. Create BarGridColumnOptions and assign them initial values.
-     */
-    BarGridColumnOptions BarGridColumnOptions;
-    BarGridColumnOptions.sm = -1;
-    BarGridColumnOptions.md = -1;
-    BarGridColumnOptions.lg = -1;
-    BarGridColumnOptions.gutter = 0.0_vp;
-    BarGridColumnOptions.margin = 0.0_vp;
-    TabsModelNG model = CreateTabs();
-    model.SetBarGridAlign(BarGridColumnOptions);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: steps3. SetBarGridAlign.
-     * @tc.expected: steps3. Check if the SetBarGridAlign function has successfully set BarGridColumnOptions.
-     */
-    EXPECT_EQ(tabBarLayoutProperty_->GetBarGridAlign(), BarGridColumnOptions);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BAR_ITEM_SIZE);
 }
 
 /**
@@ -1204,7 +868,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
      * @tc.steps: step2. Test function SetAnimationDuration in APIVersion 10.
      * @tc.expected: Related function runs ok.
      */
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    pipeline->SetMinPlatformVersion(10);
     ASSERT_FALSE(tabBarPattern_->GetAnimationDuration().has_value());
     tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), 0);
@@ -1222,7 +886,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
      * @tc.steps: step3. Test function SetAnimationDuration in APIVersion 11.
      * @tc.expected: Related function runs ok.
      */
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    pipeline->SetMinPlatformVersion(11);
     tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), defaultDuration);
     tabBarPattern_->animationDuration_.reset();
@@ -1410,38 +1074,6 @@ HWTEST_F(TabsAttrTestNg, TabsModelMeasure007, TestSize.Level1)
     tabsLayoutAlgorithm->Measure(&layoutWrapper);
     tabsLayoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_TRUE(layoutWrapper.GetTotalChildCount() - 2 <= 0);
-}
-
-/**
- * @tc.name: BarGridAlign003
- * @tc.desc: Test Tabs attr
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, BarGridAlign003, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set BarGridColumnOptions
-     * @tc.expected: TabBarItem position changed
-     */
-    TabsModelNG model = CreateTabs(BarPosition::START, 1);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(swiperNode_->TotalChildCount(), TABCONTENT_NUMBER);
-    EXPECT_EQ(frameNode_->GetIndex(), 1);
-
-    ClearOldNodes();
-    model = CreateTabs(BarPosition::START, 2);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    FlushUITasks();
-    EXPECT_EQ(frameNode_->GetIndex(), 2);
-
-    ClearOldNodes();
-    model = CreateTabs(BarPosition::START, -1);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    FlushUITasks();
-    EXPECT_EQ(frameNode_->GetIndex(), 0);
 }
 
 /**

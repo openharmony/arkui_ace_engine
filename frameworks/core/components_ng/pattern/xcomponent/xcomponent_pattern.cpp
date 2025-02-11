@@ -59,6 +59,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+
 std::string XComponentTypeToString(XComponentType type)
 {
     switch (type) {
@@ -237,6 +239,7 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {

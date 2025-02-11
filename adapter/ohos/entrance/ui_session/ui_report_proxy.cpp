@@ -167,6 +167,46 @@ void UiReportProxy::SendBaseInfo(const std::string& data)
     }
 }
 
+void UiReportProxy::SendCurrentLanguage(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCurrentLanguage write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("SendCurrentLanguage write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_CURRENT_LANGUAGE, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendCurrentLanguage send request failed");
+    }
+}
+
+void UiReportProxy::SendWebText(int32_t nodeId, std::string res)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendWebText write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(res)) {
+        LOGW("SendWebText write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt32(nodeId)) {
+        LOGW("SendWebText write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_TEXT, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendWebText send request failed");
+    }
+}
+
 void UiReportProxyRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     LOGI("uiproxy death notice");
@@ -176,6 +216,65 @@ void UiReportProxyRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
     }
     if (handler_) {
         handler_();
+    }
+}
+
+void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendShowingImage write interface token failed");
+        return;
+    }
+    if (!messageData.WriteInt32(maps.size())) {
+        LOGW("SendShowingImage write size failed");
+        return;
+    }
+    for (auto& map : maps) {
+        if (!messageData.WriteInt32(map.first)) {
+            LOGW("SendShowingImage write id failed");
+            return;
+        }
+        std::vector<uint8_t> buf;
+        map.second->EncodeTlv(buf);
+        auto dataSize = buf.size();
+        sptr<Ashmem> ashmem = Ashmem::CreateAshmem((std::to_string(map.first)).c_str(), dataSize);
+        if (ashmem == nullptr) {
+            LOGW("Create shared memory failed");
+            return;
+        }
+        // Set the read/write mode of the ashme.
+        if (!ashmem->MapReadAndWriteAshmem()) {
+            LOGW("Map shared memory fail");
+            return;
+        }
+        // Write the size and content of each item to the ashmem.
+        int32_t offset = 0;
+        if (!ashmem->WriteToAshmem(reinterpret_cast<uint8_t*>(buf.data()), dataSize, offset)) {
+            LOGW("Write info to shared memory fail");
+            ClearAshmem(ashmem);
+            return;
+        }
+
+        if (!messageData.WriteAshmem(ashmem)) {
+            ClearAshmem(ashmem);
+            LOGW("Write ashmem to tempParcel fail");
+            return;
+        }
+        ClearAshmem(ashmem);
+    }
+    if (Remote()->SendRequest(SEND_IMAGES, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendShowingImage send request failed");
+    }
+}
+
+void UiReportProxy::ClearAshmem(sptr<Ashmem>& optMem)
+{
+    if (optMem != nullptr) {
+        optMem->UnmapAshmem();
+        optMem->CloseAshmem();
     }
 }
 } // namespace OHOS::Ace

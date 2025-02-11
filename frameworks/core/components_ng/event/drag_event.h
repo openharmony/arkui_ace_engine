@@ -316,6 +316,8 @@ public:
 
     void GetThumbnailPixelMap(bool isSync);
 
+    void FireCustomerOnDragEnd();
+
     virtual void NotifyTransDragWindowToFwk() {}
 
     virtual void NotifyMenuShow(bool isMenuShow) {}
@@ -337,7 +339,6 @@ private:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
-    RefPtr<LongPressRecognizer> preDragStatusPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
     RefPtr<TouchEventImpl> touchListener_;

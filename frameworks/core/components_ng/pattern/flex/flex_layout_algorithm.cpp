@@ -1103,7 +1103,8 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
         allocatedSize_ = 0.0;
     }
     for (const auto& child : children) {
-        if (child->IsOutOfLayout() || IsVisibleGone(child)) {
+        if (child->IsOutOfLayout() || IsVisibleGone(child) ||
+            find(layoutPolicyChildren_.begin(), layoutPolicyChildren_.end(), child) != layoutPolicyChildren_.end()) {
             continue;
         }
         allocatedSize_ += GetChildMainAxisSize(child);

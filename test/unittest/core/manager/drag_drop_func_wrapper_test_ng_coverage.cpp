@@ -643,7 +643,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage027
     DragPreviewOption option;
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
 
-    EXPECT_FALSE(option.options.blurbgEffect.backGroundEffect.radius.IsValid());
+    EXPECT_TRUE(option.options.blurbgEffect.backGroundEffect.radius.IsValid());
 }
 
 /**

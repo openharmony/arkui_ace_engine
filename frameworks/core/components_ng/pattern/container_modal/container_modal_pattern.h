@@ -58,12 +58,12 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        pipeline->AddWindowFocusChangedCallback(host->GetId());
+        pipeline->AddWindowActivateChangedCallback(host->GetId());
     }
 
-    void OnWindowFocused() override;
+    void OnWindowActivated() override;
 
-    void OnWindowUnfocused() override;
+    void OnWindowDeactivated() override;
 
     virtual void OnWindowForceUnfocused();
 
@@ -203,6 +203,8 @@ public:
     {
         return false;
     }
+
+    void InitAllTitleRowLayoutProperty();
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)

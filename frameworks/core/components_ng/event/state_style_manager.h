@@ -57,14 +57,49 @@ public:
         return currentState_;
     }
 
+    // this function should only be called by the frontend parsing layer to add a supported UI state.
     void AddSupportedState(UIState state)
     {
         supportedStates_ = supportedStates_ | state;
+        frontendSubscribers_ = frontendSubscribers_ | state;
     }
 
     void SetSupportedStates(UIState state)
     {
         supportedStates_ = state;
+    }
+
+    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)> callback, bool isInner)
+    {
+        if (state == UI_STATE_NORMAL) {
+            return;
+        }
+        if (!HasStateStyle(state)) {
+            supportedStates_ = supportedStates_ | state;
+        }
+        if (isInner) {
+            innerStateStyleSubscribers_.first |= state;
+            innerStateStyleSubscribers_.second = callback;
+        } else {
+            userStateStyleSubscribers_.first |= state;
+            userStateStyleSubscribers_.second = callback;
+        }
+    }
+
+    void RemoveSupportedUIState(UIState state, bool isInner)
+    {
+        if (state == UI_STATE_NORMAL) {
+            return;
+        }
+        if (isInner) {
+            innerStateStyleSubscribers_.first &= ~state;
+        } else {
+            userStateStyleSubscribers_.first &= ~state;
+        }
+        UIState temp = frontendSubscribers_ | innerStateStyleSubscribers_.first | userStateStyleSubscribers_.first;
+        if ((temp & state) != state) {
+            supportedStates_ = supportedStates_ & ~state;
+        }
     }
 
     bool IsCurrentStateOn(UIState state) const
@@ -92,7 +127,7 @@ public:
         auto temp = currentState_ | state;
         if (temp != currentState_) {
             currentState_ = temp;
-            FireStateFunc(false);
+            FireStateFunc(state, currentState_, false);
         }
     }
 
@@ -107,7 +142,7 @@ public:
         auto temp = currentState_ ^ state;
         if (temp != currentState_) {
             currentState_ = temp;
-            FireStateFunc(true);
+            FireStateFunc(state, currentState_, true);
         }
     }
 
@@ -129,7 +164,8 @@ public:
     }
 
 private:
-    void FireStateFunc(bool isReset);
+    void HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset);
+    void FireStateFunc(UIState handlingState, UIState currentState, bool isReset);
 
     void PostListItemPressStyleTask(UIState state);
     void PostPressStyleTask(uint32_t delayTime);
@@ -209,7 +245,13 @@ private:
 
     UIState supportedStates_ = UI_STATE_NORMAL;
     UIState currentState_ = UI_STATE_NORMAL;
-
+    // manages inner subscription UI state and callbacks.
+    std::pair<UIState, std::function<void(uint64_t)>> innerStateStyleSubscribers_ = { UI_STATE_NORMAL, nullptr };
+    // manages user subscription UI state and callbacks.
+    std::pair<UIState, std::function<void(uint64_t)>> userStateStyleSubscribers_ = { UI_STATE_NORMAL, nullptr };
+    // tracks frontend UI state.
+    UIState frontendSubscribers_ = UI_STATE_NORMAL;
+    
     std::set<int32_t> pointerId_;
     CancelableCallback<void()> pressStyleTask_;
     CancelableCallback<void()> pressCancelStyleTask_;

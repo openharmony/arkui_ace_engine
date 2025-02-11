@@ -46,28 +46,6 @@ struct NativeRichEditorTextSpanOptions {
     NativeRichEditorTextStyle style;
 };
 
-struct NativeMargin {
-    double top;
-    int32_t topUnit;
-    double right;
-    int32_t rightUnit;
-    double bottom;
-    int32_t bottomUnit;
-    double left;
-    int32_t leftUnit;
-};
-
-struct NativeBorderRadiuses {
-    double top;
-    int32_t topUnit;
-    double right;
-    int32_t rightUnit;
-    double bottom;
-    int32_t bottomUnit;
-    double left;
-    int32_t leftUnit;
-};
-
 struct NativeLayoutStyle {
     NativeMargin margin;
     NativeBorderRadiuses borderRadius;

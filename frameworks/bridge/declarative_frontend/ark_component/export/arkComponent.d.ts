@@ -179,7 +179,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
     draggable(value: boolean): this;
-    dragPreview(value: CustomBuilder | DragItemInfo | string): this;
+    dragPreview(preview: CustomBuilder | DragItemInfo | string): this;
     overlay(value: string | CustomBuilder, options?: {
         align?: Alignment;
         offset?: {
@@ -984,6 +984,7 @@ declare class ArkTimePickerComponent extends ArkComponent implements TimePickerA
     textStyle(value: PickerTextStyle): this;
     selectedTextStyle(value: PickerTextStyle): this;
     onChange(callback: (value: TimePickerResult) => void): this;
+    digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this;
 }
 declare class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -997,6 +998,7 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
     onCancel(callback: () => void): this;
     onChange(callback: (value: string | string[], index: number | number[]) => void): this;
     selectedIndex(value: number | number[]): this;
+    digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this;
 }
 declare class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1182,6 +1184,7 @@ declare class ArkDatePickerComponent extends ArkComponent implements DatePickerA
     onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute;
     onDateChange(callback: (value: Date) => void): DatePickerAttribute;
     backgroundColor(value: ResourceColor): this;
+    digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): DatePickerAttribute;
 }
 declare class ArkFormComponentComponent extends ArkComponent implements FormComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

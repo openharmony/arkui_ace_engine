@@ -1090,7 +1090,6 @@ ArkThemeWhiteList.whiteList = [
     'Radio',
     'Scroll',
     'Select',
-    'Slider',
     'Swiper',
     'Text',
     'TextClock',

@@ -492,6 +492,23 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToolBarPatternTest009
+ * @tc.desc: Test the SetToolbarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest009, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    NavigationToolbarOptions opt;
+    opt.brOptions.textHideOptions = true;
+    navToolbarPattern->SetToolbarOptions(std::move(opt));
+}
+
+/**
  * @tc.name: NavToolbarPatternOnModifyDone001
  * @tc.desc: Increase the coverage of NavToolbarPattern::OnModifyDone function.
  * @tc.type: FUNC
@@ -642,6 +659,40 @@ HWTEST_F(ToolBarTestNg, HandleTitleBarAndToolBarAnimation001, TestSize.Level1)
     auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
     ASSERT_NE(toolBarLayoutProperty, nullptr);
     EXPECT_EQ(toolBarLayoutProperty->propVisibility_, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: SetIsHideItemText001
+ * @tc.desc: Test the SetIsHideItemText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetIsHideItemText001, TestSize.Level1)
+{
+    bool hideText = true;
+    bool showText = false;
+    toolBarNode_->SetIsHideItemText(hideText);
+    bool result = toolBarNode_->isHideItemText_;
+    EXPECT_EQ(result, hideText);
+    toolBarNode_->SetIsHideItemText(showText);
+    result = toolBarNode_->isHideItemText_;
+    EXPECT_EQ(result, showText);
+}
+
+/**
+ * @tc.name: IsHideTextTest001
+ * @tc.desc: Test the IsHideText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, IsHideTextTest001, TestSize.Level1)
+{
+    bool hideText = true;
+    bool showText = false;
+    toolBarNode_->SetIsHideItemText(hideText);
+    bool result = toolBarNode_->IsHideItemText();
+    EXPECT_EQ(result, hideText);
+    toolBarNode_->SetIsHideItemText(showText);
+    result = toolBarNode_->IsHideItemText();
+    EXPECT_EQ(result, showText);
 }
 
 /**

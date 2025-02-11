@@ -210,6 +210,7 @@ public:
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
+    virtual void SetFormEnableBlurBackground(bool enableBlurBackground) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -497,6 +498,17 @@ public:
     virtual std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId)
     {
         return nullptr;
+    }
+
+    virtual void ActiveWindow() {};
+
+    virtual void UnActiveWindow() {};
+
+    virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
+
+    virtual bool SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
     }
 };
 

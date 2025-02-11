@@ -34,6 +34,15 @@ bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
 
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetToolBarNode());
     CHECK_NULL_RETURN(toolbarNode, false);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(nodeBase->GetParent());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (!toolbarNode->GetEnableToolBarAdaptation()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "The toolbar adaptation has been closed");
+        return false;
+    }
+
     if (!toolbarNode->HasValidContent()) {
         return true;
     }
@@ -147,7 +156,7 @@ float NavigationLayoutUtil::MeasureToolBar(LayoutWrapper* layoutWrapper, const R
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, 0.0f);
-    auto toolbarHeight = theme->GetHeight();
+    auto toolbarHeight = theme->GetToolbarHeigth();
     constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), static_cast<float>(toolbarHeight.ConvertToPx()));
     toolBarWrapper->Measure(constraint);
     auto toolbarHeightAfterMeasure = toolBarWrapper->GetGeometryNode()->GetFrameSize().Height();

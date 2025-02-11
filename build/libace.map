@@ -90,6 +90,7 @@
       OHOS::Ace::Dimension::*;
       OHOS::Ace::Matrix4::*;
       OHOS::Ace::NG::DragDropFuncWrapper::*;
+      OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
@@ -198,6 +199,8 @@
       OHOS::Ace::VideoModel::*;
       OHOS::Ace::WebModel::*;
       OHOS::Ace::ImageInfoConfig::*;
+      OHOS::Ace::RecycleViewModel::*;
+      OHOS::Ace::NG::RecycleDummyNode::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -274,6 +277,7 @@
       OHOS::Ace::AceScoringLog::*;
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
+      "OHOS::Ace::NG::ViewAdvancedRegister::GetInstance()";
       OHOS::Ace::ImageAnalyzerAdapterImpl::*;
       OHOS::Ace::ImageAnalyzerLoader::*;
       OHOS::Ace::ImageAnalyzerManager::ImageAnalyzerManager*;
@@ -427,10 +431,23 @@
       OHOS::Ace::NG::ListItemModelNG::*;
       OHOS::Ace::NG::ScrollBarModelNG::*;
       OHOS::Ace::NG::ScrollableModelNG::*;
+      OHOS::Ace::Kit::ContentModifier::*;
+      OHOS::Ace::Kit::Property::*;
+      OHOS::Ace::Kit::ParseColor*;
+      OHOS::Ace::Kit::ParseDimension*;
+      OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::View::*;
+      OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::Text::*;
+      OHOS::Ace::NG::NavigationStack::*;
+      OHOS::Ace::NG::CustomNode::*;
+      OHOS::Ace::NavDestinationModel::*;
+      OHOS::Ace::NavDestinationModelNG::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       OHOS::Ace::NG::ComponentSnapshot::*;
+      virtual?thunk?to?OHOS::Ace::Kit::ContentModifier::*;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
@@ -469,12 +486,16 @@
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
       vtable?for?OHOS::Ace::NG::ParallelPagePattern;
       vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
-      vtable?for?OHOS::Ace::NG::ContainerModalView;      
+      vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
       vtable?for?OHOS::Ace::NG::ScrollBarModelNG;
       vtable?for?OHOS::Ace::NG::ScrollableModelNG;
+      vtable?for?OHOS::Ace::NG::NavigationStack;
+      vtable?for?OHOS::Ace::NG::CustomNode;
+      vtable?for?OHOS::Ace::NavDestinationModel;
+      vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -483,6 +504,7 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+      VTT?for?OHOS::Ace::NG::NavigationStack;
 
       OHOS::Ace::LinearColor::TRANSPARENT;
 

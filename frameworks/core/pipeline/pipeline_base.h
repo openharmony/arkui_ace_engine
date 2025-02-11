@@ -245,6 +245,8 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
+    virtual void WindowActivate(bool isActive) {}
+
     virtual void ContainerModalUnFocus() = 0;
 
     virtual void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) = 0;
@@ -364,6 +366,11 @@ public:
     void SetFormRenderingMode(int8_t renderMode)
     {
         renderingMode_ = renderMode;
+    }
+
+    void SetFormEnableBlurBackground(bool enableBlurBackground)
+    {
+        enableBlurBackground_ = enableBlurBackground;
     }
 
     const Color& GetAppBgColor() const
@@ -1158,8 +1165,6 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    virtual void SetupSubRootElement() = 0;
-
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
     void SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
@@ -1268,19 +1273,14 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    void SetUseCutout(bool useCutout)
-    {
-        useCutout_ = useCutout;
-    }
-
-    bool GetUseCutout() const
-    {
-        return useCutout_;
-    }
-
     bool GetOnFoucs() const
     {
         return onFocus_;
+    }
+
+    bool GetOnActive() const
+    {
+        return onActive_;
     }
 
     uint64_t GetVsyncTime() const
@@ -1410,6 +1410,11 @@ public:
     virtual bool IsWindowFocused() const
     {
         return GetOnFoucs();
+    }
+
+    virtual bool IsWindowActivated() const
+    {
+        return GetOnActive();
     }
 
     void SetDragNodeGrayscale(float dragNodeGrayscale)
@@ -1559,6 +1564,7 @@ protected:
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
     int8_t renderingMode_ = 0;
+    bool enableBlurBackground_ = false;
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
@@ -1604,6 +1610,7 @@ protected:
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
+    std::atomic<bool> onActive_ = false;
     uint64_t lastTouchTime_ = 0;
     uint64_t lastMouseTime_ = 0;
     uint64_t lastDragTime_ = 0;
@@ -1649,7 +1656,6 @@ private:
     bool halfLeading_ = false;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
-    bool useCutout_ = false;
     // whether visible area need to be calculate at each vsync after approximate timeout.
     bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;

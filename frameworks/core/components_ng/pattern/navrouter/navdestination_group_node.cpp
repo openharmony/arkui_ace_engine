@@ -415,7 +415,7 @@ bool NavDestinationGroupNode::CheckTransitionPop(const int32_t animationId)
     return true;
 }
 
-bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId)
+bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent)
 {
     if (animationId_ != animationId) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
@@ -433,12 +433,14 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animatio
     CHECK_NULL_RETURN(preNavDesPattern, false);
 
     // NavRouter will restore the preNavDesNode and needs to set the initial state after the animation ends.
-    auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
-    if (shallowBuilder && !IsCacheNode()) {
-        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-    }
-    if (!IsCacheNode() && GetContentNode()) {
-        GetContentNode()->Clean();
+    if (isNeedCleanContent) {
+        auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
+        if (shallowBuilder && !IsCacheNode()) {
+            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+        }
+        if (!IsCacheNode() && GetContentNode()) {
+            GetContentNode()->Clean();
+        }
     }
     GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
@@ -747,8 +749,9 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
                 renderContext->UpdateTranslateInXY({ 0.0f, 0.0f });
             }
         };
-        auto option = BuildAnimationOption(
-            MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f), BuildTransitionFinishCallback());
+        RefPtr<Curve> curve = isRight ? MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f)
+            : MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
+        auto option = BuildAnimationOption(curve, BuildTransitionFinishCallback());
         if (!isEnter) {
             GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         } else {
@@ -963,6 +966,7 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 auto parent = navDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(navDestination);
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             } else if (navDestination->HasStandardBefore()) {
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);

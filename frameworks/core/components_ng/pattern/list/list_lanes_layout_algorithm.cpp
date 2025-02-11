@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/event_report.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -59,7 +60,10 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
     bool groupLayoutAll)
 {
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
-    CHECK_NULL_RETURN(wrapper, 0.0f);
+    if (!wrapper) {
+        ReportGetChildError("MeasureAndGetChildHeightLanes", childIndex);
+        return 0.0f;
+    }
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     float mainLen = 0.0f;
     if (isGroup) {
@@ -73,6 +77,10 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
         auto laneCeil = GetLanesCeil(layoutWrapper, childIndex);
         for (int32_t i = GetLanesFloor(layoutWrapper, childIndex); i <= laneCeil; i++) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(i);
+            if (!wrapper) {
+                ReportGetChildError("MeasureAndGetChildHeightLanesItem", i);
+                continue;
+            }
             wrapper->Measure(childLayoutConstraint_);
             mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
         }
@@ -121,7 +129,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         ++currentIndex;
         endPos = firstItemInfo_.value().second.endPos;
         SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
-        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
         firstItemInfo_.reset();
         return 1;
     } else if (firstItemInfo_) {
@@ -130,6 +137,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
     for (int32_t i = 0; i < lanes && currentIndex + 1 <= GetMaxListItemIndex() && !isGroup; i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
+            ReportGetChildError("LayoutALineForwardLanes", currentIndex + 1);
             break;
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
@@ -156,7 +164,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
-    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 
@@ -171,7 +178,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         --currentIndex;
         startPos = firstItemInfo_.value().second.startPos;
         SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
-        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
         firstItemInfo_.reset();
         return 1;
     } else if (firstItemInfo_) {
@@ -184,6 +190,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         }
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
         if (!wrapper) {
+            ReportGetChildError("LayoutALineBackwardLanes", currentIndex - 1);
             break;
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
@@ -213,7 +220,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
-    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 
@@ -665,7 +671,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
                 break;
             }
         }
-        auto startIndex = curIndex - cnt + 1;
+        auto startIndex = GetLanesFloor(layoutWrapper, curIndex);
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
@@ -683,6 +689,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             pos.second.startPos = endPos - mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
+        SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
         endPos = endPos - mainLen - GetSpaceWidth();
         curIndex -= cnt;
     }

@@ -14,7 +14,7 @@
  */
 #define private public
 #define protected public
-#include "core/components_ng/pattern/ui_extension/security_session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
 
 #include <cmath>
 #include <memory>
@@ -276,13 +276,13 @@ void SecuritySessionWrapperImpl::NotifyUieDump(
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     return false;
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessData(
-    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     return false;
 }

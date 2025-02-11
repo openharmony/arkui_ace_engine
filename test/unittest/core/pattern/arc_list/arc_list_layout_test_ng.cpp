@@ -451,12 +451,12 @@ HWTEST_F(ArcListLayoutTestNg, GetNearScale001, TestSize.Level1)
     ArcListLayoutAlgorithm algorithm(200, 100);
     EXPECT_FALSE(NearEqual(algorithm.GetNearScale(150.0), 0.780000));
     EXPECT_FALSE(NearEqual(algorithm.GetNearScale(-135.0), 0.820000));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(141.0), 0.780000));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-132.0), 0.820000));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(120.0), 0.871304));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(95.0), 0.966250));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(10.0), 1.077872));
-    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-10.0), 1.077826));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(141.0), 0.832255));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-132.0), 0.856995));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(120.0), 0.889020));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(95.0), 0.950898));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(10.0), 1.077197));
+    EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-10.0), 1.077197));
 }
 
 /**
@@ -532,62 +532,6 @@ HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffset002, TestSize.Level1)
     listLayoutAlgorithm->SetPredictSnapOffset(100.0);
     ScrollTo(200);
     EXPECT_EQ(pattern_->GetTotalOffset(), -105);
-}
-
-/**
- * @tc.name: OnItemPositionAddOrUpdate001
- * @tc.desc: Test ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(ArcListLayoutTestNg, OnItemPositionAddOrUpdate001, TestSize.Level1)
-{
-    int32_t count = 3;
-
-    ListModelNG model = CreateList();
-    CreateListItems(count);
-    CreateDone();
-
-    pattern_->SetPredictSnapOffset(100.0);
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
-        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-
-    // Before scroll, call SetPredictSnapOffset to set value.
-    listLayoutAlgorithm->SetPredictSnapOffset(100.0);
-    uint32_t index = 0;
-    // For check OnItemPositionAddOrUpdate switch cover, in this case predictSnapEndPos_ is not set.
-    listLayoutAlgorithm->OnItemPositionAddOrUpdate(frameNode_.GetRawPtr(), index);
-    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
-}
-
-/**
- * @tc.name: OnItemPositionAddOrUpdate002
- * @tc.desc: Test ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(ArcListLayoutTestNg, OnItemPositionAddOrUpdate002, TestSize.Level1)
-{
-    int32_t count = 3;
-
-    ListModelNG model = CreateList();
-    CreateListItems(count);
-    CreateDone();
-
-    pattern_->SetPredictSnapOffset(100.0);
-    // Call SetPredictSnapOffset twice to cover more switch(the init value check switch).
-    pattern_->SetPredictSnapOffset(100.0);
-
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
-        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-
-    // Before scroll, call SetPredictSnapOffset to set value.
-    listLayoutAlgorithm->SetPredictSnapOffset(100.0);
-    listLayoutAlgorithm->SetPredictSnapEndPosition(200.0);
-
-    for (uint32_t index = 0; index < count; ++index) {
-        // For check OnItemPositionAddOrUpdate switch cover, in this case predictSnapEndPos_ is set.
-        listLayoutAlgorithm->OnItemPositionAddOrUpdate(frameNode_.GetRawPtr(), index);
-        EXPECT_FALSE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
-    }
 }
 
 /**

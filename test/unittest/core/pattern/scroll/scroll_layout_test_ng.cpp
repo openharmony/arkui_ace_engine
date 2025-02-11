@@ -715,4 +715,31 @@ HWTEST_F(ScrollLayoutTestNg, ScrollGetChildrenExpandedSize001, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
 }
+
+/**
+ * @tc.name: ScrollAdjustOffset001
+ * @tc.desc: Test Scroll AdjustOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ScrollAdjustOffset001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(1000.f);
+    CreateScrollDone();
+
+    pattern_->currentOffset_ = 1000.f;
+    pattern_->OnScrollCallback(-100.f, SCROLL_FROM_FOCUS_JUMP);
+    EXPECT_EQ(pattern_->currentOffset_, 900.f);
+
+    pattern_->currentOffset_ = 1000.f;
+    pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->currentOffset_, 900.f);
+    EXPECT_LT(pattern_->currentOffset_, 1000.f);
+
+    pattern_->currentOffset_ = 1000.f;
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->currentOffset_, 1000.f);
+    EXPECT_LT(pattern_->currentOffset_, 1100.f);
+}
 } // namespace OHOS::Ace::NG

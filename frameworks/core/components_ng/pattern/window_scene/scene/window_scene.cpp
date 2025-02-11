@@ -301,9 +301,9 @@ void WindowScene::BufferAvailableCallback()
             auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(config.opacityEnd_);
             effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
             context->UpdateChainedTransition(effect);
-            AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
+            AceAsyncTraceBeginCommercial(0, "StartingWindowExitAnimation");
             context->SetTransitionUserCallback([weakSession = wptr(self->session_)](bool) {
-                AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
+                AceAsyncTraceEndCommercial(0, "StartingWindowExitAnimation");
                 auto session = weakSession.promote();
                 CHECK_NULL_VOID(session);
                 CHECK_EQUAL_VOID(session->GetSystemConfig().IsPcWindow(), false);

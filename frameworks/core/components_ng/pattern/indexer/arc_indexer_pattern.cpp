@@ -54,7 +54,7 @@ void ArcIndexerPattern::InitArrayValue(bool& autoCollapseModeChanged)
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!isNewHeightCalculated_) {
-        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
+        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
         autoCollapseModeChanged = autoCollapse != autoCollapse_;
         autoCollapse_ = autoCollapse;
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
@@ -411,22 +411,31 @@ void ArcIndexerPattern::BuildArrayValueItems()
     if (layoutProperty->GetIsPopupValue(false)) {
         lastChildCount -= 1;
     }
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (indexerSize != lastChildCount) {
         host->Clean();
         layoutProperty->UpdateIsPopup(false);
-        for (int32_t index = 0; index < indexerSize - 1; index++) {
+        if (autoCollapse) {
+            indexerSize -= 1;
+        }
+        for (int32_t index = 0; index < indexerSize; index++) {
             auto indexerChildNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(indexerChildNode);
             host->AddChild(indexerChildNode);
         }
-        auto icon = BuildIcon();
-        CHECK_NULL_VOID(icon);
-        host->AddChild(icon);
+        if (autoCollapse) {
+            auto icon = BuildIcon();
+            CHECK_NULL_VOID(icon);
+            host->AddChild(icon);
+        }
     }
     std::vector<std::string> arrayValueStrs;
     auto it = arcArrayValue_.begin();
-    while (it != arcArrayValue_.end() - 1) {
+    while (it != arcArrayValue_.end()) {
+        if (autoCollapse && (it == arcArrayValue_.end() - 1)) {
+            break;
+        }
         arrayValueStrs.push_back(it->first);
         ++it;
     }
@@ -499,7 +508,10 @@ void ArcIndexerPattern::UpdateStartAndEndIndexbySelected()
         if (endIndex_ > arraySize) {
             endIndex_ = arraySize;
         }
-        if (selected_ >= endIndex_ - 1) {
+        if (selected_ >= startIndex_ && selected_ < endIndex_) {
+            selected_ -= startIndex_;
+            focusIndex_ = selected_;
+        } else if (selected_ >= endIndex_ - 1) {
             endIndex_ = selected_ + 1;
             if (endIndex_ > arraySize) {
                 endIndex_ = arraySize;
@@ -857,6 +869,7 @@ void ArcIndexerPattern::UpdateIndexerRender()
 
 std::string ArcIndexerPattern::GetChildNodeContent(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(arcArrayValue_.size()) - 1);
     auto nodeStr = autoCollapse_ && (arcArrayValue_[index].second != ArcIndexerBarState::INVALID) ?
         (arcArrayValue_[index].second == ArcIndexerBarState::COLLAPSED ?
         StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) :
@@ -942,7 +955,8 @@ void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &node
         nodeLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
         nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+        nodeLayoutProperty->UpdateBorderWidth(
+            { borderWidth, borderWidth, borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
         nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
@@ -982,7 +996,7 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
     childRenderContext->UpdateBackgroundColor(
-        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
+        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColorArc()));
     if (index != childFocusIndex_) {
         childRenderContext->ResetBlendBorderColor();
     }
@@ -1162,15 +1176,12 @@ void ArcIndexerPattern::UpdateBubbleBackgroundView()
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    BlurStyleOption styleOption;
-    if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
-        styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
-    } else {
-        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-    }
     auto bubbleRenderContext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(bubbleRenderContext);
-    bubbleRenderContext->UpdateBackBlurStyle(styleOption);
+    if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
+        BlurStyleOption styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
+        bubbleRenderContext->UpdateBackBlurStyle(styleOption);
+    }
     bubbleRenderContext->UpdateBackgroundColor(
         paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
 }
@@ -1239,8 +1250,8 @@ void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
     auto textPadding = Dimension(ARC_INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
-    letterLayoutProperty->UpdatePadding(
-        { CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding) });
+    letterLayoutProperty->UpdatePadding({ CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding),
+        CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding) });
 
     auto BubbleSize = Dimension(ARC_BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdateUserDefinedIdealSize(

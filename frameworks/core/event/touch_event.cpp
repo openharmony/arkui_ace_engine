@@ -16,6 +16,7 @@
 #include "core/event/touch_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 TouchEvent& TouchEvent::SetId(int32_t id)
@@ -823,6 +824,19 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
         touchEvent.width = changedTouches_.front().GetWidth();
         touchEvent.height = changedTouches_.front().GetHeight();
         touchEvent.pressedTime = changedTouches_.front().GetPressedTime();
+        const auto& targetLocalOffset = changedTouches_.front().GetTarget().area.GetOffset();
+        const auto& targetOrigin = changedTouches_.front().GetTarget().origin;
+        // width height x y globalx globaly
+        touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.widthArea = changedTouches_.front().GetTarget().area.GetWidth().ConvertToPx();
+        touchEvent.heightArea = changedTouches_.front().GetTarget().area.GetHeight().ConvertToPx();
+        // deviceid
+        touchEvent.deviceId = changedTouches_.front().GetDeviceId();
+        // modifierkeystates
+        touchEvent.modifierKeyState = CalculateModifierKeyState(changedTouches_.front().GetPressedKeyCodes());
     }
     touchEvent.time = timeStamp_;
     return touchEvent;

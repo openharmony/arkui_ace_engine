@@ -2705,4 +2705,29 @@ float SearchPattern::GetMinFontScale()
     return minFontScale;
 }
 
+bool SearchPattern::IsShowCancelButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, false);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto style = static_cast<int16_t>(layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT));
+    bool isEventEnabled = IsEventEnabled(textFieldPattern->GetTextUtf16Value(), style);
+    return isEventEnabled;
+}
+
+bool SearchPattern::IsShowSearchButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto searchButton = layoutProperty->GetSearchButton();
+    return searchButton.has_value();
+}
+
 } // namespace OHOS::Ace::NG

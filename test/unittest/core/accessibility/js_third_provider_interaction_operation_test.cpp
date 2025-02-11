@@ -298,11 +298,11 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     int32_t direction = 3;
     MockAccessibilityElementOperatorCallback operatorCallback;
 
-    // 1 provider abnormal, callback should receive same request id and empty info
+    // 1 provider abnormal, callback should receive same request id and info of host
     ohAccessibilityProvider->SetInjectResult(-1);
     jsInteractionOperation->FocusMoveSearch(
         elementId, direction, requestId, operatorCallback);
-    EXPECT_EQ(operatorCallback.mockInfo_.GetAccessibilityId(), -1);
+    EXPECT_EQ(operatorCallback.mockInfo_.GetAccessibilityId(), frameNode->GetAccessibilityId());
     EXPECT_EQ(operatorCallback.mockRequestId, requestId);
 
     // 2 provider normal,callback should receive same request id and same info as provider

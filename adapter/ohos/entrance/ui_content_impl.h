@@ -28,6 +28,7 @@
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
+#include "wm/data_handler_interface.h"
 #include "wm/window.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
@@ -75,6 +76,8 @@ public:
     void Background() override;
     void Focus() override;
     void UnFocus() override;
+    void ActiveWindow() override;
+    void UnActiveWindow() override;
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
@@ -343,6 +346,8 @@ public:
 
     void SetFormRenderingMode(int8_t renderMode) override;
 
+    void SetFormEnableBlurBackground(bool enableBlurBackground) override;
+
     void SetContentNodeGrayScale(float grayscale) override;
 
     void PreLayout() override;
@@ -391,6 +396,10 @@ public:
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
+    void SetTopWindowBoundaryByID(const std::string& stringId) override;
+    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
+    bool SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

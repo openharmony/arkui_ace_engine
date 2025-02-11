@@ -26,6 +26,7 @@ ace_unittest("TextInputTest") {
     "text_field_manager_test_ng.cpp",
     "text_field_overlay_modifier_test.cpp",
     "text_field_pattern_func_test.cpp",
+    "text_field_pattern_onwill.cpp",
     "text_field_pattern_test.cpp",
     "text_field_pattern_testfive.cpp",
     "text_field_pattern_testfour.cpp",

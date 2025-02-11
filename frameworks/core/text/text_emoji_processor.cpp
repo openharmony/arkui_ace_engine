@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <limits>
 
 #include "core/text/text_emoji_processor.h"
 
@@ -46,6 +47,21 @@ constexpr int32_t STATE_IN_TAG_QUEUE = 12;
 constexpr int32_t STATE_EVEN_RIS = 13;
 constexpr int32_t STATE_ODD_RIS = 14;
 constexpr int32_t STATE_FINISHED = 20;
+constexpr int32_t MAX_INT = std::numeric_limits<int32_t>::max();
+
+int32_t AddAndPreventOverflow(int32_t a, int32_t b)
+{
+    long tempA = static_cast<long>(a);
+    long tempB = static_cast<long>(b);
+    long ret = tempA + tempB;
+    if (ret > static_cast<long>(MAX_INT)) {
+        return MAX_INT;
+    } else if (ret < -static_cast<long>(MAX_INT)) {
+        return -MAX_INT;
+    } else {
+        return static_cast<int32_t>(ret);
+    }
+}
 
 } // namespace
 
@@ -268,18 +284,18 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
     int32_t index, int32_t length, const std::u16string& content, bool includeStartHalf, bool includeEndHalf)
 {
     int32_t startIndex = index;
-    int32_t endIndex = index + length;
+    int32_t endIndex = AddAndPreventOverflow(index, length);
     int32_t emojiStartIndex = index;   // [emojiStartIndex, emojiEndIndex)
     int32_t emojiEndIndex = index;
     // need to be converted to string for processing
     // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
     // exclude right overflow emoji
     if (!includeEndHalf && IsIndexInEmoji(endIndex - 1, content, emojiStartIndex, emojiEndIndex) &&
-        emojiEndIndex > index + length) {
+        emojiEndIndex > AddAndPreventOverflow(index, length)) {
         emojiEndIndex = emojiStartIndex;
         length = emojiEndIndex - index;
         length = std::max(length, 0);
-        endIndex = index + length;
+        endIndex = AddAndPreventOverflow(index, length);
     }
     // process left emoji
     if (IsIndexBeforeOrInEmoji(startIndex, content, emojiStartIndex, emojiEndIndex)) {

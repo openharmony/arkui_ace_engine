@@ -327,6 +327,40 @@ void DatePickerPattern::ColumnPatternInitHapticController(const RefPtr<FrameNode
     columnPattern->InitHapticController();
 }
 
+void DatePickerPattern::ColumnPatternStopHaptic()
+{
+    if (!isEnableHaptic_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = blendNode->GetLastChild();
+        CHECK_NULL_VOID(childNode);
+        auto datePickerColumnPattern = DynamicCast<FrameNode>(childNode)->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(datePickerColumnPattern);
+        datePickerColumnPattern->StopHaptic();
+    }
+}
+
+void DatePickerPattern::InitFocusKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+        InitOnCrownEvent(focusHub);
+#endif
+    }
+}
+
 void DatePickerPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
@@ -338,11 +372,15 @@ void DatePickerPattern::OnModifyDone()
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
-    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false))) {
-        isFiredDateChange_ = false;
-        return;
+    if (isFiredDateChange_ && !isForceUpdate_) {
+        std::string language = Localization::GetInstance()->GetLanguage();
+        if ((lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false)) &&
+            (strcmp(language.c_str(), "zh") == 0)) {
+            isFiredDateChange_ = false;
+            return;
+        }
     }
-
+    ClearFocus();
     isForceUpdate_ = false;
     InitDisabled();
     if (ShowMonthDays()) {
@@ -364,10 +402,8 @@ void DatePickerPattern::OnModifyDone()
             refPtr->ShowTitle(titleId);
         }
     });
-    auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    InitFocusKeyEvent();
+    SetDefaultFocus();
     InitFocusEvent();
     InitSelectorProps();
 }
@@ -724,29 +760,43 @@ bool DatePickerPattern::OnKeyEvent(const KeyEvent& event)
 
 bool DatePickerPattern::CheckFocusID(int32_t childSize)
 {
-    if (focusKeyID_ > childSize - 1) {
-        focusKeyID_ = childSize - 1;
-        return false;
+    int32_t startIndex = 0;
+    int32_t endIndex = 0;
+
+    if (datePickerMode_ == DatePickerMode::DATE) {
+        startIndex = INDEX_YEAR;
+        endIndex = INDEX_DAY;
+    } else if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
+        startIndex = INDEX_YEAR;
+        endIndex = INDEX_MONTH;
+    } else if (datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
+        startIndex = INDEX_MONTH;
+        endIndex = INDEX_DAY;
     }
 
     if (NeedAdaptForAging()) {
         if (GetCurrentPage() == SECOND_PAGE) {
-            if (focusKeyID_ < INDEX_MONTH) {
-                focusKeyID_ = INDEX_MONTH;
-                return false;
-            }
+            startIndex = INDEX_MONTH;
+            endIndex = INDEX_DAY;
         } else {
-            if (focusKeyID_ != INDEX_YEAR) {
-                focusKeyID_ = INDEX_YEAR;
-                return false;
+            if (datePickerMode_ == DatePickerMode::DATE) {
+                startIndex = INDEX_YEAR;
+                endIndex = INDEX_YEAR;
             }
-        }
-    } else {
-        if (focusKeyID_ < INDEX_YEAR) {
-            focusKeyID_ = INDEX_YEAR;
-            return false;
         }
     }
+
+    if (focusKeyID_ < startIndex) {
+        focusKeyID_ = startIndex;
+        return false;
+    } else if (focusKeyID_ > childSize - 1) {
+        focusKeyID_ = childSize - 1;
+        return false;
+    } else if (focusKeyID_ > endIndex) {
+        focusKeyID_ = endIndex;
+        return false;
+    }
+
     return true;
 }
 
@@ -923,6 +973,9 @@ void DatePickerPattern::FlushColumn()
 
 void DatePickerPattern::ShowColumnByDatePickMode()
 {
+    if ((datePickerMode_ == DatePickerMode::DATE) && GetIsShowInDialog()) {
+        return;
+    }
     RefPtr<FrameNode> stackYear;
     RefPtr<FrameNode> stackMonth;
     RefPtr<FrameNode> stackDay;
@@ -935,14 +988,17 @@ void DatePickerPattern::ShowColumnByDatePickMode()
         UpdateStackPropVisibility(stackYear, VisibleType::VISIBLE, RATIO_ONE);
         UpdateStackPropVisibility(stackMonth, VisibleType::VISIBLE, RATIO_ONE);
         UpdateStackPropVisibility(stackDay, VisibleType::VISIBLE, RATIO_ONE);
+        focusKeyID_ = INDEX_YEAR;
     } else if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
         UpdateStackPropVisibility(stackYear, VisibleType::VISIBLE, RATIO_ONE);
         UpdateStackPropVisibility(stackMonth, VisibleType::VISIBLE, RATIO_ONE);
         UpdateStackPropVisibility(stackDay, VisibleType::GONE, RATIO_ZERO);
+        focusKeyID_ = INDEX_YEAR;
     } else if (datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
         UpdateStackPropVisibility(stackYear, VisibleType::GONE, RATIO_ZERO);
         UpdateStackPropVisibility(stackMonth, VisibleType::VISIBLE, RATIO_ONE);
         UpdateStackPropVisibility(stackDay, VisibleType::VISIBLE, RATIO_ONE);
+        focusKeyID_ = INDEX_MONTH;
     }
 }
 
@@ -2748,4 +2804,144 @@ bool DatePickerPattern::NeedAdaptForAging()
     }
     return false;
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void DatePickerPattern::InitOnCrownEvent(const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    auto onCrowEvent = [wp = WeakClaim(this)](const CrownEvent& event)->bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnCrownEvent(event);
+        }
+        return false;
+    };
+
+    focusHub->SetOnCrownEventInternal(std::move(onCrowEvent));
+}
+
+bool DatePickerPattern::OnCrownEvent(const CrownEvent& event)
+{
+    if (event.action == OHOS::Ace::CrownAction::BEGIN ||
+        event.action == OHOS::Ace::CrownAction::UPDATE ||
+        event.action == OHOS::Ace::CrownAction::END) {
+        RefPtr<DatePickerColumnPattern> crownPickerColumnPattern;
+        for (auto& iter : datePickerColumns_) {
+            auto column = iter.Upgrade();
+            if (!column) {
+                continue;
+            }
+            auto pickerColumnPattern = column->GetPattern<DatePickerColumnPattern>();
+            if (!pickerColumnPattern) {
+                continue;
+            }
+            auto columnID =  pickerColumnPattern->GetSelectedColumnId();
+            if (!pickerColumnPattern->IsCrownEventEnded()) {
+                crownPickerColumnPattern = pickerColumnPattern;
+                break;
+            } else if (columnID == selectedColumnId_) {
+                crownPickerColumnPattern = pickerColumnPattern;
+            }
+        }
+        if (crownPickerColumnPattern) {
+            return crownPickerColumnPattern->OnCrownEvent(event);
+        }
+    }
+
+    return false;
+}
+#endif
+
+bool DatePickerPattern::IsCircle()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    return pickerTheme->IsCircleDial();
+}
+
+void DatePickerPattern::ClearFocus()
+{
+    if (!IsCircle()) {
+        return;
+    }
+
+    if (!selectedColumnId_.empty()) {
+        const auto& allChildNode = GetAllChildNode();
+        auto it = allChildNode.find(selectedColumnId_);
+        if (it != allChildNode.end()) {
+            auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+            CHECK_NULL_VOID(tmpPattern);
+            tmpPattern->SetSelectedMark(false, false);
+        }
+        selectedColumnId_ = "";
+    }
+}
+
+void DatePickerPattern::SetDefaultFocus()
+{
+    if (!IsCircle()) {
+        return;
+    }
+
+    std::function<void(std::string& focusId)> call =  [weak = WeakClaim(this)](std::string& focusId) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->selectedColumnId_.empty()) {
+            pattern->selectedColumnId_ = focusId;
+            return;
+        }
+        const auto& allChildNode = pattern->GetAllChildNode();
+        auto it = allChildNode.find(pattern->selectedColumnId_);
+        if (it != allChildNode.end()) {
+            auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+            tmpPattern->SetSelectedMark(false, false);
+        }
+
+        pattern->selectedColumnId_ = focusId;
+    };
+
+    const auto& allChildNode = GetAllChildNode();
+    static const std::string columnName[] = {"year", "month", "day"};
+    bool setFocus = true;
+    for (size_t i = 0; i < sizeof(columnName) / sizeof(columnName[0]); i++) {
+        auto it = allChildNode.find(columnName[i]);
+        if (it != allChildNode.end()) {
+            auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+            CHECK_NULL_VOID(tmpPattern);
+            tmpPattern->SetSelectedMarkId(columnName[i]);
+            tmpPattern->SetSelectedMarkListener(call);
+            if (setFocus) {
+                selectedColumnId_ = columnName[i];
+            }
+            tmpPattern->SetSelectedMark(setFocus, false);
+            setFocus = false;
+        }
+    }
+}
+
+void DatePickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto&& children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    }
+#endif
+}
+
 } // namespace OHOS::Ace::NG

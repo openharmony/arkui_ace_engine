@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/log/event_report.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/templates_parser.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 void AddCacheItemsInFront(
@@ -221,13 +223,16 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!props->HasCachedCount()) {
         info_.UpdateDefaultCachedCount();
     }
+    int32_t cacheStart = 0;
+    int32_t cacheEnd = 0; // number of cache items at tail
+    const bool showCached = props->GetShowCachedItemsValue(false);
 
     const int32_t start = info_.startMainLineIndex_ - cacheCount;
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
     float mainPos = -info_.GetHeightInRange(start, info_.startMainLineIndex_, mainGap_);
     for (auto i = start; i <= end; ++i) {
         const bool inRange = i >= info_.startMainLineIndex_ && i <= info_.endMainLineIndex_;
-        const bool isCache = !props->GetShowCachedItemsValue(false) && !inRange;
+        const bool isCache = !showCached && !inRange;
         const auto& line = info_.gridMatrix_.find(i);
         if (line == info_.gridMatrix_.end()) {
             continue;
@@ -275,6 +280,11 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (frSize == itemsCrossSize_.end()) {
                 continue;
             }
+            if (i < info_.startMainLineIndex_) {
+                ++cacheStart;
+            } else if (i > info_.endMainLineIndex_) {
+                ++cacheEnd;
+            }
             SizeF blockSize = SizeF(frSize->second, lineHeight, axis_);
             auto translate = OffsetF(0.0f, 0.0f);
             auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -311,8 +321,11 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         startIndex = endIndex = info_.childrenCount_;
     }
     if (!info_.hasMultiLineItem_) {
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
-            props->GetShowCachedItemsValue(false));
+        if (!showCached || !info_.reachEnd_) {
+            cacheStart = cacheEnd =
+                cacheCount * crossCount_; // only use counting method when last line not completely filled
+        }
+        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
     }
 }
 
@@ -657,7 +670,7 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
         cellAveLength_ = -1.0f;
         bool hasNormalItem = false;
         lastCross_ = 0;
-        for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
+        for (uint32_t i = mainIter->second.size(); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
@@ -1408,6 +1421,9 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             if (currentIndex < info_.childrenCount_) {
                 TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
                     info_.childrenCount_);
+                std::string subErrorType = "can not get item at:" + std::to_string(currentIndex) +
+                                           ", total items:" + std::to_string(info_.childrenCount_);
+                EventReport::ReportScrollableErrorEvent("Grid", ScrollableErrorType::GET_CHILD_FAILED, subErrorType);
             }
             LargeItemNextLineHeight(currentMainLineIndex_, layoutWrapper);
             break;
@@ -1931,7 +1947,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
-            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_; i++) {
+            for (uint32_t i = line->second.size(); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {

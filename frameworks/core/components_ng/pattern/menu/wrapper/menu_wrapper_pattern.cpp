@@ -610,8 +610,9 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
-    if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide()) ||
-        GetIsSelectOverlaySubWindowWrapper()) {
+    if (host->IsOnMainTree() &&
+        ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide()) ||
+            GetIsSelectOverlaySubWindowWrapper())) {
         SetHotAreas(dirty);
     }
     MarkAllMenuNoDraggable();
@@ -865,6 +866,16 @@ void MenuWrapperPattern::StopPreviewMenuAnimation()
 
     RefPtr<RenderContext> previewPositionContext;
     RefPtr<RenderContext> previewScaleContext;
+    RefPtr<RenderContext> previewDisappearContext;
+
+    GetPreviewRenderContexts(previewPositionContext, previewScaleContext, previewDisappearContext);
+
+    AnimatePreviewMenu(previewPositionContext, previewScaleContext, menuContext, previewDisappearContext);
+}
+
+void MenuWrapperPattern::GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
+    RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext)
+{
     if (isShowHoverImage_) {
         auto flexNode = GetHoverImageFlexNode();
         CHECK_NULL_VOID(flexNode);
@@ -882,9 +893,17 @@ void MenuWrapperPattern::StopPreviewMenuAnimation()
         CHECK_NULL_VOID(previewPositionContext);
         previewScaleContext = previewPositionContext;
     }
+    auto previewNode = GetPreview();
+    CHECK_NULL_VOID(previewNode);
+    previewDisappearContext = previewNode->GetRenderContext();
+}
 
+void MenuWrapperPattern::AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext,
+    RefPtr<RenderContext> previewScaleContext, RefPtr<RenderContext> menuContext,
+    RefPtr<RenderContext> previewDisappearContext)
+{
     auto option = AnimationOption(Curves::LINEAR, 0);
-    AnimationUtils::Animate(option, [previewPositionContext, previewScaleContext, menuContext,
+    AnimationUtils::Animate(option, [previewPositionContext, previewScaleContext, menuContext, previewDisappearContext,
                                         previewStopOffset = previewDisappearStartOffset_,
                                         animationInfo = animationInfo_]() {
         auto previewOffset = previewStopOffset.NonOffset() ? animationInfo.previewOffset : previewStopOffset;
@@ -904,9 +923,10 @@ void MenuWrapperPattern::StopPreviewMenuAnimation()
 
         if (previewScaleContext && Positive(animationInfo.previewScale)) {
             previewScaleContext->UpdateTransformScale(VectorF(animationInfo.previewScale, animationInfo.previewScale));
-
             if (PreviewBorderRadiusHasPositive(animationInfo.borderRadius)) {
                 previewScaleContext->UpdateBorderRadius(animationInfo.borderRadius);
+                CHECK_NULL_VOID(previewDisappearContext);
+                previewDisappearContext->UpdateBorderRadius(animationInfo.borderRadius);
             }
         }
     });

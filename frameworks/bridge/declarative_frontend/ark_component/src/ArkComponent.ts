@@ -2004,6 +2004,21 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   }
 }
 
+declare type HoverMoveEventCallback = (event: HoverEvent) => void;
+class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
+  constructor(value: HoverMoveEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onHoverMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnHoverMove(node);
+    } else {
+      getUINativeModule().common.setOnHoverMove(node, this.value);
+    }
+  }
+}
+
 declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   constructor(value: MouseEventCallback) {
@@ -2015,6 +2030,21 @@ class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
       getUINativeModule().common.resetOnMouse(node);
     } else {
       getUINativeModule().common.setOnMouse(node, this.value);
+    }
+  }
+}
+
+declare type AxisEventCallback = (event: AxisEvent) => void;
+class OnAxisEventModifier extends ModifierWithKey<AxisEventCallback> {
+  constructor(value: AxisEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAxisEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAxisEvent(node);
+    } else {
+      getUINativeModule().common.setOnAxisEvent(node, this.value);
     }
   }
 }
@@ -2802,18 +2832,12 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
     if (reset) {
       getUINativeModule().common.resetDragPreviewOptions(node);
     } else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll, this.value.enableHapticFeedback);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.mode === this.stageValue.mode
-      && this.value.numberBadge === this.stageValue.numberBadge
-      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting
-      && this.value.enableEdgeAutoScroll === this.value.enableEdgeAutoScroll
-      && this.value.enableHapticFeedback === this.stageValue.enableHapticFeedback);
+    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -2826,12 +2850,12 @@ class DragPreviewModifier extends ModifierWithKey<ArkDragPreview> {
     if (reset) {
       getUINativeModule().common.resetDragPreview(node);
     } else {
-      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+      getUINativeModule().common.setDragPreview(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return this.value.inspetorId !== this.stageValue.inspetorId;
+    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -3336,6 +3360,21 @@ class FocusBoxModifier extends ModifierWithKey<FocusBoxStyle> {
   }
 }
 
+class NextFocusModifier extends ModifierWithKey<FocusMovement> {
+  constructor(value: FocusMovement) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('nextFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetNextFocus(node);
+    } else {
+      getUINativeModule().common.setNextFocus(node, this.value.forward, this.value.backward,
+        this.value.up, this.value.down, this.value.left, this.value.right);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -3608,6 +3647,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
       arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
       arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
+      arkDragPreviewOptions.isLiftingDisabled = options.isLiftingDisabled;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
@@ -3999,6 +4039,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onHoverMove(event: (event?: HoverMoveEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
+    return this;
+  }
+
   hoverEffect(value: HoverEffect): this {
     modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
@@ -4009,6 +4054,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onAxisEvent(event: (event?: AxisEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnAxisEventModifier.identity, OnAxisEventModifier, event);
+    return this;
+  }
+  
   onTouch(event: (event?: TouchEvent) => void): this {
     modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
     return this;
@@ -4535,14 +4585,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  dragPreview(value: CustomBuilder | DragItemInfo | string): this {
-    if (typeof value === 'string') {
-      let arkDragPreview = new ArkDragPreview();
-      arkDragPreview.inspetorId = value;
-      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
-      return this;
+  dragPreview(preview: CustomBuilder | DragItemInfo | string, config: PreviewConfiguration): this {
+    let arkDragPreview = new ArkDragPreview();
+    if (typeof config === 'object') {
+      arkDragPreview.onlyForLifting = config.onlyForLifting;
     }
-    throw new Error('Method not implemented.');
+    if (typeof preview === 'string') {
+      arkDragPreview.inspetorId = preview;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'object') {
+      arkDragPreview.pixelMap = preview.pixelMap;
+      arkDragPreview.extraInfo = preview.extraInfo;
+      if (preview.builder) {
+        throw new Error('Builder is not supported.');
+      }
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'function') {
+      throw new Error('Method not implemented.');
+    }
+    return this;
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
@@ -4860,6 +4921,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   focusBox(value:FocusBoxStyle):this {
     modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
   }
+  nextFocus(value:FocusMovement):this {
+    modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
+  }
 }
 
 const isNull = (val: any) => typeof val === 'object' && val === null;
@@ -4885,6 +4949,7 @@ class UICommonEvent {
   private _onFocusEvent?: () => void;
   private _onBlur?: () => void;
   private _onHoverEvent?: (isHover: boolean, event: HoverEvent) => void;
+  private _onHoverMoveEvent?: (event: HoverEvent) => void;
   private _onMouseEvent?: (event: MouseEvent) => void;
   private _onSizeChangeEvent?: SizeChangeCallback;
   private _onVisibleAreaApproximateChange?: VisibleAreaChangeCallback;
@@ -4938,6 +5003,10 @@ class UICommonEvent {
   setOnHover(callback: (isHover: boolean, event: HoverEvent) => void): void {
     this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
+  }
+  setOnHoverMove(callback: (event: HoverMoveEvent) => void): void {
+    this._onHoverMoveEvent = callback;
+    getUINativeModule().frameNode.setOnHoverMove(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback: (event: MouseEvent) => void): void {
     this._onMouseEvent = callback;
