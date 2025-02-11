@@ -6241,22 +6241,11 @@ bool WebPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrol
 bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity)
 {
     CHECK_NULL_RETURN(parent, false);
-    if (!NestedScrollOutOfBoundary()) {
-        OnParentScrollDragEndRecursive(parent);
-    }
-    if (InstanceOf<SwiperPattern>(parent)) {
-        // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
-        // it visible before calling HandleScrollVelocity.
-        float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
-        parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-        OnParentScrollDragEndRecursive(parent);
-    }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
         OnParentScrollDragEndRecursive(parent);
         return true;
     }
-    OnParentScrollDragEndRecursive(parent);
     return false;
 }
 
@@ -6272,6 +6261,7 @@ void WebPattern::OnScrollStartRecursive(float position)
     SetIsNestedInterrupt(false);
     isFirstFlingScrollVelocity_ = true;
     isScrollStarted_ = true;
+    isDragEnd_ = false;
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_VOID(it, parentsMap_.end());
     auto parent = it->second;
