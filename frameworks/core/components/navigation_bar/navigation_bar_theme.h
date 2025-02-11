@@ -132,6 +132,7 @@ public:
             theme->subTitleFontColor_ = pattern->GetAttr<Color>("title_subheader_color", Color(0x99000000));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
                 SetToolBarTheme(pattern, theme);
+                SetNavigationTokenTheme(pattern, theme);
             }
             ParsePatternContinue(themeConstants, theme);
         }
@@ -161,6 +162,22 @@ public:
             theme->toolbarItemTopPadding_ = 2.0_vp;
             theme->toolbarItemLeftOrRightPadding_ = 2.0_vp;
             theme->toolbarItemBottomPadding_ = 2.0_vp;
+        }
+
+        void SetNavigationTokenTheme(RefPtr<ThemeStyle> pattern, const RefPtr<NavigationBarTheme>& theme) const
+        {
+            theme->titleColor_ = pattern->GetAttr<Color>("title_color_api_sixteen", Color::WHITE);
+            theme->subTitleColor_ = pattern->GetAttr<Color>("sub_title_text_color_api_sixteen", Color::WHITE);
+            theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color_api_sixteen", Color::WHITE);
+            theme->buttonPressedColor_ = pattern->GetAttr<Color>("button_bg_color_pressed_api_sixteen", Color::WHITE);
+            theme->buttonFocusColor_ = pattern->GetAttr<Color>("button_bg_color_focused_api_sixteen", Color::WHITE);
+            theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered_api_sixteen", Color::WHITE);
+            theme->backButtonIconColor_ = pattern->GetAttr<Color>("back_button_icon_color_api_sixteen", Color::WHITE);
+            theme->toolbarBgColor_ = pattern->GetAttr<Color>("toolbar_bg_color_api_sixteen", Color(0xfff1f3f5));
+            theme->toolbarDividerColor_ =
+                pattern->GetAttr<Color>("toolbar_divider_color_api_sixteen", Color(0x33182431));
+            theme->navigationDividerColor_ =
+                pattern->GetAttr<Color>("navigation_divider_color_api_sixteen", Color(0x33000000));
         }
 
         void ParsePatternContinue(const RefPtr<ThemeConstants>& themeConstants,
