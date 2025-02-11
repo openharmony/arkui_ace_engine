@@ -336,6 +336,7 @@ RefPtr<FrameNode> DragControllerFuncWrapper::CreateGatherNode(std::vector<Gather
     geometryNode->SetFrameOffset({0.0f, 0.0f});
     gatherNodeChildrenInfo.clear();
     int iterationCount = GATHER_COUNT;
+    auto frameOffset = GetOriginNodeOffset(data, asyncCtxData);
     for (auto it = asyncCtxData.pixelMapList.begin(); it != asyncCtxData.pixelMapList.end() && iterationCount > 0;
          ++it) {
         CHECK_NULL_RETURN(*it, nullptr);
@@ -343,6 +344,9 @@ RefPtr<FrameNode> DragControllerFuncWrapper::CreateGatherNode(std::vector<Gather
         CHECK_NULL_RETURN(refPixelMap, nullptr);
         auto imageNode = DragAnimationHelper::CreateImageNode(refPixelMap);
         CHECK_NULL_RETURN(imageNode, nullptr);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_RETURN(imageContext, nullptr);
+        imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(frameOffset.GetX()), Dimension(frameOffset.GetY())));
         auto width = refPixelMap->GetWidth();
         auto height = refPixelMap->GetHeight();
         auto offset = DragDropFuncWrapper::GetPaintRectCenter(data.imageNode) - OffsetF(width / 2.0f, height / 2.0f);
