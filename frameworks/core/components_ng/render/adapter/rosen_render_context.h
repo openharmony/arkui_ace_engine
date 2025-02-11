@@ -305,6 +305,8 @@ public:
 
     void GetPointWithTransform(PointF& point) override;
 
+    Matrix4 GetMatrixWithTransformRotate() override;
+
     void ClearDrawCommands() override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
@@ -611,7 +613,6 @@ protected:
 
     void SetContentRectToFrame(RectF rect) override;
     Matrix4 GetMatrix();
-    Matrix4 GetMatrixWithTransformRotate();
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);

@@ -364,6 +364,11 @@ public:
 
     virtual void GetPointWithTransform(PointF& point) {}
 
+    virtual Matrix4 GetMatrixWithTransformRotate()
+    {
+        return {};
+    }
+
     virtual void GetPointTransform(PointF& point) {}
 
     virtual void GetPointTransformRotate(PointF& point) {}

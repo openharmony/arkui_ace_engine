@@ -71,6 +71,8 @@ class RSTransaction;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
+using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
+using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
@@ -192,6 +194,19 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
 
+    int32_t GetInstanceIdFromHost() const;
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    void OnUIExtBusinessReceiveReply(
+        UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+    void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
+    void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
+    void RegisterUIExtBusinessConsumeReplyCallback(
+        UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
+
+    void TransferAccessibilityRectInfo();
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
@@ -260,8 +275,13 @@ private:
     PlaceholderType GetSizeChangeReason();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
-    int32_t GetInstanceIdFromHost();
+
     void ResetAccessibilityChildTreeCallback();
+
+    void UpdateFrameNodeState();
+    bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
+    AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -319,6 +339,10 @@ private:
     uint32_t focusWindowId_ = 0;
     uint32_t realHostWindowId_ = 0;
     std::string want_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
+
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

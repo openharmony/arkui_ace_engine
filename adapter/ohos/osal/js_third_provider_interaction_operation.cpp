@@ -100,10 +100,10 @@ void FillNodeConfig(
 {
     OHOS::Accessibility::Rect oldRect = info.GetRectInScreen();
     OHOS::Accessibility::Rect newRect = OHOS::Accessibility::Rect(
-        oldRect.GetLeftTopXScreenPostion() + static_cast<int32_t>(config.offset.GetX()),
-        oldRect.GetLeftTopYScreenPostion() + static_cast<int32_t>(config.offset.GetY()),
-        oldRect.GetRightBottomXScreenPostion() + static_cast<int32_t>(config.offset.GetX()),
-        oldRect.GetRightBottomYScreenPostion() + static_cast<int32_t>(config.offset.GetY()));
+        oldRect.GetLeftTopXScreenPostion() * config.scaleX + static_cast<int32_t>(config.offset.GetX()),
+        oldRect.GetLeftTopYScreenPostion() * config.scaleY + static_cast<int32_t>(config.offset.GetY()),
+        oldRect.GetRightBottomXScreenPostion() * config.scaleX + static_cast<int32_t>(config.offset.GetX()),
+        oldRect.GetRightBottomYScreenPostion() * config.scaleY + static_cast<int32_t>(config.offset.GetY()));
     info.SetRectInScreen(newRect);
     info.SetPageId(config.pageId);
     info.SetWindowId(config.windowId);
@@ -188,7 +188,7 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
 
 bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProvider(
     const int64_t splitElementId, const int32_t mode, const int32_t requestId,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
+    std::list<Accessibility::AccessibilityElementInfo>& infos, bool ignoreHostOffset)
 {
     auto provider = accessibilityProvider_.Upgrade();
     CHECK_NULL_RETURN(provider, false);
@@ -202,6 +202,7 @@ bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProv
     }
 
     NodeConfig config;
+    config.ignoreHostOffset = ignoreHostOffset;
     GetNodeConfig(config);
     CopyNativeInfosToAccessibilityElementInfos(nativeInfos, config, infos);
     return !infos.empty();
@@ -428,7 +429,7 @@ void JsThirdProviderInteractionOperation::ExecuteAction(
     // 2. FindNextFocusAccessibilityNode from provider
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
-        splitElementId, 0, requestId, infos);
+        splitElementId, 0, requestId, infos, true); // for drawbound, no need fix host offset
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "Find info failed when ExecuteAction.");
         SetExecuteActionResult(callback, false, requestId);
@@ -545,6 +546,39 @@ void JsThirdProviderInteractionOperation::GetCursorPosition(
     callback.SetCursorPositionResult(cursorPosition, requestId);
 }
 
+void JsThirdProviderInteractionOperation::GetHostRectTranslateInfo(NodeConfig& config)
+{
+    auto host = host_.Upgrade();
+    if ((!host) || config.ignoreHostOffset) {
+        config.offset = NG::OffsetF(0, 0);
+        config.scaleX = 1.0f;
+        config.scaleY = 1.0f;
+        return;
+    }
+    auto rect = host->GetTransformRectRelativeToWindow();
+    NG::VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    auto pipeline = host->GetContextRefPtr();
+    if (pipeline) {
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        if (accessibilityManager) {
+            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
+            auto top = rect.Top() * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
+            auto left = rect.Left() * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+            finalScale.x *= windowInfo.scaleX;
+            finalScale.y *= windowInfo.scaleY;
+            config.offset = NG::OffsetT(left, top);
+        } else {
+            auto windowRect = pipeline->GetDisplayWindowRectInfo();
+            auto top = rect.Top() + static_cast<int32_t>(windowRect.Top());
+            auto left = rect.Left() + static_cast<int32_t>(windowRect.Left());
+            config.offset = NG::OffsetT(left, top);
+        }
+    }
+    
+    config.scaleX = finalScale.x;
+    config.scaleY = finalScale.y;
+}
+
 void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
 {
     auto host = host_.Upgrade();
@@ -553,13 +587,13 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    config.offset = displayOffset;
     config.pageId = host->GetPageId();
     config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.belongTreeId = belongTreeId_;
     config.parentWindowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+
+    GetHostRectTranslateInfo(config);
 }
 
 void JsThirdProviderInteractionOperation::SetChildTreeIdAndWinId(

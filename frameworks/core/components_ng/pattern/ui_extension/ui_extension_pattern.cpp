@@ -119,7 +119,7 @@ void SetPointerEventExtraProperty(std::shared_ptr<MMI::PointerEvent>& newPointer
 
 class UIExtensionAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
-    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern> &weakPattern, int64_t accessibilityId)
+    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern>& weakPattern, int64_t accessibilityId)
         : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
     {}
 
@@ -547,6 +547,7 @@ void UIExtensionPattern::OnUeaAccessibilityEventAsync()
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    TransferAccessibilityRectInfo(); // first connect need info UEC rect info
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
@@ -691,13 +692,36 @@ void UIExtensionPattern::NotifyDestroy()
     }
 }
 
+class UECAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    UECAccessibilitySAObserverCallback(
+        const WeakPtr<UIExtensionPattern>& weakPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakUECPattern_(weakPattern)
+    {}
+
+    ~UECAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto pattern = weakUECPattern_.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (state) {
+            // first time turn on Accessibility, add TransferAccessibilityRectInfo
+            pattern->TransferAccessibilityRectInfo();
+        }
+        return true;
+    }
+private:
+    WeakPtr<UIExtensionPattern> weakUECPattern_;
+};
+
 void UIExtensionPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
@@ -724,6 +748,18 @@ void UIExtensionPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(pattern);
         pattern->SetFoldStatusChanged(true);
     });
+
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    host->RegisterNodeChangeListener();
+    accessibilitySAObserverCallback_ = std::make_shared<UECAccessibilitySAObserverCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+#ifndef ACE_UNITTEST
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
+#endif
     UIEXT_LOGI("OnAttachToFrameNode");
 }
 
@@ -732,13 +768,19 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto id = frameNode->GetId();
     UnRegisterWindowSceneVisibleChangeCallback(id);
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
     pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
+    frameNode->UnregisterNodeChangeListener();
+#ifndef ACE_UNITTEST
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+#endif
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -1461,7 +1503,7 @@ int32_t UIExtensionPattern::GetInstanceId()
     return instanceId_;
 }
 
-int32_t UIExtensionPattern::GetInstanceIdFromHost()
+int32_t UIExtensionPattern::GetInstanceIdFromHost() const
 {
     auto instanceId = GetHostInstanceId();
     if (instanceId != instanceId_) {
@@ -1604,5 +1646,122 @@ void UIExtensionPattern::DumpOthers()
             }
         }
     }
+}
+bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessDataSyncReply businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+}
+
+bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceiveReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceiveReply businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeReplyCallbacks_.find(code);
+    if (it == businessDataUECConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceive(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceive businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeCallbacks_.find(code);
+    if (it == businessDataUECConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeCallbacks_.try_emplace(code, callback);
+}
+
+bool UIExtensionPattern::IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) == FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+}
+
+bool UIExtensionPattern::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_TRANSFORM_CHANGE) == FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+}
+
+void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
+        return;
+    }
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
+    }
+    TransferAccessibilityRectInfo();
+}
+
+AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
+{
+    ACE_SCOPED_TRACE("GetAccessibilityRectInfo");
+    AccessibilityParentRectInfo rectInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, rectInfo);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    
+    rectInfo.left = static_cast<int32_t>(rect.Left());
+    rectInfo.top = static_cast<int32_t>(rect.Top());
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
+    auto pipeline = host->GetContextRefPtr();
+    if (pipeline) {
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        if (accessibilityManager) {
+            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
+            rectInfo.left =
+                rectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+            rectInfo.top = rectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
+            rectInfo.scaleX *= windowInfo.scaleX;
+            rectInfo.scaleY *= windowInfo.scaleY;
+        }
+    }
+    return rectInfo;
+}
+
+// Once enter this function, must calculate and transfer data to provider
+void UIExtensionPattern::TransferAccessibilityRectInfo()
+{
+    auto parentRectInfo = GetAccessibilityRectInfo();
+    AAFwk::Want data;
+    data.SetParam("left", parentRectInfo.left);
+    data.SetParam("top", parentRectInfo.top);
+    data.SetParam("scaleX", parentRectInfo.scaleX);
+    data.SetParam("scaleY", parentRectInfo.scaleY);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
+        parentRectInfo.scaleX, parentRectInfo.scaleY);
+    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), BusinessDataSendType::ASYNC);
 }
 } // namespace OHOS::Ace::NG

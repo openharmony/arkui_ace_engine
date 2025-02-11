@@ -3131,6 +3131,18 @@ void UIContentImpl::SetAccessibilityGetParentRectHandler(std::function<void(int3
     accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
 }
 
+void UIContentImpl::SetAccessibilityGetParentRectHandler(
+    std::function<void(AccessibilityParentRectInfo&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
+}
+
 void UIContentImpl::DeregisterAccessibilityChildTree()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -4096,6 +4108,22 @@ void UIContentImpl::EnableContainerModalGesture(bool isEnable)
             pipelineContext->EnableContainerModalGesture(isEnable);
         },
         TaskExecutor::TaskType::UI, "ArkUIEnableContainerModalGesture");
+}
+
+void UIContentImpl::UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
+            transform.posY, transform.scaleX, transform.scaleY)]() {
+            aceContainer->SetSingleHandTransform(singleHandTransform);
+        }, TaskExecutor::TaskType::UI, "ArkUISetSingleHandTransform");
 }
 
 bool UIContentImpl::GetContainerFloatingTitleVisible()
