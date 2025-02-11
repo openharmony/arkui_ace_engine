@@ -16,6 +16,8 @@
 #ifndef INTERFACES_NAPI_KITS_PROMPT_ACTION_JS_LEVEL_ORDER_H
 #define INTERFACES_NAPI_KITS_PROMPT_ACTION_JS_LEVEL_ORDER_H
 
+#include <optional>
+
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
