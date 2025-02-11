@@ -1658,4 +1658,7 @@ void ViewAbstractModelImpl::SetAccessibilityDefaultFocus()
 void ViewAbstractModelImpl::SetAccessibilityUseSamePage(bool isFullSilent)
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue)
+{}
+
 } // namespace OHOS::Ace::Framework

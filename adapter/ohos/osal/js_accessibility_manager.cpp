@@ -1497,6 +1497,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         }
     }
     nodeInfo.SetAccessibilityNextFocusInspectorKey(accessibilityProperty->GetAccessibilityNextFocusInspectorKey());
+    nodeInfo.SetAccessibilityScrollable(accessibilityProperty->IsUserScrollTriggerable());
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
     nodeInfo.SetAccessibilityGroup(accessibilityProperty->IsAccessibilityGroup());
     nodeInfo.SetAccessibilityLevel(accessibilityProperty->GetAccessibilityLevel());
@@ -2578,6 +2579,8 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("accessibilityVisible: ", nodeInfo.GetAccessibilityVisible());
     DumpLog::GetInstance().AddDesc("accessibilityNextFocusInspectorKey: ",
                                    nodeInfo.GetAccessibilityNextFocusInspectorKey());
+    DumpLog::GetInstance().AddDesc("accessibilityScrollTriggerable: ",
+                                   nodeInfo.GetAccessibilityScrollable());
     DumpLog::GetInstance().AddDesc("accessibilityNextFocusId: ", nodeInfo.GetAccessibilityNextFocusId());
     DumpLog::GetInstance().AddDesc("accessibilityPreviousFocusId: ", nodeInfo.GetAccessibilityPreviousFocusId());
     DumpLog::GetInstance().AddDesc("clip: ", nodeInfo.GetClip());

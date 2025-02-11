@@ -3610,8 +3610,8 @@ void ResetBackgroundBrightness(ArkUINodeHandle node)
     ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
 }
 
-void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
     const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize , ArkUI_Float32 fraction)
 {
@@ -3642,9 +3642,9 @@ void ResetBackgroundBrightnessInternal(ArkUINodeHandle node)
         saturation, posRGB, negRGB, fraction };
     ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
 }
- 
-void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+
+void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
     const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction)
 {
@@ -3885,6 +3885,20 @@ void ResetAccessibilityUseSamePage(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
+}
+
+void SetAccessibilityScrollTriggerable(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, value, false);
+}
+
+void ResetAccessibilityScrollTriggerable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, true, true);
 }
 
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
@@ -5896,7 +5910,7 @@ void ResetAccessibilityState(ArkUINodeHandle node)
         accessibilityProperty->SetUserDisabled(false);
     }
     if (accessibilityProperty->HasUserSelected()) {
-        accessibilityProperty->SetUserSelected(false); 
+        accessibilityProperty->SetUserSelected(false);
     }
     if (accessibilityProperty->HasUserCheckedType()) {
         accessibilityProperty->SetUserCheckedType(0);
@@ -6840,6 +6854,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
         .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
         .resetAccessibilityUseSamePage = ResetAccessibilityUseSamePage,
+        .setAccessibilityScrollTriggerable = SetAccessibilityScrollTriggerable,
+        .resetAccessibilityScrollTriggerable = ResetAccessibilityScrollTriggerable,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
         .setClickEffect = SetClickEffect,

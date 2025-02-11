@@ -324,6 +324,7 @@ public:
     void ResetOnAccessibilityFocus() override;
     void SetAccessibilityDefaultFocus() override;
     void SetAccessibilityUseSamePage(bool isFullSilent) override;
+    void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

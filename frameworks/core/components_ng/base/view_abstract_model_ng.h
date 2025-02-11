@@ -1355,6 +1355,7 @@ public:
     void ResetOnAccessibilityFocus() override;
     void SetAccessibilityDefaultFocus() override;
     void SetAccessibilityUseSamePage(bool isFullSilent) override;
+    void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1566,6 +1567,7 @@ public:
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
     static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
     static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
+    static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

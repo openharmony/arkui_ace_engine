@@ -2978,6 +2978,19 @@ class AccessibilityUseSamePageModifier extends ModifierWithKey {
   }
 }
 AccessibilityUseSamePageModifier.identity = Symbol('accessibilityUseSamePage');
+class AccessibilityScrollTriggerableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityScrollTriggerable(node);
+    } else {
+      getUINativeModule().common.setAccessibilityScrollTriggerable(node, this.value);
+    }
+  }
+}
+AccessibilityScrollTriggerableModifier.identity = Symbol('accessibilityScrollTriggerable');
 class HoverEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4535,6 +4548,15 @@ class ArkComponent {
   }
   accessibilityUseSamePage(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityUseSamePageModifier.identity, AccessibilityUseSamePageModifier, value);
+    return this;
+  }
+  accessibilityScrollTriggerable(value) {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
     return this;
   }
   obscured(reasons) {
@@ -30159,7 +30181,7 @@ class SwiperAutoPlayModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().swiper.resetSwiperAutoPlay(node);
-    } else { 
+    } else {
       getUINativeModule().swiper.setSwiperAutoPlay(node, this.value.autoPlay, this.value.needStopWhenTouched);
     }
   }
