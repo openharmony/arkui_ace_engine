@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -182,6 +183,35 @@ void JSSecButtonBase::SetBackgroundBorderColor(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundBorderRadius(const JSCallbackInfo& info)
 {
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> topLeft;
+        std::optional<CalcDimension> topRight;
+        std::optional<CalcDimension> bottomLeft;
+        std::optional<CalcDimension> bottomRight;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension topLeftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("topLeft"), topLeftDimen)) {
+            topLeft = topLeftDimen;
+        }
+        CalcDimension topRightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("topRight"), topRightDimen)) {
+            topRight = topRightDimen;
+        }
+        CalcDimension bottomLeftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottomLeft"), bottomLeftDimen)) {
+            bottomLeft = bottomLeftDimen;
+        }
+        CalcDimension bottomRightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottomRight"), bottomRightDimen)) {
+            bottomRight = bottomRightDimen;
+        }
+        
+        if (topLeft.has_value() || topRight.has_value() || bottomLeft.has_value() || bottomRight.has_value()) {
+            SecurityComponentModelNG::SetBackgroundBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+            return;
+        }
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -243,5 +273,17 @@ void JSSecButtonBase::SetTextIconSpace(const JSCallbackInfo& info)
     } else {
         SecurityComponentModelNG::SetTextIconSpace(length);
     }
+}
+
+void JSSecButtonBase::SetAlign(const JSCallbackInfo& info)
+{
+    Alignment alignment;
+    if (!info[0]->IsNumber()) {
+        alignment = Alignment::CENTER;
+    } else {
+        auto value = info[0]->ToNumber<int32_t>();
+        alignment = ParseAlignment(value);
+    }
+    SecurityComponentModelNG::SetAlign(alignment);
 }
 }
