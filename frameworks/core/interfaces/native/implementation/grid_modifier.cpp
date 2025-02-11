@@ -78,13 +78,16 @@ void SetGridOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (layoutOptions) {
+    std::optional<Ark_GridLayoutOptions> layoutOptionsOpt = layoutOptions ?
+        Converter::OptConvert<Ark_GridLayoutOptions>(*layoutOptions) : std::nullopt;
+    if (layoutOptionsOpt) {
         GridLayoutOptions options;
-        std::optional<GridItemSize> regularSizeOpt = Converter::OptConvert<GridItemSize>(*layoutOptions);
+        std::optional<GridItemSize> regularSizeOpt = Converter::OptConvert<GridItemSize>(layoutOptionsOpt.value());
         if (regularSizeOpt) {
             options.regularSize = regularSizeOpt.value();
         }
-        std::optional<std::set<int32_t>> irregularIndexes = Converter::OptConvert<std::set<int32_t>>(*layoutOptions);
+        std::optional<std::set<int32_t>> irregularIndexes =
+            Converter::OptConvert<std::set<int32_t>>(layoutOptionsOpt.value());
         if (irregularIndexes) {
             options.irregularIndexes = irregularIndexes.value();
         }
