@@ -80,7 +80,6 @@ public:
     void HandleClick(Offset offset, int32_t index);
     void HandleMouseEvent(MouseAction action, Offset location);
     void HandleHoverEvent(bool isHover);
-    void HandleTouchEvent(TouchType type, Offset location);
     GestureEvent CreateDragInfo(bool moveDirection);
     AssertionResult CurrentIndex(int32_t expectIndex);
 

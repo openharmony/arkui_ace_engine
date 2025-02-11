@@ -482,8 +482,7 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch004, TestSize.Level1)
     const float inTabBarItemY = 30.f;
     HandleMouseEvent(MouseAction::MOVE, Offset(-1.f, inTabBarItemY));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(-1.f, inTabBarItemY));
-    EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.empty());
 
     /**
      * @tc.steps: step2. Hover and Touch down tabBarItem(index:0)
@@ -491,15 +490,15 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch004, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(180.f, inTabBarItemY));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(180.f, inTabBarItemY));
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 0);
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(0) != tabBarPattern_->touchingIndex_.end());
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
     /**
      * @tc.steps: step3. Touch up tabBarItem(index:0)
      * @tc.expected: touchingIndex_ is 0, BackgroundColor change to hover color
      */
-    HandleTouchEvent(TouchType::UP, Offset(180.f, inTabBarItemY));
+    tabBarPattern_->HandleTouchEvent(TouchType::UP, 0);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::RED));
 }
 
@@ -524,12 +523,12 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch005, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(100.f, 30.f));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(100.f, 30.f));
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
     HandleMouseEvent(MouseAction::MOVE, Offset(200.f, 30.f));
     HandleHoverEvent(true);
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 0);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(0) != tabBarPattern_->touchingIndex_.end());
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
@@ -537,8 +536,8 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch005, TestSize.Level1)
      * @tc.steps: step3. Touch up tabBarItem(index:1)
      * @tc.expected: tabBarItem(index:1) BackgroundColor is hover color
      */
-    HandleTouchEvent(TouchType::UP, Offset(200.f, 30.f));
-    EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
+    tabBarPattern_->HandleTouchEvent(TouchType::UP, 0);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.empty());
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::TRANSPARENT));
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::RED));
@@ -565,7 +564,7 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(200.f, 30.f));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(200.f, 30.f));
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 1);
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::GREEN));
 
     /**
@@ -574,7 +573,7 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::WINDOW_LEAVE, Offset(200.f, 100.f));
     HandleHoverEvent(false);
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(1) != tabBarPattern_->touchingIndex_.end());
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 
@@ -583,15 +582,15 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(TABS_WIDTH + 1.f, 1.f));
     HandleHoverEvent(false);
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(1) != tabBarPattern_->touchingIndex_.end());
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 
     /**
      * @tc.steps: step6. Touch cancel
      */
-    HandleTouchEvent(TouchType::CANCEL, Offset(TABS_WIDTH + 1.f, 1.f));
-    EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
+    tabBarPattern_->HandleTouchEvent(TouchType::CANCEL, 1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.empty());
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 }
 
@@ -889,12 +888,9 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
      * @tc.steps: steps2. HandleTouchEvent
      * @tc.expected: steps2. Check the number of tabBarNode_ TotalChildCount
      */
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
-    tabBarPattern_->HandleTouchEvent(touchLocationInfo);
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
     EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
 
@@ -914,12 +910,9 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent002, TestSize.Level1)
      * @tc.steps: steps2. HandleTouchEvent
      * @tc.expected: steps2. Check the number of tabBarNode_ TotalChildCount
      */
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
-    tabBarPattern_->HandleTouchEvent(touchLocationInfo);
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
     EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
 
