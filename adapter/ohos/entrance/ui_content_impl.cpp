@@ -4175,12 +4175,12 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
     }
 }
 
-bool UIContentImpl::GetContainerModalTitleVisible()
+bool UIContentImpl::GetContainerModalTitleVisible(bool isImmersive)
 {
     ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return NG::ContainerModalViewEnhance::GetContainerModalTitleVisible(pipeline);
+    return NG::ContainerModalViewEnhance::GetContainerModalTitleVisible(pipeline, isImmersive);
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
