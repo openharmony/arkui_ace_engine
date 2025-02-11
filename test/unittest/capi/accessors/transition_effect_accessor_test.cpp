@@ -31,6 +31,10 @@ const std::string g_message = "message";
 
 } // namespace
 
+namespace GeneratedModifier {
+    const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
+}
+
 class TransitionEffectAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITransitionEffectAccessor,
     &GENERATED_ArkUIAccessors::getTransitionEffectAccessor, TransitionEffectPeer> {
 public:
@@ -38,7 +42,7 @@ public:
     {
         Ark_String arkType = Converter::ArkValue<Ark_String>(g_message);
         Ark_TransitionEffects* arkEffects = new(Ark_TransitionEffects);
-        return static_cast<TransitionEffectPeer*>(accessor_->ctor(&arkType, arkEffects));
+        return accessor_->ctor(&arkType, arkEffects);
     }
 };
 
@@ -60,9 +64,25 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
     value.centerZ = Converter::ArkValue<Opt_Number>(3);
     value.perspective = Converter::ArkValue<Opt_Number>(6);
     value.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(45);
-    auto peer = accessor_->rotate(&value);
+
+    auto ptr = accessor_->rotate(&value);
+    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_NE(peer, nullptr);
-    peer = accessor_->rotate(nullptr);
+
+    auto effect = AceType::DynamicCast<ChainedRotateEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+    ASSERT_EQ(effect->GetEffect().xDirection, 2);
+    ASSERT_EQ(effect->GetEffect().yDirection, 3);
+    ASSERT_EQ(effect->GetEffect().zDirection, 4);
+    ASSERT_EQ(effect->GetEffect().centerX.ToString(), "3.00vp");
+    ASSERT_EQ(effect->GetEffect().centerY.ToString(), "3.00vp");
+    ASSERT_EQ(effect->GetEffect().centerZ.ToString(), "3.00vp");
+    ASSERT_EQ(effect->GetEffect().perspective, 6);
+    ASSERT_EQ(effect->GetEffect().angle, 45);
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
+
+    ptr = accessor_->rotate(nullptr);
+    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -78,9 +98,19 @@ HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
     value.x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(2);
     value.y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
     value.z = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(4);
-    auto peer = accessor_->translate(&value);
+    auto ptr = accessor_->translate(&value);
+    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_NE(peer, nullptr);
-    peer = accessor_->translate(nullptr);
+
+    auto effect = AceType::DynamicCast<ChainedTranslateEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+    ASSERT_EQ(effect->GetEffect().x.ToString(), "2.00vp");
+    ASSERT_EQ(effect->GetEffect().y.ToString(), "3.00vp");
+    ASSERT_EQ(effect->GetEffect().z.ToString(), "4.00vp");
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
+
+    ptr = accessor_->translate(nullptr);
+    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -98,9 +128,21 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
     value.z = Converter::ArkValue<Opt_Number>(4);
     value.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
     value.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
-    auto peer = accessor_->scale(&value);
+    auto ptr = accessor_->scale(&value);
+    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_NE(peer, nullptr);
-    peer = accessor_->scale(nullptr);
+
+    auto effect = AceType::DynamicCast<ChainedScaleEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+    ASSERT_EQ(effect->GetEffect().xScale, 2);
+    ASSERT_EQ(effect->GetEffect().yScale, 3);
+    ASSERT_EQ(effect->GetEffect().zScale, 4);
+    ASSERT_EQ(effect->GetEffect().centerX.ToString(), "3.00vp");
+    ASSERT_EQ(effect->GetEffect().centerY.ToString(), "3.00vp");
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
+
+    ptr = accessor_->scale(nullptr);
+    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -111,11 +153,21 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
  */
 HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
 {
+    const int testValue = 330;
     ASSERT_NE(accessor_->opacity, nullptr);
-    Ark_Number value = Converter::ArkValue<Ark_Number>(33);
-    auto peer = accessor_->opacity(&value);
+    Ark_Number value = Converter::ArkValue<Ark_Number>(testValue);
+
+    auto ptr = accessor_->opacity(&value);
+    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_NE(peer, nullptr);
-    peer = accessor_->opacity(nullptr);
+
+    auto effect = AceType::DynamicCast<ChainedOpacityEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+    ASSERT_EQ(effect->GetEffect(), testValue);
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
+
+    ptr = accessor_->opacity(nullptr);
+    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -128,8 +180,15 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->move, nullptr);
     Ark_TransitionEdge value = Converter::ArkValue<Ark_TransitionEdge>(NG::TransitionEdge::END);
-    auto peer = accessor_->move(value);
+
+    auto ptr = accessor_->move(value);
+    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
     ASSERT_NE(peer, nullptr);
+
+    auto effect = AceType::DynamicCast<ChainedMoveEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+    ASSERT_EQ(effect->GetEffect(), NG::TransitionEdge::END);
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 }
 
 /**
@@ -159,9 +218,20 @@ HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getAnimationTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
 {
+    const int testValue = 333;
     ASSERT_NE(accessor_->animation, nullptr);
+    Ark_AnimateParam animParam;
+    animParam.duration = Converter::ArkValue<Opt_Number>(testValue);
+    animParam.tempo =  Converter::ArkValue<Opt_Number>(0.5);
+    TransitionEffectPeer peer;
+    peer.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(33);
+
+    auto ptr = accessor_->animation(reinterpret_cast<TransitionEffectPeer*>(&peer), &animParam);
+    auto peer2 = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    ASSERT_NE(peer2, nullptr);
+    ASSERT_EQ(peer2->handler->GetAnimationOption()->GetDuration(), testValue);
 }
 
 /**
@@ -169,9 +239,30 @@ HWTEST_F(TransitionEffectAccessorTest, DISABLED_getAnimationTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getCombineTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->combine, nullptr);
+    auto opacity1 = 444;
+    auto opacity2 = 555;
+
+    TransitionEffectPeer peer1;
+    peer1.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity1);
+
+    TransitionEffectPeer peer2;
+    peer2.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity2);
+
+    const Ark_TransitionEffect effect { .ptr = &peer2 };
+
+    auto ptr = accessor_->combine(reinterpret_cast<TransitionEffectPeer*>(&peer1), &effect);
+    auto ret_peer1 = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    ASSERT_NE(ret_peer1, nullptr);
+    auto effect1 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler);
+    ASSERT_NE(effect1, nullptr);
+    ASSERT_EQ(effect1->GetEffect(), opacity1);
+
+    auto effect2 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler->GetNext());
+    ASSERT_NE(effect2, nullptr);
+    ASSERT_EQ(effect2->GetEffect(), opacity2);
 }
 
 } // namespace OHOS::Ace::NG
