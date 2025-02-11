@@ -28,7 +28,6 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/chain_animation.h"
 #include "core/components/common/layout/constants.h"
@@ -636,7 +635,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& src);
     template<> void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
-    template<> void AssignCast(std::optional<PerfActionType>& dst, const Ark_PerfMonitorActionType& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
     template<> void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src);
     template<> void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src);

@@ -21,12 +21,15 @@
 // SORTED_SECTION
 #include <optional>
 
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace::NG {
 namespace Converter {
     template<> void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src);
+    template<> void AssignCast(std::optional<PerfActionType>& dst, const Ark_PerfMonitorActionType& src);
+    template<> void AssignCast(std::optional<PerfSourceType>& dst, const Ark_PerfMonitorSourceType& src);
     template<> void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src);
     template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src);
     template<> void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src);

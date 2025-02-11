@@ -351,28 +351,6 @@ void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrat
 }
 
 template<>
-void AssignCast(std::optional<PerfActionType>& dst, const Ark_PerfMonitorActionType& src)
-{
-    switch (src) {
-        case ARK_PERF_MONITOR_ACTION_TYPE_LAST_DOWN: dst = PerfActionType::LAST_DOWN; break;
-        case ARK_PERF_MONITOR_ACTION_TYPE_LAST_UP: dst = PerfActionType::LAST_UP; break;
-        case ARK_PERF_MONITOR_ACTION_TYPE_FIRST_MOVE: dst = PerfActionType::FIRST_MOVE; break;
-        default: LOGE("Unexpected enum value in Ark_PerfMonitorActionType: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<PerfActionType>& dst, const Ark_PerfMonitorActionType& src)
-{
-    switch (src) {
-        case ARK_PERF_MONITOR_ACTION_TYPE_LAST_DOWN: dst = PerfActionType::LAST_DOWN; break;
-        case ARK_PERF_MONITOR_ACTION_TYPE_LAST_UP: dst = PerfActionType::LAST_UP; break;
-        case ARK_PERF_MONITOR_ACTION_TYPE_FIRST_MOVE: dst = PerfActionType::FIRST_MOVE; break;
-        default: LOGE("Unexpected enum value in Ark_PerfMonitorActionType: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src)
 {
     switch (src) {
