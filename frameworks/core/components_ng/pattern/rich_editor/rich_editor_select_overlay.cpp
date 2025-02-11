@@ -589,8 +589,16 @@ void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->CalculateHandleOffsetAndShowOverlay();
-    UpdateHandleOffset();
-    IF_TRUE(IsMenuShow(), UpdateMenuOffset());
+    auto menuParams = pattern->GetMenuParams(pattern->GetEditorType(),
+        pattern->textResponseType_.value_or(TextResponseType::NONE));
+    bool needRecreate = (lastMenuParams_ == nullptr) ^ (menuParams == nullptr);
+    if (needRecreate) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu type changed, recreate menu");
+        ProcessOverlay({ .menuIsShow = IsCurrentMenuVisibile(), .requestCode = REQUEST_RECREATE });
+    } else {
+        UpdateHandleOffset();
+        IF_TRUE(IsMenuShow(), UpdateMenuOffset());
+    }
 }
 
 void RichEditorSelectOverlay::SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info)
