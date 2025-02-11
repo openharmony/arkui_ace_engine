@@ -60,8 +60,8 @@ namespace Converter {
 }
 
 namespace GeneratedModifier {
-    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
     const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
+    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
 }
 
 class CommonMethodModifierTest9 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
