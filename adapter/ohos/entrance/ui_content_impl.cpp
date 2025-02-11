@@ -41,6 +41,8 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -134,6 +136,8 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
+static bool g_isDynamicVsync = false;
+static bool g_isDragging = false;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -1680,6 +1684,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         ImageFileCache::GetInstance().SetCacheFileInfo();
         ImageFileCache::GetInstance().ClearAllCacheFiles();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+
+        auto task = [] {
+            bool dynamicVsync = false;
+            std::unordered_map<std::string, std::string> payload;
+            std::unordered_map<std::string, std::string> reply;
+            payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
+            payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
+            dynamicVsync = g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+        };
+        BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
@@ -2787,6 +2803,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
     lastReason_ = reason;
+
+    if (!g_isDragging && !g_isDynamicVsync && (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START)) {
+        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(true);
+        ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(true)");
+        g_isDragging = true;
+    }
+
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
@@ -2866,6 +2890,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         if (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
             reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
             bool isDragging = reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START;
+            if (!g_isDynamicVsync && !isDragging) {
+                OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(false);
+                ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(false)");
+                g_isDragging = false;
+            }
             taskExecutor->PostTask(
                 [weak = AceType::WeakClaim(AceType::RawPtr(context)), isDragging]() {
                     auto pipelineContext = weak.Upgrade();
