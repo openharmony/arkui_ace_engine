@@ -76,7 +76,13 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
     touchPoint.height = pointerItem.GetHeight();
-    touchPoint.operatingHand = pointerItem.GetBlobId() & (OPERATING_HAND_LEFT | OPERATING_HAND_RIGHT);
+    int32_t blobId = pointerItem.GetBlobId();
+    if (blobId < 0) {
+        touchPoint.operatingHand = 0;
+    } else {
+        touchPoint.operatingHand = static_cast<int32_t>(static_cast<uint32_t>(blobId) &
+            (OPERATING_HAND_LEFT | OPERATING_HAND_RIGHT));
+    }
     return touchPoint;
 }
 
