@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LengthMetricsAccessor {
+using namespace Converter;
 void DestroyPeerImpl(LengthMetricsPeer* peer)
 {
     LengthMetricsPeer::Destroy(peer);
@@ -35,11 +36,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer PxImpl(const Ark_Number* value)
 {
-    return nullptr;
+    return LengthMetricsPeer::Create(Dimension(Convert<float>(*value)));
 }
 Ark_NativePointer ResourceImpl(const Ark_Resource* value)
 {
-    return nullptr;
+    return LengthMetricsPeer::Create(OptConvert<Dimension>(*value).value_or(Dimension()));
 }
 Ark_NativePointer GetUnitImpl(LengthMetricsPeer* peer)
 {
