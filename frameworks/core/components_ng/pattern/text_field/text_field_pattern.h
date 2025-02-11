@@ -296,6 +296,11 @@ public:
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
+    bool HandleOnDeleteComb(bool backward) override;
+    void DeleteBackwardWord();
+    void DeleteForwardWord();
+    void HandleOnPageUp() override;
+    void HandleOnPageDown() override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
@@ -548,7 +553,7 @@ public:
     {
         return selectOverlay_->IsUsingMouse();
     }
-    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
+    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove, bool skipNewLineChar = true);
     int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
@@ -1475,6 +1480,10 @@ public:
         return maxFontSizeScale_;
     }
 
+    bool GetOriginCaretPosition(OffsetF& offset) const;
+    void ResetOriginCaretPosition() override;
+    bool RecordOriginCaretPosition() override;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1548,6 +1557,8 @@ private:
         const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
+    void UpdateShiftFlag(const KeyEvent& keyEvent) override;
+    void UpdateCaretByClick(const Offset& localOffset);
     void HandleRightMouseEvent(MouseInfo& info);
     void HandleRightMousePressEvent(MouseInfo& info);
     void HandleRightMouseReleaseEvent(MouseInfo& info);
@@ -1755,6 +1766,9 @@ private:
     // Action when "enter" pressed.
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
     TextDirection textDirection_ = TextDirection::LTR;
+    // Used to record original caret position for "shift + up/down"
+    // Less than 0 is invalid, initialized as invalid in constructor
+    OffsetF originCaretPosition_;
 
     OffsetF parentGlobalOffset_;
     OffsetF lastTouchOffset_;

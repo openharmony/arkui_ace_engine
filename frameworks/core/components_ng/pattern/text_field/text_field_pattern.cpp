@@ -152,6 +152,7 @@ const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
+const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET { -1.0f, -1.0f };
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
 #endif
@@ -458,6 +459,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     selectController_->InitContentController(contentController_);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     selectOverlay_ = MakeRefPtr<TextFieldSelectOverlay>(WeakClaim(this));
+    ResetOriginCaretPosition();
 }
 
 TextFieldPattern::~TextFieldPattern()
@@ -1311,6 +1313,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField(host->GetId());
     }
+    ResetOriginCaretPosition();
 
     ProcBorderAndUnderlineInBlurEvent();
     ProcNormalInlineStateInBlurEvent();
@@ -1757,6 +1760,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(touchInfo);
     DoGestureSelection(info);
+    ResetOriginCaretPosition();
     auto touchType = touchInfo->GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(touchInfo->GetLocalLocation());
@@ -2376,7 +2380,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
     if (mouseStatus_ != MouseStatus::MOVE) {
-        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+        UpdateCaretByClick(info.GetLocalLocation());
+        UpdateCaretInfoToController();
     }
     StartTwinkling();
     SetIsSingleHandle(true);
@@ -2928,7 +2933,9 @@ void TextFieldPattern::OnModifyDone()
     FilterInitializeText();
     InitDisableColor();
     ProcessResponseArea();
-    InitDragEvent();
+    if (!shiftFlag_) {
+        InitDragEvent();
+    }
     Register2DragDropManager();
     context->AddOnAreaChangeNode(host->GetId());
     ProcessUnderlineColorOnModifierDone();
@@ -3079,6 +3086,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     if (textCache == contentController_->GetTextValue() && previewTextCache.value == curPreviewText.value) {
         return false;
     }
+    ResetOriginCaretPosition();
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
     auto pipeline = GetContext();
@@ -3618,6 +3626,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
         selectOverlay_->SetUsingMouse(false);
     }
+    if (!IsSelected()) {
+        ResetOriginCaretPosition();
+    }
 }
 
 void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
@@ -3679,7 +3690,8 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    isPressSelectedBox_ = (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation()));
+    isPressSelectedBox_ =
+        (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation()) && !shiftFlag_);
     if (isPressSelectedBox_ || GetIsPreviewText()) {
         blockPress_ = true;
         return;
@@ -3703,11 +3715,39 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
         StopTwinkling();
         return;
     }
-    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
-    StartTwinkling();
+    UpdateCaretByClick(info.GetLocalLocation());
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
+{
+    bool flag = false;
+    if (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT)) {
+        flag = true;
+    }
+    if (flag != shiftFlag_) {
+        shiftFlag_ = flag;
+        if (!shiftFlag_) {
+            // open drag
+            InitDragEvent();
+        } else  {
+            // close drag
+            ClearDragDropEvent();
+        }
+    }
+}
+
+void TextFieldPattern::UpdateCaretByClick(const Offset& localOffset)
+{
+    if (shiftFlag_) {
+        selectController_->UpdateSecondHandleInfoByMouseOffset(localOffset);
+        StopTwinkling();
+    } else {
+        selectController_->UpdateCaretInfoByOffset(localOffset);
+        StartTwinkling();
+    }
 }
 
 void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
@@ -4499,12 +4539,12 @@ void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional
     UpdateCaretInfoToController();
 }
 
-int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove)
+int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove, bool skipNewLineChar)
 {
     if (contentController_->IsEmpty()) {
         return 0;
     }
-    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    int32_t textLength = static_cast<int32_t>(contentController_->GetTextValue().length());
     if (originCaretPosition < 0 || originCaretPosition > textLength) {
         return 0;
     }
@@ -4515,44 +4555,34 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     }
     int32_t offset = 0;
     int32_t strIndex = directionMove == 0 ? (originCaretPosition - 1) : originCaretPosition;
-    auto wideTextValue = contentController_->GetWideText();
-    if (wideTextValue[strIndex] == L' ') {
-        int32_t wordStart = 0;
-        int32_t wordEnd = 0;
-        if (!paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
-            return 0;
-        }
-        if (directionMove == 1) {
-            offset += (wordEnd - strIndex);
-            return offset;
-        } else {
-            offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
-            strIndex = (wordStart - 1);           // when move left, actual index should minus 1
-        }
-    }
-    bool hasJumpBlank = false;
-    for (; directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
+    auto wideTextValue = contentController_->GetTextValue();
+    int32_t wordStart = 0;
+    int32_t wordEnd = 0;
+    while (directionMove == 0 ? strIndex >= 0 : strIndex <= textLength) {
         auto chr = wideTextValue[strIndex];
-        if (StringUtils::IsLetterOrNumberForWchar(chr) || (chr == L' ' && directionMove == 1)) {
-            if (directionMove == 1 && hasJumpBlank && chr != L' ') {
-                return offset;
-            } else if (directionMove == 1 && !hasJumpBlank && chr == L' ') {
-                hasJumpBlank = true;
+        // skip the special character
+        if (chr == L' ' || (chr == L'\n' && skipNewLineChar)) {
+            if (directionMove == 0) {
+                strIndex--;
+            } else {
+                strIndex++;
             }
             offset++;
-        } else {
-            if (offset <= 0) {
-                offset = 1;
+            continue;
+        }
+        // cal word length
+        if (paragraph_ && paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
+            if (directionMove == 1) {
+                offset += (wordEnd - strIndex);
+            } else {
+                offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
             }
-            break;
+            return std::clamp(offset, 0, textLength);
         }
-        if (directionMove == 0) {
-            strIndex--;
-        } else {
-            strIndex++;
-        }
+        // GetWordBoundary fail
+        return 0;
     }
-    return offset;
+    return std::clamp(offset, 0, textLength);
 }
 
 int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged)
@@ -5331,6 +5361,78 @@ void TextFieldPattern::HandleOnDelete(bool backward)
     }
 }
 
+bool TextFieldPattern::HandleOnDeleteComb(bool backward)
+{
+    if (backward) {
+        DeleteBackwardWord(); // LTR is left word，RTL is right word
+    } else {
+        DeleteForwardWord(); // LTR is right word，RTL is left word
+    }
+    return true;
+}
+
+void TextFieldPattern::DeleteBackwardWord()
+{
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetTextValue().length());
+    int32_t leftWordLength = GetWordLength(originCaretPosition, 0, false);
+    if (leftWordLength < 0) {
+        // delete 1 char
+        leftWordLength = 1;
+    }
+    if (leftWordLength > textLength || selectController_->GetCaretIndex() - leftWordLength < 0) {
+        // delete left
+        leftWordLength = std::max(1, originCaretPosition);
+    }
+    DeleteBackward(leftWordLength);
+}
+
+void TextFieldPattern::DeleteForwardWord()
+{
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetTextValue().length());
+    int32_t rightWordLength = GetWordLength(originCaretPosition, 1, false);
+    if (rightWordLength < 0) {
+        // delete 1 char
+        rightWordLength = 1;
+    }
+    if (rightWordLength > textLength || rightWordLength + selectController_->GetCaretIndex() > textLength) {
+        // delete right
+        rightWordLength = std::max(1, textLength - originCaretPosition);
+    }
+    DeleteForward(rightWordLength);
+}
+
+void TextFieldPattern::HandleOnPageUp()
+{
+    if (!IsTextArea()) {
+        return;
+    }
+    auto border = GetBorderWidthProperty();
+    float maxFrameHeight =
+        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
+    OnScrollCallback(maxFrameHeight, SCROLL_FROM_JUMP);
+    auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
+    Offset offset(caretRectOffset.GetX(), GetPaddingTop() + GetBorderTop(border));
+    selectController_->UpdateCaretInfoByOffset(offset);
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
+}
+
+void TextFieldPattern::HandleOnPageDown()
+{
+    if (!IsTextArea()) {
+        return;
+    }
+    auto border = GetBorderWidthProperty();
+    float maxFrameHeight =
+        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
+    OnScrollCallback(-maxFrameHeight, SCROLL_FROM_JUMP);
+    auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
+    Offset offset(caretRectOffset.GetX(), maxFrameHeight);
+    selectController_->UpdateCaretInfoByOffset(offset);
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
+}
+
 void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
 {
     TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
@@ -5506,16 +5608,17 @@ void TextFieldPattern::AfterSelection()
 
 void TextFieldPattern::HandleSelectionUp()
 {
-    if (!IsTextArea()) {
-        return;
-    }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
     if (GreatOrEqual(newOffsetY, 0.0)) {
+        OffsetF originCaretPosition;
+        auto caretXPosition = GetOriginCaretPosition(originCaretPosition) &&
+            GreatNotEqual(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), 0) ? // handle when line head
+            originCaretPosition.GetX() : selectController_->GetCaretRect().GetX();
         selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
-            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+            Offset(caretXPosition - contentRect_.GetX(), newOffsetY)));
     } else {
         selectController_->MoveSecondHandleByKeyBoard(0);
     }
@@ -5532,8 +5635,11 @@ void TextFieldPattern::HandleSelectionDown()
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
     if (LessOrEqual(newOffsetY, textRect_.Height())) {
+        OffsetF originCaretPosition;
+        auto caretXPosition = GetOriginCaretPosition(originCaretPosition) ?
+            originCaretPosition.GetX() : selectController_->GetCaretRect().GetX();
         selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
-            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+            Offset(caretXPosition - contentRect_.GetX(), newOffsetY)));
     } else {
         selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(contentController_->GetWideText().length()));
     }
@@ -9119,5 +9225,32 @@ float TextFieldPattern::GetBorderRight(BorderWidthProperty border) const
         return rightBorderWidth.Value() * percentReferenceWidth;
     }
     return rightBorderWidth.ConvertToPx();
+}
+
+// return: whether the offset is valid, return false if invalid
+bool TextFieldPattern::GetOriginCaretPosition(OffsetF& offset) const
+{
+    if (!originCaretPosition_.NonNegative()) {
+        return false;
+    }
+    offset = originCaretPosition_;
+    return false;
+}
+
+void TextFieldPattern::ResetOriginCaretPosition()
+{
+    originCaretPosition_ = DEFAULT_NEGATIVE_CARET_OFFSET;
+}
+
+// Record current caret position if originCaretPosition is valid
+// return: whether the current offset is recorded and valid
+bool TextFieldPattern::RecordOriginCaretPosition()
+{
+    CHECK_NULL_RETURN(selectController_, false);
+    if (originCaretPosition_.NonNegative()) {
+        return false;
+    }
+    originCaretPosition_ = selectController_->GetCaretRect().GetOffset();
+    return originCaretPosition_.NonNegative();
 }
 } // namespace OHOS::Ace::NG

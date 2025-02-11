@@ -66,6 +66,8 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_ENTER, KEY_CTRL), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_NUMPAD_ENTER, KEY_CTRL), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_DPAD_CENTER, KEY_CTRL), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_PAGE_UP), &tic::HandleOnPageUp },
+    { KeyComb(KeyCode::KEY_PAGE_DOWN), &tic::HandleOnPageDown },
     // caret move keys
     { KeyComb(KeyCode::KEY_DPAD_LEFT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Left); } },
     { KeyComb(KeyCode::KEY_DPAD_RIGHT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Right); } },
@@ -101,6 +103,54 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_B, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_B); } },
     { KeyComb(KeyCode::KEY_I, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_I); } },
     { KeyComb(KeyCode::KEY_U, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_U); } },
+    // when numLock off, KEY_NUMPAD_0 perform as KEY_INSERT
+    { KeyComb(KeyCode::KEY_NUMPAD_0, KEY_CTRL), [](tic* c) -> void { c->HandleOnCopy(true); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_0, KEY_SHIFT), &tic::HandleOnPaste },
+    // when numLock off, KEY_NUMPAD_1 perform as KEY_MOVE_END
+    { KeyComb(KeyCode::KEY_NUMPAD_1), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::LineEnd); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_1, KEY_CTRL), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::End); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_1, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::LineEnd); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_1, KEY_CTRL | KEY_SHIFT),
+        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::End); } },
+    // when numLock off, KEY_NUMPAD_2 perform as KEY_DPAD_DOWN
+    { KeyComb(KeyCode::KEY_NUMPAD_2), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Down); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_2, KEY_CTRL), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghEnd); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_2, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::Down); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_2, KEY_CTRL | KEY_SHIFT),
+        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghEnd); } },
+    // when numLock off, KEY_NUMPAD_3 perform as KEY_PAGE_DOWN
+    { KeyComb(KeyCode::KEY_NUMPAD_3), &tic::HandleOnPageDown },
+    // when numLock off, KEY_NUMPAD_4 perform as KEY_DPAD_LEFT
+    { KeyComb(KeyCode::KEY_NUMPAD_4), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Left); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_4, KEY_CTRL), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::LeftWord); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_4, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::Left); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_4, KEY_CTRL | KEY_SHIFT),
+        [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::LeftWord); } },
+    // when numLock off, KEY_NUMPAD_5 perform as none
+    // when numLock off, KEY_NUMPAD_6 perform as KEY_DPAD_RIGHT
+    { KeyComb(KeyCode::KEY_NUMPAD_6), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Right); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_6, KEY_CTRL), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::RightWord); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_6, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::Right); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_6, KEY_CTRL | KEY_SHIFT),
+        [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::RightWord); } },
+    // when numLock off, KEY_NUMPAD_7 perform as KEY_MOVE_HOME
+    { KeyComb(KeyCode::KEY_NUMPAD_7), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::LineBegin); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_7, KEY_CTRL), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Home); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_7, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::LineBegin); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_7, KEY_CTRL | KEY_SHIFT),
+        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Home); } },
+    // when numLock off, KEY_NUMPAD_8 perform as KEY_DPAD_UP
+    { KeyComb(KeyCode::KEY_NUMPAD_8), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Up); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_8, KEY_CTRL),
+        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghBegin); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_8, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::Up); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_8, KEY_CTRL | KEY_SHIFT),
+        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghBegin); } },
+    // when numLock off, KEY_NUMPAD_9 perform as KEY_PAGE_UP
+    { KeyComb(KeyCode::KEY_NUMPAD_9), &tic::HandleOnPageUp },
+    // when numLock off, KEY_NUMPAD_DOT perform as KEY_FORWARD_DEL
+    { KeyComb(KeyCode::KEY_NUMPAD_DOT), [](tic* c) -> void { c->HandleOnDelete(false); } },
+    { KeyComb(KeyCode::KEY_NUMPAD_DOT, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(false); } },
 };
 
 void TextInputClient::NotifyKeyboardHeight(uint32_t height)
@@ -114,6 +164,7 @@ void TextInputClient::NotifyKeyboardHeight(uint32_t height)
 
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {
+    UpdateShiftFlag(keyEvent);
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
@@ -140,12 +191,19 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     if (iterFunctionKeys != functionKeys_.end()) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a function key, key code: %{public}d, modKeyFlags: %{public}d",
             static_cast<int32_t>(keyEvent.code), modKeyFlags);
+        this->ResetOriginCaretPosition();
         return iterFunctionKeys->second(this);
     }
     auto iterKeyboardShortCuts = keyboardShortCuts_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterKeyboardShortCuts != keyboardShortCuts_.end()) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a keyboard shortcut, key code: %{public}d, modKeyFlags: %{public}d",
             static_cast<int32_t>(keyEvent.code), modKeyFlags);
+        if (KeyComb(keyEvent.code, modKeyFlags) == KeyComb(KeyCode::KEY_DPAD_UP, KEY_SHIFT) ||
+            KeyComb(keyEvent.code, modKeyFlags) == KeyComb(KeyCode::KEY_DPAD_DOWN, KEY_SHIFT)) {
+            this->RecordOriginCaretPosition();
+        } else {
+            this->ResetOriginCaretPosition();
+        }
         iterKeyboardShortCuts->second(this);
         return true;
     }
