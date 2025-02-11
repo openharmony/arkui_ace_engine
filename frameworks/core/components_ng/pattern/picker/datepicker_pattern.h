@@ -811,6 +811,8 @@ private:
     bool OnCrownEvent(const CrownEvent& event);
 #endif
     void InitFocusKeyEvent();
+    void FlushChildNodes();
+
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
