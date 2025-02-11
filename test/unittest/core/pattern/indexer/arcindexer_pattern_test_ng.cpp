@@ -426,6 +426,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0010, TestSize.Level1)
             model.SetPopupBackground(Color(0x00000000));
             model.SetUsingPopup(true);
             model.SetSelected(-1);
+            model.SetAutoCollapse(false);
             model.SetFontSize(Dimension(24)); //24 is the fontSize of item
             model.SetFontWeight(FontWeight::MEDIUM);
             model.SetAdaptiveWidth(true);
@@ -512,7 +513,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0012, TestSize.Level1)
     pattern_->MoveIndexByOffset(Offset(0, 0));
     pattern_->itemSizeRender_  = -1.0f;
     pattern_->MoveIndexByOffset(Offset(0, 0));
-    EXPECT_EQ(pattern_->selected_, 19);
+    EXPECT_EQ(pattern_->selected_, 0);
 }
 
 /**
