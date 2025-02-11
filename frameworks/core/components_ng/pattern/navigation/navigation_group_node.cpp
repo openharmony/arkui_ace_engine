@@ -654,13 +654,12 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 "navigation pop animation end, pre node animationId: %{public}d", preAnimationId);
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto navigation = weakNavigation.Upgrade();
-            if (navigation) {
-                navigation->isOnAnimation_ = false;
-                auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
-                navigation->OnAccessibilityEvent(
-                    AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
-                navigation->CleanPopAnimations();
-            }
+            CHECK_NULL_VOID(navigation);
+            navigation->isOnAnimation_ = false;
+            auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+            navigation->CleanPopAnimations();
             auto preNavDesNode = weakPreNode.Upgrade();
             CHECK_NULL_VOID(preNavDesNode);
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
