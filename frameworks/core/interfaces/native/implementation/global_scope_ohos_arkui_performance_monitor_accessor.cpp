@@ -17,7 +17,12 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG {
+const auto EMPTY_STRING = "";
+} // OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
+
 namespace GlobalScope_ohos_arkui_performanceMonitorAccessor {
 void DestroyPeerImpl(GlobalScope_ohos_arkui_performanceMonitorPeer* peer)
 {
@@ -34,14 +39,37 @@ void BeginImpl(const Ark_String* scene,
                Ark_PerfMonitorActionType startInputType,
                const Opt_String* note)
 {
+    CHECK_NULL_VOID(scene);
+    CHECK_NULL_VOID(note);
+    auto sceneId = Converter::Convert<std::string>(*scene);
+    auto actionType = Converter::OptConvert<PerfActionType>(startInputType).value_or(PerfActionType::UNKNOWN_ACTION);
+    auto noteValue = Converter::OptConvert<std::string>(*note).value_or(EMPTY_STRING);
+    auto pMonitor = PerfMonitor::GetPerfMonitor();
+    CHECK_NULL_VOID(pMonitor);
+    pMonitor->Start(sceneId, actionType, noteValue);    
 }
 void EndImpl(const Ark_String* scene)
 {
+    CHECK_NULL_VOID(scene);
+    auto sceneId = Converter::Convert<std::string>(*scene);
+    auto pMonitor = PerfMonitor::GetPerfMonitor();
+    CHECK_NULL_VOID(pMonitor);
+    pMonitor->End(sceneId, false)
 }
 void RecordInputEventTimeImpl(Ark_PerfMonitorActionType type,
                               Ark_PerfMonitorSourceType sourceType,
                               const Ark_Number* time)
 {
+    CHECK_NULL_VOID(time);
+    auto actionType = Converter::OptConvert<PerfActionType>(type).value_or(PerfActionType::UNKNOWN_ACTION);
+
+    auto sceneId = Converter::Convert<std::string>(*scene);
+    
+    auto noteValue = Converter::OptConvert<std::string>(*note).value_or(EMPTY_STRING);
+    auto pMonitor = PerfMonitor::GetPerfMonitor();
+    CHECK_NULL_VOID(pMonitor);
+    pMonitor->Start(sceneId, actionType, noteValue);    
+
 }
 } // GlobalScope_ohos_arkui_performanceMonitorAccessor
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor()
@@ -60,4 +88,4 @@ const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGloba
 struct GlobalScope_ohos_arkui_performanceMonitorPeer {
     virtual ~GlobalScope_ohos_arkui_performanceMonitorPeer() = default;
 };
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier
