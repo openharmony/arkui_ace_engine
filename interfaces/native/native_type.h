@@ -224,7 +224,7 @@ typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
 /**
  * @brief The cross-language option.
  *
- * @since 16
+ * @since 15
  */
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
@@ -4294,7 +4294,7 @@ int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions
  * @brief Create a cross-language option instance.
  *
  * @return Returns a cross-language option instance. If the result is a null pointer, it may be out of memory.
- * @since 16
+ * @since 15
  */
 ArkUI_CrossLanguageOption* OH_ArkUI_CrossLanguageOption_Create(void);
 
@@ -4302,7 +4302,7 @@ ArkUI_CrossLanguageOption* OH_ArkUI_CrossLanguageOption_Create(void);
  * @brief Destroy the cross-language option instance.
  *
  * @param option The cross-language option instance.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_CrossLanguageOption_Destroy(ArkUI_CrossLanguageOption* option);
 
@@ -4312,7 +4312,7 @@ void OH_ArkUI_CrossLanguageOption_Destroy(ArkUI_CrossLanguageOption* option);
  * @param option The cross-language option.
  * @param enable The attribute setting in the cross-language option.
  * Default value: false.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(ArkUI_CrossLanguageOption* option, bool enable);
 
@@ -4321,7 +4321,7 @@ void OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(ArkUI_CrossLanguageO
  *
  * @param option The cross-language option.
  * @return The attribute setting enable of the cross-language option.
- * @since 16
+ * @since 15
  */
 bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageOption* option);
 

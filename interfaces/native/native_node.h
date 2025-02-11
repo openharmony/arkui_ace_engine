@@ -9033,7 +9033,7 @@ int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* s
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
 
@@ -9046,7 +9046,7 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
 
