@@ -560,7 +560,7 @@ TouchRecognizerMap* CreateTouchRecognizers(
     auto& touchRecognizerMap = *pTouchRecognizerMap;
     const auto& fingerList = info->GetFingerList();
     for (const auto& finger : fingerList) {
-        auto touchTargetList = touchTestResult[finger.fingerId_];
+        auto& touchTargetList = touchTestResult[finger.fingerId_];
         auto self = std::find_if(touchTargetList.begin(), touchTargetList.end(),
             [frameNode](
                 const RefPtr<TouchEventTarget>& target) -> bool { return (target->GetAttachedNode() == frameNode); });
