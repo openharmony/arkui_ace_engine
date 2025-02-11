@@ -67,7 +67,6 @@ Opt_RichEditorImageSpanOptions GetImageSpanOptions(const Ark_RichEditorGesture& 
         .gesture = Converter::ArkValue<Opt_RichEditorGesture>(gesture),
         .imageStyle = Converter::ArkValue<Opt_RichEditorImageSpanStyle>(),
         .offset = Converter::ArkValue<Opt_Number>(),
-        .onHover = Converter::ArkValue<Opt_OnHoverCallback>(),
     };
 
     return Converter::ArkValue<Opt_RichEditorImageSpanOptions>(options);
@@ -95,7 +94,7 @@ const double OFFSET_Y = 85.5f;
 const int32_t RESOURCE_ID = 456;
 
 const std::string STR_URL = "https://www.example.com/xxx.png";
-const std::u16string TEXT_SPAN_VALUE = u"test value";
+const std::string TEXT_SPAN_VALUE = "test value";
 } // namespace
 
 class RichEditorControllerAccessorCallbackTest : public AccessorTestBase<GENERATED_ArkUIRichEditorControllerAccessor,
@@ -148,7 +147,6 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
     Ark_RichEditorGesture gesture = {
         .onClick = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(arkOnClick),
         .onLongPress = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
-        .onDoubleClick = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
     };
 
     auto optOptions = GetImageSpanOptions(gesture);
@@ -164,50 +162,6 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
     GestureEvent event;
     event.SetLocalLocation(Offset(OFFSET_X, OFFSET_Y));
     g_gestureOptions.onClick(event);
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value().offsetX, static_cast<int32_t>(OFFSET_X));
-    EXPECT_EQ(checkEvent.value().offsetY, static_cast<int32_t>(OFFSET_Y));
-}
-
-/**
- * @tc.name: addImageSpanTestGestureOnDoubleClick
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnDoubleClick, TestSize.Level1)
-{
-    static std::optional<CheckEvent> checkEvent;
-    auto onDoubleClick = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
-        auto peer = reinterpret_cast<GestureEventPeer*>(event.ptr);
-        auto accessor = GeneratedModifier::GetGestureEventAccessor();
-        checkEvent = {
-            .offsetX = accessor->getOffsetX(peer),
-            .offsetY = accessor->getOffsetY(peer),
-        };
-        delete peer;
-    };
-    auto arkOnDoubleClick = Converter::ArkValue<Callback_GestureEvent_Void>(onDoubleClick, RESOURCE_ID);
-
-    Ark_RichEditorGesture gesture = {
-        .onClick = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(),
-        .onLongPress = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
-        .onDoubleClick = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(arkOnDoubleClick),
-    };
-
-    auto optOptions = GetImageSpanOptions(gesture);
-
-    auto resourceStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(STR_URL);
-    auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
-
-    g_gestureOptions = UserGestureOptions();
-    ASSERT_EQ(g_gestureOptions.onDoubleClick, nullptr);
-    accessor_->addImageSpan(peer_, &value, &optOptions);
-    ASSERT_NE(g_gestureOptions.onDoubleClick, nullptr);
-
-    GestureEvent event;
-    event.SetOffsetX(OFFSET_X);
-    event.SetOffsetY(OFFSET_Y);
-    g_gestureOptions.onDoubleClick(event);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().offsetX, static_cast<int32_t>(OFFSET_X));
     EXPECT_EQ(checkEvent.value().offsetY, static_cast<int32_t>(OFFSET_Y));
@@ -235,7 +189,6 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
     Ark_RichEditorGesture gesture = {
         .onClick = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(),
         .onLongPress = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(arkOnLongPress),
-        .onDoubleClick = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
     };
 
     auto optOptions = GetImageSpanOptions(gesture);
@@ -279,7 +232,6 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
     Ark_RichEditorGesture gesture = {
         .onClick = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(arkOnClick),
         .onLongPress = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
-        .onDoubleClick = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
@@ -295,50 +247,6 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
     GestureEvent event;
     event.SetLocalLocation(Offset(OFFSET_X, OFFSET_Y));
     g_gestureOptions.onClick(event);
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value().offsetX, static_cast<int32_t>(OFFSET_X));
-    EXPECT_EQ(checkEvent.value().offsetY, static_cast<int32_t>(OFFSET_Y));
-}
-
-/**
- * @tc.name: addTextSpanTestGestureOnDoubleClick
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnDoubleClick, TestSize.Level1)
-{
-    static std::optional<CheckEvent> checkEvent;
-    auto onDoubleClick = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
-        auto peer = reinterpret_cast<GestureEventPeer*>(event.ptr);
-        auto accessor = GeneratedModifier::GetGestureEventAccessor();
-        checkEvent = {
-            .offsetX = accessor->getOffsetX(peer),
-            .offsetY = accessor->getOffsetY(peer),
-        };
-        delete peer;
-    };
-    auto arkOnDoubleClick = Converter::ArkValue<Callback_GestureEvent_Void>(onDoubleClick, RESOURCE_ID);
-
-    Ark_RichEditorGesture gesture = {
-        .onClick = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(),
-        .onLongPress = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
-        .onDoubleClick = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(arkOnDoubleClick),
-    };
-
-    auto optOptions = GetTextSpanOptions(gesture);
-
-    Converter::ConvContext ctx;
-    Ark_String value = Converter::ArkValue<Ark_String>(TEXT_SPAN_VALUE, &ctx);
-
-    g_gestureOptions = UserGestureOptions();
-    ASSERT_EQ(g_gestureOptions.onDoubleClick, nullptr);
-    accessor_->addTextSpan(peer_, &value, &optOptions);
-    ASSERT_NE(g_gestureOptions.onDoubleClick, nullptr);
-
-    GestureEvent event;
-    event.SetOffsetX(OFFSET_X);
-    event.SetOffsetY(OFFSET_Y);
-    g_gestureOptions.onDoubleClick(event);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().offsetX, static_cast<int32_t>(OFFSET_X));
     EXPECT_EQ(checkEvent.value().offsetY, static_cast<int32_t>(OFFSET_Y));
@@ -366,7 +274,6 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongP
     Ark_RichEditorGesture gesture = {
         .onClick = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(),
         .onLongPress = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(arkOnLongPress),
-        .onDoubleClick = Converter::ArkValue<Opt_Callback_GestureEvent_Void>(),
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
