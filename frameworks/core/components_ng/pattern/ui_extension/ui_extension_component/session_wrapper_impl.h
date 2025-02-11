@@ -103,9 +103,9 @@ public:
     uint32_t GetReasonDump() const override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     int32_t GetInstanceIdFromHost() const;
-    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
-    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+    bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
 
     void NotifyHostWindowMode(int32_t mode) override;
@@ -140,6 +140,7 @@ private:
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> destructionCallback_;
     std::weak_ptr<Rosen::RSTransaction> transaction_;
+    std::shared_ptr<AAFwk::Want> customWant_;
     OHOS::Rosen::SubSystemId subSystemId_ = OHOS::Rosen::SubSystemId::ARKUI_UIEXT;
 };
 } // namespace OHOS::Ace::NG

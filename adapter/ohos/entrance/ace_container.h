@@ -836,8 +836,10 @@ private:
     void DispatchUIExtDataConsume(
         NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     void RegisterUIExtDataSendToHost();
-    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
-    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool FireUIExtDataSendToHost(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;

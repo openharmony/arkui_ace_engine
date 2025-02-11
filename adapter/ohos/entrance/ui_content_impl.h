@@ -398,7 +398,7 @@ public:
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
-    bool SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId) override;
+    bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
 
 private:
     UIContentErrorCode InitializeInner(
