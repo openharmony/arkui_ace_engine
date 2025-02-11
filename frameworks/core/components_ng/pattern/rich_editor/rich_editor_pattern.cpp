@@ -11213,7 +11213,7 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     }
     HandleSelectionChange(start, end);
     TriggerAvoidOnCaretChange();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
