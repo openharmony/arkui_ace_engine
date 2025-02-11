@@ -589,7 +589,18 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     TrimFloatingWindowLayout();
 }
 
-bool ContainerModalPattern::GetContainerModalTitleVisible() { return customTitleSettedShow_; }
+bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
+{
+    if (isImmersive) {
+        auto floatingTitleRow = GetFloatingTitleRow();
+        CHECK_NULL_RETURN(floatingTitleRow, false);
+        auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
+        CHECK_NULL_RETURN(floatingLayoutProperty, false);
+        return floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE;
+    } else {
+        return isTitleShow_ && customTitleSettedShow_;
+    }
+}
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
