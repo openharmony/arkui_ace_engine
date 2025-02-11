@@ -4677,7 +4677,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     UiSessionManager::GetInstance().SaveGetPixelMapFunction(getPixelMapCallback);
 }
 
-bool UIContentImpl::SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
+bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);

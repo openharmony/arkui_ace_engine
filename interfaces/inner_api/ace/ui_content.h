@@ -506,7 +506,7 @@ public:
 
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 
-    virtual bool SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
+    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
     {
         return false;
     }

@@ -279,14 +279,14 @@ void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, s
 {
 }
 
-bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
-    RSSubsystemId subSystemId)
+bool SessionWrapperImpl::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     return false;
 }
 
-bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
-    RSSubsystemId subSystemId)
+bool SessionWrapperImpl::SendBusinessData(
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     return false;
 }

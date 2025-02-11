@@ -151,9 +151,9 @@ public:
     // The interface for UEC dump
     virtual uint32_t GetReasonDump() const = 0;
     virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
-    virtual bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+    virtual bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) = 0;
-    virtual bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+    virtual bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) = 0;
 
     virtual void NotifyHostWindowMode(int32_t mode) {}

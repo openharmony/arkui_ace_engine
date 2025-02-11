@@ -341,7 +341,7 @@ bool UIExtensionManager::UIExtBusinessDataSendValid()
 
 // host send data to provider
 void UIExtensionManager::RegisterBusinessDataSendCallback(
-    UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback,
+    UIContentBusinessCode code, BusinessDataSendType type, const UIExtBusinessDataSendCallback& callback,
     RSSubsystemId subsystemId)
 {
     businessDataSendCallbacks_.try_emplace(code,
@@ -364,12 +364,11 @@ bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
     if (it == businessDataSendCallbacks_.end()) {
         return false;
     }
-    auto type = std::get<0>(it->second);
-    auto callback = std::get<1>(it->second);
-    auto subsystemId = std::get<2>(it->second);
+    auto& [type, callback, subsystemId] = it->second;
     CHECK_NULL_RETURN(callback, false);
     bool ret = false;
-    for (const auto& pattern : aliveUIExtensions_) {
+    decltype(aliveUIExtensions_) tempAliveUIExtensions(aliveUIExtensions_);
+    for (const auto& pattern : tempAliveUIExtensions) {
         auto uiExtension = pattern.second.Upgrade();
         CHECK_NULL_CONTINUE(uiExtension);
         auto frameNode = uiExtension->GetHost();
@@ -379,8 +378,9 @@ bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
         if (!data.has_value()) {
             continue;
         }
-        ret |= uiExtension->SendBusinessData(code, std::move(data.value()), type, subsystemId);
+        ret |= uiExtension->SendBusinessData(code, data.value(), type, subsystemId);
     }
+    decltype(aliveSecurityUIExtensions_) tempAliveSecurityUIExtensions(aliveSecurityUIExtensions_);
     for (const auto& pattern : aliveSecurityUIExtensions_) {
         auto uiExtension = pattern.second.Upgrade();
         CHECK_NULL_CONTINUE(uiExtension);
@@ -391,14 +391,14 @@ bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
         if (!data.has_value()) {
             continue;
         }
-        ret |= uiExtension->SendBusinessData(code, std::move(data.value()), type, subsystemId);
+        ret |= uiExtension->SendBusinessData(code, data.value(), type, subsystemId);
     }
     return ret;
 }
 
 // provider consume data
 void UIExtensionManager::RegisterBusinessDataConsumeCallback(
-    UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback)
+    UIContentBusinessCode code, const UIExtBusinessDataConsumeCallback& callback)
 {
     businessDataConsumeCallbacks_.try_emplace(code, callback);
 }
@@ -425,7 +425,7 @@ void UIExtensionManager::DispatchBusinessDataConsume(
 }
 
 void UIExtensionManager::RegisterBusinessDataConsumeReplyCallback(
-    UIContentBusinessCode code, UIExtBusinessDataConsumeReplyCallback callback)
+    UIContentBusinessCode code, const UIExtBusinessDataConsumeReplyCallback& callback)
 {
     businessDataConsumeReplyCallbacks_.try_emplace(code, callback);
 }
@@ -452,34 +452,36 @@ void UIExtensionManager::DispatchBusinessDataConsumeReply(
 }
 
 // provider send data to host
-void UIExtensionManager::RegisterBusinessSendToHostReply(UIExtBusinessSendToHostReplyFunc func)
+void UIExtensionManager::RegisterBusinessSendToHostReply(const UIExtBusinessSendToHostReplyFunc& func)
 {
     businessSendToHostReplyFunc_ = func;
 }
 
-void UIExtensionManager::RegisterBusinessSendToHost(UIExtBusinessSendToHostFunc func)
+void UIExtensionManager::RegisterBusinessSendToHost(const UIExtBusinessSendToHostFunc& func)
 {
     businessSendToHostFunc_ = func;
 }
 
-bool UIExtensionManager::SendBusinessToHost(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+bool UIExtensionManager::SendBusinessToHost(
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type)
 {
     if (!UIExtBusinessDataSendValid()) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SendBusinessToHost callback not set.");
         return false;
     }
     auto callback = businessSendToHostFunc_;
-    return callback(static_cast<uint32_t>(code), std::move(data), type);
+    return callback(static_cast<uint32_t>(code), data, type);
 }
 
-bool UIExtensionManager::SendBusinessToHostSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+bool UIExtensionManager::SendBusinessToHostSyncReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply)
 {
     if (!UIExtBusinessDataSendValid()) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SendBusinessToHost callback not set.");
         return false;
     }
     auto callback = businessSendToHostReplyFunc_;
-    return callback(static_cast<uint32_t>(code), std::move(data), reply);
+    return callback(static_cast<uint32_t>(code), data, reply);
 }
 
 void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
@@ -499,7 +501,7 @@ void UIExtensionManager::SendPageModeRequestToHost(const RefPtr<PipelineContext>
     AAFwk::Want data;
     data.SetParam("requestPageMode", std::string("yes"));
     AAFwk::Want reply;
-    SendBusinessToHostSyncReply(UIContentBusinessCode::SEND_PAGE_MODE, std::move(data), reply);
+    SendBusinessToHostSyncReply(UIContentBusinessCode::SEND_PAGE_MODE, data, reply);
     if (reply.HasParameter("pageMode")) {
         auto pageMode = reply.GetStringParam("pageMode");
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -529,7 +531,7 @@ void UIExtensionManager::TransferAccessibilityRectInfo()
     }
 }
 
-void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, AAFwk::Want data,
+void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
     RSSubsystemId subSystemId)
 {
     CHECK_RUN_ON(UI);
