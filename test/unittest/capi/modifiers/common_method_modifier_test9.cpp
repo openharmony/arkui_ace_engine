@@ -59,6 +59,7 @@ namespace Converter {
 }
 
 namespace GeneratedModifier {
+    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
 }
 
@@ -438,30 +439,20 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
     struct CheckEvent {
         int32_t nodeId;
         bool isHover;
-        int32_t pressure;
+        AccessibilityHoverAction type;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onAccessibilityHoverFunc = [](const Ark_Int32 resourceId,
                           const Ark_Boolean isHover,
                           const Ark_AccessibilityHoverEvent event) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .isHover = isHover,
-#ifdef WRONG_TYPE
-            .pressure = Converter::Convert<int32_t>(event.pressure)
-#endif
-        };
+        auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(event.ptr);
+        auto info = peer ? peer->GetEventInfo() : nullptr;
+        ASSERT_NE(info, nullptr);
+        checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
+        GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(peer);
     };
-
-    AccessibilityCallback callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onAccessibilityHoverFunc
-    };
+    auto callBackValue = Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId());
 
     auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
         checkEvent = std::nullopt;
@@ -470,6 +461,9 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         auto inputEventHub = eventHub->GetInputEventHub();
         ASSERT_NE(inputEventHub, nullptr);
 
+        std::tuple<TouchType, AccessibilityHoverAction> touchHoverType = {
+            TouchType::HOVER_MOVE, AccessibilityHoverAction::HOVER_MOVE
+        };
         OffsetF offset;
         TouchTestResult result;
         inputEventHub->ProcessMouseTestHit(offset, result);
@@ -477,10 +471,12 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
             auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
             ASSERT_NE(hoverResult, nullptr);
             TouchEvent me;
+            me.SetType(std::get<0>(touchHoverType));
             hoverResult->HandleAccessibilityHoverEvent(isHover, me);
         }
         ASSERT_TRUE(checkEvent.has_value());
         EXPECT_EQ(checkEvent->isHover, isHover);
+        EXPECT_EQ(checkEvent->type, std::get<1>(touchHoverType));
     };
     test(true);
     test(false);
