@@ -35,7 +35,7 @@ public:
 
     /**
      * @brief Called when the adapter will perform a jump
-     * 
+     *
      */
     virtual void MarkJump() {}
 
