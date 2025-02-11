@@ -992,8 +992,7 @@ export struct GaugeBootcamp {
     }, 200)
   }
 
-  @Styles
-  cardPressedStyle() {
+  @Styles cardPressedStyle() {
     .backgroundColor('rgba(0,0,0,0.1)')
     .opacity(1)
     .animation(
@@ -1001,8 +1000,7 @@ export struct GaugeBootcamp {
     )
   }
 
-  @Styles
-  cardNormalStyle() {
+  @Styles cardNormalStyle() {
     .backgroundColor(Color.White)
     .opacity(1)
     .animation(
@@ -1010,8 +1008,7 @@ export struct GaugeBootcamp {
     )
   }
 
-  @Styles
-  cardDisabledStyle() {
+  @Styles cardDisabledStyle() {
     .backgroundColor('rgba(0,0,0,0)')
     .opacity(0.5)
     .animation(
