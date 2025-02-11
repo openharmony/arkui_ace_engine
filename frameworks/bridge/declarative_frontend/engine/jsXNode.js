@@ -765,8 +765,8 @@ class NodeController {
  */
 var ExpandMode;
 (function (ExpandMode) {
-    ExpandMode[ExpandMode["EXPAND"] = 0] = "EXPAND";
-    ExpandMode[ExpandMode["NOT_EXPAND"] = 1] = "NOT_EXPAND";
+    ExpandMode[ExpandMode["NOT_EXPAND"] = 0] = "NOT_EXPAND";
+    ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
     ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
 })(ExpandMode || (ExpandMode = {}));
 class FrameNode {

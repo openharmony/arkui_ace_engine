@@ -2297,13 +2297,13 @@ typedef enum {
 /**
  * @brief Enumerates the expand modes.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
-    /** Expand. */
-    ARKUI_EXPAND = 0,
     /** Not expand. */
-    ARKUI_NOT_EXPAND = 1,
+    ARKUI_NOT_EXPAND = 0,
+    /** Expand. */
+    ARKUI_EXPAND = 1,
     /** Lazy expand. Expand the children of node if needed. */
     ARKUI_LAZY_EXPAND = 2,
 } ArkUI_ExpandMode;
