@@ -334,6 +334,7 @@ void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainD
     info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
     isDragging_ = true;
     isCrownEventDragging_ = true;
+    isCrownDragging_ = true;
     HandleDragStart(info);
 }
 
@@ -392,6 +393,7 @@ void Scrollable::HandleCrownActionCancel(GestureEvent& info)
             event(gestureInfo);
         });
     isDragging_ = false;
+    isCrownDragging_ = false;
 }
 
 void Scrollable::StartVibrateFeedback()
@@ -429,7 +431,9 @@ void Scrollable::SetAxis(Axis axis)
 
 void Scrollable::HandleTouchDown()
 {
-    isTouching_ = true;
+    if (!isCrownDragging_) {
+        isTouching_ = true;
+    }
     // If animation still runs, first stop it.
     ACE_SCOPED_TRACE("HandleTouchDown, panDirection:%u, id:%d, tag:%s", GetPanDirection(), nodeId_, nodeTag_.c_str());
     StopSpringAnimation();
@@ -487,7 +491,7 @@ bool Scrollable::IsAnimationNotRunning() const
 
 bool Scrollable::Idle() const
 {
-    return !isTouching_ && state_ == AnimationState::IDLE && !nestedScrolling_;
+    return !isTouching_ && state_ == AnimationState::IDLE && !nestedScrolling_ && !isCrownDragging_;
 }
 
 bool Scrollable::IsStopped() const
@@ -786,7 +790,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     if (dragEndCallback_) {
         dragEndCallback_();
     }
-    isTouching_ = false;
+    if (!isCrownDragging_) {
+        isTouching_ = false;
+    }
     SetDragStartPosition(0.0);
     SetDragEndPosition(0.0);
 }
