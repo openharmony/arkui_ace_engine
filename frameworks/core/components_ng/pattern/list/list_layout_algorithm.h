@@ -486,6 +486,7 @@ protected:
     float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
+    void ReportGetChildError(const std::string& funcName, int32_t index) const;
 
     Axis axis_ = Axis::VERTICAL;
     int32_t laneIdx4Divider_ = 0;
