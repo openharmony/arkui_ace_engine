@@ -361,6 +361,16 @@ void DatePickerPattern::InitFocusKeyEvent()
     }
 }
 
+void DatePickerPattern::FlushChildNodes()
+{
+    auto frameNodes = GetAllChildNode();
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        it.second->MarkModifyDone();
+        it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void DatePickerPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
@@ -406,6 +416,7 @@ void DatePickerPattern::OnModifyDone()
     SetDefaultFocus();
     InitFocusEvent();
     InitSelectorProps();
+    FlushChildNodes();
 }
 
 void DatePickerPattern::InitDisabled()
