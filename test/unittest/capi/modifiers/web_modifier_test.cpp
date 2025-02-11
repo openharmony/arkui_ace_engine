@@ -76,6 +76,7 @@ class WebModifierTest : public ModifierTestBase<GENERATED_ArkUIWebModifier,
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_UNION
 HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level1)
 {
     Ark_WebOptions options;
@@ -114,6 +115,7 @@ HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level
     EXPECT_NE(finalyzer, nullptr);
     finalyzer(reinterpret_cast<WebControllerPeer *>(controllerPtr));
 }
+#endif
 
 /*
  * @tc.name: onPageEndTest

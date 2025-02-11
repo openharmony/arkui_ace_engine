@@ -504,10 +504,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexAlignTest, TestSize.Level1)
 
 static Opt_ScrollToIndexOptions GetOptions(Ark_LengthUnit unit, float value)
 {
-    const Ark_LengthMetrics arkLengthMetrics {
-        .unit = ARK_LENGTH_UNIT_PX,
-        .value = Converter::ArkValue<Ark_Number>(value)
-    };
+    const Ark_LengthMetrics arkLengthMetrics = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, value);
     const Ark_ScrollToIndexOptions arkOptions {
         .extraOffset = Converter::ArkValue<Opt_LengthMetrics, Ark_LengthMetrics>(arkLengthMetrics)
     };

@@ -163,9 +163,9 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 };
 
 const std::string DIVIDER_DEFAULT = "0.00vp";
-const std::vector<std::pair<Ark_Number, std::string>> DIVIDER_VALUES = {
-    { Converter::ArkValue<Ark_Number>(1), "1.00px" },
-    { Converter::ArkValue<Ark_Number>(-1), DIVIDER_DEFAULT }};
+const std::vector<std::pair<float, std::string>> DIVIDER_VALUES = {
+    { 1.f, "1.00px" },
+    { -1.f, DIVIDER_DEFAULT }};
 
 class MenuModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuModifier,
     &GENERATED_ArkUINodeModifiers::getMenuModifier, GENERATED_ARKUI_MENU> {
@@ -491,9 +491,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStrokeTest, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid strokeWidth value
-    Ark_LengthMetrics arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[0])
-    };
+    auto arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
     Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -503,9 +501,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStrokeTest, TestSize.Level1)
     EXPECT_EQ(strokeWidthCheckValue, get<1>(DIVIDER_VALUES[0]));
 
     // set invalid strokeWidth value
-    arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[1])
-    };
+    arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
     dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -528,9 +524,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStartMarginTest, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid startMargin value
-    Ark_LengthMetrics arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[0])
-    };
+    auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
     Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -540,9 +534,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStartMarginTest, TestSize.Level1)
     EXPECT_EQ(startMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
 
     // set invalid startMargin value
-    arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[1])
-    };
+    arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
     dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -565,9 +557,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerEndMarginTest, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid endMargin value
-    Ark_LengthMetrics arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[0])
-    };
+    auto arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
     Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -577,9 +567,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerEndMarginTest, TestSize.Level1)
     EXPECT_EQ(endMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
 
     // set invalid endMargin value
-    arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[1])
-    };
+    arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
     dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -701,9 +689,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStrokeTest, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid strokeWidth value
-    Ark_LengthMetrics arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[0])
-    };
+    auto arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
     Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
@@ -713,9 +699,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStrokeTest, TestSize.Level1)
     EXPECT_EQ(strokeWidthCheckValue, get<1>(DIVIDER_VALUES[0]));
 
     // set invalid strokeWidth value
-    arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[1])
-    };
+    arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
     dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
@@ -738,9 +722,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStartMarginTest, TestSize.Leve
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid startMargin value
-    Ark_LengthMetrics arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[0])
-    };
+    auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
     Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
@@ -750,9 +732,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStartMarginTest, TestSize.Leve
     EXPECT_EQ(startMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
 
     // set invalid startMargin value
-    arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[1])
-    };
+    arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
     dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
@@ -775,9 +755,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerEndMarginTest, TestSize.Level1
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid endMargin value
-    Ark_LengthMetrics arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[0])
-    };
+    auto arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
     Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
@@ -787,9 +765,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerEndMarginTest, TestSize.Level1
     EXPECT_EQ(endMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
 
     // set invalid endMargin value
-    arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
-        .value = get<0>(DIVIDER_VALUES[1])
-    };
+    arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
     dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);

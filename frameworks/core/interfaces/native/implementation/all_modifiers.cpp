@@ -210,6 +210,10 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
+const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
+const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor();
+const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
+const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
@@ -239,6 +243,7 @@ const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
+const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor();
 const GENERATED_ArkUIViewAccessor* GetViewAccessor();
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor();
 const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor();
@@ -452,6 +457,10 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetDrawingCanvasAccessor,
+        GetLengthMetricsAccessor,
+        GetWebviewControllerAccessor,
+        GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
+        GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
         GetFrameNodeAccessor,
         GetPixelMapAccessor,
         GetNavExtenderAccessor,
@@ -481,6 +490,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDragEventAccessor,
         GetKeyEventAccessor,
         GetProgressMaskAccessor,
+        GetMeasurableAccessor,
         GetViewAccessor,
         GetTextContentControllerBaseAccessor,
         GetDynamicNodeAccessor,

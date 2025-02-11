@@ -21,6 +21,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
+#include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -1290,9 +1291,9 @@ Dimension Convert(const Ark_Length& src)
 template<>
 Dimension Convert(const Ark_LengthMetrics& src)
 {
-    auto unit = OptConvert<DimensionUnit>(src.unit).value_or(DimensionUnit::VP);
-    auto value = Convert<float>(src.value);
-    return Dimension(value, unit);
+    auto peer = reinterpret_cast<LengthMetricsPeer *>(src.ptr);
+    CHECK_NULL_RETURN(peer, {});
+    return peer->value;
 }
 
 template<>
