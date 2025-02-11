@@ -152,6 +152,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_radio_ffi.cpp",
       "interfaces/cj_ffi/cj_rating_ffi.cpp",
       "interfaces/cj_ffi/cj_rect_ffi.cpp",
+      "interfaces/cj_ffi/cj_recycle_ffi.cpp",
       "interfaces/cj_ffi/cj_refresh_ffi.cpp",
       "interfaces/cj_ffi/cj_relative_container_ffi.cpp",
       "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
