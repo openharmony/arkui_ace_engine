@@ -290,6 +290,10 @@ public:
         property->UpdatePreviewTextStyle(style);
     }
 
+    int32_t CheckPreviewTextValidate(const std::string& previewTextValue, const PreviewRange range) override;
+
+    int32_t CheckPreviewTextValidate(const std::u16string& previewTextValue, const PreviewRange range) override;
+
     const Color& GetPreviewTextDecorationColor() const;
 
     bool IsPreviewTextInputting()

@@ -4882,6 +4882,20 @@ bool RichEditorPattern::CloseCustomKeyboard()
     return true;
 }
 
+int32_t RichEditorPattern::CheckPreviewTextValidate(const std::u16string& previewTextValue, const PreviewRange range)
+{
+    if (IsDragging()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "SetPreviewText is not allowed while dragging");
+        return ERROR_BAD_PARAMETERS;
+    }
+    return NO_ERRORS;
+}
+
+int32_t RichEditorPattern::CheckPreviewTextValidate(const std::string& previewTextValue, const PreviewRange range)
+{
+    return CheckPreviewTextValidate(UtfUtils::Str8DebugToStr16(previewTextValue), range);
+}
+
 int32_t RichEditorPattern::SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SetPreviewText, range=[%{public}d,%{public}d], isSSMode=%{public}d",
@@ -4889,6 +4903,7 @@ int32_t RichEditorPattern::SetPreviewText(const std::u16string& previewTextValue
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewText=%{public}s", UtfUtils::Str16ToStr8(previewTextValue).c_str());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ERROR_BAD_PARAMETERS);
+    CHECK_NULL_RETURN(!IsDragging(), ERROR_BAD_PARAMETERS);
 
     if (!IsPreviewTextInputting()) {
         if (!InitPreviewText(previewTextValue, range)) {
@@ -6844,7 +6859,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleUrlSpanShowShadow(touchInfo.GetLocalLocation(), touchInfo.GetGlobalLocation(), GetUrlPressColor());
         }
     } else if (touchType == TouchType::UP) {
-        status_ = Status::NONE;
+        IF_TRUE(status_ == Status::FLOATING, status_ = Status::NONE);
         HandleTouchUp();
         if (hasUrlSpan_) {
             HandleUrlSpanForegroundClear();
