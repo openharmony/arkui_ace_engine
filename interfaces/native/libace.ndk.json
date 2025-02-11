@@ -2596,19 +2596,19 @@
         "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_RegisterLayoutCallbackOnNodeHandle"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_RegisterDrawCallbackOnNodeHandle"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_UnregisterDrawCallbackOnNodeHandle"
     },
     {
