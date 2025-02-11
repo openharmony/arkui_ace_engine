@@ -1530,6 +1530,7 @@ struct ArkUIKeyframeAnimateOption {
     void* userData;
     ArkUIKeyframeState* keyframes;
     ArkUI_Int32 keyframeSize;
+    ArkUIExpectedFrameRateRange* expectedFrameRateRange;
 };
 
 struct ArkUIKeyframe {
