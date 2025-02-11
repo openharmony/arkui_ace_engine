@@ -568,12 +568,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
-    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
-    bool isHdrDecoderNeed = false;
-    if (renderProp && renderProp->HasDynamicMode()) {
-        isHdrDecoderNeed = true;
-        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
-    }
+    bool isHdrDecoderNeed = renderProp && renderProp->HasDynamicMode();
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
