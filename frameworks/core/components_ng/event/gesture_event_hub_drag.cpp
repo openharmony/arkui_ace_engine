@@ -169,7 +169,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -1000,7 +1000,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
-            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -1441,7 +1441,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;
