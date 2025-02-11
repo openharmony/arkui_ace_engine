@@ -686,7 +686,11 @@ PickerTime TimePickerRowPattern::GetCurrentEnterTime()
     CHECK_NULL_RETURN(minutePickerColumnPattern, time);
 
     if (GetHour24()) {
-        time.SetHour(hourPickerColumnPattern->GetEnterIndex()); // hour from 0 to 23, index from 0 to 23
+        if (IsStartEndTimeDefined()) {
+            time.SetHour(hourPickerColumnPattern->GetEnterIndex() + startTime_.GetHour());
+        } else {
+            time.SetHour(hourPickerColumnPattern->GetEnterIndex()); // hour from 0 to 23, index from 0 to 23
+        }
     } else if (amPmColumn) {
         auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_RETURN(amPmPickerColumnPattern, time);
