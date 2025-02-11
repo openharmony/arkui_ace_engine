@@ -20,6 +20,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/video/video_controller_v2.h"
 
 namespace OHOS::Ace {
@@ -40,6 +41,7 @@ public:
     virtual void SetControls(bool controls) = 0;
     virtual void SetObjectFit(ImageFit objectFit) = 0;
     virtual void SetLoop(bool loop) = 0;
+    virtual void SetSurfaceBackgroundColor(Color color) {}
 
     virtual void SetOnStart(VideoEventFunc&& onStart) = 0;
     virtual void SetOnPause(VideoEventFunc&& onPause) = 0;

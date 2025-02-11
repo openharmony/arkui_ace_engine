@@ -101,6 +101,8 @@ public:
         return loop_;
     }
 
+    void SetSurfaceBackgroundColor(Color color);
+
     virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
@@ -351,6 +353,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
