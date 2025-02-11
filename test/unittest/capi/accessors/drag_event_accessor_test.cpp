@@ -332,4 +332,30 @@ HWTEST_F(DragEventAccessorTest, SetDragBehaviorTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetModifierKeyStateTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
+{
+    const std::vector<std::tuple<std::vector<std::string>, std::vector<KeyCode>, bool>> TEST_PLAN = {
+        { {"ctrl"}, {KeyCode::KEY_CTRL_LEFT}, true },
+        { {"ctrl"}, {KeyCode::KEY_CTRL_RIGHT}, true },
+        { {"shift"}, {KeyCode::KEY_CTRL_LEFT}, false },
+        { {"ctrl", "shift"}, {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT}, true },
+        { {"shift", "alt"}, {KeyCode::KEY_ALT_LEFT, KeyCode::KEY_SHIFT_RIGHT}, true },
+        { {"shift", "ctrl", "alt"}, {KeyCode::KEY_CTRL_LEFT}, false },
+        { {"fn"}, {KeyCode::KEY_CTRL_LEFT}, false }
+    };
+
+    for (auto& [param, value, expected] : TEST_PLAN) {
+        Converter::ArkArrayHolder<Array_String> stringHolder(param);
+        Array_String stringArrayValues = stringHolder.ArkValue();
+        dragEvent_->SetPressedKeyCodes(value);
+        auto result = accessor_->getModifierKeyState(peer_, &stringArrayValues);
+        EXPECT_EQ(Converter::Convert<bool>(result), expected);
+    }
+}
+
 } // namespace OHOS::Ace::NG
