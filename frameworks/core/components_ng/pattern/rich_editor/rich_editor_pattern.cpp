@@ -5091,9 +5091,12 @@ void RichEditorPattern::InsertValueToSpanNode(
     auto text = spanItem->content;
     std::wstring textTemp = StringUtils::ToWstring(text);
     auto textTempSize = static_cast<int32_t>(textTemp.size());
-    if (textTempSize < info.GetOffsetInSpan()) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "InsertValue error, offsetInSpan is greater than the size of spanItem, "
-            "spanItemSize = %{public}d, offsetInSpan = %{public}d", textTempSize, info.GetOffsetInSpan());
+    if (textTempSize < info.GetOffsetInSpan() || info.GetOffsetInSpan() < 0) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "InsertValueToSpanNode error, spanSize=%{public}d, offsetInSpan=%{public}d",
+            textTempSize, info.GetOffsetInSpan());
+        RichEditorInfo errorInfo { RichEditorErrorType::INSERT_VALUE, textTempSize,
+            static_cast<int32_t>(insertValue.length()), info.GetOffsetInSpan() };
+        RichEditorErrorReport(errorInfo);
         return;
     }
     std::wstring insertValueTemp = StringUtils::ToWstring(insertValue);
@@ -6359,8 +6362,11 @@ int32_t RichEditorPattern::ProcessDeleteNodes(std::list<RichEditorAbstractSpanRe
                 auto textTempSize = static_cast<int32_t>(textTemp.size());
                 if (textTempSize < it.OffsetInSpan()) {
                     TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "ProcessDeleteNodes failed, "
-                        "content = %{private}s, spanItemSize = %{public}d, offsetInSpan = %{public}d",
-                        text.c_str(), textTempSize, it.OffsetInSpan());
+                        "contentLen=%{public}zu, spanItemSize=%{public}d, offsetInSpan=%{public}d",
+                        textTemp.length(), textTempSize, it.OffsetInSpan());
+                    RichEditorInfo errorInfo { RichEditorErrorType::DELETE_NODE, textTempSize,
+                        it.GetEraseLength(), it.OffsetInSpan() };
+                    RichEditorErrorReport(errorInfo);
                     continue;
                 }
                 textTemp.erase(it.OffsetInSpan(), it.GetEraseLength());
@@ -7619,6 +7625,19 @@ void RichEditorPattern::DumpInfo()
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     dumpLog.AddDesc(std::string("keyboardAppearance: ")
             .append(std::to_string(static_cast<int32_t>(keyboardAppearance_))));
+}
+
+void RichEditorPattern::RichEditorErrorReport(RichEditorInfo& info)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [info] {
+            EventReport::ReportRichEditorInfo(info);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIRichEditorErrorReport");
 }
 
 bool RichEditorPattern::HasFocus() const
