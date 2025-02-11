@@ -201,6 +201,7 @@
       OHOS::Ace::ImageInfoConfig::*;
       OHOS::Ace::RecycleViewModel::*;
       OHOS::Ace::NG::RecycleDummyNode::*;
+      OHOS::Ace::XComponentModel::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -341,8 +342,6 @@
       vtable?for?OHOS::Ace::NG::GestureGroup;
       vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
-      vtable?for?OHOS::Ace::NG::XComponentModelNG;
-      vtable?for?OHOS::Ace::Framework::XComponentModelImpl;
       vtable?for?OHOS::Ace::NG::XComponentControllerNG;
       vtable?for?OHOS::Ace::NG::ViewAbstractModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
