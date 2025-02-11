@@ -25,7 +25,6 @@ class ArkThemeWhiteList {
         'Button',
         'Checkbox',
         'CheckboxGroup',
-        'Counter',
         'DataPanel',
         'LoadingProgress',
         'Menu',

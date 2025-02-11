@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,7 +128,7 @@ void CounterModelNG::SetEnableDec(bool enableDec)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -150,7 +150,7 @@ void CounterModelNG::SetEnableInc(bool enableInc)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -256,7 +256,7 @@ void CounterModelNG::SetEnableDec(FrameNode* frameNode, bool enableDec)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -276,7 +276,7 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -329,5 +329,10 @@ void CounterModelNG::SetWidth(FrameNode* frameNode, const Dimension& value)
 void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, value, frameNode);
+}
+
+void CounterModelNG::ResetBackgroundColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
 }
 } // namespace OHOS::Ace::NG
