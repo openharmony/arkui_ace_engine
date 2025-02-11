@@ -297,6 +297,7 @@ public:
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnAxisEvent(OnAxisEventFunc &&onAxisEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
+    static void SetOnHoverMove(OnHoverMoveFunc &&onHoverMoveEventFunc);
     static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
@@ -437,6 +438,7 @@ public:
     static void DisableOnCrownEvent();
 #endif
     static void DisableOnHover();
+    static void DisableOnHoverMove();
     static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
@@ -464,6 +466,7 @@ public:
     static void DisableOnCrownEvent(FrameNode* frameNode);
 #endif
     static void DisableOnHover(FrameNode* frameNode);
+    static void DisableOnHoverMove(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
@@ -700,6 +703,7 @@ public:
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
+    static void SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHoverMoveEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
     static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
     static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);
@@ -769,6 +773,7 @@ public:
     static void SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback);
     static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
     static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
+    static void SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc);
     static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
     static void SetJSFrameNodeOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
@@ -783,6 +788,7 @@ public:
     static void ClearJSFrameNodeOnFocusCallback(FrameNode* frameNode);
     static void ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode);
     static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnHoverMove(FrameNode* frameNode);
     static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
     static void ClearJSFrameNodeOnSizeChange(FrameNode* frameNode);
     static void ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode);

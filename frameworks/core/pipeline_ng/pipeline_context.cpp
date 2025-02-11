@@ -3277,6 +3277,7 @@ void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::
     touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
     eventManager_->PenHoverTest(scaleEvent, targerNode, touchRestrict);
     eventManager_->DispatchPenHoverEventNG(scaleEvent);
+    eventManager_->DispatchPenHoverMoveEventNG(scaleEvent);
     RequestFrame();
 }
 

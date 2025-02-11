@@ -57,10 +57,49 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
     }
+    NG::PointF lastLocalPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
+    hoverInfo.SetLocalLocation(Offset(localX, localY));
+    hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
+    hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     // onPenHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onPenHoverEventCallback = onPenHoverEventCallback_;
     onPenHoverEventCallback(isHovered, hoverInfo);
+    return !hoverInfo.IsStopPropagation();
+}
+
+bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
+{
+    if (!onPenHoverMoveEventCallback_) {
+        return false;
+    }
+    HoverInfo hoverInfo;
+    hoverInfo.SetTimeStamp(event.time);
+    hoverInfo.SetDeviceId(event.deviceId);
+    hoverInfo.SetSourceDevice(event.sourceType);
+    hoverInfo.SetSourceTool(event.sourceTool);
+    if (event.tiltX.has_value()) {
+        hoverInfo.SetTiltX(event.tiltX.value_or(0.0f));
+    }
+    if (event.tiltY.has_value()) {
+        hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
+    }
+    NG::PointF lastLocalPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
+    hoverInfo.SetLocalLocation(Offset(localX, localY));
+    hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
+    hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+    // onPenHoverMoveEventCallback_ may be overwritten in its invoke so we copy it first
+    auto onPenHoverMoveEventCallback = onPenHoverMoveEventCallback_;
+    onPenHoverMoveEventCallback(hoverInfo);
     return !hoverInfo.IsStopPropagation();
 }
 

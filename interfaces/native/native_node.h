@@ -6508,7 +6508,7 @@ typedef enum {
      */
     NODE_ON_FOCUS_AXIS = 23,
 
-     /**
+    /**
      * @brief Dispatch key event on the component node.
      *
      * When the component node receives a key event, this callback will be triggered instead of dispatching event to its
@@ -6530,7 +6530,7 @@ typedef enum {
      */
     NODE_ON_AXIS = 25,
 
-     /* @brief Defines the event triggered when the bound component is clicked.
+    /* @brief Defines the event triggered when the bound component is clicked.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}.  \n
@@ -6568,6 +6568,17 @@ typedef enum {
      * @since 16
      */
     NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT = 28,
+
+    /**
+     * @brief Defines the hover event.
+     * 
+     * The event is triggered when the pointer is hovered by a pen device.
+     * within the component. \n
+     * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+     * {@link ArkUI_UIInputEvent} object. \n
+     * @since16
+    */
+    NODE_ON_HOVER_MOVE = 29,
 
     /**
      * @brief Triggers onDetectResultUpdate callback
