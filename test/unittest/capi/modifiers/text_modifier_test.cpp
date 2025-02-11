@@ -67,6 +67,7 @@ const std::string TEXT_SELECTABLE_ATTR = "textSelectable";
 const auto RES_NAME = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
 const auto RES_NAME1 = NamedResourceId("aa.bb.cc", Converter::ResourceType::FLOAT);
 
+const auto CONTEXT_ID = 123;
 static constexpr int TEST_RESOURCE_ID = 1000;
 const uint32_t FLOAT_RES_0_ID = 1001;
 const uint32_t FLOAT_RES_1_ID = 1002;
@@ -639,7 +640,6 @@ HWTEST_F(TextModifierTest, setSelectableMode, TestSize.Level1)
 
 HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
 {
-    Callback_String_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
 
@@ -649,13 +649,14 @@ HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
     };
 
     static std::optional<CopyEvent> checkEvent = std::nullopt;
-    EventsTracker::textEventReceiver.onCopy = [](Ark_Int32 nodeId, const Ark_String value)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .value = value.chars
+    void (*checkCallback)(const Ark_Int32, const Ark_String) =
+        [](const Ark_Int32 resourceId, const Ark_String param) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .value =  Converter::Convert<std::string>(param)
+            };
         };
-    };
+    auto func = Converter::ArkValue<Callback_String_Void>(checkCallback, CONTEXT_ID);
 
     modifier_->setOnCopy(node_, &func);
 
@@ -663,13 +664,12 @@ HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnCopy("test_string");
     EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, CONTEXT_ID);
     EXPECT_EQ(checkEvent->value, "test_string");
 }
 
 HWTEST_F(TextModifierTest, setOnSelectionChange, TestSize.Level1)
 {
-    Callback_Number_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
 
@@ -680,15 +680,15 @@ HWTEST_F(TextModifierTest, setOnSelectionChange, TestSize.Level1)
     };
 
     static std::optional<SelectionChangeEvent> selectionEvent = std::nullopt;
-    EventsTracker::textEventReceiver.onTextSelectionChange = [](Ark_Int32 nodeId,
-        const Ark_Number selectionStart, const Ark_Number selectionEnd)
-    {
-        selectionEvent = {
-            .nodeId = nodeId,
-            .start = selectionStart.i32,
-            .end = selectionEnd.i32
+    void (*checkCallback)(const Ark_Int32, const Ark_Number, const Ark_Number) =
+        [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
+            selectionEvent = {
+                .nodeId = resourceId,
+                .start = Converter::Convert<int32_t>(start),
+                .end = Converter::Convert<int32_t>(end)
+            };
         };
-    };
+    auto func = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, CONTEXT_ID);
 
     modifier_->setOnTextSelectionChange(node_, &func);
 
@@ -696,7 +696,7 @@ HWTEST_F(TextModifierTest, setOnSelectionChange, TestSize.Level1)
     EXPECT_EQ(selectionEvent.has_value(), false);
     eventHub->FireOnSelectionChange(1, 10);
     EXPECT_EQ(selectionEvent.has_value(), true);
-    EXPECT_EQ(selectionEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(selectionEvent->nodeId, CONTEXT_ID);
     EXPECT_EQ(selectionEvent->start, 1);
     EXPECT_EQ(selectionEvent->end, 10);
 }

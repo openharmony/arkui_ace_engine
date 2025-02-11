@@ -156,8 +156,8 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](bool selected) {
-        GetFullAPI()->getEventsAPI()->getMenuItemEventsReceiver()->onChange(frameNode->GetId(), selected);
+    auto onChange = [arkCallback = CallbackHelper(*value)](const bool param) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(param));
     };
     MenuItemModelNG::SetOnChange(frameNode, onChange);
 }

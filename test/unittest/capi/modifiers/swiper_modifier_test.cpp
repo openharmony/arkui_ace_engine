@@ -33,16 +33,6 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-struct EventsTracker {
-    static inline GENERATED_ArkUISwiperEventsReceiver swiperEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getSwiperEventsReceiver = [] () -> const GENERATED_ArkUISwiperEventsReceiver* {
-            return &swiperEventReceiver;
-        }
-    };
-}; // EventsTracker
-
 static const Ark_Boolean ABOOL_TRUE(true);
 static const Ark_Boolean ABOOL_FALSE(false);
 static const Ark_Int32 AINT32_POS(1234);
@@ -81,6 +71,7 @@ static const Color THEME_SWIPER_ARROW_COLOR(Color::GREEN);
 
 const auto RES_NAME = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
 const auto RES_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
+const auto CONTEXT_ID = 123;
 } // namespace
 
 class SwiperModifierTest : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
@@ -100,9 +91,6 @@ public:
         themeStyle->SetAttr(ARROW_COLOR_COMPONENT_NORMAL, { .value = THEME_SWIPER_ARROW_COLOR });
 
         SetupTheme<SwiperIndicatorTheme>();
-
-        // setup the test event handler
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -1304,21 +1292,24 @@ HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
         int32_t index;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::swiperEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Number index)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .index = Converter::Convert<Ark_Int32>(index)
+    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
+        [](const Ark_Int32 resourceId, const Ark_Number index) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .index = Converter::Convert<Ark_Int32>(index)
+            };
         };
-    };
+    auto func = Converter::ArkValue<Callback_Number_Void>(checkCallback, CONTEXT_ID);
 
     ASSERT_NE(modifier_->setOnChange, nullptr);
 
-    modifier_->setOnChange(node_, {});
+    modifier_->setOnChange(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireChangeEvent(0, 123, false);
-    ASSERT_EQ(checkEvent.has_value(), false);
+    eventHub->FireChangeEvent(0, 321, false);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, CONTEXT_ID);
+    EXPECT_EQ(checkEvent->index, 321);
 }
 /**
  * @tc.name: setIndicatorStyleTest
@@ -1524,24 +1515,25 @@ HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
         AnimationCallbackInfo info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::swiperEventReceiver.onAnimationStart = []
-    (Ark_Int32 nodeId, const Ark_Number index, const Ark_Number targetIndex, const Ark_SwiperAnimationEvent extraInfo)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .index = Converter::Convert<Ark_Int32>(index),
-            .targetIndex = Converter::Convert<Ark_Int32>(targetIndex),
-            .info = {
-                .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
-                .targetOffset = Converter::Convert<Ark_Float32>(extraInfo.targetOffset),
-                .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
-            }
+    void (*checkCallback)(const Ark_Int32, const Ark_Number, const Ark_Number, const Ark_SwiperAnimationEvent) =
+        [](const Ark_Int32 resourceId, const Ark_Number index, const Ark_Number targetIndex,
+        const Ark_SwiperAnimationEvent extraInfo) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .index = Converter::Convert<Ark_Int32>(index),
+                .targetIndex = Converter::Convert<Ark_Int32>(targetIndex),
+                .info = {
+                    .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
+                    .targetOffset = Converter::Convert<Ark_Float32>(extraInfo.targetOffset),
+                    .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
+                }
+            };
         };
-    };
+    auto func = Converter::ArkValue<OnSwiperAnimationStartCallback>(checkCallback, CONTEXT_ID);
 
     ASSERT_NE(modifier_->setOnAnimationStart, nullptr);
 
-    modifier_->setOnAnimationStart(node_, {});
+    modifier_->setOnAnimationStart(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireAnimationStartEvent(123, 456, {
@@ -1550,7 +1542,7 @@ HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
         .velocity = 78.9f,
     });
     ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, CONTEXT_ID);
     EXPECT_EQ(checkEvent->index, 123);
     EXPECT_EQ(checkEvent->targetIndex, 456);
     EXPECT_EQ(checkEvent->info.currentOffset, 1.23f);
@@ -1575,11 +1567,10 @@ HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
         AnimationCallbackInfo info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::swiperEventReceiver.onAnimationEnd = []
-    (Ark_Int32 nodeId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
+    void (*checkCallback)(const Ark_Int32, const Ark_Number, const Ark_SwiperAnimationEvent) =
+        [](const Ark_Int32 resourceId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo) {
+            checkEvent = {
+            .nodeId = resourceId,
             .index = Converter::Convert<Ark_Int32>(index),
             .info = {
                 .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
@@ -1587,24 +1578,25 @@ HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
                 .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
             }
         };
-    };
+        };
+    auto func = Converter::ArkValue<OnSwiperAnimationEndCallback>(checkCallback, CONTEXT_ID);
 
     // the start animation before is required for the end of animation testing
     eventHub->FireAnimationStartEvent(0, 0, {});
 
     ASSERT_NE(modifier_->setOnAnimationEnd, nullptr);
 
-    modifier_->setOnAnimationEnd(node_, {});
+    modifier_->setOnAnimationEnd(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireAnimationEndEvent(123, {
+    eventHub->FireAnimationEndEvent(321, {
         .currentOffset = 1.23f,
         .targetOffset = -4.56f,
         .velocity = 78.9f,
     });
     ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->index, 123);
+    EXPECT_EQ(checkEvent->nodeId, CONTEXT_ID);
+    EXPECT_EQ(checkEvent->index, 321);
     EXPECT_EQ(checkEvent->info.currentOffset, 1.23f);
     EXPECT_EQ(checkEvent->info.targetOffset, -4.56f);
     EXPECT_EQ(checkEvent->info.velocity, 78.9f);
@@ -1627,33 +1619,33 @@ HWTEST_F(SwiperModifierTest, setOnGestureSwipeTest, TestSize.Level1)
         AnimationCallbackInfo info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::swiperEventReceiver.onGestureSwipe = []
-    (Ark_Int32 nodeId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .index = Converter::Convert<Ark_Int32>(index),
-            .info = {
-                .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
-                .targetOffset = Converter::Convert<Ark_Float32>(extraInfo.targetOffset),
-                .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
-            }
+    void (*checkCallback)(const Ark_Int32, const Ark_Number, const Ark_SwiperAnimationEvent) =
+        [](const Ark_Int32 resourceId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .index = Converter::Convert<Ark_Int32>(index),
+                .info = {
+                    .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
+                    .targetOffset = Converter::Convert<Ark_Float32>(extraInfo.targetOffset),
+                    .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
+                }
+            };
         };
-    };
+    auto func = Converter::ArkValue<OnSwiperGestureSwipeCallback>(checkCallback, CONTEXT_ID);
 
     ASSERT_NE(modifier_->setOnGestureSwipe, nullptr);
 
-    modifier_->setOnGestureSwipe(node_, {});
+    modifier_->setOnGestureSwipe(node_, &func);
 
     EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireGestureSwipeEvent(123, {
+    eventHub->FireGestureSwipeEvent(321, {
         .currentOffset = 1.23f,
         .targetOffset = -4.56f,
         .velocity = 78.9f,
     });
     ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->index, 123);
+    EXPECT_EQ(checkEvent->nodeId, CONTEXT_ID);
+    EXPECT_EQ(checkEvent->index, 321);
     EXPECT_EQ(checkEvent->info.currentOffset, 1.23f);
     EXPECT_EQ(checkEvent->info.targetOffset, -4.56f);
     EXPECT_EQ(checkEvent->info.velocity, 78.9f);
@@ -1753,22 +1745,22 @@ HWTEST_F(SwiperModifierTest, setOnContentDidScrollTest, TestSize.Level1)
     };
 
     static std::optional<OnDidScrollParams> checkEvent = std::nullopt;
-    EventsTracker::swiperEventReceiver.onContentDidScroll = []
-    (Ark_Int32 nodeId, Ark_Number selectedIndex, Ark_Number index, Ark_Number position, Ark_Number mainAxisLength)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .selectedIndex = Converter::Convert<int32_t>(selectedIndex),
-            .index = Converter::Convert<int32_t>(index),
-            .position = Converter::Convert<float>(position),
-            .mainAxisLength = Converter::Convert<float>(mainAxisLength),
+    void (*checkCallback)(const Ark_Int32, Ark_Number, Ark_Number, Ark_Number, Ark_Number) =
+        [](const Ark_Int32 resourceId, Ark_Number selectedIndex,
+            Ark_Number index, Ark_Number position, Ark_Number mainAxisLength) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .selectedIndex = Converter::Convert<int32_t>(selectedIndex),
+                .index = Converter::Convert<int32_t>(index),
+                .position = Converter::Convert<float>(position),
+                .mainAxisLength = Converter::Convert<float>(mainAxisLength),
+            };
         };
-    };
+    auto func = Converter::ArkValue<ContentDidScrollCallback>(checkCallback, CONTEXT_ID);
 
     EXPECT_NE(modifier_->setOnContentDidScroll, nullptr);
     EXPECT_FALSE(checkEvent);
 
-    ContentDidScrollCallback func{};
     modifier_->setOnContentDidScroll(node_, &func);
 
     // check the callback func that was setup
@@ -1782,7 +1774,7 @@ HWTEST_F(SwiperModifierTest, setOnContentDidScrollTest, TestSize.Level1)
     // simulate the callback invoking from ace_engine
     (*onContentDidScroll.get())(expected.selectedIndex, expected.index, expected.position, expected.mainAxisLength);
     ASSERT_TRUE(checkEvent);
-    EXPECT_EQ(checkEvent->nodeId, expected.nodeId);
+    EXPECT_EQ(checkEvent->nodeId, CONTEXT_ID);
     EXPECT_EQ(checkEvent->selectedIndex, expected.selectedIndex);
     EXPECT_EQ(checkEvent->index, expected.index);
     EXPECT_EQ(checkEvent->position, expected.position);

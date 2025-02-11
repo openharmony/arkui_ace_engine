@@ -159,11 +159,6 @@ int32_t g_targetIndexValue(0);
 float g_currentOffsetValue(0.0f);
 float g_targetOffsetValue(0.0f);
 float g_velocityValue(0.0f);
-int32_t g_fromValue(0);
-int32_t g_toValue(0);
-int32_t g_currentIndexValue(0);
-int32_t g_comingIndexValue(0);
-
 const int32_t INDEX(10);
 const int32_t TARGET_INDEX(12);
 const float CURRENT_OFFSET(0.2f);
@@ -172,6 +167,7 @@ const float VELOCITY(0.6f);
 const int32_t TO(16);
 const int32_t CURRENT_INDEX(18);
 const int32_t COMING_INDEX(20);
+const auto CONTEXT_ID = 123;
 
 GENERATED_ArkUITabsEventsReceiver recv {
     .onChange =
@@ -205,27 +201,6 @@ GENERATED_ArkUITabsEventsReceiver recv {
             g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
             g_velocityValue = Converter::Convert<float>(event.velocity);
         },
-    .customContentTransition =
-        [](Ark_Int32 nodeId, const Ark_Number from, const Ark_Number to) {
-            g_toValue = Converter::Convert<int32_t>(to);
-            g_fromValue = Converter::Convert<int32_t>(from);
-        },
-    .onContentWillChange =
-        [](Ark_Int32 nodeId, const Ark_Number currentIndex, const Ark_Number comingIndex) {
-            g_currentIndexValue = Converter::Convert<int32_t>(currentIndex);
-            g_comingIndexValue = Converter::Convert<int32_t>(comingIndex);
-        }
-};
-
-const GENERATED_ArkUITabsEventsReceiver* getTabsEventsReceiverTest()
-{
-    return &recv;
-};
-
-static const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { .getTabsEventsReceiver = getTabsEventsReceiverTest };
-    return &eventsImpl;
 };
 } // namespace
 
@@ -239,7 +214,6 @@ public:
         auto themeStyle = SetupThemeStyle(THEME_PATTERN_TAB);
         themeStyle->SetAttr("tab_content_animation_duration", { .value = ANIMATION_DURATION_DEFAULT });
         SetupTheme<TabTheme>();
-        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
         EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks(_)).Times(AnyNumber());
         AddResource(RES_STRING_REGISTERED_ID, "#FF00FF00");
     }
@@ -603,7 +577,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_Void func{};
+    auto func = Converter::ArkValue<Callback_Number_Void>(recv.onChange, CONTEXT_ID);
     ASSERT_NE(frameNode, nullptr);
     auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
     frameNode->AttachToMainTree(true, context);
@@ -629,7 +603,7 @@ HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnTabsAnimationStartCallback func{};
+    auto func = Converter::ArkValue<OnTabsAnimationStartCallback>(recv.onAnimationStart, CONTEXT_ID);
     modifier_->setOnAnimationStart(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -669,7 +643,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnTabsAnimationEndCallback func{};
+    auto func = Converter::ArkValue<OnTabsAnimationEndCallback>(recv.onAnimationEnd, CONTEXT_ID);
     modifier_->setOnAnimationEnd(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -708,7 +682,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnTabsGestureSwipeCallback func{};
+    auto func = Converter::ArkValue<OnTabsGestureSwipeCallback>(recv.onGestureSwipe, CONTEXT_ID);
     modifier_->setOnGestureSwipe(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -808,7 +782,7 @@ HWTEST_F(TabsModifierTest, setOnContentWillChangeTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnTabBarClickTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_Void func{};
+    auto func = Converter::ArkValue<Callback_Number_Void>(recv.onTabBarClick, CONTEXT_ID);
     modifier_->setOnTabBarClick(node_, &func);
     EXPECT_EQ(g_indexValue, 0);
 

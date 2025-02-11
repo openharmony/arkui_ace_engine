@@ -24,22 +24,10 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
 using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
-
-namespace {
-struct EventsTracker {
-    static inline GENERATED_ArkUIAlphabetIndexerEventsReceiver alphabetIndexerEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getAlphabetIndexerEventsReceiver = []() -> const GENERATED_ArkUIAlphabetIndexerEventsReceiver* {
-            return &alphabetIndexerEventReceiver;
-        }
-    };
-}; // EventsTracker
-} // namespace
 
 // Prop names
 const auto PROP_NAME_ARRAY_VALUE = "arrayValue";
@@ -330,6 +318,9 @@ static const std::vector<BlurStyleTestStep> BLUR_STYLE_TEST_PLAN = {
     { static_cast<Ark_BlurStyle>(177), "BlurStyle.COMPONENT_REGULAR" }
 };
 
+const auto CONTEXT_ID = 123;
+};
+
 class IndexerModifierTest
     : public ModifierTestBase<GENERATED_ArkUIAlphabetIndexerModifier,
           &GENERATED_ArkUINodeModifiers::getAlphabetIndexerModifier, GENERATED_ARKUI_ALPHABET_INDEXER> {
@@ -339,8 +330,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<IndexerTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -393,15 +382,16 @@ HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsSelected, TestSize.Level1
  */
 HWTEST_F(IndexerModifierTest, setOnSelected, TestSize.Level1)
 {
-    Callback_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
-    EventsTracker::alphabetIndexerEventReceiver.onSelected = [](Ark_Int32 nodeId, const Ark_Number value) {
-        selectedIndex = Converter::Convert<int32_t>(value);
-    };
+    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
+        [](const Ark_Int32 resourceId, const Ark_Number param) {
+            selectedIndex = Converter::Convert<int32_t>(param);
+        };
+    auto func = Converter::ArkValue<Callback_Number_Void>(checkCallback, CONTEXT_ID);
     modifier_->setOnSelected(node_, &func);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
@@ -1295,15 +1285,16 @@ HWTEST_F(IndexerModifierTest, setAlignStyleOffset, TestSize.Level1)
  */
 HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
 {
-    OnAlphabetIndexerSelectCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
-    EventsTracker::alphabetIndexerEventReceiver.onSelect = [](Ark_Int32 nodeId, const Ark_Number value) {
-        selectedIndex = Converter::Convert<int32_t>(value);
-    };
+    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
+        [](const Ark_Int32 resourceId, const Ark_Number param) {
+            selectedIndex = Converter::Convert<int32_t>(param);
+        };
+    auto func = Converter::ArkValue<OnAlphabetIndexerSelectCallback>(checkCallback, CONTEXT_ID);
     modifier_->setOnSelect(node_, &func);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
@@ -1362,15 +1353,16 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
  */
 HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
 {
-    OnAlphabetIndexerPopupSelectCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
-    EventsTracker::alphabetIndexerEventReceiver.onPopupSelect = [](Ark_Int32 nodeId, const Ark_Number value) {
-        selectedIndex = Converter::Convert<int32_t>(value);
-    };
+    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
+        [](const Ark_Int32 resourceId, const Ark_Number param) {
+            selectedIndex = Converter::Convert<int32_t>(param);
+        };
+    auto func = Converter::ArkValue<OnAlphabetIndexerPopupSelectCallback>(checkCallback, CONTEXT_ID);
     modifier_->setOnPopupSelect(node_, &func);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 

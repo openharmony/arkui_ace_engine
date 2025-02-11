@@ -34,16 +34,6 @@ namespace  {
     const auto ATTRIBUTE_ENABLE_ANIMATION_DEFAULT_VALUE = "true";
     const auto ATTRIBUTE_AUTO_HALF_FOLD_NAME = "autoHalfFold";
     const auto ATTRIBUTE_AUTO_HALF_FOLD_DEFAULT_VALUE = "true";
-
-struct EventsTracker {
-    static inline GENERATED_ArkUIFolderStackEventsReceiver eventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getFolderStackEventsReceiver = [] () -> const GENERATED_ArkUIFolderStackEventsReceiver* {
-            return &eventsReceiver;
-        }
-    };
-}; // EventsTracker
 } // namespace
 
 class FolderStackModifierTest : public ModifierTestBase<
@@ -54,8 +44,6 @@ class FolderStackModifierTest : public ModifierTestBase<
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -164,11 +152,14 @@ HWTEST_F(FolderStackModifierTest, setAlignContentTestInvalidValues, TestSize.Lev
 HWTEST_F(FolderStackModifierTest, setOnFolderStateChangeTest, TestSize.Level1)
 {
     static Ark_FoldStatus foldStatus = ARK_FOLD_STATUS_FOLD_STATUS_UNKNOWN;
-    EventsTracker::eventsReceiver.onFolderStateChange = [](Ark_Int32 nodeId, const Ark_OnFoldStatusChangeInfo event) {
-        foldStatus = event.foldStatus;
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnFoldStatusChangeCallback func{};
+    void (*checkCallback)(const Ark_Int32, const Ark_OnFoldStatusChangeInfo) =
+        [](const Ark_Int32 resourceId, const Ark_OnFoldStatusChangeInfo param) {
+            foldStatus = param.foldStatus;
+        };
+    const int32_t contextId = 123;
+    OnFoldStatusChangeCallback func = Converter::ArkValue<OnFoldStatusChangeCallback>(checkCallback, contextId);
+
     ASSERT_NE(frameNode, nullptr);
     auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
     frameNode->AttachToMainTree(true, context);
@@ -192,11 +183,14 @@ HWTEST_F(FolderStackModifierTest, setOnFolderStateChangeTest, TestSize.Level1)
 HWTEST_F(FolderStackModifierTest, setOnHoverStatusChangeTest, TestSize.Level1)
 {
     static Ark_FoldStatus foldStatus = ARK_FOLD_STATUS_FOLD_STATUS_UNKNOWN;
-    EventsTracker::eventsReceiver.onHoverStatusChange = [](Ark_Int32 nodeId, const Ark_HoverEventParam param) {
-        foldStatus = param.foldStatus;
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnHoverStatusChangeCallback func{};
+    void (*checkCallback)(const Ark_Int32, const Ark_HoverEventParam) =
+        [](const Ark_Int32 resourceId, const Ark_HoverEventParam param) {
+            foldStatus = param.foldStatus;
+        };
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<OnHoverStatusChangeCallback>(checkCallback, contextId);
+
     ASSERT_NE(frameNode, nullptr);
     auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
     frameNode->AttachToMainTree(true, context);
