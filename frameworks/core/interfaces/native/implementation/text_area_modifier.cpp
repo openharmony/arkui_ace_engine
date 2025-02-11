@@ -206,8 +206,16 @@ void OnSubmit1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextAreaModelNG::SetOnSubmit1(frameNode, convValue);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onSubmit = [arkCallback = CallbackHelper(*value), node = weakNode](
+		    const int32_t& keyType, NG::TextFieldCommonEvent& info) {
+        PipelineContext::SetCallBackNode(node);
+        auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(keyType));
+        const auto event = Converter::ArkSubmitEventSync(info);
+        auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
+        arkCallback.Invoke(enterKeyType, eventArkValue);
+    };
+    TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const EditableTextOnChangeCallback* value)
