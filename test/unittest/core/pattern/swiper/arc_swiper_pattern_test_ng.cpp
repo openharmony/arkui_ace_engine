@@ -1341,6 +1341,53 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayScrollAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PlayScrollAnimation002
+ * @tc.desc: Test for PlayScrollAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayScrollAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    ASSERT_NE(frameNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern
+     */
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->contentMainSize_ = 80;
+
+    /**
+     * @tc.steps: step3. test for isDragging_ is false
+     */
+    float currentDelta = 0.0f;
+    float currentIndexOffset = 0.0f;
+    pattern->canChangeDirectionFlag_ = true;
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
+    EXPECT_FALSE(pattern->canChangeDirectionFlag_);
+    
+    /**
+     * @tc.steps: step4. test for isDragging_ is true but itemPositon size is 1
+     */
+    pattern->isDragging_ = true;
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto node1 = CreateFrameNode();
+    auto item1 = CreateSwiperItemInfo(0, 20, node1);
+    pattern->itemPosition_.clear();
+    pattern->itemPosition_.insert(std::make_pair(0, item1));
+    EXPECT_EQ(pattern->itemPosition_.size(), 1);
+    pattern->PlayScrollAnimation(-10.0f, -10.0f);
+    EXPECT_FALSE(pattern->canChangeDirectionFlag_);
+}
+
+/**
  * @tc.name: InitialFrameNodePropertyAnimation001
  * @tc.desc: Test for InitialFrameNodePropertyAnimation
  * @tc.type: FUNC
@@ -2131,6 +2178,34 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalExitAnimation001, TestSize.Level1)
     pattern->animationVector_.clear();
     EXPECT_EQ(pattern->animationVector_.size(), 0);
     pattern->PlayVerticalExitAnimation(offset, nullptr, rollBack);
+    EXPECT_EQ(pattern->animationVector_.size(), 0);
+}
+
+/**
+ * @tc.name: PlayVerticalEntryAnimation
+ * @tc.desc: Test for method of PlayVerticalEntryAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalEntryAnimation, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->itemPosition_.size(), 2);
+    OffsetF offset(0.0f, 0.0f);
+    auto frameNode = CreateFrameNode();
+    bool rollBack = true;
+    pattern->PlayVerticalEntryAnimation(offset, frameNode, rollBack);
+    EXPECT_EQ(pattern->animationVector_.size(), 5);
+    pattern->animationVector_.clear();
+    EXPECT_EQ(pattern->animationVector_.size(), 0);
+    pattern->PlayVerticalEntryAnimation(offset, nullptr, rollBack);
     EXPECT_EQ(pattern->animationVector_.size(), 0);
 }
 } // namespace OHOS::Ace::NG
