@@ -1205,6 +1205,16 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showH
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextFieldPattern::HandleSelection(int32_t start, int32_t end)
+{
+    StopTwinkling();
+    UpdateSelection(start, end);
+    UpdateCaretInfoToController();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void TextFieldPattern::HandleExtendAction(int32_t action)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleExtendAction %{public}d", action);
@@ -6505,7 +6515,7 @@ void TextFieldPattern::SetSelectionFlag(
     } else {
         cursorVisible_ = false;
         showSelect_ = true;
-        HandleSetSelection(selectionStart, selectionEnd, false);
+        HandleSelection(selectionStart, selectionEnd);
         if (isForward) {
             selectController_->MoveSecondHandleToContentRect(selectionEnd);
             selectController_->MoveFirstHandleToContentRect(selectionStart, false);
