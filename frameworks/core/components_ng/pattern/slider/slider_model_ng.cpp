@@ -802,6 +802,7 @@ void SliderModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableH
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(sliderPattern);
     sliderPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, EnableHapticFeedback, isEnableHapticFeedback);
 }
 
 Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
