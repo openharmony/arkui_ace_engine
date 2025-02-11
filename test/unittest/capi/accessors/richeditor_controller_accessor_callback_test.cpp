@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,7 +141,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
             .offsetX = accessor->getX(peer),
             .offsetY = accessor->getY(peer),
         };
-        delete peer;
+        accessor->destroyPeer(peer);
     };
     auto arkOnClick = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, RESOURCE_ID);
 
@@ -184,7 +184,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnDoub
             .offsetX = accessor->getOffsetX(peer),
             .offsetY = accessor->getOffsetY(peer),
         };
-        delete peer;
+        accessor->destroyPeer(peer);
     };
     auto arkOnDoubleClick = Converter::ArkValue<Callback_GestureEvent_Void>(onDoubleClick, RESOURCE_ID);
 
@@ -228,7 +228,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
             .offsetX = accessor->getOffsetX(peer),
             .offsetY = accessor->getOffsetY(peer),
         };
-        delete peer;
+        accessor->destroyPeer(peer);
     };
     auto arkOnLongPress = Converter::ArkValue<Callback_GestureEvent_Void>(onLongPress, RESOURCE_ID);
 
@@ -272,7 +272,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
             .offsetX = accessor->getX(peer),
             .offsetY = accessor->getY(peer),
         };
-        delete peer;
+        accessor->destroyPeer(peer);
     };
     auto arkOnClick = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, RESOURCE_ID);
 
@@ -315,7 +315,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnDoubl
             .offsetX = accessor->getOffsetX(peer),
             .offsetY = accessor->getOffsetY(peer),
         };
-        delete peer;
+        accessor->destroyPeer(peer);
     };
     auto arkOnDoubleClick = Converter::ArkValue<Callback_GestureEvent_Void>(onDoubleClick, RESOURCE_ID);
 
@@ -359,7 +359,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongP
             .offsetX = accessor->getOffsetX(peer),
             .offsetY = accessor->getOffsetY(peer),
         };
-        delete peer;
+        accessor->destroyPeer(peer);
     };
     auto arkOnLongPress = Converter::ArkValue<Callback_GestureEvent_Void>(onLongPress, RESOURCE_ID);
 
