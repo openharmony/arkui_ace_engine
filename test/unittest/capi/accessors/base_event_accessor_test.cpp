@@ -37,11 +37,10 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        BaseEventInfo info("test");
-        peer_->SetEventInfo(info);
-        baseEvent_ = peer_->GetEventInfo();
+        baseEvent_ = std::make_unique<BaseEventInfo>("test");
+        peer_->SetEventInfo(baseEvent_.get());
     }
-    BaseEventInfo* baseEvent_ = nullptr;
+    std::unique_ptr<BaseEventInfo> baseEvent_;
 };
 
 const std::vector<std::pair<Ark_Number, int>> testFixtureInt32Values = {
