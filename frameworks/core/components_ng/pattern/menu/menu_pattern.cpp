@@ -1617,6 +1617,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(theme, false);
     auto renderContext = dirty->GetHostNode()->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->UpdateClipShape(nullptr);
+    renderContext->ResetClipShape();
 
     auto menuProp = DynamicCast<MenuLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);

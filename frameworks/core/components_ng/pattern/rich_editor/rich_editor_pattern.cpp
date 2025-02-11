@@ -2779,7 +2779,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     HandleUserClickEvent(info);
     CHECK_NULL_VOID(!info.IsPreventDefault());
     bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
-    bool isMouseClickWithShift = shiftFlag_ && isMouseClick;
+    bool isMouseClickWithShift = shiftFlag_ && isMouseClick && !IsPreviewTextInputting();
     if (textSelector_.IsValid() && !isMouseSelect_ && !isMouseClickWithShift) {
         CloseSelectOverlay();
         ResetSelection();
@@ -7006,7 +7006,8 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto touchOffset = Offset(offset.GetX(), std::max(offset.GetY(), static_cast<double>(contentRect_.GetY())));
+    Offset textOffset = ConvertTouchOffsetToTextOffset(touchOffset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     SetCaretTouchMoveOffset(offset);
@@ -7899,6 +7900,11 @@ void RichEditorPattern::CreateHandles()
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
 {
+    if (!IsSelected()) {
+        showSelect_ = true;
+        IF_TRUE(isEditing_, StartTwinkling());
+        return;
+    }
     ShowHandles();
 }
 
@@ -8431,12 +8437,9 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
     std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
-    TextPattern::BindSelectionMenu(
-        richEditorType, type, menuBuilder, menuParam);
-    if (!selectOverlay_->SelectOverlayIsCreating() && SelectOverlayIsOn()) {
-        selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
-            .requestCode = REQUEST_RECREATE });
-    }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "BindSelectionMenu spanType = %{public}d, responseType = %{public}d",
+        richEditorType, type);
+    TextPattern::BindSelectionMenu(richEditorType, type, menuBuilder, menuParam);
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
@@ -11210,7 +11213,7 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     }
     HandleSelectionChange(start, end);
     TriggerAvoidOnCaretChange();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
@@ -11459,7 +11462,9 @@ void RichEditorPattern::HandlePageScroll(bool isPageUp)
     auto visibleRect = selectOverlay_->GetVisibleRect();
     float distance = isPageUp ? visibleRect.Height() : -visibleRect.Height();
     RectF curCaretRect = GetCaretRect();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "PageScroll isPageUp:%{public}d distance:%{public}f", isPageUp, distance);
+    auto height = paragraphs_.GetHeight();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "PageScroll isPageUp:%{public}d distance:%{public}f paragraphsHeight:%{public}f",
+        isPageUp, distance, height);
     CloseSelectOverlay();
     ResetSelection();
     OnScrollCallback(distance, SCROLL_FROM_JUMP);
@@ -11468,6 +11473,12 @@ void RichEditorPattern::HandlePageScroll(bool isPageUp)
     auto localOffset = Offset(curCaretRect.GetX(), offsetY - paintOffset.GetY());
     auto textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
+    // If scrolling to the first or last line, move the cursor to the beginning or end of the line
+    if (isPageUp && LessOrEqual(textOffset.GetY(), 0)) {
+        positionWithAffinity = PositionWithAffinity(0, TextAffinity::DOWNSTREAM);
+    } else if (!isPageUp && GreatOrEqual(textOffset.GetY(), height)) {
+        positionWithAffinity = PositionWithAffinity(GetTextContentLength(), TextAffinity::UPSTREAM);
+    }
     SetCaretPositionWithAffinity(positionWithAffinity);
     IF_TRUE(isEditing_, StartTwinkling());
 }

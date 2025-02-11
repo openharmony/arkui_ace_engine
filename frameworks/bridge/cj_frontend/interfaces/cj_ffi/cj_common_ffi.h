@@ -354,6 +354,10 @@ struct AtCPackage {
     void (*atCOHOSAceFrameworkLazyForEachFuncsRemoveChildGroup)(int64_t self, const char* composedId) = nullptr;
     void (*atCOHOSAceFrameworkLazyForEachFuncsDataChangeListenerRegister)(int64_t self, int64_t idx) = nullptr;
     void (*atCOHOSAceFrameworkLazyForEachFuncsDataChangeListenerUnregister)(int64_t self, int64_t idx) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewOnDidBuild)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToReuse)(int64_t self, const char* params) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToRecycle)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewRecycleSelf)(int64_t self, const char* params) = nullptr;
 };
 
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);

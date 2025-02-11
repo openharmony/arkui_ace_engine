@@ -32,7 +32,8 @@ RefPtr<AceType> ViewFullUpdateModelNG::CreateNode(NodeInfo&& info)
         info.updateNodeFunc(composedNode);
     }
 
-    auto renderFunction = [internalRender = std::move(info.renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(info.renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };

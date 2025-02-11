@@ -275,6 +275,7 @@ public:
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
@@ -301,6 +302,8 @@ public:
     virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
     virtual void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
+    virtual void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) = 0;
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
@@ -315,6 +318,7 @@ public:
     virtual void DisableOnKeyPreIme() {}
     virtual void DisableOnKeyEventDispatch() {}
     virtual void DisableOnHover() = 0;
+    virtual void DisableOnHoverMove() = 0;
     virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
@@ -376,6 +380,10 @@ public:
     virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
     virtual int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void DismissPopup() = 0;
+    virtual int32_t OpenMenu(
+        NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) = 0;
+    virtual int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,

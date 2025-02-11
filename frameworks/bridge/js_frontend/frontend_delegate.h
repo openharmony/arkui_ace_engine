@@ -138,6 +138,8 @@ public:
 
     virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
 
+    virtual void SetKeyProcessingMode(int32_t keyProcessingMode);
+
     virtual bool ConfigWindowMask(bool enable);
 
     // restore
@@ -196,6 +198,16 @@ public:
     virtual void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) {};
     virtual void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
         std::function<void(int32_t)> &&callback) {};
+
+    virtual std::optional<double> GetTopOrder()
+    {
+        return std::nullopt;
+    }
+
+    virtual std::optional<double> GetBottomOrder()
+    {
+        return std::nullopt;
+    }
 
     virtual RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(void* value)
     {
@@ -308,6 +320,7 @@ public:
 
     virtual void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) {}
+    virtual void AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder) {}
     virtual void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
     virtual void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
     virtual void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}

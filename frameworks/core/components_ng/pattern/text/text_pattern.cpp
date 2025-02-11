@@ -354,7 +354,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
 
     if (IsDraggable(localOffset)) {
-        dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
         gestureHub->SetIsTextDraggable(true);
         return;
@@ -1879,10 +1878,6 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         leftMousePressed_ = false;
         return;
     }
-    if (blockPress_ && !shiftFlag_) {
-        dragBoxes_ = GetTextBoxes();
-        return;
-    }
     if (isMousePressed_) {
         mouseStatus_ = MouseStatus::MOVE;
         CHECK_NULL_VOID(pManager_);
@@ -2229,6 +2224,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
     ResetDragRecordSize(dragResultObjects_.empty() ? -1 : 1);
+    dragBoxes_ = GetTextBoxes();
     status_ = Status::DRAGGING;
     if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
@@ -2345,6 +2341,7 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
         return itemInfo;
     }
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    dragBoxes_ = GetTextBoxes();
     pattern->status_ = Status::DRAGGING;
     pattern->contentMod_->ChangeDragStatus();
     pattern->showSelect_ = false;
@@ -4973,9 +4970,10 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty() && spans_.empty() && contentMod_ && !NeedShowAIDetect()) {
-        contentMod_->TextColorModifier(value);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (children.empty() && spans_.empty() && !NeedShowAIDetect()) {
+        if (contentMod_) {
+            contentMod_->TextColorModifier(value);
+        }
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }

@@ -706,4 +706,14 @@ void DialogContainer::CheckAndSetFontFamily()
     path = path.append(familyName);
     fontManager->SetFontFamily(familyName.c_str(), path.c_str());
 }
+
+Rect DialogContainer::GetDisplayAvailableRect() const
+{
+    if (!uiWindow_) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "uiwindow is null, can't get displayId");
+        return Rect();
+    }
+
+    return DisplayInfoUtils::GetInstance().GetDisplayAvailableRect(uiWindow_->GetDisplayId());
+}
 } // namespace OHOS::Ace::Platform

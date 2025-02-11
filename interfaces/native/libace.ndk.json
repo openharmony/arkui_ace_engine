@@ -1184,6 +1184,18 @@
         "name": "OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_TouchRecognizer_GetNodeHandle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_TouchRecognizer_CancelTouch"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetDrawableDescriptorFromNapiValue"
     },
@@ -2729,6 +2741,30 @@
     },
     {
         "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_Dispose"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_SetRatios"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_GetRatios"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval"
+    },
+    {
+        "first_introduced": "16",
         "name": "OH_ArkUI_GestureInterrupter_GetUserData"
     },
     {
@@ -2774,6 +2810,54 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_AxisEvent_GetScrollStep"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_DragEvent_RequestDragEndPending"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NotifyDragResult"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NotifyDragEndPendingDone"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetWidth"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetHeight"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionX"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionY"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetModifierKeyStates"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_HoverEvent_IsHovered"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusSetKeyProcessingMode"
     },
     {
         "first_introduced": "16",

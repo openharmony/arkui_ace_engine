@@ -1661,7 +1661,7 @@ export class GridObjectSortComponent extends ViewPU {
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.height(this.options.imageSize || SYMBOL_DEFAULT);
                                     SymbolGlyph.width(this.options.imageSize || SYMBOL_DEFAULT);
-                                    SymbolGlyph.fontSize(this.options.imageSize || SYMBOL_DEFAULT);
+                                    SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
                                 }, SymbolGlyph);
                             });
                         } else if (w98 instanceof SymbolGlyphModifier) {
@@ -1672,7 +1672,8 @@ export class GridObjectSortComponent extends ViewPU {
                                     SymbolGlyph.height(this.options.imageSize || SYMBOL_DEFAULT);
                                     SymbolGlyph.width(this.options.imageSize || SYMBOL_DEFAULT);
                                     SymbolGlyph.attributeModifier.bind(this)(w98);
-                                    SymbolGlyph.fontSize(this.options.imageSize || SYMBOL_DEFAULT);
+                                    SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
                             });
                         } else {
@@ -1978,6 +1979,7 @@ export class GridObjectSortComponent extends ViewPU {
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.attributeModifier.bind(this)(h97.symbolStyle);
                         SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
+                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                     }, SymbolGlyph);
                 });
             } else {

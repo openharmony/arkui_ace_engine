@@ -953,6 +953,26 @@ const ArkUI_AttributeItem* GetBackdropBlur(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetAreaChangeApproximateOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    node->visibleAreaEventOptions = item->object;
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAreaChangeApproximateOptions(ArkUI_NodeHandle node)
+{
+    g_attributeItem.object = node->visibleAreaEventOptions;
+    return &g_attributeItem;
+}
+
+void ResetAreaChangeApproximateOptions(ArkUI_NodeHandle node)
+{
+    node->visibleAreaEventOptions = nullptr;
+}
+
 int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if ((!item->string && !item->object) || (item->string && item->object)) {
@@ -6405,7 +6425,7 @@ void ResetListLanes(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetListLanes(ArkUI_NodeHandle node)
 {
     auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
-    g_numberValues[NUM_0].u32 = listModifier->getListLanes(node->uiNodeHandle);
+    g_numberValues[NUM_0].u32 = static_cast<uint32_t>(listModifier->getListLanes(node->uiNodeHandle));
     g_numberValues[NUM_1].f32 = listModifier->getlistLaneMinLength(node->uiNodeHandle);
     g_numberValues[NUM_2].f32 = listModifier->getListLaneMaxLength(node->uiNodeHandle);
     g_numberValues[NUM_3].f32 = listModifier->getListLaneGutter(node->uiNodeHandle);
@@ -6727,11 +6747,24 @@ void ResetButtonLabel(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonLabel(node->uiNodeHandle);
 }
 
+bool IsLegelType(int type)
+{
+    switch (type) {
+        case ARKUI_BUTTON_TYPE_NORMAL:
+        case ARKUI_BUTTON_TYPE_CAPSULE:
+        case ARKUI_BUTTON_TYPE_CIRCLE:
+        case ARKUI_BUTTON_ROUNDED_RECTANGLE:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 int32_t SetButtonType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (LessNotEqual(actualSize, 0) ||
-        !InRegion(ARKUI_BUTTON_TYPE_NORMAL, ARKUI_BUTTON_ROUNDED_RECTANGLE, item->value[NUM_0].i32)) {
+    if (LessNotEqual(actualSize, 0) || !IsLegelType(item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
@@ -14382,6 +14415,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetBackdropBlur,
         SetBackgroundImageResizableWithSlice,
         SetNextFocus,
+        SetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14494,6 +14528,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetTabStop,
         GetBackdropBlur,
         GetBackgroundImageResizableWithSlice,
+        nullptr,
+        GetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14611,6 +14647,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBackdropBlur,
         ResetBackgroundImageResizableWithSlice,
         ResetNextFocus,
+        ResetAreaChangeApproximateOptions,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

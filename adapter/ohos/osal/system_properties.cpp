@@ -66,6 +66,8 @@ constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
+constexpr int32_t FOLD_TYPE_TWO = 2;
+constexpr int32_t FOLD_TYPE_FOUR = 4;
 
 bool IsOpIncEnabled()
 {
@@ -972,6 +974,12 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
 }
 
+ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::BIG_FOLDER;
+}
+
 void SystemProperties::InitFoldScreenTypeBySystemProperty()
 {
     if (foldScreenType_ != FoldScreenType::UNKNOWN) {
@@ -983,6 +991,9 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
         auto type = StringUtils::StringToInt(foldScreenTypeStr);
+        if (type == FOLD_TYPE_FOUR) {
+            type = FOLD_TYPE_TWO;
+        }
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
@@ -1027,5 +1038,11 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SUPER_FOLDER;
 }
 } // namespace OHOS::Ace

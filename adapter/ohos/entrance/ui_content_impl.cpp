@@ -971,6 +971,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     auto errorCode = InitializeInner(window, name, storage, true);
     AddWatchSystemParameter();
     RegisterLinkJumpCallback();
+    UpdateWindowBlur();
     return errorCode;
 }
 
@@ -2237,9 +2238,17 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
             TAG_LOGI(AceLogTag::ACE_WINDOW,
-                "InitializeDisplayAvailableRect : %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
-                availableArea.posY_, availableArea.width_, availableArea.height_);
+                "Initialize displayId: %{public}u, availableRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+                (uint32_t)displayId, availableArea.posX_, availableArea.posY_, availableArea.width_,
+                availableArea.height_);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WINDOW, "Display failed to get availableArea, displayId: %{public}u",
+                (uint32_t)displayId);
         }
+    }
+
+    if (!defaultDisplay) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "DisplayManager failed to get display by id: %{public}u", (uint32_t)displayId);
     }
 }
 
@@ -4652,5 +4661,40 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
+    auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline)]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetAllPixelMap();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
+    };
+    UiSessionManager::GetInstance().SaveGetPixelMapFunction(getPixelMapCallback);
+}
+
+bool UIContentImpl::SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, false);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, code, data, subSystemId]() {
+            auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+            CHECK_NULL_VOID(context);
+            auto uiExtManager = context->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtManager);
+            uiExtManager->UpdateWMSUIExtProperty(static_cast<Ace::NG::UIContentBusinessCode>(code),
+                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
+        }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
+    return true;
 }
 } // namespace OHOS::Ace

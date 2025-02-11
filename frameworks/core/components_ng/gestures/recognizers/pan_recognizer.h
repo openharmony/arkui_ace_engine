@@ -70,6 +70,7 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
+    void CheckCallbackState() override;
 
     double GetDistance() const
     {

@@ -188,6 +188,10 @@ private:
         }
     };
 
+    bool IsOverlayValid(const RefPtr<UINode>& frameNode);
+
+    bool IsCustomDialogValid(const RefPtr<UINode>& node);
+
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
     std::unordered_map<int32_t, std::vector<int32_t>> navigationMaps_;

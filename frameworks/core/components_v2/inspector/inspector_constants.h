@@ -61,6 +61,7 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // overlay view
 ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
+ACE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 
@@ -354,6 +355,12 @@ ACE_EXPORT extern const char FORM_ETS_TAG[];
 // formLink
 ACE_EXPORT extern const char FORM_LINK_TAG[];
 ACE_EXPORT extern const char FORM_LINK_ETS_TAG[];
+
+// formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+ACE_EXPORT extern const char FORM_BUTTON_TAG[];
+ACE_EXPORT extern const char FORM_BUTTON_ETS_TAG[];
+#endif
 
 // PluginComponent
 ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];

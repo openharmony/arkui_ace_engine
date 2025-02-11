@@ -53,6 +53,7 @@ const char ROOT_ETS_TAG[] = "root";
 const char STAGE_ETS_TAG[] = "stage";
 // overlay view
 const char OVERLAY_ETS_TAG[] = "overlay";
+const char ORDER_OVERLAY_ETS_TAG[] = "OrderOverlay";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
@@ -346,6 +347,12 @@ const char FORM_ETS_TAG[] = "FormComponent";
 // formLink
 const char FORM_LINK_TAG[] = "FormLink";
 const char FORM_LINK_ETS_TAG[] = "FormLink";
+
+// formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+const char FORM_BUTTON_TAG[] = "FormButton";
+const char FORM_BUTTON_ETS_TAG[] = "FormButton";
+#endif
 
 // PluginComponent
 const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";

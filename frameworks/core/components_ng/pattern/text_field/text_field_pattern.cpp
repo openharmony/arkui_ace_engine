@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 #include "base/geometry/dimension.h"
+#include "base/log/event_report.h"
 #include "base/memory/type_info_base.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
@@ -4899,7 +4900,8 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
     changeValueInfo.value = contentController_->GetTextUtf16Value();
-    changeValueInfo.rangeAfter = TextRange { offset, offset + contentController_->GetInsertValue().length() };
+    changeValueInfo.rangeAfter =
+        TextRange { offset, offset + static_cast<int32_t>(contentController_->GetInsertValue().length()) };
     bool isWillChange = FireOnWillChange(changeValueInfo);
     if (!isWillChange) {
         contentController_->SetTextValue(changeValueInfo.oldContent);
@@ -9090,7 +9092,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSelected()) {
             uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
             uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
-            if (startIndex < fullStr.length() && endIndex < fullStr.length()) {
+            if (startIndex < fullStr.length() && endIndex <= fullStr.length()) {
                 fullStr.erase(startIndex, endIndex - startIndex);
             }
         }
@@ -9191,7 +9193,8 @@ void TextFieldPattern::FinishTextPreviewOperation()
         originLength);
     selectController_->UpdateCaretIndex(start + caretMoveLength);
     UpdateEditingValueToRecord();
-    changeValueInfo.rangeAfter = TextRange { selectController_->GetCaretIndex(), selectController_->GetCaretIndex() };
+    changeValueInfo.rangeAfter =
+        TextRange { changeValueInfo.oldPreviewText.offset, selectController_->GetCaretIndex() };
     changeValueInfo.value = GetBodyTextValue();
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
@@ -10369,7 +10372,11 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!HasFocus()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", host->GetId());
+        int32_t frameId = host->GetId();
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
+        int32_t depth = host->GetDepth();
+        std::string errorType = "textfield on blur, can't insert value";
+        EventReport::ReportTextFieldErrorEvent(frameId, depth, errorType);
         auto currentFocusNode = InputMethodManager::GetInstance()->GetCurFocusNode();
         auto curFocusNode = currentFocusNode.Upgrade();
         CHECK_NULL_VOID(curFocusNode);
@@ -10452,7 +10459,7 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
         }
         auto originLength = contentController_->GetTextUtf16Value().length();
         auto hasInsertValue = contentController_->InsertValue(caretIndex, info.insertValue);
-        insertLength = contentController_->GetTextUtf16Value().length() - originLength;
+        insertLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length() - originLength);
         caretIndex += insertLength;
 
         if (layoutProperty->HasMaxLength()) {
@@ -10482,6 +10489,16 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
 
 void TextFieldPattern::ClearTextContent()
 {
+    if (GetIsPreviewText()) {
+        PreviewTextInfo info = {
+            .text = u"",
+            .range = {-1, -1}
+        };
+        SetPreviewTextOperation(info);
+    }
+    if (contentController_->IsEmpty()) {
+        return;
+    }
     InputCommandInfo inputCommandInfo;
     inputCommandInfo.deleteRange = { 0, contentController_->GetTextUtf16Value().length() };
     inputCommandInfo.insertOffset = 0;

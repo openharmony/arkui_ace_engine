@@ -66,6 +66,7 @@ constexpr char EXT_NAME_TS[] = ".ts";
 constexpr char EXT_NAME_JS[] = ".js";
 
 constexpr size_t MAX_NPM_LEVEL = 1;
+constexpr int32_t PATH_MIN_LENGTH = 2;
 
 void SplitString(const std::string& str, std::vector<std::string>& out, size_t pos = 0, const char* seps = SEPERATOR)
 {
@@ -116,12 +117,14 @@ JsiModuleSearcher::JsiModuleSearcher(const std::string& bundleName, const std::s
 {
     std::vector<std::string> pathVector;
     SplitString(assetPath, pathVector);
-    // pop "ets" directory from path
-    pathVector.pop_back();
-    // pop "default" directory from path
-    pathVector.pop_back();
-    // pop "assets" directory from path
-    pathVector.pop_back();
+    if (pathVector.size() > PATH_MIN_LENGTH) {
+        // pop "ets" directory from path
+        pathVector.pop_back();
+        // pop "default" directory from path
+        pathVector.pop_back();
+        // pop "assets" directory from path
+        pathVector.pop_back();
+    }
     bundleInstallPath_ = JoinString(pathVector, SEPERATOR);
     bundleName_ = bundleName;
 }

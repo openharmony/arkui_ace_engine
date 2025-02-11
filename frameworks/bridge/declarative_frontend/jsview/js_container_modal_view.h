@@ -44,6 +44,7 @@ private:
     static void CallButtonsRectChange(const JSCallbackInfo& info);
     static void CallMenuWidthChange(const JSCallbackInfo& info);
     static void CallWindowNative(const JSCallbackInfo& info);
+    static void CallTitleRowUpdate(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

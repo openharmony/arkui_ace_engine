@@ -1206,6 +1206,7 @@ group("interfaces_unittest") {
     ":node_transition_test",
     ":ui_content_test",
     ":ui_event_test",
+    ":ui_input_event_test",
     ":viewport_config_test",
     ":xcomponent_controller_test",
   ]

@@ -169,7 +169,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -615,6 +615,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         ContainerScope scope(id);
         auto gestureEventHub = weak.Upgrade();
         CHECK_NULL_VOID(gestureEventHub);
+        if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            gestureEventHub->SetMouseDragMonitorState(true);
+        }
         gestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     };
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -772,7 +775,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     dragDropManager->SetSummaryMap(summary);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
-    if (pixelMap_ == nullptr) {
+    if (pixelMap) {
+        SetPixelMap(pixelMap);
+    } else if (pixelMap == nullptr) {
         FireCustomerOnDragEnd(pipeline, eventHub);
         TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
         if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
@@ -803,7 +808,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto isNeedCreateTiled =
         DragDropFuncWrapper::IsNeedCreateTiledPixelMap(frameNode, dragEventActuator_, info.GetSourceDevice());
     PreparedInfoForDrag data = { isMenuShow, recordsSize, defaultPixelMapScale, isNeedCreateTiled, OffsetF(),
-        dragDropManager->GetUpdateDragMovePosition(), pixelMap };
+        dragDropManager->GetUpdateDragMovePosition(), pixelMap, nullptr };
     dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
     if (IsNeedSwitchToSubWindow(data)) {
@@ -862,19 +867,22 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, container->GetInstanceId());
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+    auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPoint();
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        static_cast<int32_t>(info.GetSourceTool()), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
+        static_cast<int32_t>(info.GetSourceTool()), dragMoveLastPoint.GetScreenX(),
+        dragMoveLastPoint.GetScreenY(), info.GetTargetDisplayId(), windowId, true, false, summary };
     std::string summarys = DragDropFuncWrapper::GetSummaryString(summary);
     DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
-        "pointerId %{public}d, toolType %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s.",
+        "pointerId %{public}d, toolType %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s, "
+        "eventId %{public}d.",
         frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
         recordsSize, static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(),
-        static_cast<int32_t>(info.GetSourceTool()), info.GetTargetDisplayId(), windowId, summarys.c_str());
+        static_cast<int32_t>(info.GetSourceTool()), info.GetTargetDisplayId(), windowId, summarys.c_str(),
+        info.GetPointerEventId());
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");
@@ -992,7 +1000,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
-            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -1433,7 +1441,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;

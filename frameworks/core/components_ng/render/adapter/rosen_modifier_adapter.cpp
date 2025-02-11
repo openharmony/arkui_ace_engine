@@ -127,6 +127,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorFloat, LinearVector<float>);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorLinearVector, LinearVector<LinearColor>);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertySizeF, SizeF);
 
     if (AceType::InstanceOf<AnimatableArithmeticProperty>(property)) {

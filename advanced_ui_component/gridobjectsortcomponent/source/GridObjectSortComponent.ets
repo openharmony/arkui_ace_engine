@@ -889,14 +889,15 @@ export struct GridObjectSortComponent {
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
               .attributeModifier(url)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+              .symbolEffect(new SymbolEffect(), false)
           } else {
             Image(url)
               .draggable(false)
@@ -1032,6 +1033,7 @@ export struct GridObjectSortComponent {
             .draggable(false)
             .attributeModifier(select.symbolStyle)
             .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+            .symbolEffect(new SymbolEffect(), false)
         } else {
           if (select.url === undefined) {
             SymbolGlyph()

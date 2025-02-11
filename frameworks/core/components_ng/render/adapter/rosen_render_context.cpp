@@ -1119,9 +1119,6 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
 
 void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
@@ -1811,22 +1808,23 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         AddOrChangeScaleModifier(
             rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
     } else {
-        Rosen::Vector2f xyPerspectiveValue { transform.perspective[0], transform.perspective[1] };
+        Rosen::Vector4f perspectiveValue { transform.perspective[0], transform.perspective[1], 0.0f,
+            1.0f };
         Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
         Rosen::Quaternion quaternion { static_cast<float>(transform.quaternion.GetX()),
             static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
             static_cast<float>(transform.quaternion.GetW()) };
-        Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
-        Rosen::Vector2f skewValue { transform.skew[0], transform.skew[1] };
+        Rosen::Vector2f xyScaleValue { transform.scale[0], transform.scale[1] };
+        Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], 0.0f };
 
-        AddOrChangePerspectiveModifier(rsNode_, transformMatrixModifier_->perspectiveXY,
-            transformMatrixModifier_->perspectiveXYValue, xyPerspectiveValue);
+        AddOrChangePerspectiveModifier(rsNode_, transformMatrixModifier_->perspective,
+            transformMatrixModifier_->perspectiveValue, perspectiveValue);
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
         AddOrChangeScaleModifier(
-            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
+            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, xyScaleValue);
         AddOrChangeSkewModifier(
-            rsNode_, transformMatrixModifier_->skewXY, transformMatrixModifier_->skewXYValue, skewValue);
+            rsNode_, transformMatrixModifier_->skew, transformMatrixModifier_->skewValue, skewValue);
         AddOrChangeQuaternionModifier(
             rsNode_, transformMatrixModifier_->quaternion, transformMatrixModifier_->quaternionValue, quaternion);
     }
@@ -2204,9 +2202,12 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
     CHECK_NULL_VOID(rsNode_);
     auto xValue = offset.GetX();
     auto yValue = offset.GetY();
+    bool changed = true;
     if (translateXY_) {
         auto propertyXY = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
         if (propertyXY) {
+            auto translate = propertyXY->Get();
+            changed = !NearEqual(translate[0], xValue) || !NearEqual(translate[1], yValue);
             propertyXY->Set({ xValue, yValue });
         }
     } else {
@@ -2215,7 +2216,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         rsNode_->AddModifier(translateXY_);
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
-    NotifyHostTransformUpdated();
+    NotifyHostTransformUpdated(changed);
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -2794,7 +2795,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         ContainerScope scope(containerId);
         std::shared_ptr<Media::PixelMap> pmap = std::move(pixmap);
         auto pixelmap = PixelMap::CreatePixelMap(&pmap);
-        auto task = [pixelmap, containerId = containerId, frameNode]() {
+        auto task = [pixelmap, frameNode]() {
             auto context = frameNode->GetRenderContext();
             if (context) {
                 context->UpdateBackgroundPixelMap(pixelmap);
@@ -2892,9 +2893,6 @@ void RosenRenderContext::PaintBorderImageGradient()
 
 void RosenRenderContext::OnModifyDone()
 {
-    auto frameNode = GetUnsafeHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
@@ -5462,7 +5460,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
     // transition effects should be initialized without animation.
-    RSNode::ExecuteWithoutAnimation([this, isOnTheTree, &frameNode]() {
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
         // transitionIn effects should be initialized as active if currently not on the tree.
         transitionEffect_->Attach(Claim(this), !isOnTheTree);
     });

@@ -39,6 +39,8 @@ void EventReport::SendInternalException(InternalExcepType type) {}
 
 void EventReport::SendAccessibilityException(AccessibilityExcepType type) {}
 
+void EventReport::ReportAccessibilityFailEvent(const std::string& actionName) {}
+
 void EventReport::SendFormException(FormExcepType type) {}
 
 void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr) {}
@@ -92,4 +94,15 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
 {}
 
 void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
+
+void EventReport::ReportScrollableErrorEvent(
+    const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
+{}
+
+void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
+{}
+
+void EventReport::ReportClipboardFailEvent(const std::string& errorType)
+{}
+
 } // namespace OHOS::Ace

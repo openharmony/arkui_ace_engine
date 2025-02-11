@@ -135,6 +135,7 @@ void RosenWindow::RequestFrame()
     CHECK_NULL_VOID(onShow_);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
+    CHECK_NULL_VOID(isRootInitialize_);
     auto taskExecutor = taskExecutor_.Upgrade();
     if (rsWindow_) {
         isRequestVsync_ = true;

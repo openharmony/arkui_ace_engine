@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
@@ -1261,9 +1262,48 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
     }
 }
 
+void JSSwiperController::SwipeTo(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        LOGE("Param is not valid");
+        return;
+    }
+    if (controller_) {
+        controller_->SwipeTo(args[0]->ToNumber<int32_t>());
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "swipeTo: Swiper controller not bind.");
+    }
+}
+
+void JSSwiperController::ShowNext(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (controller_) {
+        controller_->ShowNext();
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "showNext: Swiper controller not bind.");
+    }
+}
+
+void JSSwiperController::ShowPrevious(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (controller_) {
+        controller_->ShowPrevious();
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "showPrevious: Swiper controller not bind.");
+    }
+}
+
 void JSSwiperController::ChangeIndex(const JSCallbackInfo& args)
 {
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "changeIndex: Swiper controller not bind.");
         return;
     }
     if (args.Length() < 1 || !args[0]->IsNumber()) {
@@ -1289,6 +1329,8 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "finishAnimation: Swiper controller not bind.");
         return;
     }
 
@@ -1315,6 +1357,8 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Swiper controller not bind.");
         return;
     }
 
@@ -1347,6 +1391,8 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
 void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
 {
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Swiper controller not bind.");
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
         return;
     }

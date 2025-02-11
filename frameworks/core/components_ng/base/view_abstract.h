@@ -297,6 +297,7 @@ public:
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnAxisEvent(OnAxisEventFunc &&onAxisEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
+    static void SetOnHoverMove(OnHoverMoveFunc &&onHoverMoveEventFunc);
     static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
@@ -372,12 +373,19 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
+    static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t ClosePopup(const RefPtr<UINode>& customNode);
     static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static void DismissDialog();
     static void DismissPopup();
+    static void ShowMenuPreview(
+        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, NG::MenuParam& menuParam);
+    static int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId);
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+    static int32_t CloseMenu(const RefPtr<UINode>& customNode);
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(std::function<void()>&& buildFunc, const RefPtr<FrameNode>& targetNode,
@@ -430,6 +438,7 @@ public:
     static void DisableOnCrownEvent();
 #endif
     static void DisableOnHover();
+    static void DisableOnHoverMove();
     static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
@@ -457,6 +466,7 @@ public:
     static void DisableOnCrownEvent(FrameNode* frameNode);
 #endif
     static void DisableOnHover(FrameNode* frameNode);
+    static void DisableOnHoverMove(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
@@ -693,6 +703,7 @@ public:
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
+    static void SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHoverMoveEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
     static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
     static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);
@@ -762,6 +773,7 @@ public:
     static void SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback);
     static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
     static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
+    static void SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc);
     static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
     static void SetJSFrameNodeOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
@@ -776,6 +788,7 @@ public:
     static void ClearJSFrameNodeOnFocusCallback(FrameNode* frameNode);
     static void ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode);
     static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnHoverMove(FrameNode* frameNode);
     static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
     static void ClearJSFrameNodeOnSizeChange(FrameNode* frameNode);
     static void ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode);
@@ -832,6 +845,12 @@ public:
     static void ResetAlignRules(FrameNode* frameNode);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList);
+    static void SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
+        const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+        int32_t expectedUpdateInterval = 1000);
+    static void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval = 1000);
+
     static Color GetColorBlend(FrameNode* frameNode);
     static void ResetAreaChanged(FrameNode* frameNode);
     static void ResetVisibleChange(FrameNode* frameNode);
@@ -843,6 +862,8 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void FreezeUINodeById(const std::string& id, bool isFreeze);
+    static void FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
     static void SetOffsetLocalizedEdges(bool needLocalized);

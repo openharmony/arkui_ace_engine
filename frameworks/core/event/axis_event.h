@@ -73,6 +73,13 @@ struct AxisEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     int32_t originalId = 0;
     bool isInjected = false;
+    float targetPositionX;
+    float targetPositionY;
+    float targetGlobalPositionX;
+    float targetGlobalPositionY;
+    float width;
+    float height;
+    uint64_t modifierKeyState;
 
     int32_t scrollStep = 0;
 

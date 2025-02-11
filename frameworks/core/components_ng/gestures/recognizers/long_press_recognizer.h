@@ -159,6 +159,7 @@ private:
     DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
+    bool hasRepeated_ = false;
 };
 
 } // namespace OHOS::Ace::NG

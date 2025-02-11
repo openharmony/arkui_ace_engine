@@ -121,7 +121,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement() override;
+    void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
@@ -411,7 +411,7 @@ public:
     void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
         bool keyboardHeightChanged);
     float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
-        float height, SizeF& rootSize);
+        float height, SizeF& rootSize, bool isInline = false);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -1111,6 +1111,11 @@ public:
     }
 
     void SetIsWindowSizeDragging(bool isDragging);
+    void GetAllPixelMap();
+    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
+    {
+        uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

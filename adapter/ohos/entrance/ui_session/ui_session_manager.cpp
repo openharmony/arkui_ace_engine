@@ -290,9 +290,9 @@ void UiSessionManager::SendBaseInfo(int32_t processId)
     }
 }
 
-void UiSessionManager::SaveGetWebViewLanguage(GetWebViewCurrentLanguageFunction&& function)
+void UiSessionManager::SaveGetPixelMapFunction(GetPixelMapFunction&& function)
 {
-    getWebLanguageFunction_ = std::move(function);
+    getPixelMapFunction_ = std::move(function);
 }
 
 void UiSessionManager::SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager)
@@ -309,9 +309,9 @@ void UiSessionManager::GetWebViewLanguage()
     }
 }
 
-void UiSessionManager::SaveTranslateId(int32_t id)
+void UiSessionManager::SaveProcessId(std::string key, int32_t id)
 {
-    processMap_["translate"] = id;
+    processMap_[key] = id;
 }
 
 void UiSessionManager::SendCurrentLanguage(std::string result)
@@ -365,6 +365,24 @@ void UiSessionManager::ResetTranslate(int32_t nodeId)
         translateManager_->ResetTranslate(nodeId);
     } else {
         LOGE("translateManager is nullptr ,translate failed");
+    }
+}
+
+void UiSessionManager::GetPixelMap()
+{
+    if (getPixelMapFunction_) {
+        getPixelMapFunction_();
+    }
+}
+
+void UiSessionManager::SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
+{
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["pixel"]]);
+    if (reportService != nullptr && translateManager_) {
+        reportService->SendShowingImage(maps);
+        translateManager_->ClearMap();
+    } else {
+        LOGW("report component event failed,process id:%{public}d", processMap_["pixel"]);
     }
 }
 } // namespace OHOS::Ace

@@ -56,7 +56,7 @@ ohos_source_set("ace_kit") {
     "$ace_root/interfaces/inner_api/ace_kit/src",
   ]
 
-  deps = []
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   external_deps = [ "hilog:libhilog" ]
 
   if (is_arkui_x) {

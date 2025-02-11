@@ -396,6 +396,7 @@ public:
     {
         return externalDecodeFormat_;
     }
+    void AddPixelMapToUiManager();
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -514,7 +515,6 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent();
-
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;

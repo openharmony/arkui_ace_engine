@@ -1290,113 +1290,54 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayScrollAnimation001, TestSize.Level1)
     pattern->SetDisableTransitionAnimation(false);
     EXPECT_FALSE(pattern->IsDisableTransitionAnimation());
     /**
-     * @tc.steps: step4. test PlayScrollAnimation when offset is 0.0f
+     * @tc.steps: step4. test PlayScrollAnimation when currentDelta is 0.0f
      */
-    float offset = 0.0f;
-    pattern->PlayScrollAnimation(offset);
-    EXPECT_EQ(pattern->horizontalExitNodeBlur_, 0);
+    float currentDelta = 0.0f;
+    float currentIndexOffset = 50.0f;
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
+    EXPECT_EQ(pattern->canChangeDirectionFlag_, 0);
     /**
-     * @tc.steps: step5. test PlayScrollAnimation when offset is 0.0f
+     * @tc.steps: step5. test PlayScrollAnimation when currentDelta is 0.0f
      */
     pattern->isDragging_ = true;
-    offset = 0.0f;
-    pattern->PlayScrollAnimation(offset);
-    EXPECT_EQ(pattern->horizontalExitNodeBlur_, 0);
+    currentDelta = 0.0f;
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
+    EXPECT_EQ(pattern->canChangeDirectionFlag_, 0);
     /**
-     * @tc.steps: step6. test PlayScrollAnimation when offset is more than 0 but can't find next item
+     * @tc.steps: step6. test PlayScrollAnimation when currentIndexOffset is 0.0f
+     */
+    currentDelta = 50.0f;
+    currentIndexOffset = 0.0f;
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
+    EXPECT_EQ(pattern->canChangeDirectionFlag_, 1);
+    /**
+     * @tc.steps: step7. test PlayScrollAnimation when currentIndexOffset is 0.0f
+     */
+    pattern->isDragging_ = true;
+    currentIndexOffset = 0.0f;
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
+    EXPECT_EQ(pattern->canChangeDirectionFlag_, 1);
+    /**
+     * @tc.steps: step8. test PlayScrollAnimation when currentDelta and currentIndexOffset is more than 0 but can't find
+     * next item
      */
     pattern->currentIndex_ = 3;
     pattern->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    offset = 50.0f;
-    pattern->PlayScrollAnimation(offset);
+    currentDelta = 50.0f;
+    currentIndexOffset = 50.0f;
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
     EXPECT_EQ(pattern->horizontalExitNodeBlur_, 0);
     /**
      * @tc.steps: step7. change currentIndex_ to find next item
      */
     pattern->currentIndex_ = 0;
-    pattern->PlayScrollAnimation(offset);
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
     EXPECT_EQ(pattern->horizontalExitNodeBlur_, 0);
 
     pattern->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
     pattern->currentIndex_ = 1;
-    pattern->PlayScrollAnimation(offset);
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
     EXPECT_EQ(pattern->horizontalExitNodeBlur_, 0);
-}
-
-/**
- * @tc.name: PlayScrollAnimation002
- * @tc.desc: Test for PlayScrollAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(ArcSwiperPatternTestNg, PlayScrollAnimation002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node
-     */
-    SwiperModelNG model = CreateArcSwiper();
-    model.SetDirection(Axis::VERTICAL);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    ASSERT_NE(frameNode_, nullptr);
-
-    /**
-     * @tc.steps: step2. get pattern
-     */
-    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->contentMainSize_ = 80;
-    /**
-     * @tc.steps: step3. SetDisableTransitionAnimation
-     */
-    pattern->SetDisableTransitionAnimation(true);
-    EXPECT_TRUE(pattern->IsDisableTransitionAnimation());
-
-    pattern->itemPosition_ = CreateSwiperItemPostion();
-    EXPECT_EQ(pattern->itemPosition_.size(), 2);
-
-    pattern->SetDisableTransitionAnimation(false);
-    EXPECT_FALSE(pattern->IsDisableTransitionAnimation());
-    /**
-     * @tc.steps: step4. test PlayScrollAnimation when offset is 0.0f
-     */
-    float offset = 0.0f;
-    pattern->PlayScrollAnimation(offset);
-    EXPECT_EQ(pattern->verticalExitNodeBlur_, 0);
-    /**
-     * @tc.steps: step5. test PlayScrollAnimation when offset is 0.0f
-     */
-    pattern->isDragging_ = true;
-    offset = 0.0f;
-    pattern->PlayScrollAnimation(offset);
-    EXPECT_EQ(pattern->verticalExitNodeBlur_, 0);
-    /**
-     * @tc.steps: step6. test PlayScrollAnimation when offset is more than 0 but can't find next item
-     */
-    pattern->currentIndex_ = 3;
-    pattern->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    offset = 50.0f;
-    pattern->PlayScrollAnimation(offset);
-    EXPECT_EQ(pattern->verticalExitNodeBlur_, 0);
-    /**
-     * @tc.steps: step7. change currentIndex_ to find next item
-     */
-    pattern->currentIndex_ = 0;
-    pattern->PlayScrollAnimation(offset);
-    SwiperItemInfo item;
-    bool ret = FindItemByIndex(pattern, pattern->currentIndex_, item);
-    ASSERT_TRUE(ret);
-    auto startPos = item.startPos;
-    EXPECT_EQ(pattern->verticalExitNodeBlur_, CalcVerticalScrollBlur(pattern->CalculateVisibleSize(), startPos, true));
-
-    pattern->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
-    pattern->currentIndex_ = 1;
-    pattern->PlayScrollAnimation(offset);
-
-    ret = FindItemByIndex(pattern, pattern->currentIndex_, item);
-    ASSERT_TRUE(ret);
-    startPos = item.startPos;
-    EXPECT_EQ(pattern->verticalExitNodeBlur_, CalcVerticalScrollBlur(pattern->CalculateVisibleSize(), startPos, true));
 }
 
 /**
@@ -1423,7 +1364,7 @@ HWTEST_F(ArcSwiperPatternTestNg, InitialFrameNodePropertyAnimation001, TestSize.
     /**
      * @tc.steps: step3. test for InitialFrameNodePropertyAnimation when frameNode is nullptr
      */
-    OffsetF offset;
+    OffsetF offset(40.0f, 50.0f);
     RefPtr<FrameNode> frameNode = nullptr;
     pattern->InitialFrameNodePropertyAnimation(offset, frameNode);
 
@@ -1432,13 +1373,7 @@ HWTEST_F(ArcSwiperPatternTestNg, InitialFrameNodePropertyAnimation001, TestSize.
      */
     frameNode = CreateFrameNode();
     pattern->InitialFrameNodePropertyAnimation(offset, frameNode);
-    EXPECT_EQ(frameNode->GetRenderContext()->GetOpacityValue(), 1.0f);
-
-    frameNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
-    frameNode->GetRenderContext()->OnBackgroundColorUpdate(Color::RED);
-
-    pattern->InitialFrameNodePropertyAnimation(offset, frameNode);
-    EXPECT_EQ(frameNode->GetRenderContext()->GetBackgroundColorValue(), Color::BLUE);
+    EXPECT_EQ(frameNode->isTransformNotChanged_, false);
 }
 
 /**
@@ -1475,57 +1410,13 @@ HWTEST_F(ArcSwiperPatternTestNg, InitialFrameNodePropertyAnimation002, TestSize.
     frameNode = CreateFrameNode();
 
     pattern->InitialFrameNodePropertyAnimation(offset, frameNode);
-    EXPECT_EQ(frameNode->GetRenderContext()->GetOpacityValue(), 1.0f);
+    EXPECT_EQ(frameNode->isTransformNotChanged_, false);
     ArcSwiperPattern::AnimationParam scaleParam = CreateScaleParam(1.0, 40, frameNode);
 
     auto animation = pattern->Animation(true, scaleParam);
     pattern->animationVector_.push_back(animation);
-    frameNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
-    frameNode->GetRenderContext()->OnBackgroundColorUpdate(Color::RED);
-
     pattern->InitialFrameNodePropertyAnimation(offset, frameNode);
-    EXPECT_EQ(frameNode->GetRenderContext()->GetBackgroundColorValue(), Color::BLUE);
-}
-
-/**
- * @tc.name: CancelFrameNodePropertyAnimation
- * @tc.desc: Test for CancelFrameNodePropertyAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(ArcSwiperPatternTestNg, CancelFrameNodePropertyAnimation, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node
-     */
-    SwiperModelNG model = CreateArcSwiper();
-    model.SetDirection(Axis::VERTICAL);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. get pattern
-     */
-    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step3. test for CancelFrameNodePropertyAnimation when context is nullptr
-     */
-    RefPtr<RenderContext> context = nullptr;
-    pattern->CancelFrameNodePropertyAnimation(context);
-
-    /**
-     * @tc.steps: step3. test for InitialFrameNodePropertyAnimation when frameNode is not nullptr
-     */
-    auto frameNode = CreateFrameNode();
-    ArcSwiperPattern::AnimationParam param = CreateAlphaParam(0.5f, 10, 40, frameNode);
-    auto animation = pattern->Animation(true, param);
-    pattern->animationVector_.push_back(animation);
-    BlurOption blurOption;
-    context = frameNode->GetRenderContext();
-    pattern->CancelFrameNodePropertyAnimation(context);
-    EXPECT_EQ(context->GetOpacityValue(), 1.0f);
-    EXPECT_EQ(pattern->animationVector_.size(), 0);
+    EXPECT_EQ(frameNode->isTransformNotChanged_, false);
 }
 
 /**
@@ -2240,34 +2131,6 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalExitAnimation001, TestSize.Level1)
     pattern->animationVector_.clear();
     EXPECT_EQ(pattern->animationVector_.size(), 0);
     pattern->PlayVerticalExitAnimation(offset, nullptr, rollBack);
-    EXPECT_EQ(pattern->animationVector_.size(), 0);
-}
-
-/**
- * @tc.name: PlayVerticalEntryAnimation
- * @tc.desc: Test for method of PlayVerticalEntryAnimation.
- * @tc.type: FUNC
- */
-HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalEntryAnimation, TestSize.Level1)
-{
-    SwiperModelNG model = CreateArcSwiper();
-    model.SetDirection(Axis::HORIZONTAL);
-    model.SetPreviousMargin(Dimension(20), false);
-    model.SetNextMargin(Dimension(20), false);
-    CreateSwiperItems();
-    CreateSwiperDone();
-    ASSERT_NE(frameNode_, nullptr);
-    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    ASSERT_NE(pattern, nullptr);
-    EXPECT_EQ(pattern->itemPosition_.size(), 2);
-    OffsetF offset(0.0f, 0.0f);
-    auto frameNode = CreateFrameNode();
-    bool rollBack = true;
-    pattern->PlayVerticalEntryAnimation(offset, frameNode, rollBack);
-    EXPECT_EQ(pattern->animationVector_.size(), 4);
-    pattern->animationVector_.clear();
-    EXPECT_EQ(pattern->animationVector_.size(), 0);
-    pattern->PlayVerticalEntryAnimation(offset, nullptr, rollBack);
     EXPECT_EQ(pattern->animationVector_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

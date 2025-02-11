@@ -63,6 +63,7 @@ enum class SessionType : int32_t {
     SECURITY_UI_EXTENSION_ABILITY = 3,
     DYNAMIC_COMPONENT = 4,
     ISOLATED_COMPONENT = 5,
+    INVALID_TYPE = 100,
 };
 
 enum class UIExtensionUsage : uint32_t {
@@ -150,8 +151,10 @@ public:
     // The interface for UEC dump
     virtual uint32_t GetReasonDump() const = 0;
     virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
-    virtual bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply) = 0;
-    virtual bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type) = 0;
+    virtual bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) = 0;
+    virtual bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) = 0;
 
     virtual void NotifyHostWindowMode(int32_t mode) {}
 };

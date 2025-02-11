@@ -197,11 +197,7 @@ RectF TextFieldSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandle
         if (IsSingleHandle()) {
             return controller->GetCaretInfo().originalRect;
         }
-        auto handleRect = controller->GetSecondHandleRect();
-        auto contentHeight = pattern->GetTextContentRect().Height();
-        auto handleHeight = std::min(handleRect.Height(), contentHeight);
-        handleRect.SetHeight(handleHeight);
-        return handleRect;
+        return controller->GetSecondHandleRect();
     } else { // DragHandleIndex::NONE
         return RectF();
     }

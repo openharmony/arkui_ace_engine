@@ -14,6 +14,7 @@
  */
 
 #include "uv_task_wrapper_impl.h"
+#include "base/utils/time_util.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,5 +43,38 @@ void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task)
     napi_send_event(env_, [work = std::make_shared<UVWorkWrapper>(task)] {
         (*work)();
     }, napi_eprio_high);
+}
+
+void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
+{
+    if (delayTime <= 0) {
+        Call(task);
+        return;
+    }
+
+    uv_loop_t *loop;
+    napi_get_uv_event_loop(env_, &loop);
+    uv_update_time(loop);
+    uv_timer_t *timer = new uv_timer_t;
+    uv_timer_init(loop, timer);
+    timer->data = new UVTimerWorkWrapper(task, delayTime, GetCurrentTimestamp());
+    uv_timer_start(
+        timer,
+        [](uv_timer_t *timer) {
+            UVTimerWorkWrapper* workWrapper = reinterpret_cast<UVTimerWorkWrapper*>(timer->data);
+            LOGD("Start work delayTime: %{public}u, taskTime: %{public}" PRId64 ", curTime: %{public}" PRId64,
+                workWrapper->GetDelayTime(), workWrapper->GetTaskTime(), GetCurrentTimestamp());
+            if (workWrapper) {
+                (*workWrapper)();
+                delete workWrapper;
+            }
+            uv_timer_stop(timer);
+            uv_close(
+                reinterpret_cast<uv_handle_t *>(timer),
+                [](uv_handle_t *timer) {
+                    delete timer;
+            });
+        },
+        delayTime, 0);
 }
 } // namespace OHOS::Ace::NG
