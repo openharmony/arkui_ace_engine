@@ -28,8 +28,9 @@ void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
 
     parent_->GetScrollWindowAdapter()->Prepare();
     while (true) {
-        if (index < 0 || index >= totalCnt_)
+        if (index < 0 || index >= totalCnt_) {
             break;
+        }
 
         auto item = CreateItem(index);
         if (!insertRef) {
