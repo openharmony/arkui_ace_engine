@@ -66,6 +66,8 @@ constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
+constexpr int32_t FOLD_TYPE_TWO = 2;
+constexpr int32_t FOLD_TYPE_FOUR = 4;
 
 bool IsOpIncEnabled()
 {
@@ -989,6 +991,9 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
         auto type = StringUtils::StringToInt(foldScreenTypeStr);
+        if (type == FOLD_TYPE_FOUR) {
+            type = FOLD_TYPE_TWO;
+        }
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
