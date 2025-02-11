@@ -115,5 +115,6 @@ private:
 
     Axis axis_ = Axis::VERTICAL;
     bool rangeMode_ = false; // true  if providing item range to frontend directly
+    bool jumpPending_ = false; // will perform a jump on the next recomposition
 };
 } // namespace OHOS::Ace::NG

@@ -33,6 +33,12 @@ public:
      */
     virtual void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) {}
 
+    /**
+     * @brief Called when the adapter will perform a jump
+     * 
+     */
+    virtual void MarkJump() {}
+
     virtual void FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) = 0;
 
     /**

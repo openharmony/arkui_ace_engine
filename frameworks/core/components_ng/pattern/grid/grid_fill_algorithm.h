@@ -51,6 +51,11 @@ public:
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
+    void MarkJump() override
+    {
+        resetRangeOnJump_ = true;
+    }
+
     int32_t GetMarkIndex() override
     {
         return info_.startIndex_;
@@ -90,11 +95,13 @@ private:
         int32_t startLine = 0; // first line in viewport
         float offset = 0.0f;   // main-axis offset of the first line in viewport
         int32_t endLine = 0;   // last line in viewport
-        int32_t startIdx = 0; // only used in range mode
-        int32_t endIdx = 0; // only used in range mode
+        int32_t startIdx = 0;  // only used in range mode
+        int32_t endIdx = 0;    // only used in range mode
     };
     LayoutRange range_;
     GridIrregularFiller::FillParameters params_;
+
+    bool resetRangeOnJump_ = false;
 };
 
 } // namespace OHOS::Ace::NG

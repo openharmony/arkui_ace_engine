@@ -53,13 +53,17 @@ void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
     range_.offset = info_.currentOffset_;
     range_.endLine = info_.endMainLineIndex_;
     if (range_.startLine == 0) {
-        range_.offset = std::min(range_.offset, 0.0f);
+        range_.offset = std::min(range_.offset, 0.0f); // no overScroll in range estimation
     }
 }
 
 void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     FillNext(viewport, axis, node, index);
+    if (resetRangeOnJump_) {
+        range_.startLine = range_.endLine = info_.GetItemPos(index).second;
+        resetRangeOnJump_ = false;
+    }
 }
 
 void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)

@@ -165,8 +165,20 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
 
     IncrementAndLayout(__LINE__);
 
-    UpdateCurrentOffset(2000.0f);
+    UpdateCurrentOffset(-5000.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(55, 8));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(20, 26));
+    EXPECT_EQ(GetChildRect(frameNode_, 21).ToString(), "RectT (240.00, 8.00) - [240.00 x 450.00]");
+
+    UpdateCurrentOffset(-8000.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(54, 60));
+    EXPECT_EQ(GetChildRect(frameNode_, 60).ToString(), "RectT (120.00, 1382.00) - [0.00 x 450.00]");
+
+    UpdateCurrentOffset(4000.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(36, 42));
+    EXPECT_EQ(GetChildRect(frameNode_, 38).ToString(), "RectT (0.00, 466.00) - [240.00 x 450.00]");
+    EXPECT_EQ(pattern_->info_.startIndex_, 36);
 }
 } // namespace OHOS::Ace::NG

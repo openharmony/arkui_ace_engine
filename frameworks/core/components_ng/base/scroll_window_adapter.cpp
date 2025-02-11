@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,6 +33,8 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool notify)
         return;
     }
     markIndex_ = index;
+    jumpPending_ = true;
+    fillAlgorithm_->MarkJump();
     RequestRecompose();
 }
 
@@ -151,6 +154,13 @@ void ScrollWindowAdapter::Prepare()
 {
     filled_.clear();
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
+    if (jumpPending_) {
+        jumpPending_ = false;
+        auto scroll = container_->GetPattern<ScrollablePattern>();
+        if (scroll) {
+            scroll->ScrollToIndex(markIndex_, false, ScrollAlign::START, std::nullopt);
+        }
+    }
 }
 
 void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)

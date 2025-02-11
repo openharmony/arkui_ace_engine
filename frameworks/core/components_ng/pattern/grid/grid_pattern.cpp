@@ -431,7 +431,7 @@ void GridPattern::UpdateOffsetHelper(float offset)
 {
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
-    if (UpdateOffset(-userOffset) && Negative(userOffset)) {
+    if (UpdateOffset(-userOffset) && InRegion(-GetMainContentSize(), 0.0f, userOffset)) {
         // grid legacy layout would reset offset when items above are not found. skip layout to avoid that.
         return;
     }
@@ -490,7 +490,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (!isInitialized_) {
         JumpToItem(gridLayoutInfo.startIndex_); // notify 2.0 adapter after first layout
     }
-    UpdateLayoutRange(info_.axis_, info_.startIndex_);
+    UpdateLayoutRange(info_.axis_, info_.jumpForRecompose_);
+    info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
         CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());
@@ -1938,7 +1939,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
     StopAnimate();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t totalChildCount = host->TotalChildCount();
+    int32_t totalChildCount = host->GetTotalChildCount();
     if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (extraOffset.has_value()) {
             info_.extraOffset_ = -extraOffset.value();

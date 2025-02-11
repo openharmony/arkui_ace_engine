@@ -46,7 +46,7 @@ protected:
     /**
      * @brief Pass latest layout range info to adapter.
      */
-    void UpdateLayoutRange(Axis axis, int32_t markIdx);
+    void UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx);
 
     /**
      * @brief Pass scroll offset to adapter.
