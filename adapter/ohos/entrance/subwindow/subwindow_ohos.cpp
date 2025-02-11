@@ -97,7 +97,7 @@ public:
                 CHECK_NULL_VOID(subWindow);
                 subWindow->OnFreeMultiWindowSwitch(enable);
             },
-            TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch");
     }
 
 private:
@@ -506,7 +506,7 @@ void SubwindowOhos::ResizeDialogSubwindow()
             [this]() {
                 ResizeWindow();
             },
-            TaskExecutor::TaskType::UI, "ArkUIResizeDialogSubwindow", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIResizeDialogSubwindow");
     }
 }
 
@@ -1470,8 +1470,7 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
     }
 
     SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
-    if (!handler_->PostTask(
-        GetInitToastDelayTask(toastInfo, std::move(callback)), AppExecFwk::EventHandler::Priority::VIP)) {
+    if (!handler_->PostTask(GetInitToastDelayTask(toastInfo, std::move(callback)))) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1576,7 +1575,7 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
     };
     isToastWindow_ = false;
-    if (!handler_->PostTask(showDialogCallback, AppExecFwk::EventHandler::Priority::VIP)) {
+    if (!handler_->PostTask(showDialogCallback)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1639,7 +1638,7 @@ void SubwindowOhos::ShowDialogForService(const PromptDialogAttr& dialogAttr, con
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
     };
     isToastWindow_ = false;
-    if (!handler_->PostTask(showDialogCallback, AppExecFwk::EventHandler::Priority::VIP)) {
+    if (!handler_->PostTask(showDialogCallback)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1794,7 +1793,7 @@ void SubwindowOhos::ShowActionMenuForService(
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)));
     };
     isToastWindow_ = false;
-    if (!handler_->PostTask(showDialogCallback, AppExecFwk::EventHandler::Priority::VIP)) {
+    if (!handler_->PostTask(showDialogCallback)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1961,7 +1960,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
         ResizeWindowForFoldStatus();
         return;
     }
-    if (!handler_->PostTask(callback, AppExecFwk::EventHandler::Priority::VIP)) {
+    if (!handler_->PostTask(callback)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize Toast Window failed");
     }
 }

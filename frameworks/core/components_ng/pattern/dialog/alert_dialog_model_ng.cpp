@@ -100,6 +100,6 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             CHECK_NULL_VOID(pattern);
             pattern->SetOnWillDismiss(arg.onWillDismiss);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog");
 }
 } // namespace OHOS::Ace::NG
