@@ -8888,12 +8888,10 @@ ArkUINativeModuleValue CommonBridge::RegisterFrameNodeDestructorCallback(ArkUIRu
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* nativeNode = GetFrameNode(runtimeCallInfo);
-    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    if (secondeArg->IsUndefined()) {
+    if (secondeArg->IsNull() || secondeArg->IsUndefined()) {
         frameNode->SetFrameNodeDestructorCallback(nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
