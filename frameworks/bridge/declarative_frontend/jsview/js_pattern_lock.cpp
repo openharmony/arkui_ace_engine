@@ -86,6 +86,7 @@ void JSPatternLock::JSBind(BindingTarget globalObj)
     JSClass<JSPatternLock>::StaticMethod("sideLength", &JSPatternLock::SetSideLength, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("autoReset", &JSPatternLock::SetAutoReset, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("activateCircleStyle", &JSPatternLock::SetActivateCircleStyle);
+    JSClass<JSPatternLock>::StaticMethod("skipUnselectedPoint", &JSPatternLock::SetSkipUnselectedPoint);
     JSClass<JSPatternLock>::StaticMethod("onDotConnect", &JSPatternLock::SetDotConnect);
     JSClass<JSPatternLock>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSPatternLock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -283,22 +284,46 @@ void JSPatternLock::SetEnableWaveEffect(const JSRef<JSVal>& info)
     }
     PatternLockModel::GetInstance()->SetEnableWaveEffect(info->ToBoolean());
 }
+void JSPatternLock::SetEnableForeground(const JSRef<JSVal>& info)
+{
+    if (!info->IsBoolean()) {
+        PatternLockModel::GetInstance()->SetEnableForeground(false);
+        return;
+    }
+    PatternLockModel::GetInstance()->SetEnableForeground(info->ToBoolean());
+}
 void JSPatternLock::SetActivateCircleStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsObject()) {
         PatternLockModel::GetInstance()->SetActiveCircleColor(Color::TRANSPARENT);
         PatternLockModel::GetInstance()->SetActiveCircleRadius(Dimension(0.0f, DimensionUnit::VP));
         PatternLockModel::GetInstance()->SetEnableWaveEffect(true);
+        PatternLockModel::GetInstance()->SetEnableForeground(false);
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> jsColor = paramObject->GetProperty("color");
     JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
-    JSRef<JSVal> jsEnable = paramObject->GetProperty("enableWaveEffect");
+    JSRef<JSVal> jsEnableWaveEffect = paramObject->GetProperty("enableWaveEffect");
+    JSRef<JSVal> jsEnableForeground = paramObject->GetProperty("enableForeground");
     SetActiveCircleColor(jsColor);
     SetActiveCircleRadius(jsRadius);
-    SetEnableWaveEffect(jsEnable);
+    SetEnableWaveEffect(jsEnableWaveEffect);
+    SetEnableForeground(jsEnableForeground);
 }
+
+void JSPatternLock::SetSkipUnselectedPoint(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        PatternLockModel::GetInstance()->SetSkipUnselectedPoint(false);
+        return;
+    }
+    PatternLockModel::GetInstance()->SetSkipUnselectedPoint(info[0]->ToBoolean());
+}
+
 void JSPatternLockController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSPatternLockController>::Declare("PatternLockController");
