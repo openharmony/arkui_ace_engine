@@ -1033,7 +1033,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         CheckMarkDirtyNodeForRenderIndicator();
     }
 
-    PlayScrollAnimation(currentDelta_);
+    PlayScrollAnimation(currentDelta_, currentIndexOffset_);
     if (jumpIndex_) {
         auto pipeline = GetContext();
         if (pipeline) {

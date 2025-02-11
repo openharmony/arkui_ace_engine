@@ -891,7 +891,7 @@ private:
     // ArcSwiper will implement this interface in order to reset the background color of parent node.
     virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
-    virtual void PlayScrollAnimation(float offset) {};
+    virtual void PlayScrollAnimation(float currentDelta, float currentIndexOffset) {};
     virtual void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
