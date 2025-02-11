@@ -29,6 +29,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
     const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 }
 
@@ -599,11 +600,54 @@ HWTEST_F(CommonMethodModifierTest7, SetOnOnGestureJudgeBeginTest, TestSize.Level
 }
 
 /*
+ * @tc.name: SetOnGestureRecognizerJudgeBegin0Test
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin0Test, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(modifier_->setOnGestureRecognizerJudgeBegin0, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event,
+        const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
+        const Callback_GestureJudgeResult_Void continuation)
+    {
+        auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(event.ptr);
+        auto info = peer ? peer->GetBaseGestureInfo() : nullptr;
+        ASSERT_NE(info, nullptr);
+        GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(peer);
+        auto isOk = info->GetSourceDevice() != SourceType::NONE;
+        Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
+        CallbackHelper(continuation).Invoke(arkResult);
+    };
+    auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);
+    modifier_->setOnGestureRecognizerJudgeBegin0(node_, &arkCallback);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto fireOnGestureRecognizerJudgeBegin = gestureHub->GetOnGestureRecognizerJudgeBegin();
+    ASSERT_NE(fireOnGestureRecognizerJudgeBegin, nullptr);
+
+    auto info = std::make_shared<BaseGestureEvent>();
+    auto current = AceType::MakeRefPtr<ClickRecognizer>();
+    info->SetSourceDevice(SourceType::MOUSE);
+    GestureJudgeResult gjResult = fireOnGestureRecognizerJudgeBegin(info, current, {});
+    EXPECT_EQ(gjResult, GestureJudgeResult::CONTINUE);
+
+    info->SetSourceDevice(SourceType::NONE);
+    gjResult = fireOnGestureRecognizerJudgeBegin(info, current, {});
+    EXPECT_EQ(gjResult, GestureJudgeResult::REJECT);
+}
+
+/*
  * @tc.name: SetOnGestureRecognizerJudgeBegin1Test
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin1Test, TestSize.Level1)
 {
     using namespace Converter;
     ASSERT_NE(modifier_->setOnGestureRecognizerJudgeBegin1, nullptr);
@@ -614,12 +658,12 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin1Te
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
         const Callback_GestureJudgeResult_Void continuation)
     {
-#ifdef WRONG_TYPE
-        auto isOk = event.source != ARK_SOURCE_TYPE_UNKNOWN;
+        auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(event.ptr);
+        auto info = peer ? peer->GetBaseGestureInfo() : nullptr;
+        ASSERT_NE(info, nullptr);
+        GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(peer);
+        auto isOk = info->GetSourceDevice() != SourceType::NONE;
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
-#else
-        Ark_GestureJudgeResult arkResult{};
-#endif
         CallbackHelper(continuation).Invoke(arkResult);
     };
     auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);
