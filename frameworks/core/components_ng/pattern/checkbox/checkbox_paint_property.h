@@ -57,6 +57,9 @@ public:
         ResetCheckBoxSelectedColor();
         ResetCheckBoxUnSelectedColor();
         ResetCheckBoxCheckMarkColor();
+        ResetCheckBoxSelectedColorFlagByUser();
+        ResetCheckBoxUnSelectedColorFlagByUser();
+        ResetCheckBoxCheckMarkColorFlagByUser();
         ResetCheckBoxCheckMarkSize();
         ResetCheckBoxCheckMarkWidth();
         ResetCheckBoxSelectedStyle();
@@ -68,6 +71,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxSelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxUnSelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxCheckMarkColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxSelectedColorFlagByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxUnSelectedColorFlagByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxCheckMarkColorFlagByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxCheckMarkSize, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxCheckMarkWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxSelectedStyle, CheckBoxStyle, PROPERTY_UPDATE_RENDER);

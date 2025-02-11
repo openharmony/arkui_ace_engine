@@ -69,6 +69,9 @@ public:
     static void SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle);
     static void SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name);
     static void SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName);
+    static void ResetSelectedColor(FrameNode* frameNode);
+    static void ResetUnSelectedColor(FrameNode* frameNode);
+    static void ResetCheckMarkColor(FrameNode* frameNode);
 
     static bool GetSelect(FrameNode* frameNode);
     static Color GetSelectedColor(FrameNode* frameNode);

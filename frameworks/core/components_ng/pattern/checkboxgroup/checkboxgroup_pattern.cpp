@@ -619,18 +619,35 @@ void CheckBoxGroupPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto renderContext = host->GetRenderContext();
-    auto checkBoxGroupPaintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
-    CHECK_NULL_VOID(checkBoxGroupPaintProperty);
-    checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColor(checkBoxTheme->GetActiveColor());
-    checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColor(checkBoxTheme->GetInactiveColor());
-    checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColor(checkBoxTheme->GetPointColor());
+    OnThemeScopeUpdate(host->GetThemeScopeId());
     host->MarkModifyDone();
     host->MarkDirtyNode();
+}
+
+bool CheckBoxGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(themeScopeId);
+    CHECK_NULL_RETURN(checkBoxTheme, result);
+    auto checkBoxGroupPaintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_RETURN(checkBoxGroupPaintProperty, result);
+    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupSelectedColorFlagByUser()) {
+        checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColor(checkBoxTheme->GetActiveColor());
+        result = true;
+    }
+    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupUnSelectedColorFlagByUser()) {
+        checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColor(checkBoxTheme->GetInactiveColor());
+        result = true;
+    }
+    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupCheckMarkColorFlagByUser()) {
+        checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColor(checkBoxTheme->GetPointColor());
+        result = true;
+    }
+    return result;
 }
 
 void CheckBoxGroupPattern::OnAttachToMainTree()
