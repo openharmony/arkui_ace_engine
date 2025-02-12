@@ -93,6 +93,9 @@ void GridPattern::BeforeCreateLayoutWrapper()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     info_.childrenCount_ = host->GetTotalChildCount();
+    if (info_.jumpIndex_ != EMPTY_JUMP_INDEX) {
+        UpdateLayoutRange(GetAxis(), info_.jumpIndex_);
+    }
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
