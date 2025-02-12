@@ -546,16 +546,16 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
-        if (scenePersistence->IsSavingSnapshot()) {
+        auto isSaveingSnapshot = scenePersistence->IsSavingSnapshot();
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "id: %{public}d isSaveingSnapshot: %{public}d", persistentId, isSaveingSnapshot);
+        if (isSaveingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
-            if (!session_->GetSystemConfig().IsPcWindow() && !session_->GetSystemConfig().freeMultiWindowEnable_) {
-                snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
-                Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
-                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CreateSnapshotWindow: %{public}d", persistentId);
-            }
+            snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
+            Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
         } else {
             sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath());
         }
