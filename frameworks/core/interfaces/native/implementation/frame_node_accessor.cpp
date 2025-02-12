@@ -197,10 +197,19 @@ void DisposeImpl(FrameNodePeer* peer)
 }
 Ark_Int32 GetOpacityImpl(FrameNodePeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->node, 1.0f);
+    LOGE("ARKOALA FrameNodeAccessor::GetOpacityImpl is not implemented.");
+    auto opacity = ViewAbstract::GetOpacity(peer->node.GetRawPtr());
+    // should return Ark_Float32 or Ark_Number with a float value
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(opacity));
 }
 Ark_NativePointer GetPositionToWindowWithTransformImpl(FrameNodePeer* peer)
 {
+    CHECK_NULL_RETURN(peer && peer->node, nullptr);
+    LOGE("ARKOALA FrameNodeAccessor::GetPositionToWindowWithTransformImpl is not implemented.");
+    // return the result of method invokation
+    // wait for Ark_NativePointer change to a correct type which is acceptable to "offset" data
+    peer->node->GetPositionToWindowWithTransform();
     return nullptr;
 }
 } // FrameNodeAccessor

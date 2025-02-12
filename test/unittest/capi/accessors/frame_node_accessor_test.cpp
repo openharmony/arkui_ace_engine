@@ -22,6 +22,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "gmock/gmock.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 
@@ -720,6 +721,38 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
     EXPECT_EQ(rootUINodeRef->GetChildIndex(otherUINodeRef), POS_0);
     DestroyPeer(otherPeer);
     DestroyPeer(rootPeer);
+}
+
+/**
+ * @tc.name: GetOpacityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, DISABLED_GetOpacityTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getOpacity, nullptr);
+    // wait for a correct return type
+    auto opacity = accessor_->getOpacity(peer_);
+    EXPECT_EQ(opacity, 1.00);
+
+    auto fnode = reinterpret_cast<FrameNode *>(peer_->node.GetRawPtr());
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetOpacity(fnode, 0.55f);
+    opacity = accessor_->getOpacity(peer_);
+    EXPECT_EQ(opacity, 0.55);
+}
+
+/**
+ * @tc.name: GetPositionToWindowWithTransformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, DISABLED_GetPositionToWindowWithTransformTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
+    // wait for a correct return type
+    auto position = accessor_->getPositionToWindowWithTransform(peer_);
+    EXPECT_EQ(position, nullptr);
 }
 
 } // namespace OHOS::Ace::NG
