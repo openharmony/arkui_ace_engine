@@ -238,6 +238,12 @@ public:
         isSeeking_ = isSeeking;
     }
 
+    void SetShortcutKeyEnabled(bool isEnableShortcutKey);
+    bool GetShortcutKeyEnabled() const;
+
+    void SetCurrentVolume(float currentVolume);
+    float GetCurrentVolume() const;
+
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
@@ -265,6 +271,9 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnWindowHide() override;
+    void InitKeyEvent();
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleSliderKeyEvent(const KeyEventInfo& event);
 
     // Set properties for media player.
     void PrepareMediaPlayer();
@@ -355,6 +364,10 @@ private:
     void UpdateOverlayVisibility(VisibleType type);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    void OnKeySpaceEvent();
+    void MoveByStep(int32_t step);
+    void AdjustVolume(int32_t step);
+
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
@@ -380,9 +393,11 @@ private:
     bool isPaused_ = false;
     bool isContentSizeChanged_ = false;
     bool isSeeking_ = false;
+    bool isEnableShortcutKey_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;
+    float currentVolume_ = 1.0f;
 
     // full screen node id
     std::optional<int32_t> fullScreenNodeId_;

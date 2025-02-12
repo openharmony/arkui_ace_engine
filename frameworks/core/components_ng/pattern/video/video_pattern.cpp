@@ -76,6 +76,7 @@ constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
+constexpr float VOLUME_STEP = 0.05f;
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -788,17 +789,19 @@ void VideoPattern::UpdateMuted()
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_] {
-            auto mediaPlayer = weak.Upgrade();
-            CHECK_NULL_VOID(mediaPlayer);
-            if (isMuted) {
-                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
-                mediaPlayer->SetVolume(0.0f, 0.0f);
-            } else {
-                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
-                mediaPlayer->SetVolume(1.0f, 1.0f);
-            }
-            }, "ArkUIVideoUpdateMuted");
+        platformTask.PostTask(
+            [weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_, currentVolume = currentVolume_] {
+                auto mediaPlayer = weak.Upgrade();
+                CHECK_NULL_VOID(mediaPlayer);
+                if (isMuted || NearZero(currentVolume)) {
+                    mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
+                    mediaPlayer->SetVolume(0.0f, 0.0f);
+                } else {
+                    mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
+                    mediaPlayer->SetVolume(currentVolume, currentVolume);
+                }
+            },
+            "ArkUIVideoUpdateMuted");
     }
 }
 
@@ -990,6 +993,87 @@ void VideoPattern::OnModifyDone()
     } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
         StartImageAnalyzer();
     }
+    InitKeyEvent();
+}
+
+void VideoPattern::InitKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool VideoPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (isEnableShortcutKey_ && event.action == KeyAction::DOWN) {
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "video on key event %{public}d", event.code);
+        if (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT) {
+            MoveByStep(event.code == KeyCode::KEY_DPAD_LEFT ? -1 : 1);
+            return true;
+        }
+        if (event.code == KeyCode::KEY_DPAD_DOWN || event.code == KeyCode::KEY_DPAD_UP) {
+            AdjustVolume(event.code == KeyCode::KEY_DPAD_DOWN ? -1 : 1);
+            return true;
+        }
+        if (event.code == KeyCode::KEY_SPACE) {
+            OnKeySpaceEvent();
+            return true;
+        }
+    }
+    return false;
+}
+
+bool VideoPattern::HandleSliderKeyEvent(const KeyEventInfo& event)
+{
+    if (isEnableShortcutKey_ && event.GetKeyType() == KeyAction::DOWN) {
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "slider on key event %{public}d", event.GetKeyCode());
+        if (event.GetKeyCode() == KeyCode::KEY_SPACE) {
+            OnKeySpaceEvent();
+            return true;
+        }
+    }
+    return false;
+}
+
+void VideoPattern::OnKeySpaceEvent()
+{
+    if (isPlaying_) {
+        Pause();
+    } else {
+        Start();
+    }
+}
+
+void VideoPattern::MoveByStep(int32_t step)
+{
+    auto targetTime = static_cast<int32_t>(currentPos_) + step;
+    if (0 <= targetTime && targetTime <= static_cast<int32_t>(duration_)) {
+        SetCurrentTime(static_cast<float>(targetTime), OHOS::Ace::SeekMode::SEEK_CLOSEST);
+    }
+}
+
+void VideoPattern::AdjustVolume(int32_t step)
+{
+    // the volume ranges from 0 to 1. each step is VOLUME_STEP(0.05).
+    float targetVolume = currentVolume_ + step * VOLUME_STEP;
+    if (LessNotEqual(targetVolume, 0.0f) || GreatNotEqual(targetVolume, 1.0f)) {
+        return;
+    }
+    CHECK_NULL_VOID(mediaPlayer_);
+    if (NearZero(targetVolume)) {
+        mediaPlayer_->SetMediaMuted(MEDIA_TYPE_AUD, true);
+    } else {
+        mediaPlayer_->SetMediaMuted(MEDIA_TYPE_AUD, false);
+    }
+    mediaPlayer_->SetVolume(targetVolume, targetVolume);
+    currentVolume_ = targetVolume;
 }
 
 HiddenChangeEvent VideoPattern::CreateHiddenChangeEvent()
@@ -1055,51 +1139,49 @@ void VideoPattern::UpdateControllerBar()
     CHECK_NULL_VOID(layoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
-    if (layoutProperty->GetControlsValue(true)) {
-        auto video = AceType::DynamicCast<VideoNode>(host);
-        CHECK_NULL_VOID(video);
-        auto controller = AceType::DynamicCast<FrameNode>(video->GetControllerRow());
-        if (controller) {
-            auto sliderNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(SLIDER_POS));
-            CHECK_NULL_VOID(sliderNode);
-            auto sliderPattern = sliderNode->GetPattern<SliderPattern>();
-            CHECK_NULL_VOID(sliderPattern);
-            sliderPattern->UpdateValue(static_cast<float>(currentPos_));
-            sliderNode->MarkModifyDone();
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto needControlBar = layoutProperty->GetControlsValue(true);
+    focusHub->SetFocusType(needControlBar ? FocusType::SCOPE : FocusType::NODE);
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_VOID(video);
+    auto controller = AceType::DynamicCast<FrameNode>(video->GetControllerRow());
+    CHECK_NULL_VOID(controller);
+    if (needControlBar) {
+        auto sliderNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(SLIDER_POS));
+        CHECK_NULL_VOID(sliderNode);
+        auto sliderPattern = sliderNode->GetPattern<SliderPattern>();
+        CHECK_NULL_VOID(sliderPattern);
+        sliderPattern->UpdateValue(static_cast<float>(currentPos_));
+        sliderNode->MarkModifyDone();
 
-            auto textNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(CURRENT_POS));
-            CHECK_NULL_VOID(textNode);
-            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(textLayoutProperty);
-            std::string label = IntTimeToText(currentPos_);
-            textLayoutProperty->UpdateContent(label);
+        auto textNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(CURRENT_POS));
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        std::string label = IntTimeToText(currentPos_);
+        textLayoutProperty->UpdateContent(label);
 
-            auto durationNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(DURATION_POS));
-            CHECK_NULL_VOID(durationNode);
-            auto durationTextLayoutProperty = durationNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(durationTextLayoutProperty);
-            std::string durationText = IntTimeToText(duration_);
-            durationTextLayoutProperty->UpdateContent(durationText);
+        auto durationNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(DURATION_POS));
+        CHECK_NULL_VOID(durationNode);
+        auto durationTextLayoutProperty = durationNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(durationTextLayoutProperty);
+        std::string durationText = IntTimeToText(duration_);
+        durationTextLayoutProperty->UpdateContent(durationText);
 
-            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            textNode->MarkModifyDone();
-            durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            durationNode->MarkModifyDone();
-            auto controllerLayoutProperty = controller->GetLayoutProperty<LinearLayoutProperty>();
-            controllerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            controller->MarkModifyDone();
-        }
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        textNode->MarkModifyDone();
+        durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        durationNode->MarkModifyDone();
+        auto controllerLayoutProperty = controller->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(controllerLayoutProperty);
+        controllerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        controller->MarkModifyDone();
     } else {
-        auto video = AceType::DynamicCast<VideoNode>(host);
-        CHECK_NULL_VOID(video);
-        auto controller = AceType::DynamicCast<FrameNode>(video->GetControllerRow());
-        CHECK_NULL_VOID(controller);
-        if (controller) {
-            auto controllerLayoutProperty = controller->GetLayoutProperty<LinearLayoutProperty>();
-            controllerLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-            controller->MarkModifyDone();
-        }
+        auto controllerLayoutProperty = controller->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(controllerLayoutProperty);
+        controllerLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        controller->MarkModifyDone();
     }
 }
 
@@ -1336,10 +1418,18 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     };
     auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
     sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
+    auto focusHub = sliderNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
     if (InstanceOf<VideoFullScreenPattern>(this)) {
-        auto focusHub = sliderNode->GetOrCreateFocusHub();
         focusHub->SetIsDefaultFocus(true);
     }
+    // slider has registered click event, so it will consume KEY_SPACE event
+    // video needs register OnKeySpaceEvent extra
+    focusHub->SetOnKeyCallback([weak = WeakClaim(this)](const KeyEventInfo& keyEvent) -> bool {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_RETURN(videoPattern, false);
+        return videoPattern->HandleSliderKeyEvent(keyEvent);
+    });
 
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
@@ -1840,6 +1930,9 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     progressRate_ = videoPattern->GetProgressRate();
     isAnalyzerCreated_ = videoPattern->GetAnalyzerState();
     isEnableAnalyzer_ = videoPattern->isEnableAnalyzer_;
+    SetShortcutKeyEnabled(videoPattern->GetShortcutKeyEnabled());
+    SetCurrentVolume(videoPattern->GetCurrentVolume());
+
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent();
     auto videoNode = GetHost();
@@ -1898,6 +1991,26 @@ void VideoPattern::EnableAnalyzer(bool enable)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
+}
+
+void VideoPattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
+{
+    isEnableShortcutKey_ = isEnableShortcutKey;
+}
+
+bool VideoPattern::GetShortcutKeyEnabled() const
+{
+    return isEnableShortcutKey_;
+}
+
+void VideoPattern::SetCurrentVolume(float currentVolume)
+{
+    currentVolume_ = currentVolume;
+}
+
+float VideoPattern::GetCurrentVolume() const
+{
+    return currentVolume_;
 }
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)
@@ -2100,5 +2213,6 @@ void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
             ? renderContextForMediaPlayer_->GetBackgroundColorValue(Color::BLACK).ColorToString().c_str()
             : "",
         filter);
+    json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
 }
 } // namespace OHOS::Ace::NG

@@ -42,6 +42,7 @@ public:
     virtual void SetObjectFit(ImageFit objectFit) = 0;
     virtual void SetLoop(bool loop) = 0;
     virtual void SetSurfaceBackgroundColor(Color color) {}
+    virtual void SetShortcutKeyEnabled(bool isEnableShortcutKey) {}
 
     virtual void SetOnStart(VideoEventFunc&& onStart) = 0;
     virtual void SetOnPause(VideoEventFunc&& onPause) = 0;
