@@ -998,4 +998,8 @@ void ConvertPlaceholderRun(const PlaceholderRun& span, Rosen::PlaceholderSpan& t
 #endif
 }
 
+float GetVariableFontWeight(FontWeight fontWeight)
+{
+    return (static_cast<int32_t>(ConvertTxtFontWeight(fontWeight)) + 1) * DEFAULT_MULTIPLE;
+}
 } // namespace OHOS::Ace::Constants
