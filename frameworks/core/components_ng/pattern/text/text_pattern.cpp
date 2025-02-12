@@ -944,8 +944,9 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
         if (!item) {
             continue;
         }
-        auto selectedRects = GetSelectedRects(start, item->position);
-        start = item->position;
+        auto end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
+        auto selectedRects = GetSelectedRects(start, end);
+        start = end;
         for (auto&& rect : selectedRects) {
             if (!rect.IsInRegion(textOffset)) {
                 continue;
