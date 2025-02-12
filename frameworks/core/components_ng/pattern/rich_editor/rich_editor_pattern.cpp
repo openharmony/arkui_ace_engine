@@ -348,7 +348,7 @@ void RichEditorPattern::InsertValueInStyledString(const std::u16string& insertVa
         isPreventChange = !BeforeStyledStringChange(changeStart, changeLength, subValue);
     }
     CHECK_NULL_VOID(!isPreventChange || previewTextRecord_.needReplacePreviewText);
-    if (changeLength > 0 && subValue.length() > 0) {
+    if (changeLength > 0 && (subValue.length() > 0 || !calledByImf)) {
         auto start = needReplaceInTextPreview ? previewTextRecord_.replacedRange.start : caretPosition_;
         auto isUpdateCaret = !needReplaceInTextPreview;
         DeleteValueInStyledString(start, changeLength, false, isUpdateCaret);
