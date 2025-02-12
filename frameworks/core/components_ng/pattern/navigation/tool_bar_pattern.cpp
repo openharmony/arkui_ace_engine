@@ -168,6 +168,7 @@ void NavToolbarPattern::HandleLongPressActionEnd()
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->ResetBlendBgColor();
+        moveIndex_.reset();
     }
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
