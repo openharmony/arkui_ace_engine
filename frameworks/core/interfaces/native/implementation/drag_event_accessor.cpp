@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -61,11 +62,25 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Int32 GetDisplayXImpl(DragEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, 0);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenX());
+    auto arkScreenX = Converter::ArkValue<Ark_Number>(value);
+    LOGE("Arkoala method DragEventAccessor.GetDisplayXImpl return int32_t value, instead of %{public}f",
+        arkScreenX.f32);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, 0);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenY());
+    auto arkScreenY = Converter::ArkValue<Ark_Number>(value);
+    LOGE("Arkoala method DragEventAccessor.GetDisplayYImpl return int32_t value, instead of %{public}f",
+        arkScreenY.f32);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 Ark_Int32 GetWindowXImpl(DragEventPeer* peer)
 {
@@ -110,6 +125,11 @@ Ark_NativePointer GetDataImpl(DragEventPeer* peer)
 }
 Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 {
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, nullptr);
+    auto summary = info->GetSummary();
+    LOGE("DragEventAccessor::GetSummaryImpl wrong return data");
     return nullptr;
 }
 void SetResultImpl(DragEventPeer* peer,
@@ -134,28 +154,68 @@ Ark_NativePointer GetPreviewRectImpl(DragEventPeer* peer)
 }
 Ark_Int32 GetVelocityXImpl(DragEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, 0);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityX());
+    auto arkVelocityX = Converter::ArkValue<Ark_Number>(value);
+    LOGE("Arkoala method DragEventAccessor.GetVelocityXImpl return int32_t value, instead of %{public}f",
+        arkVelocityX.f32);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 Ark_Int32 GetVelocityYImpl(DragEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, 0);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityY());
+    auto arkVelocityY = Converter::ArkValue<Ark_Number>(value);
+    LOGE("Arkoala method DragEventAccessor.GetVelocityYImpl return int32_t value, instead of %{public}f",
+        arkVelocityY.f32);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 Ark_Int32 GetVelocityImpl(DragEventPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, 0);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityValue());
+    auto arkVelocity = Converter::ArkValue<Ark_Number>(value);
+    LOGE("Arkoala method DragEventAccessor.GetVelocityImpl return int32_t value, instead of %{public}f",
+        arkVelocity.f32);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
 Ark_Boolean GetModifierKeyStateImpl(DragEventPeer* peer,
                                     const Array_String* keys)
 {
-    return 0;
+    auto defaultValue = ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, defaultValue);
+    auto eventKeys = info->GetPressedKeyCodes();
+    auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
+    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
 Ark_NativePointer GetDragBehaviorImpl(DragEventPeer* peer)
 {
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, nullptr);
+    auto dragBehavior = info->GetDragBehavior();
+    auto behavior = Converter::ArkValue<Ark_DragBehavior>(dragBehavior);
+    LOGE("DragEventAccessor::GetDragBehaviorImpl wrong return data");
     return nullptr;
 }
 void SetDragBehaviorImpl(DragEventPeer* peer,
                          Ark_DragBehavior dragBehavior)
 {
+    CHECK_NULL_VOID(peer);
+    auto info = peer->dragInfo;
+    CHECK_NULL_VOID(info);
+    auto behavior = Converter::OptConvert<DragBehavior>(dragBehavior);
+    if (behavior.has_value()) {
+        info->SetDragBehavior(behavior.value());
+    }
 }
 Ark_Boolean GetUseCustomDropAnimationImpl(DragEventPeer* peer)
 {

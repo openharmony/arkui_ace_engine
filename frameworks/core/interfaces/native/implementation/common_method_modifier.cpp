@@ -1702,18 +1702,6 @@ void AssignArkValue(Ark_PreDragStatus& dst, const PreDragStatus& src)
             break;
     }
 }
-
-void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
-{
-    switch (src) {
-        case DragBehavior::COPY: dst = ARK_DRAG_BEHAVIOR_COPY; break;
-        case DragBehavior::MOVE: dst = ARK_DRAG_BEHAVIOR_MOVE; break;
-        default:
-            dst = static_cast<Ark_DragBehavior>(-1);
-            LOGE("Unexpected enum value in DragBehavior: %{public}d", src);
-            break;
-    }
-}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {

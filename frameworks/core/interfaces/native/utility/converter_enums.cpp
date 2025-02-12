@@ -1796,4 +1796,16 @@ void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
         }
     }
 }
+
+template<>
+void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src)
+{
+    switch (src) {
+        case ARK_DRAG_BEHAVIOR_COPY: dst = DragBehavior::COPY; break;
+        case ARK_DRAG_BEHAVIOR_MOVE: dst = DragBehavior::MOVE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DragBehavior: %{public}d", src);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

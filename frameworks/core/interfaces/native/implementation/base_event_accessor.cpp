@@ -17,10 +17,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/ace_events.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
-
 
 namespace OHOS::Ace::NG {
 
@@ -56,40 +56,6 @@ namespace BaseEventAccessor {
 namespace {
 const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
 const Ark_Int32 DefaultValueInt32 = Converter::ArkValue<Ark_Int32>(0);
-
-bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vector<KeyCode>& keysCodes)
-{
-    auto intersects = [](const std::vector<KeyCode>& lv, const std::vector<KeyCode>& rv) -> bool {
-        bool found = false;
-        for (const auto& key : lv) {
-            auto it = std::find(rv.begin(), rv.end(), key);
-            if (it != rv.end()) {
-                found = true;
-                break;
-            }
-        }
-        return found;
-    };
-    std::unordered_map<std::string, std::vector<KeyCode>> validKeyCodes = {
-        { "ctrl", { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT } },
-        { "shift", { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT } },
-        { "alt", { KeyCode::KEY_ALT_LEFT, KeyCode::KEY_ALT_RIGHT } },
-        { "fn", { KeyCode::KEY_FN } }
-    };
-    for (const auto& str : keysStrs) {
-        std::string code;
-        std::transform(str.begin(), str.end(), std::back_inserter(code),
-            [](const char& c) { return std::tolower(c); });
-        auto it = validKeyCodes.find(code);
-        if (it == validKeyCodes.end()) {
-            return false;
-        }
-        if (!intersects(keysCodes, it->second)) {
-            return false;
-        }
-    }
-    return true;
-}
 }  // namespace
 
 void DestroyPeerImpl(BaseEventPeer* peer)
@@ -111,7 +77,7 @@ Ark_Boolean GetModifierKeyStateImpl(BaseEventPeer* peer,
     CHECK_NULL_RETURN(keys, DefaultValueBoolean);
     auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(CheckKeysPressed(keysStr, eventKeys));
+    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
 void SetTargetImpl(BaseEventPeer* peer,
                    const Ark_EventTarget* target)

@@ -151,6 +151,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
+    void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src);
     void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
