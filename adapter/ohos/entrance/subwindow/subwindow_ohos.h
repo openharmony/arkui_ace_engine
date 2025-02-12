@@ -140,6 +140,7 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    Rect GetFoldExpandAvailableRect() const override;
     NG::RectF GetWindowRect() const override;
     bool CheckHostWindowStatus() const override;
     bool IsFreeMultiWindow() const override;

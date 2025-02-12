@@ -3258,6 +3258,12 @@ bool AceContainer::IsScenceBoardWindow()
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
 
+bool AceContainer::IsCrossAxisWindow()
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetCrossAxisState() == Rosen::CrossAxisState::STATE_CROSS;
+}
+
 bool AceContainer::IsUIExtensionWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);

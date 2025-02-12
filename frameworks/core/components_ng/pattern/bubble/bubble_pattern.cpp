@@ -708,7 +708,7 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
             CHECK_NULL_VOID(layoutProp);
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipelineNg->GetInstanceId());
                 CHECK_NULL_VOID(subwindow);
                 subwindow->HidePopupNG(targetNodeId_);
             }
@@ -730,7 +730,7 @@ void BubblePattern::OnWindowHide()
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     if (showInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipelineNg->GetInstanceId());
         CHECK_NULL_VOID(subwindow);
         subwindow->HidePopupNG(targetNodeId_);
     }

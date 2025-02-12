@@ -85,9 +85,7 @@ LayoutConstraintF CreatePreviewLayoutConstraint(const RefPtr<LayoutProperty>& la
     LayoutConstraintF constraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
 
     auto currentId = Container::CurrentId();
-    auto parentContainerId =
-        currentId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
     CHECK_NULL_RETURN(subWindow, constraint);
     auto subwindowSize = subWindow->GetRect().GetSize();
     if (!subwindowSize.IsPositive()) {

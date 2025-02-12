@@ -2939,7 +2939,7 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow)
         isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
         if (isUIExtensionSubWindow_) {
             canExpandCurrentWindow_ = true;
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
             CHECK_NULL_VOID(subwindow);
             auto rect = subwindow->GetUIExtensionHostWindowRect();
             UIExtensionHostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());

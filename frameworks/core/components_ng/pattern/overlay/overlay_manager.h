@@ -232,13 +232,6 @@ public:
     {
         maskNodeIdMap_[dialogId] = maskId;
     }
-
-    void SetModalDialogDisplayId(uint64_t displayId)
-    {
-        if (displayId != -1ULL) {
-            dialogDisplayId_ = displayId;
-        }
-    }
     bool isMaskNode(int32_t maskId);
     int32_t GetMaskNodeIdWithDialogId(int32_t dialogId);
 
@@ -896,7 +889,6 @@ private:
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
-    uint64_t dialogDisplayId_ = 0;
     bool hasPixelMap_ { false };
     bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };

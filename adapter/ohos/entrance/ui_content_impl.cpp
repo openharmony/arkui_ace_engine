@@ -670,17 +670,22 @@ public:
     ~FoldScreenListener() = default;
     void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
     {
+        LOGI("fold status is changed, foldStatus: %{public}d", foldStatus);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [container, foldStatus] {
+            [instanceId = instanceId_, container, foldStatus] {
                 auto context = container->GetPipelineContext();
                 CHECK_NULL_VOID(context);
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
+                if (SystemProperties::IsSuperFoldDisplayDevice()) {
+                    SubwindowManager::GetInstance()->HideMenuNG(false);
+                    SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
+                }
             },
             TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged", PriorityType::VIP);
     }
@@ -697,6 +702,7 @@ public:
     ~FoldDisplayModeListener() = default;
     void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
     {
+        LOGI("display mode is changed, displayMode: %{public}d", displayMode);
         if (!isDialog_) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
