@@ -417,7 +417,9 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
     std::string color = value;
     std::string tmp = value;
     tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
-    if (std::regex_match(tmp, matches, std::regex("#[0-9A-Fa-f]{7,8}"))) {
+    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+        "#[0-9A-Fa-f]{6,8}" : "#[0-9A-Fa-f]{7,8}";
+    if (std::regex_match(tmp, matches, std::regex(regStr))) {
         auto rgb = tmp.substr(1);
         // remove last 2 character rgba -> argb
         rgb.erase(rgb.length() - 2, 2);
