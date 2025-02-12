@@ -300,7 +300,7 @@
         "name": "OH_ArkUI_AxisEvent_GetPinchAxisScaleValue"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_AxisEvent_GetAxisAction"
     },
     {

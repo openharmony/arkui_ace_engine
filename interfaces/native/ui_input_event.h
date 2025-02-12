@@ -229,7 +229,7 @@ enum {
 /**
  * @brief Enumerates the action types for axis events.
  *
- * @since 16
+ * @since 15
  */
 enum {
     /** The axis event is abnormal. */
@@ -779,7 +779,7 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
  *
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the action type of the current axis event.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
 
