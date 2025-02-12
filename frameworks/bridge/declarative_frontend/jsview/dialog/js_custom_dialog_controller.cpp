@@ -315,6 +315,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         instance->dialogProperties_.controllerId = controllerId.fetch_add(1, std::memory_order_relaxed);
         JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);
         JSViewAbstract::SetDialogHoverModeProperties(constructorArg, instance->dialogProperties_);
+        JSViewAbstract::SetDialogBlurStyleOption(constructorArg, instance->dialogProperties_);
+        JSViewAbstract::SetDialogEffectOption(constructorArg, instance->dialogProperties_);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
     }

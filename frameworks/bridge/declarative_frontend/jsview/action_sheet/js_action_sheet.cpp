@@ -533,6 +533,8 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseLevelOrder(properties, obj);
     JSViewAbstract::SetDialogProperties(obj, properties);
     JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
+    JSViewAbstract::SetDialogBlurStyleOption(obj, properties);
+    JSViewAbstract::SetDialogEffectOption(obj, properties);
     ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
 #endif

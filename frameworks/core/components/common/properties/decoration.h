@@ -30,6 +30,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
@@ -91,13 +92,6 @@ enum class SpreadMethod {
     REPEAT,
 };
 
-
-enum class ThemeColorMode {
-    SYSTEM = 0,
-    LIGHT,
-    DARK,
-};
-
 struct MotionBlurAnchor {
     float x = 0.0f;
     float y = 0.0f;
@@ -121,54 +115,6 @@ struct MotionBlurOption {
     bool operator!=(const MotionBlurOption& other) const
     {
         return !operator==(other);
-    }
-};
-
-struct BlurStyleOption {
-    BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
-    ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
-    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
-    double scale = 1.0;
-    BlurOption blurOption;
-    BlurStyleActivePolicy policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
-    BlurType blurType = BlurType::WITHIN_WINDOW;
-    Color inactiveColor { Color::TRANSPARENT };
-    bool isValidColor = false;
-    bool isWindowFocused = true;
-    bool operator==(const BlurStyleOption& other) const
-    {
-        return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
-               NearEqual(scale, other.scale) && policy == other.policy && blurType == other.blurType &&
-               inactiveColor == other.inactiveColor && isValidColor == other.isValidColor &&
-               isWindowFocused == other.isWindowFocused;
-    }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
-    {
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
-            "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
-            "BlurStyle.BACKGROUND_ULTRA_THICK", "BlurStyle.COMPONENT_ULTRA_THIN", "BlurStyle.COMPONENT_THIN",
-            "BlurStyle.COMPONENT_REGULAR", "BlurStyle.COMPONENT_THICK", "BlurStyle.COMPONENT_ULTRA_THICK" };
-        static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
-        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
-        static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
-            "BlurStyleActivePolicy.ALWAYS_ACTIVE", "BlurStyleActivePolicy.ALWAYS_INACTIVE" };
-        static const char* BLUR_TYPE[] = { "BlurType.WITHIN_WINDOW", "BlurType.BEHIND_WINDOW" };
-        auto jsonBlurStyle = JsonUtil::Create(true);
-        jsonBlurStyle->Put("value", STYLE[static_cast<int>(blurStyle)]);
-        auto jsonBlurStyleOption = JsonUtil::Create(true);
-        jsonBlurStyleOption->Put("colorMode", COLOR_MODE[static_cast<int>(colorMode)]);
-        jsonBlurStyleOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int>(adaptiveColor)]);
-        jsonBlurStyleOption->Put("policy", POLICY[static_cast<int>(policy)]);
-        jsonBlurStyleOption->Put("type", BLUR_TYPE[static_cast<int>(blurType)]);
-        jsonBlurStyleOption->Put("inactiveColor", inactiveColor.ColorToString().c_str());
-        jsonBlurStyleOption->Put("scale", scale);
-        jsonBlurStyle->Put("options", jsonBlurStyleOption);
-
-        json->PutExtAttr("backgroundBlurStyle", jsonBlurStyle, filter);
     }
 };
 

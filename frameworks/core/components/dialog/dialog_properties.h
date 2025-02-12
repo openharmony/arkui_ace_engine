@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -252,6 +253,8 @@ struct DialogProperties {
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -315,6 +318,8 @@ struct PromptDialogAttr {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;

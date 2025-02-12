@@ -331,12 +331,36 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;
+    auto pipeLineContext = contentNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeLineContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
+        if (props.blurStyleOption.has_value()) {
+            styleOption = props.blurStyleOption.value();
+            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(contentNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(contentNode->GetId());
+            }
+        }
         styleOption.blurStyle = static_cast<BlurStyle>(
             props.backgroundBlurStyle.value_or(dialogTheme_->GetDialogBackgroundBlurStyle()));
+        if (props.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
+            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+        }
         contentRenderContext->UpdateBackBlurStyle(styleOption);
+        if (props.effectOption.has_value()) {
+            if (props.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(contentNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(contentNode->GetId());
+            }
+            if (contentRenderContext->GetBackBlurStyle().has_value()) {
+                contentRenderContext->UpdateBackBlurStyle(std::nullopt);
+            }
+            contentRenderContext->UpdateBackgroundEffect(props.effectOption.value());
+        }
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetColorBgWithBlur()));
     } else {
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetBackgroundColor()));

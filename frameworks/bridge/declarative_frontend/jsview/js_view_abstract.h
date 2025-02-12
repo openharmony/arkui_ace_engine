@@ -668,6 +668,8 @@ public:
         NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 

@@ -1793,6 +1793,8 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1882,7 +1884,9 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
