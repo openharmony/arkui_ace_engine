@@ -196,7 +196,7 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
-    void ProcessAxisUpdateEvent(float mainDelta);
+    void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
     void ProcessAxisEndEvent();
     void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
     void ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus);

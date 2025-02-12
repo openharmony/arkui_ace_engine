@@ -122,6 +122,7 @@ void Scrollable::Initialize(const RefPtr<FrameNode>& host)
     if (friction_ == -1) {
         InitFriction(scrollableTheme->GetFriction());
     }
+    InitAxisAnimator();
 }
 
 void Scrollable::InitAxisAnimator()
@@ -579,7 +580,6 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
         nodeId_, nodeTag_.c_str());
     if (isAxisEvent) {
-        InitAxisAnimator();
         if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
             snapDirection_ = SnapDirection::NONE;
@@ -660,7 +660,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     HandleScroll(mainDelta, source, NestedState::GESTURE);
 }
 
-void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
+void Scrollable::ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -691,11 +691,8 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
         ACE_SCOPED_TRACE("ProcessAxisUpdateEvent start SnapAnimation, snapDelta:%f, snapDirection:%d, "
                          "lastSnapDirection:%d, id:%d, tag:%s",
             snapDelta, snapDirection, snapDirection_, nodeId_, nodeTag_.c_str());
-        SnapAnimationOptions snapAnimationOptions = {
-            .snapDelta = snapDelta,
-            .animationVelocity = currentVelocity_,
-            .snapDirection = snapDirection,
-        };
+        SnapAnimationOptions snapAnimationOptions = { .snapDelta = snapDelta, .animationVelocity = currentVelocity_,
+            .snapDirection = snapDirection, .fromScrollBar = fromScrollBar };
         startSnapAnimationCallback_(snapAnimationOptions);
         auto isNeedAdjustDirection = (snapType == SnapType::SCROLL_SNAP && snapDirection == SnapDirection::NONE);
         if (isNeedAdjustDirection) {
