@@ -97,7 +97,7 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
         auto host = weak.Upgrade();
         CHECK_NULL_RETURN(host, std::nullopt);
         EventTarget eventTarget;
-        eventTarget.id = std::to_string(host->GetId());
+        eventTarget.id = host->GetInspectorId().value_or("").c_str();
         eventTarget.type = host->GetTag();
         auto geometryNode = host->GetGeometryNode();
         auto offset = geometryNode->GetFrameOffset();
