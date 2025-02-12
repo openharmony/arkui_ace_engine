@@ -14,7 +14,6 @@
  */
 
 #include "tabs_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 
