@@ -100,6 +100,10 @@ public:
     {
         return NG::RectF();
     }
+    virtual bool NeedAvoidKeyboard()
+    {
+        return false;
+    }
     virtual bool CheckHostWindowStatus() const = 0;
     virtual bool IsFreeMultiWindow() const = 0;
     virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
