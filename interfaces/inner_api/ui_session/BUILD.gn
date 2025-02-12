@@ -56,6 +56,7 @@ ohos_shared_library("ui_session") {
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
