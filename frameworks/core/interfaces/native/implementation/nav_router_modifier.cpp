@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/node/nav_router_modifier.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -54,9 +55,9 @@ void OnStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onStateChangeCallback = [frameNode](const bool isActivated) {
+    auto onStateChangeCallback = [arkCallback = CallbackHelper(*value)](const bool isActivated) {
         auto arkIsActivated = Converter::ArkValue<Ark_Boolean>(isActivated);
-        GetFullAPI()->getEventsAPI()->getNavRouterEventsReceiver()->onStateChange(frameNode->GetId(), arkIsActivated);
+        arkCallback.Invoke(arkIsActivated);
     };
     NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }

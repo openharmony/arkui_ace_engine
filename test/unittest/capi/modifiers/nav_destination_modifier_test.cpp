@@ -39,16 +39,6 @@ namespace  {
     const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_DEFAULT_VALUE = "SAFE_AREA_TYPE_NONE";
     const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_NAME = "ignoreLayoutSafeAreaEdges";
     const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_DEFAULT_VALUE = "SAFE_AREA_EDGE_NONE";
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUINavDestinationEventsReceiver eventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getNavDestinationEventsReceiver = [] () -> const GENERATED_ArkUINavDestinationEventsReceiver* {
-                return &eventsReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class NavDestinationModifierTest : public ModifierTestBase<GENERATED_ArkUINavDestinationModifier,
@@ -57,7 +47,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -213,25 +202,6 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar1TestValidValues, T
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnShownTest, TestSize.Level1)
 {
-    Callback_Void func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onShown = [](Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-    modifier_->setOnShown(node_, &func);
-    EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnShownEvent("", "");
-    EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
 /*
@@ -241,25 +211,6 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnShownTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnHiddenTest, TestSize.Level1)
 {
-    Callback_Void func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onHidden = [](Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-    modifier_->setOnHidden(node_, &func);
-    EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnHiddenEvent("");
-    EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
 /*
@@ -269,25 +220,6 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnHiddenTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillAppearTest, TestSize.Level1)
 {
-    Callback_Void func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onWillAppear = [](Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-    modifier_->setOnWillAppear(node_, &func);
-    EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnWillAppear();
-    EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
 /*
@@ -297,25 +229,6 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillAppearTest, TestSize.Leve
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillDisappearTest, TestSize.Level1)
 {
-    Callback_Void func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onWillDisappear = [](Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-    modifier_->setOnWillDisappear(node_, &func);
-    EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnWillDisAppear();
-    EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
 /*
@@ -325,25 +238,6 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillDisappearTest, TestSize.L
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
 {
-    Callback_Void func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onWillShow = [](Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-    modifier_->setOnWillShow(node_, &func);
-    EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnWillShow();
-    EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
 /*
@@ -353,25 +247,6 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1)
 {
-    Callback_Void func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onWillHide = [](Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-    modifier_->setOnWillHide(node_, &func);
-    EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnWillHide();
-    EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
 /*
@@ -381,25 +256,6 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnBackPressedTest, TestSize.Level1)
 {
-    Callback_Boolean func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::NavDestinationEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onBackPressed = [](Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-    modifier_->setOnBackPressed(node_, &func);
-    EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnBackPressedEvent();
-    EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 
 /*
