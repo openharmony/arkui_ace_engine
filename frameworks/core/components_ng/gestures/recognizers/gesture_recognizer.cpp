@@ -354,6 +354,9 @@ void NGGestureRecognizer::SetTransInfo(int transId)
 
 void NGGestureRecognizer::AboutToAccept()
 {
+    if (refereeState_ == RefereeState::FAIL) {
+        return;
+    }
     if (AceType::InstanceOf<RecognizerGroup>(this)) {
         HandleWillAccept();
         OnAccepted();
