@@ -25,8 +25,8 @@
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
-    EXPAND = 0,
-    NOT_EXPAND,
+    NOT_EXPAND = 0,
+    EXPAND,
     LAZY_EXPAND,
 };
 

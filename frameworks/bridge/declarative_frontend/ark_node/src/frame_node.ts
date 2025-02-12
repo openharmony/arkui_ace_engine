@@ -24,8 +24,8 @@ interface CrossLanguageOptions {
 }
 
 enum ExpandMode {
-  EXPAND = 0,
-  NOT_EXPAND = 1,
+  NOT_EXPAND = 0,
+  EXPAND = 1,
   LAZY_EXPAND = 2,
 }
 
