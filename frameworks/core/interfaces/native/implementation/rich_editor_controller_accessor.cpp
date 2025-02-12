@@ -135,6 +135,7 @@ TextSpanOptions Convert(const Ark_RichEditorTextSpanOptions& src)
     ret.offset = Converter::OptConvert<int32_t>(src.offset);
     ret.style = Converter::OptConvert<TextStyle>(src.style);
     ret.paraStyle = Converter::OptConvert<UpdateParagraphStyle>(src.paragraphStyle);
+    ret.userGestureOption = Converter::OptConvert<UserGestureOptions>(src.gesture).value_or(UserGestureOptions());
     return ret;
 }
 
