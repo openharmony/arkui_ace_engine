@@ -185,9 +185,9 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = option ? Converter::OptConvert<Ark_GridRowOptions>(*option) : std::nullopt;
-    auto nullGutter = RefPtr<V2::Gutter>(nullptr);
-    auto nullBreakPoints = RefPtr<V2::BreakPoints>(nullptr);
-    auto nullGridContainerSize = RefPtr<V2::GridContainerSize>(nullptr);
+    auto nullGutter = Referenced::MakeRefPtr<V2::Gutter>();
+    auto nullBreakPoints = Referenced::MakeRefPtr<V2::BreakPoints>();
+    auto nullGridContainerSize = Referenced::MakeRefPtr<V2::GridContainerSize>();
     if (convValue.has_value()) {
         auto arkOptions = convValue.value();
 
