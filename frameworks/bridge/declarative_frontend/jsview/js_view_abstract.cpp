@@ -2347,7 +2347,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 #endif
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
     }
-    if (info.Length() == 2) {
+    if (info.Length() == 2) { // 2 is background image info length
         auto jsImageRepeat = info[1];
         if (jsImageRepeat->IsNumber()) {
             repeatIndex = jsImageRepeat->ToNumber<int32_t>();
