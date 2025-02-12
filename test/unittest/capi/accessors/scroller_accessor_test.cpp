@@ -358,7 +358,7 @@ HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
         { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
         { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
-        { RES_ARK_LENGTH, 0 },
+        { RES_ARK_LENGTH, 10 },
     };
 
     Ark_Length arkDy = Converter::ArkValue<Ark_Length>(0);
@@ -399,7 +399,7 @@ HWTEST_F(ScrollerAccessorTest, scrollByYTest, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
         { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
         { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
-        { RES_ARK_LENGTH, 0 },
+        { RES_ARK_LENGTH, 10 },
     };
 
     Ark_Length arkDx = Converter::ArkValue<Ark_Length>(0);
