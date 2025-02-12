@@ -39,13 +39,13 @@ void JankFrameReport::FlushRecord() {}
 
 void JankFrameReport::RecordFrameUpdate() {}
 
-
 PerfMonitor* PerfMonitor::GetPerfMonitor()
 {
     return PerfMonitor::pMonitor;
 }
 
-void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note) {
+void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
+{
     auto holder = PerfMonitorTestHolder::GetInstance();
     holder->isCalled = true;
     holder->scene = sceneId;
@@ -53,7 +53,8 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     holder->note = note;
 }
 
-void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {
+void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
+{
     auto holder = PerfMonitorTestHolder::GetInstance();
     holder->isCalled = true;
     holder->scene = sceneId;
@@ -66,7 +67,8 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank,
 
 void PerfMonitor::ReportJankFrameApp(double jank) {}
 
-void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {
+void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
+{
     auto holder = PerfMonitorTestHolder::GetInstance();
     holder->isCalled = true;
     holder->actionType = type;

@@ -41,7 +41,7 @@ void AssignCast(std::optional<PerfSourceType>& dst, const Ark_PerfMonitorSourceT
         case ARK_PERF_MONITOR_SOURCE_TYPE_PERF_MOUSE_EVENT: dst = PerfSourceType::PERF_MOUSE_EVENT; break;
         case ARK_PERF_MONITOR_SOURCE_TYPE_PERF_TOUCHPAD_EVENT: dst = PerfSourceType::PERF_TOUCH_PAD; break;
         case ARK_PERF_MONITOR_SOURCE_TYPE_PERF_JOYSTICK_EVENT: dst = PerfSourceType::PERF_JOY_STICK; break;
-         case ARK_PERF_MONITOR_SOURCE_TYPE_PERF_KEY_EVENT: dst = PerfSourceType::PERF_KEY_EVENT; break;
+        case ARK_PERF_MONITOR_SOURCE_TYPE_PERF_KEY_EVENT: dst = PerfSourceType::PERF_KEY_EVENT; break;
         default: LOGE("Unexpected enum value in Ark_PerfMonitorSourceType: %{public}d", src);
     }
 }

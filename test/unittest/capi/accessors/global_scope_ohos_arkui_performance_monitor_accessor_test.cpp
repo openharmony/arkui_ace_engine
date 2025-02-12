@@ -25,7 +25,6 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-using ::testing::NiceMock;
 
 namespace {
 const std::vector<std::pair<Ark_String, std::string>> testFixtureStringValidValues = {
@@ -83,6 +82,7 @@ public:
         AccessorTestBase::TearDown();
         PerfMonitor::pMonitor = nullptr;
         delete mockPerfMonitor_;
+        mockPerfMonitor_ = nullptr;
     }
     PerfMonitor* mockPerfMonitor_ = nullptr;
 };
