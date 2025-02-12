@@ -259,7 +259,7 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     auto mode = windowManager->GetWindowMode();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
-        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
+        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContextSafely());
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         OnBreakPointChange(layoutWrapper, sizeType);
     }
@@ -284,7 +284,7 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto directionVal = layoutProperty->GetDirectionValue();
+    auto directionVal = layoutProperty->GetDirectionValue(V2::GridRowDirection::Row);
     auto width = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto textDirection = layoutProperty->GetLayoutDirection();
     if (textDirection == TextDirection::AUTO) {
