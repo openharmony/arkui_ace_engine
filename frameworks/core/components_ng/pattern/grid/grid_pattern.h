@@ -315,6 +315,8 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    void UpdateOffsetHelper(float offset);
+
     void ClearMultiSelect() override;
     bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;

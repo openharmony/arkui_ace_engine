@@ -1143,6 +1143,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
     }
+    info_.jumpForRecompose_ = info_.startIndex_;
 }
 
 void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper)
@@ -1188,6 +1189,7 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
     }
+    info_.jumpForRecompose_ = info_.startIndex_;
 }
 
 void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)

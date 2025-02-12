@@ -45,26 +45,14 @@ public:
      */
     void UpdateMarkItem(int32_t index, bool notify);
 
-    void UpdateSize(const SizeF& size)
-    {
-        size_ = size;
-    }
-    void UpdateSize(float width, float height)
-    {
-        size_.SetWidth(width);
-        size_.SetHeight(height);
-    }
-
-    void UpdateAxis(Axis axis)
-    {
-        axis_ = axis;
-    }
+    void UpdateViewport(const SizeF& size, Axis axis);
 
     /**
      * @param x positive if scrolling right, negative if scrolling left
      * @param y positive if scrolling down, negative if scrolling up
+     * @return true if need to recompose
      */
-    void UpdateSlidingOffset(float delta);
+    bool UpdateSlidingOffset(float delta);
 
     FrameNode* InitPivotItem(FillDirection direction);
 
@@ -127,5 +115,6 @@ private:
 
     Axis axis_ = Axis::VERTICAL;
     bool rangeMode_ = false; // true  if providing item range to frontend directly
+    bool jumpPending_ = false; // will perform a jump on the next recomposition
 };
 } // namespace OHOS::Ace::NG

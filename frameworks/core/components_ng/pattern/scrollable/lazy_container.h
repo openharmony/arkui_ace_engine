@@ -46,12 +46,13 @@ protected:
     /**
      * @brief Pass latest layout range info to adapter.
      */
-    void UpdateLayoutRange(Axis axis, int32_t markIdx);
+    void UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx);
 
     /**
      * @brief Pass scroll offset to adapter.
+     * @return true if adapter requests a recompose
      */
-    void UpdateOffset(float delta);
+    bool UpdateOffset(float delta);
 
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;

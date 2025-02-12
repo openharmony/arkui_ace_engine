@@ -325,7 +325,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (!isInitialized_) {
         JumpToItem(0);
     }
-    UpdateLayoutRange(layoutInfo_->axis_, -1);
+    UpdateLayoutRange(layoutInfo_->axis_, std::nullopt);
 
     isInitialized_ = true;
 

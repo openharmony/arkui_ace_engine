@@ -33,6 +33,12 @@ public:
      */
     virtual void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) {}
 
+    /**
+     * @brief Called when the adapter will perform a jump
+     *
+     */
+    virtual void MarkJump() {}
+
     virtual void FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) = 0;
 
     /**
@@ -45,10 +51,11 @@ public:
      */
     virtual void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) = 0;
 
+    /* for parallel mode */
     virtual bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta)
     {
         return false;
-    } // for parallel mode
+    }
 
     virtual void OnSlidingOffsetUpdate(float delta) = 0;
 

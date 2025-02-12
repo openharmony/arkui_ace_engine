@@ -577,6 +577,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
     "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
+    "$ace_root/test/mock/core/pattern/mock_koala_lazy_for_each.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animated_image.cpp",

@@ -16,18 +16,21 @@
 #include "lazy_container.h"
 
 namespace OHOS::Ace::NG {
-void LazyContainer::UpdateOffset(float delta)
+bool LazyContainer::UpdateOffset(float delta)
 {
     if (adapter_) {
-        adapter_->UpdateSlidingOffset(delta);
+        return adapter_->UpdateSlidingOffset(delta);
     }
+    return false;
 }
 
-void LazyContainer::UpdateLayoutRange(Axis axis, int32_t markIdx)
+void LazyContainer::UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx)
 {
     if (adapter_) {
-        adapter_->UpdateSize(GetHost()->GetGeometryNode()->GetFrameSize());
-        adapter_->UpdateAxis(axis);
+        adapter_->UpdateViewport(GetHost()->GetGeometryNode()->GetFrameSize(), axis);
+        if (markIdx && *markIdx >= 0) {
+            adapter_->UpdateMarkItem(*markIdx, true);
+        }
     }
 }
 
