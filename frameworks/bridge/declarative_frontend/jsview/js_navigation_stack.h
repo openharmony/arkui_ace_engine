@@ -141,7 +141,7 @@ private:
     std::string ConvertParamToString(const JSRef<JSVal>& param, bool needLimit = false) const;
     void ParseJsObject(
         std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit, bool needLimit) const;
-    static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
+    void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
     static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
         std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
@@ -158,6 +158,8 @@ private:
 
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
+
+    bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, const JSRef<JSVal>& param);
 
     JSRef<JSArray> GetPathArray();
     JSRef<JSObject> GetPathInfo(int32_t index);

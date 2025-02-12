@@ -61,13 +61,20 @@ public:
 
     static bool CheckIsValid(JSValueWrapper object);
 
+    void SetOnPopCallback(const std::function<void(const JSRef<JSVal>)>& popCallback)
+    {
+        onPopCallback_ = popCallback;
+    }
+
+    void OnPopCallback(const JSCallbackInfo& info);
+
 private:
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSNavPathStack* stack);
 
     std::function<void()> onStateChangedCallback_;
     std::function<int32_t(JSRef<JSObject>)> checkNavDestinationExistsFunc_;
-
+    std::function<void(const JSRef<JSVal>)> onPopCallback_;
     int32_t containerCurrentId_;
 };
 } // namespace OHOS::Ace::Framework
