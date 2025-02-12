@@ -583,6 +583,18 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
     manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE);
 }
 
+void RichEditorSelectOverlay::UpdateFirstHandleOffset()
+{
+    CHECK_NULL_VOID(dragHandleIndex_ != DragHandleIndex::FIRST);
+    BaseTextSelectOverlay::UpdateFirstHandleOffset();
+}
+
+void RichEditorSelectOverlay::UpdateSecondHandleOffset()
+{
+    CHECK_NULL_VOID(dragHandleIndex_ != DragHandleIndex::SECOND);
+    BaseTextSelectOverlay::UpdateSecondHandleOffset();
+}
+
 void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
