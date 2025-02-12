@@ -3585,15 +3585,6 @@ void TabBarPattern::UpdateFocusToSelectedNode(bool isFocusActive)
     if (!isFocusActive) {
         return;
     }
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE ||
-        (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && !tabTheme->GetIsChangeFocusTextStyle())) {
-        FocusCurrentOffset(focusIndicator_);
-        return;
-    }
     auto childFocusNode = GetCurrentFocusNode();
     CHECK_NULL_VOID(childFocusNode);
     if (!childFocusNode->IsCurrentFocus()) {
