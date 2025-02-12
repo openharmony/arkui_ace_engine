@@ -32,22 +32,6 @@ using namespace testing;
 using namespace testing::ext;
 using namespace AccessorTestFixtures;
 
-// namespace Converter {
-//     template<>
-//     void AssignArkValue(Ark_Resource& dst, const std::string& src, ConvContext *ctx)
-//     {
-//         dst.type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(ResourceType::STRING));
-//         dst.bundleName = Converter::ArkValue<Ark_String>(src);
-//         LOGE("this converter is disabled");
-//     }
-// } // 
-
-// namespace {
-//     const auto DIMENSION_BY_ID = Dimension(5, DimensionUnit::VP);
-//     const auto DIMENSION_BY_NAME = Dimension(4, DimensionUnit::VP);
-//     const auto DIMENSION_BY_INVALID = Dimension(0, DimensionUnit::PX);
-// } // namespace
-
 class LengthMetricsAccessorTest
     : public AccessorTestBase<GENERATED_ArkUILengthMetricsAccessor,
         &GENERATED_ArkUIAccessors::getLengthMetricsAccessor, LengthMetricsPeer> {

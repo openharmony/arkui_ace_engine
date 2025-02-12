@@ -29,6 +29,11 @@ namespace OHOS::Ace::NG {
 
 extern "C" const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
 
+#ifdef CAPI_BACKTRACE
+void ReportTheme(ThemeType type);
+void ResetThemes();
+#endif
+
 inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
 {
 #ifdef CAPI_BACKTRACE
@@ -71,6 +76,10 @@ public:
         MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+#ifdef CAPI_BACKTRACE
+        ResetThemes();
+#endif
     }
 
     static void TearDownTestCase()
