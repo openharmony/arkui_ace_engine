@@ -33,6 +33,14 @@ const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32W
     { "INT32_MAX", ArkValue<Ark_Int32>(INT32_MAX), INT32_MAX },
 };
 
+const std::vector<std::tuple<std::string, Ark_Number, int32_t>> testFixtureNumberInt32Values = {
+    { "0", ArkValue<Ark_Number>(0), 0 },
+    { "INT32_MIN", ArkValue<Ark_Number>(INT32_MIN), INT32_MIN },
+    { "32", ArkValue<Ark_Number>(32), 32 },
+    { "-1", ArkValue<Ark_Number>(-1), -1 },
+    { "INT32_MAX", ArkValue<Ark_Number>(INT32_MAX), INT32_MAX },
+};
+
 const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberValues = {
     { "1.24", ArkValue<Ark_Number>(1.24), 1.24 },
     { "0", ArkValue<Ark_Number>(0), 0 },
