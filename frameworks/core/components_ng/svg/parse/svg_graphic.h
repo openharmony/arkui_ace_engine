@@ -218,6 +218,8 @@ private:
     bool SetPenRadialGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     bool CheckHrefPattern();
     void RectifyTargetSize(const Rect& bounds, double& width, double& height);
+    RSMatrix GetLocalMatrix(SvgLengthScaleUnit gradientUnits,
+        const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     double GetFillOpacity();
     double GetStrokeOpacity();
     void SetBrushOpacity(RSBrush& brush);
