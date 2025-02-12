@@ -70,28 +70,6 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 
-@Styles
-function cardPressedStyle() {
-  .backgroundColor('rgba(0,0,0,0.1)')
-  .opacity(1)
-  .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
-}
-
-@Styles
-function cardNormalStyle() {
-  .backgroundColor('rgba(0,0,0,0)')
-  .opacity(1)
-  .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
-
-}
-
-@Styles
-function cardDisabledStyle() {
-  .backgroundColor('rgba(0,0,0,0)')
-  .opacity(0.5)
-  .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
-}
-
 class MyModifier implements AttributeModifier<TextAttribute> {
   applyNormalAttribute(instance: TextAttribute) {
     instance.backgroundColor('#0A59F7')
@@ -1106,6 +1084,59 @@ export struct GaugeBootcamp {
     .margin(useEnabled(this.enableCompBindMenuMenuMargin, this.compBindMenuMenuMargin))
   }
 
+  @Styles cardPressedStyle() {
+    .backgroundColor('rgba(0,0,0,0.1)')
+    .opacity(1)
+    .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
+  }
+
+  @Styles cardNormalStyle() {
+    .backgroundColor('rgba(0,0,0,0)')
+    .opacity(1)
+    .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
+  }
+
+  @Styles cardDisabledStyle() {
+    .backgroundColor('rgba(0,0,0,0)')
+    .opacity(0.5)
+    .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
+  }
+  @Builder
+  ListItemGroupHeaders(str: string) {
+    Row() {
+      Text(str)
+        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontWeight(FontWeight.Medium)
+      Blank()
+      Image($r('sys.media.ohos_ic_public_arrow_right'))
+        .fillColor($r('sys.color.ohos_id_color_fourth'))
+        .height(24)
+        .width(24)
+        .rotate({ angle: this.selection == str ? 90 : 0 })
+        .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
+    }
+    .borderRadius(20)
+    .width('100%')
+    .padding({
+      left: 8,
+      right: 8,
+      top: 18,
+      bottom: 18
+    })
+    .stateStyles({
+      pressed: this.cardPressedStyle,
+      normal: this.cardNormalStyle,
+      disabled: this.cardDisabledStyle,
+    })
+    .onClick(() => {
+      if (this.selection === str) {
+        this.selection = null;
+      } else {
+        this.selection = str;
+        AppStorage.setOrCreate('selection', this.selection)
+      }
+    })
+  }
   @Builder
   popupBuilder() {
     Row() {
@@ -2299,43 +2330,6 @@ export struct GaugeBootcamp {
     .height('52%')
     .id('scroll')
 
-  }
-
-  @Builder
-  ListItemGroupHeaders(str: string) {
-    Row() {
-      Text(str)
-        .fontColor($r('sys.color.ohos_id_color_text_primary'))
-        .fontWeight(FontWeight.Medium)
-      Blank()
-      Image($r('sys.media.ohos_ic_public_arrow_right'))
-        .fillColor($r('sys.color.ohos_id_color_fourth'))
-        .height(24)
-        .width(24)
-        .rotate({ angle: this.selection == str ? 90 : 0 })
-        .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
-    }
-    .borderRadius(20)
-    .width('100%')
-    .padding({
-      left: 8,
-      right: 8,
-      top: 18,
-      bottom: 18
-    })
-    .stateStyles({
-      pressed: cardPressedStyle,
-      normal: cardNormalStyle,
-      disabled: cardDisabledStyle,
-    })
-    .onClick(() => {
-      if (this.selection === str) {
-        this.selection = null;
-      } else {
-        this.selection = str;
-        AppStorage.setOrCreate('selection', this.selection)
-      }
-    })
   }
 
   @Builder
