@@ -2183,7 +2183,7 @@ typedef enum {
     /**
      * @error Internal error occurs, such as failure occurs because of the internal environment error,
      * or operation failed because of the internal execution failed.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_INTERNAL_ERROR = 100001,
     /** The component does not support specific attributes or events. */
@@ -2204,7 +2204,7 @@ typedef enum {
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
     /**
      * @error The snapshot taking is timeout.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
     /** The node is not on main tree. */
@@ -2342,7 +2342,7 @@ typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
 /**
  * @brief Defines the options for taking snapshot.
  *
- * @since 16
+ * @since 15
  */
 typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
@@ -4271,7 +4271,7 @@ float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearSty
  *
  * @return Returns the pointer to the created snapshot options object.If the object returns a null pointer,
  *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
- * @since 16
+ * @since 15
  */
 ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions();
 
@@ -4279,7 +4279,7 @@ ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions();
  * @brief Dispose a snapshot option object.
  *
  * @param snapshotOptions Indicates the pointer to the snapshot option.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
 
@@ -4290,7 +4290,7 @@ void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
  * @param scale Indicates the scale property to take the snapshot.
  * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 
