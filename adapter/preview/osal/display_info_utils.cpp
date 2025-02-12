@@ -48,4 +48,14 @@ FoldStatus DisplayInfoUtils::GetCurrentFoldStatus()
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     return displayInfo_->GetFoldStatus();
 }
+
+std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
+{
+    return {};
+}
+
+Rect DisplayInfoUtils::GetDisplayAvailableRect(int32_t displayId) const
+{
+    return Rect();
+}
 } // namespace OHOS::Ace::DisplayInfoUtils

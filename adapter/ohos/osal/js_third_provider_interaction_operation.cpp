@@ -193,7 +193,7 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
 
 bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProvider(
     const int64_t splitElementId, const int32_t mode, const int32_t requestId,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
+    std::list<Accessibility::AccessibilityElementInfo>& infos, bool ignoreHostOffset)
 {
     auto provider = accessibilityProvider_.Upgrade();
     CHECK_NULL_RETURN(provider, false);
@@ -207,6 +207,7 @@ bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProv
     }
 
     NodeConfig config;
+    config.ignoreHostOffset = ignoreHostOffset;
     GetNodeConfig(config);
     CopyNativeInfosToAccessibilityElementInfos(nativeInfos, config, infos);
     return !infos.empty();
@@ -379,14 +380,27 @@ void JsThirdProviderInteractionOperation::FocusMoveSearch(
     Accessibility::AccessibilityElementInfo info;
     bool ret = FocusMoveSearchProvider(
         splitElementId, direction, requestId, info);
-    if (!ret) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
-            "FocusMoveSearch failed.");
-        info.SetValidElement(false);
-    }
-
     // 3. Return result
-    SetFocusMoveSearchResult(callback, info, requestId);
+    if (!ret) {
+        auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(context->GetTaskExecutor());
+        context->GetTaskExecutor()->PostTask(
+            [jsMgr = jsAccessibilityManager_, weakHost = host_, &callback, requestId] () {
+                auto jsAccessibilityManager = jsMgr.Upgrade();
+                if ((!jsAccessibilityManager) || (!jsAccessibilityManager->IsRegister())) {
+                    AccessibilityElementInfo nodeInfo;
+                    nodeInfo.SetValidElement(false);
+                    callback.SetFocusMoveSearchResult(nodeInfo, requestId);
+                    return;
+                }
+                jsAccessibilityManager->SetFocusMoveResultWithNode(weakHost, callback, requestId);
+            }, TaskExecutor::TaskType::UI, "AccessibilityThirdPartyFocusMoveSearchFail");
+    } else {
+        SetFocusMoveSearchResult(callback, info, requestId);
+    }
 }
 
 bool JsThirdProviderInteractionOperation::FocusMoveSearchProvider(
@@ -439,7 +453,7 @@ void JsThirdProviderInteractionOperation::ExecuteAction(
     // 2. FindNextFocusAccessibilityNode from provider
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
-        splitElementId, 0, requestId, infos);
+        splitElementId, 0, requestId, infos, true); // for drawbound, no need fix host offset
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "Find info failed when ExecuteAction.");
         SetExecuteActionResult(callback, false, requestId);
@@ -556,14 +570,15 @@ void JsThirdProviderInteractionOperation::GetCursorPosition(
     callback.SetCursorPositionResult(cursorPosition, requestId);
 }
 
-void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
+void JsThirdProviderInteractionOperation::GetHostRectTranslateInfo(NodeConfig& config)
 {
     auto host = host_.Upgrade();
-    CHECK_NULL_VOID(host);
-    auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if ((!host) || config.ignoreHostOffset) {
+        config.offset = NG::OffsetF(0, 0);
+        config.scaleX = 1.0f;
+        config.scaleY = 1.0f;
+        return;
+    }
     auto rect = host->GetTransformRectRelativeToWindow();
     NG::VectorF finalScale = host->GetTransformScaleRelativeToWindow();
     auto pipeline = host->GetContextRefPtr();
@@ -586,11 +601,23 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     
     config.scaleX = finalScale.x;
     config.scaleY = finalScale.y;
+}
+
+void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto jsAccessibilityManager = GetHandler().Upgrade();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
     config.pageId = host->GetPageId();
     config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.belongTreeId = belongTreeId_;
     config.parentWindowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+
+    GetHostRectTranslateInfo(config);
 }
 
 void JsThirdProviderInteractionOperation::SetChildTreeIdAndWinId(

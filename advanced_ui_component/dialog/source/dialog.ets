@@ -1137,6 +1137,7 @@ struct CustomDialogContentComponent {
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
+      .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
       .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
       Color.Transparent : $r('sys.color.comp_background_primary'))
     }

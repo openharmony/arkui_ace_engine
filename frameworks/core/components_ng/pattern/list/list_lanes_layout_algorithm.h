@@ -86,6 +86,10 @@ private:
     void MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,
         int32_t index, float& pos, bool forward);
     void MeasureItem(const RefPtr<LayoutWrapper>& itemWrapper, int32_t index, bool forward);
+    void SetLaneIdx4Divider(int32_t idx)
+    {
+        laneIdx4Divider_ = idx;
+    }
 
     int32_t lanes_ = 1;
     std::optional<float> minLaneLength_;

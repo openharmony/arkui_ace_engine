@@ -47,6 +47,11 @@ enum class FocusViewStackState : int32_t {
     CLOSE = 2,
 };
 
+enum class KeyProcessingMode : int32_t {
+    FOCUS_NAVIGATION = 0,
+    ANCESTOR_EVENT = 1,
+};
+
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
@@ -156,6 +161,16 @@ public:
         focusViewStackState_ = focusViewStackState;
     }
 
+    void SetKeyProcessingMode(KeyProcessingMode keyProcessingMode)
+    {
+        keyProcessingMode_ = keyProcessingMode;
+    }
+
+    KeyProcessingMode GetKeyProcessingMode() const
+    {
+        return keyProcessingMode_;
+    }
+
     bool SetFocusViewRootScope(const RefPtr<FocusView>& focusView);
 
     void PaintFocusState();
@@ -238,6 +253,7 @@ private:
 
     int32_t requestFocusResult_ = ERROR_CODE_NO_ERROR;
     std::optional<FocusEvent> currentFocusEvent_;
+    KeyProcessingMode keyProcessingMode_ = KeyProcessingMode::FOCUS_NAVIGATION;
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };
 } // namespace OHOS::Ace::NG

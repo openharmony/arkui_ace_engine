@@ -67,6 +67,17 @@ AceContainer::~AceContainer() {}
 
 RefPtr<AceContainer> container_;
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
 RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
 {
     if (container_) {
@@ -280,5 +291,10 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
 {
     return true;
+}
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
 }
 } // namespace OHOS::Ace::Platform

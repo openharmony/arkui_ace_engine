@@ -59,11 +59,17 @@ public:
     bool IsHandleShow();
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void UpdateHandleOffset();
+    void UpdateFirstHandleOffset() override;
+    void UpdateSecondHandleOffset() override;
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
     bool GetIsHandleMoving()
     {
         return isHandleMoving_;
+    }
+    bool GetIsHandleHidden()
+    {
+        return handleIsHidden_;
     }
     bool IsSingleHandleMoving()
     {

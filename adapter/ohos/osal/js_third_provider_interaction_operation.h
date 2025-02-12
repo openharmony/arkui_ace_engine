@@ -35,6 +35,7 @@ struct NodeConfig {
     std::string inspectorKey;
     float scaleX = 1.0f;
     float scaleY = 1.0f;
+    bool ignoreHostOffset = false;
 };
 
 class JsThirdProviderInteractionOperation : public Accessibility::AccessibilityElementOperator,
@@ -80,7 +81,7 @@ public:
         Accessibility::EventType eventType);
     bool FindAccessibilityNodeInfosByIdFromProvider(
         const int64_t splitElementId, const int32_t mode, const int32_t requestId,
-        std::list<Accessibility::AccessibilityElementInfo>& infos);
+        std::list<Accessibility::AccessibilityElementInfo>& infos, bool ignoreHostOffset = false);
     const WeakPtr<JsAccessibilityManager>& GetHandler() const
     {
         return jsAccessibilityManager_;
@@ -97,6 +98,7 @@ public:
     }
 
 private:
+    void GetHostRectTranslateInfo(NodeConfig& config);
     void GetNodeConfig(NodeConfig& nodeConfig);
     void SetSearchElementInfoByAccessibilityIdResult(
         AccessibilityElementOperatorCallback& callback,

@@ -771,6 +771,12 @@ void FfiOHOSAceFrameworkDatePickerSetSelectedTextStyle(
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
+void FfiOHOSAceFrameworkDatePickerSetOpacity(double opacity)
+{
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity);
+    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
+}
+
 void FfiOHOSAceFrameworkDatePickerDialogShow(NativeDateDialogOptions options)
 {
     DatePickerType pickerType = DatePickerType::DATE;

@@ -21,7 +21,7 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT RecycleViewModel {
+class ACE_FORCE_EXPORT RecycleViewModel {
 public:
     static RecycleViewModel* GetInstance();
     virtual ~RecycleViewModel() = default;

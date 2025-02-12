@@ -48,6 +48,8 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
         !gestureHub->GetTextDraggable()) {
         DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
     }
+
+    AsyncDragEnd();
     ResetBorderRadiusAnimation();
     UnRegisterDragListener();
     HideEventColumn();
@@ -130,6 +132,32 @@ void DragDropInitiatingStateIdle::StartGatherTask()
         params.showGatherCallback, SNAPSHOT_DELAY_TIME, "ArkUIDragDropStartGather");
 }
 
+void DragDropInitiatingStateIdle::StartPreDragStatusCallback(const TouchEvent& touchEvent)
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto& params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto&& preDragStatusCallback = [weakNode = AceType::WeakClaim(RawPtr(frameNode))]() {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 350ms..");
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        if (!gestureHub->GetTextDraggable()) {
+            DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
+        }
+    };
+
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    params.preDragStatusCallback.Reset(preDragStatusCallback);
+    taskExecutor.PostDelayedTask(
+        params.preDragStatusCallback, GetCurDuration(touchEvent, DEALY_TASK_DURATION), "ArkUIPreDragLongPressTimer");
+}
+
 void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
 {
     auto machine = GetStateMachine();
@@ -146,6 +174,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
         StartCreateSnapshotTask(touchEvent.id);
         StartPreDragDetectingStartTask();
         StartGatherTask();
+        StartPreDragStatusCallback(touchEvent);
     }
     machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::READY));
 }
@@ -193,5 +222,12 @@ void DragDropInitiatingStateIdle::UnRegisterDragListener()
     CHECK_NULL_VOID(dragDropManager);
     eventManager->UnRegisterDragTouchEventListener(nodeId);
     dragDropManager->UnRegisterPullEventListener(nodeId);
+}
+
+void DragDropInitiatingStateIdle::AsyncDragEnd()
+{
+    if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
+        FireCustomerOnDragEnd();
+    }
 }
 } // namespace OHOS::Ace::NG

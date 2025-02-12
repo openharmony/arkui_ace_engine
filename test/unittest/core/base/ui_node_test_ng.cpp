@@ -1569,8 +1569,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg045, TestSize.Level1)
     int32_t depth = 0;
 
     parent->GetPageNodeCountAndDepth(&count, &depth);
-    EXPECT_EQ(parent->depth_, 1);
-    EXPECT_EQ(parent->depth_, 1);
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
 
     auto child1 = FrameNode::CreateFrameNode(
         "child1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
@@ -2519,6 +2519,196 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
     testNode2->CollectRemovedChildren(testNode2->GetChildren(), removedElmtId2, false);
     EXPECT_EQ(removedElmtId2.size(), 5);
     
+    /**
+     * @tc.steps: step5. revert to the origin API.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: IsAutoFillContainerNode001
+ * @tc.desc: Test ui node method IsAutoFillContainerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, IsAutoFillContainerNode001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode1->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode2->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode3->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 4, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode4->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 5, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode5->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode6 =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, 6, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode6->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode7 =
+        FrameNode::CreateFrameNode("OTHER_TAG", 7, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_FALSE(testNode7->IsAutoFillContainerNode());
+}
+
+/**
+ * @tc.name:
+ * @tc.desc: Test ui node method GreatOrEqualAPITargetVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GreatOrEqualAPITargetVersion, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+
+    /**
+     * @tc.steps: step3. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step4. test GreatOrEqualAPITargetVersion.
+     */
+    EXPECT_FALSE(testNode1->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN));
+    EXPECT_TRUE(testNode2->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN));
+
+    /**
+     * @tc.steps: step5. revert to the origin API.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: GetPageId_API13
+ * @tc.desc: Test ui node method GetPageId in API13
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetPageId_API13, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode1->SetHostPageId(1);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 3, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step3. add child
+     */
+    testNode1->AddChild(testNode2, 1, false);
+    testNode3->MountToParent(testNode2);
+    testNode4->MountToParent(testNode1);
+    testNode4->AddChild(testNode5, 1, false);
+
+    /**
+     * @tc.steps: step4. test GreatOrEqualAPITargetVersion.
+     */
+    EXPECT_EQ(testNode1->GetPageId(), 1);
+    EXPECT_EQ(testNode2->GetPageId(), 0);
+    EXPECT_EQ(testNode3->GetPageId(), 0);
+    EXPECT_EQ(testNode4->GetPageId(), 1);
+    EXPECT_EQ(testNode5->GetPageId(), 0);
+
+    /**
+     * @tc.steps: step5. revert to the origin API.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: GetPageId_API16
+ * @tc.desc: Test ui node method GetPageId in API16
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetPageId_API16, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode1->SetHostPageId(1);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 3, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step3. add child
+     */
+    testNode1->AddChild(testNode2, 1, false);
+    testNode3->MountToParent(testNode2);
+    testNode1->AddChild(testNode4, 1, false);
+    testNode4->AddChild(testNode5, 1, false);
+
+    /**
+     * @tc.steps: step4. test GreatOrEqualAPITargetVersion.
+     */
+    EXPECT_EQ(testNode1->GetPageId(), 1);
+    EXPECT_EQ(testNode2->GetPageId(), 1);
+    EXPECT_EQ(testNode3->GetPageId(), 1);
+    EXPECT_EQ(testNode4->GetPageId(), INT32_MAX);
+    EXPECT_EQ(testNode5->GetPageId(), INT32_MAX);
+
+    testNode1->SetHostPageId(2);
+    EXPECT_EQ(testNode1->GetPageId(), 2);
+    EXPECT_EQ(testNode2->GetPageId(), 2);
+    EXPECT_EQ(testNode3->GetPageId(), 2);
+    EXPECT_EQ(testNode4->GetPageId(), 2);
+    EXPECT_EQ(testNode5->GetPageId(), 2);
+
+    testNode4->SetHostPageId(3);
+    EXPECT_EQ(testNode1->GetPageId(), 2);
+    EXPECT_EQ(testNode2->GetPageId(), 2);
+    EXPECT_EQ(testNode3->GetPageId(), 2);
+    EXPECT_EQ(testNode4->GetPageId(), 3);
+    EXPECT_EQ(testNode5->GetPageId(), 3);
+
+    testNode1->SetHostPageIdByParent(4);
+    EXPECT_EQ(testNode1->GetPageId(), 4);
+    EXPECT_EQ(testNode2->GetPageId(), 4);
+    EXPECT_EQ(testNode3->GetPageId(), 4);
+    EXPECT_EQ(testNode4->GetPageId(), 3);
+    EXPECT_EQ(testNode5->GetPageId(), 3);
+
     /**
      * @tc.steps: step5. revert to the origin API.
      */

@@ -18,6 +18,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 #ifdef OHOS_STANDARD_SYSTEM
@@ -684,7 +685,8 @@ void PerfMonitor::SetVsyncLazyMode()
     }
 
     lastExcusion = needExcusion;
-    ACE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
+    ACE_VSYNC_MODE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) "
+        "isExcAni(%d)",
         isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
     OHOS::AppExecFwk::EventHandler::SetVsyncLazyMode(needExcusion);
 #endif

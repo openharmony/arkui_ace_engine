@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "styled_string.h"
@@ -776,6 +777,69 @@ const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
 {
     CHECK_NULL_RETURN(value, "");
     return value->text.value;
+}
+
+ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create()
+{
+    ArkUI_VisibleAreaEventOptions* options = new ArkUI_VisibleAreaEventOptions;
+    options->expectedUpdateInterval = 1000;
+    return options;
+}
+
+void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option)
+{
+    if (!option) {
+        return;
+    }
+    delete option;
+    option = nullptr;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t size)
+{
+    if (!option) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    option->ratios.clear();
+    for (int32_t i = 0; i < size; i++) {
+        option->ratios.push_back(value[i]);
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option, int32_t value)
+{
+    if (!option) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    option->expectedUpdateInterval = value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size)
+{
+    if (!option || !value || !size) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (option->ratios.size() > *size) {
+        *size = static_cast<int32_t>(option->ratios.size());
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    int32_t index = 0;
+    for (const auto& element : option->ratios) {
+        value[index] = element;
+        index++;
+    }
+    *size = static_cast<int32_t>(option->ratios.size());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option)
+{
+    if (!option) {
+        return -1;
+    }
+    return option->expectedUpdateInterval;
 }
 #ifdef __cplusplus
 };

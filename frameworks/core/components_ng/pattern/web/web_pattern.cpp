@@ -32,9 +32,7 @@
 #include "input_method_controller.h"
 #include "parameters.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "auto_fill_type.h"
 #include "page_node_info.h"
 
@@ -816,12 +814,13 @@ void WebPattern::OnAttachToFrameNode()
     });
     UpdateTransformHintChangedCallbackId(callbackId);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
         auto callback = [](int64_t accessibilityId, const std::string data) {
-            UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+            UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data);
         };
         RegisterTextBlurCallback(callback);
     }
+    pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
 #endif
 }
 
@@ -843,9 +842,10 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
         UnRegisterTextBlurCallback();
     }
+    pipeline->UnRegisterListenerForTranslate(id);
 #endif
 }
 
@@ -1897,6 +1897,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
+    StartVibraFeedback("longPress.light");
     if (!isMouseEvent_) {
         // mouse drag does not need long press action
         gestureHub->StartLongPressActionForWeb();
@@ -1963,9 +1964,9 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 void WebPattern::HandleDragStart(int32_t x, int32_t y)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "HandleDragStart DragDrop event gestureHub actionStart, isW3cDragEvent_:%{public}d, isMouseEvent_:%{public}d",
-        (int)isW3cDragEvent_, (int)isMouseEvent_);
-    if (!isW3cDragEvent_ && !isMouseEvent_) {
+        "HandleDragStart DragDrop event actionStart, isDragStartFromWeb_:%{public}d, isMouseEvent_:%{public}d",
+        (int)isDragStartFromWeb_, (int)isMouseEvent_);
+    if (!isDragStartFromWeb_ && !isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->SetDraggable(false);
@@ -1976,13 +1977,12 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         gestureHub->ResetDragActionForWeb();
         isDragging_ = false;
         isReceivedArkDrag_ = false;
-        isDragStartFromWeb_ = false;
         // cancel drag action to avoid web kernel can't process other input event
         CHECK_NULL_VOID(delegate_);
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         gestureHub->CancelDragForWeb();
     }
-    if (!isW3cDragEvent_ && isMouseEvent_) {
+    if (!isDragStartFromWeb_ && isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<WebEventHub>();
@@ -1990,6 +1990,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetMouseDragMonitorState(true);
+        isSetMouseDragMonitorState = true;
     }
 }
 
@@ -2166,6 +2167,14 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_END);
     } else {
         delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    }
+    if (isSetMouseDragMonitorState) {
+        auto eventHub = host->GetEventHub<WebEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetMouseDragMonitorState(false);
+        isSetMouseDragMonitorState = false;
     }
 }
 
@@ -7791,8 +7800,13 @@ void WebPattern::DumpInfo()
 
 float WebPattern::DumpGpuInfo()
 {
-    float totalSize = delegate_->GetNweb()->DumpGpuInfo();
-    return totalSize;
+    if (delegate_ != nullptr) {
+        if (delegate_->GetNweb() != nullptr) {
+            float totalSize = delegate_->GetNweb()->DumpGpuInfo();
+            return totalSize;
+        }
+    }
+    return 0;
 }
 
 RefPtr<WebEventHub> WebPattern::GetWebEventHub()
@@ -7812,5 +7826,14 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
     if (delegate_) {
         delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
+}
+
+std::string WebPattern::GetCurrentLanguage()
+{
+    std::string result = "";
+    if (delegate_) {
+        result = delegate_->GetCurrentLanguage();
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

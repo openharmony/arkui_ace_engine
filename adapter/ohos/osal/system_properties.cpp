@@ -66,6 +66,8 @@ constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
+constexpr int32_t FOLD_TYPE_TWO = 2;
+constexpr int32_t FOLD_TYPE_FOUR = 4;
 
 bool IsOpIncEnabled()
 {
@@ -157,6 +159,11 @@ bool IsMeasureDebugTraceEnabled()
 bool IsSafeAreaDebugTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
+}
+
+bool IsVsyncModeDebugTraceEnabled()
+{
+    return system::GetBoolParameter("persist.ace.trace.vsyncMode.debug.enabled", false);
 }
 
 bool IsDeveloperModeOn()
@@ -429,6 +436,7 @@ bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::syntaxTraceEnable_ = IsSyntaxTraceEnabled();
 bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
+bool SystemProperties::vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -626,6 +634,7 @@ void SystemProperties::InitDeviceInfo(
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
     safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
+    vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
@@ -965,6 +974,12 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
 }
 
+ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::BIG_FOLDER;
+}
+
 void SystemProperties::InitFoldScreenTypeBySystemProperty()
 {
     if (foldScreenType_ != FoldScreenType::UNKNOWN) {
@@ -976,6 +991,9 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
         auto type = StringUtils::StringToInt(foldScreenTypeStr);
+        if (type == FOLD_TYPE_FOUR) {
+            type = FOLD_TYPE_TWO;
+        }
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
@@ -1020,5 +1038,11 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SUPER_FOLDER;
 }
 } // namespace OHOS::Ace

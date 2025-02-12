@@ -373,6 +373,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest003, TestSize.Level1)
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     sliderLayoutAlgorithm->trackThickness_ = 40.0f;
 
     auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -473,6 +474,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, sliderLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
@@ -910,6 +912,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest013, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     sliderPattern->AttachToFrameNode(frameNode);
     ASSERT_NE(frameNode, nullptr);
@@ -1384,6 +1387,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
     frameNode->context_ = reinterpret_cast<PipelineContext*>(context.GetRawPtr());
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     /**
      * @tc.steps: step2. Add Slider virtual node.
      */

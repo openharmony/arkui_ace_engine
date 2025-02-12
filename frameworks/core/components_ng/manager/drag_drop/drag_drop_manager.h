@@ -91,6 +91,26 @@ public:
         return eventStrictReportingEnabled_;
     }
 
+    int32_t GetCurrentAnimationCnt() const
+    {
+        return currentAnimationCnt_;
+    }
+
+    void SetCurrentAnimationCnt(int32_t value)
+    {
+        currentAnimationCnt_ = value;
+    }
+
+    int32_t GetAllAnimationCnt() const
+    {
+        return allAnimationCnt_;
+    }
+
+    void SetAllAnimationCnt(int32_t value)
+    {
+        allAnimationCnt_ = value;
+    }
+
     void UpdateItemDragPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
@@ -114,6 +134,13 @@ public:
         const std::string& udKey, int32_t count = 0);
     void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode,
         const OHOS::Ace::DragPointerEvent& pointerEvent);
+    std::function<void(const DragRet&)> GetStopDragCallBack(const RefPtr<FrameNode>& dragFrameNode,
+        const DragPointerEvent& pointerEvent, const RefPtr<OHOS::Ace::DragEvent>& event,
+        const std::string& extraParams);
+    bool PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
+    void HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event, DragRet dragResult, bool useCustomAnimation,
         int32_t windowId, DragBehavior dragBehavior, const OHOS::Ace::DragPointerEvent& pointerEvent);
     void ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, DragDropRet dragDropRet);
@@ -196,6 +223,11 @@ public:
     void SetIsDragCancel(bool isDragCancel)
     {
         isDragCancel_ = isDragCancel;
+    }
+
+    bool IsMouseDrag() const
+    {
+        return isMouseDragged_;
     }
 
     void SetIsMouseDrag(bool isMouseDragged)
@@ -337,6 +369,16 @@ public:
         info_ = DragPreviewInfo();
     }
 
+    void SetDragPreviewInfo(const DragPreviewInfo& newInfo)
+    {
+        info_ = newInfo;
+    }
+
+    DragPreviewInfo GetDragPreviewInfo() const
+    {
+        return info_;
+    }
+
     void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
     {
         isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
@@ -354,6 +396,8 @@ public:
     void HandleSyncOnDragStart(DragStartRequestStatus dragStartRequestStatus);
 
     void SetDragMoveLastPoint(Point point) noexcept;
+
+    const Point GetDragMoveLastPoint() const;
 
     void SetDelayDragCallBack(const std::function<void()>& cb) noexcept;
 
@@ -380,6 +424,16 @@ public:
         pixelMapOffset_ = pixelMapOffset;
     }
 
+    OffsetF GetPixelMapOffset()
+    {
+        return pixelMapOffset_;
+    }
+
+    void SetCurPointerOffset(OffsetF curPointerOffset)
+    {
+        curPointerOffset_ = curPointerOffset;
+    }
+
     bool IsNeedDisplayInSubwindow();
     void ClearGatherPixelMap()
     {
@@ -397,6 +451,16 @@ public:
     void SetDragDropPointerEvent(const DragPointerEvent& dragDropPointerEvent)
     {
         dragDropPointerEvent_ = dragDropPointerEvent;
+    }
+
+    bool IsDragFwkShow() const
+    {
+        return isDragFwkShow_;
+    }
+
+    void SetDragFwkShow(bool value)
+    {
+        isDragFwkShow_ = value;
     }
 
     void SetIsShowBadgeAnimation(bool isShowBadgeAnimation)
@@ -456,6 +520,11 @@ public:
     uint32_t GetDampingOverflowCount() const
     {
         return dampingOverflowCount_;
+    }
+
+    void SetDampingOverflowCount(uint32_t count)
+    {
+        dampingOverflowCount_ = count;
     }
 
     void SetDampingOverflowCount()

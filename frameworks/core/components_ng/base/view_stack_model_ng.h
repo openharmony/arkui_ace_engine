@@ -126,6 +126,26 @@ public:
         return ViewStackProcessor::GetInstance()->IsEmpty();
     }
 
+    void PushPrebuildCompCmd() override
+    {
+        ViewStackProcessor::GetInstance()->PushPrebuildCompCmd();
+    }
+
+    void PushPrebuildCompCmd(const char* commandName, PrebuildFunc prebuildFunc) override
+    {
+        ViewStackProcessor::GetInstance()->PushPrebuildCompCmd(commandName, prebuildFunc);
+    }
+
+    bool CheckIsPrebuildTimeout() override
+    {
+        return ViewStackProcessor::GetInstance()->CheckIsPrebuildTimeout();
+    }
+
+    bool IsPrebuilding() override
+    {
+        return ViewStackProcessor::GetInstance()->IsPrebuilding();
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

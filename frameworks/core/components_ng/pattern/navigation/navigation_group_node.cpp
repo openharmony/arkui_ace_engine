@@ -15,9 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -692,9 +690,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPopPage");
-#endif
+    UiSessionManager::GetInstance()->OnRouterChange(navigationPathInfo_, "navigationPopPage");
 }
 
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
@@ -940,9 +936,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, endTime - startTime, path);
         });
     }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPushPage");
-#endif
+    UiSessionManager::GetInstance()->OnRouterChange(navigationPathInfo_, "navigationPushPage");
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());
@@ -1511,11 +1505,12 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 CHECK_NULL_VOID(preNode);
                 auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                 CHECK_NULL_VOID(preNavDesNode);
-                if (preNavDesNode->SystemTransitionPopCallback(preNavDesNode->GetAnimationId())) {
+                auto pattern = navigation->GetPattern<NavigationPattern>();
+                CHECK_NULL_VOID(pattern);
+                bool isIncurStack = pattern->FindInCurStack(preNode);
+                if (preNavDesNode->SystemTransitionPopCallback(preNavDesNode->GetAnimationId(), !isIncurStack)) {
                     auto parent = preNavDesNode->GetParent();
                     CHECK_NULL_VOID(parent);
-                    auto pattern = navigation->GetPattern<NavigationPattern>();
-                    bool isIncurStack = pattern->FindInCurStack(preNode);
                     if (!isIncurStack) {
                         parent->RemoveChild(preNavDesNode);
                     }
@@ -1638,6 +1633,11 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
         };
+    if (preNode) {
+        auto renderContext = preNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RemoveClipWithRRect();
+    }
     CreateAnimationWithDialogPush(callback, prevNavList, curNavList);
 }
 
@@ -1677,6 +1677,9 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         CHECK_NULL_VOID(navdestination);
         start = navdestination->GetIndex() + 1;
+        auto renderContext = preNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RemoveClipWithRRect();
     }
     // find the nodes need to do upward ENTER translation
     std::vector<WeakPtr<NavDestinationGroupNode>> curNavList;

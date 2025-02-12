@@ -186,19 +186,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     if (info_->isSingleHandle) {
-        if (!info_->firstHandle.isShow && info_->secondHandle.isShow) {
-            // Use the second handle to make a single handle.
-            auto secondHandleOffsetY = secondHandle.Top();
-            secondHandleRegion_.SetOffset({ secondHandleOffsetX - hotZone, secondHandleOffsetY });
-            DimensionRect secondHandleRegion;
-            secondHandleRegion.SetSize({ Dimension(secondHandleRegion_.GetSize().Width()),
-                Dimension(secondHandleRegion_.GetSize().Height()) });
-            secondHandleRegion.SetOffset(DimensionOffset(
-                Offset(secondHandleRegion_.GetOffset().GetX(), secondHandleRegion_.GetOffset().GetY())));
-            responseRegion.emplace_back(secondHandleRegion);
-            gestureEventHub->SetResponseRegion(responseRegion);
-            firstHandleRegion_.Reset();
-        } else {
+        if (info_->firstHandle.isShow && !info_->secondHandle.isShow) {
             // Use the first handle to make a single handle.
             auto firstHandleOffsetY = firstHandle.Top();
             firstHandleRegion_.SetOffset({ firstHandleOffsetX - hotZone, firstHandleOffsetY });
@@ -210,6 +198,18 @@ void SelectOverlayPattern::UpdateHandleHotZone()
             responseRegion.emplace_back(firstHandleRegion);
             gestureEventHub->SetResponseRegion(responseRegion);
             secondHandleRegion_.Reset();
+        } else {
+            // Use the second handle to make a single handle.
+            auto secondHandleOffsetY = secondHandle.Top();
+            secondHandleRegion_.SetOffset({ secondHandleOffsetX - hotZone, secondHandleOffsetY });
+            DimensionRect secondHandleRegion;
+            secondHandleRegion.SetSize({ Dimension(secondHandleRegion_.GetSize().Width()),
+                Dimension(secondHandleRegion_.GetSize().Height()) });
+            secondHandleRegion.SetOffset(DimensionOffset(
+                Offset(secondHandleRegion_.GetOffset().GetX(), secondHandleRegion_.GetOffset().GetY())));
+            responseRegion.emplace_back(secondHandleRegion);
+            gestureEventHub->SetResponseRegion(responseRegion);
+            firstHandleRegion_.Reset();
         }
         return;
     }

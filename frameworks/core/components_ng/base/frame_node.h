@@ -474,6 +474,10 @@ public:
 
     void OnWindowUnfocused() override;
 
+    void OnWindowActivated() override;
+
+    void OnWindowDeactivated() override;
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -831,6 +835,7 @@ public:
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
 
     FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false, bool isExpand = true);
+    FrameNode* GetFrameNodeChildByIndexWithoutBuild(uint32_t index);
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -1347,7 +1352,7 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
-    void ProcessThrottledVisibleCallback();
+    void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
@@ -1506,8 +1511,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
-        false, true, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_;
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 

@@ -876,7 +876,7 @@ export class SubHeader extends ViewPU {
             if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+                        Button.createWithChild({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false });
                         Button.focusable(this.operationItem ? true : false);
                         Button.margin(INDEX_ZERO);
                         Button.padding(INDEX_ZERO);
@@ -1535,19 +1535,20 @@ export class SubHeader extends ViewPU {
             Row.justifyContent(FlexAlign.End);
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({
+            SymbolGlyph.create({
                 'id': -1,
-                'type': 20000,
-                params: ['sys.media.ohos_ic_public_arrow_right'],
+                'type': 40000,
+                params: ['sys.symbol.chevron_right'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             });
-            Image.fillColor(this.subHeaderTheme.iconArrowColor);
-            Image.width(ARROW_ICON_WIDTH);
-            Image.height(OPERATE_ITEM_LENGTH);
-            Image.draggable(false);
-            Image.matchTextDirection(true);
-        }, Image);
+            SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
+            SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
+            SymbolGlyph.draggable(false);
+            SymbolGlyph.focusable(true);
+            SymbolGlyph.width(ARROW_ICON_WIDTH);
+            SymbolGlyph.height(OPERATE_ITEM_LENGTH);
+        }, SymbolGlyph);
         Row.pop();
     }
     TextArrowStyle(textArrow, parent = null) {
@@ -1567,7 +1568,7 @@ export class SubHeader extends ViewPU {
                         });
                     }, Stack);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+                        Button.createWithChild({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false });
                         Button.padding(INDEX_ZERO);
                         Button.margin({ start: this.leftIconMargin() });
                         Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
@@ -1730,12 +1731,10 @@ export class SubHeader extends ViewPU {
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH);
+                        SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
                         SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.focusable(true);
-                        SymbolGlyph.minFontScale(DEFAULT_FONT_SCALE);
-                        SymbolGlyph.maxFontScale(DEFAULT_FONT_SCALE);
                         SymbolGlyph.width(ARROW_ICON_WIDTH);
                         SymbolGlyph.height(OPERATE_ITEM_LENGTH);
                     }, SymbolGlyph);

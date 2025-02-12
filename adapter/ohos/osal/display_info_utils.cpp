@@ -81,4 +81,44 @@ FoldStatus DisplayInfoUtils::GetCurrentFoldStatus()
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     return displayInfo_->GetFoldStatus();
 }
+
+std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
+{
+    std::vector<Rect> rects;
+    auto foldCreaseRegion = Rosen::DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
+    if (!foldCreaseRegion) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "failed to get foldCreaseRegion");
+        return rects;
+    }
+
+    auto creaseRects = foldCreaseRegion->GetCreaseRects();
+    if (creaseRects.empty()) {
+        return rects;
+    }
+
+    for (const auto& item : creaseRects) {
+        Rect rect;
+        rect.SetRect(item.posX_, item.posY_, item.width_, item.height_);
+        rects.insert(rects.end(), rect);
+    }
+    return rects;
+}
+
+Rect DisplayInfoUtils::GetDisplayAvailableRect(int32_t displayId) const
+{
+    auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (!display) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "failed to get display by id: %{public}u", (uint32_t)displayId);
+        return Rect();
+    }
+
+    Rosen::DMRect availableArea;
+    Rosen::DMError ret = display->GetAvailableArea(availableArea);
+    if (ret != Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "failed to get availableArea of displayId: %{public}u", (uint32_t)displayId);
+        return Rect();
+    }
+
+    return Rect(availableArea.posX_, availableArea.posY_, availableArea.width_, availableArea.height_);
+}
 } // namespace OHOS::Ace::DisplayInfoUtils

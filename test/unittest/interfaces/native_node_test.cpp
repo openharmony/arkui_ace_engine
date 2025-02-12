@@ -1085,6 +1085,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_VISIBLE_AREA_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_HOVER, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_HOVER));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_HOVER_MOVE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_HOVER_MOVE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_MOUSE, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_MOUSE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_EVENT_ON_ATTACH, nodeType);
@@ -1312,6 +1314,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_EVENT_ON_VISIBLE_AREA_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_HOVER);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_HOVER));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_HOVER_MOVE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_HOVER_MOVE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_MOUSE);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_MOUSE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_ATTACH);
@@ -2522,8 +2526,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest024, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_TRACK_THICKNESS), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_BLOCK_COLOR), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_TRACK_COLOR), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_SELECTED_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_SHOW_STEPS), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_BLOCK_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_VALUE), nullptr);

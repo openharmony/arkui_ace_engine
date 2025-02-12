@@ -43,6 +43,7 @@ std::optional<SizeF> LayoutAlgorithmWrapper::MeasureContent(
         if (absLayoutAlgorithm_) {
             return absLayoutAlgorithm_->MeasureContent(contentConstraint);
         }
+        return std::nullopt;
     }
     return layoutAlgorithm_->MeasureContent(contentConstraint, layoutWrapper);
 }

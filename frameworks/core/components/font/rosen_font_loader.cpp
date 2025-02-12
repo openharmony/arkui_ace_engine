@@ -309,6 +309,12 @@ void RosenFontLoader::PostLoadFontTask(const std::vector<uint8_t>& fontData, con
 
 void RosenFontLoader::NotifyCallbacks()
 {
+    for (const auto& [node, callback] : callbacks_) {
+        if (callback) {
+            callback();
+        }
+    }
+    callbacks_.clear();
     for (const auto& [node, callback] : callbacksNG_) {
         if (callback) {
             callback();

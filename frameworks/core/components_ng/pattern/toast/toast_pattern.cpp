@@ -145,6 +145,21 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
     }
 }
 
+void ToastPattern::FoldStatusChangedAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+    option.SetCurve(curve);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    AnimationUtils::Animate(option, [host, context]() {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        context->FlushUITasks();
+    });
+}
+
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     CHECK_NULL_RETURN(dirty, false);
@@ -190,10 +205,7 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         CHECK_NULL_RETURN(subContext, false);
         subContext->Animate(option, option.GetCurve(), func);
     } else {
-        // animation effect of the toast position change
-        AnimationOption option;
-        auto translationCurve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
-        context->Animate(option, translationCurve, func);
+        func();
     }
     return true;
 }
@@ -260,11 +272,59 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     bool needResizeBottom = false;
     AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom);
     needResizeBottom = needResizeBottom || (!toastProp->HasToastAlignment() && toastInfo_.bottom.empty());
+    UpdateToastMaxHeight(layoutWrapper, needResizeBottom, offsetY);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && needResizeBottom &&
         !GreatNotEqual(offsetY.Value(), 0)) {
         return limitPos_ + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
     }
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
+}
+
+void ToastPattern::UpdateToastMaxHeight(
+    const RefPtr<LayoutWrapper>& layoutWrapper, bool& needResizeBottom, Dimension& offsetY)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = GetToastContext();
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+    if (safeAreaManager && NearEqual(keyboardInset, 0.0f)) {
+        keyboardInset = safeAreaManager->GetRawKeyboardHeight();
+    }
+    auto deviceHeight = context->GetRootHeight();
+    auto keyboardOffset = deviceHeight - keyboardInset;
+    if (IsAlignedWithHostWindow() && GreatNotEqual(keyboardInset, 0)) {
+        deviceHeight = uiExtensionHostWindowRect_.Height();
+
+        auto currentId = Container::CurrentId();
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+            container = AceEngine::Get().GetContainer(currentId);
+            CHECK_NULL_VOID(container);
+        }
+        if (container->IsUIExtensionWindow()) {
+            auto toastSubwindow = SubwindowManager::GetInstance()->GetToastSubwindow(currentId);
+            if (toastSubwindow) {
+                auto parentWindowRect = toastSubwindow->GetParentWindowRect();
+                keyboardOffset =
+                    deviceHeight - keyboardInset - uiExtensionHostWindowRect_.Bottom() + parentWindowRect.Bottom();
+            }
+        }
+    }
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && needResizeBottom &&
+        !GreatNotEqual(offsetY.Value(), 0)) {
+        auto maxHeight = keyboardOffset - limitPos_.Value() - LIMIT_SPACING.ConvertToPx();
+        layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(maxHeight))));
+        layoutWrapper->Measure(layoutProperty->GetLayoutConstraint());
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !GreatNotEqual(keyboardInset, 0)) {
+        layoutProperty->ResetCalcMaxSize();
+    }
 }
 
 void ToastPattern::AdjustOffsetForKeyboard(
@@ -337,7 +397,9 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
-    PopupBasePattern::BeforeCreateLayoutWrapper();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        PopupBasePattern::BeforeCreateLayoutWrapper();
+    }
 
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
@@ -449,10 +511,8 @@ void ToastPattern::OnAttachToFrameNode()
         pipeline->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this)](bool isHoverMode) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
             if (isHoverMode != pattern->isHoverMode_) {
-                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                pattern->FoldStatusChangedAnimation();
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);

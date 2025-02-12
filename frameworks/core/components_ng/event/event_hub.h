@@ -195,6 +195,8 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
+    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)> callback, bool isInner);
+    void RemoveSupportedUIState(UIState state, bool isInner);
     bool IsCurrentStateOn(UIState state);
     void SetKeyboardShortcut(
         const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction);

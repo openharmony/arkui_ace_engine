@@ -123,6 +123,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetTextStyle(uint32_t color, double 
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetSelectedTextStyle(uint32_t color, double size, int32_t unit,
     const char* weight, const char* family, uint32_t style);
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetDefaultAttributes(void);
+CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetOpacity(double opacity);
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerDialogShow(NativeDateDialogOptions options);
 
 };

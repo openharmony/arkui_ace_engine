@@ -37,10 +37,19 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.h"
 
 using namespace Commonlibrary::Concurrent::WorkerModule;
-
+namespace OHOS::Ace {
+NG::DynamicModelNG* NG::DynamicModelNG::GetInstance()
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        LOGE("Get DynamicModelNG in non NewPipeline.");
+    }
+    static NG::DynamicModelNG instance;
+    return &instance;
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 const CalcDimension DYNAMIC_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
 const CalcDimension DYNAMIC_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
@@ -58,6 +67,8 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     JSClass<JSDynamicComponent>::StaticMethod("width", &JSDynamicComponent::Width, opt);
     JSClass<JSDynamicComponent>::StaticMethod("height", &JSDynamicComponent::Height, opt);
     JSClass<JSDynamicComponent>::StaticMethod("onError", &JSDynamicComponent::JsOnError, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("isReportFrameEvent",
+        &JSDynamicComponent::SetIsReportFrameEvent, opt);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -84,7 +95,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     NG::UIExtensionConfig config;
     config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
     config.backgroundTransparent = backgroundTransparent;
-    UIExtensionModel::GetInstance()->Create(config);
+    NG::DynamicModelNG::GetInstance()->Create(config);
     ViewAbstractModel::GetInstance()->SetWidth(DYNAMIC_COMPONENT_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetHeight(DYNAMIC_COMPONENT_MIN_HEIGHT);
     ViewAbstractModel::GetInstance()->SetMinWidth(DYNAMIC_COMPONENT_MIN_WIDTH);
@@ -102,7 +113,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
     if (worker == nullptr) {
         TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr");
-        UIExtensionModel::GetInstance()->InitializeDynamicComponent(
+        NG::DynamicModelNG::GetInstance()->InitializeDynamicComponent(
             AceType::Claim(frameNode), "", "", entryPoint, nullptr);
         return;
     }
@@ -117,11 +128,21 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
             [weak, entryPoint, env]() {
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);
-                UIExtensionModel::GetInstance()->InitializeDynamicComponent(
+                NG::DynamicModelNG::GetInstance()->InitializeDynamicComponent(
                     frameNode, "", "", entryPoint, env);
             },
             TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
     });
+}
+
+void JSDynamicComponent::SetIsReportFrameEvent(const JSCallbackInfo& info)
+{
+    bool isReportFrameEvent = false;
+    if (info[0]->IsBoolean()) {
+        isReportFrameEvent = info[0]->ToBoolean();
+    }
+
+    NG::DynamicModelNG::GetInstance()->SetIsReportFrameEvent(isReportFrameEvent);
 }
 
 void JSDynamicComponent::JsOnError(const JSCallbackInfo& info)
@@ -151,7 +172,7 @@ void JSDynamicComponent::JsOnError(const JSCallbackInfo& info)
             auto returnValue = JSRef<JSVal>::Cast(obj);
             func->ExecuteJS(1, &returnValue);
         };
-    UIExtensionModel::GetInstance()->SetPlatformOnError(std::move(onError));
+    NG::DynamicModelNG::GetInstance()->SetPlatformOnError(std::move(onError));
 }
 
 void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)

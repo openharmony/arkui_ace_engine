@@ -484,16 +484,34 @@ void TabBarLayoutAlgorithm::MeasureJumpIndex(LayoutWrapper* layoutWrapper, Layou
 
 void TabBarLayoutAlgorithm::MeasureFocusIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
 {
-    MeasureItem(layoutWrapper, childLayoutConstraint, focusIndex_.value());
-    currentDelta_ = focusIndex_.value() < visibleItemPosition_.begin()->first ?
-        visibleItemLength_[focusIndex_.value()] : -visibleItemLength_[focusIndex_.value()];
-    if (focusIndex_.value() == 0) {
-        currentDelta_ += scrollMargin_;
-    } else if (focusIndex_.value() == childCount_ - 1) {
-        currentDelta_ -= scrollMargin_;
+    if (visibleItemPosition_.empty()) {
+        return;
     }
-    visibleChildrenMainSize_ = scrollMargin_ * TWO;
-    MeasureWithOffset(layoutWrapper, childLayoutConstraint);
+    auto startIndex = focusIndex_.value();
+    auto startPos = endMainPos_;
+    auto endIndex = focusIndex_.value();
+    auto endPos = 0.0f;
+    if (focusIndex_.value() < visibleItemPosition_.begin()->first) {
+        if (focusIndex_.value() == 0) {
+            endPos += scrollMargin_;
+        }
+        startIndex = endIndex - 1;
+        startPos = endPos;
+    } else if (focusIndex_.value() > visibleItemPosition_.rbegin()->first) {
+        if (focusIndex_.value() == childCount_ - 1) {
+            startPos -= scrollMargin_;
+        }
+        endIndex = startIndex + 1;
+        endPos = startPos;
+    } else {
+        return;
+    }
+    visibleItemPosition_.clear();
+    LayoutForward(layoutWrapper, childLayoutConstraint, endIndex, endPos);
+    LayoutBackward(layoutWrapper, childLayoutConstraint, startIndex, startPos);
+    if (!canOverScroll_) {
+        AdjustPosition(layoutWrapper, childLayoutConstraint, startIndex, endIndex, startPos, endPos);
+    }
 }
 
 void TabBarLayoutAlgorithm::MeasureWithOffset(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)

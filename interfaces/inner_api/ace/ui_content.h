@@ -314,7 +314,7 @@ public:
 
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
 
-    virtual bool GetContainerModalTitleVisible() { return false; }
+    virtual bool GetContainerModalTitleVisible(bool isImmersive) { return false; }
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
@@ -500,7 +500,16 @@ public:
         return nullptr;
     }
 
+    virtual void ActiveWindow() {};
+
+    virtual void UnActiveWindow() {};
+
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
+
+    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

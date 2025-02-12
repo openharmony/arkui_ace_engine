@@ -454,6 +454,8 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnWindowActivated() {}
+    virtual void OnWindowDeactivated() {}
     virtual void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) {}
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
@@ -665,6 +667,15 @@ public:
 
     virtual void OnFocusNodeChange(FocusReason focusReason) {}
     virtual void OnCollectRemoved() {}
+    virtual std::string GetCurrentLanguage()
+    {
+        return nullptr;
+    };
+    virtual void GetTranslateText(
+        std::string extraData, std::function<void(std::string)> callback, bool isContinued) {};
+    virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
+    virtual void EndTranslate() {};
+    virtual void SendTranslateResult(std::string results) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

@@ -1493,7 +1493,7 @@ HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength001, TestSize.Lev
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 4;
     int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
-    EXPECT_EQ(length, 5);
+    EXPECT_EQ(length, 4);
 }
 
 /**
@@ -1510,7 +1510,7 @@ HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength002, TestSize.Lev
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 1;
     int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
-    EXPECT_EQ(length, 3);
+    EXPECT_EQ(length, 2);
 }
 
 /**

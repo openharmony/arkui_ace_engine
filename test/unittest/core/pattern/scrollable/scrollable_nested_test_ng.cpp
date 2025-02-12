@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -650,6 +650,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
     auto listPattern = listNode->GetPattern<ListPattern>();
     auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
     auto scrollScrollable = GetScrollable(rootNode);
+    scrollScrollable->InitFriction(FRICTION);
     scrollScrollable->ratio_ = 0;
     scrollPattern->ratio_ = 0;
 
@@ -658,6 +659,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.expected: parent over scroll
      */
     auto listScrollable = GetScrollable(listNode);
+    listScrollable->InitFriction(FRICTION);
     DragStart(listScrollable);
     DragUpdate(listScrollable, 100);
     FlushLayoutTask(rootNode);
@@ -670,6 +672,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.expected: parent and child reach bottom, parent over scroll
      */
     MockAnimationManager::GetInstance().SetTicks(2);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 1000);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -697,7 +700,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.steps: step5. Tick
      * @tc.expected: start list fling animation.
      */
-    float distance = 1200 / (Scrollable::sFriction_.value_or(0.6) * -FRICTION_SCALE);
+    float distance = 1200 / (0.6 * -FRICTION_SCALE);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -731,6 +734,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
     auto listPattern = listNode->GetPattern<ListPattern>();
     auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
     auto scrollScrollable = GetScrollable(rootNode);
+    scrollScrollable->InitFriction(FRICTION);
     scrollScrollable->ratio_ = 0;
     scrollPattern->ratio_ = 0;
 
@@ -756,6 +760,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
      * @tc.expected: parent process scroll
      */
     auto listScrollable = GetScrollable(listNode);
+    listScrollable->InitFriction(FRICTION);
     DragStart(listScrollable);
     DragUpdate(listScrollable, -10);
     FlushLayoutTask(rootNode);
@@ -768,6 +773,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
      * @tc.expected: start fling animation
      */
     MockAnimationManager::GetInstance().SetTicks(3);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, -252);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -1079,6 +1085,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->onShow_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 0);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);

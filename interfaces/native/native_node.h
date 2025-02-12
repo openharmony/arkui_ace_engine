@@ -1885,7 +1885,7 @@ typedef enum {
      */
     NODE_BACKDROP_BLUR = 99,
 
-    /**
+    /*
      * @brief Defines the background image resizable attribute, which can be set, reset,
      * and obtained as required through APIs.
      *
@@ -1904,7 +1904,39 @@ typedef enum {
      * @since 16
      */
     NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE = 100,
+    
+    /**
+     * @brief Sets the next focus node.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: focus movement direction, as defined in {@link ArkUI_FocusMove}.
+     * .object: next focus node. The parameter type is {@link ArkUI_NodeHandle}.\n
+     * \n
+     *
+     */
+    NODE_NEXT_FOCUS = 101,
 
+    /**
+     * @brief Sets the parameters for visible area change events.
+     *
+     * @note The visible area change callback is not a real-time callback. The actual callback interval may differ from
+     * the expected interval due to system load and other factors.
+     * The interval between two visible area change callbacks will not be less than the expected update interval. If the
+     * provided expected interval is too short, the actual callback interval will be determined by the system load.
+     * By default, the interval threshold of the visible area change callback includes 0. This means that,
+     * if the provided threshold is [0.5], the effective threshold will be [0.0, 0.5].
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: parameters for visible area change events.
+     * The parameter type is {@link ArkUI_VisibleAreaEventOptions}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: parameters for visible area change events.
+     * The parameter type is {@link ArkUI_VisibleAreaEventOptions}. \n
+     *
+     */
+    NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO = 102,
+    
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -6476,7 +6508,7 @@ typedef enum {
      */
     NODE_ON_FOCUS_AXIS = 23,
 
-     /**
+    /**
      * @brief Dispatch key event on the component node.
      *
      * When the component node receives a key event, this callback will be triggered instead of dispatching event to its
@@ -6487,6 +6519,66 @@ typedef enum {
      * @since 16
      */
     NODE_DISPATCH_KEY_EVENT = 24,
+
+    /**
+     * @brief Defines the event triggered when the bound component receives an axis event.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     * 
+     * @since 16
+     */
+    NODE_ON_AXIS = 25,
+
+    /* @brief Defines the event triggered when the bound component is clicked.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}.  \n
+     *
+     * @since 16
+     */
+    NODE_ON_CLICK_EVENT = 26,
+
+    /**
+     * @brief Defines the event triggered when the mouse pointer hovers over or moves away from a component.
+     *
+     * This event is triggered when the mouse pointer enters or leaves the component's bounding box. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     *
+     *@since 16
+     */
+    NODE_ON_HOVER_EVENT = 27,
+
+    /**
+     * @brief Sets the callback for the NODE_EVENT_ON_VISIBLE_AREA_CHANGE event, which limits the callback interval.
+     *
+     * The callback is triggered when the ratio of the component's visible area to its total area is greater than or
+     * less than the threshold. Before registering the callback, you must configure the threshold and update interval
+     * using <b>NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO</b>. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: how the ratio of the component's visible area to its total area
+     * changes compared to the previous one. The value <b>1</b> indicates an increase, and <b>0</b> indicates
+     * a decrease. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area
+     * when this callback is invoked. \n
+     *
+     * @since 16
+     */
+    NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT = 28,
+
+    /**
+     * @brief Defines the hover event.
+     * 
+     * The event is triggered when the pointer is hovered by a pen device.
+     * within the component. \n
+     * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+     * {@link ArkUI_UIInputEvent} object. \n
+     * @since16
+    */
+    NODE_ON_HOVER_MOVE = 29,
 
     /**
      * @brief Triggers onDetectResultUpdate callback
@@ -8492,7 +8584,7 @@ typedef enum {
 
 /**
  * @brief Enumerates the inspector error codes.
- * @since 16
+ * @since 15
  */
 typedef enum {
     /**
@@ -8872,7 +8964,7 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
  * @return error code
            {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
  *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node,
     void* userData, void (*onLayoutCompleted)(void* userData));
@@ -8887,7 +8979,7 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node,
  * @return error code
            {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
  *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node,
     void* userData, void (*onDrawCompleted)(void* userData));
@@ -8899,7 +8991,7 @@ int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node,
  * @return error code
            {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
  *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
 
@@ -8910,7 +9002,7 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
  * @return error code
            {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
  *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
 
@@ -8941,7 +9033,7 @@ int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* s
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
 
@@ -8954,9 +9046,65 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Obtains the index of the current FrameNode's first child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index The index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains the index of the current FrameNode's last child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index the index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains a subnode by position with the expand mode.
+ *
+ * @param node Indicates the target node.
+ * @param position Indicates the position of the subnode.
+ * @param subnode The pointer to the subnode.
+ * @param expandMode Indicates the expand mode. {@link ArkUI_ExpandMode}.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
+    ArkUI_NodeHandle* subnode, uint32_t expandMode);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the window.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param globalOffset The offset value of the component handle relative to the window, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset);
+
 #ifdef __cplusplus
 };
 #endif

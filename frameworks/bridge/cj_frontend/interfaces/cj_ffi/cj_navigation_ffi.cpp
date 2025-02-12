@@ -14,7 +14,7 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigation_ffi.h"
-
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigation_stack_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
 #include "core/components_ng/pattern/navigation/navigation_model.h"
 #include "cj_lambda.h"
@@ -45,6 +45,33 @@ extern "C" {
 void FfiOHOSAceFrameworkNavigationCreate()
 {
     NavigationModel::GetInstance()->Create();
+}
+
+void FfiOHOSAceFrameworkNavigationCreateWithPathInfos(int64_t pathInfos)
+{
+    NavigationModel::GetInstance()->Create();
+    auto stackCreator = []() -> RefPtr<CJNavigationStack> { return AceType::MakeRefPtr<CJNavigationStack>(); };
+    auto stackUpdater = [pathInfos](RefPtr<NG::NavigationStack> stack) {
+        NavigationModel::GetInstance()->SetNavigationStackProvided(true);
+        auto cjStack = AceType::DynamicCast<CJNavigationStack>(stack);
+        CHECK_NULL_VOID(cjStack);
+        cjStack->SetDataSourceObj(pathInfos);
+    };
+    NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    NavigationModel::GetInstance()->SetNavigationPathInfo("", "");
+}
+
+void FfiOHOSAceFrameworkNavigationSetNavDestination(void (*builder)(const char*))
+{
+    auto navDestination = CJLambda::Create(builder);
+    auto navDestinationFunc =
+        [func = std::move(navDestination)](std::string name, std::string param) { func(name.c_str()); };
+
+    auto navigationStack = NavigationModel::GetInstance()->GetNavigationStack();
+    auto cjNavigationStack = AceType::DynamicCast<CJNavigationStack>(navigationStack);
+    if (cjNavigationStack) {
+        cjNavigationStack->SetNavDestBuilderFunc(navDestinationFunc);
+    }
 }
 
 void FfiOHOSAceFrameworkNavigationSetTitle(const char *title)
@@ -127,6 +154,11 @@ void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide)
 void FfiOHOSAceFrameworkNavigationSetHideBackButton(bool isHide)
 {
     NavigationModel::GetInstance()->SetHideBackButton(isHide);
+}
+
+void FfiOHOSAceFrameworkNavigationSetMode(int32_t value)
+{
+    NavigationModel::GetInstance()->SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
 }
 
 void FfiOHOSAceFrameworkNavigationSetOnTitleModeChanged(void (*callback)(int32_t))

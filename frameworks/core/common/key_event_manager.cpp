@@ -456,7 +456,7 @@ void KeyEventManager::DelKeyboardShortcutNode(int32_t nodeId)
     while (iter != keyboardShortcutNode_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (!frameNode) {
-            keyboardShortcutNode_.erase(iter++);
+            iter = keyboardShortcutNode_.erase(iter);
             continue;
         }
         if (frameNode->GetId() == nodeId) {

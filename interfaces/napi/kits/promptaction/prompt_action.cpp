@@ -23,6 +23,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
@@ -690,6 +691,7 @@ struct PromptAsyncContext {
     napi_ref onWillDisappearRef = nullptr;
     napi_value keyboardAvoidModeApi = nullptr;
     napi_value keyboardAvoidDistanceApi = nullptr;
+    napi_value levelOrderApi = nullptr;
     napi_value dialogLevelModeApi = nullptr;
     napi_value dialogLevelUniqueId = nullptr;
     napi_value dialogImmersiveModeApi = nullptr;
@@ -1289,6 +1291,14 @@ void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsy
     }
 }
 
+void GetLevelOrderApi(napi_env env, napi_value value, std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    if (asyncContext->showInSubWindowBool) {
+        return;
+    }
+    napi_get_named_property(env, value, "levelOrder", &asyncContext->levelOrderApi);
+}
+
 void GetNapiNamedBoolProperties(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
     napi_valuetype valueType = napi_undefined;
@@ -1354,6 +1364,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
+    GetLevelOrderApi(env, argv[index], asyncContext);
 }
 
 bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -1445,6 +1456,18 @@ void UpdatePromptAlignment(DialogAlignment& alignment)
     }
 }
 
+std::optional<double> GetLevelOrderParam(napi_env env, napi_value levelOrderApi)
+{
+    NG::LevelOrder* levelOrder = nullptr;
+    if (levelOrderApi) {
+        napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
+    }
+    CHECK_NULL_RETURN(levelOrder, std::nullopt);
+
+    double order = levelOrder->GetOrder();
+    return std::make_optional(order);
+}
+
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "js prompt show dialog enter");
@@ -1533,6 +1556,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
             }
             GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
+            GetLevelOrderApi(env, argv[0], asyncContext);
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
@@ -1647,7 +1671,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback");
         asyncContext = nullptr;
     };
 
@@ -1666,6 +1690,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .shadow = shadowProps,
         .hoverModeArea = hoverModeArea,
         .onLanguageChange = onLanguageChange,
+        .levelOrder = GetLevelOrderParam(asyncContext->env, asyncContext->levelOrderApi),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
@@ -1875,7 +1900,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
         asyncContext = nullptr;
     };
 
@@ -2151,6 +2176,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .onWillDisappear = lifeCycleAttr.onWillDisappear,
         .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
         .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext),
+        .levelOrder = GetLevelOrderParam(env, asyncContext->levelOrderApi),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode
@@ -2234,7 +2260,7 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback");
         asyncContext = nullptr;
     };
 }
@@ -2286,7 +2312,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
         asyncContext = nullptr;
     };
 }
@@ -2422,6 +2448,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
         napi_get_value_bool(env, asyncContext->enableHoverMode, &asyncContext->enableHoverModeBool);
     }
     napi_get_named_property(env, arg, "hoverModeArea", &asyncContext->hoverModeAreaApi);
+    GetLevelOrderApi(env, arg, asyncContext);
     napi_get_named_property(env, arg, "levelMode", &asyncContext->dialogLevelModeApi);
     napi_get_named_property(env, arg, "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);

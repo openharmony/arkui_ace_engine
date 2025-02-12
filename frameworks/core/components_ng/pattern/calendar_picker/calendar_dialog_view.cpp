@@ -32,9 +32,7 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1243,7 +1241,7 @@ bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& co
     value->Put("year", pickerDate.GetYear());
     value->Put("month", pickerDate.GetMonth());
     value->Put("day", pickerDate.GetDay());
-    UiSessionManager::GetInstance().ReportComponentChangeEvent(nodeId, "event", value);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
 #endif
     return true;
 }

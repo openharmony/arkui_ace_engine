@@ -51,6 +51,7 @@ public:
 
     static void SetStartTime(FrameNode* frameNode, const PickerTime& value);
     static void SetEndTime(FrameNode* frameNode, const PickerTime& value);
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     static void SetSelectedTime(FrameNode* frameNode, const PickerTime& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
@@ -77,6 +78,8 @@ public:
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
     static void SetEnableCascade(FrameNode* frameNode, bool isEnableCascade);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

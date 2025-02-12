@@ -36,6 +36,9 @@ public:
     static void JSOpenPopup(const JSCallbackInfo& info);
     static void JSUpdatePopup(const JSCallbackInfo& info);
     static void JSClosePopup(const JSCallbackInfo& info);
+    static void JSOpenMenu(const JSCallbackInfo& info);
+    static void JSUpdateMenu(const JSCallbackInfo& info);
+    static void JSCloseMenu(const JSCallbackInfo& info);
     static void IsFollowingSystemFontScale(const JSCallbackInfo& info);
     static void GetMaxFontScale(const JSCallbackInfo& info);
     static void SetEnableSwipeBack(const JSCallbackInfo& info);

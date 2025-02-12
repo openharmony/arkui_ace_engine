@@ -832,7 +832,7 @@ void MenuLayoutAlgorithm::UpdateSelectFocus(LayoutWrapper* layoutWrapper, Layout
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->IsSelectMenu()) {
+    if (!pattern->IsSelectMenu()) {
         return;
     }
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -2959,7 +2959,7 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    auto availableRect = pipelineContext->GetDisplayAvailableRect();
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(menuPattern->GetHost());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayAvailableRect : %{public}s", availableRect.ToString().c_str());
     if (canExpandCurrentWindow_ && isExpandDisplay_) {
         menuWindowRect = Rect(availableRect.Left(), availableRect.Top(), availableRect.Width(), availableRect.Height());
@@ -3004,8 +3004,10 @@ bool MenuLayoutAlgorithm::HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(innerMenuPattern, false);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, false);
-    return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED &&
-           menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0;
+    auto isEmbeddedMenu =
+        layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED;
+    return isEmbeddedMenu && menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0 &&
+           !menuWrapperPattern->GetForceUpdateEmbeddedMenu();
 }
 
 std::string MenuLayoutAlgorithm::MoveTo(double x, double y)

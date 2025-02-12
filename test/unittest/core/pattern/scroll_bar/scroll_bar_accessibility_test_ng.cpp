@@ -64,6 +64,44 @@ HWTEST_F(ScrollBarAccessibilityTestNg, IsScrollable001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsScrollable002
+ * @tc.desc: Test IsScrollable without child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarAccessibilityTestNg, IsScrollable002, TestSize.Level1)
+{
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateDone();
+    FlushUITasks();
+    EXPECT_NE(pattern_->scrollBar_, nullptr);
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
+
+    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
+}
+
+/**
+ * @tc.name: IsScrollable003
+ * @tc.desc: Test IsScrollable of scrollBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarAccessibilityTestNg, IsScrollable003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. child height greater than scrollbar height
+     * @tc.expected: Scrollable
+     */
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild(2000.f);
+    CreateDone();
+    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
+}
+
+/**
  * @tc.name: ScrollBarAccessibilityPropertyGetAccessibilityValue001
  * @tc.desc: Test GetAccessibilityValue of scrollBar.
  * @tc.type: FUNC

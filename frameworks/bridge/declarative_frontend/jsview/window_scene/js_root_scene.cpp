@@ -39,6 +39,9 @@ void JSRootScene::Create(const JSCallbackInfo& info)
 
 void JSRootScene::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSRootScene][pop]", &JSRootScene::Pop);
+    }
     ViewStackModel::GetInstance()->PopContainer();
 }
 } // namespace OHOS::Ace::Framework
