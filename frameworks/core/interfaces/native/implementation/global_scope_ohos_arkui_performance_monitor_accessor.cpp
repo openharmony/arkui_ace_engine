@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
@@ -33,7 +33,6 @@ void AssignCast(std::optional<PerfActionType>& dst, const Ark_PerfMonitorActionT
         default: LOGE("Unexpected enum value in Ark_PerfMonitorActionType: %{public}d", src);
     }
 }
-
 template<>
 void AssignCast(std::optional<PerfSourceType>& dst, const Ark_PerfMonitorSourceType& src)
 {
