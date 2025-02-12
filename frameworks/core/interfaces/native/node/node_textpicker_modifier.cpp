@@ -40,6 +40,8 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
 std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 
 void SetTextPickerBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -484,6 +486,73 @@ void ResetTextPickerGradientHeight(ArkUINodeHandle node)
     TextPickerModelNG::SetGradientHeight(frameNode, height);
 }
 
+void SetTextPickerDisableTextStyleAnimation(ArkUINodeHandle node, int disableTextStyleAnimation)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, disableTextStyleAnimation);
+}
+
+void ResetTextPickerDisableTextStyleAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, false);
+}
+
+void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style,
+    ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+ 
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    textStyle.minFontSize = StringUtils::StringToCalcDimension(minFontSize, false, DimensionUnit::FP);
+    textStyle.maxFontSize = StringUtils::StringToCalcDimension(maxFontSize, false, DimensionUnit::FP);
+    if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        textStyle.textOverflow = TEXT_OVERFLOWS[overflow];
+    } else {
+        textStyle.textOverflow = TEXT_OVERFLOWS[0];
+    }
+
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, textStyle);
+}
+
+void ResetTextPickerDefaultTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerTextStyle pickerTextStyle;
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, pickerTextStyle);
+}
+
 ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -507,7 +576,9 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
         GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
         SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
-        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
+        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight,
+        SetTextPickerDisableTextStyleAnimation, ResetTextPickerDisableTextStyleAnimation, SetTextPickerDefaultTextStyle,
+        ResetTextPickerDefaultTextStyle };
 
     return &modifier;
 }

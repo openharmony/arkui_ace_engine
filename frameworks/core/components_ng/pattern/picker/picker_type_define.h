@@ -39,11 +39,15 @@ struct PickerTextStyle {
     std::optional<FontWeight> fontWeight;
     std::optional<std::vector<std::string>> fontFamily;
     std::optional<Ace::FontStyle> fontStyle;
+    std::optional<Dimension> minFontSize;
+    std::optional<Dimension> maxFontSize;
+    std::optional<Ace::TextOverflow> textOverflow;
 };
 struct PickerTextProperties {
     PickerTextStyle disappearTextStyle_;
     PickerTextStyle normalTextStyle_;
     PickerTextStyle selectedTextStyle_;
+    PickerTextStyle defaultTextStyle_;
 };
 
 // textpicker column kind
@@ -95,6 +99,7 @@ struct TextPickerSettingData {
     std::vector<std::string> values;
     std::vector<NG::TextCascadePickerOptions> options;
     NG::TextCascadePickerOptionsAttr attr;
+    bool isDisableTextStyleAnimation = false;
 };
 
 struct TimePickerSettingData {
