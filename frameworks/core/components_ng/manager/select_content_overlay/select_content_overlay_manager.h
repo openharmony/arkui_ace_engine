@@ -91,6 +91,7 @@ public:
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
     void MarkHandleDirtyNode(PropertyChangeFlag flag);
+    bool IsStopBackPress() const;
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
