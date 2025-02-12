@@ -26,6 +26,11 @@ void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs)
     CJRuntimeDelegate::GetInstance()->RegisterCJFuncs(cjFuncs);
 }
 
+void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtrFuncs)
+{
+    CJRuntimeDelegate::GetInstance()->RegisterCJXCompCtrFuncs(cjCtrFuncs);
+}
+
 int64_t FfiGeneralSizeOfPointer()
 {
     return sizeof(void*);
