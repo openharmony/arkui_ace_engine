@@ -819,6 +819,7 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     }
     NotifyPullEventListener(pointerEvent);
     preMovePoint_ = point;
+    preDragPointerEvent_ = pointerEvent;
     preTimeStamp_ = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
     SetIsWindowConsumed(false);
@@ -965,7 +966,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
 }
 
 void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
-    const RefPtr<FrameNode>& node)
+    const RefPtr<FrameNode>& node, const bool keyEscape)
 {
     RemoveDeadlineTimer();
     Point point = pointerEvent.GetPoint();
@@ -982,6 +983,12 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
             return;
         }
     }
+    UpdateVelocityTrackerPoint(point, true);
+    auto dragFrameNode = FindDragFrameNodeByPosition(
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
+    if (HandleUIExtensionComponentDragCancel(preTargetFrameNode, dragFrameNode, keyEscape, pointerEvent, point)) {
+        return;
+    }
     if (isDragCancel_) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
         TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d, "
@@ -992,9 +999,6 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
         ClearVelocityInfo();
         return;
     }
-    UpdateVelocityTrackerPoint(point, true);
-    auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
     if (IsUIExtensionComponent(preTargetFrameNode) && preTargetFrameNode != dragFrameNode) {
         HandleUIExtensionDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE);
     }
@@ -1008,6 +1012,46 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
         return;
     }
     HandleOnDragEnd(pointerEvent, extraInfo, dragFrameNode);
+}
+
+bool DragDropManager::HandleUIExtensionComponentDragCancel(const RefPtr<FrameNode>& preTargetFrameNode,
+    const RefPtr<FrameNode>& dragFrameNode, const bool keyEscape, const DragPointerEvent& pointerEvent,
+    const Point& point)
+{
+    if (!isDragCancel_) {
+        return false;
+    }
+    if (keyEscape && IsUIExtensionComponent(preTargetFrameNode)) {
+        HandleUIExtensionDragEvent(preTargetFrameNode, pointerEvent, DragEventType::PULL_CANCEL);
+        NotifyDragFrameNode(point, DragEventType::DROP);
+        return true;
+    }
+    if (IsUIExtensionComponent(dragFrameNode)) {
+        auto pattern = dragFrameNode->GetPattern<Pattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        pattern->HandleDragEvent(pointerEvent);
+        NotifyDragFrameNode(point, DragEventType::DROP);
+        return true;
+    }
+    return false;
+}
+
+void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
+    const RefPtr<FrameNode>& node)
+{
+    RemoveDeadlineTimer();
+    Point point = pointerEvent.GetPoint();
+    DoDragReset();
+    auto container = Container::Current();
+    auto containerId = container->GetInstanceId();
+    DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
+    DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Drag is canceled, finish drag. WindowId is %{public}d, "
+        "pointerEventId is %{public}d.",
+        container->GetWindowId(), pointerEvent.pointerEventId);
+    DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
+    ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
+    ClearVelocityInfo();
 }
 
 bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
@@ -2412,6 +2456,8 @@ void DragDropManager::HandleUIExtensionDragEvent(
         dragEvent.action = PointerAction::PULL_IN_WINDOW;
     } else if (type == DragEventType::LEAVE) {
         dragEvent.action = PointerAction::PULL_OUT_WINDOW;
+    } else if (type == DragEventType::PULL_CANCEL) {
+        dragEvent.action = PointerAction::PULL_CANCEL;
     }
     pattern->HandleDragEvent(dragEvent);
 }
