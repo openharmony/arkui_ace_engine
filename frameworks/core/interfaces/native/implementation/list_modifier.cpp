@@ -16,6 +16,7 @@
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -341,12 +342,12 @@ void OnScrollIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollIndex = [frameNode](const int32_t start, const int32_t end, const int32_t center) {
+    auto onScrollIndex = [arkCallback = CallbackHelper(*value)]
+            (const int32_t start, const int32_t end, const int32_t center) {
         auto arkStart = Converter::ArkValue<Ark_Number>(start);
         auto arkEnd = Converter::ArkValue<Ark_Number>(end);
         auto arkCenter = Converter::ArkValue<Ark_Number>(center);
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->
-            onScrollIndex(frameNode->GetId(), arkStart, arkEnd, arkCenter);
+        arkCallback.Invoke(arkStart, arkEnd, arkCenter);
     };
     ListModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
@@ -356,13 +357,12 @@ void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollVisibleContentChange = [frameNode](const ListItemIndex& start, const ListItemIndex& end) {
+    auto onScrollVisibleContentChange = [arkCallback = CallbackHelper(*value)]
+            (const ListItemIndex& start, const ListItemIndex& end) {
         auto startItemInfo = Converter::ArkValue<Ark_VisibleListContentInfo>(start);
         auto endItemInfo = Converter::ArkValue<Ark_VisibleListContentInfo>(end);
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onScrollVisibleContentChange(
-            frameNode->GetId(), startItemInfo, endItemInfo);
+        arkCallback.Invoke(startItemInfo, endItemInfo);
     };
-
     ListModelNG::SetOnScrollVisibleContentChange(frameNode, std::move(onScrollVisibleContentChange));
 }
 void OnReachStartImpl(Ark_NativePointer node,
@@ -371,8 +371,8 @@ void OnReachStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onReachStart = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onReachStart(frameNode->GetId());
+    auto onReachStart = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ListModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }
@@ -382,8 +382,8 @@ void OnReachEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onReachEnd = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onReachEnd(frameNode->GetId());
+    auto onReachEnd = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ListModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
@@ -393,8 +393,8 @@ void OnScrollStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollStart = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onScrollStart(frameNode->GetId());
+    auto onScrollStart = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ListModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
@@ -404,8 +404,8 @@ void OnScrollStopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollStop = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onScrollStop(frameNode->GetId());
+    auto onScrollStop = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     ListModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
@@ -459,9 +459,9 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragEnter = [frameNode](const ItemDragInfo& dragInfo) {
+    auto onItemDragEnter = [arkCallback = CallbackHelper(*value)](const ItemDragInfo& dragInfo) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onItemDragEnter(frameNode->GetId(), arkDragInfo);
+        arkCallback.Invoke(arkDragInfo);
     };
     ListModelNG::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
 }
@@ -471,13 +471,12 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragMove = [frameNode](const ItemDragInfo& dragInfo,
-        int32_t itemIndex, int32_t insertIndex) {
+    auto onItemDragMove = [arkCallback = CallbackHelper(*value)](const ItemDragInfo& dragInfo,
+            int32_t itemIndex, int32_t insertIndex) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onItemDragMove(
-            frameNode->GetId(), arkDragInfo, arkItemIndex, arkInsertIndex);
+        arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex);
     };
     ListModelNG::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
 }
@@ -487,11 +486,10 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragLeave = [frameNode](const ItemDragInfo& dragInfo, int32_t itemIndex) {
+    auto onItemDragLeave = [arkCallback = CallbackHelper(*value)](const ItemDragInfo& dragInfo, int32_t itemIndex) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onItemDragLeave(
-            frameNode->GetId(), arkDragInfo, arkItemIndex);
+        arkCallback.Invoke(arkDragInfo, arkItemIndex);
     };
     ListModelNG::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
 }
@@ -501,14 +499,13 @@ void OnItemDropImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDrop = [frameNode](const ItemDragInfo& dragInfo,
-        int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+    auto onItemDrop = [arkCallback = CallbackHelper(*value)](const ItemDragInfo& dragInfo,
+            int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
         auto arkIsSuccess = Converter::ArkValue<Ark_Boolean>(isSuccess);
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onItemDrop(
-            frameNode->GetId(), arkDragInfo, arkItemIndex, arkInsertIndex, arkIsSuccess);
+        arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex, arkIsSuccess);
     };
     ListModelNG::SetOnItemDrop(frameNode, std::move(onItemDrop));
 }

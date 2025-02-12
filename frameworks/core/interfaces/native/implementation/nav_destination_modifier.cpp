@@ -16,6 +16,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
@@ -60,8 +61,8 @@ void OnShownImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onShownEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onShown(frameNode->GetId());
+    auto onShownEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     NavDestinationModelNG::SetOnShown(frameNode, std::move(onShownEvent));
 }
@@ -71,8 +72,8 @@ void OnHiddenImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onHiddenEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onHidden(frameNode->GetId());
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     NavDestinationModelNG::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
@@ -82,8 +83,7 @@ void OnBackPressedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onBackPressedEvent = [frameNode]() -> bool {
-        GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onBackPressed(frameNode->GetId());
+    auto onBackPressedEvent = [arkCallback = CallbackHelper(*value)]() -> bool {
         return true;
     };
     NavDestinationModelNG::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
@@ -133,8 +133,8 @@ void OnWillAppearImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillAppearEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillAppear(frameNode->GetId());
+    auto onWillAppearEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     NavDestinationModelNG::SetOnWillAppear(frameNode, std::move(onWillAppearEvent));
 }
@@ -144,8 +144,8 @@ void OnWillDisappearImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDisappearEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillDisappear(frameNode->GetId());
+    auto onWillDisappearEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     NavDestinationModelNG::SetOnWillDisAppear(frameNode, std::move(onWillDisappearEvent));
 }
@@ -155,8 +155,8 @@ void OnWillShowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillShowEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillShow(frameNode->GetId());
+    auto onWillShowEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     NavDestinationModelNG::SetOnWillShow(frameNode, std::move(onWillShowEvent));
 }
@@ -166,8 +166,8 @@ void OnWillHideImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillHideEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getNavDestinationEventsReceiver()->onWillHide(frameNode->GetId());
+    auto onWillHideEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
     NavDestinationModelNG::SetOnWillHide(frameNode, std::move(onWillHideEvent));
 }

@@ -89,15 +89,6 @@ const auto ATTRIBUTE_SLIDE_RANGE_FROM_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_SLIDE_RANGE_TO_NAME = "to";
 const auto ATTRIBUTE_SLIDE_RANGE_TO_DEFAULT_VALUE = "";
 
-struct EventsTracker {
-    static inline GENERATED_ArkUISliderEventsReceiver sliderEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getSliderEventsReceiver = [] () -> const GENERATED_ArkUISliderEventsReceiver* {
-            return &sliderEventReceiver;
-        }
-    };
-}; // EventsTracker
 } // namespace
 
 namespace Fixtures {
@@ -249,7 +240,6 @@ public:
             AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
             AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
         }
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -2430,9 +2420,10 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
  */
 HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Callback_Number_SliderChangeMode_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -2440,16 +2431,18 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
         std::optional<int32_t> mode;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::sliderEventReceiver.onChange = [](Ark_Int32 nodeId, Ark_Number value, Ark_SliderChangeMode mode)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .value = Converter::Convert<float>(value),
-            .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
-        };
+    Callback_Number_SliderChangeMode_Void onChangeCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number value, Ark_SliderChangeMode mode) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .value = Converter::Convert<float>(value),
+                .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
+            };
+        }
     };
 
-    modifier_->setOnChange(node_, &func);
+    modifier_->setOnChange(node_, &onChangeCallback);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(10, 0);
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -2471,6 +2464,7 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
@@ -2479,27 +2473,27 @@ HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
         float value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .value = Converter::Convert<float>(parameter)
-        };
+    Callback_Number_Void arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number value) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .value = Converter::Convert<float>(value)
+            };
+        }
     };
-
-    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
 
     modifier_->set__onChangeEvent_value(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(55.4f, 0);
     ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->value, 55.4f, FLT_EPSILON);
     eventHub->FireChangeEvent(10.2f, 3);
     ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->value, 10.2f, FLT_EPSILON);
 }
 } // namespace OHOS::Ace::NG

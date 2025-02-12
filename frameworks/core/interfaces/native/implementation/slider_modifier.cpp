@@ -229,11 +229,11 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](float value, int32_t mode) {
-        auto arkValue = Converter::ArkValue<Ark_Number>(value);
-        auto arkMode = Converter::ArkValue<Ark_SliderChangeMode>(static_cast<SliderModel::SliderChangeMode>(mode));
-        GetFullAPI()->getEventsAPI()->getSliderEventsReceiver()->onChange(
-            frameNode->GetId(), arkValue, arkMode);
+    auto onChange = [arkCallback = CallbackHelper(*value)](float newValue, int32_t mode) {
+        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(newValue);
+        Ark_SliderChangeMode arkMode = Converter::ArkValue<Ark_SliderChangeMode>(
+            static_cast<SliderModel::SliderChangeMode>(mode));
+        arkCallback.Invoke(arkValue, arkMode);
     };
     SliderModelNG::SetOnChange(frameNode, std::move(onChange));
 }

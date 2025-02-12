@@ -88,9 +88,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](bool isOn) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const bool isOn) {
         auto arkValue = Converter::ArkValue<Ark_Boolean>(isOn);
-        GetFullAPI()->getEventsAPI()->getToggleEventsReceiver()->onChange(frameNode->GetId(), arkValue);
+        arkCallback.Invoke(arkValue);
     };
     ToggleModelNG::OnChange(frameNode, std::move(onChange));
 }

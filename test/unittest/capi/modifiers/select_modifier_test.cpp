@@ -180,27 +180,6 @@ struct TestFont {
     }
 };
 
-int g_eventOnSelectIndex;
-std::string g_eventOnSelectValue;
-
-GENERATED_ArkUISelectEventsReceiver recv {
-    .onSelect0 = [](Ark_Int32 nodeId, const Ark_Number index, const Ark_String value) {
-        g_eventOnSelectIndex = Convert<int>(index);
-        g_eventOnSelectValue = Convert<std::string>(value);
-    }
-};
-
-const GENERATED_ArkUISelectEventsReceiver* getSelectEventsReceiverTest()
-{
-    return &recv;
-};
-
-const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { .getSelectEventsReceiver = getSelectEventsReceiverTest };
-    return &eventsImpl;
-};
-
 float strToFloat(const std::string& str)
 {
     char* ptr = nullptr;
@@ -232,8 +211,6 @@ public:
         AddResource(VALUE_RES_NAME, VALUE_RES_VALUE);
         AddResource(OPTIONS_VALUE_RES_NAME, OPTIONS_VALUE_RES_VALUE);
         AddResource(OPTIONS_ICON_RES_NAME, OPTIONS_ICON_RES_VALUE);
-
-        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 
     void SetUp(void) override
@@ -784,25 +761,37 @@ HWTEST_F(SelectModifierTest, setOnSelectTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnSelect0, nullptr);
 
-    g_eventOnSelectIndex = 0;
-    g_eventOnSelectValue = "";
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_String_Void func{};
-    modifier_->setOnSelect0(node_, &func);
+    struct CheckEvent {
+        int32_t nodeId;
+        int index;
+        std::string value;
+    };
+
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    Callback_Number_String_Void arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number index, const Ark_String value) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .index = Converter::Convert<int>(index),
+                .value = Converter::Convert<std::string>(value)
+            };
+        }
+    };
+
+    modifier_->setOnSelect0(node_, &arkCallback);
     auto selectEventHub = frameNode->GetEventHub<SelectEventHub>();
-    EXPECT_EQ(g_eventOnSelectIndex, 0);
-    EXPECT_EQ(g_eventOnSelectValue, "");
+    EXPECT_FALSE(checkEvent.has_value());
 
     SelectEvent selectEvent = selectEventHub->GetSelectEvent();
     ASSERT_NE(selectEvent, nullptr);
     const int index = 1;
     const std::string value = "Option B";
     selectEvent(index, value);
-    EXPECT_EQ(g_eventOnSelectIndex, index);
-    EXPECT_EQ(g_eventOnSelectValue, value);
-
-    ASSERT_NE(&recv, nullptr);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->index, index);
+    EXPECT_EQ(checkEvent->value, value);
 }
 
 /**
