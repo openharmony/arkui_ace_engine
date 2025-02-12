@@ -41,16 +41,10 @@ public:
                 CalcSize(CalcLength(1, DimensionUnit::PERCENT), CalcLength(height[idx])));
             return node;
         });
-        auto adapter = pattern_->GetOrCreateScrollWindowAdapter();
-        adapter->RegisterUpdater([&](int32_t s, void* pointer) {
-            // frontend
-            std::cout << "update " << s << std::endl;
-            lazy_.Update(s, pointer);
-        });
-        adapter->SetTotalCount(itemCnt);
+        lazy_.Register();
     }
 
-    MockKoalaLazyForEach lazy_ { nullptr, 0, nullptr };
+    MockKoalaLazyForEach lazy_;
 };
 
 /**

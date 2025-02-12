@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowPattern : public ScrollablePattern, public LazyContainer {
-    DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern);
+    DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern, LazyContainer);
 
 public:
     bool UpdateCurrentOffset(float delta, int32_t source) override;

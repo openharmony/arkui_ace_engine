@@ -31,16 +31,10 @@ private:
             node->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(450.0f)));
             return node;
         });
-        auto adapter = pattern_->GetOrCreateScrollWindowAdapter();
-        adapter->RegisterUpdater([&](int32_t s, void* pointer) {
-            // frontend
-            std::cout << "update " << s << std::endl;
-            lazy_.Update(s, pointer);
-        });
-        adapter->SetTotalCount(itemCnt);
+        lazy_.Register();
     }
 
-    MockKoalaLazyForEach lazy_ { nullptr, 0, nullptr };
+    MockKoalaLazyForEach lazy_;
 };
 
 /**

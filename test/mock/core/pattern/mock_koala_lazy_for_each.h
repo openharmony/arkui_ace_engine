@@ -37,9 +37,13 @@ struct VisibleRange {
 
 class MockKoalaLazyForEach {
 public:
+    MockKoalaLazyForEach() = default;
     MockKoalaLazyForEach(FrameNode* parent, int32_t totalCnt, std::function<RefPtr<FrameNode>(int32_t)>&& itemCreator)
         : itemCreator_(itemCreator), parent_(parent), totalCnt_(totalCnt)
     {}
+
+    void Register();
+
     void Update(int32_t s, void* pointer);
 
     void RangeModeUpdate(int32_t s, int32_t e);
@@ -67,8 +71,8 @@ public:
 private:
     std::function<RefPtr<FrameNode>(int32_t)> itemCreator_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> itemCache_;
-    FrameNode* parent_;
-    int32_t totalCnt_;
+    FrameNode* parent_ = nullptr;
+    int32_t totalCnt_ = 0;
     std::queue<std::function<void()>> taskQ_;
     std::pair<int32_t, int32_t> range_ { 0, 0 };
 };
