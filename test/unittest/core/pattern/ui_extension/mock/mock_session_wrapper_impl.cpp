@@ -260,4 +260,14 @@ uint32_t SessionWrapperImpl::GetReasonDump() const
 void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
 }
+
+bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    return false;
+}
+
+bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

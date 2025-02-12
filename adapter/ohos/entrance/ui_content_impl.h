@@ -181,6 +181,8 @@ public:
     void RegisterAccessibilityChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override;
+    void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo&)>&& callback) override;
     void DeregisterAccessibilityChildTree() override;
     void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
@@ -362,6 +364,8 @@ public:
     bool GetContainerCustomTitleVisible() override;
 
     bool GetContainerControlButtonVisible() override;
+
+    void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
     void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
 

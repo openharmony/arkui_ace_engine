@@ -58,6 +58,7 @@ class RSTransaction;
 class Transform;
 enum class AvoidAreaType : uint32_t;
 class AvoidArea;
+struct SingleHandTransform;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -84,6 +85,10 @@ class Parcelable;
 class IRemoteObject;
 
 } // namespace OHOS
+
+namespace OHOS::Ace {
+struct AccessibilityParentRectInfo;
+} // namespace OHOS::Ace
 
 class NativeEngine;
 typedef struct napi_value__* napi_value;
@@ -206,6 +211,7 @@ public:
     virtual void RegisterAccessibilityChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) {};
+    virtual void SetAccessibilityGetParentRectHandler(std::function<void(AccessibilityParentRectInfo&)>&& callback) {};
     virtual void DeregisterAccessibilityChildTree() {};
     virtual void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) {};
 
@@ -439,6 +445,8 @@ public:
     }
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
+
+    virtual void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) {};
 
     virtual bool GetContainerFloatingTitleVisible()
     {

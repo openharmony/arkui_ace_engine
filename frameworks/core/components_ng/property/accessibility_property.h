@@ -31,6 +31,13 @@ class ExtraElementInfo;
 }
 
 namespace OHOS::Ace::NG {
+struct WindowSceneInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
@@ -52,7 +59,7 @@ using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
 using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
-
+using GetWindowScenePositionImpl = std::function<void((WindowSceneInfo& windowSceneInfo))>;
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
@@ -503,6 +510,10 @@ public:
         }
     }
 
+    void SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl);
+
+    void GetWindowScenePosition(WindowSceneInfo& windowSceneInfo);
+
     bool GetAccessibilityFocusState() const
     {
         return isAccessibilityFocused_;
@@ -778,6 +789,7 @@ protected:
     ActionsImpl actionsImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
+    GetWindowScenePositionImpl getWindowScenePositionImpl_;
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     bool accessibilityHoverPriority_ = false;

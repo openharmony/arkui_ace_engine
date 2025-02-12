@@ -131,6 +131,33 @@ void SystemWindowScene::OnAttachToFrameNode()
     if (session_->NeedCheckContextTransparent()) {
         PostCheckContextTransparentTask();
     }
+    SetWindowScenePosition();
+}
+
+void SystemWindowScene::SetWindowScenePosition()
+{
+    // set window scene position (x, y) and scale data, jsAccessibilityManager will use it
+    CHECK_NULL_VOID(session_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetGetWindowScenePosition([weakSession = wptr(session_)] (
+        NG::WindowSceneInfo& windowSceneInfo) {
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        auto windowRect = session->GetSessionGlobalRect();
+
+        // get transform info in single hand mode,
+        // adjust the position (x, y) of window scene with the transform pos and scale data.
+        OHOS::Rosen::SingleHandTransform transform =
+            session->GetSingleHandTransform();
+        windowSceneInfo.left = windowRect.posX_ * transform.scaleX + transform.posX;
+        windowSceneInfo.top = windowRect.posY_ * transform.scaleY + transform.posY;
+        windowSceneInfo.scaleX = session->GetScaleX() * transform.scaleX;
+        windowSceneInfo.scaleY = session->GetScaleY() * transform.scaleY;
+        windowSceneInfo.innerWindowId = session->GetPersistentId();
+    });
 }
 
 void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)

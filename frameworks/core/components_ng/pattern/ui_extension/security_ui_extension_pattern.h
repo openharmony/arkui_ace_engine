@@ -23,6 +23,9 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 namespace OHOS::Ace::NG {
+using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
+using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
+
 class SecurityUIExtensionPattern : public PlatformPattern {
     DECLARE_ACE_TYPE(SecurityUIExtensionPattern, PlatformPattern);
 
@@ -99,6 +102,18 @@ public:
     void DispatchFollowHostDensity(bool densityDpi);
     void OnDpiConfigurationUpdate() override;
 
+    int32_t GetInstanceIdFromHost() const;
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    void OnUIExtBusinessReceiveReply(
+        UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+    void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
+    void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
+    void RegisterUIExtBusinessConsumeReplyCallback(
+        UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
+
+    void TransferAccessibilityRectInfo();
+
 private:
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
@@ -133,6 +148,8 @@ private:
 
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onAsyncOnCallbackList_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SecurityUIExtensionPattern);
 };

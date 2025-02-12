@@ -3323,13 +3323,39 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
     return offset;
 }
 
-RectF FrameNode::GetTransformRectRelativeToWindow() const
+VectorF FrameNode::GetTransformScaleRelativeToWindow() const
+{
+    VectorF finalScale {1.0f, 1.0f};
+    auto context = GetRenderContext();
+    if (context) {
+        auto scale = GetTransformScale();
+        finalScale.x = scale.x;
+        finalScale.y = scale.y;
+    }
+
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto contextParent = parent->GetRenderContext();
+        if (contextParent) {
+            auto scale = parent->GetTransformScale();
+            finalScale.x *= scale.x;
+            finalScale.y *= scale.y;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return finalScale;
+}
+
+RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, RectF());
     RectF rect = context->GetPaintRectWithTransform();
     auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
+        if (checkBoundary && IsWindowBoundary()) {
+            break; // exclude windowscene
+        }
         rect = ApplyFrameNodeTranformToRect(rect, parent);
         parent = parent->GetAncestorNodeOfFrame(true);
     }
