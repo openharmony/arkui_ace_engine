@@ -22,6 +22,7 @@ ace_unittest("water_flow_test_original") {
     "water_flow_scroller_test_ng.cpp",
     "water_flow_test_ng.cpp",
     "water_flow_top_down_test.cpp",
+    "water_flow_arkoala_test.cpp"
   ]
 }
 
@@ -51,5 +52,6 @@ ace_unittest("water_flow_test_sw") {
     "water_flow_segment_common_test.cpp",
     "water_flow_sw_layout_test.cpp",
     "water_flow_test_ng.cpp",
+    "water_flow_arkoala_test.cpp"
   ]
 }

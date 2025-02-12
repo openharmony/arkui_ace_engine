@@ -25,7 +25,7 @@ float FlowItemMeasurer::Measure(FrameNode* item, int32_t index, float crossLen) 
     CHECK_NULL_RETURN(item && itemRefPtr, 0.0f);
     float userHeight = getUserDefHeight_ ? getUserDefHeight_(index) : -1.0f;
     if (NonNegative(userHeight)) {
-        WaterFlowLayoutUtils::UpdateItemIdealSize(itemRefPtr, axis_, userHeight);
+        return userHeight;
     }
     item->Measure(
         WaterFlowLayoutUtils::CreateChildConstraint({ crossLen, containerMainLen_, axis_ }, props_, itemRefPtr));
