@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -644,6 +644,7 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
+    bool isCrownDragging_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode
@@ -692,6 +693,7 @@ private:
     float lastPosition_ = 0.0f;
     float initVelocity_ = 0.0f;
     float frictionVelocity_ = 0.0f;
+    double lastMainDelta_ = 0.0;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation

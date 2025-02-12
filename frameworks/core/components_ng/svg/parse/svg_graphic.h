@@ -213,6 +213,10 @@ private:
     void SetPenRadialGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     bool CheckHrefPattern();
     void RectifyTargetSize(const Rect& bounds, double& width, double& height);
+    double GetFillOpacity();
+    double GetStrokeOpacity();
+    void SetBrushOpacity(RSBrush& brush);
+    void SetPenOpacity(RSPen& pen);
 };
 
 } // namespace OHOS::Ace::NG

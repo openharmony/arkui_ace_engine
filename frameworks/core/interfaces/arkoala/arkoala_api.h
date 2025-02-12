@@ -240,6 +240,7 @@ struct ArkUITouchEvent {
     ArkUI_Int32 interceptResult;
     ArkUI_Int32 changedPointerId;
     ArkUI_Int32 targetDisplayId;
+    void* rawPointerEvent;
 };
 
 struct ArkUIMouseEvent {
@@ -942,6 +943,7 @@ enum ArkUIEventSubKind {
     ON_AXIS,
     ON_CLICK_EVENT,
     ON_HOVER_EVENT,
+    ON_HOVER_MOVE,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -2283,10 +2285,13 @@ struct ArkUICommonModifier {
     void (*setOnBlur)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
     void (*setOnTouch)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event));
     void (*setOnHover)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover));
+    void (*setOnHoverMove)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
     void (*setOnChange)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn));
     void (*setOnClick)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event));
     void (*setOnAppear)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
+    ArkUI_Int32 (*postTouchEvent)(ArkUINodeHandle node, const ArkUITouchEvent* arkUItouchEvent);
+    void (*createClonedTouchEvent)(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*setNodeBackdropBlur)(
@@ -3408,6 +3413,8 @@ struct ArkUIGestureInterruptInfo {
     void* gestureEvent = nullptr;
     ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
     ArkUI_Int32 count = 0;
+    void** touchRecognizers = nullptr;
+    ArkUI_Int32 touchRecognizerCnt = 0;
 };
 
 enum ArkUIGestureRecognizerState {
@@ -3490,6 +3497,8 @@ struct ArkUIGestureModifier {
         ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
     void (*registerGestureEventExt)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
         GestrueFunction* gestrueFunction, void* gestureData);
+    ArkUINodeHandle (*touchRecognizerGetNodeHandle)(void* recognizer);
+    ArkUI_Bool (*touchRecognizerCancelTouch)(void* recognizer);
 };
 
 struct ArkUISliderModifier {
@@ -5528,6 +5537,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*setCrossLanguageOptions)(ArkUINodeHandle node, bool attributeSetting);
     ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
     ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
+    void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
 };
 
 struct ArkUINodeContentEvent {
@@ -5906,6 +5916,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*setLevelMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
     ArkUI_Int32 (*setLevelUniqueId)(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
     ArkUI_Int32 (*setImmersiveMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
+    ArkUI_Int32 (*setLevelOrder)(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder);
 };
 
 struct ArkUIBasicNodeAPI {

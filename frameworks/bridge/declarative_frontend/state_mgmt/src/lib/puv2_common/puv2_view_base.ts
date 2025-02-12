@@ -989,7 +989,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     const needBuild: boolean = PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd &&
       ViewStackProcessor.CheckIsPrebuildTimeout();
     if (needBuild && !PUV2ViewBase.prebuildFuncQueues.has(this.id__())) {
-      PUV2ViewBase.prebuildFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+      PUV2ViewBase.prebuildFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
     }
     return needBuild;
   }

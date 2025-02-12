@@ -327,6 +327,27 @@ void DatePickerPattern::ColumnPatternInitHapticController(const RefPtr<FrameNode
     columnPattern->InitHapticController();
 }
 
+void DatePickerPattern::ColumnPatternStopHaptic()
+{
+    if (!isEnableHaptic_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = blendNode->GetLastChild();
+        CHECK_NULL_VOID(childNode);
+        auto datePickerColumnPattern = DynamicCast<FrameNode>(childNode)->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(datePickerColumnPattern);
+        datePickerColumnPattern->StopHaptic();
+    }
+}
+
 void DatePickerPattern::InitFocusKeyEvent()
 {
     auto host = GetHost();
@@ -337,6 +358,16 @@ void DatePickerPattern::InitFocusKeyEvent()
 #ifdef SUPPORT_DIGITAL_CROWN
         InitOnCrownEvent(focusHub);
 #endif
+    }
+}
+
+void DatePickerPattern::FlushChildNodes()
+{
+    auto frameNodes = GetAllChildNode();
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        it.second->MarkModifyDone();
+        it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -385,6 +416,7 @@ void DatePickerPattern::OnModifyDone()
     SetDefaultFocus();
     InitFocusEvent();
     InitSelectorProps();
+    FlushChildNodes();
 }
 
 void DatePickerPattern::InitDisabled()

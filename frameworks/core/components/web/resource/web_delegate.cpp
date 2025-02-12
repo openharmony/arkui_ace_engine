@@ -7422,30 +7422,42 @@ void WebDelegate::OnCursorUpdate(double x, double y, double width, double height
     webPattern->OnCursorUpdate(x, y, width, height);
 }
 
-void WebDelegate::OnSafeInsetsChange()
+NG::SafeAreaInsets WebDelegate::GetCombinedSafeArea()
 {
     NG::SafeAreaInsets resultSafeArea({0, 0}, {0, 0}, {0, 0}, {0, 0});
     resultSafeArea = resultSafeArea.Combine(systemSafeArea_);
     resultSafeArea = resultSafeArea.Combine(cutoutSafeArea_);
     resultSafeArea = resultSafeArea.Combine(navigationIndicatorSafeArea_);
+    return resultSafeArea;
+}
+
+void WebDelegate::OnSafeInsetsChange()
+{
+    NG::SafeAreaInsets resultSafeArea = GetCombinedSafeArea();
+    auto context = context_.Upgrade();
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::OnSafeInsetsChange occur errors, context is nullptr");
+        return;
+    }
+    auto windowRect = context->GetDisplayWindowRectInfo();
 
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
-        left = static_cast<int>(resultSafeArea.left_.start + resultSafeArea.left_.end);
+        left = static_cast<int>(
+            resultSafeArea.left_.start + resultSafeArea.left_.end - std::max(currentArea_.Left(), windowRect.Left()));
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = static_cast<int>(resultSafeArea.top_.end - resultSafeArea.top_.start);
+        top = static_cast<int>(resultSafeArea.top_.end - std::max(windowRect.Top(), currentArea_.Top()));
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
-        constexpr static int32_t CUTOUT_EDGES_BALANCE_FACTOR = 2;
-        right = static_cast<int>(resultSafeArea.right_.end - resultSafeArea.right_.start +
-                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR);
+        right = static_cast<int>(std::min(windowRect.Right(), currentArea_.Right()) +
+            windowRect.Right() - resultSafeArea.right_.end - resultSafeArea.right_.start);
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = static_cast<int>(resultSafeArea.bottom_.end - resultSafeArea.bottom_.start);
+        bottom = static_cast<int>(std::min(windowRect.Bottom(), currentArea_.Bottom()) - resultSafeArea.bottom_.start);
     }
 
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {
@@ -7453,7 +7465,6 @@ void WebDelegate::OnSafeInsetsChange()
                 "ltrb:%{public}d,%{public}d,%{public}d,%{public}d", left, top, right, bottom);
         return;
     }
-
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebDelegate::OnSafeInsetsChange left:%{public}d top:%{public}d right:%{public}d bottom:%{public}d "
         "systemSafeArea:%{public}s cutoutSafeArea:%{public}s navigationIndicatorSafeArea:%{public}s "
@@ -7462,10 +7473,6 @@ void WebDelegate::OnSafeInsetsChange()
         navigationIndicatorSafeArea_.ToString().c_str(), resultSafeArea.ToString().c_str(),
         currentArea_.ToString().c_str());
 
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), left, top, right, bottom]() {
             auto delegate = weak.Upgrade();
@@ -7636,4 +7643,11 @@ void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
 }
 
+std::string WebDelegate::GetCurrentLanguage()
+{
+    if (nweb_) {
+        return nweb_->GetCurrentLanguage();
+    }
+    return "";
+}
 } // namespace OHOS::Ace

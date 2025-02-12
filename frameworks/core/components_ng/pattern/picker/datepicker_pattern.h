@@ -762,6 +762,7 @@ public:
 
     void ColumnPatternInitHapticController();
     void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
+    void ColumnPatternStopHaptic();
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
@@ -810,6 +811,8 @@ private:
     bool OnCrownEvent(const CrownEvent& event);
 #endif
     void InitFocusKeyEvent();
+    void FlushChildNodes();
+
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;

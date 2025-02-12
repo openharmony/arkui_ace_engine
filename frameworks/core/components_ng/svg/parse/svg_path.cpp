@@ -68,9 +68,6 @@ RSRecordingPath SvgPath::AsPath(const SvgLengthScaleRule& lengthRule)
         if (attributes_.fillState.IsEvenodd()) {
             out.SetFillStyle(RSPathFillType::EVENTODD);
         }
-        if (attributes_.clipState.IsEvenodd()) {
-            out.SetFillStyle(RSPathFillType::EVENTODD);
-        }
     }
     /* Apply path transform for clip-path only */
     if (lengthRule.GetPathTransform()) {

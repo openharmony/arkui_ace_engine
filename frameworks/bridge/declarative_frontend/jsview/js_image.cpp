@@ -918,7 +918,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
     } else {
         JSClass<JSImage>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);

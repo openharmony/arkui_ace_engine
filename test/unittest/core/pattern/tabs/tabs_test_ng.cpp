@@ -226,14 +226,6 @@ void TabsTestNg::HandleHoverEvent(bool isHover)
     tabBarPattern_->HandleHoverEvent(isHover);
 }
 
-void TabsTestNg::HandleTouchEvent(TouchType type, Offset location)
-{
-    TouchLocationInfo touchInfo(0);
-    touchInfo.SetTouchType(type);
-    touchInfo.SetLocalLocation(location);
-    tabBarPattern_->HandleTouchEvent(touchInfo);
-}
-
 GestureEvent TabsTestNg::CreateDragInfo(bool moveDirection)
 {
     GestureEvent info;

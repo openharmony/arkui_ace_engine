@@ -342,7 +342,7 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
 
 void WaterFlowLayoutInfoSW::PrepareJump()
 {
-    if (startIndex_ > endIndex_) {
+    if (startIndex_ > endIndex_ || jumpIndex_ != EMPTY_JUMP_INDEX) {
         return;
     }
     align_ = ScrollAlign::START;

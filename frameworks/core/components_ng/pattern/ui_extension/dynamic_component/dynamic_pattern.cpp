@@ -35,6 +35,8 @@ constexpr char PARAM_NAME_INTERNAL_ERROR[] = "internalError";
 constexpr char PARAM_MSG_INTERNAL_ERROR[] = "Internal error";
 constexpr char PARAM_NAME_PARAM_ERROR[] = "paramError";
 constexpr char PARAM_MSG_PARAM_ERROR[] = "Param error";
+constexpr char PARAM_NAME_NOT_SUPPORT_UI_CONTENT_TYPE[] = "notSupportUIContentType";
+constexpr char PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE[] = "Not support uIContent type";
 const char ENABLE_DEBUG_DC_KEY[] = "persist.ace.debug.dc.enabled";
 
 bool IsDebugDCEnabled()
@@ -101,6 +103,10 @@ void DynamicPattern::HandleErrorCallback(DCResultCode resultCode)
             FireOnErrorCallbackOnUI(
                 resultCode, PARAM_NAME_PARAM_ERROR, PARAM_MSG_PARAM_ERROR);
             break;
+        case DCResultCode::DC_NOT_SUPPORT_UI_CONTENT_TYPE:
+            FireOnErrorCallbackOnUI(
+                resultCode, PARAM_NAME_NOT_SUPPORT_UI_CONTENT_TYPE, PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE);
+            break;
         default:
             PLATFORM_LOGI("HandleErrorCallback code: %{public}d is invalid.", resultCode);
     }
@@ -114,6 +120,18 @@ DCResultCode DynamicPattern::CheckConstraint()
     if (!container) {
         PLATFORM_LOGE("container is null.");
         return DCResultCode::DC_INTERNAL_ERROR;
+    }
+
+    UIContentType uIContentType = container->GetUIContentType();
+    static std::set<UIContentType> dcNotSupportUIContentType = {
+        UIContentType::ISOLATED_COMPONENT,
+        UIContentType::DYNAMIC_COMPONENT
+    };
+
+    if (dcNotSupportUIContentType.find(uIContentType) != dcNotSupportUIContentType.end()) {
+        PLATFORM_LOGE("Not support dc in uIContentType: %{public}d.",
+            static_cast<int32_t>(uIContentType));
+        return DCResultCode::DC_NOT_SUPPORT_UI_CONTENT_TYPE;
     }
 
     if (container->IsScenceBoardWindow()) {

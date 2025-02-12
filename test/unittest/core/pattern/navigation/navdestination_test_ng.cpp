@@ -1092,7 +1092,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 1.0f;
     float subtitleHeight = 0.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_ = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1112,7 +1112,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 100.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1133,7 +1133,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 99.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 0.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 0.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));

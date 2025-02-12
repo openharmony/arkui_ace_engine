@@ -1504,10 +1504,9 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptions(bool isAttachToMoreButton,
     if (!moreOrBackSymbol_) {
         moreOrBackSymbol_ = BuildMoreOrBackSymbol();
     }
-    if (isAttachToMoreButton) {
-        backButton_->RemoveChild(moreOrBackSymbol_);
-    } else {
-        moreButton_->RemoveChild(moreOrBackSymbol_);
+    auto button = isAttachToMoreButton ? backButton_ : moreButton_;
+    if (button) {
+        button->RemoveChild(moreOrBackSymbol_);
     }
     moreOrBackSymbol_->MountToParent(isAttachToMoreButton ? moreButton_ : backButton_);
     auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();

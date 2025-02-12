@@ -37,6 +37,7 @@ const EVENT_NAME_BUTTON_SIZE_CHANGE: string = 'arkui_button_size_change'
 const EVENT_NAME_BUTTON_SPACING_CHANGE: string = 'arkui_button_spacing_change'
 const EVENT_NAME_COLOR_MODE_LOCKED: string = 'arkui_color_mode_locked'
 const EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE: string = 'arkui_button_right_offset_change'
+const EVENT_NAME_TITLE_ROW_UPDATE: string = 'arkui_custom_title_row_update'
 
 const maximizeNormalResource: Resource = {
   bundleName: '',
@@ -444,6 +445,9 @@ struct custombutton {
   }
 
   aboutToAppear(): void {
+  }
+
+  onDidBuild(): void {
   }
 
   @Builder

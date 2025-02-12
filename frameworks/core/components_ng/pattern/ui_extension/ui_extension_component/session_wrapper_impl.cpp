@@ -376,6 +376,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto realHostWindowId = pipeline->GetRealHostWindowId();
+    customWant_ = std::make_shared<Want>(want);
     auto wantPtr = std::make_shared<Want>(want);
     AAFwk::WantParams configParam;
     container->GetExtensionConfig(configParam);
@@ -473,6 +474,7 @@ void SessionWrapperImpl::DestroySession()
     if (dataHandler) {
         dataHandler->UnregisterDataConsumer(subSystemId_);
     }
+    customWant_ = nullptr;
     session_ = nullptr;
 }
 
@@ -503,7 +505,7 @@ int32_t SessionWrapperImpl::GetInstanceIdFromHost() const
 
 const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
 {
-    return session_ ? session_->GetSessionInfo().want : nullptr;
+    return session_ ? customWant_ : nullptr;
 }
 /************************************************ End: About session **************************************************/
 
@@ -1078,8 +1080,8 @@ int32_t SessionWrapperImpl::GetFrameNodeId() const
     return frameNode->GetId();
 }
 
-bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
-    RSSubsystemId subSystemId)
+bool SessionWrapperImpl::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;
@@ -1099,8 +1101,8 @@ bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, A
     return true;
 }
 
-bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
-    RSSubsystemId subSystemId)
+bool SessionWrapperImpl::SendBusinessData(
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;

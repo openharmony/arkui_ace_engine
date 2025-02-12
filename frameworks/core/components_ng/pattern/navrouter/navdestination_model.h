@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 
 namespace OHOS::Ace {
-class NavDestinationModel {
+class ACE_FORCE_EXPORT NavDestinationModel {
 public:
     static NavDestinationModel* GetInstance();
     virtual ~NavDestinationModel() = default;

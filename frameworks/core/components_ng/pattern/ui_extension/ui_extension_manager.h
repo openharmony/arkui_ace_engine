@@ -53,8 +53,8 @@ using UIExtBusinessDataSendCallback = std::function<std::optional<AAFwk::Want>(W
 using UIExtBusinessDataConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using UIExtBusinessDataConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 
-using UIExtBusinessSendToHostReplyFunc = std::function<bool(uint32_t, AAFwk::Want&&, AAFwk::Want&)>;
-using UIExtBusinessSendToHostFunc = std::function<bool(uint32_t, AAFwk::Want&&, BusinessDataSendType)>;
+using UIExtBusinessSendToHostReplyFunc = std::function<bool(uint32_t, const AAFwk::Want&, AAFwk::Want&)>;
+using UIExtBusinessSendToHostFunc = std::function<bool(uint32_t, const AAFwk::Want&, BusinessDataSendType)>;
 
 }; // namespace
 
@@ -137,38 +137,39 @@ public:
 
     // host send data to provider
     void RegisterBusinessDataSendCallback(
-            UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback,
+            UIContentBusinessCode code, BusinessDataSendType type, const UIExtBusinessDataSendCallback& callback,
             RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
     void UnRegisterBusinessDataSendCallback(UIContentBusinessCode code);
     bool TriggerBusinessDataSend(UIContentBusinessCode code);
 
     // provider consume data
     void RegisterBusinessDataConsumeReplyCallback(
-            UIContentBusinessCode code, UIExtBusinessDataConsumeReplyCallback callback);
+            UIContentBusinessCode code, const UIExtBusinessDataConsumeReplyCallback& callback);
     void UnRegisterBusinessDataConsumeReplyCallback(UIContentBusinessCode code);
     void DispatchBusinessDataConsumeReply(
         UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
 
     // provider send data to host, called by framework
-    void RegisterBusinessDataConsumeCallback(UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback);
+    void RegisterBusinessDataConsumeCallback(
+        UIContentBusinessCode code, const UIExtBusinessDataConsumeCallback& callback);
     void UnRegisterBusinessDataConsumeCallback(UIContentBusinessCode code);
     void DispatchBusinessDataConsume(UIContentBusinessCode code, const AAFwk::Want& data);
 
     // register provider send data to host, called by framework
-    void RegisterBusinessSendToHostReply(UIExtBusinessSendToHostReplyFunc func);
+    void RegisterBusinessSendToHostReply(const UIExtBusinessSendToHostReplyFunc& func);
     // register provider send data to host, called by framework
-    void RegisterBusinessSendToHost(UIExtBusinessSendToHostFunc func);
+    void RegisterBusinessSendToHost(const UIExtBusinessSendToHostFunc& func);
 
     // provider send to host, consumer is in ui_extension_pattern
-    bool SendBusinessToHost(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    bool SendBusinessToHost(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type);
     // provider send to host sync reply, only used in uiextension init, not allowd used by other
-    bool SendBusinessToHostSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool SendBusinessToHostSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
 
     void NotifyWindowMode(Rosen::WindowMode mode);
 
     void SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline);
     void TransferAccessibilityRectInfo();
-    void UpdateWMSUIExtProperty(UIContentBusinessCode code, AAFwk::Want data, RSSubsystemId subSystemId);
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 private:
     bool UIExtBusinessDataSendValid();
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;

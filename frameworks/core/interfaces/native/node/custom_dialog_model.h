@@ -43,6 +43,7 @@ struct _ArkUIDialog {
     ArkUI_Int32 levelMode;
     ArkUI_Int32 levelUniqueId;
     ArkUI_Int32 immersiveMode;
+    ArkUI_Float64 levelOrder;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -71,6 +72,7 @@ ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, A
 ArkUI_Int32 SetLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
 ArkUI_Int32 SetLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
 ArkUI_Int32 SetImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder);
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

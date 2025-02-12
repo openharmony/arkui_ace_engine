@@ -47,6 +47,14 @@
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
+namespace {
+enum class GestureStatus {
+    INIT = 0,
+    START,
+    END,
+};
+} // namespace
+
 enum class PageFlipMode {
     CONTINUOUS = 0,
     SINGLE,
@@ -756,6 +764,11 @@ public:
     bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
     virtual RefPtr<Curve> GetCurve() const;
 
+    void SetGestureStatus(GestureStatus gestureStatus)
+    {
+        gestureStatus_ = gestureStatus;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -878,7 +891,7 @@ private:
     // ArcSwiper will implement this interface in order to reset the background color of parent node.
     virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
-    virtual void PlayScrollAnimation(float offset) {};
+    virtual void PlayScrollAnimation(float currentDelta, float currentIndexOffset) {};
     virtual void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
@@ -1184,6 +1197,8 @@ private:
         return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
     }
 
+    void CheckAndReportEvent();
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1359,6 +1374,7 @@ private:
     bool stopWhenTouched_ = true;
     WeakPtr<NG::UINode> indicatorNode_;
     bool isBindIndicator_ = false;
+    GestureStatus gestureStatus_ = GestureStatus::INIT;
 };
 } // namespace OHOS::Ace::NG
 
