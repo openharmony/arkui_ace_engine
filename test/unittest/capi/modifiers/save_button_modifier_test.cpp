@@ -41,6 +41,15 @@ namespace  {
     const auto DEFAULT_JSON_INT = -1;
     const double OFFSET_X = 60.4;
     const double OFFSET_Y = 85.5;
+
+    static std::shared_ptr<JsonValue> CreateJson(SecurityComponentHandleResult value)
+    {
+        int32_t res = static_cast<int32_t>(value);
+        auto jsonNode = JsonUtil::Create(true);
+        jsonNode->Put("handleRes", res);
+        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+        return jsonShrd;
+    };
 } // namespace
 
 class SaveButtonModifierTest : public ModifierTestBase<GENERATED_ArkUISaveButtonModifier,
@@ -387,19 +396,10 @@ HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
 
-    auto createJson = [](SecurityComponentHandleResult value)
-    {
-        int32_t res = static_cast<int32_t>(value);
-        auto jsonNode = JsonUtil::Create(true);
-        jsonNode->Put("handleRes", res);
-        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
-        return jsonShrd;
-    };
-
-    auto testFunction = [gestureEventHub, createJson](SecurityComponentHandleResult input,
+    auto testFunction = [gestureEventHub](SecurityComponentHandleResult input,
         Ark_SaveButtonOnClickResult expected) {
         checkEvent.reset();
-        gestureEventHub->ActClick(createJson(input));
+        gestureEventHub->ActClick(CreateJson(input));
         ASSERT_TRUE(checkEvent.has_value() && checkEvent->result.has_value());
         EXPECT_EQ(checkEvent->result.value(), expected);
         EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
@@ -407,13 +407,12 @@ HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
     };
 
 #ifdef SECURITY_COMPONENT_ENABLE
-    testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,
-        ARK_SAVE_BUTTON_ON_CLICK_RESULT_SUCCESS);
-    testFunction(SecurityComponentHandleResult::CLICK_GRANT_FAILED, 
+    testFunction(SecurityComponentHandleResult::CLICK_SUCCESS, ARK_SAVE_BUTTON_ON_CLICK_RESULT_SUCCESS);
+    testFunction(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
         ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
 
     checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
+    gestureEventHub->ActClick(CreateJson(SecurityComponentHandleResult::DROP_CLICK));
     ASSERT_FALSE(checkEvent.has_value());
 #else
     testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,

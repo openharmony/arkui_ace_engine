@@ -41,6 +41,15 @@ namespace  {
     const auto DEFAULT_JSON_INT = -1;
     const double OFFSET_X = 60.4;
     const double OFFSET_Y = 85.5;
+
+    static std::shared_ptr<JsonValue> CreateJson(SecurityComponentHandleResult value)
+    {
+        int32_t res = static_cast<int32_t>(value);
+        auto jsonNode = JsonUtil::Create(true);
+        jsonNode->Put("handleRes", res);
+        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+        return jsonShrd;
+    };
 } // namespace
 
 class LocationButtonModifierTest : public ModifierTestBase<GENERATED_ArkUILocationButtonModifier,
@@ -391,40 +400,29 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
 
-    auto createJson = [](SecurityComponentHandleResult value)
-    {
-        int32_t res = static_cast<int32_t>(value);
-        auto jsonNode = JsonUtil::Create(true);
-        jsonNode->Put("handleRes", res);
-        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
-        return jsonShrd;
-    };
-
-    auto testFunction = [gestureEventHub, createJson](SecurityComponentHandleResult input,
-        Ark_LocationButtonOnClickResult expected) {
+    auto testFunc = [gestureEventHub](SecurityComponentHandleResult input, Ark_LocationButtonOnClickResult expected) {
         checkEvent.reset();
-        gestureEventHub->ActClick(createJson(input));
-        ASSERT_TRUE(checkEvent.has_value() && checkEvent.value().result.has_value());
-        EXPECT_EQ(checkEvent.value().result.value(), expected);
-        EXPECT_EQ(checkEvent.value().offsetX, static_cast<int32_t>(OFFSET_X));
-        EXPECT_EQ(checkEvent.value().offsetY, static_cast<int32_t>(OFFSET_Y));
+        gestureEventHub->ActClick(CreateJson(input));
+        ASSERT_TRUE(checkEvent.has_value() && checkEvent->result.has_value());
+        EXPECT_EQ(checkEvent->result.value(), expected);
+        EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
+        EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
     };
 
 #ifdef SECURITY_COMPONENT_ENABLE
-    testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,
-        ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS);
-    testFunction(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
+    testFunc(SecurityComponentHandleResult::CLICK_SUCCESS, ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS);
+    testFunc(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
         ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
 
     checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
+    gestureEventHub->ActClick(CreateJson(SecurityComponentHandleResult::DROP_CLICK));
     ASSERT_FALSE(checkEvent.has_value());
 #else
-    testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,
+    testFunc(SecurityComponentHandleResult::CLICK_SUCCESS,
         ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
-    testFunction(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
+    testFunc(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
         ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
-    testFunction(SecurityComponentHandleResult::DROP_CLICK,
+    testFunc(SecurityComponentHandleResult::DROP_CLICK,
         ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
 #endif
 }
