@@ -117,6 +117,7 @@ void TabBarEventTestNg::DragEnd(float velocityDelta)
     dragInfo_.SetGlobalLocation(dragInfo_.GetGlobalLocation());
     dragInfo_.SetLocalLocation(dragInfo_.GetLocalLocation());
     scrollable->HandleTouchUp();
+    scrollable->lastMainDelta_ = 0.0;
     scrollable->HandleDragEnd(dragInfo_);
     scrollable->isDragging_ = false;
     FlushUITasks();
