@@ -63,7 +63,7 @@ Ark_NativePointer GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
         config->data.insert(std::pair(iter->first, iter->second));
     }
 
-    return nullptr; // fix a return value
+    return {}; // fix a return value
 }
 void SetPathInfoImpl(NavDestinationContextPeer* peer,
                      const Ark_NavPathInfo* pathInfo)

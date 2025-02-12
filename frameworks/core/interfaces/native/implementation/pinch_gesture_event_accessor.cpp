@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Int32 GetScaleImpl(PinchGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetScaleImpl(PinchGestureEventPeer* peer,
                   const Ark_Number* scale)
@@ -41,7 +41,7 @@ void SetScaleImpl(PinchGestureEventPeer* peer,
 }
 Ark_Int32 GetPinchCenterXImpl(PinchGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetPinchCenterXImpl(PinchGestureEventPeer* peer,
                          const Ark_Number* pinchCenterX)
@@ -49,7 +49,7 @@ void SetPinchCenterXImpl(PinchGestureEventPeer* peer,
 }
 Ark_Int32 GetPinchCenterYImpl(PinchGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetPinchCenterYImpl(PinchGestureEventPeer* peer,
                          const Ark_Number* pinchCenterY)

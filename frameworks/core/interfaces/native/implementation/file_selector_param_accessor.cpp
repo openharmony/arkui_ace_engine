@@ -49,7 +49,7 @@ Ark_NativePointer GetModeImpl(FileSelectorParamPeer* peer)
     peer->handler->GetMode();
     // mode need to be returned
     LOGE("FileSelectorParamAccessor::GetModeImpl - return value need to be supported");
-    return nullptr;
+    return {};
 }
 void GetAcceptTypeImpl(FileSelectorParamPeer* peer)
 {

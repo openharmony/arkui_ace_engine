@@ -46,7 +46,7 @@ Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
                                const Map_String_CustomObject* data)
 {
     LOGE("UIExtensionProxyAccessor::SendSyncImpl - is not supported");
-    return nullptr;
+    return {};
 }
 void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
                                  const Callback_UIExtensionProxy_Void* callback_)

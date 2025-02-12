@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean GetRepeatImpl(LongPressGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetRepeatImpl(LongPressGestureEventPeer* peer,
                    Ark_Boolean repeat)

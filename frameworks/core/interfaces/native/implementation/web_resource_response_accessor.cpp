@@ -50,7 +50,7 @@ Ark_NativePointer GetResponseDataExImpl(WebResourceResponsePeer* peer)
 {
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseDataExImpl - return value need to be supported");
-    return 0;
+    return {};
 }
 void GetResponseEncodingImpl(WebResourceResponsePeer* peer)
 {

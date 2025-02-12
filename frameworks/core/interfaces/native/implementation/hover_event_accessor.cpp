@@ -31,6 +31,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Callback_Void GetStopPropagationImpl(HoverEventPeer* peer)
+{
+    return {};
+}
 void SetStopPropagationImpl(HoverEventPeer* peer,
                             const Callback_Void* stopPropagation)
 {
@@ -42,6 +46,7 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::DestroyPeerImpl,
         HoverEventAccessor::CtorImpl,
         HoverEventAccessor::GetFinalizerImpl,
+        HoverEventAccessor::GetStopPropagationImpl,
         HoverEventAccessor::SetStopPropagationImpl,
     };
     return &HoverEventAccessorImpl;

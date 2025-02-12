@@ -130,7 +130,7 @@ Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
     CHECK_NULL_RETURN(info, nullptr);
     auto summary = info->GetSummary();
     LOGE("DragEventAccessor::GetSummaryImpl wrong return data");
-    return nullptr;
+    return {};
 }
 void SetResultImpl(DragEventPeer* peer,
                    Ark_DragResult dragResult)
@@ -145,12 +145,12 @@ void SetResultImpl(DragEventPeer* peer,
 Ark_NativePointer GetResultImpl(DragEventPeer* peer)
 {
     LOGE("DragEventAccessor::GetResultImpl wrong return data");
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetPreviewRectImpl(DragEventPeer* peer)
 {
     LOGE("DragEventAccessor::GetPreviewRectImpl wrong return data");
-    return nullptr;
+    return {};
 }
 Ark_Int32 GetVelocityXImpl(DragEventPeer* peer)
 {

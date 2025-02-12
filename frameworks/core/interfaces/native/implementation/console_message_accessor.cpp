@@ -75,7 +75,7 @@ Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
     peer->webConsoleLog->GetLogLevel();
     // log level need to be returned
     LOGE("ConsoleMessageAccessor::GetMessageLevelImpl - return value need to be supported");
-    return nullptr;
+    return {};
 }
 } // ConsoleMessageAccessor
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()

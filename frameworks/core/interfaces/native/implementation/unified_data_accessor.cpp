@@ -35,7 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Boolean HasTypeImpl(UnifiedDataPeer* peer,
                         const Ark_String* UnifiedData_type)
 {
-    return 0;
+    return {};
 }
 void GetTypesImpl(UnifiedDataPeer* peer)
 {

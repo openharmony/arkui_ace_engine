@@ -114,7 +114,7 @@ Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     LOGW("RichEditorBaseControllerAccessor:: GetTypingStyleImpl is not implemented");
-    return nullptr;
+    return {};
 }
 void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer,
                         const Ark_RichEditorTextStyle* value)

@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Int32 GetAngleImpl(RotationGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetAngleImpl(RotationGestureEventPeer* peer,
                   const Ark_Number* angle)

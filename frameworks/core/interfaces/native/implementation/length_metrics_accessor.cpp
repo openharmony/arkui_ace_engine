@@ -36,7 +36,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer PxImpl(const Ark_Number* value)
 {
-    return LengthMetricsPeer::Create(Dimension(Convert<float>(*value)));
+    return LengthMetricsPeer::Create(Convert<Dimension>(*value));
 }
 Ark_NativePointer ResourceImpl(const Ark_Resource* value)
 {
@@ -44,7 +44,7 @@ Ark_NativePointer ResourceImpl(const Ark_Resource* value)
 }
 Ark_NativePointer GetUnitImpl(LengthMetricsPeer* peer)
 {
-    return nullptr;
+    return {};
 }
 void SetUnitImpl(LengthMetricsPeer* peer,
                  Ark_LengthUnit unit)
@@ -52,7 +52,7 @@ void SetUnitImpl(LengthMetricsPeer* peer,
 }
 Ark_Int32 GetValueImpl(LengthMetricsPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetValueImpl(LengthMetricsPeer* peer,
                   const Ark_Number* value)

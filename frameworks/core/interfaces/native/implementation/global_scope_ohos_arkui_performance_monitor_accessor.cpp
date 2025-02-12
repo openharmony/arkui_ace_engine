@@ -83,7 +83,7 @@ void EndImpl(const Ark_String* scene)
     CHECK_NULL_VOID(pMonitor);
     pMonitor->End(sceneId, false);
 }
-void RecordInputEventTimeImpl(Ark_PerfMonitorActionType type,
+void RecordInputEventTimeImpl(Ark_PerfMonitorActionType actionType,
                               Ark_PerfMonitorSourceType sourceType,
                               const Ark_Number* time)
 {

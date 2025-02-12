@@ -35,22 +35,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_commonAccessor {
 void DestroyPeerImpl(GlobalScope_commonPeer* peer)
 {
-    auto commonPeer = reinterpret_cast<GlobalScopePeer*>(peer);
-    if (commonPeer) {
-        delete commonPeer;
-    }
-}
-Ark_NativePointer CtorImpl()
-{
-    return new GlobalScopePeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer GetContextImpl(const Opt_CustomObject* component)
 {
-    return nullptr;
+    return {};
 }
 void PostCardActionImpl(const Ark_CustomObject* component,
                         const Ark_CustomObject* action)
@@ -59,11 +47,11 @@ void PostCardActionImpl(const Ark_CustomObject* component,
 Ark_NativePointer Dollar_rImpl(const Ark_String* value,
                                const Array_CustomObject* params)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer Dollar_rawfileImpl(const Ark_String* value)
 {
-    return nullptr;
+    return {};
 }
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
 {
@@ -457,8 +445,6 @@ const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor()
 {
     static const GENERATED_ArkUIGlobalScope_commonAccessor GlobalScope_commonAccessorImpl {
         GlobalScope_commonAccessor::DestroyPeerImpl,
-        GlobalScope_commonAccessor::CtorImpl,
-        GlobalScope_commonAccessor::GetFinalizerImpl,
         GlobalScope_commonAccessor::GetContextImpl,
         GlobalScope_commonAccessor::PostCardActionImpl,
         GlobalScope_commonAccessor::Dollar_rImpl,

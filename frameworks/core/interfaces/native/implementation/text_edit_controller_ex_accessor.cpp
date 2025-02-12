@@ -60,7 +60,7 @@ Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
     // fix a return value
     CHECK_NULL_RETURN(peer, 0);
     peer->GetPreviewText();
-    return 0;
+    return {};
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

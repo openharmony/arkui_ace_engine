@@ -77,7 +77,7 @@ Ark_NativePointer GetMediaTypeImpl(WebContextMenuParamPeer* peer)
     peer->handler->GetMediaType();
     // correct value type need to be returned
     LOGE("WebContextMenuParamAccessor::GetMediaTypeImpl - return value need to be supported");
-    return nullptr;
+    return {};
 }
 void GetSelectionTextImpl(WebContextMenuParamPeer* peer)
 {
@@ -92,7 +92,7 @@ Ark_NativePointer GetSourceTypeImpl(WebContextMenuParamPeer* peer)
     peer->handler->GetSourceType();
     // correct value type need to be returned
     LOGE("WebContextMenuParamAccessor::GetSourceTypeImpl - return value need to be supported");
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetInputFieldTypeImpl(WebContextMenuParamPeer* peer)
 {
@@ -100,7 +100,7 @@ Ark_NativePointer GetInputFieldTypeImpl(WebContextMenuParamPeer* peer)
     peer->handler->GetInputFieldType();
     // correct value type need to be returned
     LOGE("WebContextMenuParamAccessor::GetInputFieldTypeImpl - return value need to be supported");
-    return nullptr;
+    return {};
 }
 Ark_Boolean IsEditableImpl(WebContextMenuParamPeer* peer)
 {

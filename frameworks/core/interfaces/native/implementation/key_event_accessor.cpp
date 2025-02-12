@@ -50,7 +50,7 @@ Ark_NativePointer GetTypeImpl(KeyEventPeer* peer)
     const auto keyType = info->GetKeyType();
     LOGE("ARKOALA KeyEventAccessor::GetTypeImpl is not implemented "
         "-> incorrect return Converter::ArkValue<Ark_KeyType>(keyType): %d", keyType);
-    return nullptr;
+    return {};
 }
 void SetTypeImpl(KeyEventPeer* peer,
                  Ark_KeyType type)
@@ -92,7 +92,7 @@ Ark_NativePointer GetKeySourceImpl(KeyEventPeer* peer)
     const auto keySource = info->GetKeySource();
     LOGE("ARKOALA KeyEventAccessor::GetKeySourceImpl is not implemented "
         "-> incorrect return Converter::ArkValue<Ark_KeySource>(keySource): %d", keySource);
-    return nullptr;
+    return {};
 }
 void SetKeySourceImpl(KeyEventPeer* peer,
                       Ark_KeySource keySource)
@@ -134,6 +134,10 @@ void SetTimestampImpl(KeyEventPeer* peer,
                       const Ark_Number* timestamp)
 {
     GetFullAPI()->getAccessors()->getBaseEventAccessor()->setTimestamp(peer, timestamp);
+}
+Callback_Void GetStopPropagationImpl(KeyEventPeer* peer)
+{
+    return {};
 }
 void SetStopPropagationImpl(KeyEventPeer* peer,
                             const Callback_Void* stopPropagation)
@@ -180,6 +184,7 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetMetaKeyImpl,
         KeyEventAccessor::GetTimestampImpl,
         KeyEventAccessor::SetTimestampImpl,
+        KeyEventAccessor::GetStopPropagationImpl,
         KeyEventAccessor::SetStopPropagationImpl,
         KeyEventAccessor::SetIntentionCodeImpl,
         KeyEventAccessor::GetUnicodeImpl,

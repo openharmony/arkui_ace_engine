@@ -118,13 +118,6 @@ using BackgroundImagePositionType = std::variant<
     Ark_Position,
     Ark_Alignment
 >;
-using ClipType = std::variant<
-    Ark_Boolean,
-    Ark_CircleAttribute,
-    Ark_EllipseAttribute,
-    Ark_PathAttribute,
-    Ark_RectAttribute
->;
 
 namespace GeneratedModifier {
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
@@ -3487,32 +3480,8 @@ void Clip0Impl(Ark_NativePointer node,
     ViewAbstract::SetClipEdge(frameNode, Converter::Convert<bool>(value));
 }
 void Clip1Impl(Ark_NativePointer node,
-               const Ark_Type_CommonMethod_clip_value* value)
+               Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    LOGE("ARKOALA CommonMethod::Clip1Impl: Deprecated interface!");
-    if (!value) {
-        ViewAbstract::SetClipEdge(frameNode, false);
-        return;
-    }
-    auto clipTypeOpt = Converter::OptConvert<ClipType>(*value);
-    if (clipTypeOpt) {
-        if (auto arkBool = std::get_if<Ark_Boolean>(&clipTypeOpt.value()); arkBool) {
-            ViewAbstract::SetClipEdge(frameNode, Converter::Convert<bool>(*arkBool));
-            return;
-        } else if (auto arkCircle = std::get_if<Ark_CircleAttribute>(&clipTypeOpt.value()); arkCircle) {
-            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_CircleAttribute is not supported yet!");
-        } else if (auto arkEllipse = std::get_if<Ark_EllipseAttribute>(&clipTypeOpt.value()); arkEllipse) {
-            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_EllipseAttribute is not supported yet!");
-        } else if (auto arkPath = std::get_if<Ark_PathAttribute>(&clipTypeOpt.value()); arkPath) {
-            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_PathAttribute is not supported yet!");
-        } else if (auto arkRect = std::get_if<Ark_RectAttribute>(&clipTypeOpt.value()); arkRect) {
-            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_RectAttribute is not supported yet!");
-        }
-    }
-    ViewAbstract::SetClipEdge(frameNode, false);
 }
 void ClipShapeImpl(Ark_NativePointer node,
                    const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -3533,20 +3502,8 @@ void Mask0Impl(Ark_NativePointer node,
     ViewAbstract::SetProgressMask(frameNode, progressMask);
 }
 void Mask1Impl(Ark_NativePointer node,
-               const Ark_Type_CommonMethod_mask_value* value)
+               const Ark_ProgressMask* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    Converter::VisitUnion(*value,
-        [node](const Ark_ProgressMask& value) {
-            Mask0Impl(node, &value);
-        },
-        [node](const auto& value) {
-            LOGE("CommonMethodModifier::Mask1Impl is not implemented yet");
-        },
-        []() {}
-    );
 }
 void MaskShapeImpl(Ark_NativePointer node,
                    const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)

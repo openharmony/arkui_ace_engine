@@ -965,7 +965,7 @@ Ark_Int32 GetGlobalAlphaImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetGlobalAlphaImpl there is no implementation in controller "
         "for getter method of GlobalAlpha.");
-    return 0;
+    return {};
 }
 void SetGlobalAlphaImpl(CanvasRendererPeer* peer,
                         const Ark_Number* globalAlpha)
@@ -1038,7 +1038,7 @@ Ark_Boolean GetImageSmoothingEnabledImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingEnabledImpl there is no implementation in controller "
         "for getter method of ImageSmoothingEnabled.");
-    return 0;
+    return {};
 }
 void SetImageSmoothingEnabledImpl(CanvasRendererPeer* peer,
                                   Ark_Boolean imageSmoothingEnabled)
@@ -1054,7 +1054,7 @@ Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingQualityImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
-    return nullptr;
+    return {};
 }
 void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
                                   const Ark_String* imageSmoothingQuality)
@@ -1072,7 +1072,7 @@ Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasLineCap type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl there is no implementation in controller "
         "for getter method of LineCap.");
-    return nullptr;
+    return {};
 }
 void SetLineCapImpl(CanvasRendererPeer* peer,
                     const Ark_String* lineCap)
@@ -1112,7 +1112,7 @@ Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasLineJoin type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetLineJoinImpl there is no implementation in controller "
         "for getter method of LineJoin.");
-    return nullptr;
+    return {};
 }
 void SetLineJoinImpl(CanvasRendererPeer* peer,
                      const Ark_String* lineJoin)
@@ -1128,7 +1128,7 @@ Ark_Int32 GetLineWidthImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetLineWidthImpl there is no implementation in controller "
         "for getter method of LinewWidth.");
-    return 0;
+    return {};
 }
 void SetLineWidthImpl(CanvasRendererPeer* peer,
                       const Ark_Number* lineWidth)
@@ -1145,7 +1145,7 @@ Ark_Int32 GetMiterLimitImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetMiterLimitImpl there is no implementation in controller "
         "for getter method of MiterLimit.");
-    return 0;
+    return {};
 }
 void SetMiterLimitImpl(CanvasRendererPeer* peer,
                        const Ark_Number* miterLimit)
@@ -1162,7 +1162,7 @@ Ark_Int32 GetShadowBlurImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowBlurImpl there is no implementation in controller "
         "for getter method of ShadowBlur.");
-    return 0;
+    return {};
 }
 void SetShadowBlurImpl(CanvasRendererPeer* peer,
                        const Ark_Number* shadowBlur)
@@ -1195,7 +1195,7 @@ Ark_Int32 GetShadowOffsetXImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetXImpl there is no implementation in controller "
         "for getter method of ShadowOffsetXImpl.");
-    return 0;
+    return {};
 }
 void SetShadowOffsetXImpl(CanvasRendererPeer* peer,
                           const Ark_Number* shadowOffsetX)
@@ -1212,7 +1212,7 @@ Ark_Int32 GetShadowOffsetYImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetYImpl there is no implementation in controller "
         "for getter method of ShadowOffsetYImpl.");
-    return 0;
+    return {};
 }
 void SetShadowOffsetYImpl(CanvasRendererPeer* peer,
                           const Ark_Number* shadowOffsetY)
@@ -1231,7 +1231,7 @@ Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasDirection type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl there is no implementation in controller "
         "for getter method of Direction.");
-    return nullptr;
+    return {};
 }
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
@@ -1264,7 +1264,7 @@ Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasTextAlign type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl there is no implementation in controller "
         "for getter method of TextAlign.");
-    return nullptr;
+    return {};
 }
 void SetTextAlignImpl(CanvasRendererPeer* peer,
                       const Ark_String* textAlign)
@@ -1282,7 +1282,7 @@ Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasTextBaseline type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl there is no implementation in controller "
         "for getter method of TextBaseline.");
-    return nullptr;
+    return {};
 }
 void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)

@@ -58,14 +58,14 @@ Ark_NativePointer GetItemRectInGroupImpl(ListScrollerPeer* peer,
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::GetItemRectInGroupImpl. Controller isn't bound to a component.");
-        return nullptr; // need to fix a return value
+        return {}; // need to fix a return value
     }
 
     int32_t convIndex = Converter::Convert<int32_t>(*index);
     int32_t convIndexInGroup = Converter::Convert<int32_t>(*indexInGroup);
     // get a result of GetItemRectInGroup to return it
     scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
-    return nullptr; // need to fix a return value
+    return {}; // need to fix a return value
 }
 void ScrollToItemInGroupImpl(ListScrollerPeer* peer,
                              const Ark_Number* index,
@@ -119,14 +119,14 @@ Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerPeerAccessor::GetVisibleListContentInfoImpl. Controller isn't bound to a component.");
-        return nullptr; // need to fix a return value
+        return {}; // need to fix a return value
     }
 
     auto convX = Converter::Convert<float>(*x);
     auto convY = Converter::Convert<float>(*y);
     // get a result of GetItemIndexInGroup to return it
     scrollController->GetItemIndexInGroup(convX, convY);
-    return nullptr; // need to fix a return value
+    return {}; // need to fix a return value
 }
 } // ListScrollerAccessor
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()

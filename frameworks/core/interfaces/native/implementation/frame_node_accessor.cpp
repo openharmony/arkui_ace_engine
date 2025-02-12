@@ -210,7 +210,7 @@ Ark_NativePointer GetPositionToWindowWithTransformImpl(FrameNodePeer* peer)
     // return the result of method invokation
     // wait for Ark_NativePointer change to a correct type which is acceptable to "offset" data
     peer->node->GetPositionToWindowWithTransform();
-    return nullptr;
+    return {};
 }
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()

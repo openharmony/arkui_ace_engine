@@ -161,7 +161,7 @@ Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer)
     ContainerScope scope(peerImpl->GetInstanceId());
     LOGE("WebControllerAccessor::GetHitTestImpl is not fully implemented");
     peerImpl->GetController()->GetHitTestResult();
-    return nullptr;
+    return {};
 }
 void RequestFocusImpl(WebControllerPeer* peer)
 {

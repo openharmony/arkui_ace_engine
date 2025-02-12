@@ -22,7 +22,7 @@ namespace AnimatorModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // AnimatorModifier
 namespace AnimatorInterfaceModifier {
@@ -101,7 +101,7 @@ void PlayModeImpl(Ark_NativePointer node,
     //AnimatorModelNG::SetPlayMode(frameNode, convValue);
 }
 void MotionImpl(Ark_NativePointer node,
-                const Ark_Union_SpringMotion_FrictionMotion_ScrollMotion* value)
+                const Ark_SpringMotion* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -107,7 +107,7 @@ void SetTimestampImpl(BaseEventPeer* peer,
 }
 Ark_NativePointer GetSourceImpl(BaseEventPeer* peer)
 {
-    return nullptr;
+    return {};
 }
 void SetSourceImpl(BaseEventPeer* peer,
                    Ark_SourceType source)
@@ -121,7 +121,7 @@ void SetSourceImpl(BaseEventPeer* peer,
 Ark_Int32 GetAxisHorizontalImpl(BaseEventPeer* peer)
 {
     LOGE("BaseEventAccessor.GetAxisHorizontalImpl does nothing");
-    return 0;
+    return {};
 }
 void SetAxisHorizontalImpl(BaseEventPeer* peer,
                            const Ark_Number* axisHorizontal)
@@ -131,7 +131,7 @@ void SetAxisHorizontalImpl(BaseEventPeer* peer,
 Ark_Int32 GetAxisVerticalImpl(BaseEventPeer* peer)
 {
     LOGE("BaseEventAccessor.GetAxisVerticalImpl does nothing");
-    return 0;
+    return {};
 }
 void SetAxisVerticalImpl(BaseEventPeer* peer,
                          const Ark_Number* axisVertical)
@@ -178,7 +178,7 @@ void SetTiltYImpl(BaseEventPeer* peer,
 }
 Ark_NativePointer GetSourceToolImpl(BaseEventPeer* peer)
 {
-    return nullptr;
+    return {};
 }
 void SetSourceToolImpl(BaseEventPeer* peer,
                        Ark_SourceTool sourceTool)

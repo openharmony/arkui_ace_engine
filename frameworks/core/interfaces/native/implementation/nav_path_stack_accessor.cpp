@@ -285,17 +285,17 @@ void ReplacePathByNameImpl(NavPathStackPeer* peer,
 Ark_Int32 RemoveByIndexesImpl(NavPathStackPeer* peer,
                               const Array_Number* indexes)
 {
-    return 0;
+    return {};
 }
 Ark_Int32 RemoveByNameImpl(NavPathStackPeer* peer,
                            const Ark_String* name)
 {
-    return 0;
+    return {};
 }
 Ark_Boolean RemoveByNavDestinationIdImpl(NavPathStackPeer* peer,
                                          const Ark_String* navDestinationId)
 {
-    return 0;
+    return {};
 }
 Ark_NativePointer Pop0Impl(NavPathStackPeer* peer,
                            const Opt_Boolean* animated)
@@ -332,14 +332,14 @@ Ark_Int32 PopToName0Impl(NavPathStackPeer* peer,
                          const Ark_String* name,
                          const Opt_Boolean* animated)
 {
-    return 0;
+    return {};
 }
 Ark_Int32 PopToName1Impl(NavPathStackPeer* peer,
                          const Ark_String* name,
                          const Ark_CustomObject* result,
                          const Opt_Boolean* animated)
 {
-    return 0;
+    return {};
 }
 void PopToIndex0Impl(NavPathStackPeer* peer,
                      const Ark_Number* index,
@@ -356,7 +356,7 @@ Ark_Int32 MoveToTopImpl(NavPathStackPeer* peer,
                         const Ark_String* name,
                         const Opt_Boolean* animated)
 {
-    return 0;
+    return {};
 }
 void MoveIndexToTopImpl(NavPathStackPeer* peer,
                         const Ark_Number* index,
@@ -384,7 +384,7 @@ void GetIndexByNameImpl(NavPathStackPeer* peer,
 }
 Ark_NativePointer GetParentImpl(NavPathStackPeer* peer)
 {
-    return 0;
+    return {};
 }
 Ark_Int32 SizeImpl(NavPathStackPeer* peer)
 {

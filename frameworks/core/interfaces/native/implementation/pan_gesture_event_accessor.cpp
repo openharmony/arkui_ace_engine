@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Int32 GetOffsetXImpl(PanGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetOffsetXImpl(PanGestureEventPeer* peer,
                     const Ark_Number* offsetX)
@@ -41,7 +41,7 @@ void SetOffsetXImpl(PanGestureEventPeer* peer,
 }
 Ark_Int32 GetOffsetYImpl(PanGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetOffsetYImpl(PanGestureEventPeer* peer,
                     const Ark_Number* offsetY)
@@ -49,7 +49,7 @@ void SetOffsetYImpl(PanGestureEventPeer* peer,
 }
 Ark_Int32 GetVelocityXImpl(PanGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetVelocityXImpl(PanGestureEventPeer* peer,
                       const Ark_Number* velocityX)
@@ -57,7 +57,7 @@ void SetVelocityXImpl(PanGestureEventPeer* peer,
 }
 Ark_Int32 GetVelocityYImpl(PanGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetVelocityYImpl(PanGestureEventPeer* peer,
                       const Ark_Number* velocityY)
@@ -65,7 +65,7 @@ void SetVelocityYImpl(PanGestureEventPeer* peer,
 }
 Ark_Int32 GetVelocityImpl(PanGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetVelocityImpl(PanGestureEventPeer* peer,
                      const Ark_Number* velocity)

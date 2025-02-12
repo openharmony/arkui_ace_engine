@@ -199,6 +199,10 @@ void SetYImpl(ClickEventPeer* peer,
     offset.SetY(newY, animation);
     info->SetLocalLocation(offset);
 }
+Callback_Void GetPreventDefaultImpl(ClickEventPeer* peer)
+{
+    return {};
+}
 void SetPreventDefaultImpl(ClickEventPeer* peer,
                            const Callback_Void* preventDefault)
 {
@@ -226,6 +230,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetXImpl,
         ClickEventAccessor::GetYImpl,
         ClickEventAccessor::SetYImpl,
+        ClickEventAccessor::GetPreventDefaultImpl,
         ClickEventAccessor::SetPreventDefaultImpl,
     };
     return &ClickEventAccessorImpl;

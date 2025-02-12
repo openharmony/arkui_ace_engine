@@ -38,14 +38,14 @@ Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
     // fix a return value
     CHECK_NULL_RETURN(peer && peer->controller_, 0);
     peer->controller_->GetCaretPosition();
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
 {
     // fix a return value
     CHECK_NULL_RETURN(peer && peer->controller_, 0);
     peer->controller_->GetTextContentRect();
-    return nullptr;
+    return {};
 }
 Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
 {

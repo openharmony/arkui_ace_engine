@@ -40,7 +40,7 @@ Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer,
                                 const Ark_TextMenuItem* menuItem,
                                 const Ark_TextRange* range)
 {
-    return 0;
+    return {};
 }
 } // EditMenuOptionsAccessor
 const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()

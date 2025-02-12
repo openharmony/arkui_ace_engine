@@ -60,7 +60,7 @@ namespace ScrollableCommonMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
