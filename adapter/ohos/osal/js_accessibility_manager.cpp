@@ -1662,17 +1662,15 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     nodeInfo.SetGridItem(gridItemInfo);
 
     SetAccessibilityFocusAction(nodeInfo, "web");
-    if (nodeInfo.IsEnabled()) {
-        nodeInfo.SetCheckable(node->GetIsCheckable());
-        nodeInfo.SetScrollable(node->GetIsScrollable());
-        nodeInfo.SetEditable(node->GetIsEditable());
-        nodeInfo.SetDeletable(node->GetIsDeletable());
-        nodeInfo.SetClickable(node->GetIsClickable());
-        auto supportAceActions = node->GetActions();
-        for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
-            AccessibleAction action(ConvertAceAction(static_cast<AceAction>(*it)), "web");
-            nodeInfo.AddAction(action);
-        }
+    nodeInfo.SetCheckable(node->GetIsCheckable());
+    nodeInfo.SetScrollable(node->GetIsScrollable());
+    nodeInfo.SetEditable(node->GetIsEditable());
+    nodeInfo.SetDeletable(node->GetIsDeletable());
+    nodeInfo.SetClickable(node->GetIsClickable());
+    auto supportAceActions = node->GetActions();
+    for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
+        AccessibleAction action(ConvertAceAction(static_cast<AceAction>(*it)), "web");
+        nodeInfo.AddAction(action);
     }
     nodeInfo.SetAccessibilityGroup(node->GetIsAccessibilityGroup());
 }
