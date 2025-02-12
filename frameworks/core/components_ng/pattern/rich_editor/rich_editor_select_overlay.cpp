@@ -346,7 +346,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     }
 }
 
-void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectInfo)
+void RichEditorSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
 {
     BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(selectInfo);
     selectInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
