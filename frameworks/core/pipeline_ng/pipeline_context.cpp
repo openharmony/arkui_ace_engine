@@ -2535,6 +2535,7 @@ void PipelineContext::OnTouchEvent(
     if (scalePoint.type == TouchType::MOVE) {
         if (isEventsPassThrough) {
             scalePoint.isPassThroughMode = true;
+            eventManager_->FlushTouchEventsEnd({ scalePoint });
             eventManager_->DispatchTouchEvent(scalePoint);
             hasIdleTasks_ = true;
             RequestFrame();
