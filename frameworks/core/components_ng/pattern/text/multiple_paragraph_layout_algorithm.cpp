@@ -249,8 +249,9 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
             bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (customFont) {
-                isCustomFont = true;
+            if (!customFont) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "FontRegister failed, no such familyName:%{public}s id:%{public}d",
+                    familyName.c_str(), frameNode->GetId());
             }
         }
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {

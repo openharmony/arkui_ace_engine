@@ -3712,6 +3712,54 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
     }
 }
 
+void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (pManager_) {
+        auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProp);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        std::stringstream ssColor;
+        std::stringstream ssSize;
+        if (textStyle_.has_value()) {
+            ssColor << "[FontColor: ";
+            ssColor << textStyle_->GetTextColor().ColorToString();
+            ssColor << " pro: ";
+            ssColor << (textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString()
+                                                       : "Na");
+            ssColor << " ForegroundColor: ";
+            ssColor << (renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString()
+                                                            : "Na");
+            ssColor << "]";
+
+            ssSize << "[FontSize: ";
+            ssSize << textStyle_->GetFontSize().ToString();
+            ssSize << " pro: ";
+            ssSize << (textLayoutProp->HasFontSize()
+                           ? textLayoutProp->GetFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                           : "Na");
+            ssSize << "]";
+        }
+        json->Put("TextInfo",
+            ("[content size: " + std::to_string(textLayoutProp->GetContent().value_or(u"").length()) +
+                "][contentRect :" + contentRect_.ToString() +
+                "][paragraphsInfo: size:" + std::to_string(pManager_->GetParagraphs().size()) + ",|didExc " +
+                std::to_string(pManager_->DidExceedMaxLines()) + ",|textWidth " +
+                std::to_string(pManager_->GetTextWidth()) + ",|height " + std::to_string(pManager_->GetHeight()) +
+                ",|maxwidth " + std::to_string(pManager_->GetMaxWidth()) + ",|maxIntrinsic " +
+                std::to_string(pManager_->GetMaxIntrinsicWidth()) + ",|lineCount " +
+                std::to_string(pManager_->GetLineCount()) + ",|longestLine " +
+                std::to_string(pManager_->GetLongestLine()) + ",|LineWithIndent " +
+                std::to_string(pManager_->GetLongestLineWithIndent()) +
+                "][spans size :" + std::to_string(spans_.size()) + "]" + ssColor.str() + ssSize.str())
+                .c_str());
+    } else {
+        json->Put("TextInfo", "pManager nullpter");
+    }
+}
+
 void TextPattern::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("-----DumpAdvanceInfo-----"));
@@ -3916,17 +3964,17 @@ void TextPattern::DumpScaleInfo()
     auto followSystem = pipeline->IsFollowSystem();
     float maxFontScale = pipeline->GetMaxAppFontScale();
     auto halfLeading = pipeline->GetHalfLeading();
-    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
-    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
-    dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
-    dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
-    dumpLog.AddDesc(std::string("ConfigHalfLeading: ").append(std::to_string(halfLeading)));
+    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale))
+        .append(std::string(", fontWeightScale: ")).append(std::to_string(fontWeightScale))
+        .append(std::string(", IsFollowSystem: ")).append(std::to_string(followSystem))
+        .append(std::string(", maxFontScale: ")).append(std::to_string(maxFontScale))
+        .append(std::string(", ConfigHalfLeading: ")).append(std::to_string(halfLeading)));
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     auto minFontScale = textLayoutProp->GetMinFontScale().value_or(0.0f);
-    dumpLog.AddDesc(std::string("minFontScale: ").append(std::to_string(minFontScale)));
     auto maxfontScale = textLayoutProp->GetMaxFontScale().value_or(static_cast<float>(INT32_MAX));
-    dumpLog.AddDesc(std::string("maxFontScale1: ").append(std::to_string(maxfontScale)));
+    dumpLog.AddDesc(std::string("minFontScale: ").append(std::to_string(minFontScale))
+        .append(std::string(", maxFontScale: ")).append(std::to_string(maxfontScale)));
     auto flag = textLayoutProp->HasHalfLeading();
     dumpLog.AddDesc(
         std::string("HalfLeading: ").append(flag ? std::to_string(textLayoutProp->GetHalfLeadingValue(false)) : "NA"));
