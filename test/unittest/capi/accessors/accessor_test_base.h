@@ -21,10 +21,21 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 extern "C" const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
+
+inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
+{
+#ifdef CAPI_BACKTRACE
+    ReportTheme(type);
+#endif
+    return nullptr;
+}
 
 template <typename AccessorType, auto GetAccessorFunc, typename PeerType>
 class AccessorTestBaseParent : public testing::Test {
@@ -37,6 +48,19 @@ public:
         accessors_ = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
         accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
         MockPipelineContext::SetUp();
+
+        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
+        ASSERT_TRUE(MockPipelineContext::GetCurrent());
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
+        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
+        themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
+            .WillRepeatedly(testing::Return(themeConstants_));
+        EXPECT_CALL(*themeManager_, GetTheme(testing::_)).WillRepeatedly(CatchEmptyTheme);
+
+        themeConstants_->LoadTheme(0);
+        MockThemeStyle::GetInstance()->SetAttributes({});
+
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         ASSERT_NE(accessor_, nullptr);
         ASSERT_NE(accessor_->ctor, nullptr);
@@ -51,9 +75,12 @@ public:
 
     static void TearDownTestCase()
     {
+        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
         MockContainer::TearDown();
         finalyzer_ = nullptr;
+        themeManager_ = nullptr;
+        themeConstants_ = nullptr;
     }
 
     static void AddResource(std::string key, const ResRawValue& value)
@@ -97,6 +124,9 @@ public:
 protected:
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_;
     inline static const GENERATED_ArkUIAccessors *accessors_;
+
+    inline static RefPtr<MockThemeManager> themeManager_;
+    inline static RefPtr<ThemeConstants> themeConstants_;
 
 public:
     inline static const AccessorType *accessor_;

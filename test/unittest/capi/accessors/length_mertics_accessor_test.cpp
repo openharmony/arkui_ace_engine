@@ -32,15 +32,15 @@ using namespace testing;
 using namespace testing::ext;
 using namespace AccessorTestFixtures;
 
-namespace Converter {
-    template<>
-    void AssignArkValue(Ark_Resource& dst, const std::string& src, ConvContext *ctx)
-    {
-        dst.type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(ResourceType::STRING));
-        dst.bundleName = Converter::ArkValue<Ark_String>(src);
-        LOGE("this converter is disabled");
-    }
-} // 
+// namespace Converter {
+//     template<>
+//     void AssignArkValue(Ark_Resource& dst, const std::string& src, ConvContext *ctx)
+//     {
+//         dst.type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(ResourceType::STRING));
+//         dst.bundleName = Converter::ArkValue<Ark_String>(src);
+//         LOGE("this converter is disabled");
+//     }
+// } // 
 
 // namespace {
 //     const auto DIMENSION_BY_ID = Dimension(5, DimensionUnit::VP);
@@ -92,20 +92,23 @@ HWTEST_F(LengthMetricsAccessorTest, PxTest, TestSize.Level1)
 HWTEST_F(LengthMetricsAccessorTest, ResourceTest, TestSize.Level1)
 {
     for (auto& [num_id, str_id, expected] : resourceInitTable) {
+        Converter::ConvContext ctx;
         auto expectPointer = std::get_if<Dimension>(&expected);
         ASSERT_TRUE(expectPointer);
-        // auto resourceNum = Converter::ArkValue<Ark_Resource>(static_cast<int32_t>(num_id), nullptr);
-        // auto pointerNum = reinterpret_cast<LengthMetricsPeer*>(accessor_->resource(&resourceNum));
-        // ASSERT_TRUE(pointerNum);
-        // EXPECT_EQ(pointerNum->value.ToString(), expectPointer->ToString())  <<
-        //      "Input value is: " << str_id << ", method: Px";
-        // accessor_->destroyPeer(pointerNum);
+        std::variant<int32_t, std::string> resource = num_id;
+        auto resourceNum = Converter::ArkValue<Ark_Resource>(resource, &ctx);
+        auto pointerNum = reinterpret_cast<LengthMetricsPeer*>(accessor_->resource(&resourceNum));
+        ASSERT_TRUE(pointerNum);
+        EXPECT_EQ(pointerNum->value.ToString(), expectPointer->ToString())  <<
+             "Input value is: " << num_id << ", method: resource";
+        accessor_->destroyPeer(pointerNum);
 
-        auto resourceStr = Converter::ArkValue<Ark_Resource>(str_id);
+        resource = str_id;
+        auto resourceStr = Converter::ArkValue<Ark_Resource>(resource, &ctx);
         auto pointerStr = reinterpret_cast<LengthMetricsPeer*>(accessor_->resource(&resourceStr));
         ASSERT_TRUE(pointerStr);
         EXPECT_EQ(pointerStr->value.ToString(), expectPointer->ToString())  <<
-             "Input value is: " << str_id << ", method: Px";
+             "Input value is: " << str_id << ", method: resource";
         accessor_->destroyPeer(pointerStr);
     }
 }

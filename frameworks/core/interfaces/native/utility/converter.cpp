@@ -262,17 +262,20 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 
 ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 {
+    std::cout << "themeConstants_ = " << resource.id.tag << std::endl;
     if (resource.id.tag == INTEROP_TAG_INT32) {
         id_ = resource.id.i32;
         type_ = static_cast<ResourceType>(OptConvert<int>(resource.type).value_or(0));
         bundleName_ = Convert<std::string>(resource.bundleName);
         moduleName_ = Convert<std::string>(resource.moduleName);
         if (resource.params.tag != INTEROP_TAG_UNDEFINED) {
+            std::cout << "themeConstants_2 = " << resource.params.value.array << std::endl;
             for (int i = 0; i < resource.params.value.length; i++) {
                 params_.emplace_back(resource.params.value.array[i].chars);
             }
         }
         themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
+        std::cout << "themeConstants_5 = " << themeConstants_ << std::endl;
         if (!themeConstants_) {
             auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
             auto themeManager = context->GetThemeManager();
@@ -361,11 +364,15 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    std::cout << "Dimension" << std::endl;
     if (type_ == ResourceType::FLOAT) {
+        std::cout << "Dimension 2" << std::endl;
         if (id_ == -1 && !params_.empty()) {
+            std::cout << "Dimension name" << std::endl;
             return themeConstants_->GetDimensionByName(params_.front());
         }
         if (id_ != -1) {
+            std::cout << "Dimension id" << std::endl;
             return themeConstants_->GetDimension(id_);
         }
         LOGE("ResourceConverter::ToDimension Unknown resource value");

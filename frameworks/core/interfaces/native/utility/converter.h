@@ -374,6 +374,7 @@ namespace Converter {
     template<>
     inline void AssignCast(std::optional<Dimension>& dst, const Ark_Resource& src)
     {
+        std::cout << "cast" << std::endl;
         ResourceConverter converter(src);
         dst = converter.ToDimension();
     }
