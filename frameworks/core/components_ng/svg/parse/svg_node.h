@@ -240,6 +240,7 @@ protected:
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
     bool isRootNode_ = false;
     RSCanvas* rsCanvas_ = nullptr;
+    bool isDrawing_ = false; // Indicates if the current node is being drawn in the SVG rendering process.
     SvgLengthScaleRule lengthRule_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };
