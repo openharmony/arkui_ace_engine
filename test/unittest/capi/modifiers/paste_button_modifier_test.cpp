@@ -313,8 +313,7 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        Ark_PasteButtonOnClickResult result)
-    {
+        Ark_PasteButtonOnClickResult result) {
         auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
@@ -335,8 +334,7 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
 
-    auto createJson = [](SecurityComponentHandleResult value)
-    {
+    auto createJson = [](SecurityComponentHandleResult value) {
         int32_t res = static_cast<int32_t>(value);
         auto jsonNode = JsonUtil::Create(true);
         jsonNode->Put("handleRes", res);
@@ -362,8 +360,7 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
 
     checkEvent.reset();
     gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
-    ASSERT_TRUE(checkEvent);
-    ASSERT_TRUE(checkEvent->result);
+    ASSERT_TRUE(checkEvent && checkEvent->result);
     EXPECT_EQ(checkEvent->result.value(), ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
 }
 #else
@@ -379,8 +376,7 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        Ark_PasteButtonOnClickResult result)
-    {
+        Ark_PasteButtonOnClickResult result) {
         auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
