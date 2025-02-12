@@ -126,8 +126,9 @@ public:
     const std::string& GetNavDstName() const;
     std::string GetCacheJsCode() const;
     void FillWebJsCode(std::optional<WebJsItem>& scriptItems) const;
-    void SaveJavascriptItems(const WebJsItem& scriptItems);
-    void HandleJavascriptItems(std::optional<WebJsItem>& scriptItems);
+    void SaveJavascriptItems(const WebJsItem& scriptItems, const std::vector<std::string>& orderScriptItems = {});
+    void HandleJavascriptItems(
+        std::optional<WebJsItem>& scriptItems, std::optional<std::vector<std::string>>& orderScriptItems);
     bool IsMessageValid(const std::string& webCategory, const std::string& identifier);
 
     void OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name = "");
@@ -160,6 +161,7 @@ private:
 
     std::string jsCode_;
     std::optional<std::map<std::string, std::vector<std::string>>> cacheScriptItems_;
+    std::optional<std::vector<std::string>> cacheOrderScriptItems_;
     std::unordered_map<std::string, std::string> webIdentifierMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventRecorder);

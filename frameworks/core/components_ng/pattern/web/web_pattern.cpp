@@ -3406,6 +3406,7 @@ void WebPattern::RecordWebEvent(bool isInit)
             std::make_pair<std::string, NativeMethodCallback>(Recorder::WEB_METHOD_NAME, HandleWebMessage)
         };
         delegate_->RegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME, methodList, false);
+        EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
         return;
     }
     auto cacheJsCode = EventRecorder::Get().GetCacheJsCode();
@@ -3413,9 +3414,14 @@ void WebPattern::RecordWebEvent(bool isInit)
         return;
     }
     delegate_->ExecuteTypeScript(cacheJsCode, [](std::string result) {});
-    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_);
-    UpdateJavaScriptOnDocumentEnd();
-    delegate_->JavaScriptOnDocumentEnd();
+    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_, onDocumentEndScriptItemsByOrder_);
+    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
+        UpdateJavaScriptOnDocumentEndByOrder();
+        delegate_->JavaScriptOnDocumentEndByOrder();
+    } else if (onDocumentEndScriptItems_.has_value()) {
+        UpdateJavaScriptOnDocumentEnd();
+        delegate_->JavaScriptOnDocumentEnd();
+    }
 #endif
 }
 
@@ -6749,6 +6755,8 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    EventRecorder::Get().SaveJavascriptItems(scriptItems, scriptItemsByOrder);
+    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEndByOrder();
         delegate_->JavaScriptOnDocumentEndByOrder();
@@ -6771,6 +6779,7 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::nullopt;
     EventRecorder::Get().SaveJavascriptItems(scriptItems);
+    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
         delegate_->JavaScriptOnDocumentEnd();
@@ -6817,9 +6826,7 @@ void WebPattern::UpdateJavaScriptOnHeadReadyByOrder()
 
 void WebPattern::UpdateJavaScriptOnDocumentEnd()
 {
-    CHECK_NULL_VOID(delegate_);
-    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
-    if (onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
+    if (delegate_ && onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
         onDocumentEndScriptItems_ = std::nullopt;
     }
