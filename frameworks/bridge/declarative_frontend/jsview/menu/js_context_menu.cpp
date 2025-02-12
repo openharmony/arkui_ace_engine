@@ -51,7 +51,7 @@ void JSContextMenu::Close(const JSCallbackInfo& args)
                         context->CloseContextMenu();
                     }
                 },
-                TaskExecutor::TaskType::UI, "ArkUIContextMenuClose", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "ArkUIContextMenuClose");
         }
     }
 #endif

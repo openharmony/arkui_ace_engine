@@ -460,7 +460,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             CHECK_NULL_VOID(newComponent);
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup", PriorityType::VIP);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup");
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -494,7 +494,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             }
             subwindow->ShowMenu(menu);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu", PriorityType::VIP);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu");
 }
 
 void SubwindowManager::CloseMenu()
@@ -765,7 +765,7 @@ void SubwindowManager::ShowToastNG(const NG::ToastInfo& toastInfo, std::function
             TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
             subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToastNG", PriorityType::VIP);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToastNG");
 }
 
 ToastWindowType SubwindowManager::GetToastWindowType(int32_t instanceId)
@@ -830,7 +830,7 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
                 subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast", PriorityType::VIP);
+            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
     }
 }
 
