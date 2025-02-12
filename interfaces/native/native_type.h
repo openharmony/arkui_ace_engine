@@ -2267,7 +2267,7 @@ typedef enum {
 /**
  * @brief Define an enum for the areas of the <b>ListItemGroup</b> component.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /** Outside the area of the <b>ListItemGroup</b> component. */

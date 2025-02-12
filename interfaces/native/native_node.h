@@ -4979,7 +4979,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: offset from the start of the content, in vp. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_CONTENT_START_OFFSET,
 
@@ -4992,7 +4992,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: offset from the end of the content, in vp. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_CONTENT_END_OFFSET,
 
@@ -5100,12 +5100,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: number of cached items in the list adapter. \n
      * .value[1]?.i32: whether to show cached items. The value <b>0</b> means to hide cached items, and <b>0</b> means
-     * to show cached items. The default value is <b>0</b>. This parameter is supported since API version 16. \n
+     * to show cached items. The default value is <b>0</b>. This parameter is supported since API version 15. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: number of cached items in the list adapter. \n
      * .value[1].i32: whether to show cached items. The value <b>0</b> means to hide cached items, and <b>0</b> means
-     * to show cached items. This parameter is supported since API version 16. \n
+     * to show cached items. This parameter is supported since API version 15. \n
      *
      */
     NODE_LIST_CACHED_COUNT,
@@ -5123,7 +5123,7 @@ typedef enum {
      * .value[2]?.i32：Specify the alignment of the sliding element with the current container,The parameter type is
      * {@link ArkUI_ScrollAlignment}, default value is ARKUI_SCROLL_ALIGNMENT_START. \n
      * .value[3]?.f32: extra offset, in vp. The default value is <b>0</b>.
-     * This parameter is supported since API version 16. \n
+     * This parameter is supported since API version 15. \n
      *
      */
     NODE_LIST_SCROLL_TO_INDEX,
@@ -5194,7 +5194,7 @@ typedef enum {
      * .value[3]?.i32: how the item to scroll to is aligned with the container. The parameter type is
      * {@link ArkUI_ScrollAlignment}. The default value is <b>ARKUI_SCROLL_ALIGNMENT_START</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_SCROLL_TO_INDEX_IN_GROUP = 1003010,
 
@@ -5215,7 +5215,7 @@ typedef enum {
      * .value[2].f32: maximum column width, in vp. \n
      * .value[3].f32: lane spacing, in vp. \n \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_LANES = 1003011,
 
@@ -5229,7 +5229,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      *.value[0].i32: alignment mode for the list snap position. The parameter type is {@link ArkUI_ScrollSnapAlign}.\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_SCROLL_SNAP_ALIGN = 1003012,
 
@@ -5247,7 +5247,7 @@ typedef enum {
      * display area of the <b>List</b> component. The value <b>0</b> means not to maintain the visible content's
      * position, and <b>1</b> means the opposite. The default value is <b>0</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION = 1003013,
 
@@ -5642,7 +5642,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .object: {@link ArkUI_NodeAdapter} object. \n
     *
-    * @since 16
+    * @since 15
     */
     NODE_LIST_ITEM_GROUP_NODE_ADAPTER = 1005004,
 
@@ -7409,7 +7409,7 @@ typedef enum {
      * list item group.
      * If the end of the list display area is not on a list item, the value is <b>-1</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE,
     
