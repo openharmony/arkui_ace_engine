@@ -75,16 +75,6 @@ namespace  {
         {"true", ArkValue<Ark_Boolean>(true), "true"},
         {"false", ArkValue<Ark_Boolean>(false), "false"},
     };
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUIImageEventsReceiver getImageEventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getImageEventsReceiver = [] () -> const GENERATED_ArkUIImageEventsReceiver* {
-                return &getImageEventsReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
@@ -103,7 +93,6 @@ public:
             AddResource(id, res);
             AddResource(strid, res);
         }
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 /*
@@ -210,27 +199,31 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
 {
-    Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
+        std::string value;
     };
+    static std::string expectedValue = "onFinishCallback called";
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::getImageEventsReceiver.onFinish = [](
-        Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
+    Callback_Void onFinishCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .value = expectedValue,
+            };
+        }
     };
 
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnFinish(node_, &func);
+    modifier_->setOnFinish(node_, &onFinishCallback);
     eventHub->FireFinishEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->value, expectedValue);
 }
 
 /*
@@ -240,9 +233,11 @@ HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
 {
-    ImageErrorCallback func{};
+    EXPECT_NE(modifier_->setOnError, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    EXPECT_NE(eventHub, nullptr);
     const auto width = 0.5f;
     const auto height = 0.6f;
     const auto error = "error_test";
@@ -255,20 +250,21 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
         std::string error;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::getImageEventsReceiver.onError = [](
-        Ark_Int32 nodeId, const Ark_ImageError error)
-    {
-        auto event = Convert<LoadImageFailEvent>(error);
-        checkEvent = {
-            .nodeId = nodeId,
-            .width = event.GetComponentWidth(),
-            .height = event.GetComponentHeight(),
-            .error = event.GetErrorMessage()
-        };
+    ImageErrorCallback onChangeCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_ImageError error) {
+            auto event = Convert<LoadImageFailEvent>(error);
+            checkEvent = {
+                .nodeId = nodeId,
+                .width = event.GetComponentWidth(),
+                .height = event.GetComponentHeight(),
+                .error = event.GetErrorMessage()
+            };
+        }
     };
 
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnError(node_, &func);
+    modifier_->setOnError(node_, &onChangeCallback);
     eventHub->FireErrorEvent(event);
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());

@@ -107,10 +107,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const std::string& value) {
-        Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
-        GetFullAPI()->getEventsAPI()->getRatingEventsReceiver()->onChange(
-            frameNode->GetId(), nValue);
+    auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& value) {
+        Ark_Number convValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+        arkCallback.Invoke(convValue);
     };
     RatingModelNG::SetOnChange(frameNode, onChange);
 }
