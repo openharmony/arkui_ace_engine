@@ -220,4 +220,11 @@ const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceI
     { DIMENSIONS_RES_NON_PCT_12_ID, DIMENSIONS_RES_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_PCT_13_ID, DIMENSIONS_RES_NON_PCT_13_STR, -0.2_pct },
 };
+
+const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues = {
+    { "1.24", ArkValue<Ark_Number>(1.24f), "1.24px" },
+    { "0", ArkValue<Ark_Number>(0), "0.00px" },
+    { "100", ArkValue<Ark_Number>(100), "100.00px" },
+    { "-20.65", ArkValue<Ark_Number>(-20.65), "-20.65px" },
+};
 } // namespace OHOS::Ace::NG::AccessorTestFixtures

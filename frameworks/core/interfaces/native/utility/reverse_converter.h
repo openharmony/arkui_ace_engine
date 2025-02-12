@@ -229,6 +229,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
     void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);
+    void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
     void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue& src);

@@ -379,4 +379,19 @@ void AssignArkValue(Ark_RectResult& dst, const RectF& src)
     dst.width = ArkValue<Ark_Number>(src.Width());
     dst.height = ArkValue<Ark_Number>(src.Height());
 }
+
+void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx)
+{
+    dst.id = ArkValue<Ark_Number>(-1);
+    dst.params = ArkValue<Opt_Array_String>();
+    if (auto name = std::get_if<std::string>(&src); name) {
+        CHECK_NULL_VOID(ctx);
+        std::vector<std::string> vecName { *name };
+        auto arkName = Converter::ArkValue<Array_String>(vecName, ctx);
+        dst.params = Converter::ArkValue<Opt_Array_String>(arkName, ctx);
+    } else if (auto id = std::get_if<int32_t>(&src); id) {
+        dst.id = ArkValue<Ark_Number>(*id);
+    }
+    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
+}
 } // namespace OHOS::Ace::NG::Converter
