@@ -630,6 +630,21 @@ public:
     void FireOnDetach();
     void ClearStateStyle();
     void OnDetachClear();
+    void FireDrawCompletedNDKCallback(const RefPtr<PipelineContext>& pipeline);
+    void FireLayoutNDKCallback(const RefPtr<PipelineContext>& pipeline);
+    void SetNDKDrawCompletedCallback(std::function<void()>&& callback)
+    {
+        ndkDrawCompletedCallback_ = std::move(callback);
+    }
+    void SetNDKLayoutCallback(std::function<void()>&& callback)
+    {
+        ndkLayoutCallback_ = std::move(callback);
+    }
+    bool HasNDKDrawCompletedCallback()
+    {
+        return !!ndkDrawCompletedCallback_;
+    }
+    
 
 protected:
     virtual void OnModifyDone() {}
@@ -679,6 +694,8 @@ private:
     VisibleCallbackInfo visibleAreaInnerCallback_;
     std::vector<double> throttledVisibleAreaRatios_;
     VisibleCallbackInfo throttledVisibleAreaCallback_;
+    std::function<void()> ndkDrawCompletedCallback_;
+    std::function<void()> ndkLayoutCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };
