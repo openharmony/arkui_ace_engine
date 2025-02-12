@@ -2956,7 +2956,17 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, menuWindowRect);
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
-    displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    CHECK_NULL_RETURN(menuPattern, menuWindowRect);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, menuWindowRect);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, menuWindowRect);
+    auto isMenuHide = menuWrapperPattern->IsHide();
+    if (isMenuHide) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "Notify Menu Rect %{public}s, menu is hide, skip", rect.ToString().c_str());
+    } else {
+        displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    }
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     auto availableRect = OverlayManager::GetDisplayAvailableRect(menuPattern->GetHost());
