@@ -276,6 +276,7 @@ public:
     void ShowPrevious(bool needCheckWillScroll = false);
     void SwipeTo(int32_t index);
     void ChangeIndex(int32_t index, bool useAnimation);
+    void ChangeIndex(int32_t index, SwiperAnimationMode mode);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -650,6 +651,14 @@ public:
         return static_cast<int32_t>(pageFlipMode_);
     }
 
+    void SetJumpAnimationMode(TabAnimateMode tabAnimationMode)
+    {
+        tabAnimationMode_ = tabAnimationMode;
+    }
+
+    bool NeedFastAnimation() const;
+    bool IsInFastAnimation() const;
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -1010,6 +1019,9 @@ private:
         return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
     }
 
+    bool ComputeTargetIndex(int32_t index, int32_t& targetIndex) const;
+    void FastAnimation(int32_t targetIndex);
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1185,6 +1197,8 @@ private:
     bool isBindIndicator_ = false;
 
     PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
+    bool jumpOnChange_ = false;
+    TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
 };
 } // namespace OHOS::Ace::NG
