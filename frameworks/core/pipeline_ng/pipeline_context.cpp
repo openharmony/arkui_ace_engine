@@ -5287,7 +5287,7 @@ void PipelineContext::GetInspectorTree()
     NG::InspectorFilter filter;
     filter.AddFilterAttr("content");
     auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-    UiSessionManager::GetInstance().AddValueForTree(0, nodeInfos);
+    UiSessionManager::GetInstance()->AddValueForTree(0, nodeInfos);
 #endif
     rootNode_->GetInspectorValue();
 }

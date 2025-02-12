@@ -62,6 +62,7 @@ ohos_source_set("preview_entrance_source") {
       "touch_event_convertor.cpp",
       "udmf/udmf_impl.cpp",
       "ui_content_impl.cpp",
+      "ui_session/ui_session_manager_preview.cpp",
       "vibrator/vibrator_utils.cpp",
       "xcollie/xcollieInterface_impl.cpp",
     ]

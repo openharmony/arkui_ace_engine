@@ -17,12 +17,16 @@
 #define FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
 #include <atomic>
 #include <cstdint>
+#include <functional>
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include <iremote_object.h>
+#include "ui_report_stub.h"
+#endif
+
 #include <map>
 #include <mutex>
 #include <shared_mutex>
 
-#include "ui_report_stub.h"
 #include "ui_session_json_util.h"
 #include "ui_translate_manager.h"
 
@@ -37,80 +41,99 @@ public:
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
      */
-    static UiSessionManager& GetInstance();
+    static UiSessionManager* GetInstance();
 
     /**
      * @description: execute click callback when component click event occurs
      */
-    void ReportClickEvent(const std::string& data);
+    virtual void ReportClickEvent(const std::string& data) {};
 
     /**
      * @description: execute search callback when component search event occurs
      */
-    void ReportSearchEvent(const std::string& data);
+    virtual void ReportSearchEvent(const std::string& data) {};
 
     /**
      * @description: execute switch callback when page switch to another page occurs
      */
-    void ReportRouterChangeEvent(const std::string& data);
+    virtual void ReportRouterChangeEvent(const std::string& data) {};
 
     /**
      * @description: execute click callback when page some component change occurs
      */
-    void ReportComponentChangeEvent(const std::string& key, const std::string& value);
+    virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value) {};
 
     /**
      * @description: execute click callback when page some component change occurs
      */
-    void ReportComponentChangeEvent(
-        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value);
-
+    virtual void ReportComponentChangeEvent(
+        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) {};
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     /**
      * @description: save report communication stub side
      * @param reportStub report communication stub side
      */
-    void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
-
+    virtual void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId) {};
+#endif
     /**
      * @description: get current page inspector tree value
      */
-    void GetInspectorTree();
-    void AddValueForTree(int32_t id, const std::string& value);
-    void WebTaskNumsChange(int32_t num);
-    void ReportInspectorTreeValue(const std::string& value);
-    void SaveInspectorTreeFunction(InspectorFunction&& function);
-    void SaveRegisterForWebFunction(NotifyAllWebFunction&& function);
-    void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data);
-    void NotifyAllWebPattern(bool isRegister);
-    void SetClickEventRegistered(bool status);
-    void SetSearchEventRegistered(bool status);
-    void OnRouterChange(const std::string& path, const std::string& event);
-    void SetRouterChangeEventRegistered(bool status);
-    void SetComponentChangeEventRegistered(bool status);
-    bool GetClickEventRegistered();
-    bool GetSearchEventRegistered();
-    bool GetRouterChangeEventRegistered();
-    bool GetComponentChangeEventRegistered();
-    bool GetWebFocusRegistered();
-    void SaveBaseInfo(const std::string& info);
-    void SendBaseInfo(int32_t processId);
-    void SaveGetPixelMapFunction(GetPixelMapFunction&& function);
-    void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager);
-    void GetWebViewLanguage();
-    void SendCurrentLanguage(std::string result);
-    void SaveProcessId(std::string key, int32_t id);
-    void GetWebTranslateText(std::string extraData, bool isContinued);
-    void SendWebTextToAI(int32_t nodeId, std::string res);
-    void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids);
-    void SendTranslateResult(int32_t nodeId, std::string result);
-    void ResetTranslate(int32_t nodeId = -1);
-    void GetPixelMap();
-    void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps);
+    virtual void GetInspectorTree() {};
+    virtual void AddValueForTree(int32_t id, const std::string& value) {};
+    virtual void WebTaskNumsChange(int32_t num) {};
+    virtual void ReportInspectorTreeValue(const std::string& value) {};
+    virtual void SaveInspectorTreeFunction(InspectorFunction&& function) {};
+    virtual void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) {};
+    virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) {};
+    virtual void NotifyAllWebPattern(bool isRegister) {};
+    virtual void SetClickEventRegistered(bool status) {};
+    virtual void SetSearchEventRegistered(bool status) {};
+    virtual void OnRouterChange(const std::string& path, const std::string& event) {};
+    virtual void SetRouterChangeEventRegistered(bool status) {};
+    virtual void SetComponentChangeEventRegistered(bool status) {};
+    virtual bool GetClickEventRegistered()
+    {
+        return false;
+    };
+    virtual bool GetSearchEventRegistered()
+    {
+        return false;
+    };
+    virtual bool GetRouterChangeEventRegistered()
+    {
+        return false;
+    };
+    virtual bool GetComponentChangeEventRegistered()
+    {
+        return false;
+    };
+    virtual bool GetWebFocusRegistered()
+    {
+        return false;
+    };
+    virtual void SaveBaseInfo(const std::string& info) {};
+    virtual void SendBaseInfo(int32_t processId) {};
+    virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
+    virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) {};
+    virtual void GetWebViewLanguage() {};
+    virtual void SendCurrentLanguage(std::string result) {};
+    virtual void SaveProcessId(std::string key, int32_t id) {};
+    virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
+    virtual void SendWebTextToAI(int32_t nodeId, std::string res) {};
+    virtual void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) {};
+    virtual void SendTranslateResult(int32_t nodeId, std::string result) {};
+    virtual void ResetTranslate(int32_t nodeId = -1) {};
+    virtual void GetPixelMap() {};
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    virtual void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) {};
+#endif
 
-private:
+protected:
     static std::mutex mutex_;
     static std::shared_mutex reportObjectMutex_;
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
+#endif
     std::map<std::string, int32_t> processMap_;
     std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
     std::atomic<int32_t> searchEventRegisterProcesses_ = 0;

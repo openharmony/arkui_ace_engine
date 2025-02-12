@@ -32,9 +32,7 @@
 #include "input_method_controller.h"
 #include "parameters.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "auto_fill_type.h"
 #include "page_node_info.h"
 
@@ -816,9 +814,9 @@ void WebPattern::OnAttachToFrameNode()
     });
     UpdateTransformHintChangedCallbackId(callbackId);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
         auto callback = [](int64_t accessibilityId, const std::string data) {
-            UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+            UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data);
         };
         RegisterTextBlurCallback(callback);
     }
@@ -844,7 +842,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
         UnRegisterTextBlurCallback();
     }
     pipeline->UnRegisterListenerForTranslate(id);
