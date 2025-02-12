@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 
+#include "display_info.h"
 #include "dm/display_manager.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -70,6 +71,7 @@ constexpr uint32_t ENABLE_APP_SUB_WINDOW_AVOID_AREA = 1 << 1;
 #ifndef NG_BUILD
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 #endif
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 } // namespace
 
 int32_t SubwindowOhos::id_ = 0;
@@ -85,8 +87,7 @@ public:
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Window status changes, freeMultiWindow is %{public}d", enable);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId_);
-        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindowById(instanceId_);
         CHECK_NULL_VOID(subWindow);
 
         auto taskExecutor = container->GetTaskExecutor();
@@ -188,8 +189,31 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     CHECK_NULL_RETURN(defaultDisplay, Size());
 
-    // @todo: parentWindow is sceneboard or crossDisplay, return fullscreen size
-    return Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    auto size = Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return size;
+    }
+
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId);
+    CHECK_NULL_RETURN(parentContainer, size);
+    if (parentContainer->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
+        return size;
+    }
+
+    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
+    auto isScenceBoard = parentContainer->IsScenceBoardWindow();
+    if (isCrossWindow || isScenceBoard) {
+        auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
+        if (!display) {
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "failed to GetVisibleAreaDisplayInfoById");
+        }
+        size = Size(display->GetWidth(), display->GetHeight());
+    }
+
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "parentWindow isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s", isScenceBoard,
+        isCrossWindow, size.ToString().c_str());
+    return size;
 }
 
 void SubwindowOhos::InitContainer()
@@ -442,22 +466,17 @@ void SubwindowOhos::ResizeWindow()
 void SubwindowOhos::ResizeWindowForMenu()
 {
     CHECK_NULL_VOID(window_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto containerId = Container::CurrentId();
-    if (container->IsSubContainer()) {
-        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        container = Platform::AceContainer::GetContainer(containerId);
-        CHECK_NULL_VOID(container);
-    }
-    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    auto pipeline = DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+
     Rosen::WMError ret;
     if (!(theme->GetExpandDisplay()) && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        if (container->IsUIExtensionWindow()) {
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        if (parentContainer->IsUIExtensionWindow()) {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(childContainerId_);
             CHECK_NULL_VOID(subwindow);
             auto rect = subwindow->GetUIExtensionHostWindowRect();
             ret = window_->Resize(rect.Width(), rect.Height());
@@ -466,10 +485,8 @@ void SubwindowOhos::ResizeWindowForMenu()
             ret = window_->Resize(rect.Width(), rect.Height());
         }
     } else {
-        auto displayId = window_->GetDisplayId();
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-        CHECK_NULL_VOID(defaultDisplay);
-        ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        auto windowSize = GetSubWindowSize(parentContainerId_, window_->GetDisplayId());
+        ret = window_->Resize(windowSize.Width(), windowSize.Height());
     }
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
@@ -1102,8 +1119,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         CHECK_NULL_RETURN(parentcontext, nullptr);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
-        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
-        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
+        parentOverlay->SetSubWindowId(childContainerId_);
     }
     ResizeWindow();
     ShowWindow();
@@ -1136,8 +1152,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
         CHECK_NULL_RETURN(parentcontext, nullptr);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
-        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
-        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
+        parentOverlay->SetSubWindowId(childContainerId_);
     }
     ResizeWindow();
     ShowWindow();
@@ -1182,10 +1197,9 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
         CHECK_NULL_VOID(parentcontext);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlay);
-        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
-        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
+        parentOverlay->SetSubWindowId(childContainerId_);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
-            parentContainerId_, GetSubwindowId());
+            parentContainerId_, childContainerId_);
     }
     ResizeWindow();
     ShowWindow();
@@ -1845,6 +1859,19 @@ Rect SubwindowOhos::GetUIExtensionHostWindowRect() const
     auto id = GetUIExtensionHostWindowId();
     auto hostWindowRect = parentWindow_->GetHostWindowRect(id);
     return Rect(hostWindowRect.posX_, hostWindowRect.posY_, hostWindowRect.width_, hostWindowRect.height_);
+}
+
+Rect SubwindowOhos::GetFoldExpandAvailableRect() const
+{
+    CHECK_NULL_RETURN(window_, Rect());
+    Rosen::DMRect rect;
+    Rosen::DMError ret = Rosen::DisplayManager::GetInstance().GetExpandAvailableArea(DEFAULT_DISPLAY_ID, rect);
+    if (ret != Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "failed to get expandAvailableArea");
+        return Rect();
+    }
+
+    return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
 NG::RectF SubwindowOhos::GetWindowRect() const

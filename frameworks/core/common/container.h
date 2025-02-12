@@ -507,6 +507,11 @@ public:
         return false;
     }
 
+    virtual bool IsCrossAxisWindow()
+    {
+        return false;
+    }
+
     virtual bool IsUIExtensionWindow()
     {
         return false;

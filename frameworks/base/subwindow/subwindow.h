@@ -96,6 +96,7 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual Rect GetFoldExpandAvailableRect() const = 0;
     virtual NG::RectF GetWindowRect() const
     {
         return NG::RectF();

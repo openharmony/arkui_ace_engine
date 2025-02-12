@@ -35,10 +35,11 @@ namespace OHOS::Ace {
 struct SubwindowKey {
     int32_t instanceId;
     uint64_t displayId;
+    FoldStatus foldStatus;
 
     bool operator==(const SubwindowKey& other) const
     {
-        return other.instanceId == instanceId && other.displayId == displayId;
+        return other.instanceId == instanceId && other.displayId == displayId && other.foldStatus == foldStatus;
     }
 
     std::string ToString() const
@@ -77,13 +78,15 @@ public:
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
     void RemoveSubwindow(int32_t instanceId);
 
-    // Get the subwindow of instance, return the window or nullptr.
+    // Get the subwindow of parent instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
-    const RefPtr<Subwindow> GetSubwindow(int32_t instanceId, uint64_t displayId);
+
+    // Get the subwindow of subInstance, return the window or nullptr.
+    const RefPtr<Subwindow> GetSubwindowById(int32_t subinstanceId);
 
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
-    const RefPtr<Subwindow>& GetCurrentWindow();
+    const RefPtr<Subwindow> GetCurrentWindow();
     Rect GetParentWindowRect();
 
     RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow);
@@ -190,6 +193,7 @@ private:
         uint32_t mainWindowId);
     const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
     SubwindowKey GetCurrentSubwindowKey(int32_t instanceId);
+    void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -203,6 +207,9 @@ private:
     std::mutex subwindowMutex_;
     SubwindowMixMap subwindowMap_;
     static thread_local RefPtr<Subwindow> currentSubwindow_;
+
+    std::mutex instanceSubwindowMutex_;
+    SubwindowMap instanceSubwindowMap_;
 
     std::mutex toastMutex_;
     SubwindowMixMap toastWindowMap_;

@@ -65,6 +65,7 @@ public:
     MOCK_METHOD2(SetHotAreas, void(const std::vector<Rect>& rects, int32_t overlayId));
     MOCK_CONST_METHOD0(GetParentWindowRect, Rect());
     MOCK_CONST_METHOD0(GetUIExtensionHostWindowRect, Rect());
+    MOCK_CONST_METHOD0(GetFoldExpandAvailableRect, Rect());
     MOCK_CONST_METHOD0(CheckHostWindowStatus, bool());
     MOCK_METHOD0(ClearToast, void());
     MOCK_METHOD2(ShowToast, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));

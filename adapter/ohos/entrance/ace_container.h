@@ -641,6 +641,7 @@ public:
 
     bool IsLauncherContainer() override;
     bool IsScenceBoardWindow() override;
+    bool IsCrossAxisWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;

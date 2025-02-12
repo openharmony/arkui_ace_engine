@@ -150,8 +150,6 @@ constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
-constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
-constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
     V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
@@ -3061,7 +3059,7 @@ void OverlayManager::PopModalDialog(int32_t maskId)
             break;
         }
     }
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_, dialogDisplayId_);
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
     CHECK_NULL_VOID(subWindow);
     auto subOverlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(subOverlayManager);
@@ -3195,6 +3193,8 @@ void OverlayManager::DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode)
             currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
         }
 
+        auto pipeline = dialogNode->GetContextRefPtr();
+        currentId = pipeline ? pipeline->GetInstanceId() : currentId;
         SubwindowManager::GetInstance()->DeleteHotAreas(currentId, dialogNode->GetId());
         SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
@@ -3972,7 +3972,7 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
             popupMap_.erase(targetId);
             rootNode->RemoveChild(overlay);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(container->GetInstanceId());
             CHECK_NULL_RETURN(subwindow, false);
             subwindow->DeleteHotAreas(overlay->GetId());
             if (rootNode->GetChildren().empty()) {
@@ -7716,19 +7716,20 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
         return rect;
     }
 
-    // foldStatus need exclude crease area
-    auto foldCreaseRects = container->GetCurrentFoldCreaseRegion();
-    if (foldCreaseRects.empty()) {
-        return rect;
+    auto parentContainer = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
+    CHECK_NULL_RETURN(parentContainer, rect);
+    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
+    auto isScenceBoard = parentContainer->IsScenceBoardWindow();
+    if (isCrossWindow || isScenceBoard) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipeContext->GetInstanceId());
+        CHECK_NULL_RETURN(subwindow, rect);
+        rect = subwindow->GetFoldExpandAvailableRect();
     }
 
-    auto foldCreaseRect = foldCreaseRects.front();
-    if (container->GetDisplayId() == DEFAULT_DISPLAY_ID) {
-        return Rect(rect.Left(), rect.Top(), rect.Width(), std::min(rect.Bottom(), foldCreaseRect.Top()) - rect.Top());
-    } else if (container->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
-        return Rect(rect.Left(), 0.0, rect.Width(), rect.Bottom() - std::max(rect.Top(), foldCreaseRect.Bottom()));
-    } else {
-        return rect;
-    }
+    TAG_LOGI(AceLogTag::ACE_OVERLAY,
+        "parentWindow isScenceBoard: %{public}d isCrossWindow: %{public}d availableRect: %{public}s", isScenceBoard,
+        isCrossWindow, rect.ToString().c_str());
+
+    return rect;
 }
 } // namespace OHOS::Ace::NG
