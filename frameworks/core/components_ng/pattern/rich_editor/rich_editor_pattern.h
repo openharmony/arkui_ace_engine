@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 
+#include "base/log/event_report.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -776,6 +777,7 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void RichEditorErrorReport(RichEditorInfo& info);
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
