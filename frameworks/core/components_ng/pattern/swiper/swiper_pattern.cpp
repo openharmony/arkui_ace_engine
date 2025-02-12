@@ -389,6 +389,7 @@ void SwiperPattern::OnModifyDone()
     } else if (NeedForceMeasure()) {
         MarkDirtyBindIndicatorNode();
     }
+    hoverFlag_ = HOVER_NONE;
     InitArrow();
     InitCapture();
     CheckSpecialItemCount();
@@ -5202,8 +5203,13 @@ void SwiperPattern::OnWindowHide()
     StopSpringAnimationAndFlushImmediately();
 }
 
-void SwiperPattern::ArrowHover(bool hoverFlag)
+void SwiperPattern::ArrowHover(bool isHover, SwiperHoverFlag flag)
 {
+    if (isHover) {
+        hoverFlag_ |= flag;
+    } else {
+        hoverFlag_ &= (~flag);
+    }
     if (HasLeftButtonNode() && HasRightButtonNode()) {
         auto swiperNode = GetHost();
         CHECK_NULL_VOID(swiperNode);
@@ -5212,13 +5218,13 @@ void SwiperPattern::ArrowHover(bool hoverFlag)
         CHECK_NULL_VOID(leftArrowNode);
         auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
         CHECK_NULL_VOID(leftArrowPattern);
-        leftArrowPattern->SetButtonVisible(hoverFlag);
+        leftArrowPattern->SetButtonVisible(hoverFlag_ != HOVER_NONE);
         auto rightArrowNode =
             DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetRightButtonId())));
         CHECK_NULL_VOID(rightArrowNode);
         auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
         CHECK_NULL_VOID(rightArrowPattern);
-        rightArrowPattern->SetButtonVisible(hoverFlag);
+        rightArrowPattern->SetButtonVisible(hoverFlag_ != HOVER_NONE);
     }
 }
 
@@ -5316,7 +5322,7 @@ void SwiperPattern::InitHoverMouseEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (!pattern->IsShowIndicator()) {
-            pattern->ArrowHover(isHover);
+            pattern->ArrowHover(isHover, HOVER_SWIPER);
         }
     };
 
@@ -5383,7 +5389,7 @@ void SwiperPattern::CheckAndSetArrowHoverState(const PointF& mousePoint)
     }
 
     isAtHotRegion_ = newNodeRect.IsInRegion(mousePoint);
-    ArrowHover(isAtHotRegion_);
+    ArrowHover(isAtHotRegion_, HOVER_SWIPER);
 }
 
 RectF SwiperPattern::GetArrowFrameRect(const int32_t index) const
