@@ -51,7 +51,6 @@ public:
 };
 
 /**
- * 
  * @tc.name: PxTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -68,8 +67,7 @@ HWTEST_F(LengthMetricsAccessorTest, PxTest, TestSize.Level1)
 }
 
 /**
- * 
- * @tc.name: PxTest
+ * @tc.name: ResourceTest
  * @tc.desc:
  * @tc.type: FUNC
  */
