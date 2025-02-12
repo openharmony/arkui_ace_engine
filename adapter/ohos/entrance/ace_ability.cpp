@@ -612,8 +612,7 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
                 configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
-        TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration");
     LOGI("AceAbility OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
@@ -716,8 +715,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Platform::AceViewOhos::SurfaceChanged(aceView, rect.width_, rect.height_,
                 rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged");
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -734,7 +732,7 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
         },
-        TaskExecutor::TaskType::UI, "ArkUIWindowModeChange", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIWindowModeChange");
 }
 
 void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
@@ -756,8 +754,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
                 CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange");
     }
 }
 
@@ -899,8 +896,7 @@ void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHO
                 pipeline->UpdateCutoutSafeArea(safeArea);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIAbilityAvoidAreaChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIAbilityAvoidAreaChanged");
 }
 
 } // namespace Ace
