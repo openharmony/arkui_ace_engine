@@ -46,6 +46,7 @@ constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+using ScrollBarPositionCallback = std::function<bool(double, int32_t source, bool isMouseWheelScroll)>;
 
 enum class BarDirection {
     BAR_NONE = 0,
@@ -274,11 +275,11 @@ public:
     {
         return hostBorderRadius_;
     }
-    void SetScrollPositionCallback(ScrollPositionCallback&& callback)
+    void SetScrollPositionCallback(ScrollBarPositionCallback&& callback)
     {
         scrollPositionCallback_ = std::move(callback);
     }
-    const ScrollPositionCallback& GetScrollPositionCallback() const
+    const ScrollBarPositionCallback& GetScrollPositionCallback() const
     {
         return scrollPositionCallback_;
     }
@@ -332,7 +333,7 @@ public:
     }
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, bool inBarRect = false);
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
@@ -662,7 +663,7 @@ private:
     RefPtr<Animator> frictionController_;
     RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;
-    ScrollPositionCallback scrollPositionCallback_;
+    ScrollBarPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
     StartSnapAnimationCallback startSnapAnimationCallback_;
     ScrollPageCallback scrollPageCallback_;

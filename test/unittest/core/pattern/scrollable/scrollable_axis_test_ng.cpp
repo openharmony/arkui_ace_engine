@@ -124,6 +124,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
      * @tc.expected: the position of axisAnimator is correct.
      */
     auto scrollable = GetScrollable(listNode);
+    scrollable->InitAxisAnimator();
     ASSERT_NE(scrollable, nullptr);
     scrollable->context_ = PipelineContext::GetCurrentContext();
     auto context = scrollable->context_.Upgrade();
@@ -196,6 +197,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest002, TestSize.Level1)
      */
     auto scrollable = GetScrollable(listNode);
     ASSERT_NE(scrollable, nullptr);
+    scrollable->InitAxisAnimator();
     scrollable->context_ = PipelineContext::GetCurrentContext();
     auto context = scrollable->context_.Upgrade();
     ASSERT_NE(context, nullptr);

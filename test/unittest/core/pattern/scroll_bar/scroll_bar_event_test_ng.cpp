@@ -153,6 +153,10 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     /**
      * @tc.steps: step1. HandleDragStart, mouse wheel on scrollBar
      */
+    auto scrollable = scrollPattern_->GetScrollable();
+    auto context = scrollable->context_.Upgrade();
+    ASSERT_NE(context, nullptr);
+    scrollable->InitAxisAnimator();
     GestureEvent info;
     info.SetGlobalPoint(Point(SCROLL_WIDTH - 1.f, 1.f));
     info.SetInputEventType(InputEventType::AXIS);
@@ -165,10 +169,12 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
+    MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     float expectBarPosition = -delta / controlDistance * scrollableDistance;
     EXPECT_EQ(pattern_->GetCurrentPosition(), expectBarPosition); // 512.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), -delta);
+    scrollable->axisAnimator_->StopAxisAnimation();
 
     /**
      * @tc.steps: step3. HandleDragUpdate, mouse wheel down continue
@@ -178,6 +184,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance); // 640.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance);
+    scrollable->axisAnimator_->StopAxisAnimation();
 
     /**
      * @tc.steps: step4. HandleDragUpdate, mouse wheel up
@@ -185,6 +192,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
+    MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
@@ -193,6 +201,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.steps: step5. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
@@ -532,7 +541,7 @@ HWTEST_F(ScrollBarEventTestNg, ScrollScrollBar001, TestSize.Level1)
     CreateDone();
 
     auto scrollCallback = pattern_->scrollBar_->GetScrollPositionCallback();
-    scrollCallback(-100.f, SCROLL_FROM_BAR);
+    scrollCallback(-100.f, SCROLL_FROM_BAR, false);
     FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 100.f);
 
