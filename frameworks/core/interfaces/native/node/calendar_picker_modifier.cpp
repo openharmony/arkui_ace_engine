@@ -475,6 +475,20 @@ ArkUI_CharPtr GetCalendarPickerDisabledDateRange(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+void SetCalendarPickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+    CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(*onChange));
+}
+
+void ResetCalendarPickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalendarPickerModelNG::SetOnChangeWithNode(frameNode, nullptr);
+}
 namespace NodeModifier {
 const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
@@ -515,6 +529,8 @@ const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         .setCalendarPickerBorderRadius = SetCalendarPickerBorderRadius,
         .resetCalendarPickerBorderRadius = ResetCalendarPickerBorderRadius,
         .resetCalendarPickerBorderWidth = ResetCalendarPickerBorderWidth,
+        .setCalendarPickerOnChange = SetCalendarPickerOnChangeExt,
+        .resetCalendarPickerOnChange = ResetCalendarPickerOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

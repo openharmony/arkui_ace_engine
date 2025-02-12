@@ -507,6 +507,25 @@ void ResetMinResponsiveDistance(ArkUINodeHandle node)
     SliderModelNG::ResetMinResponsiveDistance(frameNode);
 }
 
+void SetOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(float, int32_t)>*>(callback);
+        SliderModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        SliderModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetOnChange(frameNode, nullptr);
+}
+
 ArkUI_Uint32 GetBlockColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -732,6 +751,8 @@ const ArkUISliderModifier* GetSliderModifier()
         .resetInteractionMode = SliderModifier::ResetInteractionMode,
         .setMinResponsiveDistance = SliderModifier::SetMinResponsiveDistance,
         .resetMinResponsiveDistance = SliderModifier::ResetMinResponsiveDistance,
+        .setOnChange = SliderModifier::SetOnChange,
+        .resetOnChange = SliderModifier::ResetOnChange,
         .getBlockColor = SliderModifier::GetBlockColor,
         .getTrackBackgroundColor = SliderModifier::GetTrackBackgroundColor,
         .getSelectColor = SliderModifier::GetSelectColor,

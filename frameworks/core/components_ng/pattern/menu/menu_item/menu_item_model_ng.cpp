@@ -172,6 +172,14 @@ void MenuItemModelNG::SetOnChange(std::function<void(bool)>&& onChange)
     eventHub->SetOnChange(onChange);
 }
 
+void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 void MenuItemModelNG::SetFontSize(const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {

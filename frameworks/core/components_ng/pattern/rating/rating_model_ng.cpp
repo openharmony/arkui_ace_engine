@@ -175,4 +175,12 @@ void RatingModelNG::SetRatingOptions(FrameNode* frameNode, double rating, bool i
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, indicator, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, rating, frameNode);
 }
+
+void RatingModelNG::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG

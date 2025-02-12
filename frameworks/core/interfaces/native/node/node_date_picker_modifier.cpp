@@ -441,6 +441,37 @@ void ResetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
 }
+
+void SetDatePickerOnDateChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDateChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    DatePickerModelNG::SetOnDateChange(frameNode, std::move(*onDateChange));
+}
+
+void ResetDatePickerOnDateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetOnDateChange(frameNode, nullptr);
+}
+
+void SetDatePickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    DatePickerModelNG::SetOnChange(frameNode, std::move(*onChange));
+}
+
+void ResetDatePickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetOnChange(frameNode, nullptr);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -480,6 +511,10 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
         .resetEnableHapticFeedback = ResetEnableHapticFeedback,
         .setDatePickerDigitalCrownSensitivity = SetDatePickerDigitalCrownSensitivity,
         .resetDatePickerDigitalCrownSensitivity = ResetDatePickerDigitalCrownSensitivity,
+        .setDatePickerOnDateChange = SetDatePickerOnDateChangeExt,
+        .resetDatePickerOnDateChange = ResetDatePickerOnDateChange,
+        .setDatePickerOnChange = SetDatePickerOnChangeExt,
+        .resetDatePickerOnChange = ResetDatePickerOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -525,7 +560,6 @@ const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
 
     return &modifier;
 }
-
 void SetDatePickerOnDateChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
