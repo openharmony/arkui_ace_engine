@@ -2320,7 +2320,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: font weight {@link ArkUI_FontWeight}.\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_IMMUTABLE_FONT_WEIGHT = 1030,
 
