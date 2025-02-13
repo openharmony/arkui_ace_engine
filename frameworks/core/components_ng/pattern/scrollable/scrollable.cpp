@@ -57,6 +57,7 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
 constexpr float START_FRICTION_VELOCITY_THRESHOLD = 240.0f;
 constexpr float FRICTION_VELOCITY_THRESHOLD = 120.0f;
 constexpr float SPRING_ACCURACY = 0.1;
+constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
@@ -1078,6 +1079,9 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
         "The snap delta of scroll motion is %{public}f, "
         "The snap velocity of scroll motion is %{public}f",
         scrollSnapDelta, scrollSnapVelocity);
+    if (NearZero(scrollSnapDelta)) {
+        return;
+    }
     endPos_ = currentPos_ + scrollSnapDelta;
     finalPosition_ = endPos_;
     snapAnimationFromScrollBar_ = fromScrollBar;
@@ -1086,6 +1090,11 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
     AnimationOption option;
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
+    auto minimumAmplitudeRatio = DEFAULT_MINIMUM_AMPLITUDE_PX / std::abs(scrollSnapDelta);
+    if (LessNotEqualCustomPrecision(minimumAmplitudeRatio,
+        ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO)) {
+        curve->UpdateMinimumAmplitudeRatio(minimumAmplitudeRatio);
+    }
     option.SetCurve(curve);
     if (!snapOffsetProperty_) {
         GetSnapProperty();
