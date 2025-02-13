@@ -4169,14 +4169,13 @@ std::shared_ptr<Rosen::RSNode> UIContentImpl::GetRSNodeByStringID(const std::str
     taskExecutor->PostSyncTask(
         [id = instanceId_, &rsNode, stringId]() {
             ContainerScope scope(id);
-            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true, true);
+            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true);
             CHECK_NULL_VOID(frameNode);
             auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
             CHECK_NULL_VOID(renderContext);
             rsNode = renderContext->GetRSNode();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID");
     if (!rsNode) {
         LOGE("Cannot find RSNode by stringId: %{public}s", stringId.c_str());
     }
@@ -4192,11 +4191,10 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
     taskExecutor->PostSyncTask(
         [id = instanceId_, stringId]() {
             ContainerScope scope(id);
-            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true, true);
+            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true);
             CHECK_NULL_VOID(frameNode);
             frameNode->SetTopWindowBoundary(true);
         },
-        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 } // namespace OHOS::Ace
