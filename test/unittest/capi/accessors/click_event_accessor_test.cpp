@@ -73,10 +73,9 @@ HWTEST_F(ClickEventAccessorTest, getDisplayXTestValidValues, TestSize.Level1)
 
     for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
         Offset offset = eventInfo_->GetScreenLocation();
-        const auto animation = offset.GetXAnimationOption();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
-        offset.SetX(newValue, animation);
+        offset.SetX(newValue);
         eventInfo_->SetScreenLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getDisplayX(peer_));
         result = static_cast<double>(result);
@@ -112,10 +111,9 @@ HWTEST_F(ClickEventAccessorTest, getDisplayYTestValidValues, TestSize.Level1)
 
     for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
         Offset offset = eventInfo_->GetScreenLocation();
-        const auto animation = offset.GetYAnimationOption();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
-        offset.SetY(newValue, animation);
+        offset.SetY(newValue);
         eventInfo_->SetScreenLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getDisplayY(peer_));
         result = static_cast<double>(result);
@@ -151,10 +149,9 @@ HWTEST_F(ClickEventAccessorTest, getWindowXTestValidValues, TestSize.Level1)
 
     for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
         Offset offset = eventInfo_->GetGlobalLocation();
-        const auto animation = offset.GetXAnimationOption();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
-        offset.SetX(newValue, animation);
+        offset.SetX(newValue);
         eventInfo_->SetGlobalLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getWindowX(peer_));
         result = static_cast<double>(result);
@@ -190,10 +187,9 @@ HWTEST_F(ClickEventAccessorTest, getWindowYTestValidValues, TestSize.Level1)
 
     for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
         Offset offset = eventInfo_->GetGlobalLocation();
-        const auto animation = offset.GetYAnimationOption();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
-        offset.SetY(newValue, animation);
+        offset.SetY(newValue);
         eventInfo_->SetGlobalLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getWindowY(peer_));
         result = static_cast<double>(result);
@@ -229,10 +225,9 @@ HWTEST_F(ClickEventAccessorTest, getXTestValidValues, TestSize.Level1)
 
     for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
         Offset offset = eventInfo_->GetLocalLocation();
-        const auto animation = offset.GetXAnimationOption();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
-        offset.SetX(newValue, animation);
+        offset.SetX(newValue);
         eventInfo_->SetLocalLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getX(peer_));
         result = static_cast<double>(result);
@@ -268,10 +263,9 @@ HWTEST_F(ClickEventAccessorTest, getYTestValidValues, TestSize.Level1)
 
     for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
         Offset offset = eventInfo_->GetLocalLocation();
-        const auto animation = offset.GetYAnimationOption();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
-        offset.SetY(newValue, animation);
+        offset.SetY(newValue);
         eventInfo_->SetLocalLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getY(peer_));
         result = static_cast<double>(result);
