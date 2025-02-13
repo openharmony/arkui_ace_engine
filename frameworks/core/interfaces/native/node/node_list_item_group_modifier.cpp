@@ -16,10 +16,12 @@
 
 #include "interfaces/native/node/list_option.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -64,6 +66,13 @@ void ListItemGroupSetHeader(ArkUINodeHandle node, ArkUINodeHandle header)
     ListItemGroupModelNG::SetHeader(frameNode, headerNode);
 }
 
+void ListItemGroupResetHeader(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::RemoveHeader(frameNode);
+}
+
 void ListItemGroupSetFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -71,6 +80,13 @@ void ListItemGroupSetFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
     auto footerNode = reinterpret_cast<FrameNode*>(footer);
     CHECK_NULL_VOID(footerNode);
     ListItemGroupModelNG::SetFooter(frameNode, footerNode);
+}
+
+void ListItemGroupResetFooter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::RemoveFooter(frameNode);
 }
 
 void SetListItemGroupChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option, int32_t unit)
@@ -136,13 +152,42 @@ void ResetListItemGroupStyle(ArkUINodeHandle node)
     ListItemGroupModelNG::SetStyle(frameNode, V2::ListItemGroupStyle::NONE);
 }
 
+ArkUI_Int32 SetListItemGroupNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto totalChildCount = frameNode->TotalChildCount();
+    if (ListItemGroupModelNG::HasFooter(frameNode)) {
+        totalChildCount = totalChildCount - 1;
+    }
+    if (ListItemGroupModelNG::HasHeader(frameNode)) {
+        totalChildCount = totalChildCount - 1;
+    }
+    if (totalChildCount > 0) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_CHILD_NODE_EXIST;
+    }
+    NodeAdapter::GetNodeAdapterAPI()->attachHostNode(handle, node);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListItemGroupNodeAdapter(ArkUINodeHandle node)
+{
+    NodeAdapter::GetNodeAdapterAPI()->detachHostNode(node);
+}
+
+ArkUINodeAdapterHandle GetListItemGroupNodeAdapter(ArkUINodeHandle node)
+{
+    return NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(node);
+}
+
 namespace NodeModifier {
 const ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
     static const ArkUIListItemGroupModifier modifier = { ListItemGroupSetDivider, ListItemGroupResetDivider,
-        ListItemGroupSetHeader, ListItemGroupSetFooter, SetListItemGroupChildrenMainSize,
-        ResetListItemGroupChildrenMainSize, GetlistDivider, SetListItemGroupSpace, ResetListItemGroupSpace,
-        SetListItemGroupStyle, ResetListItemGroupStyle };
+        ListItemGroupSetHeader, ListItemGroupResetHeader, ListItemGroupSetFooter, ListItemGroupResetFooter,
+        SetListItemGroupChildrenMainSize, ResetListItemGroupChildrenMainSize, GetlistDivider, SetListItemGroupSpace,
+        ResetListItemGroupSpace, SetListItemGroupStyle, ResetListItemGroupStyle, SetListItemGroupNodeAdapter,
+        ResetListItemGroupNodeAdapter, GetListItemGroupNodeAdapter };
     return &modifier;
 }
 
