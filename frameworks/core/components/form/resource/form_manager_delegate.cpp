@@ -928,9 +928,14 @@ bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
 }
 
-bool FormManagerDelegate::IsFormBundleLocked(const std::string& bundleName, int64_t formId)
+bool FormManagerDelegate::IsFormBundleExempt(int64_t formId)
 {
-    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleLocked(bundleName, formId);
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleExempt(formId);
+}
+
+bool FormManagerDelegate::IsFormBundleProtected(const std::string& bundleName, int64_t formId)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleProtected(bundleName, formId);
 }
 
 void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
