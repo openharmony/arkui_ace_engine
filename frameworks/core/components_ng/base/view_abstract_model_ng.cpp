@@ -736,6 +736,19 @@ void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
     }
 }
 
+void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserScrollTriggerable();
+    } else {
+        accessibilityProperty->SetUserScrollTriggerable(triggerable);
+    }
+}
+
 void ViewAbstractModelNG::SetAccessibilityRole(const std::string& role, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -879,6 +892,18 @@ void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool che
     } else {
         accessibilityProperty->SetUserCheckedType(checked);
         accessibilityProperty->SetUserCheckable(true);
+    }
+}
+
+void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserScrollTriggerable();
+    } else {
+        accessibilityProperty->SetUserScrollTriggerable(triggerable);
     }
 }
 

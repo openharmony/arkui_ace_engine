@@ -2069,6 +2069,8 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityDefaultFocus)(ArkUINodeHandle node);
     void (*setAccessibilityUseSamePage)(ArkUINodeHandle node, ArkUI_Bool isFullSilent);
     void (*resetAccessibilityUseSamePage)(ArkUINodeHandle node);
+    void (*setAccessibilityScrollTriggerable)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAccessibilityScrollTriggerable)(ArkUINodeHandle node);
     void (*setHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);
@@ -4117,7 +4119,7 @@ struct ArkUICheckboxModifier {
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
     void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
     void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
-    
+
     ArkUI_CharPtr (*getCheckboxName)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getCheckboxGroup)(ArkUINodeHandle node);
 };
