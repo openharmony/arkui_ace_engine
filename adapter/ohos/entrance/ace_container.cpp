@@ -3962,7 +3962,7 @@ Rect AceContainer::GetDisplayAvailableRect() const
         return Rect();
     }
 
-    return DisplayInfoUtils::GetInstance().GetDisplayAvailableRect(uiWindow_->GetDisplayId());
+    return displayManager_->GetDisplayAvailableRect(uiWindow_->GetDisplayId());
 }
 
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)
