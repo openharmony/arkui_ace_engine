@@ -1084,23 +1084,27 @@ export struct GaugeBootcamp {
     .margin(useEnabled(this.enableCompBindMenuMenuMargin, this.compBindMenuMenuMargin))
   }
 
-  @Styles cardPressedStyle() {
+  @Styles
+  cardPressedStyle() {
     .backgroundColor('rgba(0,0,0,0.1)')
     .opacity(1)
     .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
   }
 
-  @Styles cardNormalStyle() {
+  @Styles
+  cardNormalStyle() {
     .backgroundColor('rgba(0,0,0,0)')
     .opacity(1)
     .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
   }
 
-  @Styles cardDisabledStyle() {
+  @Styles
+  cardDisabledStyle() {
     .backgroundColor('rgba(0,0,0,0)')
     .opacity(0.5)
     .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
   }
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1137,6 +1141,7 @@ export struct GaugeBootcamp {
       }
     })
   }
+
   @Builder
   popupBuilder() {
     Row() {
@@ -2964,6 +2969,13 @@ export struct GaugeBootcamp {
                 compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
               })
 
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性5')
+          }) {
+            if (this.selection === '通用属性5') {
               CompMotionBlurBlocks({
                 enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
                 compMotionBlurRadius: $compMotionBlurRadius,
@@ -2972,7 +2984,6 @@ export struct GaugeBootcamp {
                 enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
                 compMotionBlurAnchorY: $compMotionBlurAnchorY,
               })
-
               CompClickEffectBlocks({
                 enableCompClickEffect: $enableCompClickEffect,
                 compClickEffect: $compClickEffect,
@@ -2981,7 +2992,6 @@ export struct GaugeBootcamp {
                 enableCompClickEffectScale: $enableCompClickEffectScale,
                 compClickEffectScale: $compClickEffectScale,
               })
-
               CompAccessibilityBlocks({
                 enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
                 compAccessibilityGroup: $compAccessibilityGroup,
@@ -2992,56 +3002,6 @@ export struct GaugeBootcamp {
                 enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
                 compAccessibilityLevel: $compAccessibilityLevel,
               })
-            }
-          }
-
-          ListItemGroup({
-            header: this.ListItemGroupHeaders('通用属性5')
-          }) {
-            if (this.selection === '通用属性5') {
-              CompAttributeModifierBlocks({
-                enableCompAttributeModifier: $enableCompAttributeModifier,
-                compAttributeModifier: $compAttributeModifier,
-              })
-
-              CompForegroundEffectBlocks({
-                enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
-                compForegroundEffectRadius: $compForegroundEffectRadius
-              })
-
-              CompForegroundBlurBlocks({
-                enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
-                compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
-                enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
-                compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
-                enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
-                compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
-                enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
-                compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
-                enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
-                compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
-              })
-
-              CompMotionBlurBlocks({
-                enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
-                compMotionBlurRadius: $compMotionBlurRadius,
-                enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
-                compMotionBlurAnchorX: $compMotionBlurAnchorX,
-                enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
-                compMotionBlurAnchorY: $compMotionBlurAnchorY,
-              })
-
-              CompAccessibilityBlocks({
-                enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
-                compAccessibilityGroup: $compAccessibilityGroup,
-                enableCompAccessibilityText: $enableCompAccessibilityText,
-                compAccessibilityText: $compAccessibilityText,
-                enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
-                compAccessibilityDescription: $compAccessibilityDescription,
-                enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
-                compAccessibilityLevel: $compAccessibilityLevel,
-              })
-
               CompAttributeModifierBlocks({
                 enableCompAttributeModifier: $enableCompAttributeModifier,
                 compAttributeModifier: $compAttributeModifier,
