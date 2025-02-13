@@ -1927,18 +1927,25 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(pickerTheme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(pickerTheme));
     auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
-    auto pickerThemeWidth = dividerSpacing * 2;
-    auto centerY =
-        (frameNode->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
+
     // default focusWidth < columnWidth, focusWidth = columnWidth
     RoundRect paintRect;
     getInnerFocusRectFunc(paintRect);
     auto rect = paintRect.GetRect();
     Dimension offset = 2.0_vp;
-    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
+    Dimension focusLineWidth = 1.5_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx() + focusLineWidth.ConvertToPx());
+
+    auto centerY =
+        (frameNode->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + offset.ConvertToPx() +
+        focusLineWidth.ConvertToPx();
     EXPECT_EQ(rect.GetY(), centerY);
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2);
-    EXPECT_EQ(rect.Height(), dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2);
+
+    auto expectWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2 -
+        focusLineWidth.ConvertToPx() * 2;
+    EXPECT_EQ(rect.Width(), expectWidth);
+
+    EXPECT_EQ(rect.Height(), dividerSpacing - offset.ConvertToPx() * 2 - focusLineWidth.ConvertToPx() * 2);
 
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
@@ -1956,16 +1963,18 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y,
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+
     // default focusWidth < columnWidth
     pickerChild->GetGeometryNode()->frame_.rect_.SetWidth(EXTRA_WIDTH);
     RoundRect paintRect2;
     timePickerRowPattern->GetInnerFocusPaintRect(paintRect2);
     auto rect2 = paintRect2.GetRect();
-    auto centerX = (pickerChild->GetGeometryNode()->GetFrameSize().Width() - pickerThemeWidth) / 2 +
-                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx();
-    EXPECT_EQ(rect2.GetX(), centerX);
-    EXPECT_EQ(rect2.Width(), (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2);
+    
+    EXPECT_EQ(rect2.GetX(), offset.ConvertToPx() + focusLineWidth.ConvertToPx());
+
+    auto expectWidth2 = pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2 -
+        focusLineWidth.ConvertToPx() * 2;
+    EXPECT_EQ(rect2.Width(), expectWidth2);
 }
 
 /**
