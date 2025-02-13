@@ -949,7 +949,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     // SelectionMenuOptions
     NG::SelectMenuParam menuParam;
     menuParam.isValid = isValidTextSpanType;
-    if (info.Length() > resquiredParameterCount) {
+    if (info.Length() > static_cast<uint32_t>(resquiredParameterCount)) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
             ParseMenuParam(info, argsMenuOptions, menuParam);
