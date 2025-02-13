@@ -248,6 +248,11 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+bool IsContainerDeleteFlag()
+{
+    return (system::GetParameter("persist.container.delete", "true") == "true");
+}
+
 bool IsLayoutDetectEnabled()
 {
     return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
@@ -471,6 +476,7 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
 ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
@@ -685,6 +691,11 @@ ACE_WEAK_SYM float SystemProperties::GetFontScale()
 {
     // Default value of font size scale is 1.0.
     return fontScale_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return containerDeleteFlag_;
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
