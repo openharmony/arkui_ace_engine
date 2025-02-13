@@ -3336,6 +3336,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
     void (*resetStopBackPress)(ArkUINodeHandle node);
+    void (*setTextAreaKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
+    void (*resetTextAreaKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3537,6 +3539,9 @@ struct ArkUITextInputModifier {
     void (*resetTextInputEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 sStopBackPress);
     void (*resetStopBackPress)(ArkUINodeHandle node);
+    void (*setTextInputKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
+    ArkUI_Int32 (*getTextInputKeyboardAppearance)(ArkUINodeHandle node);
+    void (*resetTextInputKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -4167,6 +4172,8 @@ struct ArkUISearchModifier {
     void (*resetSearchEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
     void (*resetStopBackPress)(ArkUINodeHandle node);
+    void (*setSearchKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
+    void (*resetSearchKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -4630,6 +4637,8 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnCopy)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
+    void (*setRichEditorKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance);
+    void (*resetRichEditorKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

@@ -42,6 +42,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -217,6 +218,16 @@ public:
     bool NeedSoftKeyboard() const override
     {
         return true;
+    }
+
+    void SetKeyboardAppearance(KeyboardAppearance value)
+    {
+        keyboardAppearance_ = value;
+    }
+
+    KeyboardAppearance GetKeyboardAppearance() const
+    {
+        return keyboardAppearance_;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -1937,6 +1948,7 @@ private:
     std::optional<float> maxFontSizeScale_;
     float lastCaretPos_ = 0.0f;
     bool hasMousePressed_ = false;
+    KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
 };
 } // namespace OHOS::Ace::NG
 

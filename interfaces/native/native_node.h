@@ -2774,6 +2774,19 @@ typedef enum {
      */
     NODE_TEXT_INPUT_NUMBER_OF_LINES,
     /**
+    * @brief Set the keyboard style of textInput
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
+    *
+    * @since 15
+    */
+    NODE_TEXT_INPUT_KEYBOARD_APPEARANCE = 7035,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3059,6 +3072,19 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_NUMBER_OF_LINES,
+    /**
+    * @brief Set the keyboard style of textArea
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32：keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32：keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
+    *
+    * @since 15
+    */
+    NODE_TEXT_AREA_KEYBOARD_APPEARANCE = 8026,
+
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *

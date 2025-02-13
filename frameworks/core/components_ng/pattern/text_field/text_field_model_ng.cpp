@@ -856,6 +856,15 @@ void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
 }
 
+void TextFieldModelNG::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
+}
+
 void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
@@ -1645,6 +1654,22 @@ bool TextFieldModelNG::GetBlurOnSubmit(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, true);
     return pattern->GetBlurOnSubmit();
+}
+
+void TextFieldModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
+}
+
+int32_t TextFieldModelNG::GetKeyboardAppearance(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return static_cast<int32_t>(pattern->GetKeyboardAppearance());
 }
 
 void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)

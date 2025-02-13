@@ -55,6 +55,7 @@ public:
     void SetBarState(DisplayMode mode) override;
     void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
         const SelectMenuParam& menuParam) override;
+    void SetKeyboardAppearance(KeyboardAppearance value) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -80,6 +81,7 @@ public:
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPreviewMenuParam(FrameNode* frameNode,
         TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
+    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
 
 private:
     void SetDraggable(bool draggable);
