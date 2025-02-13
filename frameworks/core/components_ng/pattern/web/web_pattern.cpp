@@ -7554,6 +7554,7 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
         webPattern->OnTextSelected();
     };
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    awaitingOnTextSelected_ = true;
     auto selectedTask = [weak = AceType::WeakClaim(this)](bool isSelected) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -7562,6 +7563,7 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
         if (isSelected) {
             webPattern->CloseSelectOverlay();
             webPattern->SelectCancel();
+            webPattern->OnTextSelected();
             CHECK_NULL_VOID(webPattern->delegate_);
             webPattern->delegate_->OnContextMenuHide("");
         }
@@ -7589,6 +7591,11 @@ void WebPattern::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, 
 
 void WebPattern::OnTextSelected()
 {
+    if (!awaitingOnTextSelected_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnTextSelected already called, ignored.");
+        return;
+    }
+    awaitingOnTextSelected_ = false;
     CHECK_NULL_VOID(delegate_);
     delegate_->OnTextSelected();
     overlayCreating_ = true;
@@ -7603,6 +7610,7 @@ void WebPattern::DestroyAnalyzerOverlay()
     }
     overlayCreating_ = false;
     imageOverlayIsSelected_ = false;
+    awaitingOnTextSelected_ = false;
 }
 
 bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
