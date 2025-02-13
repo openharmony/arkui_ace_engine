@@ -52,7 +52,7 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (LessOrEqual(frameSize.Width(), 0.0f) || LessOrEqual(frameSize.Height(), 0.0f)) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
-        auto parentNode = host->GetAncestorNodeOfFrame();
+        auto parentNode = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
         auto parentGeo = parentNode->GetGeometryNode();
         CHECK_NULL_VOID(parentGeo);

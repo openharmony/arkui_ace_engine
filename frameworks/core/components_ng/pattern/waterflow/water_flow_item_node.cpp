@@ -35,7 +35,7 @@ RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(
 
 bool WaterFlowItemNode::RequestParentDirty()
 {
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parent, false);
     parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     auto pattern = parent->GetPattern<WaterFlowPattern>();
