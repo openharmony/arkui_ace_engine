@@ -192,7 +192,7 @@ export interface PopupOptions {
   showClose?: boolean | Resource;
   onClose?: () => void;
   buttons?: [PopupButtonOptions?, PopupButtonOptions?];
-  maxWidth?:Dimension;
+  maxWidth?: Dimension;
 }
 
 const noop = () => {
@@ -419,7 +419,7 @@ export struct PopupComponent {
     }
     if (this.showClose || this.showClose === void (0)) {
       if (this.messageMaxWidth != undefined) {
-        if(this.maxWidth != undefined && this.maxWidth > px2vp(defaultDisplaySync.width)) {
+        if (this.maxWidth != undefined && this.maxWidth > px2vp(defaultDisplaySync.width)) {
           textMaxWeight = px2vp(defaultDisplaySync.width)
         } else {
           textMaxWeight = this.messageMaxWidth
@@ -503,7 +503,8 @@ export struct PopupComponent {
 
   private getWindowsPadding(): LocalizedPadding {
     let top = this.theme.windows.padding.top;
-    let bottom = LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
+    let bottom =
+      LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
     let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
     let end = this.theme.windows.padding.end;
     let resolvedMaxWidth = this.toVp(this.maxWidth);
@@ -572,6 +573,7 @@ export struct PopupComponent {
     }
     return layoutWeight
   }
+
   private resourceToVp(value: Resource): number {
     try {
       if ((value as Resource).id !== -1) {
@@ -588,7 +590,7 @@ export struct PopupComponent {
 
   private toVp(value: Dimension | Length | undefined): number {
     let defaultDisplaySync: display.Display | undefined = undefined;
-     try {
+    try {
       defaultDisplaySync = display.getDefaultDisplaySync()
     } catch (error) {
       console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
@@ -648,7 +650,7 @@ export struct PopupComponent {
     let applyMaxHeight: number | undefined = undefined;
     let applyMaxSize: ConstraintSizeOptions | undefined = undefined;
     let defaultDisplaySync: display.Display | undefined = undefined;
-    let maxWidthSize = 400；
+    let maxWidthSize = 400;
     try {
       defaultDisplaySync = display.getDefaultDisplaySync()
     } catch (error) {
@@ -658,13 +660,13 @@ export struct PopupComponent {
     }
     if (this.maxWidth !== undefined) {
       if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-          maxWidthSize = px2vp(this.maxWidth);
+        maxWidthSize = px2vp(this.maxWidth);
       } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
-         maxWidthSize = POPUP_DEFAULT_MAXWIDTH
+        maxWidthSize = POPUP_DEFAULT_MAXWIDTH
       } else {
-          maxWidthSize = this.toVp(this.maxWidth);
+        maxWidthSize = this.toVp(this.maxWidth);
       }
-    } 
+    }
     if (px2vp(defaultDisplaySync.width) > maxWidthSize) {
       applyMaxWidth = maxWidthSize
     } else {
@@ -672,8 +674,8 @@ export struct PopupComponent {
         applyMaxWidth = px2vp(defaultDisplaySync.width)
       } else {
         // The previewer does not support the display interface to use abnormal values
-       applyMaxWidth = -1
-     }
+        applyMaxWidth = -1
+      }
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480
@@ -768,7 +770,7 @@ export struct PopupComponent {
           .scrollBar(BarState.Auto)
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
-          .edgeEffect(EdgeEffect.Spring)
+          .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false })
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
@@ -782,6 +784,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -811,6 +815,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -833,7 +839,12 @@ export struct PopupComponent {
           .margin(this.getButtonTextMargin())
           .flexGrow(1)
           .onAreaChange((_, rect) => {
-            this.buttonHeight = rect.height as number
+            if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+              (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+              this.buttonHeight = rect.height as number
+            } else {
+              this.buttonHeight = 0
+            }
           })
         }
         .direction(this.popupDirection)
@@ -842,7 +853,7 @@ export struct PopupComponent {
         Column() {
           Flex().height(0).onAreaChange((_, rect) => {
             this.titleHeight = rect.height as number
-           })
+          })
           Row() {
             Scroll() {
               Text(this.getMessageText())
@@ -857,7 +868,7 @@ export struct PopupComponent {
             }
             .direction(this.popupDirection)
             .layoutWeight(this.getLayoutWeight())
-            .edgeEffect(EdgeEffect.Spring)
+            .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false })
             .align(Alignment.TopStart)
             .padding(this.getMessagePadding())
             .scrollBar(BarState.Auto)
@@ -872,6 +883,7 @@ export struct PopupComponent {
                   .width(this.getCloseButtonImageWidth())
                   .height(this.getCloseButtonImageHeight())
                   .fillColor(this.getCloseButtonFillColor())
+                  .draggable(false)
               }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
@@ -909,6 +921,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -938,6 +952,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -960,7 +976,12 @@ export struct PopupComponent {
           .margin(this.getButtonTextMargin())
           .flexGrow(1)
           .onAreaChange((_, rect) => {
-            this.buttonHeight = rect.height as number
+            if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+              (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+              this.buttonHeight = rect.height as number
+            } else {
+              this.buttonHeight = 0
+            }
           })
         }
         .direction(this.popupDirection)
