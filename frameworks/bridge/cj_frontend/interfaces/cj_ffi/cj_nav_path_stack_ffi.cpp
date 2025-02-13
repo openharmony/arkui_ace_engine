@@ -35,6 +35,8 @@ void CJNavPathInfoNG::UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
 
 } // namespace OHOS::Ace::Framework
 
+namespace {
+
 CJNavPathInfo ConvertFFi2CJ(CJNavPathInfoFFi info)
 {
     CJNavPathInfo ret = CJNavPathInfo();
@@ -61,6 +63,8 @@ CJNavPathInfoFFi ConvertCJ2FFi(CJNavPathInfo info)
         ret.valid = info.valid;
     }
     return ret;
+}
+
 }
 
 extern "C" {

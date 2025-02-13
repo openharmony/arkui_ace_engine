@@ -288,6 +288,17 @@ void ReplaceHolder(std::string& originStr, const std::string& param)
 }
 } // namespace
 
+namespace OHOS::Ace::Framework {
+
+RefPtr<PipelineBase> GetPipelineContext()
+{
+    auto currentObj = Container::Current();
+    CHECK_NULL_RETURN(currentObj, nullptr);
+    return currentObj->GetPipelineContext();
+}
+
+} // namespace OHOS::Ace::Framework
+
 extern "C" {
 void FfiOHOSAceFrameworkPopupDismiss()
 {
@@ -2570,7 +2581,7 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
     }
     if (option.mode.hasValue) {
         auto sheetLevel = option.mode.value;
-        sheetStyle.showInPage = (sheetLevel == static_cast<int>(NG::SheetLevel::EMBEDDED));
+        sheetStyle.showInPage = (sheetLevel == static_cast<uint32_t>(NG::SheetLevel::EMBEDDED));
     }
     if (option.width.hasValue) {
         sheetStyle.width =

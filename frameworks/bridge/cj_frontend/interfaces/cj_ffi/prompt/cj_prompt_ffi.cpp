@@ -289,10 +289,10 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
         .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,
         .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
-        .isSysBlurStyle = false,
         .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
-        .transitionEffect = chainedEffect,
+        .isSysBlurStyle = false,
         .enableHoverMode = options.enableHoverMode,
+        .transitionEffect = chainedEffect,
         .shadow = shadow,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
     };
@@ -541,15 +541,15 @@ void FfiPromptShowToastWithOption(NativeShowToastOptions options)
 
         auto toastInfo = NG::ToastInfo { .message = toastMessage,
             .duration = durationTime,
-            .isRightToLeft = isRightToLeft,
             .bottom = toastBottom,
+            .isRightToLeft = isRightToLeft,
             .showMode = NG::ToastShowMode(options.showMode),
             .alignment = options.alignment,
             .offset = offset,
             .backgroundColor = Color(options.backgroundColor),
             .textColor = Color(ColorAlphaAdapt(options.textColor)),
-            .shadow = shadow,
             .backgroundBlurStyle = options.backgroundBlurStyle,
+            .shadow = shadow,
             .enableHoverMode = options.enableHoverMode,
             .hoverModeArea = HoverModeAreaType(options.hoverModeArea) };
         overlayManager->ShowToast(toastInfo, nullptr);
@@ -597,8 +597,8 @@ void FfiPromptShowActionMenuWithOption(NativeActionMenuOptions options, ShowActi
     auto callback = [ffiOnClick = CJLambda::Create(callbackRef)](
                         int32_t callbackType, int32_t successType) { ffiOnClick(callbackType, successType); };
     DialogProperties dialogProperties = {
-        .autoCancel = true,
         .title = options.title,
+        .autoCancel = true,
         .isMenu = true,
         .buttons = buttons,
         .isShowInSubWindow = options.showInSubWindow,
