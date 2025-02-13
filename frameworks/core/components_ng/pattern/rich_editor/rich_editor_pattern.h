@@ -160,6 +160,7 @@ public:
         PreviewRange replacedRange;
         bool isSpanSplit = false;
         bool needUpdateCaret = true;
+        bool previewTextExiting = false;
 
         std::string ToString() const
         {
@@ -170,6 +171,7 @@ public:
             JSON_STRING_PUT_INT(jsonValue, endOffset);
             JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
             JSON_STRING_PUT_BOOL(jsonValue, needUpdateCaret);
+            JSON_STRING_PUT_BOOL(jsonValue, previewTextExiting);
 
             return jsonValue->ToString();
         }
@@ -184,6 +186,7 @@ public:
             needReplaceText = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
             isSpanSplit = false;
+            previewTextExiting = false;
         }
 
         bool IsValid() const
