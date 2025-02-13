@@ -42,16 +42,6 @@ inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const Scrol
 namespace {
 const float TEST_OFFSET = 10.0f;
 
-struct EventsTracker {
-    static inline GENERATED_ArkUIScrollEventsReceiver eventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getScrollEventsReceiver = [] () -> const GENERATED_ArkUIScrollEventsReceiver* {
-            return &eventsReceiver;
-        }
-    };
-};
-
 struct ScrollStateValue {
     Ark_Int32 nodeId;
     bool state;
@@ -87,7 +77,6 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
         SetupTheme<ScrollBarTheme>();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -188,19 +177,23 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
 HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    VoidCallback func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->GetOnScrollStart());
 
     static std::optional<ScrollStateValue> state;
-    EventsTracker::eventsReceiver.onScrollStart = [] (Ark_Int32 nodeId)
-    {
-        state = {nodeId, true};
+    VoidCallback arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId) {
+            state = {
+                .nodeId = nodeId,
+                .state = true
+            };
+        }
     };
 
-    modifier_->setOnScrollStart(node_, &func);
+    modifier_->setOnScrollStart(node_, &arkCallback);
     ASSERT_NE(eventHub, nullptr);
     ASSERT_TRUE(eventHub->GetOnScrollStart());
 
@@ -218,25 +211,29 @@ HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.L
 HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Void func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->GetScrollEndEvent());
 
     static std::optional<ScrollStateValue> state;
-    EventsTracker::eventsReceiver.onScrollEnd = [] (Ark_Int32 nodeId)
-    {
-        state = {nodeId, false};
+    Callback_Void arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId) {
+            state = {
+                .nodeId = nodeId,
+                .state = true
+            };
+        }
     };
 
-    modifier_->setOnScrollEnd(node_, &func);
+    modifier_->setOnScrollEnd(node_, &arkCallback);
     ASSERT_NE(eventHub, nullptr);
     ASSERT_TRUE(eventHub->GetScrollEndEvent());
 
     eventHub->GetScrollEndEvent()();
     ASSERT_TRUE(state.has_value());
-    ASSERT_FALSE(state->state);
+    ASSERT_TRUE(state->state);
     ASSERT_EQ(frameNode->GetId(), state->nodeId);
 }
 
@@ -248,19 +245,23 @@ HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.
 HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    VoidCallback func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->GetOnScrollStop());
 
     static std::optional<ScrollStateValue> state;
-    EventsTracker::eventsReceiver.onScrollStop = [] (Ark_Int32 nodeId)
-    {
-        state = {nodeId, true};
+    VoidCallback arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId) {
+            state = {
+                .nodeId = nodeId,
+                .state = true
+            };
+        }
     };
 
-    modifier_->setOnScrollStop(node_, &func);
+    modifier_->setOnScrollStop(node_, &arkCallback);
     ASSERT_NE(eventHub, nullptr);
     ASSERT_TRUE(eventHub->GetOnScrollStop());
 

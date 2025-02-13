@@ -163,8 +163,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const bool value) {
-        GetFullAPI()->getEventsAPI()->getSideBarContainerEventsReceiver()->onChange(frameNode->GetId(), value);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const bool param) {
+        auto arkValue = Converter::ArkValue<Ark_Boolean>(param);
+        arkCallback.Invoke(arkValue);
     };
     SideBarContainerModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
