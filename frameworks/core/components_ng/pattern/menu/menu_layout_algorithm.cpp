@@ -2114,7 +2114,7 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     CHECK_NULL_RETURN(menuNode, OffsetF());
     auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
     if (menuLayoutProperty && menuLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
-        return menuNode->GetPaintRectOffset(true);
+        return menuNode->GetPaintRectOffset(true, true);
     }
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
@@ -2156,7 +2156,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
             targetOffset_ = props->GetMenuOffsetValue(OffsetF());
         } else {
             targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
-            targetOffset_ = targetNode->GetPaintRectOffset();
+            targetOffset_ = targetNode->GetPaintRectOffset(false, true);
         }
     }
     dumpInfo_.targetSize = targetSize_;

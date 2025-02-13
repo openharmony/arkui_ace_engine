@@ -641,7 +641,7 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
     if (IsSubMenu() && expandingMode == SubMenuExpandingMode::STACK) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        auto hostZone = host->GetPaintRectOffset();
+        auto hostZone = host->GetPaintRectOffset(false, true);
         auto scroll = host->GetFirstChild();
         CHECK_NULL_RETURN(scroll, false);
         auto column = scroll->GetFirstChild();
@@ -658,7 +658,7 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
     } else if (expandingMode == SubMenuExpandingMode::STACK) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        auto hostZone = host->GetPaintRectOffset();
+        auto hostZone = host->GetPaintRectOffset(false, true);
         auto clickAreaZone = host->GetGeometryNode()->GetFrameRect();
         clickAreaZone.SetLeft(hostZone.GetX());
         clickAreaZone.SetTop(hostZone.GetY());
@@ -1120,7 +1120,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
-    auto menuPosition = host->GetPaintRectOffset();
+    auto menuPosition = host->GetPaintRectOffset(false, true);
 
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -1162,7 +1162,7 @@ void MenuPattern::ShowMenuAppearAnimation()
         CHECK_NULL_VOID(renderContext);
         auto offset = GetTransformCenter();
         renderContext->UpdateTransformCenter(DimensionOffset(offset));
-        auto menuPosition = host->GetPaintRectOffset();
+        auto menuPosition = host->GetPaintRectOffset(false, true);
         if (IsSelectOverlayExtensionMenu() && !isExtensionMenuShow_) {
             menuPosition = GetEndOffset();
         }
@@ -1288,7 +1288,7 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, bool isNe
         auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_RETURN(menuItemPattern, menuItemInfo);
         if (menuItem->GetId() == menuItemPattern->GetClickMenuItemId()) {
-            auto offset = menuItem->GetPaintRectOffset();
+            auto offset = menuItem->GetPaintRectOffset(false, true);
             menuItemInfo.originOffset = offset - OffsetF(PADDING.ConvertToPx(), PADDING.ConvertToPx());
             auto menuItemFrameSize = menuItem->GetGeometryNode()->GetFrameSize();
             menuItemInfo.endOffset = menuItemInfo.originOffset + OffsetF(0.0f, menuItemFrameSize.Height());
@@ -1340,7 +1340,7 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
     CHECK_NULL_VOID(subMenuNode);
 
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, true);
-    auto subMenuPos = subMenuNode->GetPaintRectOffset();
+    auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
     option.SetCurve(STACK_MENU_CURVE);
@@ -1408,7 +1408,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ShowStackExpandMenu();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto menuPosition = host->GetPaintRectOffset();
+    auto menuPosition = host->GetPaintRectOffset(false, true);
     SetEndOffset(menuPosition);
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
