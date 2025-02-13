@@ -46,21 +46,21 @@ RepeatVirtualScroll2Caches::RepeatVirtualScroll2Caches(
  */
 GetFrameChildResult RepeatVirtualScroll2Caches::GetFrameChild(IndexType index, bool needBuild)
 {
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "    ... GetFrameChild(index %{public}d, needBuild: %{public}d)", index,
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "GetFrameChild(index %{public}d, needBuild: %{public}d)", index,
         static_cast<int32_t>(needBuild));
     OptCacheItem optCacheItem = GetL1CacheItem4Index(index);
     if (optCacheItem.has_value()) {
-        return std::pair<uint32_t, CacheItem>(ONGETRID4INDEX_RESULT_UNCHANGED_NODE, optCacheItem.value());
+        return std::pair<uint32_t, CacheItem>(OnGetRid4IndexResult::UNCHANGED_NODE, optCacheItem.value());
     }
 
     if (!needBuild) {
-        return std::pair<uint32_t, CacheItem>(ONGETRID4INDEX_RESULT_NO_NODE, nullptr);
+        return std::pair<uint32_t, CacheItem>(OnGetRid4IndexResult::NO_NODE, nullptr);
     }
 
     optCacheItem = CallOnGetRid4Index(index);
     return optCacheItem.has_value()
-               ? std::pair<uint32_t, CacheItem>(ONGETRID4INDEX_RESULT_UPDATED_NODE, optCacheItem.value())
-               : std::pair<uint32_t, CacheItem>(ONGETRID4INDEX_RESULT_NO_NODE, nullptr);
+               ? std::pair<uint32_t, CacheItem>(OnGetRid4IndexResult::UPDATED_NODE, optCacheItem.value())
+               : std::pair<uint32_t, CacheItem>(OnGetRid4IndexResult::NO_NODE, nullptr);
 }
 
 /**
@@ -70,7 +70,7 @@ GetFrameChildResult RepeatVirtualScroll2Caches::GetFrameChild(IndexType index, b
  */
 void RepeatVirtualScroll2Caches::RemoveNode(RIDType rid)
 {
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "    ... RemoveNode(rid : %{public}d) ...", static_cast<int32_t>(rid));
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveNode(rid : %{public}d)", static_cast<int32_t>(rid));
 
     DropFromL1ByRid(rid);
 
@@ -87,7 +87,7 @@ void RepeatVirtualScroll2Caches::RemoveNode(RIDType rid)
  */
 void RepeatVirtualScroll2Caches::SetInvalid(RIDType rid)
 {
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "    ... SetInvalid(rid : %{public}d) ...", static_cast<int32_t>(rid));
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "SetInvalid(rid : %{public}d)", static_cast<int32_t>(rid));
     DropFromL1ByRid(rid);
 }
 
@@ -124,7 +124,7 @@ void RepeatVirtualScroll2Caches::DropFromL1ByIndex(IndexType index)
     const auto iter = l1Rid4Index_.find(index);
     if (iter != l1Rid4Index_.end()) {
         l1Rid4Index_.erase(iter);
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "   ... DropFromL1ByIndex: removed index %{public}d -> rid %{public}d from L1",
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "DropFromL1ByIndex: removed index %{public}d -> rid %{public}d from L1",
             static_cast<int32_t>(index), static_cast<int32_t>(ridOpt.value()));
     }
 }
@@ -144,14 +144,14 @@ std::optional<IndexType> RepeatVirtualScroll2Caches::GetL1Index4Rid(RIDType rid)
 
 void RepeatVirtualScroll2Caches::UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index)
 {
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "UpdateL1Rid4Index");
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "UpdateL1Rid4Index");
 
     l1Rid4Index_ = l1Rd4Index;
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "   ... L1Rid4Index: %{public}s", DumpL1Rid4Index().c_str());
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "L1Rid4Index: %{public}s", DumpL1Rid4Index().c_str());
 
     ForEachCacheItem([&](RIDType rid, const CacheItem& cacheItem) {
       cacheItem->isL1_ = (GetL1Index4RID(rid) != std::nullopt);
-      TAG_LOGE(AceLogTag::ACE_REPEAT, "   ... %{public}s", DumpCacheItem(cacheItem).c_str());
+      TAG_LOGD(AceLogTag::ACE_REPEAT, "DumpCacheItem: %{public}s", DumpCacheItem(cacheItem).c_str());
     });
 }
 
@@ -188,7 +188,7 @@ std::optional<IndexType> RepeatVirtualScroll2Caches::GetL1Index4Node(const RefPt
 
 OptCacheItem RepeatVirtualScroll2Caches::CallOnGetRid4Index(IndexType index)
 {
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "    ... CallOnGetRid4Index(index %{public}d: calling TS ...", index);
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "CallOnGetRid4Index(index %{public}d: calling TS", index);
 
     // swap the ViewStackProcessor instance for secondary while we run the item builder function
     // so that its results can easily be obtained from it, does not disturb main ViewStackProcessor
@@ -196,7 +196,7 @@ OptCacheItem RepeatVirtualScroll2Caches::CallOnGetRid4Index(IndexType index)
     auto* viewStack = NG::ViewStackProcessor::GetInstance();
 
     const std::pair<RIDType, uint32_t> result = onGetRid4Index_(index);
-    if (result.second == ONGETRID4INDEX_RESULT_CREATED_NEW_NODE) {
+    if (result.second == OnGetRid4IndexResult::CREATED_NEW_NODE) {
         // case: new node was created successfully
         // get it from ViewStackProcessor
         RefPtr<UINode> node4Index = viewStack->Finish();
@@ -220,17 +220,17 @@ OptCacheItem RepeatVirtualScroll2Caches::CallOnGetRid4Index(IndexType index)
         // add to cache
         cacheItem4Rid_[rid] = RepeatVirtualScroll2CacheItem::MakeCacheItem(node4Index, true);
 
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "REPEAT TRACE ABNORMAL (after startup)   ... CallOnGetRid4Index"
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "REPEAT TRACE ABNORMAL (after startup) ...CallOnGetRid4Index"
             "(index %{public}d -> rid %{public}d) returns CacheItem with newly created node %{public}s .",
             index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
 
         return cacheItem4Rid_[rid];
-    } // case ONGETRID4INDEX_RESULT_CREATED_NEW_NODE)
+    } // case OnGetRid4IndexResult::CREATED_NEW_NODE)
 
-    if (result.second == ONGETRID4INDEX_RESULT_UPDATED_NODE) {
+    if (result.second == OnGetRid4IndexResult::UPDATED_NODE) {
         // case: TS updated existing node that's in the cache already
         const RIDType rid = result.first;
-        if (rid < INVALID_RID) {
+        if (rid < 0) {
             TAG_LOGE(AceLogTag::ACE_REPEAT, "Node update for index %{public}d failed. Invalid rid. "
                 "Internal error!", static_cast<int32_t>(index));
             return std::nullopt;
@@ -246,15 +246,15 @@ OptCacheItem RepeatVirtualScroll2Caches::CallOnGetRid4Index(IndexType index)
         l1Rid4Index_[index] = rid;
         optCacheItem.value()->isL1_ = true;
 
-        TAG_LOGE(AceLogTag::ACE_REPEAT,
-            "... CallOnGetRid4Index(index %{public}d -> rid %{public}d): returns CacheItem with updated node "
+        TAG_LOGD(AceLogTag::ACE_REPEAT,
+            "CallOnGetRid4Index(index %{public}d -> rid %{public}d): returns CacheItem with updated node "
             "%{public}s .", index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
 
         return optCacheItem;
-    } // case ONGETRID4INDEX_RESULT_UPDATED_NODE
+    } // case OnGetRid4IndexResult::UPDATED_NODE
 
     // TS was not able to deliver UINode
-    TAG_LOGE(AceLogTag::ACE_REPEAT,"New node creation failed for index %{public}d. TS unable to create/update node. "
+    TAG_LOGE(AceLogTag::ACE_REPEAT, "New node creation failed for index %{public}d. TS unable to create/update node. "
         "Application error!", static_cast<int32_t>(index));
     return std::nullopt;
 }
@@ -296,7 +296,7 @@ OptCacheItem RepeatVirtualScroll2Caches::GetL1CacheItem4Index(IndexType index)
     const auto cacheItemIter = cacheItem4Rid_.find(rid);
     if (cacheItemIter != cacheItem4Rid_.end() && cacheItemIter->second->node_ != nullptr &&
         cacheItemIter->second->isL1_) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "    ... GetL1CacheItem4Index(index: %{public}d) returns L1 %{public}s .",
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "GetL1CacheItem4Index(index: %{public}d) returns L1 %{public}s .",
             index, DumpCacheItem(cacheItemIter->second).c_str());
         return cacheItemIter->second;
     }

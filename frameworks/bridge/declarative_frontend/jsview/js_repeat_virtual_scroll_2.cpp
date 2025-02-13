@@ -38,10 +38,10 @@ RepeatVirtualScroll2Model* RepeatVirtualScroll2Model::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-enum {
-    PARAM_TOTAL_COUNT = 0,
-    PARAM_HANDLERS = 1,
-    PARAM_SIZE = 2,
+enum CreateParam {
+    TOTAL_COUNT = 0,
+    HANDLERS = 1,
+    SIZE = 2,
 };
 
 static JSRef<JSFunc> GetJSFunc(JsiRef<JSObject> options, const char* propertyName)
@@ -51,11 +51,13 @@ static JSRef<JSFunc> GetJSFunc(JsiRef<JSObject> options, const char* propertyNam
 
 static bool ParseAndVerifyParams(const JSCallbackInfo& info)
 {
-    if (info.Length() != PARAM_SIZE || !info[PARAM_TOTAL_COUNT]->IsNumber() || !info[PARAM_HANDLERS]->IsObject()) {
+    if (info.Length() != CreateParam::SIZE ||
+        !info[CreateParam::TOTAL_COUNT]->IsNumber() ||
+        !info[CreateParam::HANDLERS]->IsObject()) {
         return false;
     }
 
-    auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
+    auto handlers = JSRef<JSObject>::Cast(info[CreateParam::HANDLERS]);
     return (handlers->GetProperty("onGetRid4Index")->IsFunction() &&
             handlers->GetProperty("onRecycleItems")->IsFunction() &&
             handlers->GetProperty("onActiveRange")->IsFunction() &&
@@ -70,10 +72,10 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
     }
 
     // arg 0 totalCount : number
-    auto totalCount = info[PARAM_TOTAL_COUNT]->ToNumber<uint32_t>();
+    auto totalCount = info[CreateParam::TOTAL_COUNT]->ToNumber<uint32_t>();
 
     // arg 2 onGetRid4Index(number int32_t) : number(uint32_t)
-    auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
+    auto handlers = JSRef<JSObject>::Cast(info[CreateParam::HANDLERS]);
     auto onGetRid4Index = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onGetRid4Index")](
                               int32_t forIndex) -> std::pair<uint32_t, uint32_t> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, std::pair<uint32_t, uint32_t>(0, 0));
@@ -99,7 +101,10 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
     auto onActiveRange = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onActiveRange")](
         int32_t fromIndex, int32_t toIndex, bool isLoop) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto params = ConvertToJSValues(fromIndex, toIndex, isLoop);
+        auto params = ConvertToJSValues(
+            fromIndex != INT32_MAX ? fromIndex : std::numeric_limits<double>::quiet_NaN(),
+            toIndex != INT32_MAX ? toIndex : std::numeric_limits<double>::quiet_NaN(),
+            isLoop);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 
@@ -141,22 +146,24 @@ void JSRepeatVirtualScroll2::SetInvalid(const JSCallbackInfo& info)
 void JSRepeatVirtualScroll2::RequestContainerReLayout(const JSCallbackInfo& info)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll:RequestContainerReLayout");
-    enum {
-        PARAM_ELMTID = 0,
-        PARAM_TOTAL_COUNT = 1,
-        PARAM_CHILD_INDEX = 2,
+    enum RequestContainerReLayoutParam {
+        ELMTID = 0,
+        TOTAL_COUNT = 1,
+        CHILD_INDEX = 2,
     };
 
-    if (!info[PARAM_ELMTID]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber() ||
-        !info[PARAM_CHILD_INDEX]->IsNumber()) {
+    if (!info[RequestContainerReLayoutParam::ELMTID]->IsNumber() ||
+        !info[RequestContainerReLayoutParam::TOTAL_COUNT]->IsNumber() ||
+        !info[RequestContainerReLayoutParam::CHILD_INDEX]->IsNumber()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::RequestContainerReLayout - invalid parameters ERROR");
         return;
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::RequestContainerReLayout");
-    auto repeatElmtId = info[PARAM_ELMTID]->ToNumber<int32_t>();
-    auto totalCount = info[PARAM_TOTAL_COUNT]->ToNumber<int32_t>();
-    auto invalidateContainerLayoutFromChildIndex = info[PARAM_CHILD_INDEX]->ToNumber<int32_t>();
+    auto repeatElmtId = info[RequestContainerReLayoutParam::ELMTID]->ToNumber<int32_t>();
+    auto totalCount = info[RequestContainerReLayoutParam::TOTAL_COUNT]->ToNumber<int32_t>();
+    auto invalidateContainerLayoutFromChildIndex =
+        info[RequestContainerReLayoutParam::CHILD_INDEX]->ToNumber<int32_t>();
     RepeatVirtualScroll2Model::GetInstance()->RequestContainerReLayout(
         repeatElmtId, totalCount, invalidateContainerLayoutFromChildIndex);
 }
@@ -168,25 +175,27 @@ void JSRepeatVirtualScroll2::RequestContainerReLayout(const JSCallbackInfo& info
 void JSRepeatVirtualScroll2::UpdateL1Rid4Index(const JSCallbackInfo& info)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll:UpdateL1Rid4Index");
-    enum {
-        PARAM_ELMTID = 0,
-        PARAM_TOTAL_COUNT = 1,
-        PARAM_CHILD_INDEX = 2,
-        PARAM_ARRAY_PAIRS = 3,
+    enum UpdateL1Rid4IndexParam {
+        ELMTID = 0,
+        TOTAL_COUNT = 1,
+        CHILD_INDEX = 2,
+        ARRAY_PAIRS = 3,
     };
 
-    if (!info[PARAM_ELMTID]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber() ||
-        !info[PARAM_CHILD_INDEX]->IsNumber() || !info[PARAM_ARRAY_PAIRS]->IsArray()) {
+    if (!info[UpdateL1Rid4IndexParam::ELMTID]->IsNumber() ||
+        !info[UpdateL1Rid4IndexParam::TOTAL_COUNT]->IsNumber() ||
+        !info[UpdateL1Rid4IndexParam::CHILD_INDEX]->IsNumber() ||
+        !info[UpdateL1Rid4IndexParam::ARRAY_PAIRS]->IsArray()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::UpdateL1Rid4Index - invalid parameters ERROR");
         return;
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::UpdateL1Rid4Index");
-    auto repeatElmtId = info[PARAM_ELMTID]->ToNumber<int32_t>();
-    auto totalCount = info[PARAM_TOTAL_COUNT]->ToNumber<uint32_t>();
-    auto invalidateContainerLayoutFromChildIndex = info[PARAM_CHILD_INDEX]->ToNumber<uint32_t>();
+    auto repeatElmtId = info[UpdateL1Rid4IndexParam::ELMTID]->ToNumber<int32_t>();
+    auto totalCount = info[UpdateL1Rid4IndexParam::TOTAL_COUNT]->ToNumber<uint32_t>();
+    auto invalidateContainerLayoutFromChildIndex = info[UpdateL1Rid4IndexParam::CHILD_INDEX]->ToNumber<uint32_t>();
 
-    auto arrayOfPairs = JSRef<JSArray>::Cast(info[PARAM_ARRAY_PAIRS]);
+    auto arrayOfPairs = JSRef<JSArray>::Cast(info[UpdateL1Rid4IndexParam::ARRAY_PAIRS]);
     std::map<int32_t, uint32_t> l1Rid4Index;
     for (size_t i = 0; i < arrayOfPairs->Length(); i++) {
         JSRef<JSArray> pair = arrayOfPairs->GetValueAt(i);

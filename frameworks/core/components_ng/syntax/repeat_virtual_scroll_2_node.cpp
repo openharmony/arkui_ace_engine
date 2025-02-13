@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,7 +82,7 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
 
     // step 4: iterate over all UINode sub-trees, only interested in L2 ones
     // for items moved from L1 to L2 but sitl active and on render tree, correct this.
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "Checking spare nodes on C++ side ....");
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "Checking spare nodes on C++ side ...");
     needSync = ProcessActiveL2Nodes() || needSync;
 
     // memorize range
@@ -250,13 +250,13 @@ bool RepeatVirtualScroll2Node::RebuildL1(int32_t start, int32_t end, int32_t nSt
             if (repeatNode->CheckNode4IndexInL1(index, nStart, nEnd, cacheItem)) {
                 // keep in Repeat L1
                 TAG_LOGD(AceLogTag::ACE_REPEAT,
-                    "  ... in L1: index %{public}d, node %{public}s with child id %{public}d: SetActive(True)",
+                    "in L1: index %{public}d, node %{public}s with child id %{public}d: SetActive(True)",
                     index, caches_.DumpUINode(cacheItem->node_).c_str(), static_cast<int32_t>(frameNode->GetId()));
                 return true;
             }
 
             TAG_LOGD(AceLogTag::ACE_REPEAT,
-                "  ... out of L1: index %{public}d, node %{public}s with child id %{public}d",
+                "out of L1: index %{public}d, node %{public}s with child id %{public}d",
                 index, caches_.DumpUINode(cacheItem->node_).c_str(), frameNode->GetId());
 
             // move active node into L2 cached. check transition flag.
@@ -297,7 +297,7 @@ bool RepeatVirtualScroll2Node::ProcessActiveL2Nodes()
             cacheItem->node_->SetJSViewActive(false);
             needSync = true;
             TAG_LOGD(AceLogTag::ACE_REPEAT,
-                "   ... spare node %{public}s: apply SetActive(false) & SetJSViewActive(false)",
+                "spare node %{public}s: apply SetActive(false) & SetJSViewActive(false)",
                 caches_.DumpCacheItem(cacheItem).c_str());
         }
         if (!cacheItem->isOnRenderTree_) {
@@ -312,7 +312,7 @@ bool RepeatVirtualScroll2Node::ProcessActiveL2Nodes()
         }
         cacheItem->isOnRenderTree_ = false;
         needSync = true;
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "   ... spare nodes %{public}s: removed node from render tree",
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "spare nodes %{public}s: removed node from render tree",
             caches_.DumpCacheItem(cacheItem).c_str());
     });
 
@@ -425,7 +425,7 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndex(
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, "
         "needBuild:  %{public}d, isCache: %{public}d, "
-        "addToRenderTree: %{public}d) ...",
+        "addToRenderTree: %{public}d).",
         static_cast<int32_t>(GetId()), static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
         static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
@@ -447,13 +447,13 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
     uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     std::pair<uint32_t, CacheItem> resultPair = caches_.GetFrameChild(index, needBuild);
-    const bool hasNoNode = ((resultPair.first == ONGETRID4INDEX_RESULT_NO_NODE)
+    const bool hasNoNode = ((resultPair.first == OnGetRid4IndexResult::NO_NODE)
         || (resultPair.second == nullptr)
         || (resultPair.second->node_ == nullptr));
 
     if (hasNoNode && !needBuild) {
         TAG_LOGD(AceLogTag::ACE_REPEAT,
-            "... GetFrameChild(%{public}d) not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .",
+            "GetFrameChild(%{public}d) not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .",
             static_cast<IndexType>(index));
         return nullptr;
     }
@@ -461,14 +461,14 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
     // node for index needs to be created or updated on JS side
     if (hasNoNode) {
         TAG_LOGE(AceLogTag::ACE_REPEAT,
-            "    ... GetFrameChild(%{public}d) failed to create new or update existing node. Non-recoverable error.",
+            "GetFrameChild(%{public}d) failed to create new or update existing node. Non-recoverable error.",
             static_cast<IndexType>(index));
         return nullptr;
     }
 
     CacheItem& cacheItem4Index = resultPair.second;
 
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "    ... GetFrameChild(%{public}d) returns node %{public}s .",
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "GetFrameChild(%{public}d) returns node %{public}s.",
         static_cast<IndexType>(index), caches_.DumpUINode(cacheItem4Index->node_).c_str());
 
     cacheItem4Index->node_->UpdateThemeScopeId(GetThemeScopeId());
@@ -482,7 +482,7 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
         cacheItem4Index->isActive_ = true;
     }
 
-    if (cacheItem4Index->isOnRenderTree_ && (resultPair.first == ONGETRID4INDEX_RESULT_UNCHANGED_NODE)) {
+    if (cacheItem4Index->isOnRenderTree_ && (resultPair.first == OnGetRid4IndexResult::UNCHANGED_NODE)) {
         return cacheItem4Index->node_->GetFrameChildByIndex(0, needBuild);
     }
 
@@ -526,7 +526,7 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildren(bool /*no
         return children_;
     }
 
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "GetChildren rebuild starting ....");
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "GetChildren rebuild starting ...");
 
     // can not modify l1_cache while iterating
     // GetChildren is overloaded, can not change it to non-const

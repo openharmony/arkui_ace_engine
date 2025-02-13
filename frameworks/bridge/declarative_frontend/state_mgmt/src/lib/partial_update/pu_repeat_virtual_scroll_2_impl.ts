@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -216,7 +216,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // index <-> key bidirectional mapping
     private key4Index_: Map<number, string> = new Map<number, string>();
     private index4Key_: Map<string, number> = new Map<string, number>();
-    
+    // duplicate keys
+    private oldDuplicateKeys_: Set<string> = new Set<string>();
+
     // map if .each and .template functions
     private itemGenFuncs_: { [type: string]: RepeatItemGenFunc<T> };
 
@@ -425,6 +427,7 @@ class __RepeatVirtualScroll2Impl<T> {
         // clear keys for new rerender
         this.key4Index_.clear();
         this.index4Key_.clear();
+        this.oldDuplicateKeys_.clear();
 
         // step 1. move data items to newActiveDataItems that are unchanged
         // (same item / same key, still at same index, same ttype)
@@ -688,8 +691,8 @@ class __RepeatVirtualScroll2Impl<T> {
             monitorAccess && this.stopRecordDependencies();
 
             const optIndex1: number | undefined = this.index4Key_.get(key);
-            if (optIndex1 !== undefined) {
-                key = this.handleDuplicateKey(optIndex1, index, key, activateDataItems);
+            if (optIndex1 !== undefined || this.oldDuplicateKeys_.has(key)) {
+                key = this.handleDuplicateKey(index, key, optIndex1, activateDataItems);
             } else {
                 this.key4Index_.set(index, key);
                 this.index4Key_.set(key, index);
@@ -705,24 +708,28 @@ class __RepeatVirtualScroll2Impl<T> {
     // when generating key for index2, detected that index1 has same key already
     // need to change the key for both index'es
     // returns random key for index 2
-    private handleDuplicateKey(prevIndex: number, curIndex: number, origKey: string,
+    private handleDuplicateKey(curIndex: number, origKey: string, prevIndex?: number,
         activateDataItems?: Array<ActiveDataItem<void | T>>): string {
+        this.oldDuplicateKeys_.add(origKey);
+
         const curKey = this.mkRandomKey(curIndex, origKey);
         this.key4Index_.set(curIndex, curKey);
         this.index4Key_.set(curKey, curIndex);
 
-        // also make a new key for index1
-        const prevKey = this.mkRandomKey(prevIndex, origKey);
-        this.key4Index_.set(prevIndex, prevKey);
-        this.index4Key_.set(prevKey, prevIndex);
-        this.index4Key_.delete(origKey);
-        if (activateDataItems && activateDataItems[prevIndex] !== undefined) {
-            stateMgmtConsole.debug(`correcting key of activeDataItem index ${prevIndex} from `,
-                `'${activateDataItems[prevIndex].key}' to '${prevKey}'.`);
-            activateDataItems[prevIndex].key = prevKey;
+        if (prevIndex !== undefined) {
+            // also make a new key for prevIndex
+            const prevKey = this.mkRandomKey(prevIndex, origKey);
+            this.key4Index_.set(prevIndex, prevKey);
+            this.index4Key_.set(prevKey, prevIndex);
+            this.index4Key_.delete(origKey);
+            if (activateDataItems && activateDataItems[prevIndex] !== undefined) {
+                stateMgmtConsole.debug(`correcting key of activeDataItem index ${prevIndex} from `,
+                    `'${activateDataItems[prevIndex].key}' to '${prevKey}'.`);
+                activateDataItems[prevIndex].key = prevKey;
+            }
         }
-        stateMgmtConsole.applicationError(`__RepeatVirtualScroll2Impl (${this.repeatElmtId_}): `,
-            `Detected duplicate key ${origKey} for index ${prevIndex} and ${curIndex}! `,
+        stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}): `,
+            `Detected duplicate key ${origKey} for index ${curIndex}! `,
             `Generated random key will decrease Repeat performance. Fix the key gen function in your application!`);
         return curKey;
     }
@@ -979,12 +986,6 @@ class __RepeatVirtualScroll2Impl<T> {
                     `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - unchanged, skipping.`);
                 return;
             }
-        }
-
-        const maxInt: number = 2147483647;
-        if (nStart === maxInt && nEnd === maxInt) { // there is no active node on screen
-            nStart = NaN;
-            nEnd = NaN;
         }
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,

@@ -111,11 +111,12 @@ bool ViewPartialUpdateModelNG::AllowReusableV2Descendant(const WeakPtr<AceType>&
     RefPtr<UINode> node = weak.Upgrade();
     CHECK_NULL_RETURN(node, false);
 
-    while (node->GetParent() && (node->GetParent()->GetTag() != V2::JS_VIEW_ETS_TAG)) {
-        if (AceType::DynamicCast<RepeatVirtualScrollNode>(node->GetParent()) != nullptr) {
+    node = node->GetParent();
+    while (node && (node->GetTag() != V2::JS_VIEW_ETS_TAG)) {
+        if (AceType::DynamicCast<RepeatVirtualScrollNode>(node) != nullptr) {
             break;
         }
-        if (AceType::DynamicCast<RepeatVirtualScroll2Node>(node->GetParent()) != nullptr) {
+        if (AceType::DynamicCast<RepeatVirtualScroll2Node>(node) != nullptr) {
             break;
         }
         node = node->GetParent();

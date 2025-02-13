@@ -121,14 +121,13 @@ using ActiveRangeType = std::pair<IndexType, IndexType>;
 // Note: using #define instead of enum class due to bridging limitations
 // between TS and UINode classes: not allowed to import the class definition
 // from js_repeat_virtual_scroll.cpp
-#define ONGETRID4INDEX_RESULT_FAILED 0
-#define ONGETRID4INDEX_RESULT_NO_NODE 0
-#define ONGETRID4INDEX_RESULT_CREATED_NEW_NODE 1
-#define ONGETRID4INDEX_RESULT_UPDATED_NODE 2
-#define ONGETRID4INDEX_RESULT_UNCHANGED_NODE 3
-
-#define NO_L1_INDEX (-1)
-#define INVALID_RID 0
+enum OnGetRid4IndexResult {
+    FAILED = 0,
+    NO_NODE = 0,
+    CREATED_NEW_NODE = 1,
+    UPDATED_NODE = 2,
+    UNCHANGED_NODE = 3
+};
 
 class RepeatVirtualScroll2Caches {
 public:
@@ -210,7 +209,7 @@ public:
 
     /**
      * return the index of given RID in L1
-     * or NO_L1_INDEX
+     * or NO_L1_INDEX(-1)
      */
     std::optional<IndexType> GetL1Index4RID(RIDType rid) const;
 
