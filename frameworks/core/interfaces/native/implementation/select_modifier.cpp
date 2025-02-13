@@ -258,10 +258,10 @@ void OnSelectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSelect = [frameNode](int32_t index, const std::string& value) {
+    auto onSelect = [arkCallback = CallbackHelper(*value)](int32_t index, const std::string& value) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         auto arkValue = Converter::ArkValue<Ark_String>(value);
-        GetFullAPI()->getEventsAPI()->getSelectEventsReceiver()->onSelect(frameNode->GetId(), arkIndex, arkValue);
+        arkCallback.Invoke(arkIndex, arkValue);
     };
     SelectModelNG::SetOnSelect(frameNode, std::move(onSelect));
 }

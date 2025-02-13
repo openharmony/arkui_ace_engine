@@ -58,16 +58,6 @@ namespace  {
     const auto POINT_COLOR_RESOURCE = CreateResource("switch_point_color", Converter::ResourceType::COLOR);
     const auto POINT_RADIUS_RESOURCE = CreateResource("switch_point_radius", Converter::ResourceType::FLOAT);
     const auto TRACK_BORDER_RADIUS_RESOURCE = CreateResource("track_border_radius", Converter::ResourceType::FLOAT);
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUIToggleEventsReceiver toggleEventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getToggleEventsReceiver = [] () -> const GENERATED_ArkUIToggleEventsReceiver* {
-                return &toggleEventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class ToggleModifierTest : public ModifierTestBase<GENERATED_ArkUIToggleModifier,
@@ -93,7 +83,6 @@ public:
         AddResource("track_border_radius", Dimension(SWITCH_RADIUS, DimensionUnit::VP));
         SetupTheme<SwitchTheme>();
         SetupTheme<CheckboxTheme>();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -265,7 +254,6 @@ HWTEST_F(ToggleModifierTest, setToggleOptionsTestIsOnInvalidValues, TestSize.Lev
  */
 HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
 
@@ -274,15 +262,17 @@ HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
         bool isOn;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::toggleEventReceiver.onChange = [](Ark_Int32 nodeId, Ark_Boolean isOn)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .isOn = Converter::Convert<bool>(isOn)
-        };
+    Callback_Boolean_Void arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Boolean value) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .isOn = Converter::Convert<bool>(value)
+            };
+        }
     };
 
-    modifier_->setOnChange(node_, &func);
+    modifier_->setOnChange(node_, &arkCallback);
     EXPECT_FALSE(checkEvent.has_value());
     eventHub->UpdateChangeEvent(true);
     ASSERT_TRUE(checkEvent.has_value());
