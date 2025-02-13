@@ -28,6 +28,15 @@ struct ASTCdata {
 
 namespace Converter {
 template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ASTCResource& src)
+{
+    auto sources = OptConvert<ASTCdata>(src);
+    if (sources) {
+        dst.reset();
+    }
+}
+
+template<>
 void AssignCast(std::optional<ASTCdata>& dst, const Ark_ASTCResource& src)
 {
     auto sources = Convert<std::vector<std::string>>(src.sources);
@@ -65,7 +74,13 @@ void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
     // Note.
     // This function should skip InitImage invocation if info's optional is empty.
     if (info) {
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
+        if (info->GetPixmap()) {
+            auto pixelMap = info->GetPixmap(); // GetPixmap return const RefPtr
+            ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+        } else {
+            ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                info->GetModuleName(), info->GetIsUriPureNumber());
+        }
     }
 }
 } // MediaCachedImageInterfaceModifier
