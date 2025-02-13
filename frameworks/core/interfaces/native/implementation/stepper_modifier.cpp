@@ -98,8 +98,8 @@ void OnPreviousImpl(Ark_NativePointer node,
     };
     StepperModelNG::SetOnPrevious(frameNode, std::move(onPrevious));
 }
-void __onChangeEvent_indexImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_indexImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -122,7 +122,7 @@ const GENERATED_ArkUIStepperModifier* GetStepperModifier()
         StepperAttributeModifier::OnChangeImpl,
         StepperAttributeModifier::OnNextImpl,
         StepperAttributeModifier::OnPreviousImpl,
-        StepperAttributeModifier::__onChangeEvent_indexImpl,
+        StepperAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUIStepperModifierImpl;
 }

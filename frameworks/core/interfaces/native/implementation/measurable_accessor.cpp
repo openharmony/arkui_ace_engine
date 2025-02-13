@@ -22,7 +22,7 @@ namespace MeasurableAccessor {
 void DestroyPeerImpl(MeasurablePeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_Measurable CtorImpl()
 {
     return nullptr;
 }

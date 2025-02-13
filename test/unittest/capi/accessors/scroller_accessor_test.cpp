@@ -856,9 +856,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToICurveTest, TestSize.Level1)
 
     ICurvePeer peer;
     peer.handler = Referenced::MakeRefPtr<MockCurve>();
-    Ark_ICurve ICurve;
-    ICurve.ptr = &peer;
-    Ark_Union_Curve_ICurve arkCurve =  Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_ICurve>(ICurve);
+    Ark_Union_Curve_ICurve arkCurve = Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_ICurve>(&peer);
     scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(arkCurve);
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);

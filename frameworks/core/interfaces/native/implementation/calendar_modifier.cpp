@@ -91,7 +91,7 @@ CalendarData Convert(const Ark_Type_CalendarInterface_value& src)
         .currentData = Convert<ObtainedMonth>(src.currentData),
         .preData = Convert<ObtainedMonth>(src.preData),
         .nextData = Convert<ObtainedMonth>(src.nextData),
-        .controller = peer ? reinterpret_cast<CalendarControllerPeer*>(peer->ptr)->controller : nullptr,
+        .controller = peer ? peer.value()->controller : nullptr,
     };
 }
 

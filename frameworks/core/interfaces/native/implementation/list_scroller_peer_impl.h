@@ -20,7 +20,7 @@
 struct ListScrollerPeer : public OHOS::Ace::NG::GeneratedModifier::ScrollerPeerImpl {
 public:
     ListScrollerPeer() = default;
-    ~ListScrollerPeer() = default;
+    ~ListScrollerPeer() override = default;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ListScrollerPeer);

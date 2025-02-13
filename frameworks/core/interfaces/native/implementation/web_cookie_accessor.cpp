@@ -16,22 +16,23 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+
+#include "web_cookie_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
 void DestroyPeerImpl(WebCookiePeer* peer)
 {
-    auto peerImpl = reinterpret_cast<WebCookiePeerImpl *>(peer);
+    auto peerImpl = peer;
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_WebCookie CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<WebCookiePeerImpl>();
+    auto peerImpl = Referenced::MakeRefPtr<WebCookiePeer>();
     peerImpl->IncRefCount();
-    return reinterpret_cast<WebCookiePeer *>(Referenced::RawPtr(peerImpl));
+    return Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

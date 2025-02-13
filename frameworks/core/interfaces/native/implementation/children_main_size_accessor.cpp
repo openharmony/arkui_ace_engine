@@ -27,7 +27,7 @@ void DestroyPeerImpl(ChildrenMainSizePeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_Number* childDefaultSize)
+Ark_ChildrenMainSize CtorImpl(const Ark_Number* childDefaultSize)
 {
     CHECK_NULL_RETURN(childDefaultSize, nullptr);
     float size = Converter::Convert<float>(*childDefaultSize);

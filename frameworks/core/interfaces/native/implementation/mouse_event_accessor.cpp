@@ -54,7 +54,7 @@ void DestroyPeerImpl(MouseEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_MouseEvent CtorImpl()
 {
     return new MouseEventPeer();
 }

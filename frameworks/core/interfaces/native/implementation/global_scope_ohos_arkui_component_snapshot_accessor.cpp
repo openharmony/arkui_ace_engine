@@ -22,7 +22,7 @@ namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
 void DestroyPeerImpl(GlobalScope_ohos_arkui_componentSnapshotPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_GlobalScope_ohos_arkui_componentSnapshot CtorImpl()
 {
     return nullptr;
 }

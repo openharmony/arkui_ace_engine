@@ -774,9 +774,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    Ark_Scroller arkScroller;
-    arkScroller.ptr = peerImplPtr;
-    Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(arkScroller);
+    Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(peerImplPtr);
     modifier_->setScrollOptions(node_, &scroller);
 
     RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();
@@ -809,8 +807,6 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestS
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    Ark_Scroller arkScroller;
-    arkScroller.ptr = peerImplPtr;
     Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
     modifier_->setScrollOptions(node_, &scroller);
 
@@ -1418,8 +1414,7 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
 
     auto id = Converter::ArkValue<Ark_Int32>(123);
 
-    auto apiCall = Converter::ArkValue<Opt_ScrollOnScrollCallback>(
-        Converter::ArkValue<ScrollOnScrollCallback>(callback, id));
+    auto apiCall = Converter::ArkValue<ScrollOnScrollCallback>(callback, id);
     ASSERT_FALSE(eventHub->GetOnDidScrollEvent());
 
     ASSERT_NE(modifier_->setOnDidScroll, nullptr);

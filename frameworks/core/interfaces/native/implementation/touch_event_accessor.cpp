@@ -23,7 +23,7 @@ void DestroyPeerImpl(TouchEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TouchEvent CtorImpl()
 {
     return new TouchEventPeer();
 }

@@ -29,7 +29,7 @@ void DestroyPeerImpl(TextControllerPeer* peer)
     peer->controller = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextController CtorImpl()
 {
     return new TextControllerPeer();
 }
@@ -43,19 +43,18 @@ void CloseSelectionMenuImpl(TextControllerPeer* peer)
     peer->controller->CloseSelectionMenu();
 }
 void SetStyledStringImpl(TextControllerPeer* peer,
-                         const Ark_StyledString* value)
+                         Ark_StyledString value)
 {
     CHECK_NULL_VOID(peer && peer->controller);
-    CHECK_NULL_VOID(value && value->ptr);
-    auto styledStringPeer = reinterpret_cast<StyledStringPeer*>(value->ptr);
-    peer->controller->SetStyledString(styledStringPeer->spanString);
+    CHECK_NULL_VOID(value);
+    peer->controller->SetStyledString(value->spanString);
 }
-Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(TextControllerPeer* peer)
 {
     CHECK_NULL_RETURN(peer && peer->controller, nullptr);
     auto layoutManagerAccessor = GetLayoutManagerAccessor();
     CHECK_NULL_RETURN(layoutManagerAccessor, nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(layoutManagerAccessor->ctor());
+    auto layoutManagerPeer = layoutManagerAccessor->ctor();
     CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
     layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
     return layoutManagerPeer;

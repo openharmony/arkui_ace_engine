@@ -63,11 +63,10 @@ void SetPatternLockOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(controller);
 
-    auto controllerPtr = Converter::OptConvert<Ark_NativePointer>(*controller);
+    auto controllerPtr = Converter::OptConvert<Ark_PatternLockController>(*controller);
     if (controllerPtr.has_value()) {
         auto internalController = PatternLockModelNG::GetController(frameNode);
-        auto peerImplPtr = reinterpret_cast<GeneratedModifier::PatternLockControllerPeerImpl *>(
-        controllerPtr.value());
+        auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
         CHECK_NULL_VOID(peerImplPtr);
         // pass the internal controller to external management
         peerImplPtr->SetHandler(internalController);

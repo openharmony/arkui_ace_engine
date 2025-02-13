@@ -29,7 +29,7 @@ void DestroyPeerImpl(KeyEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_KeyEvent CtorImpl()
 {
     return new KeyEventPeer();
 }

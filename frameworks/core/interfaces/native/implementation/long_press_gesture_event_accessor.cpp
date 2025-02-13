@@ -23,7 +23,7 @@ void DestroyPeerImpl(LongPressGestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_LongPressGestureEvent CtorImpl()
 {
     return new LongPressGestureEventPeer();
 }

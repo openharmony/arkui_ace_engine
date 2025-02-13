@@ -19,7 +19,8 @@
 #include "core/common/container.h"
 #include "core/common/container_consts.h"
 #include "core/components/web/web_property.h"
-#include "core/interfaces/native/utility/ace_engine_types.h"
+
+#include "web_cookie_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class WebControllerPeerImpl : public Referenced {
@@ -31,9 +32,6 @@ public:
 
     ~WebControllerPeerImpl() override
     {
-        if (webCookie_) {
-            webCookie_->DecRefCount();
-        }
     }
 
     const RefPtr<WebController>& GetController() const
@@ -51,7 +49,7 @@ public:
         return instanceId_;
     }
 
-    RefPtr<WebCookiePeerImpl> GetCookieManager()
+    RefPtr<WebCookiePeer> GetCookieManager()
     {
         ContainerScope scope(instanceId_);
         if (webController_) {
@@ -59,8 +57,7 @@ public:
                 return nullptr;
             }
             if (webCookie_ == nullptr) {
-                webCookie_ = Referenced::MakeRefPtr<WebCookiePeerImpl>();
-                webCookie_->IncRefCount();
+                webCookie_ = Referenced::MakeRefPtr<WebCookiePeer>();
             }
         }
         return webCookie_;
@@ -69,7 +66,9 @@ public:
 private:
     RefPtr<WebController> webController_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
-    RefPtr<WebCookiePeerImpl> webCookie_;
+    RefPtr<WebCookiePeer> webCookie_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct WebControllerPeer : public OHOS::Ace::NG::GeneratedModifier::WebControllerPeerImpl {};
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEB_CONTROLLER_PEER_IMPL_H

@@ -133,7 +133,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(peer);
             auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
             uiExtensionProxyPeerPtr->SetProxy(proxy);
-            arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
+            arkCallback.Invoke(peer);
         };
     UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED

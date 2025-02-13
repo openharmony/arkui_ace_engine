@@ -28,7 +28,7 @@ void DestroyPeerImpl(XComponentControllerPeer* peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_NativePointer CtorImpl()
+Ark_XComponentController CtorImpl()
 {
     auto peer = Referenced::MakeRefPtr<XComponentControllerPeer>();
     peer->IncRefCount();

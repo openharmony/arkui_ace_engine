@@ -213,32 +213,30 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountInvalidValues, 
  */
 HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestController, TestSize.Level1)
 {
-    Opt_TextTimerOptions opts = {};
-    Ark_NativePointer controllerPtr =
+    auto controllerPtr =
         fullAPI_->getAccessors()->getTextTimerControllerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<TextTimerControllerPeer*>(controllerPtr);
-    ASSERT_NE(peerImplPtr, nullptr);
+    ASSERT_NE(controllerPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    Ark_TextTimerController arkController;
-    arkController.ptr = controllerPtr;
-    opts.value.controller = Converter::ArkValue<Opt_TextTimerController>(arkController);
+    Opt_TextTimerOptions opts = Converter::ArkValue<Opt_TextTimerOptions>(Ark_TextTimerOptions{
+        .controller = Converter::ArkValue<Opt_TextTimerController>(controllerPtr),
+    });
     modifier_->setTextTimerOptions(node_, &opts);
 
     RefPtr<TextTimerController> controller = pattern->GetTextTimerController();
     ASSERT_NE(controller, nullptr);
 
-    EXPECT_EQ(peerImplPtr->GetController(), controller);
+    EXPECT_EQ(controllerPtr->GetController(), controller);
 
-    Ark_NativePointer finalizerPtr =
+    auto finalizerPtr =
         fullAPI_->getAccessors()->getTextTimerControllerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(TextTimerControllerPeer *)>(finalizerPtr);
     ASSERT_NE(finalyzer, nullptr);
-    finalyzer(reinterpret_cast<TextTimerControllerPeer *>(controllerPtr));
+    finalyzer(controllerPtr);
 }
 
 /*

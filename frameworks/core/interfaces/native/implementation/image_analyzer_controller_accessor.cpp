@@ -56,7 +56,7 @@ void DestroyPeerImpl(ImageAnalyzerControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_ImageAnalyzerController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ImageAnalyzerControllerPeer>();
     peerImpl->IncRefCount();

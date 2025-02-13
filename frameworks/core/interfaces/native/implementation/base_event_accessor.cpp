@@ -62,7 +62,7 @@ void DestroyPeerImpl(BaseEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_BaseEvent CtorImpl()
 {
     return new BaseEventPeerImpl();
 }

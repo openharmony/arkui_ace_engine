@@ -35,7 +35,7 @@ void DestroyPeerImpl(LazyForEachOpsPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_LazyForEachOps CtorImpl()
 {
     return new LazyForEachOpsPeer();
 }

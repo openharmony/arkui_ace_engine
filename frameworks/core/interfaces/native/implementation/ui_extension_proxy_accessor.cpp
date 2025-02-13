@@ -29,7 +29,7 @@ void DestroyPeerImpl(UIExtensionProxyPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_UIExtensionProxy CtorImpl()
 {
     return nullptr;
 }
@@ -61,7 +61,7 @@ void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
         CHECK_NULL_VOID(peer);
         auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
         uiExtensionProxyPeerPtr->SetProxy(proxy);
-        arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
+        arkCallback.Invoke(peer);
     };
 
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
@@ -85,7 +85,7 @@ void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
         CHECK_NULL_VOID(peer);
         auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
         uiExtensionProxyPeerPtr->SetProxy(proxy);
-        arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
+        arkCallback.Invoke(peer);
     };
 
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);

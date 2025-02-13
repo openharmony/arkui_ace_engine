@@ -24,7 +24,7 @@ namespace CustomSpanAccessor {
 void DestroyPeerImpl(CustomSpanPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_CustomSpan CtorImpl()
 {
     return nullptr;
 }

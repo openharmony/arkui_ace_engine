@@ -26,7 +26,7 @@ void DestroyPeerImpl(LengthMetricsPeer* peer)
 {
     LengthMetricsPeer::Destroy(peer);
 }
-Ark_NativePointer CtorImpl()
+Ark_LengthMetrics CtorImpl()
 {
     return LengthMetricsPeer::Create({});
 }
@@ -34,11 +34,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer PxImpl(const Ark_Number* value)
+Ark_LengthMetrics PxImpl(const Ark_Number* value)
 {
-    return LengthMetricsPeer::Create(Convert<Dimension>(*value));
+    return LengthMetricsPeer::Create(Dimension(Convert<float>(*value)));
 }
-Ark_NativePointer ResourceImpl(const Ark_Resource* value)
+Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
     return LengthMetricsPeer::Create(OptConvert<Dimension>(*value).value_or(Dimension()));
 }

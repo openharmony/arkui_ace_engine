@@ -63,7 +63,7 @@ void DestroyPeerImpl(ActionSheetPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_ActionSheet CtorImpl()
 {
     return new ActionSheetPeer();
 }

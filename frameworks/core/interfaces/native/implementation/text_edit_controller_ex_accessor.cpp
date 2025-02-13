@@ -24,7 +24,7 @@ void DestroyPeerImpl(TextEditControllerExPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextEditControllerEx CtorImpl()
 {
     LOGE("TextEditControllerExPeer is an abstract class.");
     return nullptr;

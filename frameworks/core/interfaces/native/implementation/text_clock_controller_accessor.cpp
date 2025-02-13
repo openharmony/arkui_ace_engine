@@ -27,7 +27,7 @@ void DestroyPeerImpl(TextClockControllerPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TextClockController CtorImpl()
 {
     return new TextClockControllerPeer();
 }

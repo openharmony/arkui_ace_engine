@@ -26,7 +26,7 @@ void DestroyPeerImpl(ScreenCaptureHandlerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_ScreenCaptureHandler CtorImpl()
 {
     return new ScreenCaptureHandlerPeer();
 }

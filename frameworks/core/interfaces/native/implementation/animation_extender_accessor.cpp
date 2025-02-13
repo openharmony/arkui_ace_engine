@@ -22,7 +22,7 @@ namespace AnimationExtenderAccessor {
 void DestroyPeerImpl(AnimationExtenderPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_AnimationExtender CtorImpl()
 {
     return nullptr;
 }

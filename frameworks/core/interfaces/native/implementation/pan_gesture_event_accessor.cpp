@@ -23,7 +23,7 @@ void DestroyPeerImpl(PanGestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_PanGestureEvent CtorImpl()
 {
     return new PanGestureEventPeer();
 }

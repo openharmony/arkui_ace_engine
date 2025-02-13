@@ -23,7 +23,7 @@ void DestroyPeerImpl(HoverEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_HoverEvent CtorImpl()
 {
     return new HoverEventPeer();
 }

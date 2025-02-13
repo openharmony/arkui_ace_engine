@@ -42,9 +42,9 @@ namespace GeneratedModifier {
 namespace Converter {
     void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
     {
-        const auto peer = reinterpret_cast<UnifiedDataPeer*>(GeneratedModifier::GetUnifiedDataAccessor()->ctor());
+        const auto peer = GeneratedModifier::GetUnifiedDataAccessor()->ctor();
         peer->unifiedData = data;
-        arkData.ptr = peer;
+        arkData = peer;
     }
 }
 
@@ -167,13 +167,12 @@ HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
-    auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
-    auto arkUnifiedData = ArkValue<Ark_UnifiedData>(data);
-    accessor_->setData(peer_, &arkUnifiedData);
+    auto arkUnifiedData = ArkValue<Ark_UnifiedData>(unifiedData);
+    accessor_->setData(peer_, arkUnifiedData);
     ASSERT_NE(dragEvent_->GetData(), nullptr);
     EXPECT_EQ(dragEvent_->GetData()->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: setData";
-    auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(arkUnifiedData.ptr);
+    auto unifiedDataPeer = arkUnifiedData;
     GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
 }
 
@@ -185,16 +184,15 @@ HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
-    auto data = AceType::DynamicCast<UnifiedData>(unifiedData);
-    auto arkUnifiedData = ArkValue<Ark_UnifiedData>(data);
-    accessor_->setData(peer_, &arkUnifiedData);
+    auto arkUnifiedData = ArkValue<Ark_UnifiedData>(unifiedData);
+    accessor_->setData(peer_, arkUnifiedData);
     auto getData = accessor_->getData(peer_);
     ASSERT_NE(getData, nullptr);
-    auto dataPeer = reinterpret_cast<UnifiedDataPeer*>(getData);
+    auto dataPeer = getData;
     ASSERT_NE(dataPeer->unifiedData, nullptr);
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
-    auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(arkUnifiedData.ptr);
+    auto unifiedDataPeer = arkUnifiedData;
     GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
     GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(dataPeer);
 }

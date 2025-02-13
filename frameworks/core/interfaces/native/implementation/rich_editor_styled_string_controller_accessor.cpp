@@ -14,31 +14,22 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/implementation/styled_string_peer.h"
-#include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 
-namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_Materialized& dst, const std::string& src)
-{
-    auto str2 = const_cast<std::string&>(src);
-    dst.ptr = &str2;
-}
+#include "mutable_styled_string_peer.h"
+#include "rich_editor_styled_string_controller_peer_impl.h"
+#include "styled_string_peer.h"
+
+namespace OHOS::Ace::NG {
 void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
 {
-    auto str = src.GetReplacementString();
-    auto replacementString = reinterpret_cast<MutableSpanString*>(str.GetRawPtr());
-    if (replacementString) {
-        dst.replacementString = Converter::ArkValue<Ark_StyledString>(replacementString->GetString());
-    }
+    dst.replacementString = StyledStringPeer::Create(src.GetReplacementString());
     dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
     dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);
 }
-} // namespace OHOS::Ace::NG::Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
@@ -47,7 +38,7 @@ void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorStyledStringController CtorImpl()
 {
     return new RichEditorStyledStringControllerPeer();
 }
@@ -56,15 +47,13 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
-                         const Ark_StyledString* styledString)
+                         Ark_StyledString styledString)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(styledString);
-    CHECK_NULL_VOID(styledString->ptr);
-    auto styledStringPeer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
-    peer->SetStyledString(styledStringPeer->spanString);
+    peer->SetStyledString(styledString->spanString);
 }
-Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
+Ark_MutableStyledString GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
 {
     auto mutableString = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
     CHECK_NULL_RETURN(peer && mutableString, mutableString);

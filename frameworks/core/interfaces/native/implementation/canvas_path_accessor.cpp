@@ -27,7 +27,7 @@ void DestroyPeerImpl(CanvasPathPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_CanvasPath CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<CanvasPathPeerImpl>();
     peerImpl->IncRefCount();

@@ -24,7 +24,7 @@ namespace ContextMenuAccessor {
 void DestroyPeerImpl(ContextMenuPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ContextMenu CtorImpl()
 {
     return nullptr;
 }

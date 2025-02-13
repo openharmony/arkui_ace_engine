@@ -25,7 +25,7 @@ void DestroyPeerImpl(SwiperContentTransitionProxyPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_SwiperContentTransitionProxy CtorImpl()
 {
     return new SwiperContentTransitionProxyPeer();
 }

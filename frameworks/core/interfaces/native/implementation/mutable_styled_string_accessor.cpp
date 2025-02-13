@@ -39,7 +39,7 @@ void DestroyPeerImpl(MutableStyledStringPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_MutableStyledString CtorImpl()
 {
     return new MutableStyledStringPeer();
 }
@@ -179,12 +179,12 @@ void ClearStylesImpl(MutableStyledStringPeer* peer)
 void ReplaceStyledStringImpl(MutableStyledStringPeer* peer,
                              const Ark_Number* start,
                              const Ark_Number* length,
-                             const Ark_StyledString* other)
+                             Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && start && length && other && other->ptr);
+    CHECK_NULL_VOID(peer && start && length && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    auto otherString = reinterpret_cast<MutableStyledStringPeer*>(other->ptr)->GetMutableString();
+    auto otherString = other->GetMutableString();
     CHECK_NULL_VOID(otherString);
     const auto convStart = Converter::Convert<int32_t>(*start);
     const auto convLength = Converter::Convert<int32_t>(*length);
@@ -198,15 +198,15 @@ void ReplaceStyledStringImpl(MutableStyledStringPeer* peer,
 }
 void InsertStyledStringImpl(MutableStyledStringPeer* peer,
                             const Ark_Number* start,
-                            const Ark_StyledString* other)
+                            Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && start && other && other->ptr);
+    CHECK_NULL_VOID(peer && start && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
     auto strLength = mutableString->GetLength();
     const auto convStart = Converter::Convert<int32_t>(*start);
     if (convStart >= 0 && convStart <= strLength) {
-        auto otherString = reinterpret_cast<MutableStyledStringPeer*>(other->ptr)->GetMutableString();
+        auto otherString = other->GetMutableString();
         CHECK_NULL_VOID(otherString);
         mutableString->InsertSpanString(convStart, otherString);
     } else {
@@ -216,12 +216,12 @@ void InsertStyledStringImpl(MutableStyledStringPeer* peer,
     }
 }
 void AppendStyledStringImpl(MutableStyledStringPeer* peer,
-                            const Ark_StyledString* other)
+                            Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && other && other->ptr);
+    CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    auto otherString = reinterpret_cast<MutableStyledStringPeer*>(other->ptr)->GetMutableString();
+    auto otherString = other->GetMutableString();
     CHECK_NULL_VOID(otherString);
     mutableString->AppendSpanString(otherString);
 }

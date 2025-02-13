@@ -314,7 +314,7 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
 
     auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
         Ark_PasteButtonOnClickResult result) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .nodeId = resourceId,
@@ -377,7 +377,7 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
 
     auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
         Ark_PasteButtonOnClickResult result) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {

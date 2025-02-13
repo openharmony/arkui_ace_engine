@@ -24,7 +24,7 @@ void DestroyPeerImpl(UnifiedDataPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_UnifiedData CtorImpl()
 {
     return new UnifiedDataPeer();
 }

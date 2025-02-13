@@ -23,7 +23,7 @@ void DestroyPeerImpl(PinchGestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_PinchGestureEvent CtorImpl()
 {
     return new PinchGestureEventPeer();
 }

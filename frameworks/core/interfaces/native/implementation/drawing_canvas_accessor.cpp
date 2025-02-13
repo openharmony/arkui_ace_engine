@@ -24,14 +24,9 @@ void DestroyPeerImpl(DrawingCanvasPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_PixelMap* pixelmap)
+Ark_DrawingCanvas CtorImpl(Ark_PixelMap pixelmap)
 {
-    auto info = Converter::OptConvert<ImageSourceInfo>(*pixelmap);
-    RefPtr<PixelMap> bitmap;
-    if (info) {
-        bitmap = info->GetPixmap();
-    }
-    return new DrawingCanvasPeer(bitmap);
+    return new DrawingCanvasPeer(pixelmap->pixelMap);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

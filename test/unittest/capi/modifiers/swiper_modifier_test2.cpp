@@ -56,7 +56,7 @@ HWTEST_F(SwiperModifierTest2, setSwiperOptionsTest, TestSize.Level1)
     });
 
     // create the external SwiperController peer and attach modifier to it
-    GeneratedModifier::SwiperControllerPeerImpl peer;
+    SwiperControllerPeer peer;
     auto controller = Converter::ArkValue<Opt_SwiperController>(&peer);
     modifier_->setSwiperOptions(node_, &controller);
 

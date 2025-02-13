@@ -25,7 +25,7 @@ void DestroyPeerImpl(NavDestinationContextPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_NavDestinationContext CtorImpl()
 {
     return new NavDestinationContextPeer();
 }
@@ -66,12 +66,12 @@ Ark_NativePointer GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
     return {}; // fix a return value
 }
 void SetPathInfoImpl(NavDestinationContextPeer* peer,
-                     const Ark_NavPathInfo* pathInfo)
+                     Ark_NavPathInfo pathInfo)
 {
     LOGE("NavDestinationContext doesn't support set path info");
 }
 void SetPathStackImpl(NavDestinationContextPeer* peer,
-                      const Ark_NavPathStack* pathStack)
+                      Ark_NavPathStack pathStack)
 {
     LOGE("NavDestinationContext doesn't support set nav path stack");
 }

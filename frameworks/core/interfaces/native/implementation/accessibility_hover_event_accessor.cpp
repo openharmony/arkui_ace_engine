@@ -23,7 +23,7 @@ void DestroyPeerImpl(AccessibilityHoverEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_AccessibilityHoverEvent CtorImpl()
 {
     return new AccessibilityHoverEventPeer();
 }

@@ -379,8 +379,8 @@ void MenuAlignImpl(Ark_NativePointer node,
     }
     SelectModelNG::SetMenuAlign(frameNode, menuAlign);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Union_Number_Resource_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Union_Number_Resource_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -392,8 +392,8 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     };
     SelectModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_ResourceStr_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_ResourceStr_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -432,8 +432,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::MenuItemContentModifierImpl,
         SelectAttributeModifier::DividerImpl,
         SelectAttributeModifier::MenuAlignImpl,
-        SelectAttributeModifier::__onChangeEvent_selectedImpl,
-        SelectAttributeModifier::__onChangeEvent_valueImpl,
+        SelectAttributeModifier::_onChangeEvent_selectedImpl,
+        SelectAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISelectModifierImpl;
 }

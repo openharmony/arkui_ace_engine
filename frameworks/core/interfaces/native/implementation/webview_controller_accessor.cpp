@@ -22,7 +22,7 @@ namespace WebviewControllerAccessor {
 void DestroyPeerImpl(WebviewControllerPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_WebviewController CtorImpl()
 {
     return nullptr;
 }

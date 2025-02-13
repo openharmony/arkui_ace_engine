@@ -23,7 +23,7 @@ void DestroyPeerImpl(UICommonEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_UICommonEvent CtorImpl()
 {
     return new UICommonEventPeer();
 }

@@ -27,10 +27,10 @@ void DestroyPeerImpl(ConsoleMessagePeer* peer)
     peer->webConsoleLog = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_String* message,
-                           const Ark_String* sourceId,
-                           const Ark_Number* lineNumber,
-                           Ark_MessageLevel messageLevel)
+Ark_ConsoleMessage CtorImpl(const Ark_String* message,
+                            const Ark_String* sourceId,
+                            const Ark_Number* lineNumber,
+                            Ark_MessageLevel messageLevel)
 {
     CHECK_NULL_RETURN(message, nullptr);
     CHECK_NULL_RETURN(sourceId, nullptr);

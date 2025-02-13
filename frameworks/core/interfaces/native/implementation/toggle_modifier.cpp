@@ -138,8 +138,8 @@ void SwitchStyleImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(convValue.trackBorderRadius);
     ToggleModelNG::SetTrackBorderRadius(frameNode, convValue.trackBorderRadius);
 }
-void __onChangeEvent_isOnImpl(Ark_NativePointer node,
-                              const Callback_Boolean_Void* callback)
+void _onChangeEvent_isOnImpl(Ark_NativePointer node,
+                             const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -162,7 +162,7 @@ const GENERATED_ArkUIToggleModifier* GetToggleModifier()
         ToggleAttributeModifier::SelectedColorImpl,
         ToggleAttributeModifier::SwitchPointColorImpl,
         ToggleAttributeModifier::SwitchStyleImpl,
-        ToggleAttributeModifier::__onChangeEvent_isOnImpl,
+        ToggleAttributeModifier::_onChangeEvent_isOnImpl,
     };
     return &ArkUIToggleModifierImpl;
 }

@@ -24,7 +24,7 @@ namespace LinearIndicatorControllerAccessor {
 void DestroyPeerImpl(LinearIndicatorControllerPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_LinearIndicatorController CtorImpl()
 {
     return nullptr;
 }

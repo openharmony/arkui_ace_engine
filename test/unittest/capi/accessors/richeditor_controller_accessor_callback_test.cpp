@@ -134,7 +134,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
 {
     static std::optional<CheckEvent> checkEvent;
     auto onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .offsetX = accessor->getX(peer),
@@ -176,7 +176,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
 {
     static std::optional<CheckEvent> checkEvent;
     auto onLongPress = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
-        auto peer = reinterpret_cast<GestureEventPeer*>(event.ptr);
+        auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
             .offsetX = accessor->getOffsetX(peer),
@@ -219,7 +219,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
 {
     static std::optional<CheckEvent> checkEvent;
     auto onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .offsetX = accessor->getX(peer),
@@ -261,7 +261,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongP
 {
     static std::optional<CheckEvent> checkEvent;
     auto onLongPress = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
-        auto peer = reinterpret_cast<GestureEventPeer*>(event.ptr);
+        auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
             .offsetX = accessor->getOffsetX(peer),

@@ -26,12 +26,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 }
 namespace OHOS::Ace::NG::Converter {
     template<>
-    RefPtr<UnifiedData> Convert(const Ark_UnifiedData& data)
-    {
-        auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(data.ptr);
-        return (unifiedDataPeer && unifiedDataPeer->unifiedData) ? unifiedDataPeer->unifiedData : nullptr;
-    }
-    template<>
     void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
     {
         switch (src) {
@@ -52,7 +46,7 @@ void DestroyPeerImpl(DragEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_DragEvent CtorImpl()
 {
     return new DragEventPeer();
 }
@@ -105,23 +99,22 @@ Ark_Int32 GetYImpl(DragEventPeer* peer)
     return GetWindowYImpl(peer);
 }
 void SetDataImpl(DragEventPeer* peer,
-                 const Ark_UnifiedData* unifiedData)
+                 Ark_UnifiedData unifiedData)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->dragInfo);
     CHECK_NULL_VOID(unifiedData);
-    CHECK_NULL_VOID(unifiedData->ptr);
-    peer->dragInfo->SetData(Convert<RefPtr<UnifiedData>>(*unifiedData));
+    peer->dragInfo->SetData(unifiedData->unifiedData);
 }
-Ark_NativePointer GetDataImpl(DragEventPeer* peer)
+Ark_UnifiedData GetDataImpl(DragEventPeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->dragInfo, nullptr);
     auto data = peer->dragInfo->GetData();
     CHECK_NULL_RETURN(data, nullptr);
-    const auto unifiedPeer = reinterpret_cast<UnifiedDataPeer*>(GeneratedModifier::GetUnifiedDataAccessor()->ctor());
+    const auto unifiedPeer = GeneratedModifier::GetUnifiedDataAccessor()->ctor();
     unifiedPeer->unifiedData = data;
-    return reinterpret_cast<Ark_NativePointer>(unifiedPeer);
+    return unifiedPeer;
 }
 Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
 {

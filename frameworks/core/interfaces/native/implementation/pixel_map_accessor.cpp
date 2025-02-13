@@ -24,7 +24,7 @@ void DestroyPeerImpl(PixelMapPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_PixelMap CtorImpl()
 {
     return new PixelMapPeer();
 }

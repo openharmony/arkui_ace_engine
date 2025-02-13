@@ -27,7 +27,7 @@ void DestroyPeerImpl(TabContentTransitionProxyPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TabContentTransitionProxy CtorImpl()
 {
     return new TabContentTransitionProxyPeer();
 }

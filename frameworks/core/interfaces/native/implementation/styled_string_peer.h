@@ -14,10 +14,28 @@
  */
 #pragma once
 
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 struct StyledStringPeer {
     virtual ~StyledStringPeer() = default;
+
+    static StyledStringPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& src = nullptr)
+    {
+        auto ret = new StyledStringPeer;
+        ret->spanString = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::SpanString>(src);
+        return ret;
+    }
+
+    static void Destroy(StyledStringPeer *peer)
+    {
+        delete peer;
+    }
+
+    OHOS::Ace::RefPtr<OHOS::Ace::MutableSpanString> GetMutableString()
+    {
+        return OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(spanString);
+    }
 
     OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString;
 };

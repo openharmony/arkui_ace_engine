@@ -1966,22 +1966,15 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_CLIP_DEFAULT_VALUE);
 
-    modifier_->setClip0(node_, true);
+    auto inputVal = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setClip0(node_, &inputVal);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, "true");
 
-    modifier_->setClip0(node_, false);
+    inputVal = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setClip0(node_, &inputVal);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, "false");
-
-    Ark_Type_CommonMethod_clip_value arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(true));
-    modifier_->setClip1(node_, &arg);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
-    EXPECT_EQ(strResult, "true");
-
-    arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(false));
-    modifier_->setClip1(node_, &arg);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
 }
 
 /*

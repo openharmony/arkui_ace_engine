@@ -24,7 +24,7 @@ namespace EditMenuOptionsAccessor {
 void DestroyPeerImpl(EditMenuOptionsPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_EditMenuOptions CtorImpl()
 {
     return nullptr;
 }

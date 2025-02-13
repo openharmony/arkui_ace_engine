@@ -65,7 +65,7 @@ static void DestroyPeerImpl(WaterFlowSectionsPeer *peerImpl)
         delete peerImpl;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_WaterFlowSections CtorImpl()
 {
     return new WaterFlowSectionsPeer();
 }

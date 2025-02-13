@@ -25,7 +25,7 @@ void DestroyPeerImpl(CustomDialogControllerPeer* peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_NativePointer CtorImpl(const Ark_CustomDialogControllerOptions* value)
+Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* value)
 {
     auto peer = AceType::MakeRefPtr<CustomDialogControllerPeer>();
     peer->IncRefCount();

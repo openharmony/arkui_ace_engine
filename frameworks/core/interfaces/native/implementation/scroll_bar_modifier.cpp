@@ -35,8 +35,8 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value && value->scroller.ptr) {
-        auto scrollerPeer = reinterpret_cast<ScrollerPeer*>(value->scroller.ptr);
+    if (value) {
+        auto scrollerPeer = value->scroller;
         auto scrollProxy = ScrollBarModelNG::SetScrollBarProxy(frameNode, scrollerPeer->GetScrollBarProxy());
         scrollerPeer->SetScrollBarProxy(scrollProxy);
     }

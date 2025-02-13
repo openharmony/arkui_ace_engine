@@ -23,7 +23,7 @@ void DestroyPeerImpl(ClickEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_ClickEvent CtorImpl()
 {
     return new ClickEventPeer();
 }

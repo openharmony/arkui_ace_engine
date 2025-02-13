@@ -270,10 +270,8 @@ HWTEST_F(CommonMethodModifierTest5, setDrawModifierTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     ASSERT_NE(modifier_->setDrawModifier, nullptr);
-    auto peer = DrawModifierPeer();
-    Ark_DrawModifier drawModifier;
-    drawModifier.ptr = &peer;
-    Opt_DrawModifier drawModifierOpt = Converter::ArkValue<Opt_DrawModifier>(drawModifier);
+    DrawModifierPeer peer{};
+    Opt_DrawModifier drawModifierOpt = Converter::ArkValue<Opt_DrawModifier>(&peer);
     EXPECT_EQ(peer.drawModifier, nullptr);
     EXPECT_EQ(peer.frameNode.Upgrade(), nullptr);
     modifier_->setDrawModifier(node_, &drawModifierOpt);

@@ -31,7 +31,7 @@ void DestroyPeerImpl(DatePickerDialogPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_DatePickerDialog CtorImpl()
 {
     return new DatePickerDialogPeer();
 }

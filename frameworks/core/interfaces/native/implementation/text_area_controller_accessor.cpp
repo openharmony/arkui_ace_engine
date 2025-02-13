@@ -26,7 +26,7 @@ void DestroyPeerImpl(TextAreaControllerPeer* peer)
     peer->controller_ = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextAreaController CtorImpl()
 {
     return new TextAreaControllerPeer();
 }

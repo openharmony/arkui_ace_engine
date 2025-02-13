@@ -27,7 +27,7 @@ void DestroyPeerImpl(Matrix2DPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_Matrix2D CtorImpl()
 {
     return new Matrix2DPeer();
 }
@@ -35,13 +35,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
+Ark_Matrix2D IdentityImpl(Matrix2DPeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     Matrix2D::Identity(peer->transform);
-    return reinterpret_cast<Ark_NativePointer>(peer);
+    return peer;
 }
-Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
+Ark_Matrix2D InvertImpl(Matrix2DPeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     bool retValue = NG::Matrix2D::Invert(peer->transform);
@@ -53,25 +53,25 @@ Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
         peer->transform.translateX = NAN;
         peer->transform.translateY = NAN;
     }
-    return reinterpret_cast<Ark_NativePointer>(peer);
+    return peer;
 }
-Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
-                               const Opt_Matrix2D* other)
+Ark_Matrix2D MultiplyImpl(Matrix2DPeer* peer,
+                          const Opt_Matrix2D* other)
 {
     LOGE("ARKOALA Matrix2DAccessor::MultiplyImpl is not implemented as deprecated.");
     return {};
 }
-Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer,
-                              const Opt_Number* rx,
-                              const Opt_Number* ry)
+Ark_Matrix2D Rotate0Impl(Matrix2DPeer* peer,
+                         const Opt_Number* rx,
+                         const Opt_Number* ry)
 {
     LOGE("ARKOALA Matrix2DAccessor::Rotate0Impl is not implemented as deprecated.");
     return {};
 }
-Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
-                              const Ark_Number* degree,
-                              const Opt_Number* rx,
-                              const Opt_Number* ry)
+Ark_Matrix2D Rotate1Impl(Matrix2DPeer* peer,
+                         const Ark_Number* degree,
+                         const Opt_Number* rx,
+                         const Opt_Number* ry)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(degree, nullptr);
@@ -83,11 +83,11 @@ Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
     double skewX = static_cast<double>(optX.has_value() ? *optX : 0);
     double skewY = static_cast<double>(optY.has_value() ? *optY : 0);
     NG::Matrix2D::Rotate(peer->transform, angle, skewX, skewY);
-    return reinterpret_cast<Ark_NativePointer>(peer);
+    return peer;
 }
-Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
-                                const Opt_Number* tx,
-                                const Opt_Number* ty)
+Ark_Matrix2D TranslateImpl(Matrix2DPeer* peer,
+                           const Opt_Number* tx,
+                           const Opt_Number* ty)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(tx, nullptr);
@@ -100,11 +100,11 @@ Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
     transX *= density;
     transY *= density;
     NG::Matrix2D::Translate(peer->transform, transX, transY);
-    return reinterpret_cast<Ark_NativePointer>(peer);
+    return peer;
 }
-Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,
-                            const Opt_Number* sx,
-                            const Opt_Number* sy)
+Ark_Matrix2D ScaleImpl(Matrix2DPeer* peer,
+                       const Opt_Number* sx,
+                       const Opt_Number* sy)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(sx, nullptr);
@@ -114,7 +114,7 @@ Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,
     double scaleX = static_cast<double>(optX.has_value() ? *optX : 1);
     double scaleY = static_cast<double>(optY.has_value() ? *optY : 1);
     NG::Matrix2D::Scale(peer->transform, scaleX, scaleY);
-    return reinterpret_cast<Ark_NativePointer>(peer);
+    return peer;
 }
 Ark_Int32 GetScaleXImpl(Matrix2DPeer* peer)
 {

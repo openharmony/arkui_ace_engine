@@ -69,9 +69,9 @@ VideoOptions Convert(const Ark_VideoOptions& src)
         .value_or(ImageSourceInfo("", "", ""));
 
     // controller
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_VideoController>(src.controller);
     CHECK_NULL_RETURN(abstPeerPtrOpt, options);
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::VideoControllerPeerImpl *>(*abstPeerPtrOpt);
+    auto peerImplPtr = abstPeerPtrOpt.value();
     CHECK_NULL_RETURN(peerImplPtr, options);
     options.videoController = peerImplPtr->GetController();
     return options;
