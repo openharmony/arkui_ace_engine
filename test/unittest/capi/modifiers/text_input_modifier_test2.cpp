@@ -25,8 +25,9 @@ namespace OHOS::Ace::NG {
 using namespace Converter;
 
 namespace GeneratedModifier {
-const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor();
-}
+    const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor();
+    const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
+} // namespace GeneratedModifier
 
 namespace Converter {
     template<>
@@ -37,6 +38,10 @@ namespace Converter {
         return previewText;
     }
 } // namespace Converter
+
+namespace {
+    Ark_EnterKeyType g_EventTestKey{};
+}
 
 class TextInputModifierTest2 : public ModifierTestBase<GENERATED_ArkUITextInputModifier,
                                   &GENERATED_ArkUINodeModifiers::getTextInputModifier, GENERATED_ARKUI_TEXT_INPUT> {
@@ -157,4 +162,51 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }
 
+/**
+ * @tc.name: OnSubmitTest
+ * @tc.desc: setOnSubmit test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
+{
+    static const int expectedResId = 123;
+    static const std::string TEST_VALUE("string text");
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onSubmitFunc = [](Ark_Int32 resourceId, Ark_EnterKeyType enterKeyType, const Ark_SubmitEvent event) {
+        auto peer = reinterpret_cast<SubmitEventPeer*>(event.ptr);
+        ASSERT_NE(peer, nullptr);
+        auto submitEventInfo = peer->GetEventInfo();
+        ASSERT_NE(submitEventInfo, nullptr);
+        EXPECT_EQ(submitEventInfo->GetText(), TEST_VALUE);
+        GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
+        EXPECT_EQ(resourceId, expectedResId);
+        g_EventTestKey = enterKeyType;
+    };
+
+    auto func = Converter::ArkValue<OnSubmitCallback>(onSubmitFunc, expectedResId);
+    modifier_->setOnSubmit(node_, &func);
+    TextFieldCommonEvent event;
+    event.SetText(TEST_VALUE);
+    eventHub->FireOnSubmit(111, event);
+    EXPECT_EQ(g_EventTestKey, -1);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_GO, event);
+    EXPECT_EQ(g_EventTestKey, 2);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEARCH, event);
+    EXPECT_EQ(g_EventTestKey, 3);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEND, event);
+    EXPECT_EQ(g_EventTestKey, 4);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_DONE, event);
+    EXPECT_EQ(g_EventTestKey, 6);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_PREVIOUS, event);
+    EXPECT_EQ(g_EventTestKey, 7);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEW_LINE, event);
+    EXPECT_EQ(g_EventTestKey, 8);
+}
 } // namespace OHOS::Ace::NG

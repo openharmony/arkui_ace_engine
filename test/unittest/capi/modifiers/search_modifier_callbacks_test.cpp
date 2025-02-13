@@ -87,6 +87,10 @@ namespace Converter {
     PreviewText Convert(const Ark_PreviewText& value);
 }
 
+namespace GeneratedModifier {
+    const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
+}
+
 class SearchModifierCallbackTest : public ModifierTestBase<GENERATED_ArkUISearchModifier,
                                &GENERATED_ArkUINodeModifiers::getSearchModifier, GENERATED_ARKUI_SEARCH> {
 public:
@@ -416,6 +420,52 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit0Test, TestSize.Level1)
     searchEventHub->FireOnSubmit(CHECK_TEXT, event);
     EXPECT_EQ(testString, CHECK_TEXT);
     searchEventHub->FireOnSubmit(EMPTY_TEXT, event);
+    EXPECT_EQ(testString, EMPTY_TEXT);
+}
+
+/**
+ * @tc.name: setOnSubmit1Test
+ * @tc.desc: Test Seacrh setOnSubmit1 event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierCallbackTest, setOnSubmit1Test, TestSize.Level1)
+{
+    static const int expectedResId = 123;
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::string testString;
+    static std::string eventText;
+    auto onSubmitFunc = [](Ark_Int32 resourceId, const Ark_String searchContent, const Opt_SubmitEvent event) {
+        auto value = Converter::Convert<std::string>(searchContent);
+        auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
+        ASSERT_TRUE(eventValue);
+        auto peer = reinterpret_cast<SubmitEventPeer*>(eventValue.value().ptr);
+        ASSERT_NE(peer, nullptr);
+        auto submitEventInfo = peer->GetEventInfo();
+        ASSERT_NE(submitEventInfo, nullptr);
+        eventText.clear();
+        eventText.append(submitEventInfo->GetText());
+        GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
+        EXPECT_EQ(resourceId, expectedResId);
+        testString.clear();
+        testString.append(value);
+    };
+    
+    auto func = Converter::ArkValue<SearchSubmitCallback>(onSubmitFunc, expectedResId);
+    testString.clear();
+    modifier_->setOnSubmit1(node_, &func);
+    NG::TextFieldCommonEvent event;
+    EXPECT_EQ(testString, EMPTY_TEXT);
+    EXPECT_EQ(eventText, EMPTY_TEXT);
+    event.SetText(CHECK_TEXT);
+    eventHub->FireOnSubmit(CHECK_TEXT, event);
+    EXPECT_EQ(testString, CHECK_TEXT);
+    EXPECT_EQ(eventText, CHECK_TEXT);
+    event.SetText(EMPTY_TEXT);
+    eventHub->FireOnSubmit(EMPTY_TEXT, event);
+    EXPECT_EQ(eventText, EMPTY_TEXT);
     EXPECT_EQ(testString, EMPTY_TEXT);
 }
 
