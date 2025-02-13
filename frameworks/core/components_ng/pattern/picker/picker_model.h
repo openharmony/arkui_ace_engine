@@ -88,7 +88,7 @@ private:
     static std::once_flag onceFlag_;
 };
 
-class DatePickerDialogModel {
+class ACE_FORCE_EXPORT DatePickerDialogModel {
 public:
     static DatePickerDialogModel* GetInstance();
     virtual ~DatePickerDialogModel() = default;
