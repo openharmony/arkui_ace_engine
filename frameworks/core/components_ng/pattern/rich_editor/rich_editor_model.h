@@ -369,6 +369,7 @@ public:
     virtual void SetBarState(DisplayMode mode) {}
     virtual void SetPreviewMenuParam(NG::TextSpanType spanType, std::function<void()>& buildFunc,
         const NG::SelectMenuParam& menuParam) {}
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

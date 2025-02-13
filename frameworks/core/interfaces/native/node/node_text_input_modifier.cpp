@@ -1128,6 +1128,29 @@ void ResetTextInputUserUnderlineColor(ArkUINodeHandle node)
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }
 
+void SetTextInputKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetKeyboardAppearance(frameNode));
+}
+
+void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 void SetTextInputWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1881,7 +1904,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText,
         SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
         SetTextInputWidth, ResetTextInputWidth, SetTextInputEnableHapticFeedback, ResetTextInputEnableHapticFeedback,
-        SetStopBackPress, ResetStopBackPress };
+        SetStopBackPress, ResetStopBackPress, SetTextInputKeyboardAppearance, GetTextInputKeyboardAppearance,
+        ResetTextInputKeyboardAppearance };
     return &modifier;
 }
 

@@ -346,6 +346,13 @@ enum class ImageFit {
     COVER_TOP_LEFT,
 };
 
+enum class KeyboardAppearance {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+};
+
 enum class DynamicRangeMode {
     HIGH = 0,
     CONSTRAINT,
