@@ -1556,9 +1556,12 @@ HWTEST_F(TabBarEventTestNg, HandleDragOverScroll003, TestSize.Level1)
      * @tc.expected: Would not over the edge
      */
     // scroll to right edge
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    scrollable->InitAxisAnimator();
     DragStart(Offset(), InputEventType::AXIS);
     float scrollableDistance = 10.0f;
     DragUpdate(-scrollableDistance);
+    MockAnimationManager::GetInstance().Tick();
     EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
 
     float dragDelta = 1.0f;
