@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "test/unittest/capi/accessors/accessor_test_fixtures.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
@@ -24,17 +25,10 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace AccessorTestFixtures;
 
 namespace {
-    const std::vector<std::pair<Ark_Number, int>> accessibilityHoverLocationTestPlan = {
-        { Converter::ArkValue<Ark_Number>(5), 5 },
-        { Converter::ArkValue<Ark_Number>(2.4), 2 },
-        { Converter::ArkValue<Ark_Number>(1), 1 },
-        { Converter::ArkValue<Ark_Number>(0), 0 },
-        { Converter::ArkValue<Ark_Number>(-1), -1 },
-        { Converter::ArkValue<Ark_Number>(-2.4), -2 },
-        { Converter::ArkValue<Ark_Number>(-5), -5 },
-    };
+    const double EPSILON = 0.00001;
 } // namespace
 
 class ClickEventAccessorTest : public AccessorTestBase<GENERATED_ArkUIClickEventAccessor,
@@ -52,105 +46,236 @@ public:
 };
 
 /**
- * @tc.name: ClickEventAccessorDisplaySetGetXTest
+ * @tc.name: setDisplayXTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ClickEventAccessorTest, ClickEventAccessorDisplaySetGetXTest, TestSize.Level1)
+HWTEST_F(ClickEventAccessorTest, setDisplayXTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setDisplayX, nullptr);
+
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
+        accessor_->setDisplayX(peer_, &value);
+        const auto& offset = eventInfo_->GetScreenLocation();
+        const auto result = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
+    }
+}
+
+/**
+ * @tc.name: getDisplayXTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, getDisplayXTestValidValues, TestSize.Level1)
+{
     ASSERT_NE(accessor_->getDisplayX, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
-        accessor_->setDisplayX(peer_, &actual);
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+        Offset offset = eventInfo_->GetScreenLocation();
+        const auto animation = offset.GetXAnimationOption();
+        const auto convValue = Converter::Convert<double>(value);
+        const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
+        offset.SetX(newValue, animation);
+        eventInfo_->SetScreenLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getDisplayX(peer_));
-        EXPECT_EQ(result, expected);
+        result = static_cast<double>(result);
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
 
 /**
- * @tc.name: ClickEventAccessorDisplaySetGetYTest
+ * @tc.name: setDisplayYTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ClickEventAccessorTest, ClickEventAccessorDisplaySetGetYTest, TestSize.Level1)
+HWTEST_F(ClickEventAccessorTest, setDisplayYTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setDisplayY, nullptr);
+
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
+        accessor_->setDisplayY(peer_, &value);
+        const auto& offset = eventInfo_->GetScreenLocation();
+        const auto result = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
+    }
+}
+
+/**
+ * @tc.name: getDisplayYTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, getDisplayYTestValidValues, TestSize.Level1)
+{
     ASSERT_NE(accessor_->getDisplayY, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
-        accessor_->setDisplayY(peer_, &actual);
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+        Offset offset = eventInfo_->GetScreenLocation();
+        const auto animation = offset.GetYAnimationOption();
+        const auto convValue = Converter::Convert<double>(value);
+        const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
+        offset.SetY(newValue, animation);
+        eventInfo_->SetScreenLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getDisplayY(peer_));
-        EXPECT_EQ(result, expected);
+        result = static_cast<double>(result);
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
 
 /**
- * @tc.name: ClickEventAccessorWindowAndScreenSetGetXTest
+ * @tc.name: setWindowXTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ClickEventAccessorTest, ClickEventAccessorWindowAndScreenSetGetXTest, TestSize.Level1)
+HWTEST_F(ClickEventAccessorTest, setWindowXTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setWindowX, nullptr);
+
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
+        accessor_->setWindowX(peer_, &value);
+        const auto& offset = eventInfo_->GetGlobalLocation();
+        const auto result = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
+    }
+}
+
+/**
+ * @tc.name: getWindowXTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, getWindowXTestValidValues, TestSize.Level1)
+{
     ASSERT_NE(accessor_->getWindowX, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
-        accessor_->setWindowX(peer_, &actual);
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+        Offset offset = eventInfo_->GetGlobalLocation();
+        const auto animation = offset.GetXAnimationOption();
+        const auto convValue = Converter::Convert<double>(value);
+        const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
+        offset.SetX(newValue, animation);
+        eventInfo_->SetGlobalLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getWindowX(peer_));
-        EXPECT_EQ(result, expected);
+        result = static_cast<double>(result);
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
 
 /**
- * @tc.name: ClickEventAccessorWindowAndScreenSetGetYTest
+ * @tc.name: setWindowYTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ClickEventAccessorTest, ClickEventAccessorWindowAndScreenSetGetYTest, TestSize.Level1)
+HWTEST_F(ClickEventAccessorTest, setWindowYTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setWindowY, nullptr);
+
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
+        accessor_->setWindowY(peer_, &value);
+        const auto& offset = eventInfo_->GetGlobalLocation();
+        const auto result = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
+    }
+}
+
+/**
+ * @tc.name: getWindowYTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, getWindowYTestValidValues, TestSize.Level1)
+{
     ASSERT_NE(accessor_->getWindowY, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
-        accessor_->setWindowY(peer_, &actual);
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+        Offset offset = eventInfo_->GetGlobalLocation();
+        const auto animation = offset.GetYAnimationOption();
+        const auto convValue = Converter::Convert<double>(value);
+        const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
+        offset.SetY(newValue, animation);
+        eventInfo_->SetGlobalLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getWindowY(peer_));
-        EXPECT_EQ(result, expected);
+        result = static_cast<double>(result);
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
 
-
 /**
- * @tc.name: ClickEventAccessorSetGetXTest
+ * @tc.name: setXTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ClickEventAccessorTest, ClickEventAccessorSetGetXTest, TestSize.Level1)
+HWTEST_F(ClickEventAccessorTest, setXTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setX, nullptr);
-    ASSERT_NE(accessor_->getX, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
-        accessor_->setX(peer_, &actual);
-        auto result = Converter::Convert<int>(accessor_->getX(peer_));
-        EXPECT_EQ(result, expected);
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
+        accessor_->setX(peer_, &value);
+        const auto& offset = eventInfo_->GetLocalLocation();
+        const auto result = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
 
 /**
- * @tc.name: ClickEventAccessorSetGetYTest
+ * @tc.name: getXTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ClickEventAccessorTest, ClickEventAccessorSetGetYTest, TestSize.Level1)
+HWTEST_F(ClickEventAccessorTest, getXTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getX, nullptr);
+
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+        Offset offset = eventInfo_->GetLocalLocation();
+        const auto animation = offset.GetXAnimationOption();
+        const auto convValue = Converter::Convert<double>(value);
+        const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
+        offset.SetX(newValue, animation);
+        eventInfo_->SetLocalLocation(offset);
+        auto result = Converter::Convert<int>(accessor_->getX(peer_));
+        result = static_cast<double>(result);
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
+    }
+}
+
+/**
+ * @tc.name: setYTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, setYTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setY, nullptr);
+
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
+        accessor_->setY(peer_, &value);
+        const auto& offset = eventInfo_->GetLocalLocation();
+        const auto result = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
+    }
+}
+
+/**
+ * @tc.name: getXTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, getYTestValidValues, TestSize.Level1)
+{
     ASSERT_NE(accessor_->getY, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
-        accessor_->setY(peer_, &actual);
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+        Offset offset = eventInfo_->GetLocalLocation();
+        const auto animation = offset.GetYAnimationOption();
+        const auto convValue = Converter::Convert<double>(value);
+        const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
+        offset.SetY(newValue, animation);
+        eventInfo_->SetLocalLocation(offset);
         auto result = Converter::Convert<int>(accessor_->getY(peer_));
-        EXPECT_EQ(result, expected);
+        result = static_cast<double>(result);
+        EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
 }
