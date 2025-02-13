@@ -661,7 +661,7 @@ void FormPattern::OnModifyDone()
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
     info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleLocked(info.bundleName, info.id));
+    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleProtected(info.bundleName, info.id));
     auto wantWrap = info.wantWrap;
     if (wantWrap) {
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
@@ -704,7 +704,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     UpdateBackgroundColorWhenUnTrustForm();
     info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleLocked(info.bundleName, info.id));
+    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleProtected(info.bundleName, info.id));
     HandleFormComponent(info);
     return true;
 }
@@ -780,10 +780,10 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         formSpecialStyle_.SetInitDone();
         return;
     }
-    bool isFormLocked = IsFormBundleLocked(info.bundleName, info.id);
-    if (isFormLocked || isFormBundleForbidden)  {
+    bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
+    if (isFormProtected || isFormBundleForbidden)  {
         auto newFormSpecialStyle = formSpecialStyle_;
-        newFormSpecialStyle.SetIsLockedByAppLock(isFormLocked);
+        newFormSpecialStyle.SetIsLockedByAppLock(isFormProtected);
         newFormSpecialStyle.SetIsForbiddenByParentControl(isFormBundleForbidden);
         newFormSpecialStyle.SetInitDone();
         PostUITask([weak = WeakClaim(this), info, newFormSpecialStyle] {
@@ -1685,7 +1685,7 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
     json->Put("idString", std::to_string(id).c_str());
     bool isLocked = formSpecialStyle_.IsInited() ?
         formSpecialStyle_.IsLockedByAppLock() :
-        (IsFormBundleLocked(cardInfo_.bundleName, id) && !formSpecialStyle_.IsMultiAppForm());
+        (!IsFormBundleExempt(id) && !formSpecialStyle_.IsMultiAppForm());
     json->Put("isLocked", isLocked);
     eventHub->FireOnAcquired(json->ToString());
 }
@@ -2470,10 +2470,16 @@ void FormPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
 }
 
-bool FormPattern::IsFormBundleLocked(const std::string& bundleName, int64_t formId) const
+bool FormPattern::IsFormBundleExempt(int64_t formId) const
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
-    return formManagerBridge_->IsFormBundleLocked(bundleName, formId);
+    return formManagerBridge_->IsFormBundleExempt(formId);
+}
+
+bool FormPattern::IsFormBundleProtected(const std::string& bundleName, int64_t formId) const
+{
+    CHECK_NULL_RETURN(formManagerBridge_, false);
+    return formManagerBridge_->IsFormBundleProtected(bundleName, formId);
 }
 
 void FormPattern::HandleLockEvent(bool isLock)
