@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-namespace{
+namespace {
 const auto RES_NAME_ID = NamedResourceId { "aa.bb.cc", Converter::ResourceType::STRING };
 const auto RES_NAME_ID_ANY = "res_name_any";
 const auto RES_NAME_ID_EMPTY = NamedResourceId { "res_name_empty", Converter::ResourceType::STRING };
@@ -53,7 +53,7 @@ const std::vector<std::tuple<std::string, Ark_Buffer, std::string>> responseBuff
     { RES_DATA_URL_OTHER, Converter::ArkValue<Ark_Buffer>(RES_DATA_URL_OTHER, nullptr), "example.com/" },
     { RES_DATA_EMPTY, Converter::ArkValue<Ark_Buffer>(RES_DATA_EMPTY, nullptr), "" },
 };
-}
+} // namespace
 class WebResourceResponseAccessorTest : public AccessorTestBase<GENERATED_ArkUIWebResourceResponseAccessor,
     &GENERATED_ArkUIAccessors::getWebResourceResponseAccessor, WebResourceResponsePeer> {
 public:
@@ -194,7 +194,7 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest,setResponseDataResourceTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, setResponseDataResourceTest, TestSize.Level1)
 {
     Ark_Union_String_Number_Resource_Buffer initvalueResponse;
     ASSERT_NE(accessor_->setResponseData, nullptr);
