@@ -50,6 +50,9 @@ using namespace testing::ext;
 using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
+namespace GeneratedModifier {
+    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+}
 
 class MockGestureEventResult : public GestureEventResult {
     DECLARE_ACE_TYPE(MockGestureEventResult, GestureEventResult);
@@ -585,11 +588,12 @@ HWTEST_F(WebModifierTest2, onNativeEmbedLifecycleChangeTest, TestSize.Level1)
  */
 HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
 {
+    static const std::string expectedType = "xxx";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
     std::string embedId = "embed_id";
-    TouchEventInfo touchEventInfo("touchEvent");
+    TouchEventInfo touchEventInfo(expectedType);
     auto param = AceType::MakeRefPtr<MockGestureEventResult>();
 
     struct CheckEvent {
@@ -599,6 +603,14 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo data) {
+        auto touchEventOpt = Converter::OptConvert<Ark_TouchEvent>(data.touchEvent);
+        ASSERT_TRUE(touchEventOpt.has_value());
+        auto eventPtr = touchEventOpt.value().ptr;
+        ASSERT_NE(eventPtr, nullptr);
+        auto peer = reinterpret_cast<TouchEventPeer*>(eventPtr);
+        auto touchEventInfo = peer->GetEventInfo();
+        EXPECT_EQ(touchEventInfo->GetType(), expectedType);
+        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
         checkEvent = {
             .resourceId = resourceId,
             .embedId = Converter::OptConvert<std::string>(data.embedId),

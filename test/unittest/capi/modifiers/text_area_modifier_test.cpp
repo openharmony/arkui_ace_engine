@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -347,6 +348,10 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
 };
 } // namespace
 
+namespace GeneratedModifier {
+    const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
+}
+
 class TextAreaModifierTest : public ModifierTestBase<GENERATED_ArkUITextAreaModifier,
                                  &GENERATED_ArkUINodeModifiers::getTextAreaModifier, GENERATED_ARKUI_TEXT_AREA> {
 public:
@@ -615,11 +620,11 @@ HWTEST_F(TextAreaModifierTest, setOnEditChangeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnSubmitTest
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnSubmit.
+ * @tc.name: setOnSubmit0Test
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnSubmit0.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setOnSubmit0Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto func = Converter::ArkValue<Callback_EnterKeyType_Void>(recv.onSubmit0, CONTEXT_ID);
@@ -628,6 +633,55 @@ HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     ASSERT_NE(eventHub, nullptr);
     TextFieldCommonEvent event;
+    eventHub->FireOnSubmit(111, event);
+    EXPECT_EQ(g_EventTestKey, -1);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_GO, event);
+    EXPECT_EQ(g_EventTestKey, 2);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEARCH, event);
+    EXPECT_EQ(g_EventTestKey, 3);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEND, event);
+    EXPECT_EQ(g_EventTestKey, 4);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_DONE, event);
+    EXPECT_EQ(g_EventTestKey, 6);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_PREVIOUS, event);
+    EXPECT_EQ(g_EventTestKey, 7);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEW_LINE, event);
+    EXPECT_EQ(g_EventTestKey, 8);
+}
+
+/**
+ * @tc.name: setOnSubmit1Test
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnSubmit1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
+{
+    static const int expectedResId = 123;
+    static const std::u16string testValue(u"string text");
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onSubmitFunc = [](Ark_Int32 resourceId, const Ark_EnterKeyType enterKeyType, const Opt_SubmitEvent event) {
+        auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
+        ASSERT_TRUE(eventValue);
+        auto peer = reinterpret_cast<SubmitEventPeer*>(eventValue.value().ptr);
+        ASSERT_NE(peer, nullptr);
+        auto submitEventInfo = peer->GetEventInfo();
+        EXPECT_EQ(submitEventInfo->GetText(), testValue);
+        GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
+        EXPECT_EQ(resourceId, expectedResId);
+        g_EventTestKey = enterKeyType;
+    };
+    
+    auto func = Converter::ArkValue<TextAreaSubmitCallback>(onSubmitFunc, expectedResId);
+    modifier_->setOnSubmit1(node_, &func);
+    TextFieldCommonEvent event;
+    event.SetText(testValue);
     eventHub->FireOnSubmit(111, event);
     EXPECT_EQ(g_EventTestKey, -1);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
