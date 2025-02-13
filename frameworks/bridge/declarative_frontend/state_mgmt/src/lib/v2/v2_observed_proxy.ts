@@ -65,7 +65,7 @@ class ObjectProxyHandler {
         // for some common function attributes, e.g. toString etc.
         if (typeof (ret) !== 'function') {
             ObserveV2.getObserve().addRef(conditionalTarget, key);
-            return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret).proxy : ret;
+            return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret)[RefInfo.MAKE_OBSERVED_PROXY] : ret;
         }
 
         if (target instanceof Date) {
@@ -157,7 +157,7 @@ class ArrayProxyHandler {
         let ret = this.isMakeObserved_ ? target[key] : ObserveV2.autoProxyObject(target, key);
         if (typeof (ret) !== 'function') {
             ObserveV2.getObserve().addRef(conditionalTarget, key);
-            return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret).proxy : ret;
+            return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret)[RefInfo.MAKE_OBSERVED_PROXY] : ret;
         }
 
         if (ArrayProxyHandler.arrayMutatingFunctions.has(key)) {
@@ -186,7 +186,7 @@ class ArrayProxyHandler {
                     // so we must call "target" here to deal with the collections situations.
                     // But we also need to addref for each index.
                     ObserveV2.getObserve().addRef(conditionalTarget, index.toString());
-                    callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+                    callbackFn(typeof value === 'object' ? RefInfo.get(value)[RefInfo.MAKE_OBSERVED_PROXY] : value, index, receiver);
                 });
                 return result;
             };
@@ -266,7 +266,7 @@ class SetMapProxyHandler {
         let ret = this.isMakeObserved_ ? target[key] : ObserveV2.autoProxyObject(target, key);
         if (typeof (ret) !== 'function') {
             ObserveV2.getObserve().addRef(conditionalTarget, key);
-            return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret).proxy : ret;
+            return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret)[RefInfo.MAKE_OBSERVED_PROXY] : ret;
         }
 
         if (key === 'has') {
@@ -347,7 +347,7 @@ class SetMapProxyHandler {
                         ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
                     }
                     let item = target.get(prop);
-                    return (typeof item === 'object' && this.isMakeObserved_) ? RefInfo.get(item).proxy : item;
+                    return (typeof item === 'object' && this.isMakeObserved_) ? RefInfo.get(item)[RefInfo.MAKE_OBSERVED_PROXY] : item;
                 };
             }
             if (key === 'set') {

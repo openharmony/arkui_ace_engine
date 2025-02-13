@@ -39,8 +39,8 @@ public:
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
-    RectF GetSelectArea() override;
     std::string GetSelectedText() override;
+    bool IsStopBackPress() const override;
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
@@ -59,11 +59,21 @@ public:
     bool IsHandleShow();
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void UpdateHandleOffset();
+    void UpdateFirstHandleOffset() override;
+    void UpdateSecondHandleOffset() override;
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
     bool GetIsHandleMoving()
     {
         return isHandleMoving_;
+    }
+    bool GetIsHandleHidden()
+    {
+        return handleIsHidden_;
+    }
+    bool IsSingleHandleMoving()
+    {
+        return isHandleMoving_ && IsSingleHandle();
     }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
@@ -74,7 +84,12 @@ public:
     {
         return true;
     }
+    RectF GetVisibleRect();
     float GetHandleHotZoneRadius();
+    bool IsMenuShow();
+
+protected:
+    RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
     void RemoveAreaChangeInner();
@@ -83,8 +98,8 @@ private:
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
     void SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info);
     void SetMagnifierOffset(const OffsetF& localOffset, const RectF& handleRect);
+    void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo);
     void ResumeTwinkling();
-    RectF GetVisibleRect();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;

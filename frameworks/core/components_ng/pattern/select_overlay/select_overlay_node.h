@@ -64,6 +64,8 @@ public:
 
     void UpdateToolBar(bool menuItemChanged, bool noAnimation = false);
 
+    void UpdateMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info);
+
     void UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation = false);
 
     void SetSelectInfo(const std::string& selectInfo)
@@ -101,6 +103,10 @@ public:
 
     void SwitchToOverlayMode();
     void UpdateSelectMenuBg();
+    void AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info);
+    void OnCustomSelectMenuAppear();
+    void FireCustomMenuChangeEvent(bool isMenuShow);
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
 
 private:
     void CreateToolBar();
@@ -117,12 +123,14 @@ private:
     void ShowCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowPaste(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowTranslate(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowSearch(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     bool IsShowOnTargetAPIVersion();
     std::function<void()> GetDefaultOptionCallback();
+    std::function<void(WeakPtr<NG::FrameNode>)> GetSymbolFunc(const std::string& symbolId);
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
     void GetFlexibleOptionsParams(
         const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params);
@@ -154,6 +162,8 @@ private:
     void SetBackButtonOpacity(float value);
     void HideFrameNodeImmediately(FrameNodeType type);
     void CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info);
+    void UpdateMoreOrBackSymbolOptions(bool isMoreButton, bool isReplaceEffectEnable);
+    void UpdateMoreOrBackSymbolOptionsWithDelay();
     void MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation);
     void HideMenuOnlyImmediately();
     void InitSelectMenuStatus(
@@ -162,6 +172,11 @@ private:
     void SetAnimationStatus(bool toDoAnimation)
     {
         isDoingAnimation_ = toDoAnimation;
+    }
+
+    void SetIsMoreOrBackSymbolIcon(bool isMoreOrBackSymbol)
+    {
+        isMoreOrBackSymbolIcon_ = isMoreOrBackSymbol;
     }
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
@@ -194,6 +209,8 @@ private:
     RefPtr<FrameNode> selectMenuInner_;
     RefPtr<FrameNode> extensionMenu_;
     RefPtr<FrameNode> backButton_;
+    RefPtr<FrameNode> moreOrBackSymbol_;
+    RefPtr<FrameNode> moreButton_;
 
     FrameNodeStatus selectMenuStatus_ = FrameNodeStatus::VISIBLE;
     FrameNodeStatus extensionMenuStatus_ = FrameNodeStatus::GONE;
@@ -215,6 +232,9 @@ private:
     bool isShowInDefaultMenu_[9] = { false };
 
     bool isDefaultBtnOverMaxWidth_ = false;
+
+    bool isMoreOrBackSymbolIcon_ = false;
+    bool isCustomMenuAppear_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

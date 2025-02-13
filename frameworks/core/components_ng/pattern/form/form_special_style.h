@@ -18,6 +18,10 @@
 
 #include <cstdint>
 
+namespace OHOS::AppExecFwk {
+struct FormInfo;
+}
+
 namespace OHOS::Ace::NG {
 enum class FormOperation : int32_t {
     KEEP,
@@ -53,10 +57,19 @@ public:
     [[nodiscard]] FormStyleAttribution GetFormStyleAttribution() const;
     FormOperation GetOperationToNewFormStyle(const FormSpecialStyle& formSpecialStyle);
     bool IsNeedToShowSpecialStyle();
+    bool IsLockedByAppLock() const;
+    void SetInitDone();
+    bool IsInited() const;
+    void SetIsMultiAppForm(AppExecFwk::FormInfo &formInfo);
+    bool IsMultiAppForm() const;
 private:
     bool isForbiddenByParentControl_ = false;
 
     bool isLockedByAppLock_ = false;
+
+    bool isInited_ = false;
+
+    bool isMultiAppForm_ = false;
 };
 } // namespace OHOS::Ace::NG
 

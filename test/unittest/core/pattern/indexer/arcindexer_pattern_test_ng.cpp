@@ -331,10 +331,13 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg005, TestSize.Level1)
     /**
      * @tc.steps: step1. isHover is false and call IndexNodeCollapsedAnimation.
      */
-    pattern_->IndexNodeCollapsedAnimation();
-
     pattern_->atomicAnimateOp_ = false;
     pattern_->IndexNodeCollapsedAnimation();
+    EXPECT_FALSE(pattern_->collapsedProperty_);
+
+    pattern_->atomicAnimateOp_ = true;
+    pattern_->IndexNodeCollapsedAnimation();
+    EXPECT_EQ(pattern_->collapsedProperty_->Get(), pattern_->stepAngle_ * 5);
 }
 
 /**
@@ -349,6 +352,8 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg006, TestSize.Level1)
      * @tc.steps: step1. isHover is true and call OnHover.
     */
     pattern_->IndexNodeExpandedAnimation();
+    auto total = frameNode_->GetTotalChildCount();
+    EXPECT_EQ(pattern_->expandedProperty_->Get(), pattern_->stepAngle_ * total);
 }
 
 /**
@@ -365,6 +370,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg007, TestSize.Level1)
     */
     auto renderContext = AceType::MakeRefPtr<RenderContext>();
     pattern_->UpdateIndexerNodeOpacityByIdx(renderContext, index);
+    EXPECT_FALSE(renderContext->GetOpacity().has_value());
 }
 
 /**
@@ -380,6 +386,9 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg008, TestSize.Level1)
      * @tc.steps: step1. isHover is false and call OnHover.
      */
     pattern_->StartIndexerNodeDisappearAnimation(1);
+    auto itemNode = GetChildFrameNode(frameNode_, 1);
+    auto renderContext = itemNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOpacityValue(), 0);
     pattern_->StartIndexerNodeDisappearAnimation(100);
 }
 
@@ -396,6 +405,9 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg009, TestSize.Level1)
     */
     int32_t nodeIndex  = 1;
     pattern_->StartIndexerNodeAppearAnimation(nodeIndex);
+    auto itemNode = GetChildFrameNode(frameNode_, nodeIndex);
+    auto renderContext = itemNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOpacityValue(), 1);
 }
 
 /**
@@ -414,6 +426,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0010, TestSize.Level1)
             model.SetPopupBackground(Color(0x00000000));
             model.SetUsingPopup(true);
             model.SetSelected(-1);
+            model.SetAutoCollapse(false);
             model.SetFontSize(Dimension(24)); //24 is the fontSize of item
             model.SetFontWeight(FontWeight::MEDIUM);
             model.SetAdaptiveWidth(true);
@@ -428,8 +441,10 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0010, TestSize.Level1)
     locationInfo.SetScreenLocation(Offset(200, 200));
     touchEventInfo.AddTouchLocationInfo(std::move(locationInfo));
     pattern_->OnTouchDown(touchEventInfo);
+    EXPECT_EQ(pattern_->selected_, 23);
     pattern_->itemCount_ = -1;
     pattern_->OnTouchDown(touchEventInfo);
+    EXPECT_EQ(pattern_->selected_, 23);
 }
 
 /**
@@ -464,8 +479,10 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0011, TestSize.Level1)
     pattern_->OnTouchUp(touchEventInfo);
     pattern_->isHover_ = true;
     pattern_->OnTouchUp(touchEventInfo);
+    EXPECT_EQ(pattern_->childPressIndex_, -1);
     pattern_->itemCount_ = -1;
     pattern_->OnTouchUp(touchEventInfo);
+    EXPECT_EQ(pattern_->childPressIndex_, -1);
 }
 
 /**
@@ -496,6 +513,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0012, TestSize.Level1)
     pattern_->MoveIndexByOffset(Offset(0, 0));
     pattern_->itemSizeRender_  = -1.0f;
     pattern_->MoveIndexByOffset(Offset(0, 0));
+    EXPECT_EQ(pattern_->selected_, 0);
 }
 
 /**
@@ -529,6 +547,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0014, TestSize.Level1)
     */
     int32_t nextIndex = 1;
     pattern_->ArcExpandedAnimation(nextIndex);
+    EXPECT_GT(pattern_->contentModifier_->sweepAngle_->Get(), 0);
 }
 
 /**
@@ -545,6 +564,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0015, TestSize.Level1)
     */
     int32_t nextIndex = 1;
     pattern_->ArcCollapedAnimation(nextIndex);
+    EXPECT_GT(pattern_->contentModifier_->sweepAngle_->Get(), 0);
 }
 
 /**
@@ -560,6 +580,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0016, TestSize.Level1)
      * @tc.expected: step1. expect Search is true
     */
     pattern_->StartBubbleDisappearAnimation();
+    EXPECT_FALSE(pattern_->popupNode_);
 }
 
 /**
@@ -591,6 +612,7 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0018, TestSize.Level1)
      * @tc.steps: step1. call ApplyIndexChanged set arcindex theme.
     */
     pattern_->ApplyIndexChanged(false, false, false, false);
+    EXPECT_TRUE(pattern_->initialized_);
 }
 
 /**
@@ -606,8 +628,10 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0019, TestSize.Level1)
     */
     bool isShow = true;
     pattern_->ShowBubble(isShow);
+    EXPECT_FALSE(pattern_->popupNode_);
     pattern_->itemCount_ = 2;
     pattern_->ShowBubble(isShow);
+    EXPECT_FALSE(pattern_->popupNode_);
 }
 
 /**

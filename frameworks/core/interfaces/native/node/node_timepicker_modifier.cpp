@@ -49,6 +49,38 @@ void ResetTimepickerSelected(ArkUINodeHandle node)
     TimePickerModelNG::SetSelectedTime(frameNode, pickerTime);
 }
 
+void SetTimepickerStart(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetStartTime(frameNode, PickerTime(hour, minute, 0));
+}
+
+void ResetTimepickerStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerTime pickerTime(0, 0, 0);
+
+    TimePickerModelNG::SetStartTime(frameNode, pickerTime);
+}
+
+void SetTimepickerEnd(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEndTime(frameNode, PickerTime(hour, minute, 0));
+}
+
+void ResetTimepickerEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerTime defaultEndTime = PickerTime(23, 59, 59);
+
+    TimePickerModelNG::SetEndTime(frameNode, defaultEndTime);
+}
+
 void SetTimepickerBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -353,6 +385,28 @@ ArkUI_CharPtr GetTimepickerSelected(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+ArkUI_CharPtr GetTimepickerStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTime pickerTime = TimePickerModelNG::getTimepickerStart(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(pickerTime.GetHour())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetMinute())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetSecond()));
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetTimepickerEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTime pickerTime = TimePickerModelNG::getTimepickerEnd(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(pickerTime.GetHour())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetMinute())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetSecond()));
+    return g_strValue.c_str();
+}
+
 ArkUI_Uint32 GetTimepickerBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -388,6 +442,34 @@ ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
     return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
 }
 
+void SetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
+
+void SetTimepickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    TimePickerModelNG::SetOnChange(frameNode, std::move(*onChange));
+}
+
+void ResetTimepickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetOnChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -398,6 +480,12 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .getTimepickerSelected = GetTimepickerSelected,
         .setTimepickerSelected = SetTimepickerSelected,
         .resetTimepickerSelected = ResetTimepickerSelected,
+        .getTimepickerStart = GetTimepickerStart,
+        .setTimepickerStart = SetTimepickerStart,
+        .resetTimepickerStart = ResetTimepickerStart,
+        .getTimepickerEnd = GetTimepickerEnd,
+        .setTimepickerEnd = SetTimepickerEnd,
+        .resetTimepickerEnd = ResetTimepickerEnd,
         .getTimepickerBackgroundColor = GetTimepickerBackgroundColor,
         .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
         .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
@@ -422,6 +510,10 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .getTimepickerEnableCascade = GetTimepickerEnableCascade,
         .setTimepickerEnableCascade = SetTimepickerEnableCascade,
         .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
+        .setTimePickerDigitalCrownSensitivity = SetTimePickerDigitalCrownSensitivity,
+        .resetTimePickerDigitalCrownSensitivity = ResetTimePickerDigitalCrownSensitivity,
+        .setTimepickerOnChange = SetTimepickerOnChangeExt,
+        .resetTimepickerOnChange = ResetTimepickerOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -435,6 +527,12 @@ const CJUITimepickerModifier* GetCJUITimepickerModifier()
         .getTimepickerSelected = GetTimepickerSelected,
         .setTimepickerSelected = SetTimepickerSelected,
         .resetTimepickerSelected = ResetTimepickerSelected,
+        .getTimepickerStart = GetTimepickerStart,
+        .setTimepickerStart = SetTimepickerStart,
+        .resetTimepickerStart = ResetTimepickerStart,
+        .getTimepickerEnd = GetTimepickerEnd,
+        .setTimepickerEnd = SetTimepickerEnd,
+        .resetTimepickerEnd = ResetTimepickerEnd,
         .getTimepickerBackgroundColor = GetTimepickerBackgroundColor,
         .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
         .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
@@ -454,9 +552,6 @@ const CJUITimepickerModifier* GetCJUITimepickerModifier()
         .resetTimepickerLoop = ResetTimepickerLoop,
         .setTimepickerDateTimeOptions = SetTimepickerDateTimeOptions,
         .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
-        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
-        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
-        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

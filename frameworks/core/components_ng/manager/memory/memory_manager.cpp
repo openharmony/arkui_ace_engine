@@ -149,7 +149,7 @@ void MemoryManager::TrimMemRecycle()
             iter = pageNodes_.erase(iter);
             continue;
         }
-        if (frameNode->IsVisible()) {
+        if (frameNode->IsVisible() || frameNode->IsTrimMemRecycle()) {
             continue;
         }
         RecycleImageByPage(frameNode);

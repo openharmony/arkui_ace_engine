@@ -422,6 +422,13 @@ struct CollapsibleMenuSection {
     .justifyContent(FlexAlign.Center)
   }
 
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
   @Builder
   popupBuilder() {
     Column() {
@@ -701,11 +708,6 @@ struct TabContentItem {
 struct ImageMenuItem {
   item: TabTitleBarMenuItem = { value: '' };
   index: number = 0;
-  minFontSize: number = 1.75;
-  isFollowingSystemFontScale: boolean = false;
-  maxFontScale: number = 1;
-  systemFontScale?: number = 1;
-  isPopup: boolean = false;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -717,30 +719,6 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
-  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
-  dialogController: CustomDialogController | null = new CustomDialogController({
-    builder: TabTitleBarDialog({
-      cancel: () => {
-      },
-      confirm: () => {
-      },
-      tabTitleDialog: this.item,
-      tabTitleBarDialog: this.item.label ? this.item.label : '',
-      fontSize: this.fontSize,
-    }),
-    maskColor: Color.Transparent,
-    isModal: true,
-    customStyle: true,
-  })
-  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
-
-  private textDialog(): ResourceStr {
-    if (this.item.value === PUBLIC_MORE) {
-      return $r('sys.string.ohos_toolbar_more');
-    } else {
-      return this.item.label ? this.item.label : '';
-    }
-  }
 
   getFgColor() {
     return this.isOnClick
@@ -785,39 +763,6 @@ struct ImageMenuItem {
       return this.toStringFormat(this.item.label);
     }
     return ' ';
-  }
-
-  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
-    children.forEach((child) => {
-      child.layout({ x: 0, y: 0 });
-    })
-    this.fontSize = this.decideFontScale();
-  }
-
-  onFontSizeUpdated(): void {
-    this.buttonGestureModifier.fontSize = this.fontSize;
-  }
-
-  aboutToAppear(): void {
-    try {
-      let uiContent: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-      this.maxFontScale = uiContent.getMaxFontScale();
-    } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
-    }
-    this.fontSize = this.decideFontScale();
-  }
-
-  decideFontScale(): number {
-    let uiContent: UIContext = this.getUIContext();
-    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
-    if (!this.isFollowingSystemFontScale) {
-      return 1;
-    }
-    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   build() {
@@ -910,13 +855,9 @@ struct ImageMenuItem {
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
-        if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-          this.dialogController?.close()
-        }
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
-    .gestureModifier(this.buttonGestureModifier)
   }
 }
 
@@ -1061,7 +1002,7 @@ class Util {
     let resource = resourceStr as Resource;
     return resource.type === RESOURCE_TYPE_SYMBOL;
   }
-  
+
   public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
     if (!resource) {
       return false;

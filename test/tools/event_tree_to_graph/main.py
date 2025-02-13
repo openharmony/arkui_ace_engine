@@ -40,16 +40,19 @@ def parse_args():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-d', action='store_true', default=False, help='enable debug info')
     parser.add_argument('-r', action='store_true', default=False, help='dump event tree with device')
-    parser.add_argument('-i',
-                        type=str, default='./resources/dumpfile/input.txt', help='input the dump source file')
     parser.add_argument('-m', action='store_true', default=False, help='add details info')
     argument = parser.parse_args()
-    argument.input_file = argument.i
     argument.detailed = argument.m
     argument.dump_from_device = argument.r
     argument.debug = argument.d
     return argument
 
+def delete_file(file_path):
+    try:
+        os.remove(file_path)
+        log_message("delete file successful")
+    except OSError as e:
+        log_error("delete file error")
 
 def dump_from_device():
     bat_file_path = r'src\bats\dump_event.bat'
@@ -66,18 +69,20 @@ def dump_from_device():
 if __name__ == '__main__':
     # parse the args
     args = parse_args()
+    generated_file_path = ''
     # config log model
     if args.debug:
         enable_debug(True)
     # dump trace from device if needed
-    if args.dump_from_device:
-        if os.name == 'nt':
-            dump_from_device()
-        else:
-            log_error('only support dump from device on windows')
-            sys.exit(1)
+    if os.name == 'nt':
+        dump_from_device()
+        with open('generated_file_path.txt', 'r') as f:
+            generated_file_path = f.read().strip()
+    else:
+        log_error('only support dump from device on windows')
+        sys.exit(1)
     # pre process
-    handle_file_preprocess(args.input_file, 'dump_temp.txt')
+    handle_file_preprocess(generated_file_path, 'dump_temp.txt')
     # read the dump file and parse
     dump_result = ContentParser('dump_temp.txt').do_parse()
     if dump_result.is_succeed():
@@ -85,4 +90,5 @@ if __name__ == '__main__':
         dump_result.dump()
     else:
         log_error('parse failed')
+    delete_file('generated_file_path.txt')
     generate_all_graphs(dump_result, args.detailed)

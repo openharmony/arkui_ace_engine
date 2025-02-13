@@ -130,7 +130,8 @@ private:
     void Initialize(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
-    void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
+    void InitializeSecurityPadding();
+    void InitializeParam(LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern);
     void InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
@@ -234,6 +235,7 @@ private:
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
 
+    void UpdateSelectFocus(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
     void TranslateOptions(LayoutWrapper* layoutWrapper);
@@ -262,6 +264,8 @@ private:
     void NormalizeBorderRadius(float& radiusTopLeftPx, float& radiusTopRightPx,
         float& radiusBottomLeftPx, float& radiusBottomRightPx);
     std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
+    bool UpdateSelectOverlayMenuColumnInfo(
+        const RefPtr<MenuPattern>& menuPattern, const RefPtr<GridColumnInfo>& columnInfo);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

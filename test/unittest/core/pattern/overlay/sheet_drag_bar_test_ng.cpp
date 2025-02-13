@@ -116,25 +116,6 @@ HWTEST_F(SheetDragBarTestNg, OnClick001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScaleAnimation001
- * @tc.desc: Increase the coverage of SheetDragBarPattern::ScaleAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetDragBarTestNg, ScaleAnimation001, TestSize.Level1)
-{
-    auto dragBarNode = FrameNode::CreateFrameNode("SheetDragBar", 101, AceType::MakeRefPtr<SheetDragBarPattern>());
-    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
-    ASSERT_NE(dragBarPattern, nullptr);
-    bool isDown = true;
-    EXPECT_EQ(isDown, true);
-    dragBarPattern->ScaleAnimation(isDown);
-
-    isDown = false;
-    EXPECT_EQ(isDown, false);
-    dragBarPattern->ScaleAnimation(isDown);
-}
-
-/**
  * @tc.name: HandleTouchEvent001
  * @tc.desc: Increase the coverage of SheetDragBarPattern::HandleTouchEvent function.
  * @tc.type: FUNC

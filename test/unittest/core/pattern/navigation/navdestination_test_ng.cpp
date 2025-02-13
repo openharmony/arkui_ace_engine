@@ -1092,7 +1092,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 1.0f;
     float subtitleHeight = 0.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_ = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1112,7 +1112,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 100.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1133,7 +1133,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 99.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 0.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 0.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1141,6 +1141,48 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     float offsetY = 0.0f;
     EXPECT_EQ(ui.titleBarLayoutAlgorithm->GetFullModeTitleOffsetY(
         titleHeight, subtitleHeight, titleBarGeometryNode), offsetY);
+}
+
+/**
+ * @tc.name: SetHideBackButton001
+ * @tc.desc: Test SetHideBackButton function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideBackButton001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideBackButton(true);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideBackButtonValue = navDestinationLayoutProperty->GetHideBackButtonValue(false);
+    ASSERT_EQ(hideBackButtonValue, true);
+}
+
+/**
+ * @tc.name: SetHideBackButton002
+ * @tc.desc: Test SetHideBackButton function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideBackButton002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideBackButton(false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideBackButtonValue = navDestinationLayoutProperty->GetHideBackButtonValue(false);
+    ASSERT_EQ(hideBackButtonValue, false);
 }
 
 /**

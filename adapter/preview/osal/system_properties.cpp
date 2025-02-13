@@ -51,6 +51,7 @@ bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
 bool SystemProperties::accessTraceEnable_ = false;
+bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -110,6 +111,8 @@ float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
 double SystemProperties::scrollableDistance_ = 0.0;
+bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
+int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -337,6 +340,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
 std::string SystemProperties::GetDebugInspectorId()
 {
     return UNDEFINED_PARAM;
@@ -365,5 +373,15 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return true;
+}
+
+int32_t SystemProperties::GetDragDropFrameworkStatus()
+{
+    return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    return false;
 }
 } // namespace OHOS::Ace

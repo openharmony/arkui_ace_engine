@@ -42,7 +42,8 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     return this;
   }
   onChange(callback: (isChecked: boolean) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RadioOnChangeModifier.identity, RadioOnChangeModifier,callback);
+    return this;
   }
   radioStyle(value: RadioStyle): this {
     modifierWithKey(this._modifiersWithKeys, RadioStyleModifier.identity, RadioStyleModifier, value);
@@ -350,6 +351,20 @@ class RadioContentModifier extends ModifierWithKey<ContentModifier<RadioConfigur
     radioComponent.setContentModifier(this.value); 
   }
 }
+class RadioOnChangeModifier extends ModifierWithKey<(isChecked: boolean) => void>{
+  constructor(value:(isChecked: boolean) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioOnChange(node);
+    } else {
+      getUINativeModule().radio.setRadioOnChange(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

@@ -478,44 +478,6 @@ export struct ButtonBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-  //sweepGradient
-  @State enableCompSweepGradientCenterValue1: boolean = false;
-  @State compSweepGradientCenterValue1: number = 0;
-  @State enableCompSweepGradientCenterValue2: boolean = false;
-  @State compSweepGradientCenterValue2: number = 0;
-  @State enableCompSweepGradientStart: boolean = false;
-  @State compSweepGradientStart: number = 0;
-  @State enableCompSweepGradientEnd: boolean = false;
-  @State compSweepGradientEnd: number = 0;
-  @State enableCompSweepGradientRotation: boolean = false;
-  @State compSweepGradientRotation: number = 0;
-  @State enableCompSweepGradientColors1: boolean = false;
-  @State compSweepGradientColors1: ResourceStr = '#ff000000';
-  @State enableCompSweepGradientColorsNumber1: boolean = false;
-  @State compSweepGradientColorsNumber1: number = 0;
-  @State enableCompSweepGradientColors2: boolean = false;
-  @State compSweepGradientColors2: ResourceStr = '#ff000000';
-  @State enableCompSweepGradientColorsNumber2: boolean = false;
-  @State compSweepGradientColorsNumber2: number = 0;
-  @State enableCompSweepGradientRepeating: boolean = false;
-  @State compSweepGradientRepeating: boolean = false;
-  //RadialGradient
-  @State enableCompRadialGradientCenterValue1: boolean = false;
-  @State compRadialGradientCenterValue1: number = 0;
-  @State enableCompRadialGradientCenterValue2: boolean = false;
-  @State compRadialGradientCenterValue2: number = 0;
-  @State enableCompRadialGradientRadius: boolean = false;
-  @State compRadialGradientRadius: number = 0;
-  @State enableCompRadialGradientColors1: boolean = false;
-  @State compRadialGradientColors1: ResourceStr = '#ff000000';
-  @State enableCompRadialGradientColorsNumber1: boolean = false;
-  @State compRadialGradientColorsNumber1: number = 0;
-  @State enableCompRadialGradientColors2: boolean = false;
-  @State compRadialGradientColors2: ResourceStr = '#ff000000';
-  @State enableCompRadialGradientColorsNumber2: boolean = false;
-  @State compRadialGradientColorsNumber2: number = 0;
-  @State enableCompRadialGradientRepeating: boolean = false;
-  @State compRadialGradientRepeating: boolean = false;
   //Popup Control
   //bindPopup
   @State enableCompBindPopupType: boolean = true;
@@ -908,27 +870,6 @@ export struct ButtonBootcamp {
   @State compFontStyle: FontStyle = FontStyle.Normal
   @State enableCompFontWeight: boolean = false
   @State compFontWeight: FontWeight = FontWeight.Normal
-  @State enableCompLineHeight: boolean = false
-  @State compLineHeight: number = 16
-  @State enableCompDecorationType: boolean = false
-  @State compDecorationType: TextDecorationType = TextDecorationType.None
-  @State enableCompDecorationColor: boolean = false
-  @State compDecorationColor: ResourceColor = Color.Black
-  @State enableCompDecorationStyle: boolean = false
-  @State compDecorationStyle: TextDecorationStyle = TextDecorationStyle.SOLID
-  @State enableCompDraggable: boolean = false
-  // Drag and Drop Control
-  @State compDraggable: boolean = false
-  @State enableCompDragPreview: boolean = false
-  @State compDragPreview: string = '默认'
-  @State enableCompDragPreviewOptionsValueMode: boolean = false
-  @State compDragPreviewOptionsValueMode: DragPreviewMode = DragPreviewMode.AUTO
-  @State enableCompDragPreviewOptionsValueNumberBadge: boolean = false
-  @State compDragPreviewOptionsValueNumberBadge: number = 1
-  @State enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State compDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-  @State compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
   // Safe Area
   @State enableCompExpandSafeAreaTypes: boolean = false
   @State compExpandSafeAreaTypes: Array<SafeAreaType> =
@@ -964,7 +905,7 @@ export struct ButtonBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -1568,7 +1509,7 @@ export struct ButtonBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient(!this.enableCompRadialGradientColors1 && !this.enableCompSweepGradientColors1 ? {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1582,11 +1523,6 @@ export struct ButtonBootcamp {
             ]
           ],
           repeating: useEnabled(this.enableCompLinearGradientRepeating, this.compLinearGradientRepeating),
-        } : {
-          angle: 0,
-          direction: null,
-          colors: null,
-          repeating: null
         })
         .bindPopup(this.handlePopup, {
           message: this.compPopupType === 0 ? 'This is a popup with button ' : 'This is a popup only Text ',
@@ -1743,7 +1679,7 @@ export struct ButtonBootcamp {
           LengthMetrics.vp(useEnabled(this.enableCompFocusBoxStrokeWidth,
             this.compFocusBoxStrokeWidth)) : null,
         })
-        .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
+        .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : 'Button')
         .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : null)
         .focusScopePriority(
           useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
@@ -1945,20 +1881,6 @@ export struct ButtonBootcamp {
         .fontSize(useEnabled(this.enableCompFontSize, this.compFontSize))
         .fontStyle(useEnabled(this.enableCompFontStyle, this.compFontStyle))
         .fontWeight(useEnabled(this.enableCompFontWeight, this.compFontWeight))
-        .draggable(useEnabled(this.enableCompDraggable, this.compDraggable))
-        .dragPreview(useEnabled(this.enableCompDragPreview, this.compDragPreview))
-        .dragPreviewOptions({
-          mode: useEnabled(this.enableCompDragPreviewOptionsValueMode, this.compDragPreviewOptionsValueMode),
-          numberBadge: useEnabled(this.enableCompDragPreviewOptionsValueNumberBadge,
-            this.compDragPreviewOptionsValueNumberBadge),
-        }, {
-          isMultiSelectionEnabled:
-          useEnabled(this.enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-            this.compDragPreviewOptionsOptionsIsMultiSelectionEnabled),
-          defaultAnimationBeforeLifting:
-          useEnabled(this.enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
-            this.compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting)
-        })
         .expandSafeArea(
           useEnabled(this.enableCompExpandSafeAreaTypes, this.compExpandSafeAreaTypes),
           useEnabled(this.enableCompExpandSafeAreaEdges, this.compExpandSafeAreaEdges))
@@ -2077,61 +1999,60 @@ export struct ButtonBootcamp {
       Column({ space: 8 }) {
 
         RadioBlock({
-          title: '按钮类型',
+          title: 'buttonOptions.type',
           isEnabled: $enableBtnType,
           value: $btnType,
           dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            { label: 'Capsule', value: ButtonType.Capsule },
+            { label: 'Normal', value: ButtonType.Normal },
+            { label: 'Circle', value: ButtonType.Circle }
           ]
         })
 
         RadioBlock({
-          title: '按钮样式',
+          title: 'buttonOptions.buttonStyle',
           isEnabled: $enableButtonStyle,
           value: $buttonStyle,
           dataSource: [
-            { label: '强调型', value: ButtonStyleMode.EMPHASIZED },
-            { label: '普通型', value: ButtonStyleMode.NORMAL },
-            { label: '文本型', value: ButtonStyleMode.TEXTUAL }
+            { label: 'EMPHASIZED', value: ButtonStyleMode.EMPHASIZED },
+            { label: 'NORMAL', value: ButtonStyleMode.NORMAL },
+            { label: 'TEXTUAL', value: ButtonStyleMode.TEXTUAL }
           ]
         })
 
         RadioBlock({
-          title: '按钮尺寸',
+          title: 'buttonOptions.controlSize',
           isEnabled: $enableControlSize,
           value: $controlSize,
           dataSource: [
-            { label: '正常尺寸', value: ControlSize.NORMAL },
-            { label: '小尺寸', value: ControlSize.SMALL }
+            { label: 'NORMAL', value: ControlSize.NORMAL },
+            { label: 'SMALL', value: ControlSize.SMALL }
           ]
         })
 
         RadioBlock({
-          title: '按压态效果',
+          title: 'buttonOptions.stateEffect',
           isEnabled: $enableStateEffect,
           value: $stateEffect,
           dataSource: [
-            { label: '显示效果', value: true },
-            { label: '关闭效果', value: false }
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
 
         RadioBlock({
-          title: '超长规则',
+          title: 'labelStyle.overflow',
           isEnabled: $enableOverFlow,
           value: $overflow,
           dataSource: [
-            { label: '省略号', value: TextOverflow.Ellipsis },
-            { label: '跑马灯', value: TextOverflow.MARQUEE },
-            { label: '截断', value: TextOverflow.Clip }
+            { label: 'Ellipsis', value: TextOverflow.Ellipsis },
+            { label: 'MARQUEE', value: TextOverflow.MARQUEE },
+            { label: 'Clip', value: TextOverflow.Clip }
           ]
         })
 
         RadioBlock({
-          title: '最大行数',
+          title: 'labelStyle.maxLines',
           isEnabled: $enableMaxLines,
           value: $maxLines,
           dataSource: [
@@ -2151,12 +2072,12 @@ export struct ButtonBootcamp {
         })
 
         RadioBlock({
-          title: '设置按钮角色',
+          title: 'buttonOptions.role',
           isEnabled: $enableRole,
           value: $btnRole,
           dataSource: [
-            { label: '正常按钮', value: ButtonRole.NORMAL },
-            { label: '警示按钮', value: ButtonRole.ERROR },
+            { label: 'NORMAL', value: ButtonRole.NORMAL },
+            { label: 'ERROR', value: ButtonRole.ERROR },
           ]
         })
 
@@ -2647,6 +2568,7 @@ export struct ButtonBootcamp {
           compBindPopupTransitionMove: $compBindPopupTransitionMove,
         })
 
+
         //bindMenu
         CompMenuControlBlocks({
           enableCompBindMenuStartIcon: $enableCompBindMenuStartIcon,
@@ -2816,60 +2738,6 @@ export struct ButtonBootcamp {
           enableCompAttributeModifier: $enableCompAttributeModifier,
           compAttributeModifier: $compAttributeModifier,
         })
-
-        CompForegroundEffectBlocks({
-          enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
-          compForegroundEffectRadius: $compForegroundEffectRadius
-        })
-
-
-        CompForegroundBlurBlocks({
-          enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
-          compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
-          enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
-          compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
-          enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
-          compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
-          enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
-          compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
-          enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
-          compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
-        })
-
-        CompMotionBlurBlocks({
-          enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
-          compMotionBlurRadius: $compMotionBlurRadius,
-          enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
-          compMotionBlurAnchorX: $compMotionBlurAnchorX,
-          enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
-          compMotionBlurAnchorY: $compMotionBlurAnchorY,
-        })
-
-        CompClickEffectBlocks({
-          enableCompClickEffect: $enableCompClickEffect,
-          compClickEffect: $compClickEffect,
-          enableCompClickEffectLevel: $enableCompClickEffectLevel,
-          compClickEffectLevel: $compClickEffectLevel,
-          enableCompClickEffectScale: $enableCompClickEffectScale,
-          compClickEffectScale: $compClickEffectScale,
-        })
-
-        CompAccessibilityBlocks({
-          enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
-          compAccessibilityGroup: $compAccessibilityGroup,
-          enableCompAccessibilityText: $enableCompAccessibilityText,
-          compAccessibilityText: $compAccessibilityText,
-          enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
-          compAccessibilityDescription: $compAccessibilityDescription,
-          enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
-          compAccessibilityLevel: $compAccessibilityLevel,
-        })
-
-        CompAttributeModifierBlocks({
-          enableCompAttributeModifier: $enableCompAttributeModifier,
-          compAttributeModifier: $compAttributeModifier,
-        })
-
 
         //part3
         CompGestureModifierBlocks({

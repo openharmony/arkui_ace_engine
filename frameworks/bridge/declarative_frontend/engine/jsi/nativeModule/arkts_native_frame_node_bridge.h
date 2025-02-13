@@ -20,6 +20,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 
 namespace OHOS::Ace::NG {
+#define HAND_NONE 0
+#define HAND_LEFT 1
+#define HAND_RIGHT 2
 class FrameNodeBridge {
 public:
     static ArkUINodeHandle GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -40,6 +43,7 @@ public:
     static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info);
     static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ObjectRef> CreateMouseInfo(EcmaVM* vm, MouseInfo& info);
+    static Local<panda::ObjectRef> CreateHoverInfo(EcmaVM* vm, HoverInfo& info);
     static ArkUINativeModuleValue MakeFrameNodeInfo(EcmaVM* vm, ArkUINodeHandle frameNode);
     static ArkUINativeModuleValue IsModifiable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CreateFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -51,10 +55,13 @@ public:
     static ArkUINativeModuleValue ClearChildren(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetChildrenCount(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetFirstChildIndexWithoutExpand(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetLastChildIndexWithoutExpand(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFirst(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetNextSibling(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPreviousSibling(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetParent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue MoveTo(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPositionToParent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPositionToScreen(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -93,6 +100,7 @@ public:
     static ArkUINativeModuleValue SetOnFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnHover(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnHoverMove(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnMouse(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnSizeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnVisibleAreaApproximateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -105,6 +113,11 @@ public:
     static ArkUINativeModuleValue GetFirstUINode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue TriggerOnReuse(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue TriggerOnRecycle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CheckIfCanCrossLanguageAttributeSetting(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue RemoveSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 
 } // namespace OHOS::Ace::NG

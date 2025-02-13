@@ -87,6 +87,7 @@ public:
 
     static void SetDefaultPickerItemHeight(const JSCallbackInfo& info);
     static void SetCanLoop(const JSCallbackInfo& info);
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 
     static void OnAccept(const JSCallbackInfo& info);
     static void OnCancel(const JSCallbackInfo& info);
@@ -104,6 +105,8 @@ public:
 
     static void SetDisableTextStyleAnimation(const JSCallbackInfo& info);
     static void SetDefaultTextStyle(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
     static void ProcessCascadeSelected(const std::vector<NG::TextCascadePickerOptions>& options,

@@ -18,6 +18,10 @@ import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
 
+const RESOURCE_TYPE_STRING = 10003;
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
+
 interface IconTheme {
   size: SizeOptions;
   margin: LocalizedMargin;
@@ -188,10 +192,13 @@ export interface PopupOptions {
   showClose?: boolean | Resource;
   onClose?: () => void;
   buttons?: [PopupButtonOptions?, PopupButtonOptions?];
+  maxWidth?:Dimension;
 }
 
 const noop = () => {
 };
+
+const POPUP_DEFAULT_MAXWIDTH = 400;
 
 @Builder
 export function Popup(options: PopupOptions) {
@@ -202,8 +209,47 @@ export function Popup(options: PopupOptions) {
     popupDirection: options.direction,
     showClose: options.showClose,
     onClose: options.onClose,
-    buttons: options.buttons
+    buttons: options.buttons,
+    maxWidth: options.maxWidth
   })
+}
+
+function isValidString(dimension: string, regex: RegExp): boolean {
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+}
+
+function isValidResource(context: Context | undefined, value: Resource) {
+  const resourceManager = context?.resourceManager;
+  if (value === void (0) || value === null || resourceManager === void (0)) {
+    return false;
+  }
+  if (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+    value.type !== RESOURCE_TYPE_FLOAT) {
+    return false;
+  }
+
+  if (value.type === RESOURCE_TYPE_INTEGER || value.type === RESOURCE_TYPE_FLOAT) {
+    if (resourceManager.getNumber(value.id) >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(resourceManager.getStringSync(value.id))) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 @Component
@@ -211,6 +257,8 @@ export struct PopupComponent {
   private onClose: () => void = noop;
   private theme: PopupTheme = defaultTheme;
   @Prop icon: PopupIconOptions = { image: '' };
+  @Prop maxWidth?: Dimension;
+  @Prop messageMaxWidth?: number = 0;
   @Prop title: PopupTextOptions = { text: '' };
   @Prop message: PopupTextOptions = { text: '' };
   @Prop popupDirection: Direction = Direction.Auto;
@@ -370,8 +418,12 @@ export struct PopupComponent {
       return textMaxWeight = 400
     }
     if (this.showClose || this.showClose === void (0)) {
-      if (px2vp(defaultDisplaySync.width) > 400) {
-        textMaxWeight = 400
+      if (this.messageMaxWidth != undefined) {
+        if(this.maxWidth != undefined && this.maxWidth > px2vp(defaultDisplaySync.width)) {
+          textMaxWeight = px2vp(defaultDisplaySync.width)
+        } else {
+          textMaxWeight = this.messageMaxWidth
+        }
       } else {
         if (defaultDisplaySync.width != 0) {
           textMaxWeight = px2vp(defaultDisplaySync.width)
@@ -450,14 +502,21 @@ export struct PopupComponent {
   }
 
   private getWindowsPadding(): LocalizedPadding {
-    return {
-      top: this.theme.windows.padding.top,
-      bottom: LengthMetrics.vp(this.theme.windows.padding.bottom.value -
-        (this.theme.button.textMargin.bottom.value / 2)),
-      start: LengthMetrics.vp(this.theme.windows.padding.start.value -
-        (this.theme.button.margin.end.value / 2)),
-      end: this.theme.windows.padding.end
+    let top = this.theme.windows.padding.top;
+    let bottom = LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
+    let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
+    let end = this.theme.windows.padding.end;
+    let resolvedMaxWidth = this.toVp(this.maxWidth);
+    if (resolvedMaxWidth === 0) {
+      start = LengthMetrics.vp(0);
+      end = LengthMetrics.vp(0);
     }
+    return {
+      top: top,
+      bottom: bottom,
+      start: start,
+      end: end
+    };
   }
 
   onWillApplyTheme(theme: Theme): void {
@@ -513,12 +572,83 @@ export struct PopupComponent {
     }
     return layoutWeight
   }
+  private resourceToVp(value: Resource): number {
+    try {
+      if ((value as Resource).id !== -1) {
+        return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
+      } else {
+        return px2vp(getContext(this)
+          .resourceManager
+          .getNumberByName(((value.params as string[])[0]).split('.')[2]))
+      }
+    } catch (error) {
+      return POPUP_DEFAULT_MAXWIDTH
+    }
+  }
+
+  private toVp(value: Dimension | Length | undefined): number {
+    let defaultDisplaySync: display.Display | undefined = undefined;
+     try {
+      defaultDisplaySync = display.getDefaultDisplaySync()
+    } catch (error) {
+      console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+      return Number.NEGATIVE_INFINITY;
+    }
+    if (value === void (0)) {
+      return Number.NEGATIVE_INFINITY
+    }
+    switch (typeof (value)) {
+      case 'number':
+        return value as number
+      case 'object':
+        try {
+          let returnValue = this.resourceToVp(value);
+          if (returnValue === 0 &&
+            !isValidResource(getContext(this), value)) {
+            return Number.NEGATIVE_INFINITY;
+          }
+          return returnValue;
+        } catch (error) {
+          return Number.NEGATIVE_INFINITY
+        }
+      case 'string':
+        let regex: RegExp = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
+        let matches: RegExpMatchArray | null = value.match(regex);
+        if (!matches) {
+          return Number.NEGATIVE_INFINITY
+        }
+        let length: number = Number(matches?.[1] ?? 0);
+        let unit: string = matches?.[2] ?? 'vp'
+        switch (unit.toLowerCase()) {
+          case 'px':
+            length = px2vp(length)
+            break
+          case 'fp':
+            length = px2vp(fp2px(length))
+            break
+          case 'lpx':
+            length = px2vp(lpx2px(length))
+            break
+          case '%':
+            length = length / 100 * px2vp(defaultDisplaySync.width);
+            break
+          case 'vp':
+            break
+          default:
+            break
+        }
+        return length
+      default:
+        return Number.NEGATIVE_INFINITY
+    }
+  }
 
   private getApplyMaxSize(): ConstraintSizeOptions {
     let applyMaxWidth: number | undefined = undefined;
     let applyMaxHeight: number | undefined = undefined;
     let applyMaxSize: ConstraintSizeOptions | undefined = undefined;
     let defaultDisplaySync: display.Display | undefined = undefined;
+    let maxWidthSize = 400；
     try {
       defaultDisplaySync = display.getDefaultDisplaySync()
     } catch (error) {
@@ -526,15 +656,24 @@ export struct PopupComponent {
       this.messageMaxWeight = 400
       return applyMaxSize = { maxWidth: 400, maxHeight: 480 }
     }
-    if (px2vp(defaultDisplaySync.width) > 400) {
-      applyMaxWidth = 400
+    if (this.maxWidth !== undefined) {
+      if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
+          maxWidthSize = px2vp(this.maxWidth);
+      } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
+         maxWidthSize = POPUP_DEFAULT_MAXWIDTH
+      } else {
+          maxWidthSize = this.toVp(this.maxWidth);
+      }
+    } 
+    if (px2vp(defaultDisplaySync.width) > maxWidthSize) {
+      applyMaxWidth = maxWidthSize
     } else {
       if (defaultDisplaySync.width != 0) {
         applyMaxWidth = px2vp(defaultDisplaySync.width)
       } else {
         // The previewer does not support the display interface to use abnormal values
-        applyMaxWidth = -1
-      }
+       applyMaxWidth = -1
+     }
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480
@@ -542,6 +681,7 @@ export struct PopupComponent {
       applyMaxHeight = px2vp(defaultDisplaySync.height) - 40 - 40
     }
     applyMaxSize = { maxWidth: applyMaxWidth, maxHeight: applyMaxHeight }
+    this.messageMaxWidth = applyMaxHeight;
     this.messageMaxWeight = this.getMessageMaxWeight()
     return applyMaxSize
   }
@@ -831,6 +971,7 @@ export struct PopupComponent {
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
     .constraintSize(this.applySizeOptions)
+    .constraintSize(this.getApplyMaxSize())
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number
     })

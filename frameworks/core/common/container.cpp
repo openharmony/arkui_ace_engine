@@ -22,6 +22,8 @@
 
 #include <dirent.h>
 
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+
 namespace OHOS::Ace {
 
 int32_t Container::CurrentId()
@@ -133,6 +135,17 @@ RefPtr<Container> Container::GetFoucsed()
     return foucsContainer;
 }
 
+RefPtr<Container> Container::GetByWindowId(uint32_t windowId)
+{
+    RefPtr<Container> windowContainer;
+    AceEngine::Get().NotifyContainers([&windowContainer, windowId](const RefPtr<Container>& container) {
+        if (windowId == container->GetWindowId()) {
+            windowContainer = container;
+        }
+    });
+    return windowContainer;
+}
+
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();
@@ -222,6 +235,11 @@ FoldStatus Container::GetCurrentFoldStatus()
     return DisplayInfoUtils::GetInstance().GetCurrentFoldStatus();
 }
 
+std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
+{
+    return DisplayInfoUtils::GetInstance().GetCurrentFoldCreaseRegion();
+}
+
 void Container::DestroyToastSubwindow(int32_t instanceId)
 {
     auto subwindow = SubwindowManager::GetInstance()->GetToastSubwindow(instanceId);
@@ -231,6 +249,15 @@ void Container::DestroyToastSubwindow(int32_t instanceId)
     auto systemToastWindow = SubwindowManager::GetInstance()->GetSystemToastWindow(instanceId);
     if (systemToastWindow && systemToastWindow->IsToastSubWindow()) {
         systemToastWindow->DestroyWindow();
+    }
+}
+
+void Container::DestroySelectOverlaySubwindow(int32_t instanceId)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSelectOverlaySubwindow(instanceId);
+    if (subwindow && subwindow->IsToastSubWindow()) {
+        subwindow->DestroyWindow();
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Destroy selectOverlay subwindow, instanceId is %{public}d", instanceId);
     }
 }
 
@@ -307,4 +334,12 @@ int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
 #endif
 }
 
+bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    return NG::WindowSceneHelper::IsNodeInKeyGuardWindow(node);
+#else
+    return false;
+#endif
+}
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,12 @@
 #include "core/animation/spring_curve.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t SWIPE_ONE = 1;
+constexpr int32_t SWIPE_THREE = 3;
+constexpr int32_t SWIPE_FOUR = 4;
+} // namespace
+
 class SwiperAnimationTestNg : public SwiperTestNg {
 public:
     static void SetUpTestSuite()
@@ -67,7 +73,9 @@ void SwiperAnimationTestNg::CreateWithCustomAnimation()
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     double dragVelocity = 2000.0;
     pattern_->springAnimation_ = nullptr;
     pattern_->currentOffset_ = 1;
@@ -120,7 +128,9 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     double dragVelocity = 2000.0;
     pattern_->springAnimation_ = nullptr;
     pattern_->currentOffset_ = 1;
@@ -324,7 +334,9 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset002, TestSize.
      * @tc.steps: step1. Has items, but !IsAutoLinear
      * @tc.expected: AutoLinearAnimationNeedReset return false
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
 }
 
@@ -619,6 +631,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
     pattern_->SwipeTo(1);
     pattern_->TriggerCustomContentTransitionEvent(0, 1);
     pattern_->OnCustomAnimationFinish(0, 1, false);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -1128,7 +1141,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
 
     /**
      * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
@@ -1138,7 +1151,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
 
     /**
      * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
@@ -1187,7 +1200,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
@@ -1197,7 +1210,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
@@ -1210,5 +1223,75 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+}
+
+/**
+ * @tc.name: NeedFastAnimation001
+ * @tc.desc: Test NeedFastAnimation
+ * @tc.desc: Test NeedFastAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, NeedFastAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::CONTENT_FIRST);
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::ACTION_FIRST);
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::NO_ANIMATION);
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::CONTENT_FIRST_WITH_JUMP);
+    EXPECT_TRUE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::ACTION_FIRST_WITH_JUMP);
+    EXPECT_TRUE(pattern_->NeedFastAnimation());
+}
+
+/**
+ * @tc.name: FastAnimation001
+ * @tc.desc: Test FastAnimation
+ * @tc.desc: Test FastAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, FastAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(pattern_->currentIndex_);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(SWIPE_ONE);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(SWIPE_THREE);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(SWIPE_FOUR);
+    EXPECT_EQ(pattern_->currentIndex_, SWIPE_ONE);
+
+    pattern_->currentIndex_ = SWIPE_FOUR;
+    pattern_->FastAnimation(-SWIPE_THREE);
+    EXPECT_EQ(pattern_->currentIndex_, SWIPE_ONE);
+
+    pattern_->currentIndex_ = SWIPE_FOUR;
+    pattern_->FastAnimation(-SWIPE_FOUR);
+    EXPECT_EQ(pattern_->currentIndex_, SWIPE_ONE);
 }
 } // namespace OHOS::Ace::NG

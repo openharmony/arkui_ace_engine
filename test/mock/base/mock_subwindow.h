@@ -25,8 +25,9 @@ class ACE_EXPORT MockSubwindow : public Subwindow {
     DECLARE_ACE_TYPE(MockSubwindow, Subwindow)
 
 public:
-    MOCK_METHOD0(InitContainer, bool());
+    MOCK_METHOD0(InitContainer, void());
     MOCK_METHOD0(ResizeWindow, void());
+    MOCK_METHOD0(ResizeWindowForMenu, void());
     MOCK_METHOD0(GetRect, NG::RectF());
     MOCK_METHOD0(UpdatePreviewPosition, void());
     MOCK_METHOD1(GetMenuPreviewCenter, bool(NG::OffsetF& offset));
@@ -64,6 +65,8 @@ public:
     MOCK_METHOD2(SetHotAreas, void(const std::vector<Rect>& rects, int32_t overlayId));
     MOCK_CONST_METHOD0(GetParentWindowRect, Rect());
     MOCK_CONST_METHOD0(GetUIExtensionHostWindowRect, Rect());
+    MOCK_CONST_METHOD0(GetFoldExpandAvailableRect, Rect());
+    MOCK_CONST_METHOD0(CheckHostWindowStatus, bool());
     MOCK_METHOD0(ClearToast, void());
     MOCK_METHOD2(ShowToast, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));
     MOCK_METHOD2(CloseToast, void(int32_t toastId, std::function<void(int32_t)>&& callback));
@@ -101,6 +104,7 @@ public:
     MOCK_METHOD0(DestroyWindow, void());
     MOCK_METHOD0(ResizeDialogSubwindow, void());
     MOCK_METHOD0(GetDisplayId, uint64_t());
+    MOCK_METHOD1(ShowSelectOverlay, bool(const RefPtr<NG::FrameNode>& overlayNode));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

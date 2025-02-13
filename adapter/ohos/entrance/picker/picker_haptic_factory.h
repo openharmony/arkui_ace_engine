@@ -27,7 +27,9 @@ class PickerAudioHapticFactory {
 public:
     PickerAudioHapticFactory() = delete;
     ~PickerAudioHapticFactory() = delete;
-    static std::shared_ptr<IPickerAudioHaptic> GetInstance();
+    static std::shared_ptr<IPickerAudioHaptic> GetInstance(
+        const std::string& uri = "", const std::string& effectId = "");
+
 private:
     static std::shared_ptr<IPickerAudioHaptic> instance_;
     static std::mutex mutex_;

@@ -316,6 +316,11 @@ public:
         motionVelocity_ = motionVelocity;
     }
 
+    void SetUserSetSwiperCurve(RefPtr<Curve> userSetSwiperCurve)
+    {
+        userSetSwiperCurve_ = userSetSwiperCurve;
+    }
+
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -339,6 +344,8 @@ protected:
     float CalculateMinimumAmplitudeRatio(
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState) const;
     RefPtr<InterpolatingSpring> GetTailCurve();
+    AnimationOption CreateTailOption(
+        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState, bool isNormal);
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -355,6 +362,7 @@ protected:
     RefPtr<PropertyBool> isFocused_;
 
     RefPtr<Curve> headCurve_;
+    RefPtr<Curve> userSetSwiperCurve_;
     float motionVelocity_ = 0;
 
     float centerY_ = 0;

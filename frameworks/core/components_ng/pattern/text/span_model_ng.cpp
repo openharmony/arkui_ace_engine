@@ -488,19 +488,20 @@ Ace::TextDecorationStyle SpanModelNG::GetTextDecorationStyle(UINode* uiNode)
     return spanNode->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
 }
 
-TextStyle SpanModelNG::GetDefaultTextStyle()
+TextStyle SpanModelNG::GetDefaultTextStyle(int32_t themeScopeId)
 {
     TextStyle textStyle;
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, textStyle);
-    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    auto textTheme = pipelineContext->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_RETURN(textTheme, textStyle);
     return textTheme->GetTextStyle();
 }
 
 Color SpanModelNG::GetFontColor(UINode* uiNode)
 {
-    auto defaultColor = GetDefaultTextStyle().GetTextColor();
+    auto themeScopeId = uiNode ? uiNode->GetThemeScopeId() : 0;
+    auto defaultColor = GetDefaultTextStyle(themeScopeId).GetTextColor();
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(spanNode, defaultColor);
     return spanNode->GetTextColor().value_or(defaultColor);
@@ -508,7 +509,8 @@ Color SpanModelNG::GetFontColor(UINode* uiNode)
 
 Dimension SpanModelNG::GetFontSize(UINode* uiNode)
 {
-    const Dimension& defaultFontSize = GetDefaultTextStyle().GetFontSize();
+    auto themeScopeId = uiNode ? uiNode->GetThemeScopeId() : 0;
+    const Dimension& defaultFontSize = GetDefaultTextStyle(themeScopeId).GetFontSize();
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(spanNode, defaultFontSize);
     return spanNode->GetFontSize().value_or(defaultFontSize);

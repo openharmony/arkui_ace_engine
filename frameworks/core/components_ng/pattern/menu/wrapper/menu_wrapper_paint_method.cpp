@@ -86,6 +86,12 @@ void MenuWrapperPaintMethod::PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* p
         }
         auto frameNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto opacity = renderContext->GetOpacity().value_or(1.0);
+        if (!NearEqual(opacity, 1.0)) {
+            continue;
+        }
         auto pattern = frameNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(pattern);
         auto params = pattern->GetMenuPathParams();

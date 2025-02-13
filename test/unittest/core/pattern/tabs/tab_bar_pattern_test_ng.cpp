@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +15,12 @@
 
 #include "tabs_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class TabBarPatternTestNg : public TabsTestNg {
-public:
-};
+class TabBarPatternTestNg : public TabsTestNg {};
 
 /**
  * @tc.name: TabBarPatternUpdateBottomTabBarImageColor001
@@ -48,6 +42,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor001, Test
         tabBarPattern_->UpdateBottomTabBarImageColor(selectedIndexes, maskIndex);
         maskIndex = 1;
     }
+    EXPECT_EQ(tabBarPattern_->iconStyles_.size(), 1);
 }
 
 /**
@@ -70,6 +65,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor002, Test
         tabBarPattern_->UpdateBottomTabBarImageColor(selectedIndexes, maskIndex);
         maskIndex = 1;
     }
+    EXPECT_EQ(tabBarPattern_->iconStyles_.size(), 1);
 }
 /**
  * @tc.name: TabBarPatternUpdateBottomTabBarImageColor003
@@ -92,6 +88,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor003, Test
         tabBarPattern_->UpdateBottomTabBarImageColor(selectedIndexes, maskIndex);
         maskIndex = 1;
     }
+    EXPECT_EQ(tabBarPattern_->iconStyles_.size(), 1);
 }
 /**
  * @tc.name: TabBarPatternUpdateBottomTabBarImageColor004
@@ -112,6 +109,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor004, Test
         tabBarPattern_->UpdateBottomTabBarImageColor(selectedIndexes, maskIndex);
         maskIndex = 1;
     }
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -166,6 +164,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset002,
         }
         tabBarNode_->Clean(false, false);
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -220,6 +219,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset003,
         }
         tabBarNode_->Clean(false, false);
     }
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -273,6 +273,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset004,
         }
         tabBarNode_->Clean(false, false);
     }
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -396,6 +397,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight003, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->iconStyles_.size(), 1);
 }
 
 /**
@@ -432,6 +434,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight004, Test
     tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    EXPECT_TRUE(pattern_);
 }
 
 /**
@@ -468,6 +471,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight005, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -503,6 +507,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight006, Test
     tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -539,6 +544,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight007, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -574,6 +580,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight008, Test
     tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -609,6 +616,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight009, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -643,6 +651,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight010, Test
     tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -679,6 +688,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight011, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -714,6 +724,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight012, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -749,6 +760,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight013, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -783,6 +795,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight014, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -943,6 +956,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -978,6 +992,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -1013,6 +1028,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -1047,6 +1063,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -1082,6 +1099,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -1116,6 +1134,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -1150,6 +1169,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -1183,6 +1203,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, Test
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_.size(), 1);
 }
 
 /**
@@ -1221,6 +1242,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation002, TestSize.Level1
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
+    EXPECT_EQ(tabBarPattern_->iconStyles_.size(), 4);
 }
 
 /**
@@ -1258,6 +1280,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation003, TestSize.Level1
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1295,6 +1318,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation004, TestSize.Level1
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
+    EXPECT_EQ(tabBarPattern_->iconStyles_.size(), 4);
 }
 
 /**
@@ -1331,6 +1355,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation005, TestSize.Level1
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
+    EXPECT_EQ(tabBarPattern_->iconStyles_.size(), 4);
 }
 
 /**

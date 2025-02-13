@@ -39,7 +39,9 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -193,7 +195,7 @@ void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
 
 void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -356,7 +358,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -872,7 +874,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -930,7 +932,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -982,7 +984,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -1542,6 +1544,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleButton"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomButton));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomAppbar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomAppBar));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomWindowMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomWindowMask));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

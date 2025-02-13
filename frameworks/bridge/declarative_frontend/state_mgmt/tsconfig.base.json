@@ -56,6 +56,7 @@
     "src/lib/full_update/fu_view.ts",
 
     // partial update and v2 common
+    "src/lib/puv2_common/puv2_view_buildnode_base.ts",
     "src/lib/puv2_common/puv2_viewstack_processor.d.ts",
     "src/lib/puv2_common/iview.ts",
     "src/lib/puv2_common/puv2_updatefunc.ts",

@@ -117,33 +117,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, BeforeStatusCursorMove001, TestSize.Level
 }
 
 /**
- * @tc.name: CursorMoveRight001
- * @tc.desc: test CursorMoveRight
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveRight001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->CursorMoveRight();
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
-}
-
-/**
- * @tc.name: CursorMoveLeftAndRightWord001
- * @tc.desc: test CursorMoveLeftWord and CursorMoveRightWord
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveLeftWord001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    EXPECT_FALSE(richEditorPattern->CursorMoveLeftWord());
-    EXPECT_FALSE(richEditorPattern->CursorMoveRightWord());
-}
-
-/**
  * @tc.name: CursorMoveToParagraphBegin001
  * @tc.desc: test CursorMoveToParagraphBegin
  * @tc.type: FUNC

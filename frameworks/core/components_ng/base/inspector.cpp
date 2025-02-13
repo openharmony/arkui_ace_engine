@@ -519,10 +519,10 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
     ACE_SCOPED_TRACE("Inspector::GetRectangleById_Id=%d_Tag=%s_Key=%s",
         frameNode->GetId(), frameNode->GetTag().c_str(), key.c_str());
-    LOGI("GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s windowOffset:%{public}s "
+    LOGI("GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s"
          "screenRect:%{public}s",
         frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
-        rectangle.windowOffset.ToString().c_str(), rectangle.screenRect.ToString().c_str());
+        rectangle.screenRect.ToString().c_str());
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     Matrix4 defMatrix4 = Matrix4::CreateIdentity();
@@ -1076,5 +1076,28 @@ void Inspector::GetOffScreenTreeNodes(InspectorTreeMap& nodes)
     for (const auto& item : offscreenNodes) {
         AddInspectorTreeNode(item, nodes);
     }
+}
+
+uint32_t Inspector::ParseWindowIdFromMsg(const std::string& message)
+{
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start process inspector get window msg");
+    uint32_t windowId = INVALID_WINDOW_ID;
+    auto json = JsonUtil::ParseJsonString(message);
+    if (json == nullptr || !json->IsValid() || !json->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message is invalid");
+        return windowId;
+    }
+    auto methodVal = json->GetString(KEY_METHOD);
+    if (methodVal != SUPPORT_METHOD) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "method is not supported");
+        return windowId;
+    }
+    auto paramObj = json->GetObject(KEY_PARAMS);
+    if (paramObj == nullptr || !paramObj->IsValid() || !paramObj->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message params is invalid");
+        return windowId;
+    }
+    windowId = StringUtils::StringToUint(paramObj->GetString("windowId"));
+    return windowId;
 }
 } // namespace OHOS::Ace::NG

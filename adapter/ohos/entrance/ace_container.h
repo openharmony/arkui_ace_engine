@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -87,6 +88,17 @@ struct ParsedConfig {
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
                  preferredLanguage.empty() && fontId.empty());
     }
+};
+
+struct SingleHandTransform {
+    SingleHandTransform() = default;
+    SingleHandTransform(float x, float y, float scaleX, float scaleY)
+        : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
+ 
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
 };
 
 using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
@@ -324,6 +336,8 @@ public:
 
     bool DumpInfo(const std::vector<std::string>& params);
 
+    bool DumpRSNodeByStringID(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
@@ -394,7 +408,7 @@ public:
         return sharedRuntime_;
     }
 
-    void SetParentId(int32_t parentId)
+    void SetParentId(int32_t parentId) override
     {
         parentId_ = parentId;
     }
@@ -417,7 +431,7 @@ public:
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
-    int32_t GetParentId() const
+    int32_t GetParentId() const override
     {
         return parentId_;
     }
@@ -470,6 +484,8 @@ public:
     static void OnHide(int32_t instanceId);
     static void OnActive(int32_t instanceId);
     static void OnInactive(int32_t instanceId);
+    static void ActiveWindow(int32_t instanceId);
+    static void UnActiveWindow(int32_t instanceId);
     static void OnNewWant(int32_t instanceId, const std::string& data);
     static bool OnStartContinuation(int32_t instanceId);
     static std::string OnSaveData(int32_t instanceId);
@@ -541,6 +557,10 @@ public:
         isFormRender_ = isFormRender;
     }
 
+    void SetAppRunningUniqueId(const std::string& uniqueId) override;
+
+    const std::string& GetAppRunningUniqueId() const override;
+
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -605,7 +625,7 @@ public:
     Rosen::WindowMode GetWindowMode() const
     {
         CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
-        return uiWindow_->GetMode();
+        return uiWindow_->GetWindowMode();
     }
 
     // ArkTSCard
@@ -621,6 +641,7 @@ public:
 
     bool IsLauncherContainer() override;
     bool IsScenceBoardWindow() override;
+    bool IsCrossAxisWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
@@ -675,7 +696,7 @@ public:
         int32_t eventType, int64_t timeMs);
 
     void TerminateUIExtension() override;
-
+    bool UIExtensionIsHalfScreen() override;
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {
         isUIExtensionSubWindow_ = isUIExtensionSubWindow;
@@ -762,8 +783,29 @@ public:
     bool IsFloatingWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
-        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
+
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
+
+    void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
+    {
+        singleHandTransform_ = singleHandTransform;
+    }
+
+    const SingleHandTransform& GetSingleHandTransform() const
+    {
+        return singleHandTransform_;
+    }
+
+    bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
+
+    Rect GetDisplayAvailableRect() const override;
+
+    void GetExtensionConfig(AAFwk::WantParams& want);
 
 private:
     virtual bool MaybeRelease() override;
@@ -795,8 +837,10 @@ private:
     void DispatchUIExtDataConsume(
         NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     void RegisterUIExtDataSendToHost();
-    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
-    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool FireUIExtDataSendToHost(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -862,6 +906,8 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    std::string uniqueId_;
+
     // For custom drag event
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
@@ -872,6 +918,9 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
+
+    SingleHandTransform singleHandTransform_;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -62,6 +62,12 @@ enum class SecCompBackground {
     MAX_BG_TYPE
 };
 
+enum CrossAxisState {
+    STATE_INVALID = 0,
+    STATE_CROSS,
+    STATE_NO_CROSS,
+};
+
 class SecCompBase {
 public:
     SecCompBase() = default;
@@ -106,6 +112,7 @@ public:
     int32_t windowId_;
     uint64_t displayId_ = 0;
     int32_t nodeId_;
+    CrossAxisState crossAxisState_ = CrossAxisState::STATE_INVALID;
 };
 }  // namespace SecurityComponent
 }  // namespace Security

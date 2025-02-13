@@ -16,15 +16,28 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_CONTENT_MODIFIER_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_CONTENT_MODIFIER_H
 
+#include <memory>
+
 #include "ui/base/ace_type.h"
 #include "ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::Kit {
-class ContentModifier : public Modifier {
+class ContentModifierAdapter;
+class ACE_FORCE_EXPORT ContentModifier : public Modifier {
     DECLARE_ACE_TYPE(ContentModifier, Modifier);
 
 public:
-    virtual void OnDraw(DrawingContext* context) = 0;
+    ContentModifier();
+    ~ContentModifier() override;
+
+    virtual void OnDraw(const DrawingContext& context) = 0;
+    void AttachRSProperty(const std::shared_ptr<Rosen::RSPropertyBase>& property) override;
+
+    void InitAdapter();
+    const std::shared_ptr<ContentModifierAdapter>& GetRSModifier() const;
+
+private:
+    std::shared_ptr<ContentModifierAdapter> modifierAdapter_;
 };
 } // namespace OHOS::Ace::Kit
 

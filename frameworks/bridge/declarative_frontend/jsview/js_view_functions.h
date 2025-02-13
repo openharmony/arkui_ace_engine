@@ -29,6 +29,12 @@ class ComposedElement;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+enum class PrebuildPhase : int32_t {
+    NONE = 0,
+    BUILD_PREBUILD_CMD = 1,
+    EXECUTE_PREBUILD_CMD = 2,
+    PREBUILD_DONE = 3,
+};
 
 class JSView;
 
@@ -68,11 +74,14 @@ public:
     void ExecuteRecycle(const std::string& viewName);
     void ExecuteAboutToRecycle();
     void ExecuteAboutToReuse(void* params);
-    void ExecuteSetActive(bool active);
+    void ExecuteSetActive(bool active, bool isReuse = false);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
     std::string ExecuteOnDumpInfo();
     std::string ExecuteOnFormRecycle();
     void ExecuteOnFormRecover(const std::string &statusData);
+    void ExecutePrebuildComponent();
+    void ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase);
+    bool ExecuteIsEnablePrebuildInMultiFrame();
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -125,6 +134,9 @@ private:
     JSWeak<JSFunc> jsSetActive_;
     JSWeak<JSFunc> jsOnDumpInfo_;
     JSWeak<JSFunc> jsOnDumpInspector_;
+    JSWeak<JSFunc> jsPrebuildComponent_;
+    JSWeak<JSFunc> jsSetPrebuildPhase_;
+    JSWeak<JSFunc> jsIsEnablePrebuildInMultiFrame_;
     JSWeak<JSFunc>jsOnFormRecycleFunc_;
     JSWeak<JSFunc>jsOnFormRecoverFunc_;
 

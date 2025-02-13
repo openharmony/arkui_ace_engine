@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,9 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
-class TabBarTestNg : public TabsTestNg {
-public:
-};
+class TabBarTestNg : public TabsTestNg {};
 
 /**
  * @tc.name: TabBarPatternUpdateSubTabBoard001
@@ -654,6 +651,7 @@ HWTEST_F(TabBarTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
     }
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -669,6 +667,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitClick001, TestSize.Level1)
 
     auto info = GestureEvent();
     tabBarPattern_->clickEvents_.begin()->second->callback_(info);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -692,6 +691,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange001, TestSize.Level1)
         tabBarPattern_->FocusIndexChange(index);
         tabBarPattern_->animationDuration_ = animation_test;
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -732,7 +732,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange003, TestSize.Level1)
         ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
     }
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->CanScroll());
 
     /**
@@ -764,6 +764,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternMaskAnimationFinish003, TestSize.Level1)
     int32_t selectedIndex = -1;
     bool isSelected = true;
     tabBarPattern_->MaskAnimationFinish(tabBarNode_, selectedIndex, isSelected);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -835,6 +836,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
         tabBarPattern_->PlayPressAnimation(index, pressColor, animationType);
         animationType = AnimationType::HOVER;
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -858,6 +860,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -954,6 +957,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable002, TestSize.Level1)
         scrollableEvent->SetScrollable(nullptr);
         tabBarPattern_->scrollableEvent_ = scrollableEvent;
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1040,6 +1044,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1110,6 +1115,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect002, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1638,6 +1644,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1814,6 +1821,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitLongPressEvent001, TestSize.Level1)
         tabBarPattern_->InitLongPressEvent(gestureHub);
         tabBarPattern_->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1838,6 +1846,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitDragEvent001, TestSize.Level1)
         tabBarPattern_->InitDragEvent(gestureHub);
         tabBarPattern_->dragEvent_ = AceType::MakeRefPtr<DragEvent>(nullptr, [](GestureEvent&) {}, nullptr, nullptr);
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**

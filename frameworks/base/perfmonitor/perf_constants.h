@@ -24,6 +24,40 @@ public:
     // start app from launcher icon sceneid
     static constexpr char LAUNCHER_APP_LAUNCH_FROM_ICON[] = "LAUNCHER_APP_LAUNCH_FROM_ICON";
 
+    // start app from notificationbar
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_NOTIFICATIONBAR[] = "LAUNCHER_APP_LAUNCH_FROM_NOTIFICATIONBAR";
+
+    // start app from lockscreen
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_NOTIFICATIONBAR_IN_LOCKSCREEN[] =
+        "LAUNCHER_APP_LAUNCH_FROM_NOTIFICATIONBAR_IN_LOCKSCREEN";
+
+    // start app from recent
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_RECENT[] = "LAUNCHER_APP_LAUNCH_FROM_RECENT";
+
+    // start app from Card
+    static constexpr char START_APP_ANI_FORM[] = "START_APP_ANI_FORM";
+
+    // into home ani
+    static constexpr char INTO_HOME_ANI[] = "INTO_HOME_ANI";
+
+    // screenlock screen off ani
+    static constexpr char SCREENLOCK_SCREEN_OFF_ANIM[] = "SCREENLOCK_SCREEN_OFF_ANIM";
+
+    // password unlock ani
+    static constexpr char PASSWORD_UNLOCK_ANI[] = "PASSWORD_UNLOCK_ANI";
+
+    // facial fling unlock ani
+    static constexpr char FACIAL_FLING_UNLOCK_ANI[] = "FACIAL_FLING_UNLOCK_ANI";
+
+    // facial unlock ani
+    static constexpr char FACIAL_UNLOCK_ANI[] = "FACIAL_UNLOCK_ANI";
+
+    // fingerprint unlock ani
+    static constexpr char FINGERPRINT_UNLOCK_ANI[] = "FINGERPRINT_UNLOCK_ANI";
+
+    // charging dynamic ani
+    static constexpr char META_BALLS_TURBO_CHARGING_ANIMATION[] = "META_BALLS_TURBO_CHARGING_ANIMATION";
+
     // app ablitity page switch
     static constexpr char ABILITY_OR_PAGE_SWITCH[] = "ABILITY_OR_PAGE_SWITCH";
 

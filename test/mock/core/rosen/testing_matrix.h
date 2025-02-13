@@ -70,6 +70,8 @@ public:
     }
 
     void Reset() {}
+
+    void SetScaleTranslate(float sx, float sy, float dx, float dy) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_MATRIX_H

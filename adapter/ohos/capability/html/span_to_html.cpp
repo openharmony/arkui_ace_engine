@@ -135,7 +135,7 @@ std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decoration
 
 std::string SpanToHtml::DimensionToString(const Dimension& dimension)
 {
-    return StringUtils::DoubleToString(dimension.ConvertToPx()).append("px");
+    return StringUtils::DoubleToString(dimension.ConvertToVp()).append("px");
 }
 
 std::string SpanToHtml::DimensionToStringWithoutUnit(const Dimension& dimension)
@@ -550,7 +550,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
                 paragrapStart = out.length();
             }
             out += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
-            auto content = UtfUtils::Str16ToStr8(item->GetSpanContent());
+            auto content = UtfUtils::Str16DebugToStr8(item->GetSpanContent());
             auto wContent = StringUtils::ToWstring(content);
             if (wContent.back() == L'\n') {
                 if (newLine) {

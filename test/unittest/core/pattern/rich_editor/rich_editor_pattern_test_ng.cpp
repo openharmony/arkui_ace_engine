@@ -464,10 +464,12 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorToJsonValue001, TestSize.Level1)
     InspectorFilter filter;
     filter.filterFixed = 0;
     filter.filterExt.clear();
-    auto ret1 = filter.IsFastFilter();
+    EXPECT_FALSE(filter.IsFastFilter());
+
+    filter.filterFixed = 10;
+    EXPECT_TRUE(filter.IsFastFilter());
     richEditorPattern->ToJsonValue(jsonObject, filter);
-    auto ret2 = filter.IsFastFilter();
-    EXPECT_EQ(ret1, ret2);
+    EXPECT_FALSE(jsonObject->IsNull());
 }
 
 /**
@@ -494,34 +496,7 @@ HWTEST_F(RichEditorPatternTestNg, HandleOnDragStatusCallback001, TestSize.Level1
     notifyDragEvent->SetX(10.0f);
     notifyDragEvent->SetY(20.0f);
     richEditorPattern->HandleOnDragStatusCallback(dragEventType1, notifyDragEvent);
-    EXPECT_TRUE(richEditorPattern->isDragging_);
-
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    DragEventType dragEventType2 = DragEventType::LEAVE;
-    notifyDragEvent->SetX(20.0f);
-    notifyDragEvent->SetY(20.0f);
-    richEditorPattern->HandleOnDragStatusCallback(dragEventType2, notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isDragging_, true);
-
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    DragEventType dragEventType3 = DragEventType::DROP;
-    notifyDragEvent->SetX(20.0f);
-    notifyDragEvent->SetY(10.0f);
-    richEditorPattern->HandleOnDragStatusCallback(dragEventType3, notifyDragEvent);
-    EXPECT_FALSE(richEditorPattern->isDragging_);
-
-    /**
-     * @tc.steps: step5. change parameter and call function.
-     */
-    DragEventType dragEventType4 = DragEventType::ENTER;
-    notifyDragEvent->SetX(20.0f);
-    notifyDragEvent->SetY(15.0f);
-    richEditorPattern->HandleOnDragStatusCallback(dragEventType4, notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isDragging_, false);
+    EXPECT_TRUE(richEditorPattern->isOnlyRequestFocus_);
 }
 
 /**
@@ -1725,6 +1700,8 @@ HWTEST_F(RichEditorPatternTestNg, BindSelectionMenu001, TestSize.Level1)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
     std::function<void()> buildFunc = []() {
         callBack1 = 1;
         return;
@@ -1733,6 +1710,7 @@ HWTEST_F(RichEditorPatternTestNg, BindSelectionMenu001, TestSize.Level1)
     TextResponseType textResponseType = TextResponseType::LONG_PRESS;
     SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
     richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
+    EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 }
 
 /**

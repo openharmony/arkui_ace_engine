@@ -99,6 +99,8 @@ public:
     static ArkUINativeModuleValue ResetOnContentScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShowCounter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShowCounter(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnWillChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnWillChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnWillInsert(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnWillInsert(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDidInsert(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -115,6 +117,8 @@ public:
     static ArkUINativeModuleValue ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetStopBackPress(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetStopBackPress(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetKeyboardAppearance(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetKeyboardAppearance(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

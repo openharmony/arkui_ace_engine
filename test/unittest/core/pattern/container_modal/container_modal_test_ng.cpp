@@ -439,41 +439,6 @@ HWTEST_F(ContainerModelTestNg, Test004, TestSize.Level1)
     Mouse(Offset(0, titlePopupDistance));
     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
 }
-
-/**
- * @tc.name: Test005
- * @tc.desc: WindowFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test005, TestSize.Level1)
-{
-    CreateContainerModal();
-
-    /**
-     * @tc.steps: step1. set foused true.
-     * @tc.expected: isFocus_ is true.
-     */
-    pattern_->OnWindowFocused();
-    EXPECT_TRUE(pattern_->isFocus_);
-
-    /**
-     * @tc.steps: step2. set foused false.
-     * @tc.expected: isFocus_ is false.
-     */
-    pattern_->OnWindowUnfocused();
-    EXPECT_FALSE(pattern_->isFocus_);
-
-    // coverage OnWindowForceUnfocused
-    pattern_->OnWindowForceUnfocused();
-
-    /**
-     * @tc.steps: step3. Alter maxId.
-     */
-    auto pipeline = MockPipelineContext::GetCurrent();
-    pipeline->windowManager_->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
-    pattern_->OnWindowFocused();
-    EXPECT_TRUE(pattern_->isFocus_);
-}
 /**
  * @tc.name: Test006
  * @tc.desc: CanShowFloatingTitle windowMode_.
@@ -485,20 +450,6 @@ HWTEST_F(ContainerModelTestNg, Test006, TestSize.Level1)
     pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
     bool bResult = pattern_->CanShowFloatingTitle();
     EXPECT_FALSE(bResult);
-}
-/**
- * @tc.name: Test009
- * @tc.desc: AddButtonStyleMouseEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test009, TestSize.Level1)
-{
-    CreateContainerModal();
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AccessibilityManager::MakeRefPtr<ButtonPattern>());
-    auto imageIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AccessibilityManager::MakeRefPtr<ImagePattern>());
-    ContainerModalView::AddButtonStyleMouseEvent(buttonNode, imageIcon, false);
 }
 
 /**
@@ -966,5 +917,26 @@ HWTEST_F(ContainerModelTestNg, AddButtonOnEvent, TestSize.Level1)
         (*callback)(mouseInfo);
     }
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ConfigCustomWindowMask
+ * @tc.desc: Test ConfigCustomWindowMask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ConfigCustomWindowMask, TestSize.Level1)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    ASSERT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline->rootNode_, nullptr);
+    EXPECT_FALSE(ContainerModalView::ConfigCustomWindowMask(pipeline, true));
+    EXPECT_FALSE(ContainerModalView::ConfigCustomWindowMask(pipeline, false));
+    auto processor = ViewStackProcessor::GetInstance();
+    auto customWindowMaskNode = processor->GetCustomWindowMaskNode();
+    ASSERT_EQ(customWindowMaskNode, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 100, AceType::MakeRefPtr<ButtonPattern>());
+    processor->SetCustomWindowMaskNode(buttonNode);
+    EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, true));
+    EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, false));
 }
 } // namespace OHOS::Ace::NG

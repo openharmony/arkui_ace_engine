@@ -657,7 +657,10 @@ void TextFieldContentModifier::UpdateTextFadeout(
     std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
         Color::TRANSPARENT.GetValue() };
     float leftEndPercent = leftFade ? gradientPercent : 0;
-    float rightStartPercent = rightFade ? (1.0f - gradientPercent) : 1.0f;
+    float rightStartPercent = 1.0f;
+    if (rightFade && gradientPercent > 0 && gradientPercent < 1.0f) {
+        rightStartPercent = 1.0f - gradientPercent;
+    }
     std::vector<RSScalar> pos = { 0.0f, leftEndPercent, rightStartPercent, 1.0f };
     brush.SetShaderEffect(
         RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));

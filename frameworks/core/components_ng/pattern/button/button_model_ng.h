@@ -59,6 +59,8 @@ public:
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     void SetRole(const std::optional<ButtonRole>& buttonRole) override;
     void SetCreateWithLabel(bool createWithLabel) override;
+    void SetMinFontScale(float minFontScale) override;
+    void SetMaxFontScale(float maxFontScale) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);
@@ -90,6 +92,10 @@ public:
     static void SetLabelWithCheck(FrameNode* frameNode, const char* label);
     static void SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel);
     static bool GetAutoDisable(FrameNode* frameNode);
+    static void SetMinFontScale(FrameNode* frameNode, float minFontScale);
+    static void SetMaxFontScale(FrameNode* frameNode, float maxFontScale);
+    static float GetMinFontScale(FrameNode* frameNode);
+    static float GetMaxFontScale(FrameNode* frameNode);
 
 private:
     static void CreateWithLabel(const std::string& label);

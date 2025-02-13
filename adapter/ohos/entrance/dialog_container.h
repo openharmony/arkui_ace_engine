@@ -192,6 +192,7 @@ public:
     void SetFontScaleAndWeightScale(int32_t instanceId);
     void UpdateConfiguration(const ParsedConfig& parsedConfig);
     void CheckAndSetFontFamily() override;
+    Rect GetDisplayAvailableRect() const override;
 
 private:
     void InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density, int32_t width,
@@ -208,9 +209,7 @@ private:
     void InitializeSystemBarHeightChangeCallback();
     void InitializeSurfaceDestroyCallback();
     void InitializeDragEventCallback();
-#ifdef SUPPORT_DIGITAL_CROWN
     void InitializeCrownEventCallback();
-#endif
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, int32_t width,
         int32_t height, uint32_t windowId);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);

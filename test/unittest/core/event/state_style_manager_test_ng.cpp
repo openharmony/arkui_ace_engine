@@ -526,34 +526,6 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: StateStyleTest015
- * @tc.desc: test HandleScrollingParent
- * @tc.type: FUNC
- */
-HWTEST_F(StateStyleManagerTestNg, StateStyleTest015, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
-    bool hasScrollingParent = true;
-    auto parent = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    frameNode->SetParent(parent);
-    auto swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
-    parent->pattern_ = swiperPattern;
-    stateStyleMgr->HandleScrollingParent();
-    auto scrollingListener = swiperPattern->scrollingListener_;
-    for (auto listener : scrollingListener) {
-        listener->NotifyScrollingEvent();
-    }
-    CancelableCallback<void()> cancelableTask;
-    cancelableTask.Reset([] { ; });
-    stateStyleMgr->pressStyleTask_ = cancelableTask;
-    for (auto listener : scrollingListener) {
-        listener->NotifyScrollingEvent();
-    }
-    EXPECT_EQ(true, hasScrollingParent);
-}
-
-/**
  * @tc.name: StateStyleTest016
  * @tc.desc: test FireStateFunc
  * @tc.type: FUNC
@@ -567,7 +539,7 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest016, TestSize.Level1)
     bool hasScrollingParent = true;
     auto swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
     customNode->AddChild(frameNode);
-    stateStyleMgr->FireStateFunc(hasScrollingParent);
+    stateStyleMgr->FireStateFunc(UI_STATE_PRESSED, stateStyleMgr->currentState_, hasScrollingParent);
     EXPECT_EQ(true, hasScrollingParent);
 }
 
@@ -589,7 +561,7 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest017, TestSize.Level1)
     contentNode->pattern_ = popupBasePattern;
     customNode->SetParent(contentNode);
     frameNode->SetParent(contentNode);
-    stateStyleMgr->FireStateFunc(hasScrollingParent);
+    stateStyleMgr->FireStateFunc(UI_STATE_PRESSED, stateStyleMgr->currentState_, hasScrollingParent);
     EXPECT_EQ(true, hasScrollingParent);
 }
 } // namespace OHOS::Ace::NG

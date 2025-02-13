@@ -368,6 +368,7 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
@@ -378,6 +379,9 @@ public:
     virtual void SetMaxLength(std::optional<int32_t> value) {}
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
+    virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
+
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

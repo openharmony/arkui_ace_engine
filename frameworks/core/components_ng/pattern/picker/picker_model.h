@@ -29,6 +29,8 @@ struct PickerDialogInfo {
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate;
+    PickerTime parseStartTime;
+    PickerTime parseEndTime;
     PickerTime pickerTime;
     bool isUseMilitaryTime;
     bool isSelectedTime;
@@ -42,6 +44,8 @@ struct PickerDialogInfo {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
     std::optional<HoverModeAreaType> hoverModeArea;
 };
@@ -76,13 +80,15 @@ public:
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(DateChangeEvent&& onChange) = 0;
     virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) {};
 
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
-class DatePickerDialogModel {
+class ACE_FORCE_EXPORT DatePickerDialogModel {
 public:
     static DatePickerDialogModel* GetInstance();
     virtual ~DatePickerDialogModel() = default;
@@ -95,7 +101,7 @@ public:
 
 private:
     static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H

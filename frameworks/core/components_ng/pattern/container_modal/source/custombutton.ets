@@ -37,6 +37,7 @@ const EVENT_NAME_BUTTON_SIZE_CHANGE: string = 'arkui_button_size_change'
 const EVENT_NAME_BUTTON_SPACING_CHANGE: string = 'arkui_button_spacing_change'
 const EVENT_NAME_COLOR_MODE_LOCKED: string = 'arkui_color_mode_locked'
 const EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE: string = 'arkui_button_right_offset_change'
+const EVENT_NAME_TITLE_ROW_UPDATE: string = 'arkui_custom_title_row_update'
 
 const maximizeNormalResource: Resource = {
   bundleName: '',
@@ -433,7 +434,6 @@ struct custombutton {
     if (!this.hideSplit && this.isFocused) {
       this.showMenuTimeoutId = setTimeout(() => {
         this.isShowMenu = true
-        this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
       }, HOVER_TIME)
     }
   }
@@ -445,6 +445,9 @@ struct custombutton {
   }
 
   aboutToAppear(): void {
+  }
+
+  onDidBuild(): void {
   }
 
   @Builder
@@ -551,7 +554,7 @@ struct custombutton {
 
   build() {
     Row() {
-      Row() {
+      Row({space: this.buttonSpacing}) {
         Button() {
           Image(this.maximizeResource)
             .width(IMAGE_SIZE)
@@ -569,8 +572,6 @@ struct custombutton {
         .type(ButtonType.Normal)
         .borderRadius('4vp')
         .hoverEffect(HoverEffect.None)
-        // 间距可修改
-        .margin({ right: this.buttonSpacing + 'vp' })
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -587,6 +588,7 @@ struct custombutton {
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
           this.onMenuWidthChange()
           this.isShowMenu = !this.hideSplit
+          this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
         }), TapGesture().onAction(() => {
           this.onMaximizeButtonClick()
         })))
@@ -595,8 +597,10 @@ struct custombutton {
           if (isHover) {
             this.onMenuWidthChange()
             this.onShowMenuWithTimer()
+            this.cancelMenuDisappearTimer()
           } else {
             this.onCancelMenuTimer()
+            this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
           }
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
@@ -622,7 +626,6 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        .margin({ right: this.buttonSpacing + 'vp' })
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,

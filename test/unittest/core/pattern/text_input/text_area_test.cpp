@@ -103,6 +103,13 @@ void TextAreaBase::SetUpTestSuite()
             }
             return textFieldTheme;
         });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type, int themeScopeId) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(MIN_PLATFORM_VERSION);
     MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -627,6 +634,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     pattern_->SetIsSingleHandle(false);
     RectF handleRect;
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 10);
 }
 
 /**
@@ -806,8 +815,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove008, TestSize.Level1)
      * tc.expected: step2. Check if the value is created.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->SetIsSingleHandle(false);
     pattern_->ProcessOverlay();
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect(5, 5, 1, 1);
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
 
@@ -1840,5 +1849,77 @@ HWTEST_F(TextFieldUXTest, SupportTextFadeoutTest001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
     EXPECT_TRUE(pattern_->IsTextArea());
     EXPECT_FALSE(pattern_->GetTextFadeoutCapacity());
+}
+
+/**
+ * @tc.name: TextAreaMinFontScale001
+ * @tc.desc: test TextArea minFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMinFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMinFontScale(1.0);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetMinFontScale(), 1.0);
+}
+
+/**
+ * @tc.name: TextAreaMaxFontScale001
+ * @tc.desc: test TextArea maxFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMaxFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxFontScale(2.0);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
 }
 }

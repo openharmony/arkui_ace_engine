@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +35,8 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     RefPtr<NG::CustomNodeBase> customNode;
     if (info.isCustomTitle) {
         customNode = NG::CustomTitleNode::CreateCustomTitleNode(viewId, key);
+    } else if (info.isCustomAppBar) {
+        customNode = NG::CustomAppBarNode::CreateCustomAppBarNode(viewId, key);
     } else if (info.hasMeasureOrLayout) {
         customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
         auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);
@@ -57,8 +60,9 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     }
     customNode->SetAppearFunction(std::move(info.appearFunc));
     customNode->SetDidBuildFunction(std::move(info.didBuildFunc));
-    auto renderFunc = [renderFunction = std::move(info.renderFunc)]() -> RefPtr<UINode> {
-        auto node = renderFunction();
+    auto renderFunc =
+        [renderFunction = std::move(info.renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        auto node = renderFunction(deadline, isTimeout);
         return AceType::DynamicCast<UINode>(node);
     };
     customNode->SetRenderFunction(std::move(renderFunc));
@@ -69,8 +73,9 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetHasNodeUpdateFunc(std::move(info.hasNodeUpdateFunc));
     customNode->SetReloadFunction(std::move(info.reloadFunc));
     customNode->SetThisFunc(std::move(info.getThisFunc));
-    auto completeReloadFunc = [reloadFunc = std::move(info.completeReloadFunc)]() -> RefPtr<UINode> {
-        return AceType::DynamicCast<UINode>(reloadFunc());
+    auto completeReloadFunc =
+        [reloadFunc = std::move(info.completeReloadFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        return AceType::DynamicCast<UINode>(reloadFunc(deadline, isTimeout));
     };
     customNode->SetCompleteReloadFunc(std::move(completeReloadFunc));
     customNode->SetJSViewName(std::move(info.jsViewName));

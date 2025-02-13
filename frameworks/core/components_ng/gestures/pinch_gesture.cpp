@@ -26,7 +26,7 @@ RefPtr<NGGestureRecognizer> PinchGesture::CreateRecognizer()
     CHECK_NULL_RETURN(context, nullptr);
 
     double distance = context->NormalizeToPx(Dimension(distance_, DimensionUnit::VP));
-    auto pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(fingers_, distance);
+    auto pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(fingers_, distance, isLimitFingerCount_);
     if (onActionStartId_) {
         pinchRecognizer->SetOnActionStart(*onActionStartId_);
     }
@@ -46,6 +46,9 @@ RefPtr<NGGestureRecognizer> PinchGesture::CreateRecognizer()
     pinchRecognizer->SetPriority(priority_);
     pinchRecognizer->SetPriorityMask(gestureMask_);
     pinchRecognizer->SetGestureInfo(gestureInfo_);
+    if (gestureInfo_) {
+        gestureInfo_->SetDisposeTag(false);
+    }
     pinchRecognizer->SetUserData(userData_);
 
     return pinchRecognizer;

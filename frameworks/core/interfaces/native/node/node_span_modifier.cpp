@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "draw/canvas.h"
+#include "frameworks/core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,14 +41,14 @@ void SetSpanContent(ArkUINodeHandle node, const char* value)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(value);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 const char* GetSpanContent(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, nullptr);
-    g_strValue = UtfUtils::Str16ToStr8(SpanModelNG::GetContent(uiNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(SpanModelNG::GetContent(uiNode));
     return g_strValue.c_str();
 }
 
@@ -56,7 +57,7 @@ void SetSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(src);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)
@@ -307,6 +308,9 @@ void SetSpanFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
     font.fontWeight = static_cast<FontWeight>(fontInfo->fontWeight);
     std::vector<std::string> families;
     if (fontInfo->fontFamilies && fontInfo->familyLength > 0) {
+        if (fontInfo->familyLength > DEFAULT_MAX_FONT_FAMILY_LENGTH) {
+            return;
+        }
         families.resize(fontInfo->familyLength);
         for (uint32_t i = 0; i < fontInfo->familyLength; i++) {
             families.at(i) = std::string(*(fontInfo->fontFamilies + i));

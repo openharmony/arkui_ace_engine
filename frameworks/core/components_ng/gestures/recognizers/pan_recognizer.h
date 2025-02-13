@@ -28,7 +28,7 @@ class PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
 
 public:
-    PanRecognizer(int32_t fingers, const PanDirection& direction, double distance);
+    PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount = false);
 
     explicit PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption);
 
@@ -70,6 +70,8 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
+    void CheckCallbackState() override;
+    void DumpVelocityInfo(int32_t fingerId);
 
     double GetDistance() const
     {

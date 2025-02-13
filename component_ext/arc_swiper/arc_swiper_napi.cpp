@@ -384,10 +384,14 @@ napi_value JsSetEffectMode(napi_env env, napi_callback_info info)
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
-    EdgeEffect edgeEffect = EdgeEffect::NONE;
+    EdgeEffect edgeEffect = EdgeEffect::SPRING;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
         edgeEffect = static_cast<EdgeEffect>(ExtNapiUtils::GetCInt32(env, argv[0]));
     }
+    if (static_cast<int>(edgeEffect) < static_cast<int>(EdgeEffect::SPRING) ||
+        static_cast<int>(edgeEffect) > static_cast<int>(EdgeEffect::NONE)) {
+            edgeEffect = EdgeEffect::SPRING;
+        }
 
     SwiperModel::GetInstance()->SetEdgeEffect(edgeEffect);
     return ExtNapiUtils::CreateNull(env);
@@ -548,6 +552,11 @@ napi_value SetArcDirection(napi_env env, napi_callback_info info)
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
         arcDirection = static_cast<SwiperArcDirection>(ExtNapiUtils::GetCInt32(env, argv[0]));
     }
+
+    if (static_cast<int>(arcDirection) < static_cast<int>(SwiperArcDirection::THREE_CLOCK_DIRECTION) ||
+        static_cast<int>(arcDirection) > static_cast<int>(SwiperArcDirection::NINE_CLOCK_DIRECTION)) {
+            arcDirection = SwiperArcDirection::SIX_CLOCK_DIRECTION;
+        }
     indicator->SetArcDirection(arcDirection);
     return thisVar;
 }

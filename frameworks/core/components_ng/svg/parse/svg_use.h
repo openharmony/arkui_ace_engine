@@ -33,7 +33,10 @@ public:
     void OnInitStyle() override;
     RSRecordingPath AsPath(const Size& viewPort) const override;
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
+    void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void ApplyOpacity(RSCanvas& canvas);
 
 private:
     // saves the current attributes of the svg node, and restores them when the scope exits.

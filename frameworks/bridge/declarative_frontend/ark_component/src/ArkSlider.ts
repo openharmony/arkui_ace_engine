@@ -68,7 +68,8 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     return this;
   }
   onChange(callback: (value: number, mode: SliderChangeMode) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnChangeModifier.identity, OnChangeModifier, callback);
+    return this;
   }
   blockBorderColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, BlockBorderColorModifier.identity, BlockBorderColorModifier, value);
@@ -142,6 +143,10 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
       this.sliderNode.update(sliderConfiguration);
     }
     return this.sliderNode.getFrameNode();
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SliderEnableHapticFeedbackModifier.identity, SliderEnableHapticFeedbackModifier, value);
+    return this;
   }
 }
 
@@ -286,6 +291,20 @@ class StepColorModifier extends ModifierWithKey<ResourceColor> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class OnChangeModifier extends ModifierWithKey<(value:number,mode:SliderChangeMode) => void> {
+  constructor(value: (value:number,mode:SliderChangeMode) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetOnChange(node);
+    } else {
+      getUINativeModule().slider.setOnChange(node, this.value);
+    }
   }
 }
 
@@ -494,6 +513,20 @@ class SliderContentModifier extends ModifierWithKey<ContentModifier<SliderConfig
   applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
     let sliderComponent = component as ArkSliderComponent;
     sliderComponent.setContentModifier(this.value);
+  }
+}
+
+class SliderEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().slider.setEnableHapticFeedback(node, this.value);
+    }
   }
 }
 

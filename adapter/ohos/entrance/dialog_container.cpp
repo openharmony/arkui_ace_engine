@@ -62,7 +62,7 @@ void DialogContainer::InitializeTouchEventCallback()
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogTouchEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogTouchEvent");
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 }
@@ -80,7 +80,7 @@ void DialogContainer::InitializeMouseEventCallback()
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogMouseEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogMouseEvent");
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 }
@@ -98,7 +98,7 @@ void DialogContainer::InitializeAxisEventCallback()
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogAxisEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogAxisEvent");
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 }
@@ -117,7 +117,6 @@ void DialogContainer::InitializeKeyEventCallback()
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
 void DialogContainer::InitializeCrownEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
@@ -138,7 +137,6 @@ void DialogContainer::InitializeCrownEventCallback()
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 }
-#endif
 
 void DialogContainer::InitializeRotationEventCallback()
 {
@@ -166,7 +164,7 @@ void DialogContainer::InitializeViewChangeCallback()
             [context, width, height, type, rsTransaction]() {
                 context->OnSurfaceChanged(width, height, type, rsTransaction);
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceChanged", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceChanged");
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 }
@@ -179,7 +177,7 @@ void DialogContainer::InitializeDensityChangeCallback()
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
         context->GetTaskExecutor()->PostTask(
             [context, density]() { context->OnSurfaceDensityChanged(density); },
-            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceDensityChanged", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceDensityChanged");
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 }
@@ -193,7 +191,7 @@ void DialogContainer::InitializeSystemBarHeightChangeCallback()
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
             [context, statusBar, navigationBar]() { context->OnSystemBarHeightChanged(statusBar, navigationBar); },
-            TaskExecutor::TaskType::UI, "ArkUIDialogSystemBarHeightChanged", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogSystemBarHeightChanged");
     };
     aceView_->RegisterSystemBarHeightChangeCallback(systemBarHeightChangeCallback);
 }
@@ -205,7 +203,7 @@ void DialogContainer::InitializeSurfaceDestroyCallback()
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context]() { context->OnSurfaceDestroyed(); },
-            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceDestroyed", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceDestroyed");
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 }
@@ -219,7 +217,7 @@ void DialogContainer::InitializeDragEventCallback()
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, pointerEvent, action, node]() { context->OnDragEvent(pointerEvent, action, node); },
-            TaskExecutor::TaskType::UI, "ArkUIDialogDragEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogDragEvent");
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);
 }
@@ -237,9 +235,7 @@ void DialogContainer::InitializeCallback()
     InitializeSystemBarHeightChangeCallback();
     InitializeSurfaceDestroyCallback();
     InitializeDragEventCallback();
-#ifdef SUPPORT_DIGITAL_CROWN
     InitializeCrownEventCallback();
-#endif
 }
 
 RefPtr<DialogContainer> DialogContainer::GetContainer(int32_t instanceId)
@@ -273,7 +269,7 @@ void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<v
             CHECK_NULL_VOID(destroyCallback);
             destroyCallback();
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIDialogContainerDestroy", PriorityType::VIP);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIDialogContainerDestroy");
 }
 
 void DialogContainer::Destroy()
@@ -287,7 +283,7 @@ void DialogContainer::Destroy()
             context->Destroy();
         } else {
             taskExecutor_->PostTask([context]() { context->Destroy(); },
-                TaskExecutor::TaskType::UI, "ArkUIDialogDestoryPipeline", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "ArkUIDialogDestoryPipeline");
         }
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend>& frontend = frontend_;
@@ -300,10 +296,11 @@ void DialogContainer::Destroy()
                     frontend->UpdateState(Frontend::State::ON_DESTROY);
                     frontend->Destroy();
                 },
-                TaskExecutor::TaskType::JS, "ArkUIDialogFrontendDestroy", PriorityType::VIP);
+                TaskExecutor::TaskType::JS, "ArkUIDialogFrontendDestroy");
         }
     }
     DestroyToastSubwindow(instanceId_);
+    DestroySelectOverlaySubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -370,7 +367,7 @@ void DialogContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<Ac
     CheckAndSetFontFamily();
 
     taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); },
-        TaskExecutor::TaskType::UI, "ArkUIDialogFrameReportInit", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDialogFrameReportInit");
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
     RefPtr<ThemeManagerImpl> themeManager = nullptr;
@@ -392,7 +389,7 @@ void DialogContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<Ac
                 themeManager->LoadCustomTheme(assetManager);
                 themeManager->LoadResourceThemes();
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogLoadTheme", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogLoadTheme");
     }
     aceView_->Launch();
     // Only MainWindow instance will be registered to watch dog.
@@ -451,7 +448,7 @@ void DialogContainer::DumpHeapSnapshot(bool isPrivate)
             CHECK_NULL_VOID(sp);
             sp->DumpHeapSnapshot(isPrivate);
         },
-        TaskExecutor::TaskType::JS, "ArkUIDialogDumpHeapSnapshot", PriorityType::VIP);
+        TaskExecutor::TaskType::JS, "ArkUIDialogDumpHeapSnapshot");
 }
 void DialogContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window>& uiWindow)
 {
@@ -708,5 +705,15 @@ void DialogContainer::CheckAndSetFontFamily()
     }
     path = path.append(familyName);
     fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+}
+
+Rect DialogContainer::GetDisplayAvailableRect() const
+{
+    if (!uiWindow_) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "uiwindow is null, can't get displayId");
+        return Rect();
+    }
+
+    return DisplayInfoUtils::GetInstance().GetDisplayAvailableRect(uiWindow_->GetDisplayId());
 }
 } // namespace OHOS::Ace::Platform

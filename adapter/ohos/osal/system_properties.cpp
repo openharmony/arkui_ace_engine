@@ -18,6 +18,7 @@
 #include <shared_mutex>
 #include <regex>
 
+#include "display_info.h"
 #include "display_manager.h"
 #include "locale_config.h"
 #include "parameter.h"
@@ -65,6 +66,8 @@ constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
+constexpr int32_t FOLD_TYPE_TWO = 2;
+constexpr int32_t FOLD_TYPE_FOUR = 4;
 
 bool IsOpIncEnabled()
 {
@@ -156,6 +159,11 @@ bool IsMeasureDebugTraceEnabled()
 bool IsSafeAreaDebugTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
+}
+
+bool IsVsyncModeDebugTraceEnabled()
+{
+    return system::GetBoolParameter("persist.ace.trace.vsyncMode.debug.enabled", false);
 }
 
 bool IsDeveloperModeOn()
@@ -401,6 +409,18 @@ int32_t GetPageCountProp()
     return pageCount > 0.0f ? pageCount : 0.0f;
 }
 
+bool IsTaskPriorityAdjustmentEnable()
+{
+    int32_t appVsyncPriority = system::GetIntParameter("const.graphic.app_vsync_priority", -1);
+    bool isArkUIEnable = system::GetBoolParameter("persist.sys.arkui.task_priority.enabled", false);
+    return appVsyncPriority != -1 && isArkUIEnable;
+}
+
+int32_t ReadDragDropFrameworkStatus()
+{
+    return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -416,6 +436,7 @@ bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::syntaxTraceEnable_ = IsSyntaxTraceEnabled();
 bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
+bool SystemProperties::vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -478,6 +499,8 @@ uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
+bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
+int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -611,6 +634,7 @@ void SystemProperties::InitDeviceInfo(
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
     safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
+    vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
@@ -629,6 +653,7 @@ void SystemProperties::InitDeviceInfo(
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
+    taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -891,9 +916,10 @@ float SystemProperties::GetDefaultResolution()
     // always return density of main screen, don't use this interface unless you need density when no window exists
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
-    }
+    CHECK_NULL_RETURN(defaultDisplay, density);
+    auto displayInfo = defaultDisplay->GetDisplayInfoWithCache();
+    CHECK_NULL_RETURN(displayInfo, density);
+    density = displayInfo->GetVirtualPixelRatio();
     return density;
 }
 
@@ -948,6 +974,12 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
 }
 
+ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::BIG_FOLDER;
+}
+
 void SystemProperties::InitFoldScreenTypeBySystemProperty()
 {
     if (foldScreenType_ != FoldScreenType::UNKNOWN) {
@@ -959,6 +991,9 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
         auto type = StringUtils::StringToInt(foldScreenTypeStr);
+        if (type == FOLD_TYPE_FOUR) {
+            type = FOLD_TYPE_TWO;
+        }
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
@@ -998,5 +1033,16 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return true;
+}
+
+int32_t SystemProperties::GetDragDropFrameworkStatus()
+{
+    return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SUPER_FOLDER;
 }
 } // namespace OHOS::Ace

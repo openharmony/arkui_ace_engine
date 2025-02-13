@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -85,8 +83,11 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::CENTER);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->UpdateContent(symbol);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    }
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
@@ -168,9 +169,7 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
                         clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onInc");
-#endif
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -186,9 +185,7 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
                         clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDec");
-#endif
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }

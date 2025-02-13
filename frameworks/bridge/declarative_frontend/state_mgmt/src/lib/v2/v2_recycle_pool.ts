@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ class RecyclePoolV2 {
     // key: recycle element name, value: recycled element JS object
     private cachedRecycleComponents_: Map<string, Array<ViewV2>> = undefined;
  
-    private recycledIdRegistry_? : RecycledIdRegistry;
+    private recycledIdRegistry_?: RecycledIdRegistry;
 
     constructor() {
       this.cachedRecycleComponents_ = new Map<string, Array<ViewV2>>();
@@ -43,14 +43,13 @@ class RecyclePoolV2 {
      *
      * @param {string} reuseId - The id of the component being recycled.
      * @param {ViewV2} reuseComp - The recycled component to be added to the pool.
-    */
+     */
     public pushRecycleV2Component(reuseId: string, reuseComp: ViewV2): void {
       if (!this.cachedRecycleComponents_.get(reuseId)) {
         this.cachedRecycleComponents_.set(reuseId, new Array<ViewV2>());
       }
       this.cachedRecycleComponents_.get(reuseId)?.push(reuseComp);
     }
-
 
     /**
      * @function popRecycleV2Component
@@ -59,11 +58,10 @@ class RecyclePoolV2 {
      *
      * @param {string} reuseId - The id of the component being recycled.
      * @returns {ViewV2 | undefined} - The recycled component, or undefined if not found.
-    */
+     */
     public popRecycleV2Component(reuseId: string): ViewV2 | undefined {
       return this.cachedRecycleComponents_.get(reuseId)?.pop();
     }
-
 
     /**
      * @function updateRecycleIdMapping
@@ -73,12 +71,11 @@ class RecyclePoolV2 {
      *
      * @param {number} recycledElementId - The ID of the recycled element.
      * @param {number} newElmtId - The new ID to map the recycled element to.
-    */
-    public updateRecycleIdMapping(recycledElementId : number, newElmtId: number): void {
-      this.recycledIdRegistry_.delete(recycledElementId );
-      this.recycledIdRegistry_.add([recycledElementId , newElmtId]);
+     */
+    public updateRecycleIdMapping(recycledElementId: number, newElmtId: number): void {
+      this.recycledIdRegistry_.delete(recycledElementId);
+      this.recycledIdRegistry_.add([recycledElementId, newElmtId]);
     }
-
 
     /**
      * @function getRecycleIdMapping
@@ -87,15 +84,14 @@ class RecyclePoolV2 {
      *
      * @param {number} recycledElementId - The ID of the recycled element.
      * @returns {number} - The mapped ID or the original ID if no mapping exists.
-    */
+     */
     public getRecycleIdMapping(recycledElementId : number): number {
-      const mappedId  = this.recycledIdRegistry_.get(recycledElementId );
-      if (!mappedId ) {
-        return recycledElementId ;
+      const mappedId = this.recycledIdRegistry_.get(recycledElementId);
+      if (!mappedId) {
+        return recycledElementId;
       }
-      return mappedId ;
+      return mappedId;
     }
-
 
     /**
      * @function purgeAllCachedRecycleElements
@@ -108,17 +104,15 @@ class RecyclePoolV2 {
      * custom node linked to the JSView object:
      * - If the JSView object has been garbage collected, the CustomNode is deleted.
      * - If the JSView object is managed by the RecyclePool, the CustomNode is reused.
-    */
+     */
     public purgeAllCachedRecycleElmtIds(): void {
-  
       this.cachedRecycleComponents_.forEach((components_, _) => {
         components_.forEach((node) => {
           node.resetRecycleCustomNode();
         });
-      })
+      });
       this.cachedRecycleComponents_.clear();
     }
-  
   }
 
   /**
@@ -127,7 +121,7 @@ class RecyclePoolV2 {
    * the new elementID that gets created on every initial render.
    * This class supports adding, retrieving, and deleting mappings between old and new element IDs
    *  for recycling purposes.
-  */
+   */
   class RecycledIdRegistry {
     private fwdMap_: Map<number, number>;
     private revMap_: Map<number, number>;
@@ -143,8 +137,8 @@ class RecyclePoolV2 {
      * forward and reverse maps.
      *
      * @param {number} key - The element ID to be removed from the map.
-    */
-    delete(key: number) {
+     */
+    delete(key: number): void {
       if (!this.fwdMap_[key]) {
         return;
       }
@@ -153,7 +147,6 @@ class RecyclePoolV2 {
       this.revMap_.delete(rev);
     }
 
-
     /**
      * @function get
      * @description Retrieves the mapped ID for a given element ID, either from the
@@ -161,11 +154,10 @@ class RecyclePoolV2 {
      *
      * @param {number} key - The element ID for which the mapped ID is requested.
      * @returns {number | undefined} - The mapped ID or undefined if no mapping exists.
-    */
+     */
     get(key: number): number | undefined {
       return this.fwdMap_[key] || this.revMap_[key];
     }
-
 
     /**
      * @function add
@@ -173,10 +165,9 @@ class RecyclePoolV2 {
      * the forward and reverse maps.
      *
      * @param {Array<number>} pair - A pair of old and new element IDs to be added to the mapping.
-    */
-    add(pair: [number, number]) {
+     */
+    add(pair: [number, number]): void {
       this.fwdMap_[pair[0]] = pair[1];
       this.revMap_[pair[1]] = pair[0];
     }
-
   }

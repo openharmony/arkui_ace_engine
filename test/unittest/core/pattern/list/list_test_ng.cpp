@@ -34,9 +34,12 @@ void ListTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockAnimationManager::Enable(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    auto buttonThemeConstants = CreateThemeConstants(THEME_PATTERN_BUTTON);
+    auto buttonTheme = ButtonTheme::Builder().Build(buttonThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
     auto listThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST);
     auto listTheme = ListTheme::Builder().Build(listThemeConstants);
@@ -47,10 +50,8 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->itemDefaultColor_ = ITEM_DEFAULT_COLOR;
     listItemTheme->hoverColor_ = HOVER_COLOR;
     listItemTheme->pressColor_ = PRESS_COLOR;
-    int32_t hoverAnimationDuration = 250;
-    int32_t hoverToPressAnimationDuration = 100;
-    listItemTheme->hoverAnimationDuration_ = hoverAnimationDuration;
-    listItemTheme->hoverToPressAnimationDuration_ = hoverToPressAnimationDuration;
+    listItemTheme->hoverAnimationDuration_ = 250;
+    listItemTheme->hoverToPressAnimationDuration_ = 100;
     listItemTheme->disabledAlpha_ = DISABLED_ALPHA;
     listItemTheme->defaultColor_ = Color::WHITE;
     listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
@@ -59,8 +60,6 @@ void ListTestNg::SetUpTestSuite()
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
-    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    MockAnimationManager::Enable(true);
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -68,19 +67,16 @@ void ListTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void ListTestNg::SetUp()
-{
-    MockAnimationManager::GetInstance().Reset();
-}
+void ListTestNg::SetUp() {}
 
 void ListTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
-    accessibilityProperty_ = nullptr;
     positionController_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
@@ -95,7 +91,6 @@ void ListTestNg::GetList()
     eventHub_ = frameNode_->GetEventHub<ListEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ListLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
-    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();
     positionController_ = AceType::DynamicCast<ListPositionController>(pattern_->GetPositionController());
 }
 
@@ -105,8 +100,8 @@ ListModelNG ListTestNg::CreateList()
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     ListModelNG model;
     model.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     RefPtr<ScrollControllerBase> scrollController = model.CreateScrollController();
     RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
     model.SetScroller(scrollController, proxy);
@@ -123,17 +118,12 @@ void ListTestNg::CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemS
     }
 }
 
-void ListTestNg::AddItems(int32_t itemNumber, V2::ListItemStyle listItemStyle)
+void ListTestNg::AddListItem(V2::ListItemStyle listItemStyle)
 {
-    for (int i = 0; i < itemNumber; ++i) {
-        ListItemModelNG itemModel;
-        itemModel.Create();
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(ITEM_MAIN_SIZE));
-        RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
-        auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
-        currentFrameNode->MountToParent(frameNode_);
-    }
+    CreateListItem(listItemStyle);
+    RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    currentFrameNode->MountToParent(frameNode_);
 }
 
 ListItemModelNG ListTestNg::CreateListItem(V2::ListItemStyle listItemStyle)
@@ -194,57 +184,6 @@ void ListTestNg::CreateGroupWithSetting(
         CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-}
-
-void ListTestNg::CreateGroupWithSettingChildrenMainSize(int32_t groupNumber)
-{
-    for (int32_t index = 0; index < groupNumber; ++index) {
-        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
-        auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
-        ListItemGroupModelNG groupModel = CreateListItemGroup();
-        groupModel.SetSpace(Dimension(SPACE));
-        groupModel.SetDivider(ITEM_DIVIDER);
-        groupModel.SetHeader(std::move(header));
-        groupModel.SetFooter(std::move(footer));
-        auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
-        childrenSize->UpdateDefaultSize(ITEM_MAIN_SIZE);
-        const int32_t itemNumber = 2;
-        childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
-        CreateListItems(1);
-        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
-        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
-        CreateListItems(1);
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-}
-
-void ListTestNg::CreateGroupChildrenMainSize(int32_t groupNumber)
-{
-    for (int32_t index = 0; index < groupNumber; index++) {
-        ListItemGroupModelNG groupModel = CreateListItemGroup();
-        auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
-        childrenSize->UpdateDefaultSize(ITEM_MAIN_SIZE);
-        const int32_t itemNumber = 2;
-        childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
-        CreateListItems(1);
-        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
-        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
-        CreateListItems(1);
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-}
-
-void ListTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
-{
-    for (int32_t index = 0; index < groupNumber; index++) {
-        if (index & 1) {
-            CreateListItems(1);
-        } else {
-            CreateListItemGroups(1);
-        }
     }
 }
 
@@ -320,43 +259,6 @@ void ListTestNg::SetChildrenMainSize(
     for (int32_t index = 0; index < size; index++) {
         auto child = GetChildFrameNode(frameNode, index + startIndex);
         ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(newChildrenSize[index]));
-    }
-}
-
-void ListTestNg::CreateGroupWithSettingWithComponentContent(
-    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
-{
-    for (int32_t index = 0; index < groupNumber; index++) {
-        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
-        groupModel.SetSpace(Dimension(SPACE));
-        groupModel.SetHeaderComponent(CreateCustomNode("Header", LIST_WIDTH, LIST_HEIGHT));
-        groupModel.SetFooterComponent(CreateCustomNode("Footer", LIST_WIDTH, LIST_HEIGHT));
-        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-}
-
-void ListTestNg::CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
-    const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber)
-{
-    for (int32_t index = 0; index < itemNumber; index++) {
-        ListItemModelNG itemModel = CreateListItem();
-        itemModel.SetSwiperAction(nullptr, nullptr, nullptr, effect);
-        if (startBuilderNode) {
-            itemModel.SetDeleteAreaWithFrameNode(
-                startBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
-        }
-        if (endBuilderNode) {
-            itemModel.SetDeleteAreaWithFrameNode(
-                endBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
-        }
-        {
-            GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 

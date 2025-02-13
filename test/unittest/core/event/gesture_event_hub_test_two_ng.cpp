@@ -252,7 +252,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset002, TestSize.Le
     auto size = SizeF(1, 1);
     gestureEventHub->frameNodeOffset_.SetX(1);
     gestureEventHub->frameNodeOffset_.SetY(1);
-    gestureEventHub->GetPixelMapOffset(info, size, -1.0f);
+    PreparedInfoForDrag data;
+    gestureEventHub->GetPixelMapOffset(info, size, data, -1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
@@ -260,6 +261,36 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset002, TestSize.Le
     EXPECT_FALSE(result.GetX() >= 0.0f);
     EXPECT_FALSE(result.GetX() + size.Width() <= 0.0f);
     EXPECT_FALSE(result.GetY() >= 0.0f);
+    EXPECT_FALSE(result.GetY() + size.Height() <= 0.0f);
+}
+
+/**
+ * @tc.name: GestureEventHubGetPixelMapOffset003
+ * @tc.desc: Test GetPixelMapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset003, TestSize.Level1)
+{
+    auto frameNodeTest = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNodeTest->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNodeTest);
+    ASSERT_NE(eventHub, nullptr);
+
+    constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
+    constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
+    GestureEvent info = GestureEvent();
+    auto size = SizeF(1, 1);
+    gestureEventHub->frameNodeOffset_.SetX(1);
+    gestureEventHub->frameNodeOffset_.SetY(1);
+    PreparedInfoForDrag data;
+    data.isNeedCreateTiled = true;
+    gestureEventHub->GetPixelMapOffset(info, size, data, -1.0f);
+    auto frameNode = gestureEventHub->GetFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    EXPECT_FALSE(result.GetX() + size.Width() <= 0.0f);
     EXPECT_FALSE(result.GetY() + size.Height() <= 0.0f);
 }
 

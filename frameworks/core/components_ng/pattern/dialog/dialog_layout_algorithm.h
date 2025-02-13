@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/border.h"
@@ -82,12 +83,13 @@ private:
     void UpdateTouchRegion();
 
     double GetPaddingBottom() const;
+    double GetKeyboardAvoidDistance() const;
 
     OffsetF AdjustChildPosition(
         OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard);
 
     SizeF UpdateHeightWithSafeArea(SizeF size);
-    void UpdateSafeArea();
+    void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
@@ -97,6 +99,9 @@ private:
     void ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp);
 
     void ResizeDialogSubwindow(bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow);
+
+    bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
+    float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
@@ -127,8 +132,12 @@ private:
     HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
 
     KeyboardAvoidMode keyboardAvoidMode_ = KeyboardAvoidMode::DEFAULT;
+    std::optional<Dimension> keyboardAvoidDistance_;
 
     bool isShowInFloatingWindow_ = false;
+
+    float embeddedDialogOffsetY_ = 0.0f;
+    float safeAreaBottomLength_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

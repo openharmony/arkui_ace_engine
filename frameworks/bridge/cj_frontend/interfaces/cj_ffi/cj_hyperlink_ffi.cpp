@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_hyperlink_ffi.h"
 
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model.h"
 
 using namespace OHOS::Ace;
@@ -30,6 +31,6 @@ void FfiOHOSAceFrameworkHyperlinkColor(uint32_t color)
 }
 void FfiOHOSAceFrameworkHyperlinkPop()
 {
-    HyperlinkModel::GetInstance()->Pop();
+    ViewStackModel::GetInstance()->PopContainer();
 }
 }

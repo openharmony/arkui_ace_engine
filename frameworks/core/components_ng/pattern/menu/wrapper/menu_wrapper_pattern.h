@@ -449,6 +449,16 @@ public:
         return embeddedSubMenuExpandTotalCount_;
     }
 
+    void SetForceUpdateEmbeddedMenu(bool forceUpdate)
+    {
+        forceUpdateEmbeddedMenu_ = forceUpdate;
+    }
+
+    bool GetForceUpdateEmbeddedMenu()
+    {
+        return forceUpdateEmbeddedMenu_;
+    }
+
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetShowedSubMenu();
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
@@ -459,6 +469,10 @@ public:
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
     void StopPreviewMenuAnimation();
+    void GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
+        RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext);
+    void AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext, RefPtr<RenderContext> previewScaleContext,
+        RefPtr<RenderContext> menuContext, RefPtr<RenderContext> previewDisappearContext);
 
     void SetAnimationPreviewScale(float scale)
     {
@@ -485,9 +499,12 @@ public:
         animationInfo_.clipRate = rate;
     }
 
-    void SetAnimationBorderRadius(float radius)
+    void SetAnimationBorderRadius(double rate, const BorderRadiusProperty& radius)
     {
-        animationInfo_.borderRadius = radius;
+        animationInfo_.borderRadius.radiusTopLeft = Dimension(radius.radiusTopLeft->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusTopRight = Dimension(radius.radiusTopRight->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusBottomLeft = Dimension(radius.radiusBottomLeft->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusBottomRight = Dimension(radius.radiusBottomRight->ConvertToPx() * rate);
     }
 
     PreviewMenuAnimationInfo GetPreviewMenuAnimationInfo()
@@ -534,6 +551,26 @@ public:
 
     bool IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const;
 
+    void SetHoverMode(bool enableFold)
+    {
+        enableFold_ = enableFold;
+    }
+
+    bool GetHoverMode() const
+    {
+        return enableFold_.value_or(false);
+    }
+
+    bool GetIsSelectOverlaySubWindowWrapper() const
+    {
+        return isSelectOverlaySubWindowWrapper_;
+    }
+
+    void SetIsSelectOverlaySubWindowWrapper(bool isSelectOverlaySubWindowWrapper)
+    {
+        isSelectOverlaySubWindowWrapper_ = isSelectOverlaySubWindowWrapper;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -563,6 +600,7 @@ private:
     void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
+    bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
     void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
@@ -579,6 +617,7 @@ private:
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
     int embeddedSubMenuExpandTotalCount_ = 0;
+    bool forceUpdateEmbeddedMenu_ = false;
     LayoutConstraintF childLayoutConstraint_;
 
     AnimationOption animationOption_;
@@ -602,6 +641,9 @@ private:
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
     int32_t fingerId_ = -1;
+    std::optional<bool> enableFold_;
+    // Identify whether the menuWrapper is used by selectOverlay in the subwindow.
+    bool isSelectOverlaySubWindowWrapper_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

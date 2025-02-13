@@ -144,7 +144,7 @@ float CounterDecorator::MeasureTextNodeHeight()
     auto counterGeometryNode = textNode->GetGeometryNode();
     CHECK_NULL_RETURN(counterGeometryNode, 0.0);
 
-    //For efficiency: keep content same, make full use of rs cache.
+    // For efficiency: keep content same, make full use of rs cache.
     auto textContent = contentController->GetTextValue();
     auto textLength = static_cast<uint32_t>(textContent.length());
     auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLength().value());
@@ -251,8 +251,6 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
     CHECK_NULL_VOID(textNode);
     auto pipeline = decoratedNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
     auto textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();

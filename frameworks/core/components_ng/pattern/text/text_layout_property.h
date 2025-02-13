@@ -110,14 +110,11 @@ public:
         ResetTextMarqueeOptions();
         ResetCursorColor();
         ResetSelectedBackgroundColor();
-        ResetTextColorFlagByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
-
-    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -172,7 +169,7 @@ public:
 public:
     void UpdateContent(const std::string& value)
     {
-        UpdateContent(UtfUtils::Str8ToStr16(value));
+        UpdateContent(UtfUtils::Str8DebugToStr16(value));
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
@@ -246,8 +243,6 @@ public:
 
     // Used to mark whether a paragraph needs to be recreated for Measure.
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(NeedReCreateParagraph, bool);
-
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
 
     std::string GetTextMarqueeOptionsString() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);

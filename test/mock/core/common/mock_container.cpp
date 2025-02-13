@@ -154,6 +154,11 @@ FoldStatus Container::GetCurrentFoldStatus()
     return MockContainer::Current()->GetMockDisplayInfo()->GetFoldStatus();
 }
 
+std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
+{
+    return {};
+}
+
 RefPtr<Container> Container::GetFoucsed()
 {
     RefPtr<Container> foucsContainer;
@@ -164,5 +169,10 @@ RefPtr<Container> Container::GetFoucsed()
         }
     });
     return foucsContainer;
+}
+
+bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
+{
+    return false;
 }
 } // namespace OHOS::Ace

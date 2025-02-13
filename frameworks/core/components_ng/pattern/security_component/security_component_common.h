@@ -29,6 +29,12 @@ enum class SecurityComponentHandleResult : int32_t {
     GRANT_CANCEL = -64, // Keep consistent with the defined enum of security component service
 };
 
+enum SecurityComponentErrorCode : int32_t {
+    SUCCESS = 0,
+    SYSTEM_INTERNAL_ERROR = 1,
+    PROPERTY_SETING_ERROR = 2,
+};
+
 enum class SecurityComponentIconStyle : int32_t {
     ICON_NULL = -1,
 };

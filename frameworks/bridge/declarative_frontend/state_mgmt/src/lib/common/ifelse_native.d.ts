@@ -24,6 +24,8 @@
 declare class If {
     static create(): void;
     static pop() : void;
-    static branchId(id: number, removedChildelmtIds: Array<number>): void;
+    static branchId(id: number, removedChildElmtIds: Array<number>, reservedChildElmtIds: Array<number>): void;
     static getBranchId() : number;
+    static canRetake(id: string): boolean;
+    static getRetakenElmtIds(retakenChildElmtIds: Array<number>): boolean;
 }

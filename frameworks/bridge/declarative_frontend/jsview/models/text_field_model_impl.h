@@ -38,11 +38,13 @@ public:
     void SetType(TextInputType value) override;
     void SetContentType(const NG::TextContentType& value) override {};
     void SetPlaceholderColor(const Color& value) override;
+    void ResetPlaceholderColor() override {};
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
     void SetTextAlign(TextAlign value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override {};
     void SetCaretColor(const Color& value) override;
+    void ResetCaretColor() override {};
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
@@ -53,6 +55,7 @@ public:
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override {};
     void SetFontStyle(FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>&& func) override;
@@ -61,7 +64,7 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) override;
+    void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
@@ -74,8 +77,10 @@ public:
     static void InitTextInputDefaultStyle();
     void SetForegroundColor(const Color& value) override {};
     void SetShowUnit(std::function<void()>&& unitAction) override {};
+    void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) override {};
     void SetBackgroundColor(const Color& color, bool tmp) override;
+    void ResetBackgroundColor() override {};
     void SetHeight(const Dimension& value) override;
     void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetBackBorder() override;
@@ -103,6 +108,7 @@ public:
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
     void SetEnableHapticFeedback(bool state) override {};
+    void SetKeyboardAppearance(KeyboardAppearance value) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

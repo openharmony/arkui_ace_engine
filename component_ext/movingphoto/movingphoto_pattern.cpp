@@ -1147,14 +1147,10 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
-        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        autoAndRepeatLevel_ = PlaybackMode::NONE;
+        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         Pause();
-        if (autoPlayPeriodEndTime_ != -1) {
-            Seek(autoPlayPeriodEndTime_);
-        } else {
-            Seek(0);
-        }
+        StopAnimation();
     }
     ResetMediaPlayer();
     if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {

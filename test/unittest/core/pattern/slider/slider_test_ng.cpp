@@ -378,6 +378,7 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     sliderTheme->tipFontSize_ = Dimension(16.0);
     sliderTheme->tipTextColor_ = Color::BLACK;
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step3. get sliderPattern and test init parameter.
      */

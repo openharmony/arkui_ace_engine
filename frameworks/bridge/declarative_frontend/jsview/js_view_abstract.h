@@ -135,6 +135,11 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
+    static void ParseDragPreviewConfig(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewValue(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewBuilderNode(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo,
+        const JSRef<JSVal>& builder);
+    static void ParseDragInteractionOptions(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static NG::DragPreviewOption ParseDragPreviewOptions(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
@@ -145,6 +150,7 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption);
+    static void ParseBackgroundImageOption(const JSCallbackInfo& jsOption, int32_t& repeatIndex, bool& syncMode);
     static void ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
@@ -160,6 +166,12 @@ public:
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void MenuDefaultParam(NG::MenuParam& menuParam);
+    static void ParseContentMenuCommonParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam);
+    static int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId);
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+    static int32_t CloseMenu(const RefPtr<NG::UINode>& customNode);
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
@@ -171,11 +183,13 @@ public:
         const JSCallbackInfo& info, const std::string& name, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(
         const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
+    static NG::SheetEffectEdge ParseSheetEffectEdge(const JSRef<JSObject>& paramObj);
     static void ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle);
     static bool ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
     static std::optional<CalcDimension> ParseBindSheetBorderRadiusProp(const JSRef<JSObject>& object, const char* prop);
+    static bool ParseSheetMode(const std::string heightStr, NG::SheetHeight& detent);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
-    static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
+    static bool ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent, bool isReset);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static bool ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseCallback(const JSRef<JSObject>& paramObj,
@@ -260,7 +274,9 @@ public:
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
+    static void JsOnAxisEvent(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
+    static void JsOnHoverMove(const JSCallbackInfo& info);
     static void JsOnAccessibilityHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
@@ -270,6 +286,7 @@ public:
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
+    static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
@@ -358,9 +375,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void JsConstraintSize(const JSCallbackInfo& info);
     static void JsLayoutPriority(const JSCallbackInfo& info);
-    static void JsPixelRound(const JSCallbackInfo& info);
     static void JsLayoutWeight(const JSCallbackInfo& info);
-    static void JsChainWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
@@ -423,6 +438,7 @@ public:
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsTabStop(const JSCallbackInfo& info);
+    static void JsNextFocus(const JSCallbackInfo& info);
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);
@@ -454,6 +470,8 @@ public:
     static void JsAccessibilityChecked(const JSCallbackInfo& info);
     static void JsAccessibilityRole(const JSCallbackInfo& info);
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
+    static void JsAccessibilityDefaultFocus(const JSCallbackInfo& info);
+    static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -472,6 +490,7 @@ public:
 
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
+    static void JsCancelDataLoading(const std::string& key);
     static void SetSymbolOptionApply(const JSCallbackInfo& info,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj);
     static void SetTextStyleApply(const JSCallbackInfo& info,
@@ -495,6 +514,7 @@ public:
      * Binds the native methods to the the js object
      */
     static void JSBind(BindingTarget globalObj);
+    static void JsNotifyDragStartRequest(const JSCallbackInfo& info);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
@@ -648,6 +668,8 @@ public:
         NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 
@@ -669,6 +691,7 @@ public:
     static NG::BorderRadiusProperty GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
+    static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
 private:
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result);

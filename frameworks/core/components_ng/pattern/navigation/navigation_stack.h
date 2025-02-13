@@ -40,7 +40,7 @@ public:
     }
 };
 
-class NavigationStack : public virtual AceType {
+class ACE_FORCE_EXPORT NavigationStack : public virtual AceType {
     DECLARE_ACE_TYPE(NG::NavigationStack, AceType)
 public:
     NavigationStack() = default;
@@ -66,8 +66,6 @@ public:
 
     void SetNavPathList(const NavPathList& navPathList)
     {
-        // save pre nav path list when poped
-        SavePreNavList();
         preNavPathList_ = navPathList;
         //copy nav path
         navPathList_ = navPathList;

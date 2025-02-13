@@ -86,6 +86,14 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
+std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
+{
+    if (!perfMonitor_) {
+        perfMonitor_ = std::make_shared<ArkUIPerfMonitor>();
+    }
+    return perfMonitor_;
+}
+
 PipelineBase::~PipelineBase()
 {
     std::lock_guard lock(destructMutex_);
@@ -233,7 +241,8 @@ void PipelineBase::SetRootSize(double density, float width, float height)
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 
@@ -249,6 +258,18 @@ void PipelineBase::SetFontScale(float fontScale)
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->RebuildFontNode();
     }
+}
+
+bool PipelineBase::NeedTouchInterpolation()
+{
+    if (!IsFocusWindowIdSetted()) {
+        return true;
+    }
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto uIContentType = container->GetUIContentType();
+    return uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
+        uIContentType == UIContentType::MODAL_UI_EXTENSION;
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
@@ -761,16 +782,19 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     bool forceChange)
 {
     auto currentContainer = Container::Current();
+    double keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
 #ifdef OHOS_STANDARD_SYSTEM
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown()) {
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow() &&
+            !subwindow->NeedAvoidKeyboard()) {
             // subwindow is shown, main window no need to handle the keyboard event
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
+            CheckAndUpdateKeyboardInset(keyboardHeight);
             return;
         }
 #endif
     }
-    double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, true)) {
         return;
     }
@@ -784,7 +808,8 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow() &&
+            !subwindow->NeedAvoidKeyboard()) {
             // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
             CheckAndUpdateKeyboardInset(keyboardHeight);
@@ -978,7 +1003,8 @@ bool PipelineBase::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 

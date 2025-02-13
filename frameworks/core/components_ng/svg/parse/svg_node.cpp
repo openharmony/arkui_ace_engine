@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,15 @@
 #include "core/components/common/painter/rosen_svg_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "core/components_ng/svg/parse/svg_constants.h"
+#include "core/components_ng/svg/parse/svg_filter.h"
+#include "core/components_ng/svg/parse/svg_mask.h"
+#include "core/components_ng/svg/parse/svg_clip_path.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
+#include "core/components_ng/svg/parse/svg_transform.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -143,7 +148,8 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
             } },
         { DOM_SVG_SRC_CLIP_RULE,
             [](const std::string& val, SvgBaseAttribute& attrs) {
-                attrs.clipState.SetClipRule(val);
+                attrs.clipState.SetClipRule(val == "evenodd" ? SvgRuleType::SVG_RULE_EVENODD :
+                    SvgRuleType::SVG_RULE_NONEZERO);
             } },
         { DOM_CLIP_PATH,
             [](const std::string& val, SvgBaseAttribute& attrs) {
@@ -154,9 +160,15 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                     attrs.clipState.SetHref(src);
                 }
             } },
+        { SVG_CLIP_PATH_UNITS,
+            [](const std::string& val, SvgBaseAttribute& attrs) {
+                attrs.clipState.SetClipPathUnits((val == "objectBoundingBox") ?
+                    SvgLengthScaleUnit::OBJECT_BOUNDING_BOX : SvgLengthScaleUnit::USER_SPACE_ON_USE);
+            } },
         { SVG_CLIP_RULE,
             [](const std::string& val, SvgBaseAttribute& attrs) {
-                attrs.clipState.SetClipRule(val);
+                attrs.clipState.SetClipRule(val == "evenodd" ? SvgRuleType::SVG_RULE_EVENODD :
+                    SvgRuleType::SVG_RULE_NONEZERO);
             } },
         { SVG_FILL,
             [](const std::string& val, SvgBaseAttribute& attrs) {
@@ -324,10 +336,14 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
         { SVG_TRANSFORM,
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 attrs.transform = val;
+                attrs.transformVec = SvgAttributesParser::GetTransformInfo(val);
+                if (attrs.transformVec.empty()) {
+                    TAG_LOGW(AceLogTag::ACE_IMAGE, "Set transformVec failed. transform:[%{public}s]", val.c_str());
+                }
             } },
         { DOM_SVG_SRC_TRANSFORM_ORIGIN,
             [](const std::string& val, SvgBaseAttribute& attrs) {
-                attrs.transformOrigin = val;
+                attrs.transformOrigin = SvgAttributesParser::GetTransformOrigin(val);
             } },
         { SVG_XLINK_HREF,
             [](const std::string& val, SvgBaseAttribute& attrs) {
@@ -393,10 +409,16 @@ void SvgNode::InitStyle(const SvgBaseAttribute& attr)
 
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
+    if (isDrawing_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "The current node is already in the process of being drawn in the SVG rendering flow.");
+        return;
+    }
     if (!OnCanvas(canvas)) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Draw failed(Reason: Canvas is null).");
         return;
     }
+    isDrawing_ = true;
     // mask and filter create extra layers, need to record initial layer count
     auto count = rsCanvas_->GetSaveCount();
     rsCanvas_->Save();
@@ -418,6 +440,41 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
     rsCanvas_->RestoreToCount(count);
+    isDrawing_ = false; // end the drawing process.
+}
+
+void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    // mask and filter create extra layers, need to record initial layer count
+    auto count = canvas.GetSaveCount();
+    canvas.Save();
+    auto rsBounds = AsPath(lengthRule).GetBounds();
+    Rect boundingRect(rsBounds.GetLeft(), rsBounds.GetTop(), rsBounds.GetWidth(), rsBounds.GetHeight());
+    SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, GetSvgContainerRect());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "l:%{public}lf, t:%{public}lf, r:%{public}lf, b:%{public}lf, units:%{public}d",
+        rsBounds.GetLeft(), rsBounds.GetTop(), rsBounds.GetRight(), rsBounds.GetBottom(),
+        (int)lengthRule.GetLengthScaleUnit());
+    if (!hrefClipPath_.empty()) {
+        OnClipPath(canvas, svgCoordinateSystemContext);
+    } else if (isRootNode_) {
+        auto svgContext = svgContext_.Upgrade();
+        if (svgContext) {
+            AdjustContentAreaByViewBox(canvas, svgContext->GetViewPort());
+        }
+    }
+    if (!transform_.empty() || !animateTransform_.empty()) {
+        OnTransform(canvas, lengthRule);
+    }
+    if (!hrefMaskId_.empty()) {
+        OnMask(canvas, svgCoordinateSystemContext);
+    }
+    if (!hrefFilterId_.empty()) {
+        OnFilter(canvas, svgCoordinateSystemContext);
+    }
+
+    OnDraw(canvas, lengthRule);
+    OnDrawTraversed(canvas, lengthRule);
+    canvas.RestoreToCount(count);
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -431,6 +488,21 @@ void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std:
             }
             node->SetColorFilter(colorFilter);
             node->Draw(canvas, viewPort, color);
+        }
+    }
+}
+
+void SvgNode::OnDrawTraversed(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    auto smoothEdge = GetSmoothEdge();
+    auto colorFilter = GetColorFilter();
+    for (auto& node : children_) {
+        if (node && node->drawTraversed_) {
+            if (GreatNotEqual(smoothEdge, 0.0f)) {
+                node->SetSmoothEdge(smoothEdge);
+            }
+            node->SetColorFilter(colorFilter);
+            node->Draw(canvas, lengthRule);
         }
     }
 }
@@ -455,6 +527,18 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
     rsCanvas_->ClipPath(clipPath, RSClipOp::INTERSECT, true);
 }
 
+void SvgNode::OnClipPath(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto refSvgNode = svgContext->GetSvgNodeById(hrefClipPath_);
+    CHECK_NULL_VOID(refSvgNode);
+    if (!AceType::InstanceOf<SvgClipPath>(refSvgNode)) {
+        return;
+    }
+    refSvgNode->OnClipEffect(canvas, svgCoordinateSystemContext);
+}
+
 void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
 {
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -474,6 +558,18 @@ void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
     return;
 }
 
+void SvgNode::OnFilter(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto refFilter = svgContext->GetSvgNodeById(hrefFilterId_);
+    CHECK_NULL_VOID(refFilter);
+    if (!AceType::InstanceOf<SvgFilter>(refFilter)) {
+        return;
+    }
+    refFilter->OnFilterEffect(canvas, svgCoordinateSystemContext);
+}
+
 void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
 {
     auto svgContext = svgContext_.Upgrade();
@@ -484,11 +580,79 @@ void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
     return;
 }
 
+void SvgNode::OnMask(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto refMask = svgContext->GetSvgNodeById(hrefMaskId_);
+    CHECK_NULL_VOID(refMask);
+    if (!AceType::InstanceOf<SvgMask>(refMask)) {
+        return;
+    }
+    refMask->OnMaskEffect(canvas, svgCoordinateSystemContext);
+}
+
 void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
     auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
-    rsCanvas_->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
+    canvas.ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
+}
+
+void SvgNode::OnTransform(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, lengthRule.GetBaseRect());
+    auto matrix = (animateTransform_.empty()) ? NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot)
+                                              : SvgTransform::CreateMatrixFromMap(animateTransform_);
+    canvas.ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
+}
+
+float SvgNode::GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType)
+{
+    switch (lengthType) {
+        case SvgLengthType::HORIZONTAL: {
+            auto x = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, GetSvgContainerRect().Width()) :
+                     origin.Value() * boxMeasureRule.GetBaseRect().Width();
+            return x;
+        }
+        case SvgLengthType::VERTICAL: {
+            auto y = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, GetSvgContainerRect().Height()) :
+                     origin.Value() * boxMeasureRule.GetBaseRect().Height();
+            return y;
+        }
+        /*using the original definition, radius*/
+        case SvgLengthType::OTHER: {
+            auto width = boxMeasureRule.GetBaseRect().Width();
+            auto height = boxMeasureRule.GetBaseRect().Height();
+            auto baseLength = std::sqrt(width * width + height * height) / std::sqrt(2.0f);
+            return boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE ?
+                ConvertDimensionToPx(origin, baseLength) : origin.Value() * baseLength;
+        }
+    }
+    return 0.0f;
+}
+
+float SvgNode::GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule,
+    SvgLengthType lengthType)
+{
+    switch (lengthType) {
+        case SvgLengthType::HORIZONTAL: {
+            auto x = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, GetSvgContainerRect().Width()) :
+                     origin.Value() * boxMeasureRule.GetBaseRect().Width() + boxMeasureRule.GetBaseRect().Left();
+            return x;
+        }
+        case SvgLengthType::VERTICAL: {
+            auto y = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, GetSvgContainerRect().Height()) :
+                     origin.Value() * boxMeasureRule.GetBaseRect().Height() + boxMeasureRule.GetBaseRect().Top();
+            return y;
+        }
+        default:
+            return 0.0f;
+    }
 }
 
 double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const
@@ -546,6 +710,17 @@ std::optional<Ace::Gradient> SvgNode::GetGradient(const std::string& href)
         return std::make_optional(svgGradient->GetGradient());
     }
     return std::nullopt;
+}
+
+Rect SvgNode::GetSvgContainerRect() const
+{
+    auto svgContext = svgContext_.Upgrade();
+    if (!svgContext) {
+        LOGE("Gradient failed, svgContext is null");
+        static Rect empty;
+        return empty;
+    }
+    return Rect(0, 0, svgContext->GetViewPort().Width(), svgContext->GetViewPort().Height());
 }
 
 const Rect& SvgNode::GetRootViewBox() const
@@ -706,6 +881,25 @@ void SvgNode::AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double
         context->AnimateFlush();
     };
     animate->CreatePropertyAnimation(originalValue, std::move(callback));
+}
+
+Offset SvgNode::CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Rect& baseRect)
+{
+    Rect RectForX = baseRect;
+    Rect RectForY = baseRect;
+    Rect ReferenceBox = GetRootViewBox();
+    if (ReferenceBox == Rect(0, 0, 0, 0)) {
+        ReferenceBox = baseRect;
+    }
+    if (transformOrigin.first.Unit() == DimensionUnit::PERCENT) {
+        RectForX = ReferenceBox;
+    }
+    if (transformOrigin.second.Unit() == DimensionUnit::PERCENT) {
+        RectForY = ReferenceBox;
+    }
+    double x = ConvertDimensionToPx(transformOrigin.first, RectForX.GetSize(), SvgLengthType::HORIZONTAL);
+    double y = ConvertDimensionToPx(transformOrigin.second, RectForY.GetSize(), SvgLengthType::VERTICAL);
+    return Offset(x, y);
 }
 
 } // namespace OHOS::Ace::NG

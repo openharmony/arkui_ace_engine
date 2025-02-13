@@ -63,6 +63,7 @@ RadioModifier::RadioModifier()
     ringPointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isUserSetUncheckedBorderColor_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     AttachProperty(enabled_);
     AttachProperty(isCheck_);
@@ -354,10 +355,17 @@ void RadioModifier::PaintIndicator(
     outPen.SetColor(ToRSColor(activeColor_->Get().BlendOpacity(opacityScale_->Get()).BlendOpacity(alphaCalculate)));
     if (isFocused_->Get()) {
         brush.SetColor(ToRSColor(focusedBgUnchecked_.BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
+        if (isUserSetUncheckedBorderColor_->Get()) {
+            pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale)
+                .BlendOpacity(alphaCalculate)));
+        } else {
+            pen.SetColor(ToRSColor(focusedRingUnchecked_.BlendOpacity(borderOpacityScale)
+                .BlendOpacity(alphaCalculate)));
+        }
     } else {
+        pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
         brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
     }
-    pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale).BlendOpacity(alphaCalculate)));
     auto outWidth = outCircleRadius * totalScale_->Get();
     if (outWidth < borderWidth_) {
         outWidth = borderWidth_;

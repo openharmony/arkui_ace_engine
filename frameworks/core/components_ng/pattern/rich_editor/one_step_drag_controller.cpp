@@ -22,10 +22,18 @@ OneStepDragParam::OneStepDragParam(const Builder& builder, const SelectMenuParam
     TextSpanType spanType, TagFilter tagFilter) : spanType_(spanType), tagFilter_(tagFilter)
 {
     menuBuilder = builder;
-    onAppear = selectMenuParam.onAppear;
+    onAppear = [onAppearFunc = selectMenuParam.onAppear, onMenuShowFunc = selectMenuParam.onMenuShow](
+                   int32_t start, int32_t end) {
+        onAppearFunc(start, end);
+        onMenuShowFunc(start, end);
+    };
+    onDisappear = [onDisappearFunc = selectMenuParam.onDisappear, onMenuHideFunc = selectMenuParam.onMenuHide](
+                      int32_t start, int32_t end) {
+        onMenuHideFunc(start, end);
+        onDisappearFunc();
+    };
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     menuParam.type = MenuType::CONTEXT_MENU;
-    menuParam.onDisappear = selectMenuParam.onDisappear;
     menuParam.previewAnimationOptions.scaleFrom = 1.0f;
     menuParam.previewBorderRadius = BorderRadiusProperty(Dimension(0));
     menuParam.backgroundBlurStyle = static_cast<int>(BlurStyle::NO_MATERIAL);
@@ -91,6 +99,13 @@ MenuParam ImageOneStepDragParam::GetMenuParam(const RefPtr<FrameNode>& frameNode
         const auto& spanItem = imageNode->GetSpanItem();
         onAppear(spanItem->rangeStart, spanItem->position);
     };
+    res.onDisappear = [weak = AceType::WeakClaim(AceType::RawPtr(imageNode)), onDisappear = this->onDisappear]() {
+        CHECK_NULL_VOID(onDisappear);
+        auto imageNode = weak.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        const auto& spanItem = imageNode->GetSpanItem();
+        onDisappear(spanItem->rangeStart, spanItem->position);
+    };
     res.previewAnimationOptions.scaleTo = CalcImageScale(imageNode);
     return res;
 }
@@ -133,6 +148,13 @@ MenuParam PlaceholderOneStepDragParam::GetMenuParam(const RefPtr<FrameNode>& fra
         CHECK_NULL_VOID(placeholderNode);
         const auto& spanItem = placeholderNode->GetSpanItem();
         onAppear(spanItem->rangeStart, spanItem->position);
+    };
+    res.onDisappear = [weak = AceType::WeakClaim(AceType::RawPtr(placeholderNode)), onDisappear = this->onDisappear]() {
+        CHECK_NULL_VOID(onDisappear);
+        auto placeholderNode = weak.Upgrade();
+        CHECK_NULL_VOID(placeholderNode);
+        const auto& spanItem = placeholderNode->GetSpanItem();
+        onDisappear(spanItem->rangeStart, spanItem->position);
     };
     return res;
 }
@@ -233,9 +255,6 @@ void OneStepDragController::CopyDragCallback(TextSpanType spanType, const RefPtr
     auto oneStepDragEnd = [end, weakPattern = pattern_, scopeId = Container::CurrentId()]
         (const RefPtr<OHOS::Ace::DragEvent>& event) {
         ContainerScope scope(scopeId);
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isDragging_ = false;
         IF_TRUE(end, end(event));
     };
     frameNodeEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(oneStepDragEnd));

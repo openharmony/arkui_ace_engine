@@ -38,6 +38,19 @@ ace_unittest("drag_drop_manager_test_ng") {
   ]
 }
 
+ace_unittest("drag_drop_initiating_state_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [
+    "./drag_drop/drag_drop_initiating_state_idle_test_ng.cpp",
+    "./drag_drop/drag_drop_initiating_state_lifting_test_ng.cpp",
+    "./drag_drop/drag_drop_initiating_state_machine_test_ng.cpp",
+    "./drag_drop/drag_drop_initiating_state_moving_test_ng.cpp",
+    "./drag_drop/drag_drop_initiating_state_press_test_ng.cpp",
+    "./drag_drop/drag_drop_initiating_state_ready_test_ng.cpp",
+  ]
+}
+
 ace_unittest("drag_drop_report_test_ng") {
   type = "new"
   module_output = "manager"
@@ -135,6 +148,7 @@ group("core_manager_unittest") {
     ":drag_animation_helper_test_ng",
     ":drag_drop_behavior_reporter_test_ng",
     ":drag_drop_func_wrapper_test_ng",
+    ":drag_drop_initiating_state_test_ng",
     ":drag_drop_manager_test_ng",
     ":drag_drop_proxy_test_ng",
     ":drag_drop_report_test_ng",

@@ -133,11 +133,17 @@ void FfiOHOSAceFrameworkShapeSetStrokeDashOffset(double offset, int32_t offsetUn
 
 void FfiOHOSAceFrameworkShapeSetStrokeLineCap(int32_t lineCap)
 {
+    if (lineCap < 0 || lineCap >= static_cast<int32_t>(LINE_CAP_STYLE_LIST.size())) {
+        return;
+    }
     ShapeModel::GetInstance()->SetStrokeLineCap(static_cast<int32_t>(LINE_CAP_STYLE_LIST[lineCap]));
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeLineJoin(int32_t lineJoin)
 {
+    if (lineJoin < 0 || lineJoin >= static_cast<int32_t>(LINE_JOIN_STYLE_LIST.size())) {
+        return;
+    }
     ShapeModel::GetInstance()->SetStrokeLineJoin(static_cast<int32_t>(LINE_JOIN_STYLE_LIST[lineJoin]));
 }
 

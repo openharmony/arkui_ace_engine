@@ -28,6 +28,7 @@
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
+#include "wm/data_handler_interface.h"
 #include "wm/window.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
@@ -51,6 +52,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        UnSubscribeEventsPassThroughMode();
         ProcessDestructCallbacks();
         DestroyUIDirector();
         DestroyCallback();
@@ -74,6 +76,8 @@ public:
     void Background() override;
     void Focus() override;
     void UnFocus() override;
+    void ActiveWindow() override;
+    void UnActiveWindow() override;
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
@@ -294,6 +298,7 @@ public:
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
+    bool GetContainerModalTitleVisible(bool isImmersive) override;
     void SetContainerModalTitleHeight(int32_t height) override;
     void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
@@ -341,6 +346,8 @@ public:
 
     void SetFormRenderingMode(int8_t renderMode) override;
 
+    void SetFormEnableBlurBackground(bool enableBlurBackground) override;
+
     void SetContentNodeGrayScale(float grayscale) override;
 
     void PreLayout() override;
@@ -385,6 +392,14 @@ public:
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
         const std::function<void(bool)>& callback) override;
 
+    bool ConfigCustomWindowMask(bool enable) override;
+    void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
+
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
+    void SetTopWindowBoundaryByID(const std::string& stringId) override;
+    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
+    bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -411,6 +426,10 @@ private:
     void UnregisterDisplayManagerCallback();
     void RegisterLinkJumpCallback();
     void ExecuteUITask(std::function<void()> task, const std::string& name);
+    void SubscribeEventsPassThroughMode();
+    void UnSubscribeEventsPassThroughMode();
+    bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
+        OHOS::Rosen::WindowSizeChangeReason reason);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -462,6 +481,7 @@ private:
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
+    OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
 };
 
 } // namespace OHOS::Ace

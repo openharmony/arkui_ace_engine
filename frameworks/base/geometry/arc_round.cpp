@@ -19,6 +19,7 @@
 #endif
 
 namespace OHOS::Ace {
+
 ArcRound::ArcRound(const ArcRound& other)
 {
     *this = other;
@@ -103,24 +104,38 @@ void ArcRound::SetWidth(float width)
     width_ = width;
 }
 
-bool ArcRound::IsInRegion(const Point& point) const
+double ArcRound::Get2PIRadians(double radian) const
+{
+    if (radian < 0) {
+        return SQUARE * PI_NUM + radian; // 2 * PI: 360度
+    }
+    return radian;
+}
+
+bool ArcRound::IsInRegion(const Point& point, float minHotRegion) const
 {
     float distance = pow(pow(point.GetX() - centerPoint_.GetX(), SQUARE) +
         pow(point.GetY() - centerPoint_.GetY(), SQUARE), HALF);
     float angle = GetPositionAngle(Offset(point.GetX(), point.GetY()));
-    if (distance > outerRadius_ || distance < outerRadius_ - width_) {
+    float width = std::max(minHotRegion, width_);
+    if (distance > outerRadius_ || distance < outerRadius_ - width) {
         return false;
     }
     auto startAngle = startAngle_;
     auto endAngle = startAngle_ + sweepAngle_;
+    auto startRadian = startAngle * PI_NUM / HALF_CIRCULARITY;
+    auto endRadian = endAngle * PI_NUM / HALF_CIRCULARITY;
     if (positionMode_ == PositionMode::LEFT) {
         endAngle = startAngle_ + sweepAngle_ <= -HALF_CIRCULARITY ? startAngle_ + sweepAngle_ + WHOLE_CIRCULARITY :
                                                                     startAngle_ + sweepAngle_;
-        if (angle > (startAngle * PI_NUM / HALF_CIRCULARITY) && angle < (endAngle * PI_NUM / HALF_CIRCULARITY)) {
+        startRadian = Get2PIRadians(startRadian);
+        endRadian = Get2PIRadians(endAngle * PI_NUM / HALF_CIRCULARITY);
+        angle = Get2PIRadians(angle);
+        if (angle < endRadian || angle > startRadian) {
             return false;
         }
     } else {
-        if (angle < (startAngle * PI_NUM / HALF_CIRCULARITY) || angle > (endAngle * PI_NUM / HALF_CIRCULARITY)) {
+        if (angle < startRadian || angle > endRadian) {
             return false;
         }
     }

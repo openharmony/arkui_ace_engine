@@ -17,9 +17,7 @@
 
 #include <optional>
 #include <string>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -503,9 +501,7 @@ void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
                         const NG::RichEditorAbstractSpanResult& textSpanResult) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(textSpanResult);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onIMEInputComplete");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onIMEInputComplete");
     };
     RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(callback));
 }
@@ -519,9 +515,7 @@ void JSRichEditor::SetOnDidIMEInput(const JSCallbackInfo& args)
                         const TextRange& textRange) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(textRange);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDidIMEInput");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDidIMEInput");
     };
     RichEditorModel::GetInstance()->SetOnDidIMEInput(std::move(callback));
 }
@@ -638,6 +632,22 @@ void JSRichEditor::EditMenuOptions(const JSCallbackInfo& info)
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
     RichEditorModel::GetInstance()->SetSelectionMenuOptions(
         std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void JSRichEditor::SetOnShare(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onShare = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        NG::TextCommonEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onShare");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info);
+    };
+    RichEditorModel::GetInstance()->SetOnShare(std::move(onShare));
 }
 
 void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
@@ -1058,9 +1068,7 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onPaste");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
 }
@@ -1357,6 +1365,30 @@ void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetMaxLines(normalMaxLines);
 }
 
+void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
+void JSRichEditor::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        return;
+    }
+    auto keyboardAppearance = info[0]->ToNumber<int32_t>();
+    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        RichEditorModel::GetInstance()->SetKeyboardAppearance(KeyboardAppearance::NONE_IMMERSIVE);
+        return;
+    }
+    RichEditorModel::GetInstance()->
+        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1396,12 +1428,15 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onDidChange", &JSRichEditor::SetOnDidChange);
     JSClass<JSRichEditor>::StaticMethod("onCut", &JSRichEditor::SetOnCut);
     JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
+    JSClass<JSRichEditor>::StaticMethod("onShare", &JSRichEditor::SetOnShare);
     JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
     JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
     JSClass<JSRichEditor>::StaticMethod("enableHapticFeedback", &JSRichEditor::SetEnableHapticFeedback);
     JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
+    JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
+    JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1993,6 +2028,15 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
         if (placeholderOffset >= 0) {
             placeholderSpan.offset = placeholderOffset;
         }
+    }
+    JSRef<JSVal> colorMetrics = placeholderOptionObject->GetProperty("dragBackgroundColor");
+    if (Color dragBackgroundColor; !colorMetrics->IsNull() &&
+        JSContainerBase::ParseColorMetricsToColor(colorMetrics, dragBackgroundColor)) {
+        placeholderSpan.dragBackgroundColor = dragBackgroundColor;
+    }
+    JSRef<JSVal> isDragShadowNeeded = placeholderOptionObject->GetProperty("isDragShadowNeeded");
+    if (!isDragShadowNeeded->IsNull() && isDragShadowNeeded->IsBoolean()) {
+        placeholderSpan.isDragShadowNeeded = isDragShadowNeeded->ToBoolean();
     }
 }
 

@@ -33,6 +33,10 @@ namespace {
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
+    constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
+    constexpr int32_t ARKUI_LEVEL_MODE_DEFAULT_VALUE = 0;
+    constexpr int32_t ARKUI_DEFAULT_LEVEL_UNIQUEID = -1;
+    constexpr int32_t ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE = 0;
 } // namespace
 
 ArkUIDialogHandle CreateDialog()
@@ -54,7 +58,14 @@ ArkUIDialogHandle CreateDialog()
         .enableCustomAnimation = false,
         .onWillDismissCall = nullptr,
         .onWillDismissCallByNDK  = nullptr,
-        .userData = nullptr });
+        .userData = nullptr,
+        .keyboardAvoidDistanceValue = std::optional<ArkUI_Float32>(),
+        .keyboardAvoidDistanceUnit = DimensionUnit::VP,
+        .levelMode = ARKUI_LEVEL_MODE_DEFAULT_VALUE,
+        .levelUniqueId = ARKUI_DEFAULT_LEVEL_UNIQUEID,
+        .immersiveMode = ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE,
+        .levelOrder = 0.0f,
+    });
 }
 
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
@@ -126,6 +137,19 @@ void ParseDialogMask(DialogProperties& dialogProperties, ArkUIDialogHandle contr
     dialogProperties.maskRect = maskRect;
 }
 
+void ParseDialogOnWillDismiss(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!controllerHandler->onWillDismissCall) {
+        return;
+    }
+    dialogProperties.onWillDismiss = [controllerHandler](int32_t reason, int32_t instanceId) {
+        CHECK_NULL_VOID(controllerHandler);
+        CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
+        (*(controllerHandler->onWillDismissCall))(reason);
+    };
+}
+
 void ParseDialogCornerRadiusRect(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -141,6 +165,25 @@ void ParseDialogCornerRadiusRect(DialogProperties& dialogProperties, ArkUIDialog
     dialogProperties.borderRadius = radius;
 }
 
+void ParseDialogKeyboardAvoidDistance(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!dialogProperties.keyboardAvoidDistance.has_value() &&
+        controllerHandler->keyboardAvoidDistanceValue.has_value()) {
+        auto unitEnum = controllerHandler->keyboardAvoidDistanceUnit;
+        if (controllerHandler->keyboardAvoidDistanceValue.value() < 0 || unitEnum < OHOS::Ace::DimensionUnit::NONE ||
+            unitEnum > OHOS::Ace::DimensionUnit::CALC || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+            dialogProperties.keyboardAvoidDistance = Dimension(DEFAULT_AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+        } else if (unitEnum == OHOS::Ace::DimensionUnit::NONE) {
+            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
+                OHOS::Ace::DimensionUnit::VP);
+        } else {
+            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
+                unitEnum);
+        }
+    }
+}
+
 void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -153,15 +196,16 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
     dialogProperties.customStyle = controllerHandler->enableCustomStyle;
     dialogProperties.gridCount = controllerHandler->gridCount;
+    dialogProperties.dialogLevelMode = static_cast<LevelMode>(controllerHandler->levelMode);
+    dialogProperties.dialogLevelUniqueId = controllerHandler->levelUniqueId;
+    dialogProperties.dialogImmersiveMode = static_cast<ImmersiveMode>(controllerHandler->immersiveMode);
+    if (!dialogProperties.isShowInSubWindow) {
+        dialogProperties.levelOrder = std::make_optional(controllerHandler->levelOrder);
+    }
+
     ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
-    if (controllerHandler->onWillDismissCall) {
-        dialogProperties.onWillDismiss = [controllerHandler](int32_t reason, int32_t instanceId) {
-            CHECK_NULL_VOID(controllerHandler);
-            CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
-            (*(controllerHandler->onWillDismissCall))(reason);
-        };
-    }
+    ParseDialogOnWillDismiss(dialogProperties, controllerHandler);
 
     if (controllerHandler->onWillDismissCallByNDK) {
         dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
@@ -179,6 +223,8 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         AnimationOption animation;
         dialogProperties.closeAnimation = animation;
     }
+
+    ParseDialogKeyboardAvoidDistance(dialogProperties, controllerHandler);
 }
 
 ArkUI_Int32 SetDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
@@ -334,4 +380,40 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 SetKeyboardAvoidDistance(
+    ArkUIDialogHandle controllerHandler, float distance, ArkUI_Int32 unit)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->keyboardAvoidDistanceValue = distance;
+    controllerHandler->keyboardAvoidDistanceUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetLevelMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 mode)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->levelMode = mode;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetLevelUniqueId(ArkUIDialogHandle controllerHandler, ArkUI_Int32 uniqueId)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->levelUniqueId = uniqueId;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetImmersiveMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 mode)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->immersiveMode = mode;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 levelOrder)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->levelOrder = levelOrder;
+    return ERROR_CODE_NO_ERROR;
+}
 } // namespace OHOS::Ace::NG::ViewModel

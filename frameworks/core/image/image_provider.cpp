@@ -764,30 +764,19 @@ void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineBase>& context, const 
         });
 }
 
-#ifndef USE_ROSEN_DRAWING
-bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
-{
-#else
 bool ImageProvider::IsWideGamut(const std::shared_ptr<RSColorSpace>& rsColorSpace)
 {
     if (!rsColorSpace) {
         return false;
     }
-    auto colorSpace = rsColorSpace->GetSkColorSpace();
-#endif
-    if (!colorSpace)
-        return false;
-
-    skcms_ICCProfile encodedProfile;
-    colorSpace->toProfile(&encodedProfile);
-    if (!encodedProfile.has_toXYZD50) {
-        LOGI("This profile's gamut can not be represented by a 3x3 transform to XYZD50");
-        return false;
-    }
     // Normalize gamut by 1.
     // rgb[3] represents the point of Red, Green and Blue coordinate in color space diagram.
     Point rgb[3];
-    auto xyzGamut = encodedProfile.toXYZD50;
+    bool hasToXYZD50 = true;
+    auto xyzGamut = rsColorSpace->ToXYZD50(hasToXYZD50);
+    if (!hasToXYZD50) {
+        return false;
+    }
     for (int32_t i = 0; i < 3; i++) {
         auto sum = xyzGamut.vals[i][0] + xyzGamut.vals[i][1] + xyzGamut.vals[i][2];
         rgb[i].SetX(xyzGamut.vals[i][0] / sum);

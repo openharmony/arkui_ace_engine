@@ -23,9 +23,7 @@
 #endif
 
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/ng/vector.h"
 #include "base/image/drawing_color_filter.h"
@@ -272,9 +270,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onComplete");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onComplete");
         };
         ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
     }
@@ -290,9 +286,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onError");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onError");
         };
 
         ImageModel::GetInstance()->SetOnError(onError);
@@ -579,6 +573,16 @@ void JSImage::SetSourceSize(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetImageSourceSize(JSViewAbstract::ParseSize(info));
 }
 
+bool JSImage::ParseColorContent(const JSRef<JSVal>& jsValue)
+{
+    if (jsValue.IsEmpty() || jsValue->IsNull() || !jsValue->IsObject()) {
+        return false;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("colorContent_");
+    return !typeVal.IsEmpty() && typeVal->IsString() && typeVal->ToString() == "ORIGIN";
+}
+
 void JSImage::SetImageFill(const JSCallbackInfo& info)
 {
     if (ImageModel::GetInstance()->GetIsAnimation()) {
@@ -590,6 +594,10 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
+        if (ParseColorContent(info[0])) {
+            ImageModel::GetInstance()->ResetImageFill();
+            return;
+        }
         if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
             return;
         }
@@ -904,7 +912,11 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
-    JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
+    } else {
+        JSClass<JSImage>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
+    }
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
     JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);

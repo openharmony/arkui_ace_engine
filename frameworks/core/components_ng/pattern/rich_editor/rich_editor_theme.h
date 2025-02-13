@@ -93,6 +93,8 @@ public:
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("rich_editor_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("rich_editor_writting_ability_name", "");
             theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("rich_editor_writting_is_support", "");
+            auto translateIsSupport = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->translateIsSupport_ = StringUtils::StringToInt(translateIsSupport);
             auto searchIsSupport = pattern->GetAttr<std::string>("richeditor_menu_search_is_support", "0");
             theme->searchIsSupport_ = StringUtils::StringToInt(searchIsSupport);
             auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
@@ -217,6 +219,11 @@ public:
         return aiWriteIsSupport_;
     }
 
+    bool GetTranslateIsSupport() const
+    {
+        return translateIsSupport_;
+    }
+
     bool GetSearchIsSupport() const
     {
         return searchIsSupport_;
@@ -289,6 +296,7 @@ private:
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
     std::string aiWriteIsSupport_;
+    bool translateIsSupport_ = false;
     bool searchIsSupport_ = false;
     Color urlDisabledColor_ = Color(0x99000000);
     Color urlDefaultColor_ = Color(0x99000000);

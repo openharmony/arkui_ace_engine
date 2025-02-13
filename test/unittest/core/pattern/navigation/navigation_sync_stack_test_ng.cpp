@@ -94,7 +94,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg001, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 10;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
         ASSERT_EQ(mockNavPathStack->GetNavDestinationId(index), "undefined");
     }
     MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
@@ -134,7 +134,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg002, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 10;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
     /**
@@ -211,7 +211,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg003, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 3;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
     /**
@@ -232,7 +232,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg003, TestSize.Level
         mockNavPathStack->Pop();
     }
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     // run sync again
     RunNavigationStackSync(navigationPattern);
@@ -267,7 +267,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg004, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 3;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
     /**
@@ -288,8 +288,11 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg004, TestSize.Level
         mockNavPathStack->Pop();
     }
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(
-            MockNavPathInfo(destNameBase + std::to_string(index)), true, LaunchMode::NEW_INSTANCE);
+        auto info = AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index));
+        info->isEntry_ = true;
+        info->mode = LaunchMode::NEW_INSTANCE;
+        info->needBuildNewInstance = true;
+        mockNavPathStack->MockPushPath(info);
     }
     ASSERT_EQ(static_cast<int32_t>(mockNavPathStack->Size()), testNumber);
     // run sync again
@@ -336,7 +339,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg005, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 3;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     RunNavigationStackSync(navigationPattern);
     /**
@@ -360,8 +363,8 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg005, TestSize.Level
     // front stack(NavPathStack) should contains only two page, so pop twice
     mockNavPathStack->Pop();
     mockNavPathStack->Pop();
-    mockNavPathStack->MockPushPath(
-        MockNavPathInfo(destNameBase + std::to_string(testNumber)), true, LaunchMode::NEW_INSTANCE);
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(testNumber)),
+        true, LaunchMode::NEW_INSTANCE);
     RunNavigationStackSync(navigationPattern);
     /**
      * @tc.steps: step3. check the order of total 4(= testNumber + 1) navDestinations, it should belike:
@@ -396,7 +399,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg006, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 3;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     RunNavigationStackSync(navigationPattern);
     /**
@@ -457,7 +460,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg007, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 5;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     RunNavigationStackSync(navigationPattern);
     /**
@@ -516,7 +519,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg008, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNumber = 5;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     RunNavigationStackSync(navigationPattern);
     /**
@@ -556,11 +559,11 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg009, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t sameNameCnt = 3;
     for (int32_t index = 0; index < sameNameCnt; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase));
     }
     const int32_t diffNameCnt = 2;
     for (int32_t index = 0; index < diffNameCnt; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     RunNavigationStackSync(navigationPattern);
     /**
@@ -600,7 +603,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg010, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNum = 3;
     for (int32_t index = 0; index < testNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), testNum);
     /**
@@ -634,7 +637,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg011, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNum = 5;
     for (int32_t index = 0; index < testNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), testNum);
     /**
@@ -670,7 +673,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg012, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNum = 5;
     for (int32_t index = 0; index < testNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), testNum);
     /**
@@ -706,7 +709,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg013, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNum = 5;
     for (int32_t index = 0; index < testNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), testNum);
     /**
@@ -742,7 +745,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg014, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNum = 5;
     for (int32_t index = 0; index < testNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), testNum);
     /**
@@ -784,7 +787,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg015, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNum = 5;
     for (int32_t index = 0; index < testNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), testNum);
     /**
@@ -826,7 +829,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg016, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t testNum = 5;
     for (int32_t index = 0; index < testNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), testNum);
     /**
@@ -870,10 +873,10 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg017, TestSize.Level
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     ASSERT_NE(navigationPattern, nullptr);
     const std::string destNameBase = "dest";
-    mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase));
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase));
     const int32_t diffDestNum = 3;
     for (int32_t index = 0; index < diffDestNum; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), 1 + diffDestNum);
     /**
@@ -919,7 +922,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg019, TestSize.Level
     const std::string destNameBase = "dest";
     const int32_t diffDestNum = 3;
     for (int32_t index = 0; index < diffDestNum; ++index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), diffDestNum);
     /**
@@ -960,10 +963,10 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg020, TestSize.Level
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     ASSERT_NE(navigationPattern, nullptr);
     const std::string destNameBase = "dest";
-    mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase));
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase));
     const int32_t diffDestNum = 3;
     for (int32_t index = 0; index < diffDestNum; ++index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), diffDestNum + 1);
     /**
@@ -1011,10 +1014,10 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg021, TestSize.Level
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     ASSERT_NE(navigationPattern, nullptr);
     const std::string destNameBase = "dest";
-    mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase));
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase));
     const int32_t diffDestNum = 3;
     for (int32_t index = 0; index < diffDestNum; ++index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
     }
     ASSERT_EQ(mockNavPathStack->Size(), diffDestNum + 1);
     /**

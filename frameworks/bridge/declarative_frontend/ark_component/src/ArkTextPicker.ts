@@ -49,8 +49,10 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
   onCancel(callback: () => void): this {
     throw new Error('Method not implemented.');
   }
-  onChange(callback: (value: string | string[], index: number | number[]) => void): this {
-    throw new Error('Method not implemented.');
+  onChange(callback: Optional<OnTextPickerChangeCallback>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerOnChangeModifier.identity, TextpickerOnChangeModifier, callback);
+    return this;
   }
   selectedIndex(value: number | number[]): this {
     modifierWithKey(
@@ -77,6 +79,22 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerDefaultTextStyleModifier.identity, TextpickerDefaultTextStyleModifier, value);
     return this;
   }
+
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextpickerEnableHapticFeedbackModifier.identity, TextpickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
+
+  digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDigitalCrownSensitivityModifier.identity, TextpickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
+  onScrollStop(callback: (value: string | string[], index: number | number[]) => void) : this{
+    modifierWithKey(
+      this._modifiersWithKeys,TextpickerOnScrollStopModifier.identity,TextpickerOnScrollStopModifier,callback);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -89,6 +107,20 @@ class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
       getUINativeModule().textpicker.resetCanLoop(node);
     } else {
       getUINativeModule().textpicker.setCanLoop(node, this.value);
+    }
+  }
+}
+
+class TextpickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDigitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().textpicker.setDigitalCrownSensitivity(node, this.value);
     }
   }
 }
@@ -306,6 +338,45 @@ class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey<number |
   }
 }
 
+class TextpickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetTextpickerEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().textpicker.setTextpickerEnableHapticFeedback(node, this.value!);
+    }
+  }
+}
+class TextpickerOnChangeModifier extends ModifierWithKey<Optional<OnTextPickerChangeCallback>>{
+  constructor(value: Optional<OnTextPickerChangeCallback>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetOnChange(node);
+    } else {
+      getUINativeModule().textpicker.setOnChange(node, this.value);
+    }
+  }
+}
+class TextpickerOnScrollStopModifier extends ModifierWithKey<(value: string | string[], index: number | number[]) => void>{
+  constructor(value:(value: string | string[], index: number | number[]) => void){
+     super(value);
+  }
+  static identity: Symbol = Symbol('textpickerOnScrollStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().textpicker.setOnScrollStop(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.TextPicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

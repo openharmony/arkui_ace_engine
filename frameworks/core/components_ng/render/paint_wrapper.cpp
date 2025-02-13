@@ -15,6 +15,9 @@
 
 #include "core/components_ng/render/paint_wrapper.h"
 
+#include "ui/base/utils/utils.h"
+#include "ui/view/draw/node_paint_method.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -55,6 +58,17 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
         }
         renderContext->FlushForegroundModifier(foregroundModifier);
     }
+}
+
+void PaintWrapper::SetKitNodePaintMethod(const RefPtr<Kit::NodePaintMethod>& nodePaintMethod)
+{
+    nodePaintMethod_ = nodePaintMethod;
+    auto modifier = nodePaintMethod_->GetContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->InitAdapter();
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->FlushKitContentModifier(modifier);
 }
 
 void PaintWrapper::FlushOverlayModifier()

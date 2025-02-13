@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 constexpr int32_t US_TO_MS = 1000;
 constexpr int32_t NS_TO_MS = 1000000;
 constexpr int32_t NS_TO_S = 1000000000;
+constexpr uint32_t JANK_STATS_VERSION = 2;
 constexpr char DEFAULT_SCENE_ID[] = "NONE_ANIMATION";
 
 enum PerfActionType {
@@ -93,6 +94,7 @@ struct JankInfo {
     std::string windowName {""};
     std::string sceneId {""};
     int32_t filterType {0};
+    int64_t realSkippedFrameTime {0};
     BaseInfo baseInfo;
 };
 
@@ -136,6 +138,8 @@ class ACE_FORCE_EXPORT PerfMonitor {
 public:
     void Start(const std::string& sceneId, PerfActionType type, const std::string& note);
     void End(const std::string& sceneId, bool isRsRender);
+    void StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note);
+    void EndCommercial(const std::string& sceneId, bool isRsRender);
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
     int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName);
@@ -148,11 +152,15 @@ public:
     void SetAppStartStatus();
     static PerfMonitor* GetPerfMonitor();
     static PerfMonitor* pMonitor;
+    static std::once_flag initFlag;
+    static void InitInstance();
     void SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor);
     void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                            const std::string& pageName);
     void RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason,
                            const std::string& bundleName);
+    void NotifyAppJankStatsBegin();
+    void NotifyAppJankStatsEnd();
 
 private:
     SceneRecord* GetRecord(const std::string& sceneId);
@@ -164,6 +172,13 @@ private:
     void RecordBaseInfo(SceneRecord* record);
     bool IsExceptResponseTime(int64_t time, const std::string& sceneId);
     int32_t GetFilterType() const;
+    void ClearJankFrameRecord();
+    void JankFrameStatsRecord(double jank);
+    void NotifySbdJankStatsBegin(const std::string& sceneId);
+    void NotifySdbJankStatsEnd(const std::string& sceneId);
+    void ReportJankStatsApp(int64_t duration);
+    void NotifyRsJankStatsBegin();
+    void NotifyRsJankStatsEnd(int64_t endTime);
 private:
     std::shared_ptr<ApsMonitor> apsMonitor_ = nullptr;
     std::map<PerfActionType, int64_t> mInputTime;
@@ -180,11 +195,16 @@ private:
     bool isExclusionWindow {false};
     int64_t startAppTime {0};
     std::string currentSceneId {""};
+    std::vector<uint16_t> jankFrameRecord;
+    int64_t jankFrameRecordBeginTime;
+    bool isStats = {false};
+    int32_t jankFrameTotalCount {0};
     // filter common discarded frames in white list
     bool isExceptAnimator {false};
     bool IsSceneIdInSceneWhiteList(const std::string& sceneId);
     void CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId);
     bool IsExclusionFrame();
+    void SetVsyncLazyMode();
     void CheckInStartAppStatus();
     void CheckExclusionWindow(const std::string& windowName);
     void CheckResponseStatus();

@@ -89,7 +89,7 @@ void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::u16string content = UtfUtils::Str8ToStr16(std::string(value));
+    std::u16string content = UtfUtils::Str8DebugToStr16(std::string(value));
     TextModelNG::InitText(frameNode, content);
 }
 
@@ -97,7 +97,7 @@ const char* GetTextContent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    g_strValue = UtfUtils::Str16ToStr8(TextModelNG::GetContent(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextModelNG::GetContent(frameNode));
     return g_strValue.c_str();
 }
 
@@ -244,11 +244,7 @@ void ResetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color textColor;
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    textColor = theme->GetTextStyle().GetTextColor();
-    TextModelNG::SetTextColor(frameNode, textColor);
+    TextModelNG::ResetTextColor(frameNode);
 }
 
 uint32_t GetFontColor(ArkUINodeHandle node)
@@ -605,6 +601,7 @@ void SetTextHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    value = std::clamp(value, 0, static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size()));
     TextModelNG::SetHeightAdaptivePolicy(frameNode, HEIGHT_ADAPTIVE_POLICY[value]);
 }
 
@@ -690,6 +687,9 @@ void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* 
     font.fontWeight = static_cast<FontWeight>(fontInfo->fontWeight);
     std::vector<std::string> families;
     if (fontInfo->fontFamilies && fontInfo->familyLength > 0) {
+        if (fontInfo->familyLength > DEFAULT_MAX_FONT_FAMILY_LENGTH) {
+            return;
+        }
         families.resize(fontInfo->familyLength);
         for (uint32_t i = 0; i < fontInfo->familyLength; i++) {
             families.at(i) = std::string(*(fontInfo->fontFamilies + i));

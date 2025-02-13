@@ -239,7 +239,7 @@ bool WaterFlowLayoutSW::CheckData() const
 void WaterFlowLayoutSW::MeasureOnOffset(float delta)
 {
     // handle initial layout
-    if (NearZero(delta) && info_->startIndex_ > info_->endIndex_) {
+    if (NearZero(delta) && info_->startIndex_ > info_->endIndex_ && itemCnt_ != 0) {
         info_->ResetWithLaneOffset(info_->TopMargin());
     }
 
@@ -568,7 +568,7 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
 
     // If item is close, we simply scroll to it instead of triggering a reset/jump, which would change the layout.
     bool closeToView = info_->ItemCloseToView(jumpIdx);
-    if (closeToView) {
+    if (!inView && closeToView) {
         MeasureToTarget(jumpIdx);
     }
 
@@ -659,7 +659,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
     minStart -= info_->TopMargin();
 
     int32_t startIdx = info_->StartIndex();
-    if (startIdx == 0 && Positive(minStart)) {
+    if (info_->AtStartPos(startIdx) && Positive(minStart)) {
         if (canOverScrollStart_) {
             return;
         }
@@ -669,7 +669,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
             return;
         }
         float delta = mainLen_ - maxEnd;
-        if (startIdx == 0) {
+        if (info_->AtStartPos(startIdx)) {
             delta = std::min(-minStart, delta);
         }
         ApplyDelta(delta);

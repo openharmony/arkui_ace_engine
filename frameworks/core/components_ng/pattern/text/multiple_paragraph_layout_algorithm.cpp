@@ -57,6 +57,17 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
+    bool needRemain = false;
+    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+}
+
+void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle, bool& needRemain)
+{
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
+        needRemain = true;
+        return;
+    }
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -67,8 +78,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(pattern);
     auto contentModifier = pattern->GetContentModifier();
 
-    textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    auto themeScopeId = frameNode->GetThemeScopeId();
+    textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
+        pipeline->GetTheme<TextTheme>(themeScopeId));
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
         !(textLayoutProperty->GetFontFamily().has_value())) {
@@ -203,6 +215,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
+    if (lineStyle->HasHalfLeading()) {
+        pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
+    }
     if (layoutWrapper) {
         pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
     } else {
@@ -222,6 +237,7 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
+        TAG_LOGI(AceLogTag::ACE_TEXT, "FontRegisterCallback callback id:%{public}d", frameNode->GetId());
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->OnPropertyChangeMeasure();
@@ -320,6 +336,12 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetTextColor(textStyle.GetTextColor(), true);
     }
+    auto symbolColors = layoutProperty->GetSymbolColorList();
+    if (symbolColors && symbolColors.has_value()) {
+        modifier->SetSymbolColor(symbolColors.value());
+    } else {
+        modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+    }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {
         modifier->SetTextShadow(textShadow.value());
@@ -396,7 +418,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .indent = textStyle.GetTextIndent()
+        .indent = textStyle.GetTextIndent(),
+        .halfLeading = textStyle.GetHalfLeading()
         };
 }
 
@@ -450,7 +473,11 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
                     paragraphNewWidth, paragraph->GetMaxWidth(), indentWidth, contentConstraint.ToString().c_str());
             }
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
-                OTHER_DURATION();
+                int32_t id = -1;
+                if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+                    id = Container::CurrentId();
+                }
+                OTHER_DURATION(id);
                 paragraph->Layout(std::ceil(paragraphNewWidth));
             }
         }

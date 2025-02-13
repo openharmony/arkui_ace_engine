@@ -37,16 +37,17 @@ void AnrThread::Stop()
     g_anrThread.Reset();
 }
 
-bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string& name)
+bool AnrThread::PostTaskToTaskRunner(
+    Task&& task, uint32_t delayTime, const std::string& name, PriorityType priorityType)
 {
     if (!g_anrThread || !task) {
         return false;
     }
 
     if (delayTime > 0) {
-        g_anrThread->PostDelayedTask(std::move(task), delayTime, name);
+        g_anrThread->PostDelayedTask(std::move(task), delayTime, name, priorityType);
     } else {
-        g_anrThread->PostTask(std::move(task), name);
+        g_anrThread->PostTask(std::move(task), name, priorityType);
     }
     return true;
 }
