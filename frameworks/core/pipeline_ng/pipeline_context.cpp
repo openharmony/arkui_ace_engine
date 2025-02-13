@@ -801,6 +801,40 @@ void PipelineContext::FlushModifier()
     window_->FlushModifier();
 }
 
+void PipelineContext::HandleSpecialContainerNode()
+{
+    if (!SystemProperties::GetContainerDeleteFlag()) {
+        return;
+    }
+
+    auto positionZSet = GetPositionZNodes();
+    for (auto positionZNodeId : positionZSet) {
+        auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(positionZNodeId));
+        if (!frameNode) {
+            DeletePositionZNode(positionZNodeId);
+            continue;
+        }
+        auto parentNode = frameNode->GetParentFrameNode();
+        if (!parentNode) {
+            continue;
+        }
+        if (parentNode->GetRenderContext()) {
+            parentNode->GetRenderContext()->SetDrawNode();
+        }
+        std::list<RefPtr<FrameNode>> childrenList;
+        parentNode->GenerateOneDepthVisibleFrameWithTransition(childrenList);
+        for (auto& node : childrenList) {
+            if (node && node->GetRenderContext()) {
+                node->GetRenderContext()->SetDrawNode();
+            }
+        }
+        auto overlayNode = parentNode->GetOverlayNode();
+        if (overlayNode && overlayNode->GetRenderContext()) {
+            overlayNode->GetRenderContext()->SetDrawNode();
+        }
+    }
+}
+
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE_COMMERCIAL();
@@ -816,6 +850,7 @@ void PipelineContext::FlushMessages()
         ACE_SCOPED_TRACE("smart gc end with no request frame(app_start or push_page)!");
         ResSchedReport::GetInstance().ResSchedDataReport("page_end_flush", {});
     }
+    HandleSpecialContainerNode();
     window_->FlushTasks();
 }
 

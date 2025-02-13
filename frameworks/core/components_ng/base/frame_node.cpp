@@ -2348,6 +2348,13 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
+    if (isDeleteRsNode) {
+        auto parentFrameNode = GetParentFrameNode();
+        if (parentFrameNode) {
+            parentFrameNode->MarkNeedSyncRenderTree();
+            parentFrameNode->RebuildRenderContextTree();
+        }
+    }
     needSyncRenderTree_ = false;
 }
 
