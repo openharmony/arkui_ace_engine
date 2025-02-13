@@ -191,7 +191,7 @@ void DialogContainer::InitializeDragEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const PointerEvent& pointerEvent, const DragEventAction& action,
+                                    const DragPointerEvent& pointerEvent, const DragEventAction& action,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(

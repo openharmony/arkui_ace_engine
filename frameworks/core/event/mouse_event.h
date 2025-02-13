@@ -86,7 +86,7 @@ enum class HoverEffectType : int32_t {
     UNKNOWN,
 };
 
-struct MouseEvent final : public UIInputEvent {
+struct MouseEvent final : public PointerEvent {
     int32_t id = 0;
     float z = 0.0f;
     float deltaX = 0.0f;

@@ -16,6 +16,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/event/event_constants.h"
+#include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -3107,6 +3109,15 @@ void PipelineContext::ReDispatch(KeyEvent& keyEvent)
     eventManager_->DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame);
 }
 
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
+{
+    if (event.eventType == UIInputEventType::KEY) {
+        const KeyEvent* keyEvent = static_cast<const KeyEvent*>(&event);
+        return OnKeyEvent(*keyEvent);
+    }
+    return false;
+}
+
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     CHECK_NULL_RETURN(eventManager_, false);
@@ -3128,7 +3139,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         auto manager = GetDragDropManager();
         if (manager && manager->IsMSDPDragging()) {
             manager->SetIsDragCancel(true);
-            manager->OnDragEnd(PointerEvent(0, 0), "");
+            manager->OnDragEnd(DragPointerEvent(0, 0), "");
             manager->SetIsDragCancel(false);
             return true;
         }
@@ -3717,7 +3728,7 @@ void PipelineContext::RequireSummary()
     manager->RequireSummary();
 }
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
     const RefPtr<NG::FrameNode>& node)
 {
     auto manager = GetDragDropManager();

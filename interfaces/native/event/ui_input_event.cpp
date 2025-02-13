@@ -164,7 +164,7 @@ int64_t HandleCTouchEvent(ArkUI_UIInputEvent* event)
 
 int64_t HandleTouchEvent(ArkUI_UIInputEvent* event)
 {
-    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::UIInputEvent*>(event->inputEvent);
+    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::PointerEvent*>(event->inputEvent);
     if (!uiEvent) {
         LOGE("The parameter of OH_ArkUI_UIInputEvent_GetEventTime is invalid");
         return 0;
@@ -174,7 +174,7 @@ int64_t HandleTouchEvent(ArkUI_UIInputEvent* event)
 
 int64_t HandleAxisEvent(ArkUI_UIInputEvent* event)
 {
-    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::UIInputEvent*>(event->inputEvent);
+    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::PointerEvent*>(event->inputEvent);
     if (!uiEvent) {
         LOGE("The parameter of OH_ArkUI_UIInputEvent_GetEventTime is invalid");
         return 0;

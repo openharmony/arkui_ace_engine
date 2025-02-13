@@ -96,7 +96,7 @@ struct DragControllerAsyncCtx {
     int32_t errCode = -1;
     std::mutex mutex;
     bool hasHandle = false;
-    PointerEvent dragPointerEvent;
+    DragPointerEvent dragPointerEvent;
     float windowScale = 1.0f;
     float dipScale = 0.0;
     int parseBuilderCount = 0;

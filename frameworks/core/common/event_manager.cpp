@@ -2312,10 +2312,10 @@ void EventManager::FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoi
 bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
 {
-    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
     newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
     bool ret = false;
     if (newXy.x != 0 && newXy.y != 0) {

@@ -498,7 +498,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage014, TestSi
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    OHOS::Ace::PointerEvent point;
+    OHOS::Ace::DragPointerEvent point;
 
     /**
      * @tc.steps: step2. call OnDragStart
@@ -576,7 +576,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage018, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 1000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     Point point(0, 0);
     EXPECT_FALSE(dragDropManager.isTimeLimited(pointerEvent, point));
 }
@@ -591,7 +591,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage019, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 1000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     pointerEvent.time += std::chrono::milliseconds(1000); // 1000ms after preTimeStamp_
     Point point(0, 0);
     EXPECT_FALSE(dragDropManager.isTimeLimited(pointerEvent, point));
@@ -607,7 +607,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage020, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 1000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     pointerEvent.time += std::chrono::milliseconds(2500); // 1500ms after preTimeStamp_
     Point point(0, 0);
     EXPECT_FALSE(dragDropManager.isTimeLimited(pointerEvent, point));
@@ -623,7 +623,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage021, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 1000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     pointerEvent.time += std::chrono::milliseconds(1000); // Same as preTimeStamp_
     Point point(0, 0);
     EXPECT_FALSE(dragDropManager.isTimeLimited(pointerEvent, point));
@@ -639,7 +639,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage022, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 2000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     pointerEvent.time += std::chrono::milliseconds(1500); // Less than preTimeStamp_
     Point point(0, 0);
     EXPECT_FALSE(dragDropManager.isTimeLimited(pointerEvent, point));
@@ -655,7 +655,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage023, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 2000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     pointerEvent.time += std::chrono::milliseconds(2005);
     pointerEvent.sourceTool = SourceTool::MOUSE;
     dragDropManager.preMovePoint_ = Point(0, 0);
@@ -673,7 +673,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage024, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 2000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     pointerEvent.time += std::chrono::milliseconds(1000);
     pointerEvent.sourceTool = SourceTool::MOUSE;
     dragDropManager.preMovePoint_ = Point(0, 0);
@@ -691,7 +691,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage025, TestSi
 {
     DragDropManager dragDropManager;
     dragDropManager.preTimeStamp_ = 2000;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     pointerEvent.time += std::chrono::milliseconds(2002);
     pointerEvent.sourceTool = SourceTool::MOUSE;
     dragDropManager.preMovePoint_ = Point(0, 0);
@@ -745,7 +745,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage026, TestSi
     auto parentNode = pipeline->GetRootElement();
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
     auto children = parentFrameNode->GetFrameChildren();
-    PointerEvent pointEvent(100, 100, 100, 100);
+    DragPointerEvent pointEvent(100, 100, 100, 100);
     auto draggedNode = dragDropManager->draggedFrameNode_;
     auto preTargetNode = dragDropManager->preTargetFrameNode_;
     dragDropManager->isMouseDragged_ = true;
@@ -803,7 +803,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage027, TestSi
     auto parentNode = pipeline->GetRootElement();
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
     auto children = parentFrameNode->GetFrameChildren();
-    PointerEvent pointEvent(100, 100, 100, 100);
+    DragPointerEvent pointEvent(100, 100, 100, 100);
     auto draggedNode = dragDropManager->draggedFrameNode_;
     auto preTargetNode = dragDropManager->preTargetFrameNode_;
     dragDropManager->isMouseDragged_ = true;
@@ -826,7 +826,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage028, TestSi
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    PointerEvent point(100, 100, 100, 100);
+    DragPointerEvent point(100, 100, 100, 100);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
 
@@ -868,7 +868,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage032, TestSi
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     ASSERT_NE(dragDropManager, nullptr);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    PointerEvent point;
+    DragPointerEvent point;
     std::string remoteUdKey;
     auto result = dragDropManager->CheckRemoteData(frameNode, point, remoteUdKey);
     EXPECT_FALSE(result);
@@ -885,7 +885,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage033, TestSi
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     ASSERT_NE(dragDropManager, nullptr);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    PointerEvent point;
+    DragPointerEvent point;
     std::string remoteUdKey = "abc";
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
     EXPECT_CALL(*mockUdmfClient, GetRemoteStatus(testing::_)).WillOnce(testing::Return(true));
@@ -955,7 +955,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage037, TestSi
     std::string remoteUdKey = "abc";
     RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    PointerEvent point;
+    DragPointerEvent point;
     dragDropManager->DoDropAction(frameNode, point, unifiedData, remoteUdKey);
     EXPECT_NE(unifiedData, nullptr);
 }
@@ -972,7 +972,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage038, TestSi
     ASSERT_NE(dragDropManager, nullptr);
     std::string remoteUdKey;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    PointerEvent point;
+    DragPointerEvent point;
     dragDropManager->DoDropAction(frameNode, point, nullptr, remoteUdKey);
     EXPECT_NE(frameNode, nullptr);
 }

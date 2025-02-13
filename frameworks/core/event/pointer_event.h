@@ -56,7 +56,7 @@ enum class PointerAction : int32_t {
     POINTER_ACTION_ROTATE_END = 22,
 };
 
-struct PointerEvent final : public UIInputEvent {
+struct DragPointerEvent final : public PointerEvent {
     int32_t pointerEventId = 0;
     int32_t pointerId = 0;
     int32_t pullId = -1;
@@ -77,14 +77,14 @@ struct PointerEvent final : public UIInputEvent {
     int32_t displayId = 0;
     int32_t sourceType = 0;
 
-    PointerEvent() = default;
-    PointerEvent(float x, float y)
-        :UIInputEvent(x, y)
+    DragPointerEvent() = default;
+    DragPointerEvent(float x, float y)
+        :PointerEvent(x, y)
     {}
-    PointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+    DragPointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
-    PointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+    DragPointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
 

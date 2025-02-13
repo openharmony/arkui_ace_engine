@@ -169,6 +169,7 @@ public:
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
+    bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
     // ReDispatch KeyEvent from Web process.
     void ReDispatch(KeyEvent& keyEvent);
@@ -189,7 +190,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
 
     // Called by view when idle event.
