@@ -121,7 +121,7 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
 }
 } // namespace
 
-void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
+void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
     if (isFirstPoint_) {
         firstTrackPoint_ = event;
@@ -136,8 +136,6 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
     std::chrono::duration<double> diffTime = event.time - lastTimePoint_;
     lastTimePoint_ = event.time;
     lastPosition_ = event.GetOffset();
-    // judge duration is 500ms.
-    static const double range = 0.5;
     if (end) {
         Offset oriDelta;
         if (isFirstPoint_) {
