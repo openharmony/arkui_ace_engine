@@ -1434,7 +1434,7 @@ private:
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
-    std::list<WeakPtr<ImageSpanNode>> imageSpanNodes;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
