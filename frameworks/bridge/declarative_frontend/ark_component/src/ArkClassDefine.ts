@@ -1331,6 +1331,20 @@ class ArkSymbolEffect {
   }
 }
 
+class ArkBindMenu{
+  content: Array<MenuElement> | CustomBuilder | undefined;
+  options: MenuOptions | undefined;
+
+  constructor() {
+    this.content = undefined;
+    this.options = undefined;
+  }
+
+  isEqual(another: ArkBindMenu): boolean {
+    return (this.content === another.content && this.options === another.options);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;

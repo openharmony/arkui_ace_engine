@@ -25,6 +25,8 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 
+#include "bridge/declarative_frontend/jsview/js_popups.h"
+
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t PARAMETER_LENGTH_ZERO = 0;
@@ -52,7 +54,7 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
 using DoubleBindCallback = std::function<void(const std::string&)>;
 
 #ifndef WEARABLE_PRODUCT
-DoubleBindCallback ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj,
+DoubleBindCallback JSViewPopups::ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj,
     const char* arrowFuncName)
 {
     JSRef<JSVal> arrowFunc = callbackObj->GetProperty(arrowFuncName);
@@ -541,7 +543,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         builderIndex = 1;
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj, "$value");
+        menuParam.onStateChange = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
         auto isShowObj = callbackObj->GetProperty("value");
         if (isShowObj->IsBoolean()) {
             menuParam.isShow = isShowObj->ToBoolean();
@@ -607,7 +609,7 @@ void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::
     }
 }
 
-std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
+std::vector<NG::OptionParam> JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
 {
     JSRef<JSVal> arg = info[optionIndex];
     if (!arg->IsArray()) {
@@ -657,7 +659,7 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
     return params;
 }
 
-void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto borderRadiusValue = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BORDER_RADIUS));
     NG::BorderRadiusProperty menuBorderRadius;
@@ -698,7 +700,7 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
     }
 }
 
-void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto enableArrowValue = menuOptions->GetProperty("enableArrow");
     if (enableArrowValue->IsBoolean()) {
@@ -717,7 +719,7 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
-void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension)
+void JSViewPopups::ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension)
 {
     CalcDimension dimension;
     if (!JSViewAbstract::ParseJsDimensionVpNG(jsValue, dimension, true)) {
@@ -729,7 +731,7 @@ void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDime
     }
 }
 
-void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto marginVal = menuOptions->GetProperty("layoutRegionMargin");
     if (!marginVal->IsObject()) {
@@ -738,10 +740,10 @@ void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::Me
 
     CommonCalcDimension commonCalcDimension;
     auto object = JSRef<JSObject>::Cast(marginVal);
-    ParseLayoutRegionMargin(object->GetProperty("top"), commonCalcDimension.top);
-    ParseLayoutRegionMargin(object->GetProperty("bottom"), commonCalcDimension.bottom);
-    ParseLayoutRegionMargin(object->GetProperty("left"), commonCalcDimension.left);
-    ParseLayoutRegionMargin(object->GetProperty("right"), commonCalcDimension.right);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("top"), commonCalcDimension.top);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("bottom"), commonCalcDimension.bottom);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("left"), commonCalcDimension.left);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("right"), commonCalcDimension.right);
 
     if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
         commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
@@ -750,7 +752,7 @@ void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::Me
     }
 }
 
-void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto blurStyle = menuOptions->GetProperty("backgroundBlurStyleOptions");
     if (blurStyle->IsObject()) {
@@ -761,7 +763,7 @@ void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam&
     }
 }
 
-void ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto effectOption = menuOptions->GetProperty("backgroundEffect");
     if (effectOption->IsObject()) {
@@ -772,7 +774,7 @@ void ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
     }
 }
 
-void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
+void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -782,7 +784,8 @@ void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
 }
 
-void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
@@ -890,27 +893,27 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
 
     JSRef<JSVal> showInSubWindowValue = menuOptions->GetProperty("showInSubWindow");
-    GetMenuShowInSubwindow(menuParam);
+    JSViewPopups::GetMenuShowInSubwindow(menuParam);
     if (menuParam.isShowInSubWindow) {
         if (showInSubWindowValue->IsBoolean()) {
             menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
         }
     }
-    ParseMenuArrowParam(menuOptions, menuParam);
-    ParseMenuBorderRadius(menuOptions, menuParam);
-    ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
-    ParseMenuBlurStyleOption(menuOptions, menuParam);
-    ParseMenuEffectOption(menuOptions, menuParam);
+    JSViewPopups::ParseMenuArrowParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuBorderRadius(menuOptions, menuParam);
+    JSViewPopups::ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuBlurStyleOption(menuOptions, menuParam);
+    JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
 }
 
-void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
+void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
     if (!info[optionIndex]->IsObject()) {
         return;
     }
     auto menuOptions = JSRef<JSObject>::Cast(info[optionIndex]);
     JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
-    ParseMenuParam(info, menuOptions, menuParam);
+    JSViewPopups::ParseMenuParam(info, menuOptions, menuParam);
 }
 
 void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, MenuPreviewAnimationOptions& options)
@@ -986,7 +989,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         return;
     }
     auto menuContentOptions = JSRef<JSObject>::Cast(args);
-    ParseMenuParam(info, menuContentOptions, menuParam);
+    JSViewPopups::ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
     auto preview = menuContentOptions->GetProperty("preview");
     if (!preview->IsFunction() && !preview->IsNumber()) {
@@ -1031,7 +1034,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         popupParam->SetIsShow(info[NUM_ZERO]->ToBoolean());
     } else {
         JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[NUM_ZERO]);
-        auto callback = ParseDoubleBindCallback(info, showObj, "$value");
+        auto callback = JSViewPopups::ParseDoubleBindCallback(info, showObj, "$value");
         popupParam->SetDoubleBindCallback(std::move(callback));
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
@@ -1312,10 +1315,10 @@ bool JSViewAbstract::ParseSheetIsShow(const JSCallbackInfo& info, const std::str
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
-        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
+        callback = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "changeEvent");
         if (!callback && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             TAG_LOGD(AceLogTag::ACE_SHEET, "Try %{public}s another parsing", name.c_str());
-            callback = ParseDoubleBindCallback(info, callbackObj, "$value");
+            callback = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
         }
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "%{public}s get isShow is: %{public}d", name.c_str(), isShow);
@@ -1862,7 +1865,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     NG::MenuParam menuParam;
     MenuDefaultParam(menuParam);
     size_t builderIndex = 0;
-    GetMenuShowInSubwindow(menuParam);
+    JSViewPopups::GetMenuShowInSubwindow(menuParam);
     if (info.Length() > PARAMETER_LENGTH_FIRST) {
         auto jsVal = info[0];
         if (jsVal->IsBoolean()) {
@@ -1870,35 +1873,35 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             menuParam.setShow = true;
             builderIndex = 1;
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
-                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
         } else if (jsVal->IsUndefined()) {
             menuParam.setShow = true;
             menuParam.isShow = false;
             builderIndex = 1;
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
-                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
         } else if (jsVal->IsObject()) {
             JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(jsVal);
-            menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj, "$value");
+            menuParam.onStateChange = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
             auto isShowObj = callbackObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
             if (isShowObj->IsBoolean()) {
                 menuParam.isShow = isShowObj->ToBoolean();
                 menuParam.setShow = true;
                 builderIndex = 1;
                 if (info.Length() > PARAMETER_LENGTH_SECOND) {
-                    ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                    JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
                 }
             } else {
                 builderIndex = 0;
-                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
         }
     }
 
     if (info[builderIndex]->IsArray()) {
-        std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
+        std::vector<NG::OptionParam> optionsParam = JSViewPopups::ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
     } else if (info[builderIndex]->IsObject()) {
         // CustomBuilder
@@ -1935,7 +1938,7 @@ void JSViewAbstract::ParseContentMenuCommonParam(
         MenuDefaultParam(menuParam);
     }
     CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
-    ParseMenuParam(info, menuObj, menuParam);
+    JSViewPopups::ParseMenuParam(info, menuObj, menuParam);
     auto preview = menuObj->GetProperty("preview");
     if (preview->IsNumber()) {
         auto previewMode = preview->ToNumber<int32_t>();

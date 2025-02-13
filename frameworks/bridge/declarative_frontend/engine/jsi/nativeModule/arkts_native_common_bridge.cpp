@@ -37,6 +37,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_accessibility.h"
+#include "bridge/declarative_frontend/jsview/js_popups.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -102,6 +103,8 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
 enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
 enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
+constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
+constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -3435,6 +3438,56 @@ ArkUINativeModuleValue CommonBridge::ResetGeometryTransition(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetGeometryTransition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBindMenu(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JSCallbackInfo info = Framework::JSCallbackInfo(runtimeCallInfo);
+    NG::MenuParam menuParam;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
+    size_t builderIndex = NUM_1;
+    JSViewPopups::GetMenuShowInSubwindow(menuParam);
+    if (info.Length() > PARAMETER_LENGTH_SECOND) {
+        auto jsVal = info[builderIndex];
+        if (jsVal->IsBoolean()) {
+            menuParam.isShow = jsVal->ToBoolean();
+            menuParam.setShow = true;
+            builderIndex = NUM_2;
+            if (info.Length() > PARAMETER_LENGTH_THIRD) {
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }
+        } else if (jsVal->IsUndefined()) {
+            menuParam.setShow = true;
+            menuParam.isShow = false;
+            builderIndex = NUM_2;
+            if (info.Length() > PARAMETER_LENGTH_THIRD) {
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }
+        } else if (jsVal->IsObject()) {
+            JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(jsVal);
+            menuParam.onStateChange = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
+            auto isShowObj = callbackObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+            if (isShowObj->IsBoolean()) {
+                menuParam.isShow = isShowObj->ToBoolean();
+                menuParam.setShow = true;
+                builderIndex = NUM_2;
+                if (info.Length() > PARAMETER_LENGTH_THIRD) {
+                    JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                }
+            } else {
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }
+        }
+    }
+    if (info[builderIndex]->IsArray()) {
+        std::vector<NG::OptionParam> optionsParam = JSViewPopups::ParseBindOptionParam(info, builderIndex);
+        ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
