@@ -151,6 +151,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
     webpattern.OnAudioResumeIntervalUpdate(0);
     webpattern.OnAudioExclusiveUpdate(true);
+    webpattern.OnOptimizeParserBudgetEnabledUpdate(true);
 #endif
 }
 
@@ -202,6 +203,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnAllowWindowOpenMethodUpdate(true);
     webPattern->OnHorizontalScrollBarAccessEnabledUpdate(true);
     webPattern->OnVerticalScrollBarAccessEnabledUpdate(true);
+    webPattern->OnOptimizeParserBudgetEnabledUpdate(true);
 #endif
 }
 

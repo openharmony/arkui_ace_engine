@@ -120,6 +120,7 @@ HWTEST_F(WebModelTestNg, WebFrameNodeCreator002, TestSize.Level1)
     webModelNG.SetZoomAccessEnabled(true);
     webModelNG.SetGeolocationAccessEnabled(true);
     webModelNG.SetUserAgent("123");
+    webModelNG.SetOptimizeParserBudgetEnabled(true);
 #endif
 }
 

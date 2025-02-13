@@ -2006,6 +2006,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
     JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
+    JSClass<JSWeb>::StaticMethod("optimizeParserBudget", &JSWeb::OptimizeParserBudgetEnabled);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -5335,4 +5336,8 @@ void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetEnabledHapticFeedback(isEnabled);
 }
 
+void JSWeb::OptimizeParserBudgetEnabled(bool enable)
+{
+    WebModel::GetInstance()->SetOptimizeParserBudgetEnabled(enable);
+}
 } // namespace OHOS::Ace::Framework
