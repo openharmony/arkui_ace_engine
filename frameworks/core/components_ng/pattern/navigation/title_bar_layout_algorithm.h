@@ -140,14 +140,14 @@ private:
     Dimension paddingTopTwolines_;
     Dimension titleSpaceVertical_;
 
-    float menuHeight_ = 0.0f;
+    float menuOccupiedHeight_ = 0.0f;
     float initialTitleOffsetY_ = 0.0f;
 
     bool isInitialTitle_ = true;
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
-    float menuWidth_ = 0.0f;
+    float menuOccupiedWidth_ = 0.0f;
     bool showBackButton_ = false;
 
     float singleLineTitleHeight_ = 0.0f;

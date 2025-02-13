@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/event_report.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
@@ -590,6 +591,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineAuto(LayoutWrapper* layoutWrap
 {
     auto wrapper = GetListItem(layoutWrapper, currentIndex);
     if (!wrapper) {
+        ReportGetChildError("MeasureALineAuto", currentIndex);
         return 0;
     }
     if (CheckNeedMeasure(wrapper)) {
@@ -611,6 +613,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineCenter(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < lanes && currentIndex + cnt < totalItemCount_; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + cnt);
         if (!wrapper) {
+            ReportGetChildError("MeasureALineCenter", currentIndex + cnt);
             break;
         }
         if (CheckNeedMeasure(wrapper)) {
@@ -641,6 +644,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineForward(LayoutWrapper* layoutW
     for (int32_t i = 0; i < lanes && currentIndex + 1 <= totalItemCount_; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + 1);
         if (!wrapper) {
+            ReportGetChildError("MeasureALineForward", currentIndex + 1);
             break;
         }
         cnt++;
@@ -671,6 +675,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineBackward(LayoutWrapper* layout
     for (int32_t i = 0; i < lanes && currentIndex - 1 >= 0; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex - 1);
         if (!wrapper) {
+            ReportGetChildError("MeasureALineBackward", currentIndex - 1);
             break;
         }
         --currentIndex;
@@ -1034,7 +1039,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
 
 void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
 {
-    if (itemPosition_.empty() && cachedItemPosition_.empty()) {
+    if (itemPosition_.empty()) {
         return;
     }
     int32_t startIndex = INT_MAX;
@@ -1046,12 +1051,6 @@ void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
         endIndex = itemPosition_.rbegin()->first;
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
-    }
-    if (!cachedItemPosition_.empty()) {
-        startIndex = std::min(startIndex, cachedItemPosition_.begin()->first);
-        endIndex = std::max(endIndex, cachedItemPosition_.rbegin()->first);
-        startPos = std::min(startPos, cachedItemPosition_.begin()->second.startPos);
-        endPos = std::max(endPos, cachedItemPosition_.rbegin()->second.endPos);
     }
     if (layoutedItemInfo_.has_value()) {
         auto& itemInfo = layoutedItemInfo_.value();
@@ -1106,6 +1105,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
     for (auto& pos : itemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
+            ReportGetChildError("LayoutListItem", pos.first);
             continue;
         }
 
@@ -1527,5 +1527,14 @@ void ListItemGroupLayoutAlgorithm::LayoutCacheItem(LayoutWrapper* layoutWrapper,
             SyncGeometry(wrapper);
         }
     }
+}
+
+void ListItemGroupLayoutAlgorithm::ReportGetChildError(const std::string& funcName, int32_t index) const
+{
+    if (index < 0 || index > totalItemCount_ - 1) {
+        return;
+    }
+    std::string subErrorType = funcName + " get item: " + std::to_string(index) + " failed.";
+    EventReport::ReportScrollableErrorEvent("ListItemGroup", ScrollableErrorType::GET_CHILD_FAILED, subErrorType);
 }
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,7 @@
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -158,7 +159,6 @@ private:
     bool NeedAdditionalLayout();
     void FlushAllSingleNodeTasks();
     void SetLayoutNodeRect();
-
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -172,7 +172,8 @@ private:
             if (nodeLeft->GetPageId() != nodeRight->GetPageId()) {
                 return nodeLeft->GetPageId() < nodeRight->GetPageId();
             }
-            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+                nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
                 return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() != nodeRight->GetDepth()) {

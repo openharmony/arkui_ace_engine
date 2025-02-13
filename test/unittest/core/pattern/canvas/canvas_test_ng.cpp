@@ -198,9 +198,6 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest003, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
 
     /**
@@ -227,9 +224,6 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest004, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
 
     /**
@@ -251,14 +245,11 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest005, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
-    
+
     RefPtr<CanvasLayoutAlgorithm> canvasLayoutAlgorithm = AceType::MakeRefPtr<CanvasLayoutAlgorithm>();
     LayoutConstraintF layoutConstraint;
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, frameNode->GetLayoutProperty());
 
     /**
      * @tc.steps: step1. IsValid() == false;
@@ -333,14 +324,8 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest006, TestSize.Level1)
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
-    auto offPattern = frameNode->GetPattern<OffscreenCanvasPattern>();
+    auto offPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100);
+    ASSERT_NE(offPattern, nullptr);
 
     /**
      * @tc.steps: step1. SetTextDirection : TextDirection::AUTO;
@@ -368,39 +353,25 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
 
 /**
  * @tc.name: CanvasPatternTest008
- * @tc.desc: CustomPaintPaintMethod::FillText && StrokeText
+ * @tc.desc: CustomPaintPaintMethod::HasShadow
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
-    auto offPattern = frameNode->GetPattern<OffscreenCanvasPattern>();
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
 
     /**
-     * @tc.steps: step1. FillText : ret == false
-     */
-    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50);
-    EXPECT_FALSE(offPattern->offscreenPaintMethod_->UpdateFillParagraph("test"));
-
-    /**
-     * @tc.steps: step2. StrokeText : HasShadow() == false
+     * @tc.steps: step1. HasShadow() == false
      */
     Shadow shadow1 = Shadow(5.0f, Offset(0.0, 0.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
     Shadow shadow2 = Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
-    offPattern->offscreenPaintMethod_->state_.shadow = shadow1;
-    EXPECT_FALSE(offPattern->offscreenPaintMethod_->HasShadow());
-    offPattern->offscreenPaintMethod_->StrokeText("test", 0.0, 0.0, 50);
+    paintMethod->state_.shadow = shadow1;
+    EXPECT_FALSE(paintMethod->HasShadow());
     /**
-     * @tc.steps: step3. StrokeText : HasShadow() == true
+     * @tc.steps: step2. HasShadow() == true
      */
-    offPattern->offscreenPaintMethod_->state_.shadow = shadow2;
-    EXPECT_TRUE(offPattern->offscreenPaintMethod_->HasShadow());
-    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50);
+    paintMethod->state_.shadow = shadow2;
+    EXPECT_TRUE(paintMethod->HasShadow());
 }
 } // namespace OHOS::Ace::NG

@@ -217,6 +217,10 @@ bool FocusView::IsViewRootScopeHasLastFocus()
 
     std::list<int32_t> rootScopeDeepth = GetRouteOfFirstScope();
     RefPtr<FocusHub> rootScope = focusViewHub;
+
+    if (rootScopeDeepth.empty()) {
+        return true;
+    }
     for (auto index : rootScopeDeepth) {
         bool hit = rootScope->AnyChildFocusHub([&rootScope, &index](const RefPtr<FocusHub>& focusNode) {
             if (--index < 0) {

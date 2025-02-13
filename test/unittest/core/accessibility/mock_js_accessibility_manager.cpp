@@ -54,7 +54,7 @@ void UIExtensionManager::TransferAccessibilityRectInfo()
 }
 
 void UIExtensionManager::RegisterBusinessDataConsumeCallback(
-    UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback)
+    UIContentBusinessCode code, const UIExtBusinessDataConsumeCallback& callback)
 {
 }
 
@@ -64,7 +64,7 @@ const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
 }
 
 bool UIExtensionManager::SendBusinessToHostSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply)
 {
     return true;
 }

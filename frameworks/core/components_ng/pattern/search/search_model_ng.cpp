@@ -1030,7 +1030,8 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     auto renderContext = frameNode->GetRenderContext();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
     textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
-    PaddingProperty padding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0) });
+    PaddingProperty padding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0),
+        std::nullopt, std::nullopt });
     textFieldLayoutProperty->UpdatePadding(padding);
     BorderRadiusProperty borderRadius;
     textFieldPaintProperty->UpdateBorderRadiusFlagByUser(borderRadius);

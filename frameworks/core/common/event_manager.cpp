@@ -285,7 +285,7 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
                 continue;
             }
             hittedRecognizerInfo[AceType::TypeName(item)].emplace_back(NG::TouchTestResultInfo {
-                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue("") });
+                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue(""), "" });
         }
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
         if (group) {
@@ -728,7 +728,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     UpdateDragInfo(point);
-    ACE_SCOPED_TRACE(
+    ACE_SCOPED_TRACE_COMMERCIAL(
         "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
@@ -917,6 +917,7 @@ void EventManager::CleanHoverStatusForDragBegin()
         DispatchMouseHoverEventNG(falsifyEvent);
     }
     mouseTestResults_.clear();
+    pressMouseTestResultsMap_.clear();
 }
 
 void EventManager::RegisterDragTouchEventListener(
@@ -961,6 +962,26 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
             isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+        }
+    }
+}
+
+void EventManager::DispatchTouchCancelToRecognizer(
+    RefPtr<TouchEventTarget>& touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items)
+{
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::CANCEL;
+    touchEvent.isFalsified = true;
+    for (auto& item : items) {
+        touchEvent.originalId = item.first;
+        touchEvent.id = item.first;
+        touchEventTarget->HandleMultiContainerEvent(touchEvent);
+        eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(touchEventTarget)), "",
+            std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+
+        touchTestResults_[item.first].erase(item.second);
+        if (touchTestResults_[item.first].empty()) {
+            touchTestResults_.erase(item.first);
         }
     }
 }
@@ -1041,7 +1062,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
         }
     }
 
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     for (const auto& entry : curResultIter->second) {
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (!recognizer && !sendOnTouch) {
@@ -1635,10 +1656,13 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
-    if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
-        !event.isRotationEvent) {
-        axisTestResults_.clear();
-        return false;
+    // when api >= 15, do not block this event.
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
+            !event.isRotationEvent) {
+            axisTestResults_.clear();
+            return false;
+        }
     }
     for (const auto& axisTarget : axisTestResults_) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
@@ -1904,6 +1928,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     TouchEvent falsifyEvent = touchPoint;
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
+    falsifyEvent.sourceType = SourceType::TOUCH;
+    falsifyEvent.isInterpolated = true;
     auto downFingerIds = downFingerIds_;
     for (const auto& iter : downFingerIds) {
         falsifyEvent.id = iter.first;

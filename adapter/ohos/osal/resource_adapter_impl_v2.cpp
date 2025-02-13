@@ -247,7 +247,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
     CHECK_NULL_VOID(taskExecutor);
 
     // post an asynchronous task to preload themes in PRELOAD_LIST
-    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
+    auto task = [manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
         weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
         CHECK_NULL_VOID(themeStyle);
@@ -890,6 +890,23 @@ bool ResourceAdapterImplV2::CloseRawFileDescription(const std::string &rawfileNa
             rawfileName, "RawFileDescription", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
+    return true;
+}
+
+bool ResourceAdapterImplV2::GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    OHOS::Global::Resource::ResourceManager::RawFileDescriptor descriptor;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto state = manager->GetRawFdNdkFromHap(rawfileName, descriptor);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get raw fd(no cache) error, rawFileName:%{public}s, error:%{public}u",
+            rawfileName.c_str(), state);
+        return false;
+    }
+    rawfileDescription.fd = descriptor.fd;
+    rawfileDescription.offset = descriptor.offset;
+    rawfileDescription.length = descriptor.length;
     return true;
 }
 

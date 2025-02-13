@@ -69,7 +69,6 @@ void ScrollBarPattern::OnModifyDone()
     if (axis_ == axis && scrollableEvent_) {
         return;
     }
-    InitScrollPositionCallback();
     InitScrollEndCallback();
     AddScrollableEvent();
     SetAccessibilityAction();
@@ -84,23 +83,18 @@ void ScrollBarPattern::OnModifyDone()
     }
 }
 
-void ScrollBarPattern::InitScrollPositionCallback()
+bool ScrollBarPattern::ScrollPositionCallback(double offset, int32_t source, bool isMouseWheelScroll)
 {
-    scrollPositionCallback_ = [weak = WeakClaim(this)](double offset, int32_t source) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        if (source == SCROLL_FROM_START) {
-            pattern->isScrolling_ = true;
-            pattern->StopDisappearAnimator();
-            auto scrollBarProxy = pattern->scrollBarProxy_;
-            if (scrollBarProxy) {
-                scrollBarProxy->NotifyScrollStart();
-            }
-            // AccessibilityEventType::SCROLL_START
-            return true;
+    if (source == SCROLL_FROM_START) {
+        isScrolling_ = true;
+        StopDisappearAnimator();
+        if (scrollBarProxy_) {
+            scrollBarProxy_->NotifyScrollStart();
         }
-        return pattern->UpdateCurrentOffset(offset, source);
-    };
+        // AccessibilityEventType::SCROLL_START
+        return true;
+    }
+    return UpdateCurrentOffset(offset, source, isMouseWheelScroll);
 }
 
 void ScrollBarPattern::InitScrollEndCallback()
@@ -130,6 +124,7 @@ void ScrollBarPattern::AddScrollableEvent()
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis_);
     SetInBarRegionCallback();
     SetBarCollectTouchTargetCallback();
+    SetBarRectCollectTouchTargetCallback();
     SetBarCollectClickAndLongPressTargetCallback();
     SetInBarRectRegionCallback();
     gestureHub->AddScrollableEvent(scrollableEvent_);
@@ -171,6 +166,27 @@ void ScrollBarPattern::SetBarCollectTouchTargetCallback()
             } else {
                 scrollBarPattern->OnCollectTouchTarget(
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+            }
+        });
+}
+
+void ScrollBarPattern::SetBarRectCollectTouchTargetCallback()
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    scrollableEvent_->SetBarRectCollectTouchTargetCallback(
+        [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            ResponseLinkResult& responseLinkResult) {
+            auto scrollBarPattern = weak.Upgrade();
+            CHECK_NULL_VOID(scrollBarPattern);
+            if (scrollBarPattern->UseInnerScrollBar()) {
+                auto scrollBar = scrollBarPattern->scrollBar_;
+                CHECK_NULL_VOID(scrollBar);
+                scrollBar->OnCollectTouchTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult, true);
+            } else {
+                scrollBarPattern->OnCollectTouchTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult, true);
             }
         });
 }
@@ -314,12 +330,12 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
         host->MarkNeedRenderOnly();
     });
 
-    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source, bool isMouseWheelScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->scrollBarProxy_->NotifyScrollBarNode(offset, source);
+        pattern->scrollBarProxy_->NotifyScrollBarNode(offset, source, isMouseWheelScroll);
         if (source == SCROLL_FROM_START) {
-            pattern->scrollPositionCallback_(0.0, SCROLL_FROM_START);
+            pattern->ScrollPositionCallback(0.0, SCROLL_FROM_START);
         }
         return true;
     };
@@ -463,7 +479,7 @@ void ScrollBarPattern::ValidateOffset()
     currentOffset_ = std::clamp(currentOffset_, 0.0f, scrollableDistance_);
 }
 
-bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
+bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source, bool isMouseWheelScroll)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -474,7 +490,7 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
-        scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this));
+        scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this), isMouseWheelScroll);
     }
     AddScrollBarLayoutInfo();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -740,28 +756,26 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag start");
     ACE_SCOPED_TRACE("outer scrollBar HandleDragStart");
-    if (scrollPositionCallback_) {
-        if (scrollBarProxy_) {
-            scrollBarProxy_->SetScrollSnapTrigger_(true);
-        }
-        scrollPositionCallback_(0, SCROLL_FROM_START);
+    if (scrollBarProxy_) {
+        scrollBarProxy_->SetScrollSnapTrigger_(true);
     }
+    ScrollPositionCallback(0, SCROLL_FROM_START);
 }
 
 void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    if (scrollPositionCallback_) {
-        auto offset = info.GetMainDelta();
-        if (IsReverse()) {
-            offset = -offset;
-        }
-        // The offset of the mouse wheel and gesture is opposite.
-        if (info.GetInputEventType() == InputEventType::AXIS && !NearZero(controlDistance_)) {
-            offset = - offset * scrollableDistance_ / controlDistance_;
-        }
-        ACE_SCOPED_TRACE("outer scrollBar HandleDragUpdate offset:%f", offset);
-        scrollPositionCallback_(offset, SCROLL_FROM_BAR);
+    auto offset = info.GetMainDelta();
+    if (IsReverse()) {
+        offset = -offset;
     }
+    // The offset of the mouse wheel and gesture is opposite.
+    if (info.GetInputEventType() == InputEventType::AXIS && !NearZero(controlDistance_)) {
+        offset = - offset * scrollableDistance_ / controlDistance_;
+    }
+    ACE_SCOPED_TRACE("outer scrollBar HandleDragUpdate offset:%f", offset);
+    auto isMouseWheelScroll =
+        info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+    ScrollPositionCallback(offset, SCROLL_FROM_BAR, isMouseWheelScroll);
 }
 
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
@@ -770,6 +784,16 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("outer scrollBar HandleDragEnd velocity:%f", velocity);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
+    if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
+        if (scrollEndCallback_) {
+            if (scrollBarProxy_) {
+                scrollBarProxy_->NotifyScrollStop();
+                scrollBarProxy_->SetScrollSnapTrigger_(false);
+            }
+            scrollEndCallback_();
+        }
+        return;
+    }
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
         frictionMotion_->Reset(friction_, 0, velocity);
@@ -784,16 +808,6 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     if (scrollBarProxy_ && scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
         velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset()))) {
         scrollBarProxy_->SetScrollSnapTrigger_(false);
-        return;
-    }
-    if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
-        if (scrollEndCallback_) {
-            if (scrollBarProxy_) {
-                scrollBarProxy_->NotifyScrollStop();
-                scrollBarProxy_->SetScrollSnapTrigger_(false);
-            }
-            scrollEndCallback_();
-        }
         return;
     }
     if (!frictionController_) {
@@ -813,10 +827,8 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 
 void ScrollBarPattern::ProcessFrictionMotion(double value)
 {
-    if (scrollPositionCallback_) {
-        auto offset = value - frictionPosition_;
-        scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING);
-    }
+    auto offset = value - frictionPosition_;
+    ScrollPositionCallback(offset, SCROLL_FROM_BAR_FLING);
     frictionPosition_ = value;
 }
 
@@ -834,7 +846,7 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult, bool inBarRect)
 {
     if (panRecognizer_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -844,6 +856,16 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
         panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+        GestureJudgeFunc sysJudge = nullptr;
+        if (inBarRect) {
+            sysJudge = [](const RefPtr<GestureInfo>& gestureInfo,
+                          const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+                auto inputEventType = gestureInfo->GetInputEventType();
+                return inputEventType == InputEventType::AXIS ? GestureJudgeResult::CONTINUE
+                                                              : GestureJudgeResult::REJECT;
+            };
+        }
+        panRecognizer_->SetSysGestureJudge(sysJudge);
         result.emplace_front(panRecognizer_);
         responseLinkResult.emplace_back(panRecognizer_);
     }

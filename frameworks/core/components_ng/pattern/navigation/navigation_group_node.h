@@ -332,6 +332,8 @@ private:
     RefPtr<FrameNode> TransitionAnimationIsValid(
         const RefPtr<FrameNode>& node, bool isNavBar, bool isUseNavDestCustomTransition);
     bool CheckNeedUpdateParentNode(const RefPtr<UINode>& node);
+    void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
+        int32_t preAnimationId);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

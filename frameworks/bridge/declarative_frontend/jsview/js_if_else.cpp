@@ -49,6 +49,7 @@ void JSIfElse::JSBind(BindingTarget globalObj)
     JSClass<JSIfElse>::StaticMethod("branchId", &JSIfElse::SetBranchId);
     JSClass<JSIfElse>::StaticMethod("getBranchId", &JSIfElse::GetBranchId);
     JSClass<JSIfElse>::StaticMethod("canRetake", &JSIfElse::CanRetake);
+    JSClass<JSIfElse>::StaticMethod("getRetakenElmtIds", &JSIfElse::GetRetakenElmtIds);
 
     JSClass<JSIfElse>::Bind<>(globalObj);
 }
@@ -70,23 +71,47 @@ void JSIfElse::CanRetake(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
-// JS signature branchId(branchId: number, removedIfElseChildelmtIds : Array<number>)
+void JSIfElse::GetRetakenElmtIds(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        TAG_LOGW(AceLogTag::ACE_IF, "GetRetakenElmtIds needs 1 param");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    if (!info[0]->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_IF, "GetRetakenElmtIds needs array param");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    std::list<int32_t> retakenElmtIds;
+    auto result = IfElseModel::GetInstance()->GetRetakenElmtIds(retakenElmtIds);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+
+    // convert list of retaken elmtIds: std::list to JSArray<number>
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
+    size_t index = jsArr->Length();
+    for (const auto& elmtId : retakenElmtIds) {
+        jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(elmtId)));
+    }
+}
+
 void JSIfElse::SetBranchId(const JSCallbackInfo& info)
 {
-    int32_t paramsLength = 2;
+    int32_t paramsLength = 3;
     if (!info[0]->IsNumber()) {
         return;
     }
     const int32_t branchid = info[0]->ToNumber<int32_t>();
     std::list<int32_t> removedElmtIds;
-    IfElseModel::GetInstance()->SetBranchId(branchid, removedElmtIds);
+    std::list<int32_t> reservedElmtIds;
+    IfElseModel::GetInstance()->SetBranchId(branchid, removedElmtIds, reservedElmtIds);
 
-    if ((info.Length() < paramsLength) || (!info[0]->IsNumber()) || (!info[1]->IsArray())) {
+    if ((info.Length() < paramsLength) || (!info[0]->IsNumber()) || (!info[1]->IsArray()) || (!info[2]->IsArray())) {
         TAG_LOGD(AceLogTag::ACE_IF, "If Params is not expected, maybe use old SDK");
         return;
     }
 
-    if (!removedElmtIds.size()) {
+    if (!removedElmtIds.size() && !reservedElmtIds.size()) {
         return;
     }
     // convert list of removed elmtIds: std::list to JSArray<number>
@@ -94,6 +119,13 @@ void JSIfElse::SetBranchId(const JSCallbackInfo& info)
     size_t index = jsArr->Length();
     for (const auto& rmElmtId : removedElmtIds) {
         jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(rmElmtId)));
+    }
+
+    // convert list of reserved elmtIds: std::list to JSArray<number>
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(info[2]);
+    size_t idx = jsArray->Length();
+    for (const auto& rsElmtId : reservedElmtIds) {
+        jsArray->SetValueAt(idx++, JSRef<JSVal>::Make(ToJSValue(rsElmtId)));
     }
 }
 } // namespace OHOS::Ace::Framework

@@ -114,6 +114,8 @@ export struct DatePickerDialogBootcamp {
   @State dialogBackgroundBlurStyle: BlurStyle = BlurStyle.COMPONENT_ULTRA_THICK;
   @State enableDialogShadow: boolean = false;
   @State dialogShadow: ShadowStyle = ShadowStyle.OUTER_FLOATING_SM;
+  @State enableHapticFeedback: boolean = false;
+  @State isHapticFeedback: boolean = true;
 
   build() {
     NavDestination() {
@@ -146,6 +148,7 @@ export struct DatePickerDialogBootcamp {
             lunarSwitch: useEnabled(this.enableLunarSwitch, this.lunarSwitch),
             showTime: useEnabled(this.enableShowTime, this.showTime),
             useMilitaryTime: useEnabled(this.enableMilitaryTime, this.isMilitaryTime),
+            enableHapticFeedback: useEnabled(this.enableHapticFeedback, this.isHapticFeedback),
             disappearTextStyle: {
               color: useEnabled(this.enableDisappearTextStyleColor, this.disappearTextStyleColor),
               font: {
@@ -638,6 +641,16 @@ export struct DatePickerDialogBootcamp {
           dataSource: [
             { label: '有前导0', value: '2-digit' },
             { label: '无前导0', value: 'numeric' },
+          ]
+        })
+
+        RadioBlock({
+          title: '是否开启音效震动',
+          isEnabled: this.enableHapticFeedback,
+          value: this.isHapticFeedback,
+          dataSource: [
+            { label: '开启', value: true },
+            { label: '关闭', value: false },
           ]
         })
       }.width('100%')

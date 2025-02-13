@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,9 @@ public:
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator007, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
@@ -49,7 +51,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator007, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator008, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
@@ -69,7 +73,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator008, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator009, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2007,7 +2013,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     ASSERT_NE(indicatorNode_, nullptr);
     auto wrapper = indicatorNode_->CreatePaintWrapper();
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);

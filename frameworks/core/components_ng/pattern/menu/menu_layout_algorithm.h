@@ -235,6 +235,7 @@ private:
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
 
+    void UpdateSelectFocus(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
     void TranslateOptions(LayoutWrapper* layoutWrapper);

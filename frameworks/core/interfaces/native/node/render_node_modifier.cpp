@@ -524,6 +524,22 @@ void SetMarkNodeGroup(ArkUINodeHandle node, ArkUI_Bool isNodeGroup)
     CHECK_NULL_VOID(renderContext);
 
     renderContext->SetMarkNodeGroup(isNodeGroup);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    if (frameNode) {
+        frameNode->SetApplicationRenderGroupMarked(true);
+    }
+    renderContext->RequestNextFrame();
+}
+
+void SetTransformScale(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    VectorF scaleValue = VectorF(xF, yF);
+    renderContext->UpdateTransformScale(scaleValue);
     renderContext->RequestNextFrame();
 }
 
@@ -568,6 +584,7 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         .setCommandPathClip = SetCommandPathClip,
         .setPosition = SetPosition,
         .setMarkNodeGroup = SetMarkNodeGroup,
+        .setTransformScale = SetTransformScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

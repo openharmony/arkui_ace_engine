@@ -1042,8 +1042,8 @@ float SheetPresentationPattern::GetSheetHeightChange()
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight() - sheetHeightUp_ -
             scrollHeight_ : 0.f;
     } else {
-        inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
-                                    textFieldManager->GetHeight()) : 0.f;
+        inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
+            textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
     }
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
@@ -1646,6 +1646,15 @@ void SheetPresentationPattern::UpdateMaskBackgroundColorRender()
     maskRenderContext->UpdateBackgroundColor(sheetMaskColor_);
 }
 
+void SheetPresentationPattern::FireCommonCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FireOnTypeDidChange();
+    FireOnWidthDidChange(host);
+    FireOnHeightDidChange();
+}
+
 void SheetPresentationPattern::CheckSheetHeightChange()
 {
     auto host = GetHost();
@@ -1677,6 +1686,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 CHECK_NULL_VOID(renderContext);
                 renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
+                FireCommonCallback();
             } else {
                 overlayManager->PlaySheetTransition(host, true, false);
             }
@@ -2063,17 +2073,10 @@ void SheetPresentationPattern::ResetToInvisible()
 bool SheetPresentationPattern::IsFoldExpand()
 {
     bool isExpand = false;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        auto foldStatus = container->GetCurrentFoldStatus();
-        isExpand = foldStatus != FoldStatus::FOLDED && foldStatus != FoldStatus::UNKNOWN;
-    } else {
-        auto containerId = Container::CurrentId();
-        auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
-        CHECK_NULL_RETURN(foldWindow, false);
-        isExpand = foldWindow->IsFoldExpand();
-    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto foldStatus = container->GetCurrentFoldStatus();
+    isExpand = foldStatus != FoldStatus::FOLDED && foldStatus != FoldStatus::UNKNOWN;
     if (isExpand) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "Get Fold status IsFoldExpand is true");
         return true;
@@ -2648,18 +2651,18 @@ void SheetPresentationPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("IsShouldDismiss: ").append(shouldDismiss_ ? "true" : "false"));
 }
 
-void SheetPresentationPattern::FireOnHeightDidChange(float height)
+void SheetPresentationPattern::FireOnHeightDidChange()
 {
+    auto height = 0.0f;
+    if (!IsSheetBottomStyle()) {
+        height = centerHeight_;
+    } else {
+        height = height_;
+    }
     if (NearEqual(preDidHeight_, height)) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!IsSheetBottomStyle()) {
-        OnHeightDidChange(centerHeight_);
-    } else {
-        OnHeightDidChange(height_);
-    }
+    OnHeightDidChange(height);
     preDidHeight_ = height;
 }
 
@@ -2916,14 +2919,40 @@ void SheetPresentationPattern::OverlaySheetSpringBack()
     overlayManager->SheetSpringBack();
 }
 
-float SheetPresentationPattern::GetBottomSafeArea()
+PipelineContext* SheetPresentationPattern::GetSheetMainPipeline() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, .0f);
+    CHECK_NULL_RETURN(host, nullptr);
     auto pipelineContext = host->GetContext();
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+
+    if (sheetStyle.instanceId.has_value()) {
+        // need to get mainWindow's pipeline, and get mainWindow's cutoutSafeArea
+        auto container = Container::GetContainer(sheetStyle.instanceId.value());
+        CHECK_NULL_RETURN(container, nullptr);
+        auto parentId = container->GetParentId();
+        TAG_LOGI(AceLogTag::ACE_SHEET, "mainWindow id : %{public}d", parentId);
+        auto parentContainer = Container::GetContainer(parentId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        auto parentPipelineBase = parentContainer->GetPipelineContext();
+        CHECK_NULL_RETURN(parentPipelineBase, nullptr);
+        auto parentPipelineContext = AceType::DynamicCast<PipelineContext>(parentPipelineBase);
+        pipelineContext = RawPtr(parentPipelineContext);
+    }
+    return pipelineContext;
+}
+
+float SheetPresentationPattern::GetBottomSafeArea()
+{
+    auto pipelineContext = GetSheetMainPipeline();
     CHECK_NULL_RETURN(pipelineContext, .0f);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+    auto manager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, .0f);
+    auto cutoutSafeArea = manager->GetCutoutSafeAreaWithoutProcess();
+    if (cutoutSafeArea.top_.IsValid()) {
         auto topAreaInWindow = GetTopAreaInWindow();
         TAG_LOGD(AceLogTag::ACE_SHEET, "rosen window sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
         return topAreaInWindow;
@@ -3623,5 +3652,18 @@ void SheetPresentationPattern::OnWillDisappear()
     CHECK_NULL_VOID(navigationManager);
     navigationManager->FireOverlayLifecycle(hostNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
         static_cast<int32_t>(NavDestinationActiveReason::SHEET));
+}
+
+void SheetPresentationPattern::OnFontScaleConfigurationUpdate()
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterReloadAnimationTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->AvoidSafeArea(true);
+    });
 }
 } // namespace OHOS::Ace::NG

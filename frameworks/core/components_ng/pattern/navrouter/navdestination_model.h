@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 
 namespace OHOS::Ace {
-class NavDestinationModel {
+class ACE_FORCE_EXPORT NavDestinationModel {
 public:
     static NavDestinationModel* GetInstance();
     virtual ~NavDestinationModel() = default;
@@ -56,6 +56,7 @@ public:
     virtual void SetOnPop(std::function<void(const RefPtr<NG::NavPathInfo>&)>&& onPop) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetHideItemText(bool isHideItemText) {};
     virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);

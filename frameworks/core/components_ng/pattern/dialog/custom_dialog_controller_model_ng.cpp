@@ -54,7 +54,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
             isShown = isShownStatus;
         }
     };
-
+    dialogProperties.isUserCreatedDialog = true;
     auto executor = context->GetTaskExecutor();
     if (!executor) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
@@ -62,7 +62,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     }
     auto task = ParseOpenDialogTask(
         currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);
-    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog", PriorityType::VIP);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
 }
 
 TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t currentId,
@@ -137,6 +137,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
             overlayManager = embeddedOverlay;
         }
     }
+    dialogProperties.isUserCreatedDialog = true;
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
@@ -185,7 +186,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     auto task = ParseCloseDialogTask(controller, dialogProperties, dialogs, overlayManager);
-    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog", PriorityType::VIP);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
 }
 
 TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const WeakPtr<AceType>& controller,

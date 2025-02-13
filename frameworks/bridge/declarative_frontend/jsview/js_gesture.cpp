@@ -17,6 +17,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
@@ -267,11 +268,17 @@ void JSGesture::Create(const JSCallbackInfo& info)
 
 void JSGesture::Finish()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSGesture][pop]", &JSGesture::Finish);
+    }
     GestureModel::GetInstance()->Finish();
 }
 
 void JSGesture::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSGesture][pop]", &JSGesture::Pop);
+    }
     GestureModel::GetInstance()->Pop();
 }
 
@@ -597,6 +604,7 @@ void JSPanGestureOption::JSBind(BindingTarget globalObj)
     JSClass<JSPanGestureOption>::CustomMethod("setDistance", &JSPanGestureOption::SetDistance);
     JSClass<JSPanGestureOption>::CustomMethod("setFingers", &JSPanGestureOption::SetFingers);
     JSClass<JSPanGestureOption>::CustomMethod("getDirection", &JSPanGestureOption::GetDirection);
+    JSClass<JSPanGestureOption>::CustomMethod("getDistance", &JSPanGestureOption::GetDistance);
     JSClass<JSPanGestureOption>::Bind(globalObj, &JSPanGestureOption::Constructor, &JSPanGestureOption::Destructor);
 }
 
@@ -642,6 +650,19 @@ void JSPanGestureOption::GetDirection(const JSCallbackInfo& args)
         direction = panGestureOption_->GetDirection();
     }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(direction.type))));
+}
+
+void JSPanGestureOption::GetDistance(const JSCallbackInfo& args)
+{
+    double distance = 5;
+    double distance_new = distance;
+    if (panGestureOption_) {
+        distance = panGestureOption_->GetDistance();
+        auto context = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(distance_new))));
 }
 
 void JSPanGestureOption::Constructor(const JSCallbackInfo& args)

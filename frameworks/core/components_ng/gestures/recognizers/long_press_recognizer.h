@@ -84,6 +84,16 @@ public:
         return duration_;
     }
 
+    void SetIsRepeat(bool repeat)
+    {
+        repeat_ = repeat;
+    }
+
+    bool GetIsRepeat() const
+    {
+        return repeat_;
+    }
+
     void SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
     {
         gestureHub_ = gestureHub;
@@ -149,6 +159,7 @@ private:
     DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
+    bool hasRepeated_ = false;
 };
 
 } // namespace OHOS::Ace::NG

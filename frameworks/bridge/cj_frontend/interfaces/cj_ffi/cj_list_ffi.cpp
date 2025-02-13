@@ -455,6 +455,32 @@ void FfiOHOSAceFrameworkListSetOnItemDragStartCallback(void (*callback)(
     ListModel::GetInstance()->SetOnItemDragStart(std::move(lambda));
 }
 
+void FfiOHOSAceFrameworkListOnItemDragStartWithBack(
+    CJDragItemInfo (*callback)(CJPosition itemDragInfo, int32_t itemIndex))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto lambda = [ffiCallback = CJLambda::Create(callback), node = frameNode](
+        const ItemDragInfo& itemInfo, int32_t itemIndexVal) -> RefPtr<AceType> {
+            CJPosition itemDragInfo_ {itemInfo.GetX(), itemInfo.GetY()};
+            int32_t itemIndex_ = itemIndexVal;
+            LOGI("FfiOHOSAceFrameworkListOnItemDragStartWithBack lambda start");
+            auto ret = ffiCallback(itemDragInfo_, itemIndex_);
+            // use another VSP instance while executing the builder function
+            if (ret.builder == nullptr) {
+                LOGE("FfiOHOSAceFrameworkListOnItemDragStartWithBack lambda ret is nullptr");
+                return nullptr;
+            }
+            std::function<void(void)> builderFunc = CJLambda::Create(ret.builder);
+            ViewStackModel::GetInstance()->NewScope();
+            {
+                PipelineContext::SetCallBackNode(node);
+                builderFunc();
+            }
+            return ViewStackModel::GetInstance()->Finish();
+    };
+    ListModel::GetInstance()->SetOnItemDragStart(std::move(lambda));
+}
+
 void FfiOHOSAceFrameworkListSetOnItemDragEnterCallback(void (*callback)(CJPosition itemDragInfo))
 {
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());

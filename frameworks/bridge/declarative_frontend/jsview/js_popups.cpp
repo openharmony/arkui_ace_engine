@@ -975,9 +975,8 @@ void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG
     }
     auto previewBorderRadiusValue = menuContentOptions->GetProperty("previewBorderRadius");
     NG::BorderRadiusProperty previewBorderRadius;
-    if (JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius)) {
-        menuParam.previewBorderRadius = previewBorderRadius;
-    }
+    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    menuParam.previewBorderRadius = previewBorderRadius;
 }
 
 void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
@@ -1861,9 +1860,7 @@ bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        menuParam.placement = Placement::BOTTOM_LEFT;
-    }
+    MenuDefaultParam(menuParam);
     size_t builderIndex = 0;
     GetMenuShowInSubwindow(menuParam);
     if (info.Length() > PARAMETER_LENGTH_FIRST) {
@@ -1924,6 +1921,47 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::MenuDefaultParam(NG::MenuParam& menuParam)
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
+}
+
+void JSViewAbstract::ParseContentMenuCommonParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam)
+{
+    if (!menuParam.placement.has_value()) {
+        MenuDefaultParam(menuParam);
+    }
+    CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
+    ParseMenuParam(info, menuObj, menuParam);
+    auto preview = menuObj->GetProperty("preview");
+    if (preview->IsNumber()) {
+        auto previewMode = preview->ToNumber<int32_t>();
+        if (previewMode == static_cast<int32_t>(MenuPreviewMode::IMAGE)) {
+            menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
+            ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
+        }
+    }
+}
+
+int32_t JSViewAbstract::OpenMenu(
+    NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+{
+    return ViewAbstractModel::GetInstance()->OpenMenu(menuParam, customNode, targetId);
+}
+
+int32_t JSViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->UpdateMenu(menuParam, customNode);
+}
+
+int32_t JSViewAbstract::CloseMenu(const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->CloseMenu(customNode);
+}
+
 void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
     std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
 {
@@ -1964,6 +2002,28 @@ void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, Di
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
             properties.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
         }
+    }
+}
+
+void JSViewAbstract::SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto blurStyleValue = obj->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!properties.blurStyleOption.has_value()) {
+            properties.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, properties.blurStyleOption.value());
+    }
+}
+
+void JSViewAbstract::SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto effectOptionValue = obj->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!properties.effectOption.has_value()) {
+            properties.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, properties.effectOption.value());
     }
 }
 }

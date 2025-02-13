@@ -185,7 +185,7 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
-    bool showTranslate = true;
+    bool showTranslate = false;
     bool showSearch = false;
     bool showShare = false;
     bool showCameraInput = false;

@@ -960,6 +960,45 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Pattern004
+ * @tc.desc: Test whether the chainAnimation exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Pattern004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Create the List.
+     * @tc.expected: Create the List successfully.
+     */
+    ListModelNG model = CreateList();
+    model.SetChainAnimation(true);
+    model.SetSpace(Dimension(SPACE));
+    CreateListItems(4);
+    CreateDone();
+    EXPECT_TRUE(pattern_->isScrollable_);
+    EXPECT_NE(pattern_->chainAnimation_, nullptr);
+
+    /**
+     * @tc.steps: step2. Remove a item to make list unscrollable.
+     * @tc.expected: The isScrollable_ of List is false and the chainAnimation_ is null.
+     */
+    frameNode_->RemoveChildAtIndex(3);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->isScrollable_);
+    EXPECT_EQ(pattern_->chainAnimation_, nullptr);
+
+    /**
+     * @tc.steps: step3. Add a item to make list scrollable.
+     * @tc.expected: The isScrollable_ of List is true and the chainAnimation_ is exist.
+     */
+    AddListItem();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->isScrollable_);
+    EXPECT_NE(pattern_->chainAnimation_, nullptr);
+}
+
+/**
  * @tc.name: Pattern006
  * @tc.desc: Test GetItemIndexByPosition
  * @tc.type: FUNC

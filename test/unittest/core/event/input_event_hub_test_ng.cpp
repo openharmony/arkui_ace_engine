@@ -523,6 +523,57 @@ HWTEST_F(InputEventHubTestNg, DisableMouseEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DisableAxisEvent001
+ * @tc.desc: Test disable Axis event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, DisableAxisEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize axisEventActuator_, and set callback
+     * @tc.expected: callback is right.
+     */
+    inputEventHub->axisEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    std::string result;
+    OnAxisEventFunc onAxis = [&result](AxisInfo& info) { result = RESULT_SUCCESS_ONE; };
+    inputEventHub->SetAxisEvent(std::move(onAxis));
+    EXPECT_NE(inputEventHub->axisEventActuator_->userCallback_, nullptr);
+
+    AxisInfo axis;
+    inputEventHub->axisEventActuator_->userCallback_->onAxisCallback_(axis);
+    EXPECT_EQ(result, RESULT_SUCCESS_ONE);
+
+    /**
+     * @tc.steps: step3. Clear the callback.
+     * @tc.expected: callback is null.
+     */
+    inputEventHub->ClearUserOnAxisEvent();
+    EXPECT_EQ(inputEventHub->axisEventActuator_->userCallback_, nullptr);
+
+    /**
+     * @tc.steps: step4. Set the callback again.
+     * @tc.expected: callback is right.
+     */
+    OnAxisEventFunc onAxis2 = [&result](AxisInfo& info) { result = RESULT_SUCCESS_TWO; };
+    inputEventHub->SetAxisEvent(std::move(onAxis2));
+    EXPECT_NE(inputEventHub->axisEventActuator_->userCallback_, nullptr);
+
+    AxisInfo axis2;
+    inputEventHub->axisEventActuator_->userCallback_->onAxisCallback_(axis2);
+    EXPECT_EQ(result, RESULT_SUCCESS_TWO);
+}
+
+/**
  * @tc.name: DisableHoverEvent001
  * @tc.desc: Test disable hover event.
  * @tc.type: FUNC

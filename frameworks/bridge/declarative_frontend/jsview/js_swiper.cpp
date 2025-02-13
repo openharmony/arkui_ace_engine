@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
@@ -193,6 +194,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("cachedCount", &JSSwiper::SetCachedCount);
     JSClass<JSSwiper>::StaticMethod("curve", &JSSwiper::SetCurve);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
+    JSClass<JSSwiper>::StaticMethod("onUnselected", &JSSwiper::SetOnUnselected);
     JSClass<JSSwiper>::StaticMethod("onAnimationStart", &JSSwiper::SetOnAnimationStart);
     JSClass<JSSwiper>::StaticMethod("onAnimationEnd", &JSSwiper::SetOnAnimationEnd);
     JSClass<JSSwiper>::StaticMethod("onGestureSwipe", &JSSwiper::SetOnGestureSwipe);
@@ -1022,6 +1024,30 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
+void JSSwiper::SetOnUnselected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto unselectedHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onUnselected = [executionContext = info.GetExecutionContext(), func = std::move(unselectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onUnselected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Swiper.onUnselected");
+        ACE_SCOPED_TRACE("Swiper.onUnselected index %d", swiperInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*swiperInfo);
+    };
+    SwiperModel::GetInstance()->SetOnUnselected(std::move(onUnselected));
+}
+
 void JSSwiper::SetOnAnimationStart(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -1236,9 +1262,48 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
     }
 }
 
+void JSSwiperController::SwipeTo(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        LOGE("Param is not valid");
+        return;
+    }
+    if (controller_) {
+        controller_->SwipeTo(args[0]->ToNumber<int32_t>());
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "swipeTo: Swiper controller not bind.");
+    }
+}
+
+void JSSwiperController::ShowNext(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (controller_) {
+        controller_->ShowNext();
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "showNext: Swiper controller not bind.");
+    }
+}
+
+void JSSwiperController::ShowPrevious(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (controller_) {
+        controller_->ShowPrevious();
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "showPrevious: Swiper controller not bind.");
+    }
+}
+
 void JSSwiperController::ChangeIndex(const JSCallbackInfo& args)
 {
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "changeIndex: Swiper controller not bind.");
         return;
     }
     if (args.Length() < 1 || !args[0]->IsNumber()) {
@@ -1264,6 +1329,8 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "finishAnimation: Swiper controller not bind.");
         return;
     }
 
@@ -1290,6 +1357,8 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Swiper controller not bind.");
         return;
     }
 
@@ -1322,6 +1391,8 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
 void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
 {
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Swiper controller not bind.");
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
         return;
     }

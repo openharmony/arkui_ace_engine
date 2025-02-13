@@ -887,8 +887,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h @arkui_image
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h @arkuilayout
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.cpp @arkuiabilitygroup
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.cpp @arkuilayout
@@ -1119,6 +1119,8 @@ frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_layout_manager.cpp @zhuweifeng94
 frameworks/bridge/declarative_frontend/jsview/js_layout_manager.h @zhuweifeng94
+frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.cpp @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_component.h @arkuistatemgmt
@@ -1317,6 +1319,8 @@ frameworks/bridge/declarative_frontend/jsview/js_video_controller.cpp @arkuilayo
 frameworks/bridge/declarative_frontend/jsview/js_video_controller.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_video.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_video.h @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.cpp @arkuievent
+frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h @arkuievent
@@ -1918,6 +1922,7 @@ frameworks/core/components/common/properties/animatable_path.h @arkuiframework
 frameworks/core/components/common/properties/animation_option.h @arkuiframework
 frameworks/core/components/common/properties/blend_mode.h @arkuiframework
 frameworks/core/components/common/properties/blur_parameter.h @arkuiframework
+frameworks/core/components/common/properties/blur_style_option.h @arkuievent
 frameworks/core/components/common/properties/border.cpp @arkuilayout
 frameworks/core/components/common/properties/border_edge.cpp @arkuilayout
 frameworks/core/components/common/properties/border_edge.h @arkuilayout
@@ -3069,6 +3074,7 @@ test/unittest/core/image_provider/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent
+test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/pattern/animator/ @arkui_superman
 test/unittest/core/pattern/app_bar/ @arkuievent
@@ -3173,4 +3179,4 @@ test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
 test/unittest/interfaces/ @arkuiframework
-
+test/unittest/interfaces/ui_input_event_test.cpp @arkuievent

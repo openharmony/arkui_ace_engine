@@ -32,9 +32,7 @@
 #include "input_method_controller.h"
 #include "parameters.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "auto_fill_type.h"
 #include "page_node_info.h"
 
@@ -104,7 +102,8 @@ constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 constexpr float SELECT_MENE_HEIGHT = 140.0f;
-constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
+constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
+constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -245,6 +244,18 @@ const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
     {OHOS::NWeb::NWEB_AUTOFILL_USERNAME, AceAutoFillType::ACE_USER_NAME},
     {OHOS::NWeb::NWEB_AUTOFILL_PASSWORD, AceAutoFillType::ACE_PASSWORD},
     {OHOS::NWeb::NWEB_AUTOFILL_NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD},
+    {OHOS::NWeb::NWEB_AUTOFILL_PASSPORT_NUMBER, AceAutoFillType::ACE_PASSPORT_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_VALIDITY, AceAutoFillType::ACE_VALIDITY},
+    {OHOS::NWeb::NWEB_AUTOFILL_ISSUE_AT, AceAutoFillType::ACE_ISSUE_AT},
+    {OHOS::NWeb::NWEB_AUTOFILL_ORGANIZATION, AceAutoFillType::ACE_ORGANIZATION},
+    {OHOS::NWeb::NWEB_AUTOFILL_TAX_ID, AceAutoFillType::ACE_TAX_ID},
+    {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_CITY_AND_STATE, AceAutoFillType::ACE_ADDRESS_CITY_AND_STATE},
+    {OHOS::NWeb::NWEB_AUTOFILL_FLIGHT_NUMBER, AceAutoFillType::ACE_FLIGHT_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_NUMBER, AceAutoFillType::ACE_LICENSE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_FILE_NUMBER, AceAutoFillType::ACE_LICENSE_FILE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_PLATE, AceAutoFillType::ACE_LICENSE_PLATE},
+    {OHOS::NWeb::NWEB_AUTOFILL_ENGINE_NUMBER, AceAutoFillType::ACE_ENGINE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_CHASSIS_NUMBER, AceAutoFillType::ACE_LICENSE_CHASSIS_NUMBER},
 };
 
 const std::map<AceAutoFillType, std::string> ACE_AUTOFILL_TYPE_TO_NWEB = {
@@ -268,6 +279,18 @@ const std::map<AceAutoFillType, std::string> ACE_AUTOFILL_TYPE_TO_NWEB = {
     {AceAutoFillType::ACE_USER_NAME, OHOS::NWeb::NWEB_AUTOFILL_USERNAME},
     {AceAutoFillType::ACE_PASSWORD, OHOS::NWeb::NWEB_AUTOFILL_PASSWORD},
     {AceAutoFillType::ACE_NEW_PASSWORD, OHOS::NWeb::NWEB_AUTOFILL_NEW_PASSWORD},
+    {AceAutoFillType::ACE_PASSPORT_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_PASSPORT_NUMBER},
+    {AceAutoFillType::ACE_VALIDITY, OHOS::NWeb::NWEB_AUTOFILL_VALIDITY},
+    {AceAutoFillType::ACE_ISSUE_AT, OHOS::NWeb::NWEB_AUTOFILL_ISSUE_AT},
+    {AceAutoFillType::ACE_ORGANIZATION, OHOS::NWeb::NWEB_AUTOFILL_ORGANIZATION},
+    {AceAutoFillType::ACE_TAX_ID, OHOS::NWeb::NWEB_AUTOFILL_TAX_ID},
+    {AceAutoFillType::ACE_ADDRESS_CITY_AND_STATE, OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_CITY_AND_STATE},
+    {AceAutoFillType::ACE_FLIGHT_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_FLIGHT_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_FILE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_FILE_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_PLATE, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_PLATE},
+    {AceAutoFillType::ACE_ENGINE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_ENGINE_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_CHASSIS_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_CHASSIS_NUMBER},
 };
 
 const std::map<std::string, OHOS::NWeb::NWebAutofillEvent> NWEB_AUTOFILL_EVENTS = {
@@ -300,6 +323,7 @@ constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+const std::string BUFFER_USAGE_WEB = "web";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE = 5;
@@ -790,12 +814,13 @@ void WebPattern::OnAttachToFrameNode()
     });
     UpdateTransformHintChangedCallbackId(callbackId);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
         auto callback = [](int64_t accessibilityId, const std::string data) {
-            UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+            UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data);
         };
         RegisterTextBlurCallback(callback);
     }
+    pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
 #endif
 }
 
@@ -817,9 +842,10 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
         UnRegisterTextBlurCallback();
     }
+    pipeline->UnRegisterListenerForTranslate(id);
 #endif
 }
 
@@ -1064,7 +1090,7 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
                 TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn curScale * pageScale_= %{public}f", scale);
             } else {
                 TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn curScale < DEFAULT_PINCH_SCALE");
-                scale = pageScale_ + (curScale - startPinchScale_);
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
             }
         } else {
             // The scale is from 0.4 to 0.5, the scale conversion should be from 1.0 to 1.1
@@ -1078,7 +1104,7 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
                 zoomOutSwitch_ = true;
             } else {
                 TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn zoomStatus_ = STATUS_ZOOMOUT curScale < 1.0");
-                scale = pageScale_ + (curScale - startPinchScale_);
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
             }
         }
         zoomStatus_ = STATUS_ZOOMOUT;
@@ -1141,10 +1167,9 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     CHECK_NULL_VOID(frameNode);
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
-        " newOriginScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
-        " offset Y: %{public}f",
-        curScale, scale, newScale, newOriginScale, centerX, centerY, offset.GetX(), offset.GetY());
+        "HandleScaleGestureChangeV2 curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
+        " centerX: %{public}f centerY: %{public}f",
+        curScale, scale, newScale, centerX, centerY);
 
     // Plan two
     delegate_->ScaleGestureChangeV2(
@@ -1872,6 +1897,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
+    StartVibraFeedback("longPress.light");
     if (!isMouseEvent_) {
         // mouse drag does not need long press action
         gestureHub->StartLongPressActionForWeb();
@@ -1938,9 +1964,9 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 void WebPattern::HandleDragStart(int32_t x, int32_t y)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "HandleDragStart DragDrop event gestureHub actionStart, isW3cDragEvent_:%{public}d, isMouseEvent_:%{public}d",
-        (int)isW3cDragEvent_, (int)isMouseEvent_);
-    if (!isW3cDragEvent_ && !isMouseEvent_) {
+        "HandleDragStart DragDrop event actionStart, isDragStartFromWeb_:%{public}d, isMouseEvent_:%{public}d",
+        (int)isDragStartFromWeb_, (int)isMouseEvent_);
+    if (!isDragStartFromWeb_ && !isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->SetDraggable(false);
@@ -1951,13 +1977,12 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         gestureHub->ResetDragActionForWeb();
         isDragging_ = false;
         isReceivedArkDrag_ = false;
-        isDragStartFromWeb_ = false;
         // cancel drag action to avoid web kernel can't process other input event
         CHECK_NULL_VOID(delegate_);
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         gestureHub->CancelDragForWeb();
     }
-    if (!isW3cDragEvent_ && isMouseEvent_) {
+    if (!isDragStartFromWeb_ && isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<WebEventHub>();
@@ -1965,6 +1990,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetMouseDragMonitorState(true);
+        isSetMouseDragMonitorState = true;
     }
 }
 
@@ -2141,6 +2167,14 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_END);
     } else {
         delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    }
+    if (isSetMouseDragMonitorState) {
+        auto eventHub = host->GetEventHub<WebEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetMouseDragMonitorState(false);
+        isSetMouseDragMonitorState = false;
     }
 }
 
@@ -3173,6 +3207,7 @@ void WebPattern::OnModifyDone()
                 renderContextForSurface_->SetOpacity(0.0f);
             } else {
                 renderSurface_->SetIsTexture(false);
+                renderSurface_->SetBufferUsage(BUFFER_USAGE_WEB);
                 renderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             }
@@ -3371,6 +3406,7 @@ void WebPattern::RecordWebEvent(bool isInit)
             std::make_pair<std::string, NativeMethodCallback>(Recorder::WEB_METHOD_NAME, HandleWebMessage)
         };
         delegate_->RegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME, methodList, false);
+        EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
         return;
     }
     auto cacheJsCode = EventRecorder::Get().GetCacheJsCode();
@@ -3378,9 +3414,14 @@ void WebPattern::RecordWebEvent(bool isInit)
         return;
     }
     delegate_->ExecuteTypeScript(cacheJsCode, [](std::string result) {});
-    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_);
-    UpdateJavaScriptOnDocumentEnd();
-    delegate_->JavaScriptOnDocumentEnd();
+    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_, onDocumentEndScriptItemsByOrder_);
+    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
+        UpdateJavaScriptOnDocumentEndByOrder();
+        delegate_->JavaScriptOnDocumentEndByOrder();
+    } else if (onDocumentEndScriptItems_.has_value()) {
+        UpdateJavaScriptOnDocumentEnd();
+        delegate_->JavaScriptOnDocumentEnd();
+    }
 #endif
 }
 
@@ -3513,6 +3554,30 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
     return true;
 }
 
+bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    lastKeyboardHeight_ = keyboard;
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), width, height]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            // In split-screen mode, the keyboard height is reported multiple times and is not the same.
+            // Use the last height.
+            webPattern->UpdateLayoutAfterKeyboardShow(width,
+                                                      height,
+                                                      webPattern->lastKeyboardHeight_,
+                                                      webPattern->GetDrawSize().Height());
+        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
     if (IsDialogNested()) {
@@ -3526,6 +3591,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not obstruct");
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        lastKeyboardHeight_ = keyboard;
         return !safeAreaEnabled;
     }
     if (height - GetCoordinatePoint()->GetY() < keyboard) {
@@ -3548,20 +3614,10 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return false;
     }
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, false);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    lastKeyboardHeight_ = keyboard;
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
-            auto webPattern = weak.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
-        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+
+    if (!UpdateLayoutAfterKeyboard(width, height, keyboard)) {
+        return false;
+    }
     return true;
 }
 
@@ -4901,6 +4957,10 @@ AceAutoFillType WebPattern::GetFocusedType()
             break;
         }
     }
+    if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
+        std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
+        TAG_LOGI(AceLogTag::ACE_WEB, "type:%{public}s", key.c_str());
+    }
     return type;
 }
 
@@ -5128,7 +5188,7 @@ bool WebPattern::OnCursorChange(
     const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo)
 {
     auto [type, info] = GetAndUpdateCursorStyleInfo(cursorType, cursorInfo);
-    if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
+    if (mouseEventDeviceId_ == RESERVED_DEVICEID1 || mouseEventDeviceId_ == RESERVED_DEVICEID2) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
         return false;
     }
@@ -6041,7 +6101,7 @@ void WebPattern::OnActive()
     CHECK_NULL_VOID(delegate_);
     bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
         GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;
@@ -6695,6 +6755,8 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    EventRecorder::Get().SaveJavascriptItems(scriptItems, scriptItemsByOrder);
+    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEndByOrder();
         delegate_->JavaScriptOnDocumentEndByOrder();
@@ -6717,6 +6779,7 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::nullopt;
     EventRecorder::Get().SaveJavascriptItems(scriptItems);
+    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
         delegate_->JavaScriptOnDocumentEnd();
@@ -6763,9 +6826,7 @@ void WebPattern::UpdateJavaScriptOnHeadReadyByOrder()
 
 void WebPattern::UpdateJavaScriptOnDocumentEnd()
 {
-    CHECK_NULL_VOID(delegate_);
-    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
-    if (onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
+    if (delegate_ && onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
         onDocumentEndScriptItems_ = std::nullopt;
     }
@@ -7746,8 +7807,13 @@ void WebPattern::DumpInfo()
 
 float WebPattern::DumpGpuInfo()
 {
-    float totalSize = delegate_->GetNweb()->DumpGpuInfo();
-    return totalSize;
+    if (delegate_ != nullptr) {
+        if (delegate_->GetNweb() != nullptr) {
+            float totalSize = delegate_->GetNweb()->DumpGpuInfo();
+            return totalSize;
+        }
+    }
+    return 0;
 }
 
 RefPtr<WebEventHub> WebPattern::GetWebEventHub()
@@ -7767,5 +7833,14 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
     if (delegate_) {
         delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
+}
+
+std::string WebPattern::GetCurrentLanguage()
+{
+    std::string result = "";
+    if (delegate_) {
+        result = delegate_->GetCurrentLanguage();
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

@@ -93,7 +93,7 @@ public:
     virtual ~TokenColors() = default;
 
     void SetColors(const std::vector<Color>& colors);
-    void SetColor(int32_t idx, const Color& color);
+    void SetColor(uint32_t idx, const Color& color);
     const std::vector<Color>& GetColors();
 
     Color Brand() const;
@@ -158,7 +158,7 @@ public:
 
     static int32_t GetSystemColorResIdByIndex(int32_t idx);
 
-    Color GetByIndex(int32_t idx);
+    Color GetByIndex(uint32_t idx);
 
     static const TokenColorData& GetTokenColorDataByIndex(int32_t idx);
 

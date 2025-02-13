@@ -539,7 +539,7 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest016, TestSize.Level1)
     bool hasScrollingParent = true;
     auto swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
     customNode->AddChild(frameNode);
-    stateStyleMgr->FireStateFunc(hasScrollingParent);
+    stateStyleMgr->FireStateFunc(UI_STATE_PRESSED, stateStyleMgr->currentState_, hasScrollingParent);
     EXPECT_EQ(true, hasScrollingParent);
 }
 
@@ -561,7 +561,7 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest017, TestSize.Level1)
     contentNode->pattern_ = popupBasePattern;
     customNode->SetParent(contentNode);
     frameNode->SetParent(contentNode);
-    stateStyleMgr->FireStateFunc(hasScrollingParent);
+    stateStyleMgr->FireStateFunc(UI_STATE_PRESSED, stateStyleMgr->currentState_, hasScrollingParent);
     EXPECT_EQ(true, hasScrollingParent);
 }
 } // namespace OHOS::Ace::NG

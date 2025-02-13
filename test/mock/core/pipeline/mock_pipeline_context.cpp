@@ -22,12 +22,13 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
+
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
 namespace OHOS::Ace {
 
@@ -287,45 +288,6 @@ void PipelineContext::SetupRootElement()
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
-void PipelineContext::SetupSubRootElement()
-{
-    CHECK_RUN_ON(UI);
-    appBgColor_ = Color::TRANSPARENT;
-    rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
-    rootNode_->SetHostRootId(GetInstanceId());
-    rootNode_->SetHostPageId(-1);
-    rootNode_->SetActive(true);
-    CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = idealSize;
-    layoutConstraint.maxSize = idealSize;
-    rootNode_->UpdateLayoutConstraint(layoutConstraint);
-    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
-    rootFocusHub->SetFocusType(FocusType::SCOPE);
-    rootFocusHub->SetFocusable(true);
-    window_->SetRootFrameNode(rootNode_);
-    rootNode_->AttachToMainTree(false, this);
-    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
-    // the subwindow for overlay not need stage
-    stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(nullptr);
-    if (!stageManager_) {
-        stageManager_ = MakeRefPtr<StageManager>(nullptr);
-    }
-    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
-        auto frontend = weakFrontend.Upgrade();
-        CHECK_NULL_RETURN(frontend, "");
-        return frontend->GetPagePathByUrl(url);
-    };
-    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
-    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
-    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
-    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = GetOrCreateFocusManager();
-    postEventManager_ = MakeRefPtr<PostEventManager>();
-}
-
 void PipelineContext::SendEventToAccessibilityWithNode(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node)
 {}
@@ -398,6 +360,14 @@ void PipelineContext::WindowFocus(bool isFocus)
     }
     GetOrCreateFocusManager()->WindowFocus(isFocus);
 }
+
+void PipelineContext::WindowActivate(bool isActive) {}
+
+void PipelineContext::AddWindowActivateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::RemoveWindowActivateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::FlushWindowActivateChangedCallback(bool isActivate) {}
 
 void PipelineContext::RootLostFocus(BlurReason reason) const {}
 
@@ -670,6 +640,8 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+void PipelineContext::AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node) {}
+
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -769,6 +741,24 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
+void PipelineContext::AddWindowSizeDragEndCallback(std::function<void()>&& callback)
+{
+    onWindowSizeDragEndCallbacks_.emplace_back(std::move(callback));
+}
+
+void PipelineContext::SetIsWindowSizeDragging(bool isDragging)
+{
+    isWindowSizeDragging_ = isDragging;
+    if (!isDragging) {
+        decltype(onWindowSizeDragEndCallbacks_) dragEndCallbacks(std::move(onWindowSizeDragEndCallbacks_));
+        for (const auto& func : dragEndCallbacks) {
+            if (func) {
+                func();
+            }
+        }
+    }
+}
+
 void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode) {}
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
@@ -831,11 +821,6 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 }
 
 SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
-{
-    return SafeAreaInsets({}, { 0, 1 }, {}, {});
-}
-
-PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
 {
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
@@ -1270,6 +1255,11 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 }
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+
+RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
+{
+    return nullptr;
+}
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}

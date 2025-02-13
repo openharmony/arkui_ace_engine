@@ -107,6 +107,7 @@ JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation  = fingerInfo.screenLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
+    fingerInfoObj->SetProperty<int32_t>("hand", fingerInfo.operatingHand_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
     fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));

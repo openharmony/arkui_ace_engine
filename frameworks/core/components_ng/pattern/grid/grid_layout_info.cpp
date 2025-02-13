@@ -980,7 +980,7 @@ void GridLayoutInfo::UpdateDefaultCachedCount()
     if (crossCount_ == 0) {
         return;
     }
-    static float pageCount = SystemProperties::GetPageCount();
+    thread_local float pageCount = SystemProperties::GetPageCount();
     if (pageCount <= 0.0f) {
         return;
     }

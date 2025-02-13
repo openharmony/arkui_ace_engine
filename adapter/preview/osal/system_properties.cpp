@@ -51,6 +51,7 @@ bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
 bool SystemProperties::accessTraceEnable_ = false;
+bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -339,6 +340,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
 std::string SystemProperties::GetDebugInspectorId()
 {
     return UNDEFINED_PARAM;
@@ -372,5 +378,10 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    return false;
 }
 } // namespace OHOS::Ace

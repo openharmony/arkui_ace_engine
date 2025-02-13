@@ -50,7 +50,6 @@ void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode, 
             context->GetHostParentOffsetToWindow().GetY());
         bool isCurrentNotSameRect = currFrameRect != frameNode->GetLastFrameRect() ||
             currParentOffset != frameNode->GetLastParentOffsetToWindow();
-        bool isHostNotSameOffset = currHostParentOffset != *frameNode->GetLastHostParentOffsetToWindow();
         if (logFlag) {
             TAG_LOGD(AceLogTag::ACE_DYNAMIC_COMPONENT,
                 "OnAreaChange Node(%{public}s/%{public}d) rect:%{public}s lastRect:%{public}s "
@@ -62,7 +61,7 @@ void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode, 
                 currHostParentOffset.ToString().c_str(),
                 (*frameNode->GetLastHostParentOffsetToWindow()).ToString().c_str());
         }
-        if (isCurrentNotSameRect || isHostNotSameOffset) {
+        if (isCurrentNotSameRect) {
             HandleDynamicRenderOnAreaChange(frameNode, currFrameRect, currParentOffset, currHostParentOffset);
         }
 

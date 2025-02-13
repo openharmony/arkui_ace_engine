@@ -265,7 +265,7 @@ void GridPattern::FireOnScrollStart()
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -381,7 +381,8 @@ float GridPattern::GetMainGap() const
 bool GridPattern::IsFadingBottom() const
 {
     float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
-    if (LessNotEqual(info_.totalHeightOfItemsInView_, mainSize) && info_.startIndex_ == 0) {
+    if (info_.startIndex_ == 0 && (info_.endIndex_ == info_.childrenCount_ - 1) &&
+        LessNotEqual(info_.totalHeightOfItemsInView_, mainSize)) {
         return Positive(info_.currentOffset_);
     } else {
         return !info_.offsetEnd_;

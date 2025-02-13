@@ -315,6 +315,16 @@ public:
     void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
         int32_t backwardCached, ListMainSizeValues listSizeValues);
 
+    RefPtr<UINode> GetHeader() const
+    {
+        return header_.Upgrade();
+    }
+
+    RefPtr<UINode> GetFooter() const
+    {
+        return footer_.Upgrade();
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;

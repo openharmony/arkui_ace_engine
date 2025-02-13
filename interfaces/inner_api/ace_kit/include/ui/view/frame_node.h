@@ -21,6 +21,9 @@
 #include <string>
 
 #include "ui/base/ace_type.h"
+#include "ui/base/referenced.h"
+#include "ui/properties/dirty_flag.h"
+#include "ui/view/layout/layout_info.h"
 
 namespace OHOS::Ace::NG {
 class LayoutProperty;
@@ -31,6 +34,10 @@ struct LayoutConstraintT;
 namespace OHOS::Ace::Kit {
 
 class Pattern;
+class UIContext;
+class Property;
+using NodeHandle = void*;
+
 class FrameNode : public AceType {
     DECLARE_ACE_TYPE(FrameNode, AceType);
 
@@ -41,12 +48,26 @@ public:
     virtual void InitializePatternAndContext() = 0;
     virtual void Reset() = 0;
 
-    virtual void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) = 0;
+    virtual void Measure(const Kit::LayoutConstraintInfo& parentContraint) = 0;
     virtual void Layout() = 0;
+
     virtual RefPtr<NG::LayoutProperty> GetLayoutProperty() = 0;
     virtual RefPtr<Pattern> GetPattern() = 0;
+    virtual RefPtr<Property> GetProperty() = 0;
+    virtual NodeHandle GetHandle() = 0;
+
+    virtual void AddChild(const RefPtr<FrameNode>& child) = 0;
+    virtual std::list<RefPtr<FrameNode>> GetChildren() = 0;
+    virtual void MarkDirtyNode(NG::PropertyChangeFlag flag = NG::PROPERTY_UPDATE_NORMAL) = 0;
+    virtual void RemoveChild(const RefPtr<FrameNode>& child) = 0;
+
+    virtual std::string GetTag() const = 0;
+    virtual int32_t GetId() const = 0;
+
     virtual void MeasureChildren() = 0;
     virtual void LayoutChildren() = 0;
+
+    virtual RefPtr<UIContext> GetUIContext() const = 0;
 };
 } // namespace OHOS::Ace::Kit
 

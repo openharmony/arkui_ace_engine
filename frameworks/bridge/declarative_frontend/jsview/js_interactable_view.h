@@ -34,6 +34,7 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsTouchable(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
+    static void JsOnHoverMove(const JSCallbackInfo& info);
     static void JsOnKey(const JSCallbackInfo& args);
     static void JsOnKeyPreIme(const JSCallbackInfo& args);
     static void JsOnKeyEventDispatch(const JSCallbackInfo& args);

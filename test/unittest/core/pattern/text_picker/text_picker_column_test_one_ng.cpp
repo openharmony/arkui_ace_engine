@@ -58,6 +58,25 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+namespace {
+const int32_t HALF_NUMBER = 2;
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
+} // namespace
+
 class TextPickerColumnTestOneNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -163,16 +182,10 @@ void TextPickerColumnTestOneNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1064,5 +1077,160 @@ HWTEST_F(TextPickerColumnTestOneNg, InitPanEvent001, TestSize.Level1)
     event.sourceTool_ = SourceTool::MOUSE;
     panEvent->actionEnd_(event);
     EXPECT_TRUE(event.GetSourceTool() == SourceTool::MOUSE);
+}
+
+/**
+ * @tc.name: SetCanLoop002
+ * @tc.desc: Test TextPickerColumnPattern SetCanLoop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SetCanLoop002, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->isLoop_ = true;
+    columnPattern->isTossStatus_ = true;
+
+    columnPattern->overscroller_.SetOverScroll(1.0f);
+    columnPattern->SetCanLoop(false);
+    EXPECT_EQ(columnPattern->isLoop_, false);
+}
+
+/**
+ * @tc.name: UpdateColumnChildPosition002
+ * @tc.desc: Test TextPickerColumnPattern UpdateColumnChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, UpdateColumnChildPosition002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->yLast_ = 0;
+    columnPattern->yOffset_ = 0;
+    columnPattern->overscroller_.SetOverScroll(1.0f);
+    auto midIndex = columnPattern->GetShowOptionCount() / HALF_NUMBER;
+    columnPattern->optionProperties_[midIndex].nextDistance = 0.0f;
+    columnPattern->optionProperties_[midIndex].prevDistance = 0.0f;
+    columnPattern->pressed_ = false;
+    columnPattern->isTossStatus_ = true;
+    columnPattern->isReboundInProgress_ = false;
+    columnPattern->UpdateColumnChildPosition(0.0f);
+
+    columnPattern->optionProperties_[midIndex].nextDistance = 3.0f;
+    columnPattern->optionProperties_[midIndex].prevDistance = 3.0f;
+    pickerNodeLayout->UpdateCanLoop(true);
+    columnPattern->UpdateColumnChildPosition(4.0f);
+
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto column = columnPattern->overscroller_.column_.Upgrade();
+    ASSERT_NE(column, nullptr);
+    auto columnPattern1 = AceType::DynamicCast<TextPickerColumnPattern>(column);
+    NG::RangeContent option;
+    columnPattern1->options_.emplace_back(option);
+    auto hostNode = columnPattern1->GetHost();
+    ASSERT_NE(hostNode, nullptr);
+    auto geometryNode = hostNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameHeight(-5.0f);
+    auto toss = columnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+    auto snapPropertyCallback = [](float offset) {};
+    toss->property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+
+    columnPattern->UpdateColumnChildPosition(4.0f);
+    EXPECT_EQ(columnPattern->yOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: SpringCurveTailEndProcess002
+ * @tc.desc: Test TextPickerColumnPattern SpringCurveTailEndProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SpringCurveTailEndProcess002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    auto toss = columnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+    auto snapPropertyCallback = [](float offset) {};
+    toss->property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+
+    columnPattern->SpringCurveTailEndProcess(false, true);
+    EXPECT_FALSE(toss->GetTossPlaying());
+
+    columnPattern->tossAnimationController_ = nullptr;
+
+    columnPattern->SpringCurveTailEndProcess(false, true);
+    EXPECT_FALSE(columnPattern->GetToss());
+}
+
+/**
+ * @tc.name: GetShiftDistance002
+ * @tc.desc: Test TextPickerColumnPattern GetShiftDistance
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, GetShiftDistance002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    int32_t index = 1;
+    ScrollDirection dir = ScrollDirection::UP;
+
+    auto distance = columnPattern->GetShiftDistanceForLandscape(index, dir);
+    EXPECT_EQ(distance, -10.0);
+
+    index = 7;
+    distance = columnPattern->GetShiftDistance(index, dir);
+    EXPECT_EQ(distance, 0.0);
 }
 } // namespace OHOS::Ace::NG

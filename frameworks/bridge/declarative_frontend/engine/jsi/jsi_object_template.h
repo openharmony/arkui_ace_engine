@@ -27,7 +27,7 @@ class JsiObjectTemplate {
 public:
     JsiObjectTemplate();
     ~JsiObjectTemplate() = default;
-    static JSView* GetNativeViewPartialUpdate(const panda::Local<panda::ObjectRef> obj);
+    static JSView* GetNativeView(const panda::Local<panda::ObjectRef> obj, const EcmaVM* vm);
 
 protected:
     panda::Local<panda::ObjectRef> operator*() const;

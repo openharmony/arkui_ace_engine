@@ -209,6 +209,8 @@ public:
     static Local<JSValueRef> GetModifierKeyState(
         ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

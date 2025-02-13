@@ -246,32 +246,9 @@ class __RepeatVirtualScrollImpl<T> {
                 }
             }
 
-            if (this.reusable_) {
-                return;
+            if (!this.reusable_) {
+                this.updateRepeatItem4Key(from, to);
             }
-            let newRepeatItem4Key = new Map<string, __RepeatItemFactoryReturn<T>>();
-            if (from <= to) {
-                for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
-                    let key = this.key4Index_.get(i);
-                    if (key && this.repeatItem4Key_.has(key)) {
-                        newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
-                    }
-                }
-            } else {
-                for (let i = 0; i <= to && i < this.arr_.length; i++) {
-                    let key = this.key4Index_.get(i);
-                    if (key && this.repeatItem4Key_.has(key)) {
-                        newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
-                    }
-                }
-                for (let i = Math.max(0, from); i < this.arr_.length; i++) {
-                    let key = this.key4Index_.get(i);
-                    if (key && this.repeatItem4Key_.has(key)) {
-                        newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
-                    }
-                }
-            }
-            this.repeatItem4Key_ = newRepeatItem4Key;
         };
 
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll ...`);
@@ -364,5 +341,31 @@ class __RepeatVirtualScrollImpl<T> {
     private purgeKeyCache(): void {
         this.key4Index_.clear();
         this.index4Key_.clear();
+    }
+
+    private updateRepeatItem4Key(from: number, to: number): void {
+        let newRepeatItem4Key = new Map<string, __RepeatItemFactoryReturn<T>>();
+        if (from <= to) {
+            for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                let key = this.key4Index_.get(i);
+                if (key && this.repeatItem4Key_.has(key)) {
+                    newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                }
+            }
+        } else {
+            for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                let key = this.key4Index_.get(i);
+                if (key && this.repeatItem4Key_.has(key)) {
+                    newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                }
+            }
+            for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                let key = this.key4Index_.get(i);
+                if (key && this.repeatItem4Key_.has(key)) {
+                    newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                }
+            }
+        }
+        this.repeatItem4Key_ = newRepeatItem4Key;
     }
 };

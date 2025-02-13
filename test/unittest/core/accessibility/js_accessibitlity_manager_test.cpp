@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
-
+#include "accessibility_system_ability_client.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -25,6 +26,7 @@
 #include "base/log/dump_log.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
+#include "adapter/ohos/entrance/ace_container.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -112,6 +114,13 @@ void JsAccessibilityManagerTest::TearDownTestCase()
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
+
+class MockJsAccessibilityManager : public Framework::JsAccessibilityManager {
+public:
+    MOCK_METHOD3(SendEventToAccessibilityWithNode,
+        void(const AccessibilityEvent& accessibilityEvent,
+            const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context));
+};
 
 /**
  * @tc.name: JsAccessibilityManager001
@@ -350,6 +359,62 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: JsAccessibilityManager008
+ * @tc.desc: SendAccessibilitySyncEvent, TransferAccessibilityAsyncEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+
+    /**
+     * @tc.steps: step2. test SendAccessibilitySyncEvent with register true
+     */
+    AccessibilityEvent accessibilityEvent;
+    Accessibility::AccessibilityEventInfo eventInfo;
+    auto ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    if (client) {
+        bool isEnabled = false;
+        client->IsEnabled(isEnabled);
+        EXPECT_EQ(ret, isEnabled);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    
+    /**
+     * @tc.steps: step3. test TransferAccessibilityAsyncEvent with register true
+     */
+    int64_t uiExtensionOffset = 1000;
+    ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
+    if (client) {
+        bool isEnabled = false;
+        client->IsEnabled(isEnabled);
+        EXPECT_EQ(ret, isEnabled);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+
+    /**
+     * @tc.steps: step4. test SendAccessibilitySyncEvent with register false
+     */
+    jsAccessibilityManager->Register(false);
+    ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    EXPECT_EQ(ret, false);
+    /**
+     * @tc.steps: step5. test TransferAccessibilityAsyncEvent with register false
+     */
+    ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: JsAccessibilityManager009
  * @tc.desc: GetDelayTimeBeforeSendEvent
  * @tc.type: FUNC
@@ -527,7 +592,9 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager013, TestSize.Level1)
      */
     AccessibilityEvent accessibilityEvent;
     auto context = NG::PipelineContext::GetCurrentContext();
+    EXPECT_EQ(jsAccessibilityManager->context_.Upgrade(), nullptr);
     jsAccessibilityManager->SetPipelineContext(context);
+    EXPECT_NE(jsAccessibilityManager->context_.Upgrade(), nullptr);
     jsAccessibilityManager->SendEventToAccessibilityWithNode(accessibilityEvent, frameNode, context);
 
     /**
@@ -726,5 +793,283 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager019, TestSize.Level1)
     EXPECT_EQ(callback0, jsAccessibilityManager->componentSACallbackMap_[elementId0]);
     jsAccessibilityManager->DeregisterAccessibilitySAObserverCallback(elementId0);
     EXPECT_EQ(0, jsAccessibilityManager->componentSACallbackMap_.size());
+}
+/**
+ * @tc.name: UpdateWindowInfo001
+ * @tc.desc: UpdateWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateWindowInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    jsAccessibilityManager->context_ = pipelineContext;
+
+    /**
+     * @tc.steps: step2. construct windowInfo
+     */
+    AccessibilityWindowInfo windowInfo;
+    windowInfo.left = 10;
+    windowInfo.top = 10;
+    windowInfo.scaleX = 1.0f;
+    windowInfo.scaleY = 1.0f;
+
+    /**
+     * @tc.steps: step3. call and test UpdateWindowInfo method
+     */
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
+    EXPECT_EQ(windowInfo.left, 10);
+    EXPECT_EQ(windowInfo.top, 10);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.6f));
+
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
+    EXPECT_EQ(windowInfo.left, 107.0f);
+    EXPECT_EQ(windowInfo.top, 206.0f);
+    EXPECT_EQ(windowInfo.scaleX, 0.7f);
+    EXPECT_EQ(windowInfo.scaleY, 0.6f);
+}
+
+/**
+ * @tc.name: GenerateWindowInfo001
+ * @tc.desc: GenerateWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GenerateWindowInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step3. call and test GenerateWindowInfo method
+     */
+    auto windowInfo = jsAccessibilityManager->GenerateWindowInfo(nullptr, nullptr);
+    EXPECT_EQ(windowInfo.left, 0);
+    EXPECT_EQ(windowInfo.top, 0);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    windowInfo = jsAccessibilityManager->GenerateWindowInfo(frameNode, nullptr);
+    
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    jsAccessibilityManager->context_ = pipelineContext;
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    auto singleHandTransform = container->GetSingleHandTransform();
+    container->SetSingleHandTransform(Platform::SingleHandTransform(0.0f, 0.0f, 1.0f, 1.0f));
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->getParentRectHandler_ = nullptr;
+    jsAccessibilityManager->getParentRectHandlerNew_ = nullptr;
+    windowInfo = jsAccessibilityManager->GenerateWindowInfo(nullptr, context);
+
+    EXPECT_EQ(windowInfo.left, 0);
+    EXPECT_EQ(windowInfo.top, 0);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    /**
+     * @tc.steps: step4. mock SingleHandTransform, and then test GenerateWindowInfo method again
+     */
+    container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.7f));
+
+    jsAccessibilityManager->UpdateWindowInfo(windowInfo, pipelineContext);
+    EXPECT_EQ(windowInfo.left, 100.0f);
+    EXPECT_EQ(windowInfo.top, 200.0f);
+    EXPECT_EQ(windowInfo.scaleX, 0.7f);
+    EXPECT_EQ(windowInfo.scaleY, 0.7f);
+}
+
+/**
+ * @tc.name: SingleHandTransformTest001
+ * @tc.desc: SetSingleHandTransform & GetSingleHandTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SingleHandTransformTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AceContainer
+     */
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetSingleHandTransform & GetSingleHandTransform
+     */
+    container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.6f));
+    auto singleHandTransform = container->GetSingleHandTransform();
+    EXPECT_EQ(singleHandTransform.x_, 100.0f);
+    EXPECT_EQ(singleHandTransform.y_, 200.0f);
+    EXPECT_EQ(singleHandTransform.scaleX_, 0.7f);
+    EXPECT_EQ(singleHandTransform.scaleY_, 0.6f);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager020
+ * @tc.desc: dump event test  DumpProcessEventParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager020, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    bool ret;
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.nodeId = 1;
+    accessibilityEvent.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    accessibilityEvent.type = AccessibilityEventType::PAGE_CHANGE;
+    // 1. parameter stackNodeId
+    std::vector<std::string> params;
+    params.push_back("-inspector");
+    params.push_back("1");
+
+    params.push_back("--stackNodeId");
+
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, false);
+
+    int64_t testStackId = 2;
+    params.push_back(std::to_string(testStackId));
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(accessibilityEvent.stackNodeId, testStackId);
+
+    // 2. parameter beforeText
+    params.push_back("--beforeText");
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, false);
+
+    std::string beforeText = "teststr1";
+    params.push_back(beforeText);
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(accessibilityEvent.beforeText, beforeText);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager020
+ * @tc.desc: dump event test  DumpProcessEventParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager0201, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    bool ret;
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.nodeId = 1;
+    accessibilityEvent.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    accessibilityEvent.type = AccessibilityEventType::PAGE_CHANGE;
+    std::vector<std::string> params;
+    params.push_back("-inspector");
+    params.push_back("1");
+
+    // 3. parameter latestContent
+    params.push_back("--latestContent");
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, false);
+
+    std::string latestContent = "teststr2";
+    params.push_back(latestContent);
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(accessibilityEvent.latestContent, latestContent);
+
+    // 4. parameter latestContent
+    params.push_back("--textAnnounced");
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, false);
+
+    std::string textAnnounced = "teststr3";
+    params.push_back(textAnnounced);
+    ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(accessibilityEvent.textAnnouncedForAccessibility, textAnnounced);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager021
+ * @tc.desc: dump event test  DumpProcessEventParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager021, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+
+    MockJsAccessibilityManager mockJsManger;
+    mockJsManger.SetPipelineContext(context);
+    mockJsManger.Register(true);
+
+    int64_t nodeId = 1;
+    int32_t eventId = 2;
+    // 1. check parameter fail
+    std::vector<std::string> params;
+    params.push_back("-inspector");
+    params.push_back("1");
+    params.push_back("--stackNodeId");
+    EXPECT_CALL(mockJsManger, SendEventToAccessibilityWithNode(_, _, _))
+        .Times(0);
+
+    mockJsManger.DumpSendEventTest(nodeId, eventId, params);
+
+    // 2. check parameter success
+    int64_t testStackId = 2;
+    params.push_back(std::to_string(testStackId));
+
+    EXPECT_CALL(mockJsManger, SendEventToAccessibilityWithNode(_, _, _))
+        .Times(1);
+
+    mockJsManger.DumpSendEventTest(nodeId, eventId, params);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager022
+ * @tc.desc: dump event test  OnDumpInfoNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager022, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    MockJsAccessibilityManager mockJsManger;
+    mockJsManger.SetPipelineContext(context);
+    mockJsManger.Register(true);
+
+    std::vector<std::string> params;
+
+    // 1.  dump event
+    params.push_back("-inspector");
+    params.push_back("--event-test");
+    params.push_back("1");
+    params.push_back("2");
+
+    EXPECT_CALL(mockJsManger, SendEventToAccessibilityWithNode(_, _, _))
+        .Times(1);
+    mockJsManger.OnDumpInfoNG(params, 1, false);
 }
 } // namespace OHOS::Ace::NG

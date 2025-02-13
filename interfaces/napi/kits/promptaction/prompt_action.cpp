@@ -23,6 +23,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
@@ -50,8 +51,7 @@ const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
-const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = {
-    ImmersiveMode::DEFAULT, ImmersiveMode::PAGE, ImmersiveMode::FULL};
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -646,6 +646,8 @@ struct PromptAsyncContext {
     napi_value onWillDismiss = nullptr;
     napi_value backgroundColorApi = nullptr;
     napi_value backgroundBlurStyleApi = nullptr;
+    napi_value blurStyleOptionApi = nullptr;
+    napi_value effectOptionApi = nullptr;
     napi_value enableHoverMode = nullptr;
     napi_value hoverModeAreaApi = nullptr;
     napi_value borderWidthApi = nullptr;
@@ -691,6 +693,7 @@ struct PromptAsyncContext {
     napi_ref onWillDisappearRef = nullptr;
     napi_value keyboardAvoidModeApi = nullptr;
     napi_value keyboardAvoidDistanceApi = nullptr;
+    napi_value levelOrderApi = nullptr;
     napi_value dialogLevelModeApi = nullptr;
     napi_value dialogLevelUniqueId = nullptr;
     napi_value dialogImmersiveModeApi = nullptr;
@@ -892,6 +895,42 @@ void GetNapiBlurStyleAndHoverModeProps(napi_env env, const std::shared_ptr<Promp
         if (num >= 0 && num < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
             hoverModeArea = HOVER_MODE_AREA_TYPE[num];
         }
+    }
+}
+
+void GetBackgroundBlurStyleOption(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::optional<BlurStyleOption>& blurStyleOption)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->blurStyleOptionApi, &valueType);
+    if (valueType == napi_object) {
+        BlurStyleOption styleOption;
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
+        if (delegate) {
+            delegate->GetBackgroundBlurStyleOption(asyncContext->blurStyleOptionApi, styleOption);
+        }
+        if (!blurStyleOption.has_value()) {
+            blurStyleOption.emplace();
+        }
+        blurStyleOption.value() = styleOption;
+    }
+}
+
+void GetBackgroundEffect(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext, std::optional<EffectOption>& effectOption)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->effectOptionApi, &valueType);
+    if (valueType == napi_object) {
+        EffectOption styleOption;
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
+        if (delegate) {
+            delegate->GetBackgroundEffect(asyncContext->effectOptionApi, styleOption);
+        }
+        if (!effectOption.has_value()) {
+            effectOption.emplace();
+        }
+        effectOption.value() = styleOption;
     }
 }
 
@@ -1286,8 +1325,16 @@ void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsy
         napi_get_value_int32(env, asyncContext->dialogImmersiveModeApi, &immersiveMode);
     }
     if (immersiveMode >= 0 && immersiveMode < static_cast<int32_t>(DIALOG_IMMERSIVE_MODE.size())) {
-        dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[mode];
+        dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[immersiveMode];
     }
+}
+
+void GetLevelOrderApi(napi_env env, napi_value value, std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    if (asyncContext->showInSubWindowBool) {
+        return;
+    }
+    napi_get_named_property(env, value, "levelOrder", &asyncContext->levelOrderApi);
 }
 
 void GetNapiNamedBoolProperties(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -1320,6 +1367,8 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
         napi_get_named_property(env, argv[index], "builder", &asyncContext->builder);
         napi_get_named_property(env, argv[index], "backgroundColor", &asyncContext->backgroundColorApi);
         napi_get_named_property(env, argv[index], "backgroundBlurStyle", &asyncContext->backgroundBlurStyleApi);
+        napi_get_named_property(env, argv[index], "backgroundBlurStyleOptions", &asyncContext->blurStyleOptionApi);
+        napi_get_named_property(env, argv[index], "backgroundEffect", &asyncContext->effectOptionApi);
         napi_get_named_property(env, argv[index], "hoverModeArea", &asyncContext->hoverModeAreaApi);
         napi_get_named_property(env, argv[index], "cornerRadius", &asyncContext->borderRadiusApi);
         napi_get_named_property(env, argv[index], "borderWidth", &asyncContext->borderWidthApi);
@@ -1355,6 +1404,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
+    GetLevelOrderApi(env, argv[index], asyncContext);
 }
 
 bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -1446,6 +1496,18 @@ void UpdatePromptAlignment(DialogAlignment& alignment)
     }
 }
 
+std::optional<double> GetLevelOrderParam(napi_env env, napi_value levelOrderApi)
+{
+    NG::LevelOrder* levelOrder = nullptr;
+    if (levelOrderApi) {
+        napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
+    }
+    CHECK_NULL_RETURN(levelOrder, std::nullopt);
+
+    double order = levelOrder->GetOrder();
+    return std::make_optional(order);
+}
+
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "js prompt show dialog enter");
@@ -1479,6 +1541,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     std::optional<Shadow> shadowProps;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<HoverModeAreaType> hoverModeArea;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
@@ -1503,6 +1567,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "shadow", &asyncContext->shadowApi);
             napi_get_named_property(env, argv[0], "backgroundColor", &asyncContext->backgroundColorApi);
             napi_get_named_property(env, argv[0], "backgroundBlurStyle", &asyncContext->backgroundBlurStyleApi);
+            napi_get_named_property(env, argv[0], "backgroundBlurStyleOptions", &asyncContext->blurStyleOptionApi);
+            napi_get_named_property(env, argv[0], "backgroundEffect", &asyncContext->effectOptionApi);
             napi_get_named_property(env, argv[0], "enableHoverMode", &asyncContext->enableHoverMode);
             napi_get_named_property(env, argv[0], "hoverModeArea", &asyncContext->hoverModeAreaApi);
             napi_get_named_property(env, argv[0], "levelMode", &asyncContext->dialogLevelModeApi);
@@ -1514,6 +1580,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
             shadowProps = GetShadowProps(env, asyncContext);
             GetNapiBlurStyleAndHoverModeProps(env, asyncContext, backgroundBlurStyle, hoverModeArea);
+            GetBackgroundBlurStyleOption(env, asyncContext, blurStyleOption);
+            GetBackgroundEffect(env, asyncContext, effectOption);
             if (!ParseButtonsPara(env, asyncContext, SHOW_DIALOG_BUTTON_NUM_MAX, false)) {
                 return nullptr;
             }
@@ -1534,6 +1602,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
             }
             GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
+            GetLevelOrderApi(env, argv[0], asyncContext);
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
@@ -1648,7 +1717,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback");
         asyncContext = nullptr;
     };
 
@@ -1664,9 +1733,12 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .maskRect = maskRect,
         .backgroundColor = backgroundColor,
         .backgroundBlurStyle = backgroundBlurStyle,
+        .blurStyleOption = blurStyleOption,
+        .effectOption = effectOption,
         .shadow = shadowProps,
         .hoverModeArea = hoverModeArea,
         .onLanguageChange = onLanguageChange,
+        .levelOrder = GetLevelOrderParam(asyncContext->env, asyncContext->levelOrderApi),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
@@ -1876,7 +1948,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
         asyncContext = nullptr;
     };
 
@@ -2107,8 +2179,12 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     std::optional<DimensionRect> maskRect;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<HoverModeAreaType> hoverModeArea;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
     GetNapiBlurStyleAndHoverModeProps(env, asyncContext, backgroundBlurStyle, hoverModeArea);
+    GetBackgroundBlurStyleOption(env, asyncContext, blurStyleOption);
+    GetBackgroundEffect(env, asyncContext, effectOption);
     auto borderWidthProps = GetBorderWidthProps(env, asyncContext);
     std::optional<NG::BorderColorProperty> borderColorProps;
     std::optional<NG::BorderStyleProperty> borderStyleProps;
@@ -2135,6 +2211,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .maskRect = maskRect,
         .backgroundColor = backgroundColorProps,
         .backgroundBlurStyle = backgroundBlurStyle,
+        .blurStyleOption = blurStyleOption,
+        .effectOption = effectOption,
         .borderWidth = borderWidthProps,
         .borderColor = borderColorProps,
         .borderStyle = borderStyleProps,
@@ -2152,6 +2230,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .onWillDisappear = lifeCycleAttr.onWillDisappear,
         .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
         .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext),
+        .levelOrder = GetLevelOrderParam(env, asyncContext->levelOrderApi),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode
@@ -2235,7 +2314,7 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback");
         asyncContext = nullptr;
     };
 }
@@ -2287,7 +2366,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
         asyncContext = nullptr;
     };
 }
@@ -2295,6 +2374,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
 void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext,
     PromptDialogAttr& promptDialogAttr, std::function<void(int32_t)>& openCallback)
 {
+    promptDialogAttr.isUserCreatedDialog = true;
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -2422,6 +2502,12 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
         napi_get_value_bool(env, asyncContext->enableHoverMode, &asyncContext->enableHoverModeBool);
     }
     napi_get_named_property(env, arg, "hoverModeArea", &asyncContext->hoverModeAreaApi);
+    GetLevelOrderApi(env, arg, asyncContext);
+    napi_get_named_property(env, arg, "backgroundBlurStyleOptions", &asyncContext->blurStyleOptionApi);
+    napi_get_named_property(env, arg, "backgroundEffect", &asyncContext->effectOptionApi);
+    napi_get_named_property(env, arg, "levelMode", &asyncContext->dialogLevelModeApi);
+    napi_get_named_property(env, arg, "levelUniqueId", &asyncContext->dialogLevelUniqueId);
+    napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);
 
     ParseBaseDialogOptionsEvent(env, arg, asyncContext);
 }

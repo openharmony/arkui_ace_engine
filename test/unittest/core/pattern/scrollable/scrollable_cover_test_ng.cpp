@@ -353,29 +353,6 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetVelocityScaleTest001
- * @tc.desc: Test SetVelocityScale method with valid and invalid values
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, SetVelocityScaleTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set VelocityScale to a valid value
-     * @tc.expected: VelocityScale is updated to the new value
-     */
-    double sVelocityScale = 2.0;
-    auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    scrollable->SetVelocityScale(sVelocityScale);
-    EXPECT_EQ(scrollable->sVelocityScale_.value_or(0.0), sVelocityScale);
-    /**
-     * @tc.steps: step2. Set VelocityScale to an invalid value (less than or equal to 0)
-     * @tc.expected: VelocityScale remains unchanged
-     */
-    scrollable->SetVelocityScale(-1.0);
-    EXPECT_EQ(scrollable->sVelocityScale_.value_or(0.0), sVelocityScale);
-}
-
-/**
  * @tc.name: HandleTouchCancel001
  * @tc.desc: Test the behavior of the HandleTouchCancel method
  * @tc.type: FUNC
@@ -1195,22 +1172,6 @@ HWTEST_F(ScrollableCoverTestNg, GetOrCreateScrollableItemWithParent002, TestSize
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetTag(), "notExistsTag");
     EXPECT_EQ(result->GetId(), nodeId);
-}
-
-/**
- * @tc.name: SetFriction001
- * @tc.desc: Test SetFriction method
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, SetFriction001, TestSize.Level1)
-{
-    double sFriction = -1.0;
-    /**
-     * @tc.steps: step1. Call SetFriction with sFriction LessOrEqual 0.0
-     * @tc.expected: sFriction_ dont change
-     */
-    Scrollable::SetFriction(sFriction);
-    EXPECT_FALSE(Scrollable::sFriction_.has_value());
 }
 
 /**

@@ -21,6 +21,7 @@
 #define private public
 
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -67,6 +68,8 @@ const OffsetF offset(10, 10);
 int32_t callBackFlag = 0;
 constexpr float RK356_HEIGHT = 1136.0f;
 const OffsetF OFFSET_ITEM1 = OffsetF(5, 5);
+const Rect WINDOW_RECT(0, 0, 280, 1280);
+constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -4706,6 +4709,297 @@ HWTEST_F(SelectOverlayTestNg, CreateMenuNode002, TestSize.Level1)
     auto menuWrapperNoShortCut = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapperNoShortCut, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
+}
+
+/**
+ * @tc.name: GetDefaultButtonAndMenuWidth001
+ * @tc.desc: Test GetDefaultButtonAndMenuWidth with UIExtension Window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, GetDefaultButtonAndMenuWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set TextOverlayTheme to themeManager and Create selectOverlayNode.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set container UIExtension State and Window Rect.
+     */
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    container->SetIsUIExtensionWindow(true);
+    MockPipelineContext::SetCurrentWindowRect(WINDOW_RECT);
+
+    /**
+     * @tc.steps: step3. test GetDefaultButtonAndMenuWidth return value.
+     * @tc.expected: maxWidth changed is right.
+     */
+    float maxWidth = 1040.0f;
+    const auto& menuPadding = textOverlayTheme->GetMenuPadding();
+
+    auto backButtonWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - menuPadding.Top().ConvertToPx() -
+                           menuPadding.Bottom().ConvertToPx();
+    selectOverlayNode->GetDefaultButtonAndMenuWidth(maxWidth);
+    EXPECT_EQ(maxWidth,
+        WINDOW_RECT.Width() - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() - backButtonWidth);
+}
+
+/**
+ * @tc.name: GetDefaultButtonAndMenuWidth002
+ * @tc.desc: Test GetDefaultButtonAndMenuWidth without UIExtension Window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, GetDefaultButtonAndMenuWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set TextOverlayTheme to themeManager and Create selectOverlayNode.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set container UIExtension State and Window Rect.
+     */
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    container->SetIsUIExtensionWindow(false);
+    MockPipelineContext::SetCurrentWindowRect(WINDOW_RECT);
+
+    /**
+     * @tc.steps: step3. test GetDefaultButtonAndMenuWidth return value.
+     * @tc.expected: maxWidth changed is right.
+     */
+    float maxWidth = 1040.0f;
+    const auto& menuPadding = textOverlayTheme->GetMenuPadding();
+
+    auto backButtonWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - menuPadding.Top().ConvertToPx() -
+                           menuPadding.Bottom().ConvertToPx();
+    selectOverlayNode->GetDefaultButtonAndMenuWidth(maxWidth);
+    EXPECT_EQ(maxWidth, OVERLAY_MAX_WIDTH.ConvertToPx() - menuPadding.Left().ConvertToPx() -
+                            menuPadding.Right().ConvertToPx() - backButtonWidth);
+}
+
+/**
+ * @tc.name: AddMenuItemByCreateMenuCallback001
+ * @tc.desc: Test AddMenuItemByCreateMenuCallback with backButton.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set ApiTargetVersion.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+
+    /**
+     * @tc.steps: step2. Set TextOverlayTheme to themeManager and Create selectOverlayNode.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.menuInfo.showCopy = true;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = true;
+    selectInfo.menuInfo.showTranslate = false;
+    selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
+    selectInfo.menuInfo.showCameraInput = false;
+    selectInfo.menuInfo.showAIWrite = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool { return false; };
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick;
+    auto onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        return {};
+    };
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test AddMenuItemByCreateMenuCallback.
+     * @tc.expected: The default menu is created successfully and backButton is reset.
+     */
+    float maxWidth = 2.0f;
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
+    EXPECT_FALSE(selectOverlayNode->backButton_);
+    EXPECT_TRUE(selectOverlayNode->selectMenu_);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
+}
+
+/**
+ * @tc.name: AddMenuItemByCreateMenuCallback002
+ * @tc.desc: Test AddMenuItemByCreateMenuCallback without backButton.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set ApiTargetVersion.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+
+    /**
+     * @tc.steps: step2. Set TextOverlayTheme to themeManager and Create selectOverlayNode.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.menuInfo.showCopy = true;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = true;
+    selectInfo.menuInfo.showTranslate = true;
+    selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
+    selectInfo.menuInfo.showCameraInput = true;
+    selectInfo.menuInfo.showAIWrite = true;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool { return false; };
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick;
+    auto onCreateMenuCallback = [menuOptionItems](
+                                    const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        return menuOptionItems;
+    };
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test AddMenuItemByCreateMenuCallback.
+     * @tc.expected: The backButton and moreButton are created successfully.
+     */
+    float maxWidth = 1040.0f;
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_EQ(selectOverlayNode->backButton_, nullptr);
+    selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_NE(selectOverlayNode->moreButton_, nullptr);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
+}
+
+/**
+ * @tc.name: AddMenuItemByCreateMenuCallback003
+ * @tc.desc: Test AddMenuItemByCreateMenuCallback with Lower version.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set ApiTargetVersion.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    /**
+     * @tc.steps: step2. Set TextOverlayTheme to themeManager and Create selectOverlayNode.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.menuInfo.showCopy = true;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = true;
+    selectInfo.menuInfo.showTranslate = false;
+    selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
+    selectInfo.menuInfo.showCameraInput = false;
+    selectInfo.menuInfo.showAIWrite = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool { return false; };
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick;
+    auto onCreateMenuCallback = [menuOptionItems](
+                                    const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        return menuOptionItems;
+    };
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test AddMenuItemByCreateMenuCallback.
+     * @tc.expected: The backButton and moreButton are created successfully.
+     */
+    float maxWidth = 1040.0f;
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_EQ(selectOverlayNode->backButton_, nullptr);
+    selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_NE(selectOverlayNode->moreButton_, nullptr);
+    EXPECT_EQ(selectOverlayNode->moreOrBackSymbol_, nullptr);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
 }
 
 } // namespace OHOS::Ace::NG

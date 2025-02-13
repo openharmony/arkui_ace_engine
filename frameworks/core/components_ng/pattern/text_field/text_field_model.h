@@ -302,7 +302,6 @@ public:
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) = 0;
     virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;

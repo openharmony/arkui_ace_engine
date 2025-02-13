@@ -50,6 +50,7 @@ public:
     void SetAnimationDuration(float duration) override;
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
     void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) override;
+    void SetOnUnselected(std::function<void(const BaseEventInfo*)>&& onUnselected) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
@@ -79,6 +80,7 @@ public:
     static void SetHeightAuto(FrameNode* frameNode, bool isAuto);
     static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
+    static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
@@ -100,6 +102,7 @@ public:
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode);
+    static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("marquee_test_ng") {
   type = "new"
   sources = [
+    "marquee_pattern_test_ng.cpp",
     "marquee_test_ng.cpp",
     "marquee_test_update_strategy.cpp",
   ]

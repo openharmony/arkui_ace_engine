@@ -95,15 +95,21 @@ void JSView::JSBind(BindingTarget object)
     JSViewFullUpdate::JSBind(object);
 }
 
-void JSView::RenderJSExecution()
+void JSView::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
+{
+    jsViewFunction_->ExecuteRender();
+}
+
+void JSView::RenderJSExecution(int64_t deadline, bool& isTimeout)
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (!jsViewFunction_) {
         return;
     }
-    {
+    if (!executedAboutToRender_) {
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
+        executedAboutToRender_ = true;
     }
     if (!jsViewFunction_) {
         return;
@@ -111,18 +117,22 @@ void JSView::RenderJSExecution()
     {
         ACE_SCORING_EVENT("Component.Build");
         ViewStackModel::GetInstance()->PushKey(viewId_);
-        jsViewFunction_->ExecuteRender();
+        DoRenderJSExecution(deadline, isTimeout);
         ViewStackModel::GetInstance()->PopKey();
+        if (isTimeout) {
+            return;
+        }
     }
     if (!jsViewFunction_) {
         return;
     }
-    {
+    if (!executedOnRenderDone_) {
         ACE_SCORING_EVENT("Component.OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
         if (notifyRenderDone_) {
             notifyRenderDone_();
         }
+        executedOnRenderDone_ = true;
     }
 }
 
@@ -166,6 +176,14 @@ void JSView::JsGetCardId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(cardId_)));
 }
 
+JSView* JSView::GetNativeView(JSRef<JSObject> obj)
+{
+    if (obj->HasProperty("nativeViewPartialUpdate")) {
+        JSRef<JSObject> nativeViewPartialUpdate = obj->GetProperty("nativeViewPartialUpdate");
+        return nativeViewPartialUpdate->Unwrap<JSView>();
+    }
+    return obj->Unwrap<JSView>();
+}
 
 JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
 {
@@ -243,7 +261,8 @@ RefPtr<AceType> JSViewFullUpdate::InternalRender()
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     needsUpdate_ = false;
-    RenderJSExecution();
+    bool isTimeout = false;
+    RenderJSExecution(0, isTimeout);
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy();
     return ViewStackModel::GetInstance()->Finish();
@@ -555,15 +574,19 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         }
     };
 
-    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
+    auto renderFunction = [weak = AceType::WeakClaim(this)](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
         ContainerScope scope(jsView->GetInstanceId());
-        if (!jsView->isFirstRender_) {
+        if (!jsView->isFirstRender_ && jsView->prebuildPhase_ == PrebuildPhase::PREBUILD_DONE) {
             return nullptr;
         }
         jsView->isFirstRender_ = false;
-        return jsView->InitialRender();
+        auto res = jsView->InitialRender(deadline, isTimeout);
+        if (!isTimeout) {
+            jsView->SetPrebuildPhase(PrebuildPhase::PREBUILD_DONE);
+        }
+        return res;
     };
 
     auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
@@ -593,11 +616,11 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     };
 
     // @Component level complete reload, can detect added/deleted frame nodes
-    auto completeReloadFunc = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
+    auto completeReloadFunc = [weak = AceType::WeakClaim(this)](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
         ContainerScope scope(jsView->GetInstanceId());
-        return jsView->InitialRender();
+        return jsView->InitialRender(deadline, isTimeout);
     };
 
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
@@ -665,6 +688,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         jsView->jsViewFunction_->ExecuteSetActive(active, isReuse);
     };
 
@@ -814,10 +838,60 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     return node;
 }
 
-RefPtr<AceType> JSViewPartialUpdate::InitialRender()
+void JSViewPartialUpdate::PrebuildComponentsInMultiFrame(int64_t deadline, bool& isTimeout)
+{
+    ACE_BUILD_TRACE_BEGIN("PrebuildComponentsInMultiFrame");
+    auto& prebuildComponentCmds = NG::ViewStackProcessor::GetInstance()->GetPrebuildComponentCmds();
+    if (!prebuildComponentCmds.empty()) {
+        SetPrebuildPhase(PrebuildPhase::EXECUTE_PREBUILD_CMD);
+    }
+    while (!prebuildComponentCmds.empty()) {
+        if (deadline > 0 && GetSysTimestamp() > deadline) {
+            isTimeout = true;
+            ACE_BUILD_TRACE_END()
+            return;
+        }
+        auto prebuildCmd = prebuildComponentCmds.front();
+        if (prebuildCmd.commandType == NG::PrebuildCompCmdType::FRONT) {
+            jsViewFunction_->ExecutePrebuildComponent();
+        } else if (prebuildCmd.commandType == NG::PrebuildCompCmdType::BACK) {
+            ACE_BUILD_TRACE_BEGIN("%s", prebuildCmd.commandName);
+            prebuildCmd.prebuildFunc();
+            ACE_BUILD_TRACE_END()
+        }
+        prebuildComponentCmds.pop();
+    }
+    isTimeout = false;
+    ACE_BUILD_TRACE_END()
+}
+
+void JSViewPartialUpdate::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
+{
+    if (!executedRender_) {
+        if (deadline > 0 && jsViewFunction_->ExecuteIsEnablePrebuildInMultiFrame()) {
+            SetPrebuildPhase(PrebuildPhase::BUILD_PREBUILD_CMD, deadline);
+        }
+        jsViewFunction_->ExecuteRender();
+        executedRender_ = true;
+    }
+    PrebuildComponentsInMultiFrame(deadline, isTimeout);
+}
+
+void JSViewPartialUpdate::SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline)
+{
+    prebuildPhase_ = prebuildPhase;
+    NG::ViewStackProcessor::GetInstance()->SetIsPrebuildingAndDeadline(
+        prebuildPhase == PrebuildPhase::BUILD_PREBUILD_CMD, deadline);
+    jsViewFunction_->ExecuteSetPrebuildPhase(prebuildPhase);
+}
+
+RefPtr<AceType> JSViewPartialUpdate::InitialRender(int64_t deadline, bool& isTimeout)
 {
     needsUpdate_ = false;
-    RenderJSExecution();
+    RenderJSExecution(deadline, isTimeout);
+    if (isTimeout) {
+        return nullptr;
+    }
     return ViewStackModel::GetInstance()->Finish();
 }
 
@@ -859,7 +933,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        auto* view = JSViewPartialUpdate::GetNativeViewPartialUpdate(object);
+        auto* view = JSView::GetNativeView(object);
         if (view == nullptr) {
             LOGE("View is null");
             return;
@@ -961,7 +1035,16 @@ void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)
 
 void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
 {
-    auto result = NG::UIObserverHandler::GetInstance().GetNavigationState(GetViewNode());
+    std::shared_ptr<OHOS::Ace::NG::NavDestinationInfo> result;
+    if (info[0]->IsBoolean()) {
+        if (info[0]->ToBoolean()) {
+            result = NG::UIObserverHandler::GetInstance().GetNavigationInnerState(GetViewNode());
+        } else {
+            result = NG::UIObserverHandler::GetInstance().GetNavigationOuterState(GetViewNode());
+        }
+    } else {
+        result = NG::UIObserverHandler::GetInstance().GetNavigationState(GetViewNode());
+    }
     if (result) {
         JSRef<JSObject> obj = JSRef<JSObject>::New();
         obj->SetProperty<std::string>("navigationId", result->navigationId);
@@ -1253,9 +1336,4 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     return;
 }
 
-JSView* JSViewPartialUpdate::GetNativeViewPartialUpdate(JSRef<JSObject> obj)
-{
-    JSRef<JSObject> nativeViewPartialUpdate = obj->GetProperty("nativeViewPartialUpdate");
-    return nativeViewPartialUpdate->Unwrap<JSView>();
-}
 } // namespace OHOS::Ace::Framework

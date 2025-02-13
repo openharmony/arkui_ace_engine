@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/log/log_wrapper.h"
 #include "base/log/dump_log.h"
@@ -95,10 +96,41 @@ void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWr
     InitializeRender(runtime);
 }
 
+bool IsolatedPattern::CheckConstraint()
+{
+    auto instanceId = GetHostInstanceId();
+    PLATFORM_LOGI("CheckConstraint instanceId: %{public}d.", instanceId);
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    if (!container) {
+        PLATFORM_LOGE("container is null.");
+        return false;
+    }
+
+    UIContentType uIContentType = container->GetUIContentType();
+    static std::set<UIContentType> isolatedNotSupportUIContentType = {
+        UIContentType::ISOLATED_COMPONENT,
+        UIContentType::DYNAMIC_COMPONENT
+    };
+
+    if (isolatedNotSupportUIContentType.find(uIContentType) !=
+        isolatedNotSupportUIContentType.end()) {
+        PLATFORM_LOGE("Not support isolatedComponent in uIContentType: %{public}d.",
+            static_cast<int32_t>(uIContentType));
+        return false;
+    }
+
+    return true;
+}
+
 void IsolatedPattern::InitializeRender(void* runtime)
 {
     isolatedDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
 #if !defined(PREVIEW)
+    if (!CheckConstraint()) {
+        PLATFORM_LOGE("CheckConstraint failed.");
+        return;
+    }
+
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
         dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), runtime, curIsolatedInfo_);

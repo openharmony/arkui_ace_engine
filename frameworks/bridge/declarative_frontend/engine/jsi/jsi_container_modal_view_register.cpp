@@ -103,7 +103,7 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     const auto object = JSRef<JSObject>::Make(obj);
     const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = JsiObjectTemplate::GetNativeViewPartialUpdate(obj);
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -114,6 +114,7 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
 
     BindingCustomBaseFromJS(object, vm, customNode);
     BindingCustomTitleFromJS(object, vm, customNode);
+    BindingCustomButtonFromJS(object, vm, customNode);
     NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
 }
 
@@ -135,7 +136,7 @@ void AddCustomButtonComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     const auto object = JSRef<JSObject>::Make(obj);
     const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = JsiObjectTemplate::GetNativeViewPartialUpdate(obj);
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }

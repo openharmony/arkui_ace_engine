@@ -41,6 +41,7 @@ namespace OHOS::Ace {
 
 namespace OHOS::Ace::NG {
 namespace {
+    const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
 } // namespace
 
 class JsThirdAccessibilityHoverNgTest : public testing::Test {
@@ -56,7 +57,8 @@ void JsThirdAccessibilityHoverNgTest::SetUpTestCase()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
-
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->instanceId_ = IGNORE_POSITION_TRANSITION_SWITCH;
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     ASSERT_NE(ostream, nullptr);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
@@ -331,7 +333,6 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest005, Te
     jsAccessibilityManager->RegisterJsThirdProviderInteractionOperation(hostElementId, jsInteractionOperation);
 
     NG::PointF point(1, 1);
-    NG::OffsetF hostOffset(0, 0);
     auto elementInfoListSize = ohAccessibilityProvider->providerMockResult_.elementInfosList_.size();
     for (int32_t i = 0; i < elementInfoListSize; i++) {
         auto leftTopX = 0;
@@ -345,7 +346,7 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest005, Te
 
     auto ret = jsAccessibilityManager->GetElementInfoForThird(-1, rootInfo, hostElementId);
     EXPECT_EQ(ret, true);
-    auto path = jsAccessibilityManager->HoverPathForThird(hostElementId, point, rootInfo, hostOffset);
+    auto path = jsAccessibilityManager->HoverPathForThird(hostElementId, point, rootInfo);
     EXPECT_EQ(path.size(), elementInfoListSize);
 }
 

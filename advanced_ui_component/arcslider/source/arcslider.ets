@@ -308,7 +308,7 @@ export struct ArcSlider {
 
   @Monitor('trackStartAngle', 'trackEndAngle', 'selectedStartAngle', 'selectedEndAngle', 'options.valueOptions.min',
   'options.valueOptions.max', 'options.valueOptions.progress', 'options.layoutOptions.reverse',
-  'options.layoutOptions.position','options.styleOptions.trackThickness', 'options.styleOptions.activeTrackThickness',
+  'options.layoutOptions.position', 'options.styleOptions.trackThickness', 'options.styleOptions.activeTrackThickness',
   'options.styleOptions.trackColor', 'options.styleOptions.selectedColor', 'options.styleOptions.trackBlur', 'clipPath',
   'isFocus', 'isAntiClock')
   onChange(monitor: IMonitor) {

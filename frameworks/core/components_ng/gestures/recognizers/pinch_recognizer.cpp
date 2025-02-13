@@ -409,6 +409,9 @@ void PinchRecognizer::OnResetStatus()
 
 void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
@@ -440,6 +443,14 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+    }
+}
+
+void PinchRecognizer::CheckCallbackState()
+{
+    if ((callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) &&
+        currentFingers_ == 0) {
+        SendCallbackMsg(onActionEnd_);
     }
 }
 

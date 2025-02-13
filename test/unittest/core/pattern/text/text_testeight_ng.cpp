@@ -13,11 +13,65 @@
  * limitations under the License.
  */
 
+#include "gmock/gmock.h"
+
 #include "text_base.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "foundation/arkui/ace_engine/test/mock/core/rosen/testing_canvas.h"
+
+#define private protected
+#define protected public
+#include "core/components_ng/pattern/text/text_overlay_modifier.h"
+#undef protected
+#undef private
 
 namespace OHOS::Ace::NG {
+
+using namespace testing;
+using namespace testing::ext;
+using namespace Testing;
+
+class MockCanvas : public TestingCanvas {
+public:
+    MockCanvas() = default;
+    explicit MockCanvas(void* rawCanvas) {}
+    ~MockCanvas() = default;
+
+    MOCK_METHOD2(DrawLine, void(const TestingPoint& startPt, const TestingPoint& endPt));
+    MOCK_METHOD1(DrawPath, void(const TestingPath& path));
+    MOCK_METHOD3(DrawArc, void(const TestingRect& oval, float startAngle, float sweepAngle));
+    MOCK_METHOD1(DrawRect, void(const TestingRect& rect));
+    MOCK_METHOD3(Rotate, void(float deg, float sx, float sy));
+    MOCK_METHOD1(Rotate, void(float deg));
+    MOCK_METHOD2(Translate, void(float tx, float ty));
+    MOCK_METHOD2(Scale, void(float sx, float sy));
+    MOCK_METHOD3(ClipRoundRectImpl, void(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias));
+    virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias = false)
+    {
+        ClipRoundRectImpl(roundRect, op, antiAlias);
+    }
+    MOCK_METHOD1(AttachPen, TestingCanvas&(const TestingPen& pen));
+    MOCK_METHOD1(AttachBrush, TestingCanvas&(const TestingBrush& brush));
+    MOCK_METHOD0(DetachPen, TestingCanvas&());
+    MOCK_METHOD0(DetachBrush, TestingCanvas&());
+    MOCK_METHOD0(Save, void());
+    MOCK_METHOD0(Restore, void());
+    MOCK_METHOD2(DrawCircle, void(const TestingPoint& centerPt, float radius));
+    MOCK_METHOD1(DrawRoundRect, void(const TestingRoundRect& roundRect));
+    MOCK_METHOD3(DrawBitmap, void(const TestingBitmap& bitmap, const float px, const float py));
+    MOCK_METHOD4(DrawImage,
+        void(const TestingImage& image, const float px, const float py, const TestingSamplingOptions& sampling));
+    MOCK_METHOD1(DrawBackground, void(const TestingBrush& brush));
+    MOCK_METHOD3(ClipRect, void(const TestingRect& rect, ClipOp op, bool doAntiAlias));
+    MOCK_METHOD3(ClipPath, void(const TestingPath& rect, ClipOp op, bool doAntiAlias));
+    MOCK_METHOD3(
+        DrawImageRect, void(const TestingImage& image, const TestingRect& dst, const TestingSamplingOptions& sampling));
+    MOCK_METHOD5(DrawImageRect, void(const TestingImage& image, const TestingRect& src, const TestingRect& dst,
+                                    const TestingSamplingOptions& sampling, SrcRectConstraint constraint));
+    MOCK_METHOD1(SaveLayer, void(const TestingSaveLayerOps& saveLayerOps));
+    MOCK_METHOD1(DrawOval, void(const TestingRect& oval));
+};
 
 class TextTestEightNg : public TextBases {
 public:
@@ -960,5 +1014,125 @@ HWTEST_F(TextTestEightNg, LocalOffsetInSelectedArea001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::None;
     auto res = pattern->LocalOffsetInSelectedArea(Offset(0, 0));
     EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: onDraw001
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw001, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(0);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    vector<RectF> selectedRects { { 5, 5, 5, 5 } };
+    textOverlayModifier.SetSelectedRects(selectedRects);
+    textOverlayModifier.SetShowSelect(true);
+    textOverlayModifier.SetSelectedForegroundColorAndRects({ { 5, 5, 5, 5 } }, 1);
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw002
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw002, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(0);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    textOverlayModifier.SetShowSelect(true);
+    vector<RectF> selectedRects = { { 5, 5, 5, 5 }, {} };
+    textOverlayModifier.SetSelectedRects(selectedRects);
+    textOverlayModifier.isClip_ = nullptr;
+    textOverlayModifier.SetContentRect({});
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw003
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw003, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(0);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    textOverlayModifier.SetShowSelect(true);
+    vector<RectF> selectedRects = { { 5, 5, 5, 5 }, {} };
+    textOverlayModifier.SetSelectedRects(selectedRects);
+    textOverlayModifier.SetIsClip(false);
+    textOverlayModifier.SetContentRect({});
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw004
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw004, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(1);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    textOverlayModifier.SetSelectedForegroundColorAndRects({ { 5, 5, 5, 5 }, { 0, 0, 0, 0 } }, 1);
+    textOverlayModifier.SetContentRect({ 3, 3, 3, 3 });
+    textOverlayModifier.SetShowSelect(true);
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: IsSelectedRectsChanged001
+ * @tc.desc: test IsSelectedRectsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, IsSelectedRectsChanged001, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    vector<RectF> selectedRects { {} };
+    auto result = textOverlayModifier.IsSelectedRectsChanged(selectedRects);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: IsSelectedRectsChanged002
+ * @tc.desc: test IsSelectedRectsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, IsSelectedRectsChanged002, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    vector<RectF> selectedRects { {} };
+    textOverlayModifier.SetSelectedRects({ { 3, 3, 3, 3 } });
+    auto result = textOverlayModifier.IsSelectedRectsChanged(selectedRects);
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG

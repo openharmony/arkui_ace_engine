@@ -33,9 +33,9 @@ ArkUINativeModuleValue PluginBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
     CalcDimension height = 0.0_vp;
     if (!(ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, false)) ||
         !(ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height, false))) {
-        auto nodeModifiers = GetArkUINodeModifiers();
-        CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-        nodeModifiers->getPluginModifier()->resetPluginSize(nativeNode);
+        auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+        CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+        pluginModifier->resetPluginSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessNotEqual(width.Value(), 0.0)) {
@@ -45,9 +45,9 @@ ArkUINativeModuleValue PluginBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
         height.SetValue(0.0);
     }
 
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getPluginModifier()->setPluginSize(nativeNode, width.Value(), height.Value(),
+    auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+    CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+    pluginModifier->setPluginSize(nativeNode, width.Value(), height.Value(),
         static_cast<int32_t>(width.Unit()), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -65,18 +65,17 @@ ArkUINativeModuleValue PluginBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
 
     CalcDimension width = 0.0_vp;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width)) {
-        auto nodeModifiers = GetArkUINodeModifiers();
-        CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-        nodeModifiers->getPluginModifier()->resetPluginWidth(nativeNode);
+        auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+        CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+        pluginModifier->resetPluginWidth(nativeNode);
     }
     if (LessNotEqual(width.Value(), 0.0)) {
         width.SetValue(0.0);
     }
 
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getPluginModifier()->setPluginWidth(
-        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
+    auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+    CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+    pluginModifier->setPluginWidth(nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -93,18 +92,17 @@ ArkUINativeModuleValue PluginBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
 
     CalcDimension height = 0.0_vp;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height)) {
-        auto nodeModifiers = GetArkUINodeModifiers();
-        CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-        nodeModifiers->getPluginModifier()->resetPluginHeight(nativeNode);
+        auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+        CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+        pluginModifier->resetPluginHeight(nativeNode);
     }
     if (LessNotEqual(height.Value(), 0.0)) {
         height.SetValue(0.0);
     }
 
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getPluginModifier()->setPluginHeight(
-        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
+    auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+    CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+    pluginModifier->setPluginHeight(nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -117,9 +115,9 @@ ArkUINativeModuleValue PluginBridge::ResetSize(ArkUIRuntimeCallInfo* runtimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getPluginModifier()->resetPluginSize(nativeNode);
+    auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+    CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+    pluginModifier->resetPluginSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -132,9 +130,9 @@ ArkUINativeModuleValue PluginBridge::ResetWidth(ArkUIRuntimeCallInfo* runtimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getPluginModifier()->resetPluginWidth(nativeNode);
+    auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+    CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+    pluginModifier->resetPluginWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -147,9 +145,9 @@ ArkUINativeModuleValue PluginBridge::ResetHeight(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getPluginModifier()->resetPluginHeight(nativeNode);
+    auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
+    CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
+    pluginModifier->resetPluginHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

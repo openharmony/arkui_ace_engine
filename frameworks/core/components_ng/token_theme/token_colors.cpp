@@ -87,7 +87,7 @@ void TokenColors::SetColors(const std::vector<Color>& colors)
     colors_ = colors;
 }
 
-void TokenColors::SetColor(int32_t idx, const Color& color)
+void TokenColors::SetColor(uint32_t idx, const Color& color)
 {
     if (idx >= 0 && idx < colors_.size()) {
         colors_[idx] = color;
@@ -369,7 +369,7 @@ const TokenColorData& TokenColors::GetTokenColorDataByIndex(int32_t idx)
     return (idx >= 0 && idx < TokenColors::TOTAL_NUMBER) ? colorData[idx] : colorData[TokenColors::TOTAL_NUMBER];
 }
 
-Color TokenColors::GetByIndex(int32_t idx)
+Color TokenColors::GetByIndex(uint32_t idx)
 {
     return (idx >= 0 && idx < colors_.size()) ? colors_[idx] : Color{};
 }

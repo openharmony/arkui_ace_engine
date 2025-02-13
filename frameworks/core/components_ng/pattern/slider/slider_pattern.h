@@ -56,6 +56,7 @@ public:
                     CHECK_NULL_VOID(pattern);
                     pattern->UpdateImagePositionY(y);
                 });
+            sliderContentModifier_->SetHost(GetHost());
         }
         InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());
@@ -165,7 +166,12 @@ public:
 
     void SetSliderValue(double value, int32_t mode);
     void InitAccessibilityVirtualNodeTask();
+    void SetIsAccessibilityOn(bool value)
+    {
+        isAccessibilityOn_ = value;
+    }
     void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
@@ -335,6 +341,7 @@ private:
     void SetStepPointAccessibilityVirtualNode(
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
     void SendAccessibilityValueEvent(int32_t mode);
+    void ClearSliderVirtualNode();
     void InitOrRefreshSlipFactor();
     RefPtr<PanEvent> CreatePanEvent();
 
@@ -412,6 +419,8 @@ private:
     RefPtr<FrameNode> imageFrameNode_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
+    SliderModel::SliderMode sliderMode_ = SliderModel::SliderMode::OUTSET;
+    bool isAccessibilityOn_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
 
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     RefPtr<FrameNode> parentAccessibilityNode_;

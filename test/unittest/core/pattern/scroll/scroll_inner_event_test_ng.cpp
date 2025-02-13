@@ -668,6 +668,82 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragScrollBar006
+ * @tc.desc: Test handleDrag with snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar006, TestSize.Level1)
+{
+    float intervalSize = 100;
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollSnap(ScrollSnapAlign::START, Dimension(intervalSize), snapPaginations, enableSnapToSide);
+
+    ScrollSource scrollSource;
+    auto willEvent = [&scrollSource](Dimension x, Dimension y, ScrollState state, ScrollSource source) {
+        scrollSource = source;
+        TwoDimensionScrollResult result;
+        result.xOffset = x;
+        result.yOffset = y;
+        return result;
+    };
+    model.SetOnWillScroll(std::move(willEvent));
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Drag update inner scrollbar
+     * @tc.expected: the source of onWillScroll is SCROLL_FROM_BAR_FLING
+     */
+    DragScrollBarAction(IN_ACTIVE_BAR_OFFSET, 10.f, 1000.f);
+    EXPECT_EQ(scrollSource, ScrollSource::SCROLL_BAR);
+
+    /**
+     * @tc.steps: step2. Drag End inner scrollbar
+     * @tc.expected: the source of onWillScroll is SCROLL_FROM_BAR_FLING
+     */
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(scrollSource, ScrollSource::SCROLL_BAR_FLING);
+}
+
+/**
+ * @tc.name: HandleDragScrollBar007
+ * @tc.desc: Test handleDrag with snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar007, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Drag inner scrollbar
+     * @tc.expected: IsDriving is true
+     */
+    MockAnimationManager::GetInstance().SetTicks(1);
+    GestureEvent info;
+    scrollBar_->HandleDragStart(info);
+    EXPECT_TRUE(scrollBar_->IsDriving());
+    
+    info.SetMainDelta(10.f);
+    info.SetMainVelocity(0.f);
+    scrollBar_->HandleDragEnd(info);
+    EXPECT_FALSE(scrollBar_->IsDriving());
+
+    /**
+     * @tc.steps: step2. Trigger scrollbar fling animation
+     * @tc.expected: IsDriving is true
+     */
+    scrollBar_->HandleDragStart(info);
+    EXPECT_TRUE(scrollBar_->IsDriving());
+    info.SetMainVelocity(1000.f);
+    scrollBar_->HandleDragEnd(info);
+    EXPECT_TRUE(scrollBar_->IsDriving());
+}
+
+/**
  * @tc.name: RegisterEventByClick001
  * @tc.desc: Test Register Event By Click(CollectTouchTarget)
  * @tc.type: FUNC
@@ -729,5 +805,192 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragEndScrollBar001, TestSize.Level1)
      */
     DragScrollBarAction(Offset(239, 398), 0.f, -1000.f);
     EXPECT_LE(GetChildX(frameNode_, 0), 60.f);
+}
+
+/**
+ * @tc.name: ScrollBarSetOpacity001
+ * @tc.desc: Test scrollBar SetOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollBarSetOpacity001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
+
+    AnimationOption option;
+    option.SetCurve(Curves::SHARP);
+    option.SetDuration(300);
+    auto propertyCallback = [this]() {
+        EXPECT_TRUE(MockAnimationManager::GetInstance().IsAnimationOpen());
+        pattern_->scrollBarOverlayModifier_->SetOpacity(0);
+        EXPECT_FALSE(MockAnimationManager::GetInstance().IsAnimationOpen());
+    };
+    auto finishCallback = []() {};
+    auto animation = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), 0);
+}
+
+/**
+ * @tc.name: ScrollBarOpacityAnimation001
+ * @tc.desc: Test scrollBar OpacityAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollBarOpacityAnimation001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+    CreateContent();
+    CreateScrollDone();
+    auto scrollBarOverlayModifier = pattern_->scrollBarOverlayModifier_;
+    EXPECT_NE(scrollBarOverlayModifier, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacityAnimatingType(), OpacityAnimationType::NONE);
+
+    /**
+     * @tc.steps: step1. Trigger scrollbar disappear animation
+     * @tc.expected: scrollbar opacity will be 0 after animation finish
+     */
+    scrollBarOverlayModifier->StartOpacityAnimation(OpacityAnimationType::DISAPPEAR);
+    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), 0);
+
+    /**
+     * @tc.steps: step2. Trigger scrollbar appear animation
+     * @tc.expected: scrollbar opacity will be 255 after animation finish
+     */
+    scrollBarOverlayModifier->opacityAnimation_ = nullptr;
+    scrollBarOverlayModifier->StartOpacityAnimation(OpacityAnimationType::APPEAR);
+    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
+}
+
+/**
+ * @tc.name: ScrollBarOpacityAnimation002
+ * @tc.desc: Test scrollBar OpacityAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollBarOpacityAnimation002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+    CreateContent();
+    CreateScrollDone();
+    auto scrollBarOverlayModifier = pattern_->scrollBarOverlayModifier_;
+    EXPECT_NE(scrollBarOverlayModifier, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacityAnimatingType(), OpacityAnimationType::NONE);
+
+    /**
+     * @tc.steps: step1. Trigger scrollbar disappear animation
+     * @tc.expected: scrollbar opacity is 0
+     */
+    scrollBarOverlayModifier->SetNavDestinationShow(false);
+    scrollBarOverlayModifier->StartOpacityAnimation(OpacityAnimationType::DISAPPEAR);
+    EXPECT_EQ(scrollBarOverlayModifier->opacityAnimation_, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), 0);
+}
+
+/**
+ * @tc.name: ScrollSnap001
+ * @tc.desc: Test handleDrag with snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollSnap001, TestSize.Level1)
+{
+    float intervalSize = 100;
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollSnap(ScrollSnapAlign::START, Dimension(intervalSize), snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Drag end scroll
+     * @tc.expected: the source of onWillScroll is SCROLL_FROM_BAR_FLING
+     */
+    GestureEvent info;
+    info.SetMainDelta(-10.f);
+    info.SetMainVelocity(-1000000.f);
+    auto scrollable = pattern_->GetScrollable();
+    scrollable->HandleDragEnd(info);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SNAP);
+}
+
+/**
+ * @tc.name: ScrollSnap002
+ * @tc.desc: Test handleDrag with enablePaging and spring
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollSnap002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. drag update
+     * @tc.expected: the currentOffset of scroll greater than 0
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragStart(frameNode_, Offset());
+    DragUpdate(10);
+    EXPECT_TRUE(Position(10));
+
+    DragUpdate(-5);
+    EXPECT_LT(GetChildY(frameNode_, 0), 10);
+    EXPECT_GT(GetChildY(frameNode_, 0), 5);
+
+    float velocityDelta = -1000;
+    DragEnd(velocityDelta);
+    auto scrollable = pattern_->GetScrollable();
+
+    /**
+     * @tc.steps: step2. drag end and trigger spring animation
+     * @tc.expected: the currentOffset of scroll is 0
+     */
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().TickByVelocity(velocityDelta);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. spring end and trigger snap animation
+     * @tc.expected: the currentOffset of scroll is scrollHeight
+     */
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SNAP);
+    MockAnimationManager::GetInstance().TickByVelocity(velocityDelta);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -600);
+}
+
+/**
+ * @tc.name: ScrollSnap003
+ * @tc.desc: Test handleTouchUp and snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollSnap003, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. handelTouchUp
+     * @tc.expected: trigger snap animation
+     */
+    pattern_->currentOffset_ = -100;
+    auto scrollable = pattern_->GetScrollable();
+    scrollable->HandleTouchUp();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SNAP);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
 }
 } // namespace OHOS::Ace::NG

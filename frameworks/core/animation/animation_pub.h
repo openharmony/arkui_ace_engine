@@ -16,90 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANIMATION_PUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANIMATION_PUB_H
 
-#include <atomic>
-#include <string>
+#include "ui/animation/animation_constants.h"
 
 namespace OHOS::Ace {
-
-// Forever animation
-static constexpr int32_t ANIMATION_REPEAT_INFINITE { -1 };
-
-// normalized max duration time.
-static constexpr float NORMALIZED_DURATION_MAX { 1.0f };
-
-// normalized min duration time.
-static constexpr float NORMALIZED_DURATION_MIN { 0.0f };
-
-enum class FillMode {
-    NONE,
-    FORWARDS,
-    BACKWARDS,
-    BOTH,
-};
-
-enum class AnimationDirection {
-    NORMAL,
-    ALTERNATE,
-    REVERSE,
-    ALTERNATE_REVERSE,
-};
-
-enum class AnimationOperation {
-    NONE,
-    PLAY,
-    RUNNING,
-    FINISH,
-    PAUSE,
-    CANCEL,
-    REVERSE,
-};
-
-enum class AnimationType {
-    TRANSLATE,
-    TRANSLATE_X,
-    TRANSLATE_Y,
-    TRANSLATE_Z,
-    TRANSLATE_3D,
-    SCALE,
-    SCALE_X,
-    SCALE_Y,
-    SCALE_Z,
-    SCALE_3D,
-    ROTATE_Z,
-    ROTATE_X,
-    ROTATE_Y,
-    ROTATE,
-    ROTATE_3D,
-    SKEW,
-    SKEW_X,
-    SKEW_Y,
-    MATRIX_3D,
-    MATRIX_2D,
-    PERSPECTIVE
-};
-
-enum class TransitionEffect {
-    NONE,
-    UNFOLD,
-};
-
-enum class TransitionType {
-    ALL,
-    APPEARING,
-    DISAPPEARING
-};
-
-enum class FinishCallbackType {
-    REMOVED = 0,
-    LOGICALLY = 1
-};
-
-enum class AnimationInterface : int32_t {
-    ANIMATION = 0,
-    ANIMATE_TO,
-    ANIMATE_TO_IMMEDIATELY,
-    KEYFRAME_ANIMATE_TO,
-};
 
 const char* GetAnimationInterfaceName(AnimationInterface interfaceName);
 

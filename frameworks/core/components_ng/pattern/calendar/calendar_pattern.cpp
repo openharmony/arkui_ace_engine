@@ -102,6 +102,14 @@ void CalendarPattern::OnModifyDone()
     currentPattern->SetEndDate(endDate_);
     nextPattern->SetEndDate(endDate_);
 
+    prePattern->SetMarkToday(markToday_);
+    currentPattern->SetMarkToday(markToday_);
+    nextPattern->SetMarkToday(markToday_);
+
+    prePattern->SetDisabledDateRange(disabledDateRange_);
+    currentPattern->SetDisabledDateRange(disabledDateRange_);
+    nextPattern->SetDisabledDateRange(disabledDateRange_);
+
     // Flush the focus.
     FlushFocus(preMonth_);
     FlushFocus(currentMonth_);

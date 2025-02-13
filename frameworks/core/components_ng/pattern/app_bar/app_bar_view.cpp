@@ -37,8 +37,8 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_WIDTH = 96;
-constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 12;
-constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 4;
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 8;
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 12;
 
 RefPtr<AppBarTheme> GetAppBarTheme()
 {
@@ -99,6 +99,7 @@ void AppBarView::BindJSContainer()
     CHECK_NULL_VOID(pattern);
     pattern->AppInfoCallBack();
     pattern->AppScreenCallBack();
+    pattern->AppBgColorCallBack();
 }
 
 void AppBarView::AddContentToJSContainer()
@@ -115,6 +116,7 @@ void AppBarView::AddContentToJSContainer()
     stageNodeWrapper->MarkDirtyNode();
 
     auto focusHub = contentStage_->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     focusHub->AnyChildFocusHub([](const RefPtr<FocusHub>& child) {
         auto node = child->GetFrameNode();
         auto focusView = node ? node->GetPattern<FocusView>() : nullptr;

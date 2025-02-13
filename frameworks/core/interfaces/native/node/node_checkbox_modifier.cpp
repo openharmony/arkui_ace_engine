@@ -123,6 +123,18 @@ void SetCheckboxResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values
     CheckBoxModelNG::SetResponseRegion(frameNode, region);
 }
 
+void SetCheckboxOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        CheckBoxModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        CheckBoxModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
 void ResetCheckboxPadding(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -137,6 +149,13 @@ void ResetCheckboxPadding(ArkUINodeHandle node)
 }
 
 void ResetCheckboxResponseRegion(ArkUINodeHandle node) {}
+
+void ResetCheckboxOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetOnChange(frameNode, nullptr);
+}
 
 void ResetSelect(ArkUINodeHandle node)
 {
@@ -317,6 +336,7 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
         .setMark = SetMark,
         .setCheckboxPadding = SetCheckboxPadding,
         .setCheckboxResponseRegion = SetCheckboxResponseRegion,
+        .setCheckboxOnChange = SetCheckboxOnChange,
         .resetSelect = ResetSelect,
         .resetSelectedColor = ResetSelectedColor,
         .resetUnSelectedColor = ResetUnSelectedColor,
@@ -327,6 +347,7 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
         .resetCheckboxShape = ResetCheckboxShape,
         .resetCheckboxPadding = ResetCheckboxPadding,
         .resetCheckboxResponseRegion = ResetCheckboxResponseRegion,
+        .resetCheckboxOnChange = ResetCheckboxOnChange,
         .getSelect = GetSelect,
         .getSelectedColor = GetSelectedColor,
         .getUnSelectedColor = GetUnSelectedColor,

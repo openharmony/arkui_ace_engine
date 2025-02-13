@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,6 @@ void SwiperModelNG::SetShowIndicator(bool showIndicator)
 
 void SwiperModelNG::SetIndicatorType(SwiperIndicatorType indicatorType)
 {
-    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType);
 }
 
@@ -216,6 +215,19 @@ void SwiperModelNG::SetOnChange(std::function<void(const BaseEventInfo* info)>&&
     CHECK_NULL_VOID(pattern);
 
     pattern->UpdateChangeEvent([event = std::move(onChange)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {
         CHECK_NULL_VOID(event);
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
@@ -749,7 +761,6 @@ void SwiperModelNG::SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDig
 
 void SwiperModelNG::SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType)
 {
-    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType, frameNode);
 }
 
@@ -788,6 +799,18 @@ void SwiperModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const B
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateChangeEvent([event = std::move(onChange)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {
         CHECK_NULL_VOID(event);
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);

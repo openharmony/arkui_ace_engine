@@ -773,6 +773,8 @@ public:
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
+    std::string GetCurrentLanguage() override;
+
 private:
     friend class WebContextSelectOverlay;
 
@@ -788,6 +790,7 @@ private:
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard = false);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
+    bool UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
@@ -1251,6 +1254,7 @@ private:
     int64_t lastHeight_ = 0L;
     int64_t lastWidth_ = 0L;
     bool dragWindowFlag_ = false;
+    bool isSetMouseDragMonitorState = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
 

@@ -43,6 +43,18 @@ extern "C" {
 #endif
 
 /**
+ * @brief Determines the priority of key event processing when component cannot handle the key event.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Key events are used to move focus. */
+    ARKUI_KEY_PROCESSING_MODE_FOCUS_NAVIGATION = 0,
+    /** Key events bubble up to ancestors. */
+    ARKUI_KEY_PROCESSING_MODE_FOCUS_ANCESTOR_EVENT,
+} ArkUI_KeyProcessingMode;
+
+/**
  * @brief Apply focus for a specific node.
  *
  * @param node The node.
@@ -83,6 +95,15 @@ void OH_ArkUI_FocusActivate(ArkUI_ContextHandle uiContext, bool isActive, bool i
  * @since 16
  */
 void OH_ArkUI_FocusSetAutoTransfer(ArkUI_ContextHandle uiContext, bool autoTransfer);
+
+/**
+ * @brief Set the priority of key event processing when component cannot handle the key event.
+ *
+ * @param uiContext Indicates the pointer to a UI instance.
+ * @param mode Indicates the key processing mode.
+ * @since 16
+ */
+void OH_ArkUI_FocusSetKeyProcessingMode(ArkUI_ContextHandle uiContext, ArkUI_KeyProcessingMode mode);
 
 #ifdef __cplusplus
 };

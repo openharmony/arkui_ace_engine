@@ -75,9 +75,6 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
     CHECK_NULL_VOID(pattern);
     bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
-    if ((static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) != REQUEST_SELECT_ALL) {
-        selectController->CalculateHandleOffset();
-    }
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
         SetIsSingleHandle(true);
         selectController->UpdateCaretIndex(selectController->GetFirstHandleIndex());
@@ -193,17 +190,14 @@ RectF TextFieldSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandle
     CHECK_NULL_RETURN(pattern, RectF());
     auto controller = pattern->GetTextSelectController();
     CHECK_NULL_RETURN(controller, RectF());
+    controller->AdjustAllHandlesWithBoundary();
     if (dragHandleIndex == DragHandleIndex::FIRST) {
         return controller->GetFirstHandleRect();
     } else if (dragHandleIndex == DragHandleIndex::SECOND) {
         if (IsSingleHandle()) {
             return controller->GetCaretInfo().originalRect;
         }
-        auto handleRect = controller->GetSecondHandleRect();
-        auto contentHeight = pattern->GetTextContentRect().Height();
-        auto handleHeight = std::min(handleRect.Height(), contentHeight);
-        handleRect.SetHeight(handleHeight);
-        return handleRect;
+        return controller->GetSecondHandleRect();
     } else { // DragHandleIndex::NONE
         return RectF();
     }
@@ -359,7 +353,7 @@ RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
         if (NearZero(res.Width())) {
-            res.SetWidth(TextBase::GetSelectedBlankLineWidth());
+            pattern->AdjustSelectedBlankLineWidth(res);
         }
     }
     auto globalContentRect = GetVisibleContentRect(true);
@@ -566,7 +560,10 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         }
     } else {
         pattern->StopTwinkling();
-        selectController->MoveSecondHandleToContentRect(selectController->GetSecondHandleIndex(), false);
+        // single handle use caret offset.
+        auto caretRect = selectController->GetCaretRect();
+        selectController->UpdateCaretInfoByOffset(
+            Offset(caretRect.Left(), caretRect.Top() + caretRect.Height() / 2.0f));
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->SetHandleCircleIsShow(isFirst, true);
