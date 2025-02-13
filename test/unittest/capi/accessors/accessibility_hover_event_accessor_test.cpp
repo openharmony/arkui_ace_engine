@@ -32,7 +32,7 @@ const std::vector<std::pair<Ark_AccessibilityHoverType, AccessibilityHoverAction
     { ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT, AccessibilityHoverAction::HOVER_EXIT },
     { ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL, AccessibilityHoverAction::HOVER_CANCEL },
 };
-const std::vector<std::pair<Ark_Number, int>> accessibilityHoverLocationTestPlan = {
+const std::vector<std::pair<Ark_Number, int>> clickEventLocationTestPlan = {
     { Converter::ArkValue<Ark_Number>(5), 5 },
     { Converter::ArkValue<Ark_Number>(2.4), 2 },
     { Converter::ArkValue<Ark_Number>(1), 1 },
@@ -94,7 +94,7 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetGetXT
     ASSERT_NE(accessor_->setX, nullptr);
     ASSERT_NE(accessor_->getX, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
+    for (auto& [actual, expected] : clickEventLocationTestPlan) {
         accessor_->setX(peer_, &actual);
         auto result = Converter::Convert<int>(accessor_->getX(peer_));
         EXPECT_EQ(result, expected);
@@ -111,7 +111,7 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetGetYT
     ASSERT_NE(accessor_->setY, nullptr);
     ASSERT_NE(accessor_->getY, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
+    for (auto& [actual, expected] : clickEventLocationTestPlan) {
         accessor_->setY(peer_, &actual);
         auto result = Converter::Convert<int>(accessor_->getY(peer_));
         EXPECT_EQ(result, expected);
@@ -128,7 +128,7 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrDisplayS
     ASSERT_NE(accessor_->setDisplayX, nullptr);
     ASSERT_NE(accessor_->getDisplayX, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
+    for (auto& [actual, expected] : clickEventLocationTestPlan) {
         accessor_->setDisplayX(peer_, &actual);
         auto result = Converter::Convert<int>(accessor_->getDisplayX(peer_));
         EXPECT_EQ(result, expected);
@@ -145,7 +145,7 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrDisplayS
     ASSERT_NE(accessor_->setDisplayY, nullptr);
     ASSERT_NE(accessor_->getDisplayY, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
+    for (auto& [actual, expected] : clickEventLocationTestPlan) {
         accessor_->setDisplayY(peer_, &actual);
         auto result = Converter::Convert<int>(accessor_->getDisplayY(peer_));
         EXPECT_EQ(result, expected);
@@ -162,7 +162,7 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrWindowSe
     ASSERT_NE(accessor_->setWindowX, nullptr);
     ASSERT_NE(accessor_->getWindowX, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
+    for (auto& [actual, expected] : clickEventLocationTestPlan) {
         accessor_->setWindowX(peer_, &actual);
         auto result = Converter::Convert<int>(accessor_->getWindowX(peer_));
         EXPECT_EQ(result, expected);
@@ -179,7 +179,7 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrWindowSe
     ASSERT_NE(accessor_->setWindowY, nullptr);
     ASSERT_NE(accessor_->getWindowY, nullptr);
 
-    for (auto& [actual, expected] : accessibilityHoverLocationTestPlan) {
+    for (auto& [actual, expected] : clickEventLocationTestPlan) {
         accessor_->setWindowY(peer_, &actual);
         auto result = Converter::Convert<int>(accessor_->getWindowY(peer_));
         EXPECT_EQ(result, expected);

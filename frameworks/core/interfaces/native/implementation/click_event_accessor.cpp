@@ -38,6 +38,8 @@ Ark_Int32 GetDisplayXImpl(ClickEventPeer* peer)
     CHECK_NULL_RETURN(info, 0);
     const auto& offset = info->GetScreenLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    LOGE("ARKOALA ClickEventAccessor::GetDisplayXImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
 }
 void SetDisplayXImpl(ClickEventPeer* peer,
@@ -61,6 +63,8 @@ Ark_Int32 GetDisplayYImpl(ClickEventPeer* peer)
     CHECK_NULL_RETURN(info, 0);
     const auto& offset = info->GetScreenLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    LOGE("ARKOALA ClickEventAccessor::GetDisplayYImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
 }
 void SetDisplayYImpl(ClickEventPeer* peer,
@@ -84,6 +88,8 @@ Ark_Int32 GetWindowXImpl(ClickEventPeer* peer)
     CHECK_NULL_RETURN(info, 0);
     const auto& offset = info->GetGlobalLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    LOGE("ARKOALA ClickEventAccessor::GetWindowXImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
 }
 void SetWindowXImpl(ClickEventPeer* peer,
@@ -107,6 +113,8 @@ Ark_Int32 GetWindowYImpl(ClickEventPeer* peer)
     CHECK_NULL_RETURN(info, 0);
     const auto& offset = info->GetGlobalLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    LOGE("ARKOALA ClickEventAccessor::GetWindowYImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
 }
 void SetWindowYImpl(ClickEventPeer* peer,
@@ -148,6 +156,8 @@ Ark_Int32 GetXImpl(ClickEventPeer* peer)
     CHECK_NULL_RETURN(info, 0);
     const auto& offset = info->GetLocalLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    LOGE("ARKOALA ClickEventAccessor::GetXImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
 }
 void SetXImpl(ClickEventPeer* peer,
@@ -171,6 +181,8 @@ Ark_Int32 GetYImpl(ClickEventPeer* peer)
     CHECK_NULL_RETURN(info, 0);
     const auto& offset = info->GetLocalLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    LOGI("ARKOALA ClickEventAccessor::GetYImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
 }
 void SetYImpl(ClickEventPeer* peer,

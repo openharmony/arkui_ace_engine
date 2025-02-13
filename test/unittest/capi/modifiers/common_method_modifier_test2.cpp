@@ -77,8 +77,8 @@ static const float VALID_VAL = 123.4567f;
 static const Opt_Length OPT_LEN_EMPTY = Converter::ArkValue<Opt_Length>(Ark_Empty());
 static const Opt_Length OPT_LEN_VALID = Converter::ArkValue<Opt_Length>(VALID_VAL);
 
-const double OFFSET_X = 60.4;
-const double OFFSET_Y = 85.5;
+constexpr double OFFSET_X = 60.4;
+constexpr double OFFSET_Y = 85.5;
 
 static const Ark_Rectangle ARK_RECT_EMPTY {
     OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY
@@ -232,11 +232,11 @@ HWTEST_F(CommonMethodModifierTest2, setMouseResponseRegionTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnClick0
+ * @tc.name: setOnClick0Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnClick0, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setOnClick0Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnClick0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -279,11 +279,11 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick0, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnClick1
+ * @tc.name: setOnClick1Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnClick1, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnClick1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

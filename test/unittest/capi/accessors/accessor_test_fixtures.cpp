@@ -41,6 +41,26 @@ const std::vector<std::tuple<std::string, Ark_Number, int32_t>> testFixtureNumbe
     { "INT32_MAX", ArkValue<Ark_Number>(INT32_MAX), INT32_MAX },
 };
 
+const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberDoubleRoundValues = {
+    { "5.0", Converter::ArkValue<Ark_Number>(5), 5.0 },
+    { "2.4", Converter::ArkValue<Ark_Number>(2.4), 2.0 },
+    { "1.0", Converter::ArkValue<Ark_Number>(1), 1.0 },
+    { "0.0", Converter::ArkValue<Ark_Number>(0), 0.0 },
+    { "-1.0", Converter::ArkValue<Ark_Number>(-1), -1.0 },
+    { "-2.4", Converter::ArkValue<Ark_Number>(-2.4), -2.0 },
+    { "-5.0", Converter::ArkValue<Ark_Number>(-5), -5.0 },
+};
+
+const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberDoubleValues = {
+    { "5.0", Converter::ArkValue<Ark_Number>(5), 5.0 },
+    { "2.4", Converter::ArkValue<Ark_Number>(2.4), 2.4 },
+    { "1.0", Converter::ArkValue<Ark_Number>(1), 1.0 },
+    { "0.0", Converter::ArkValue<Ark_Number>(0), 0.0 },
+    { "-1.0", Converter::ArkValue<Ark_Number>(-1), -1.0 },
+    { "-2.4", Converter::ArkValue<Ark_Number>(-2.4), -2.4 },
+    { "-5.0", Converter::ArkValue<Ark_Number>(-5), -5.0 },
+};
+
 const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberValues = {
     { "1.24", ArkValue<Ark_Number>(1.24), 1.24 },
     { "0", ArkValue<Ark_Number>(0), 0 },
