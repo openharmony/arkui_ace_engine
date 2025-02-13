@@ -1495,7 +1495,7 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    if (isUsingExternalKeyboard || IsUsingMouse()) {
+    if (isUsingExternalKeyboard || selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay(true);
     } else {
         selectOverlay_->HideMenu();
