@@ -342,12 +342,12 @@ void TimePickerColumnPattern::HandleMouseEvent(bool isHover)
 
 void TimePickerColumnPattern::OnTouchDown()
 {
+    SetSelectedMark();
     PlayPressAnimation(pressColor_);
 }
 
 void TimePickerColumnPattern::OnTouchUp()
 {
-    SetSelectedMark();
     if (hoverd_) {
         PlayPressAnimation(hoverColor_);
     } else {
@@ -357,6 +357,12 @@ void TimePickerColumnPattern::OnTouchUp()
 
 void TimePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
 {
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    CHECK_EQUAL_VOID(pickerTheme->IsCircleDial(), true);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = host->GetParent();
