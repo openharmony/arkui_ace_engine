@@ -50,10 +50,9 @@ void SetDisplayXImpl(ClickEventPeer* peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     Offset offset = info->GetScreenLocation();
-    const auto animation = offset.GetXAnimationOption();
     const auto convWindowsX = Converter::Convert<float>(*displayX);
     const auto x = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
-    offset.SetX(x, animation);
+    offset.SetX(x);
     info->SetScreenLocation(offset);
 }
 Ark_Int32 GetDisplayYImpl(ClickEventPeer* peer)
@@ -75,10 +74,9 @@ void SetDisplayYImpl(ClickEventPeer* peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     Offset offset = info->GetScreenLocation();
-    const auto animation = offset.GetYAnimationOption();
     const auto convWindowsY = Converter::Convert<float>(*displayY);
     const auto y = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
-    offset.SetY(y, animation);
+    offset.SetY(y);
     info->SetScreenLocation(offset);
 }
 Ark_Int32 GetWindowXImpl(ClickEventPeer* peer)
@@ -100,10 +98,9 @@ void SetWindowXImpl(ClickEventPeer* peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     Offset offset = info->GetGlobalLocation();
-    const auto animation = offset.GetXAnimationOption();
     const auto convWindowsX = Converter::Convert<float>(*windowX);
     const auto x = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
-    offset.SetX(x, animation);
+    offset.SetX(x);
     info->SetGlobalLocation(offset);
 }
 Ark_Int32 GetWindowYImpl(ClickEventPeer* peer)
@@ -125,10 +122,9 @@ void SetWindowYImpl(ClickEventPeer* peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     Offset offset = info->GetGlobalLocation();
-    const auto animation = offset.GetYAnimationOption();
     const auto convWindowsY = Converter::Convert<float>(*windowY);
     const auto y = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
-    offset.SetY(y, animation);
+    offset.SetY(y);
     info->SetGlobalLocation(offset);
 }
 Ark_Int32 GetScreenXImpl(ClickEventPeer* peer)
@@ -168,10 +164,9 @@ void SetXImpl(ClickEventPeer* peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     Offset offset = info->GetLocalLocation();
-    const auto animation = offset.GetXAnimationOption();
     const auto convWindowsX = Converter::Convert<float>(*x);
     const auto newX = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
-    offset.SetX(newX, animation);
+    offset.SetX(newX);
     info->SetLocalLocation(offset);
 }
 Ark_Int32 GetYImpl(ClickEventPeer* peer)
@@ -193,10 +188,9 @@ void SetYImpl(ClickEventPeer* peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     Offset offset = info->GetLocalLocation();
-    const auto animation = offset.GetYAnimationOption();
     const auto convWindowsY = Converter::Convert<float>(*y);
     const auto newY = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
-    offset.SetY(newY, animation);
+    offset.SetY(newY);
     info->SetLocalLocation(offset);
 }
 void SetPreventDefaultImpl(ClickEventPeer* peer,
