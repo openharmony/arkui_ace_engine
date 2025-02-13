@@ -492,9 +492,9 @@ struct ArkUIProgressStyle {
     ArkUI_Float32 strokeRadiusValue;
     ArkUI_Int32 strokeRadiusUnit;
     ArkUI_Bool enableSmoothEffect;
-    ArkUI_Float32 borderColor;
+    ArkUI_Uint32 borderColor;
     ArkUI_CharPtr content;
-    ArkUI_Float32 fontColor;
+    ArkUI_Uint32 fontColor;
     ArkUI_Bool enableScanEffect;
     ArkUI_Bool shadow;
     ArkUI_Bool showDefaultPercentage;
@@ -2331,6 +2331,8 @@ struct ArkUICommonModifier {
     void (*setDisableDataPrefetch)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*setOnVisibleAreaApproximateChange)(
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval);
+    void (*setPrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
+    void (*resetPrivacySensitive)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2692,6 +2694,8 @@ struct ArkUIImageModifier {
     void (*resetOnError)(ArkUINodeHandle node);
     void (*setImageOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetImageOnFinish)(ArkUINodeHandle node);
+    void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
+    void (*resetResizableLattice)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -4143,6 +4147,10 @@ struct ArkUICounterModifier {
     void (*resetCounterWidth)(ArkUINodeHandle node);
     void (*setCounterBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetCounterBackgroundColor)(ArkUINodeHandle node);
+    void (*setCounterOnInc)(ArkUINodeHandle node, void* callback);
+    void (*resetCounterOnInc)(ArkUINodeHandle node);
+    void (*setCounterOnDec)(ArkUINodeHandle node, void* callback);
+    void (*resetCounterOnDec)(ArkUINodeHandle node);
 };
 
 struct ArkUICheckboxModifier {
@@ -4611,6 +4619,16 @@ struct ArkUIImageAnimatorModifier {
     ArkUI_Int32 (*getFillMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIteration)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImagesSize)(ArkUINodeHandle node);
+    void (*setImageAnimatorOnStart)(ArkUINodeHandle node, void* callback);
+    void (*resetImageAnimatorOnStart)(ArkUINodeHandle node);
+    void (*setImageAnimatorOnPause)(ArkUINodeHandle node, void* callback);
+    void (*resetImageAnimatorOnPause)(ArkUINodeHandle node);
+    void (*setImageAnimatorOnRepeat)(ArkUINodeHandle node, void* callback);
+    void (*resetImageAnimatorOnRepeat)(ArkUINodeHandle node);
+    void (*setImageAnimatorOnCancel)(ArkUINodeHandle node, void* callback);
+    void (*resetImageAnimatorOnCancel)(ArkUINodeHandle node);
+    void (*setImageAnimatorOnFinish)(ArkUINodeHandle node, void* callback);
+    void (*resetImageAnimatorOnFinish)(ArkUINodeHandle node);
 };
 
 struct ArkUISideBarContainerModifier {
@@ -4836,6 +4854,8 @@ struct ArkUITextClockModifier {
     void (*setDateTimeOptions)(ArkUINodeHandle node, ArkUI_Int32 hourType);
     void (*resetDateTimeOptions)(ArkUINodeHandle node);
     void (*setTextClockTimeZoneOffset)(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset);
+    void (*setTextClockOnDateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextClockOnDateChange)(ArkUINodeHandle node);
 };
 
 struct ArkUITextClockControllerModifier {
@@ -4917,6 +4937,8 @@ struct ArkUITextTimerModifier {
     void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
     void (*resetTextShadow)(ArkUINodeHandle node);
     void (*setTextTimerOptions)(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count);
+    void (*setTextTimerOnTimer)(ArkUINodeHandle node, void* callback);
+    void (*resetTextTimerOnTimer)(ArkUINodeHandle node);
 };
 
 struct ArkUISymbolGlyphModifier {
@@ -5271,6 +5293,10 @@ struct ArkUIPatternLockModifier {
     void (*resetPatternLockEnableForeground)(ArkUINodeHandle node);
     void (*setPatternLockSkipUnselectedPoint)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetPatternLockSkipUnselectedPoint)(ArkUINodeHandle node);
+    void (*setPatternLockOnPatternComplete)(ArkUINodeHandle node, void* callback);
+    void (*resetPatternLockOnPatternComplete)(ArkUINodeHandle node);
+    void (*setPatternLockOnDotConnect)(ArkUINodeHandle node, void* callback);
+    void (*resetPatternLockOnDotConnect)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnSplitModifier {

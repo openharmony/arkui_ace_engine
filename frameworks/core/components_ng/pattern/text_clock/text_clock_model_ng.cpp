@@ -281,4 +281,12 @@ RefPtr<Referenced> TextClockModelNG::GetJSTextClockController(FrameNode* frameNo
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetJSTextClockController();
 }
+
+void TextClockModelNG::SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDateChange(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG

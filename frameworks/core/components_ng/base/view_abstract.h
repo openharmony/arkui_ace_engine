@@ -870,6 +870,7 @@ public:
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
+    static void SetPrivacySensitive(FrameNode* frameNode, bool flag);
 
 private:
     static void AddDragFrameNodeToManager();
