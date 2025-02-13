@@ -4125,7 +4125,7 @@ static void DumpAccessibilityElementInfosTreeNG(
 static void DumpTreeNodeInfoNG(
     const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
 {
-    NG::RectF rect = node->GetTransformRectRelativeToWindow();
+    NG::RectF rect = node->GetTransformRectRelativeToWindow(true);
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
@@ -4248,7 +4248,7 @@ void JsAccessibilityManager::DumpTreeNodeCommonInfoNg(
         DumpLog::GetInstance().AddDesc(std::string("PaintRectWithoutTransform: ")
                                            .append(renderContext->GetPaintRectWithoutTransform().ToString()));
     }
-    NG::RectF rect = node->GetTransformRectRelativeToWindow();
+    NG::RectF rect = node->GetTransformRectRelativeToWindow(true);
     auto top = rect.Top() + commonProperty.windowTop;
     auto left = rect.Left() + commonProperty.windowLeft;
     if (!NearZero(top, 0.0) && !NearZero(left, 0.0)) {
@@ -7213,7 +7213,7 @@ void JsAccessibilityManager::CreateNodeInfoJson(const RefPtr<NG::FrameNode>& nod
         child->Put("accessibilityGroup", accessibilityProperty->IsAccessibilityGroup());
         child->Put("accessibilityLevel", accessibilityProperty->GetAccessibilityLevel().c_str());
     }
-    NG::RectF rect = node->GetTransformRectRelativeToWindow();
+    NG::RectF rect = node->GetTransformRectRelativeToWindow(true);
     child->Put("top", rect.Top() + commonProperty.windowTop);
     child->Put("left", rect.Left() + commonProperty.windowLeft);
     child->Put("width", rect.Width());
