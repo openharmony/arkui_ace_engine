@@ -44,6 +44,7 @@ public:
 
     virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
+    virtual void ResizeWindowForMenu() = 0;
     virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, const NG::MenuParam& menuParam,
