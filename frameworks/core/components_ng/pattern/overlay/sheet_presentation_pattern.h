@@ -506,6 +506,11 @@ public:
         return sheetOffsetY_;
     }
 
+    OffsetF GetSheetArrowOffset() const
+    {
+        return arrowOffset_;
+    }
+
     float GetFitContentHeight();
 
     void ProcessColumnRect(float height = 0.0f);
@@ -617,6 +622,8 @@ public:
     bool IsScrollOutOfBoundary();
     RefPtr<FrameNode> GetScrollNode();
 
+    // Used for isolation of SHEET_BOTTOMLANDSPACE after version 12, such as support for height setting callback,
+    // support for detents setting and callback for SHEET_BOTTOMLANDSPACE
     bool IsSheetBottomStyle()
     {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -624,6 +631,14 @@ public:
             sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
         }
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    }
+
+    // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
+    bool IsSheetBottom()
+    {
+        auto sheetType = GetSheetType();
+        return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
+                 sheetType == SheetType::SHEET_BOTTOM_OFFSET);
     }
 
     // Nestable Scroll
@@ -645,6 +660,7 @@ public:
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
     void RecoverHalfFoldOrAvoidStatus();
+    void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -682,12 +698,16 @@ private:
     void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
         uint32_t& detentsUpperPos);
     void IsCustomDetentsChanged(SheetStyle sheetStyle);
-    std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
+    void CalculateAloneSheetRadius(
+        std::optional<Dimension>& sheetRadius, const std::optional<Dimension>& sheetStyleRadius);
+    std::string GetPopupStyleSheetClipPath(const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetBottomStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
+    void MarkSheetPageNeedRender();
+    void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     bool AvoidKeyboardBeforeTranslate();
@@ -697,6 +717,8 @@ private:
     void GetCurrentScrollHeight();
     void RecoverAvoidKeyboardStatus();
     void RecoverScrollOrResizeAvoidStatus();
+    void ResetClipShape();
+    void UpdateSheetWhenSheetTypeChanged();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
