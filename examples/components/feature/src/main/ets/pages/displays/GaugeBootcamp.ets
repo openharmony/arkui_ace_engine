@@ -2829,6 +2829,38 @@ export struct GaugeBootcamp {
                 enableCompBindPopupTransitionMove: $enableCompBindPopupTransitionMove,
                 compBindPopupTransitionMove: $compBindPopupTransitionMove,
               })
+              //focusable
+              CompFocusControlBlocks({
+                enableCompFocusable: $enableCompFocusable,
+                compFocusable: $compFocusable,
+                enableCompDefaultFocus: $compDefaultFocus,
+                compDefaultFocus: $compDefaultFocus,
+                enableCompGroupDefaultFocus: $enableCompGroupDefaultFocus,
+                compGroupDefaultFocus: $compGroupDefaultFocus,
+                enableCompFocusOnTouch: $enableCompFocusOnTouch,
+                compFocusOnTouch: $compFocusOnTouch,
+                enableCompFocusBoxMargin: $enableCompFocusBoxMargin,
+                compFocusBoxMargin: $compFocusBoxMargin,
+                enableCompFocusBoxStrokeColor: $enableCompFocusBoxStrokeColor,
+                compFocusBoxStrokeColor: $compFocusBoxStrokeColor,
+                enableCompFocusBoxStrokeWidth: $enableCompFocusBoxStrokeWidth,
+                compFocusBoxStrokeWidth: $compFocusBoxStrokeWidth,
+                enableCompFocusScopePriorityScopeId: $enableCompFocusScopePriorityScopeId,
+                compFocusScopePriorityScopeId: $compFocusScopePriorityScopeId,
+                enableCompFocusScopePriorityPriority: $enableCompFocusScopePriorityPriority,
+                compFocusScopePriorityPriority: $compFocusScopePriorityPriority,
+                enableCompFocusScopeId: $enableCompFocusScopeId,
+                compFocusScopeId: $compFocusScopeId,
+                enableCompFocusScopeIdIsGroup: $enableCompFocusScopeIdIsGroup,
+                compFocusScopeIdIsGroup: $compFocusScopeIdIsGroup,
+              })
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性4')
+          }) {
+            if (this.selection === '通用属性4') {
               //bindMenu
               CompMenuControlBlocks({
                 enableCompBindMenuStartIcon: $enableCompBindMenuStartIcon,
@@ -2898,64 +2930,35 @@ export struct GaugeBootcamp {
                 enableCompBindMenuMenuMargin: $enableCompBindMenuMenuMargin,
                 compBindMenuMenuMargin: $compBindMenuMenuMargin,
               })
-              //focusable
-              CompFocusControlBlocks({
-                enableCompFocusable: $enableCompFocusable,
-                compFocusable: $compFocusable,
-                enableCompDefaultFocus: $compDefaultFocus,
-                compDefaultFocus: $compDefaultFocus,
-                enableCompGroupDefaultFocus: $enableCompGroupDefaultFocus,
-                compGroupDefaultFocus: $compGroupDefaultFocus,
-                enableCompFocusOnTouch: $enableCompFocusOnTouch,
-                compFocusOnTouch: $compFocusOnTouch,
-                enableCompFocusBoxMargin: $enableCompFocusBoxMargin,
-                compFocusBoxMargin: $compFocusBoxMargin,
-                enableCompFocusBoxStrokeColor: $enableCompFocusBoxStrokeColor,
-                compFocusBoxStrokeColor: $compFocusBoxStrokeColor,
-                enableCompFocusBoxStrokeWidth: $enableCompFocusBoxStrokeWidth,
-                compFocusBoxStrokeWidth: $compFocusBoxStrokeWidth,
-                enableCompFocusScopePriorityScopeId: $enableCompFocusScopePriorityScopeId,
-                compFocusScopePriorityScopeId: $compFocusScopePriorityScopeId,
-                enableCompFocusScopePriorityPriority: $enableCompFocusScopePriorityPriority,
-                compFocusScopePriorityPriority: $compFocusScopePriorityPriority,
-                enableCompFocusScopeId: $enableCompFocusScopeId,
-                compFocusScopeId: $compFocusScopeId,
-                enableCompFocusScopeIdIsGroup: $enableCompFocusScopeIdIsGroup,
-                compFocusScopeIdIsGroup: $compFocusScopeIdIsGroup,
-              })
-            }
-          }
-
-          ListItemGroup({
-            header: this.ListItemGroupHeaders('通用属性4')
-          }) {
-            if (this.selection === '通用属性4') {
               CompHoverEffectBlocks({
                 enableCompHoverEffect: $enableCompHoverEffect,
                 compHoverEffect: $compHoverEffect,
               })
-
               CompComponentIDBlocks({
                 enableCompId: $enableCompId,
                 compId: $compId,
                 enableCompKey: $enableCompKey,
                 compKey: $compKey,
               })
-
               CompReuseIDBlocks({
                 enableCompReuseId: $enableCompReuseId,
                 compReuseId: $compReuseId,
               })
-
               CompRestoreIdBlocks({
                 enableCompRestoreId: $enableCompRestoreId,
                 compRestoreId: $compRestoreId,
               })
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性5')
+          }) {
+            if (this.selection === '通用属性5') {
               CompForegroundEffectBlocks({
                 enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
                 compForegroundEffectRadius: $compForegroundEffectRadius
               })
-
               CompForegroundBlurBlocks({
                 enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
                 compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
@@ -2968,14 +2971,6 @@ export struct GaugeBootcamp {
                 enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
                 compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
               })
-
-            }
-          }
-
-          ListItemGroup({
-            header: this.ListItemGroupHeaders('通用属性5')
-          }) {
-            if (this.selection === '通用属性5') {
               CompMotionBlurBlocks({
                 enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
                 compMotionBlurRadius: $compMotionBlurRadius,
