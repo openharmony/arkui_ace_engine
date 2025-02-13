@@ -324,7 +324,6 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_VISIBILITY, hideMaximize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MINIMIZE_VISIBILITY, hideMinimize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_CLOSE_VISIBILITY, hideClose);
-    InitAllTitleRowLayoutProperty();
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
