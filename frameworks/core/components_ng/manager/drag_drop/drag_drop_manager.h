@@ -595,6 +595,11 @@ public:
         return preDragPointerEvent_;
     }
 
+    void SetIsReDragStart(bool isReDragStart)
+    {
+        isReDragStart_ = isReDragStart;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -609,6 +614,7 @@ private:
     const RefPtr<NG::OverlayManager> GetDragAnimationOverlayManager(int32_t containerId);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
         const RefPtr<FrameNode>& node = nullptr);
+    RefPtr<FrameNode> FilterSubwindowDragRootNode(const RefPtr<FrameNode>& node);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent,
         DragEventType type, const std::string& extraInfo);
@@ -680,6 +686,7 @@ private:
     bool isDragWindowSubWindow_ = false;
     bool isDragNodeNeedClean_ = false;
     bool isAnyDraggableHit_ = false;
+    bool isReDragStart_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };

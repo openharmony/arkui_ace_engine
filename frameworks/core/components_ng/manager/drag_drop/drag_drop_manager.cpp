@@ -424,6 +424,20 @@ RefPtr<FrameNode> DragDropManager::FindTargetDropNode(const RefPtr<UINode> paren
     return nullptr;
 }
 
+RefPtr<FrameNode> DragDropManager::FilterSubwindowDragRootNode(const RefPtr<FrameNode>& node)
+{
+    auto rootNode = node;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, rootNode);
+    auto containerId = container->GetInstanceId();
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, rootNode);
+    if (isReDragStart_ && !DragDropFuncWrapper::IsExpandDisplay(pipeline) && containerId >= MIN_SUBCONTAINER_ID) {
+        rootNode = pipeline->GetRootElement();
+    }
+    return rootNode;
+}
+
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY,
     const RefPtr<FrameNode>& node)
 {
@@ -736,6 +750,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
             return;
         }
     }
+    isReDragStart_ = false;
     SetIsWindowConsumed(false);
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(Point(-1, -1));
@@ -864,6 +879,7 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
     NotifyDragFrameNode(point, DragEventType::DROP, dragDropRet.result);
     ResetPullId();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+    isReDragStart_ = false;
 }
 
 void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
@@ -985,7 +1001,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
     }
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), FilterSubwindowDragRootNode(node));
     if (HandleUIExtensionComponentDragCancel(preTargetFrameNode, dragFrameNode, keyEscape, pointerEvent, point)) {
         return;
     }
@@ -1232,6 +1248,7 @@ void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, con
     auto overlayManager = GetDragAnimationOverlayManager(container->GetInstanceId());
     if (overlayManager && !isDragFwkShow_) {
         overlayManager->RemovePixelMap();
+        overlayManager->RemoveFilter();
         pipeline->FlushMessages();
     }
     ExecuteStopDrag(event, dragResult, useCustomAnimation, windowId, dragBehavior, pointerEvent);
