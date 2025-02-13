@@ -10278,7 +10278,6 @@ bool TextFieldPattern::FireOnWillChange(const ChangeValueInfo& changeValueInfo)
     CHECK_NULL_RETURN(host, true);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
-    CHECK_NULL_RETURN(eventHub->HaveOnWillChangeEvent(), true);
     callbackRangeBefore_ = changeValueInfo.rangeBefore;
     callbackRangeAfter_ = changeValueInfo.rangeAfter;
     callbackOldContent_ = changeValueInfo.oldContent;
@@ -10293,7 +10292,6 @@ bool TextFieldPattern::OnWillChangePreInsert(const std::u16string& insertValue, 
     CHECK_NULL_RETURN(host, true);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
-    CHECK_NULL_RETURN(eventHub->HaveOnWillChangeEvent(), true);
     ChangeValueInfo changeValueInfo;
     PreviewText previewText {.offset = -1, .value = u""};
     if (hasPreviewText_) {
@@ -10322,7 +10320,6 @@ bool TextFieldPattern::OnWillChangePreDelete(const std::u16string& oldContent, u
     CHECK_NULL_RETURN(host, true);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
-    CHECK_NULL_RETURN(eventHub->HaveOnWillChangeEvent(), true);
     ChangeValueInfo changeValueInfo;
     PreviewText previewText {.offset = -1, .value = u""};
     if (hasPreviewText_) {
@@ -10350,7 +10347,6 @@ bool TextFieldPattern::OnWillChangePreSetValue(const std::u16string& newValue)
     CHECK_NULL_RETURN(host, true);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
-    CHECK_NULL_RETURN(eventHub->HaveOnWillChangeEvent(), true);
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldContent = contentController_->GetTextUtf16Value();
     changeValueInfo.value = newValue;
