@@ -34,7 +34,7 @@ public:
     virtual void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) {}
 
     /**
-     * @brief Called when the adapter will perform a jump
+     * @brief Called before the adapter performs a jump
      *
      */
     virtual void MarkJump() {}
@@ -64,11 +64,6 @@ public:
      * @return true if more items can be filled in the given @c direction
      */
     virtual bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) = 0;
-
-    virtual bool IsReady() const
-    {
-        return false;
-    }
 
     virtual int32_t GetMarkIndex() = 0;
 

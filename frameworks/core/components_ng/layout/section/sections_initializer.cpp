@@ -15,6 +15,8 @@
 #include "sections_initializer.h"
 
 #include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
@@ -22,6 +24,52 @@
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
+class WaterFlowSectionInitializer : public SectionInitializer {
+public:
+    WaterFlowSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : SectionInitializer(frameSize, axis, totalCnt)
+    {}
+    std::vector<Section> Init(
+        const RefPtr<WaterFlowSections>& sectionData, const RefPtr<WaterFlowLayoutProperty>& props);
+
+private:
+    std::vector<Section> SingleInit(const RefPtr<WaterFlowLayoutProperty>& props);
+};
+
+class ListSectionInitializer : public SectionInitializer {
+public:
+    ListSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : SectionInitializer(frameSize, axis, totalCnt)
+    {}
+    std::vector<Section> Init()
+    {
+        Section res;
+        res.lanes = std::vector<Lane>(1);
+        res.lanes[0].crossLen = frameSize_.CrossSize(axis_);
+        res.minItem = 0;
+        res.maxItem = totalCnt_ - 1;
+        return { res };
+    }
+};
+
+class SwiperSectionInitializer : public SectionInitializer {
+public:
+    SwiperSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : SectionInitializer(frameSize, axis, totalCnt)
+    {}
+    std::vector<Section> Init(const RefPtr<SwiperLayoutProperty>& props)
+    {
+        Section res;
+        res.lanes = std::vector<Lane>(1);
+        res.lanes[0].crossLen = frameSize_.CrossSize(axis_);
+        res.minItem = 0;
+        res.maxItem = totalCnt_ - 1;
+
+        res.mainGap = SwiperUtils::GetItemSpace(props);
+        return { res };
+    }
+};
+
 bool SectionInitializer::Compare(const std::vector<Section>& prev, const std::vector<Section>& cur)
 {
     if (prev.size() != cur.size()) {
@@ -51,6 +99,10 @@ std::vector<Section> SectionInitializer::InitSections(
     if (AceType::InstanceOf<ListLayoutProperty>(props)) {
         ListSectionInitializer initializer(frameSize, axis, totalCnt);
         return initializer.Init();
+    }
+    if (AceType::InstanceOf<SwiperLayoutProperty>(props)) {
+        SwiperSectionInitializer initializer(frameSize, axis, totalCnt);
+        return initializer.Init(AceType::DynamicCast<SwiperLayoutProperty>(props));
     }
     return {};
 }
@@ -110,16 +162,6 @@ std::vector<Section> WaterFlowSectionInitializer::SingleInit(const RefPtr<WaterF
         res.lanes[i].crossLen = static_cast<float>(cross.first[i]);
     }
 
-    res.minItem = 0;
-    res.maxItem = totalCnt_ - 1;
-    return { res };
-}
-
-std::vector<Section> ListSectionInitializer::Init()
-{
-    Section res;
-    res.lanes = std::vector<Lane>(1);
-    res.lanes[0].crossLen = frameSize_.CrossSize(axis_);
     res.minItem = 0;
     res.maxItem = totalCnt_ - 1;
     return { res };

@@ -66,7 +66,7 @@ void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
     }
 
     range_ = { visibleRange.indexUp_, visibleRange.indexDown_ };
-    // remove not used items
+    // remove unused items
     for (auto it = itemCache_.begin(); it != itemCache_.end();) {
         if (it->first < visibleRange.indexUp_ || it->first > visibleRange.indexDown_) {
             parent_->RemoveChild(it->second);

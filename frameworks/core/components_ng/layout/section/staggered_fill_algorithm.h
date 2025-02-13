@@ -38,21 +38,13 @@ public:
 
     void FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    void FillNext(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
+    void FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    void FillPrev(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
+    void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
     void OnSlidingOffsetUpdate(float delta) override;
 
-    bool IsReady() const override
-    {
-        return true;
-    }
-
-    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx,
-        FillDirection direction) override;
+    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
@@ -65,6 +57,12 @@ private:
 
     void InitSections(int32_t totalCnt, Axis axis, const SizeF& frameSize);
 
+    /**
+     * @brief update syncCacheCnt_ from LayoutProperty
+     *
+     */
+    void UpdateSyncCachedCnt();
+
     std::optional<int32_t> StartIdx() const;
     std::optional<int32_t> EndIdx() const;
 
@@ -73,6 +71,8 @@ private:
     std::vector<Section> sections_;
     const RefPtr<LayoutProperty> props_;
     RefPtr<Measurer> measurer_;
+
+    int32_t syncCacheCnt_ = 0; // cache items to load synchronously
 };
 } // namespace OHOS::Ace::NG
 

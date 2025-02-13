@@ -40,30 +40,6 @@ protected:
     Axis axis_;
     int32_t totalCnt_;
 };
-
-class WaterFlowSections;
-class WaterFlowLayoutProperty;
-
-class WaterFlowSectionInitializer : public SectionInitializer {
-public:
-    WaterFlowSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
-        : SectionInitializer(frameSize, axis, totalCnt)
-    {}
-    std::vector<Section> Init(
-        const RefPtr<WaterFlowSections>& sectionData, const RefPtr<WaterFlowLayoutProperty>& props);
-
-private:
-    std::vector<Section> SingleInit(const RefPtr<WaterFlowLayoutProperty>& props);
-};
-
-class ListLayoutProperty;
-class ListSectionInitializer : public SectionInitializer {
-public:
-    ListSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
-        : SectionInitializer(frameSize, axis, totalCnt)
-    {}
-    std::vector<Section> Init();
-};
 } // namespace OHOS::Ace::NG
 
 #endif
