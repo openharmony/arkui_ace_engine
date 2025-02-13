@@ -365,8 +365,6 @@ public:
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
 
-    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
-
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
         destructCallbacks_.emplace(key, callback);
