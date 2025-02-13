@@ -1326,4 +1326,104 @@ HWTEST_F(EventHubTestNg, EventHubTest024, TestSize.Level1)
     eventHub->FireOnUnbind(nodeContainerId);
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
 }
+
+/**
+ * @tc.name: EventHubTest025
+ * @tc.desc: AddSupportedUIStateWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddSupportedUIStateWithCallback using UI_STATE_PRESSED | UI_STATE_NORMAL.
+     * @tc.expected: retFlag is true.
+     */
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, [](UIState){}, true);
+    bool retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED | UI_STATE_NORMAL);
+    EXPECT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: EventHubTest026
+ * @tc.desc: AddSupportedUIStateWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddSupportedUIStateWithCallback using UI_STATE_PRESSED | UI_STATE_NORMAL.
+     * @tc.expected: stateStyleMgr_ is true.
+     */
+    eventHub->stateStyleMgr_ = nullptr;
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, [](UIState){}, true);
+    EXPECT_TRUE(eventHub->stateStyleMgr_);
+}
+
+/**
+ * @tc.name: EventHubTest027
+ * @tc.desc: RemoveSupportedState
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. RemoveSupportedUIState in eventHub using UI_STATE_NORMAL.
+     * @tc.expected: retFlag is true.
+     */
+    eventHub->RemoveSupportedUIState(UI_STATE_NORMAL, true);
+    bool retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_NORMAL);
+    EXPECT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: EventHubTest028
+ * @tc.desc: RemoveSupportedState
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddSupportedUIStateWithCallback using UI_STATE_PRESSED | UI_STATE_NORMAL.
+     * @tc.expected: retFlag is true.
+     */
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, [](UIState){}, true);
+
+    /**
+     * @tc.steps: step3. Call RemoveSupportedState using UI_STATE_PRESSED.
+     * @tc.expected: stateStyleMgr_ is true. retFlag is true.
+     */
+    eventHub->stateStyleMgr_ = nullptr;
+    eventHub->RemoveSupportedUIState(UI_STATE_PRESSED, true);
+    EXPECT_TRUE(eventHub->stateStyleMgr_);
+    bool retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED);
+    EXPECT_FALSE(retFlag);
+}
 } // namespace OHOS::Ace::NG
