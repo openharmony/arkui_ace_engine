@@ -48,7 +48,6 @@ public:
             AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
             AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
         }
-        // fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 
     RefPtr<PixelMap> CreatePixelMap(std::string& src);
