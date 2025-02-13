@@ -15,6 +15,8 @@
 
 #include "lazy_container.h"
 
+#include "core/components_ng/layout/section/staggered_fill_algorithm.h"
+
 namespace OHOS::Ace::NG {
 bool LazyContainer::UpdateOffset(float delta)
 {
@@ -24,20 +26,15 @@ bool LazyContainer::UpdateOffset(float delta)
     return false;
 }
 
-void LazyContainer::UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx)
+void LazyContainer::UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout)
 {
     if (adapter_) {
         adapter_->UpdateViewport(GetHost()->GetGeometryNode()->GetFrameSize(), axis);
         if (markIdx && *markIdx >= 0) {
             adapter_->UpdateMarkItem(*markIdx, true);
+        } else if (firstLayout) {
+            adapter_->UpdateMarkItem(0, true);
         }
-    }
-}
-
-void LazyContainer::JumpToItem(int32_t index)
-{
-    if (adapter_) {
-        adapter_->UpdateMarkItem(index, true);
     }
 }
 
@@ -66,5 +63,10 @@ RefPtr<FrameNode> LazyContainer::GetOrCreateChildByIndex(uint32_t index)
         return adapter_->GetChildByIndex(index);
     }
     return nullptr;
+}
+
+RefPtr<FillAlgorithm> LinearLazyContainer::CreateFillAlgorithm()
+{
+    return MakeRefPtr<StaggeredFillAlgorithm>(GetLayoutProperty<LayoutProperty>());
 }
 } // namespace OHOS::Ace::NG

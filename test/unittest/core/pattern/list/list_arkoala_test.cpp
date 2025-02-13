@@ -28,9 +28,11 @@ public:
     {
         lazy_ = MockKoalaLazyForEach(frameNode_.GetRawPtr(), itemCnt, [](int32_t idx) {
             auto node = ListItemModelNG::CreateListItem(-1);
-            node->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0f)));
+            node->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(Dimension(1, DimensionUnit::PERCENT)), CalcLength(90.0f)));
             return node;
         });
+        lazy_.Register();
     }
 
     MockKoalaLazyForEach lazy_;
@@ -48,39 +50,41 @@ HWTEST_F(ListArkoalaTest, Basic001, TestSize.Level1)
     CreateDone(frameNode_);
 
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 7));
-    EXPECT_EQ(GetChildY(frameNode_, 6), 542);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 4));
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, 270.00) - [240.00 x 90.00]");
 
-    UpdateCurrentOffset(-400.0f);
+    UpdateCurrentOffset(-200.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(3, 12));
-    // EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
-    EXPECT_EQ(GetChildRect(frameNode_, 12).ToString(), "RectT (240.00, 796.00) - [240.00 x 278.00]");
-    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (240.00, -160.00) - [240.00 x 237.00]");
+    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 6));
+    EXPECT_EQ(pattern_->GetEndIndex(), 6);
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, 70.00) - [240.00 x 90.00]");
 
-    UpdateCurrentOffset(-500.0f);
+    UpdateCurrentOffset(-350.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(8, 16));
-    EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 163.00) - [240.00 x 234.00]");
-    EXPECT_EQ(GetChildRect(frameNode_, 15).ToString(), "RectT (240.00, 574.00) - [240.00 x 246.00]");
+    EXPECT_EQ(lazy_.GetRange(), std::pair(6, 10));
+    EXPECT_EQ(GetChildRect(frameNode_, 7).ToString(), "RectT (0.00, 80.00) - [240.00 x 90.00]");
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(480.0f), CalcLength(1200.0f)));
     FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(8, 19));
-    EXPECT_EQ(GetChildRect(frameNode_, 19).ToString(), "RectT (240.00, 1076.00) - [240.00 x 242.00]");
+    EXPECT_EQ(lazy_.GetRange(), std::pair(6, 19));
+    EXPECT_EQ(pattern_->GetEndIndex(), 19);
+    EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 350.00) - [480.00 x 90.00]");
 
     UpdateCurrentOffset(300.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(5, 17));
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 16));
+    EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 650.00) - [480.00 x 90.00]");
 
     UpdateCurrentOffset(-51.0f);
     EXPECT_FALSE(lazy_.NeedRecompose());
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, -31.00) - [480.00 x 90.00]");
 
     UpdateCurrentOffset(2.0f);
     EXPECT_FALSE(lazy_.NeedRecompose());
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, -29.00) - [480.00 x 90.00]");
     UpdateCurrentOffset(-2.0f);
     EXPECT_FALSE(lazy_.NeedRecompose());
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, -31.00) - [480.00 x 90.00]");
 }
 } // namespace OHOS::Ace::NG
