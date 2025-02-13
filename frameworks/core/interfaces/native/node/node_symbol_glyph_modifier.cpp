@@ -155,6 +155,14 @@ void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SymbolModelNG::SetSymbolGlyphInitialize(frameNode, 0);
 }
+
+void UpdateSymbolEffect(ArkUINodeHandle node, ArkUI_Uint32 symbolEffectType, ArkUI_Bool isActive,
+    ArkUI_Int16 isTxtActiveSource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::UpdateSymbolEffect(frameNode, symbolEffectType, isActive, isTxtActiveSource);
+}
 }
 
 namespace NodeModifier {
@@ -175,6 +183,7 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
+        .updateSymbolEffect = UpdateSymbolEffect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
