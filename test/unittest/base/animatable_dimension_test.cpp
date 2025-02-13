@@ -19,6 +19,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "core/animation/animator.h"
 #include "base/geometry/animatable_dimension.h"
 
 using namespace testing;

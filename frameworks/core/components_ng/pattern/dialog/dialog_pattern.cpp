@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"

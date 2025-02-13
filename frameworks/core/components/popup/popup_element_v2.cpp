@@ -14,6 +14,7 @@
  */
 
 #include "core/components/popup/popup_element_v2.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

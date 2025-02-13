@@ -22,6 +22,7 @@
 #include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/listener.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 
 namespace OHOS::Ace::NG {

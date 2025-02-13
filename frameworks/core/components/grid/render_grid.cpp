@@ -17,6 +17,7 @@
 
 #include "core/components/grid/grid_component.h"
 #include "core/components/grid/render_grid_item.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

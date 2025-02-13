@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/ng/entry_page_info.h"
 
 namespace OHOS::Ace::NG {
 
