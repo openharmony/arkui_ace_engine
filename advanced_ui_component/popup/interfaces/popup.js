@@ -708,7 +708,7 @@ export class g1 extends ViewPU {
         }
     }
     toVp(value) {
-        let q1 = display.getDefaultDisplaySync();
+        let q1 = undefined;
         try {
             q1 = display.getDefaultDisplaySync();
         }

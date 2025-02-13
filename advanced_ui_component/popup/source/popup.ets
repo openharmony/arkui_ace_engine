@@ -674,7 +674,7 @@ export struct PopupComponent {
       applyMaxHeight = px2vp(defaultDisplaySync.height) - 40 - 40
     }
     applyMaxSize = { maxWidth: applyMaxWidth, maxHeight: applyMaxHeight }
-    this.messageMaxWidth = applyMaxHeight;
+    this.messageMaxWidth = applyMaxWidth;
     this.messageMaxWeight = this.getMessageMaxWeight()
     return applyMaxSize
   }
