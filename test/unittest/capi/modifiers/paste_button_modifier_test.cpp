@@ -39,8 +39,8 @@ namespace  {
     const auto ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE = ButtonType::CAPSULE;
 
     const auto DEFAULT_JSON_INT = -1;
-    const double OFFSET_X = 60.4;
-    const double OFFSET_Y = 85.5;
+    constexpr double OFFSET_X = 60.4;
+    constexpr double OFFSET_Y = 85.5;
 } // namespace
 
 class PasteButtonModifierTest : public ModifierTestBase<GENERATED_ArkUIPasteButtonModifier,
