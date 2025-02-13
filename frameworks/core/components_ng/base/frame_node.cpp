@@ -2671,7 +2671,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         localMat_ = localMat;
     }
     int32_t parentId = -1;
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     if (parent) {
         parentId = parent->GetId();
     }
@@ -3376,6 +3376,9 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf, bool checkBoundary) cons
     OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
+        if (!checkBoundary && parent->CheckTopWindowBoundary()) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         offset += renderContext->GetPaintRectWithTransform().GetOffset();
@@ -3392,6 +3395,9 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf, bool checkBoundary) co
     Point point = Matrix4::Invert(context->GetRevertMatrix()) * Point(offset.GetX(), offset.GetY());
     auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
+        if (!checkBoundary && parent->CheckTopWindowBoundary()) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
@@ -3457,10 +3463,10 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
     auto frameSize = geometryNode->GetFrameSize();
     auto pointList = GetRectPoints(frameSize);
     GetRectPointToParentWithTransform(pointList, Claim(this));
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
         if (GetRectPointToParentWithTransform(pointList, parent)) {
-            parent = parent->GetAncestorNodeOfFrame(false);
+            parent = parent->GetAncestorNodeOfFrame(true);
         } else {
             return RectF();
         }
@@ -3495,10 +3501,10 @@ OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
 {
     OffsetF offset {};
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
         offset += parent->geometryNode_->GetFrameOffset();
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return offset;
 }
@@ -4022,13 +4028,13 @@ void FrameNode::UpdatePercentSensitive()
     bool percentWidth = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentWidth() : true;
     auto res = layoutProperty_->UpdatePercentSensitive(percentHeight, percentWidth);
     if (res.first) {
-        auto parent = GetAncestorNodeOfFrame(false);
+        auto parent = GetAncestorNodeOfFrame(true);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentWidth(true);
         }
     }
     if (res.second) {
-        auto parent = GetAncestorNodeOfFrame(false);
+        auto parent = GetAncestorNodeOfFrame(true);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -4552,7 +4558,7 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 
 OffsetF FrameNode::GetOffsetInScreen()
 {
-    auto frameOffset = GetPaintRectOffset();
+    auto frameOffset = GetPaintRectOffset(false, true);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
@@ -5489,7 +5495,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
 
 void FrameNode::MarkAndCheckNewOpIncNode()
 {
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
         SetSuggestOpIncActivatedOnce();
