@@ -1365,4 +1365,49 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest022, TestSize.Level1)
     EXPECT_TRUE(iIndex >= static_cast<int32_t>(pattern_->images_.size()));
 }
 
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImageAnimatorModelTestNg.
+     */
+
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
+
+    /**
+     * @tc.steps: step2. set image's duration by zero and imageAnimatorView's attributes.
+     * @tc.expected: step2. related function is called.
+     */
+
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
+    RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
+        AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
+    EXPECT_NE(imageAnimatorPattern, nullptr);
+    ViewStackProcessor::GetInstance()->Push(element);
+
+    // Enable automatic monitoring of invisible areas
+    ImageAnimatorModelNG.SetAutoMonitorInvisibleArea(true);
+
+    // Verify that the flag is correctly set to true
+    EXPECT_TRUE(imageAnimatorPattern->isAutoMonitorInvisibleArea_);
+
+    // Disable automatic monitoring of invisible areas
+    ImageAnimatorModelNG.SetAutoMonitorInvisibleArea(false);
+
+    // Verify that the flag is correctly set to false
+    EXPECT_FALSE(imageAnimatorPattern->isAutoMonitorInvisibleArea_);
+}
 } // namespace OHOS::Ace::NG

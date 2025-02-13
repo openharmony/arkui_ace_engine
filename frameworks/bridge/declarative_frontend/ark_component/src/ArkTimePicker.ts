@@ -22,6 +22,10 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     modifierWithKey(this._modifiersWithKeys, TimepickerLoopModifier.identity, TimepickerLoopModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value: Optional<CrownSensitivity>): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDigitalCrownSensitivityModifier.identity, TimepickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   useMilitaryTime(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity,
       TimepickerUseMilitaryTimeModifier, value);
@@ -43,7 +47,9 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     return this;
   }
   onChange(callback: (value: TimePickerResult) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys,TimepickerOnChangeModifier.identity,
+      TimepickerOnChangeModifier,callback);
+    return this;
   }
   dateTimeOptions(value: DateTimeOptions): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity,
@@ -179,6 +185,20 @@ class TimepickerLoopModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TimepickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerDigitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerDigitalCrownSensitivity(node, this.value);
+    }
+  }
+}
+
 class TimepickerDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> {
   constructor(value: DateTimeOptions) {
     super(value);
@@ -221,6 +241,20 @@ class TimepickerEnableCascadeModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TimepickerOnChangeModifier extends ModifierWithKey<(value:TimePickerResult)=> void>
+{
+  constructor(value: (value: TimePickerResult) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timePickerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerOnChange(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerOnChange(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.TimePicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

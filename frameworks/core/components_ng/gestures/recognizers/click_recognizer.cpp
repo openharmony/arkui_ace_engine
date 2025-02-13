@@ -348,6 +348,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         // Turn off the multi-finger lift deadline timer
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
+        if (CheckLimitFinger()) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
         if (tappedCount_ == count_) {
             TriggerClickAccepted(event);
             return;
@@ -521,14 +524,17 @@ void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto host = GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(host);
+        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
         Recorder::EventParamsBuilder builder;
-        builder.SetId(host->GetInspectorId().value_or(""))
+        builder.SetEventType(Recorder::EventType::CLICK)
+            .SetId(host->GetInspectorId().value_or(""))
             .SetType(host->GetTag())
-            .SetText(host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true))
+            .SetText(accessibilityProperty->GetGroupText(true))
             .SetDescription(host->GetAutoEventParamValue(""))
             .SetHost(host);
-        auto rectSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT);
-        if (rectSwitch) {
+        auto pointSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_POINT);
+        if (pointSwitch) {
             static const int32_t precision = 2;
             std::stringstream ss;
             ss << std::fixed << std::setprecision(precision) << info.GetGlobalPoint().GetX() << ","

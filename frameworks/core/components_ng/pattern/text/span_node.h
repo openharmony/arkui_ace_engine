@@ -186,9 +186,8 @@ public:
     {
         children.clear();
     }
-    // position of last char + 1
     int32_t rangeStart = -1;
-    int32_t position = -1;
+    int32_t position = -1; // position of last char + 1
     int32_t imageNodeId = -1;
     int32_t paragraphIndex = -1;
     uint32_t length = 0;
@@ -215,7 +214,7 @@ public:
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
     std::optional<LeadingMargin> leadingMargin;
-    int32_t selectedStart = -1;
+    int32_t selectedStart = -1; // relative offset from span, [selectedStart, selectedEnd)
     int32_t selectedEnd = -1;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
     void UpdateSymbolSpanParagraph(

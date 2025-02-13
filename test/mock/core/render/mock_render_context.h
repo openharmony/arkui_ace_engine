@@ -103,6 +103,12 @@ public:
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
+    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propEffectOption = effectOption;
+    }
+
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
     {
         const auto& groupProperty = GetOrCreateForeground();

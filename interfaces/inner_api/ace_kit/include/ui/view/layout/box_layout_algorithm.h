@@ -27,7 +27,7 @@ public:
     explicit BoxLayoutAlgorithm(const WeakPtr<FrameNode>& host) : LayoutAlgorithm(host) {}
     ~BoxLayoutAlgorithm() = default;
 
-    void Measure() override;
+    void Measure(const Kit::LayoutConstraintInfo& contentConstraint) override;
 
     void Layout() override;
 

@@ -136,7 +136,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest002, TestSize.Level1)
      */
     const int32_t testNumber = 10;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(DEST_NAME_BASE + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(DEST_NAME_BASE + std::to_string(index)));
     }
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     ASSERT_NE(navigationNode, navigationPattern);
@@ -209,7 +209,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest003, TestSize.Level1)
      */
     const int32_t testNumber = 10;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->MockPushPath(MockNavPathInfo(DEST_NAME_BASE + std::to_string(index)));
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(DEST_NAME_BASE + std::to_string(index)));
     }
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     ASSERT_NE(navigationNode, navigationPattern);
@@ -439,6 +439,4 @@ HWTEST_F(NavigationManagerTestNg, ButtonsRectChangeListener001, TestSize.Level1)
     navigationManager->RemoveButtonsRectChangeListener(LISTENER_ID1);
     ASSERT_TRUE(navigationManager->buttonsRectChangeListeners_.empty());
 }
-
-
 } // namespace OHOS::Ace::NG

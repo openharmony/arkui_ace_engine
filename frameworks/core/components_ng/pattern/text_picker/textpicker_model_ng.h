@@ -33,6 +33,7 @@ public:
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetGradientHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override;
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
@@ -99,6 +100,7 @@ public:
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);

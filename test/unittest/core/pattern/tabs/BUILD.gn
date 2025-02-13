@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +25,7 @@ ace_unittest("tabs_test_ng") {
     "tabs_attr_test_ng.cpp",
     "tabs_common_test_ng.cpp",
     "tabs_event_test_ng.cpp",
-    "tabs_layout_algorithm_test_ng.cpp",
+    "tabs_layout_test_ng.cpp",
     "tabs_sub_tab_bar_style_test_ng.cpp",
     "tabs_test_ng.cpp",
   ]

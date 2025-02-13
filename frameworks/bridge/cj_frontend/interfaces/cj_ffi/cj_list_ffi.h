@@ -110,6 +110,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkListSetOnScrollVisibleContentChange(void (*cal
     CJVisibleListContentInfo start, CJVisibleListContentInfo end));
 CJ_EXPORT void FfiOHOSAceFrameworkListSetOnItemDragStartCallback(void (*callback)(
     CJPosition itemDragInfo, int32_t itemIndex));
+CJ_EXPORT void FfiOHOSAceFrameworkListOnItemDragStartWithBack(
+    CJDragItemInfo (*callback)(CJPosition itemDragInfo, int32_t itemIndex));
 CJ_EXPORT void FfiOHOSAceFrameworkListSetOnItemDragEnterCallback(void (*callback)(CJPosition itemDragInfo));
 CJ_EXPORT void FfiOHOSAceFrameworkListSetOnItemDragMoveCallback(void (*callback)(
     CJPosition itemDragInfo, int32_t itemIndex, int32_t insertIndex));

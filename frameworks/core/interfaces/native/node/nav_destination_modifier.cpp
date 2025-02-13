@@ -247,6 +247,99 @@ void ResetNavDestinationRecoverable(ArkUINodeHandle node)
     NavDestinationModelNG::SetRecoverable(frameNode, true);
 }
 
+void SetNavDestinationCustomTitle(ArkUINodeHandle node, ArkUINodeHandle titleNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* customTitleFrameNode = reinterpret_cast<FrameNode*>(titleNode);
+    CHECK_NULL_VOID(customTitleFrameNode);
+    NavDestinationModelNG::SetCustomTitle(frameNode, AceType::Claim(customTitleFrameNode));
+}
+
+ArkUINodeHandle GetNavDestinationCustomTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto titleNode = NavDestinationModelNG::GetCustomTitle(frameNode);
+    CHECK_NULL_RETURN(titleNode, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(titleNode));
+}
+
+void SetNavDestinationTitleHeight(ArkUINodeHandle node, const struct ArkUIDimensionType height)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension titleHeight = Dimension(height.value, static_cast<OHOS::Ace::DimensionUnit>(height.units));
+    NavDestinationModelNG::SetTitleHeight(frameNode, titleHeight, true);
+}
+
+void SetNavDestinationTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (opts.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(opts.colorValue.value);
+    }
+    if (opts.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(opts.barStyle.value);
+    }
+    NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void SetNavDestinationOnCoordScrollStartAction(
+    ArkUINodeHandle node, void (*onCoordScrollStartAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        onCoordScrollStartAction(nodeHandle);
+    };
+    NavDestinationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
+}
+
+void SetNavDestinationOnCoordScrollUpdateAction(ArkUINodeHandle node,
+    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollUpdateActionCallBack =
+        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+            onCoordScrollUpdateAction(nodeHandle, currentOffset);
+        };
+    NavDestinationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
+}
+
+void SetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        onCoordScrollEndAction(nodeHandle);
+    };
+    NavDestinationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
+}
+
+void SetNavDestinationSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentColor = Color(value);
+    NavDestinationModelNG::SetSystemBarStyle(frameNode, contentColor);
+}
+
+void SetCustomBackButtonNode(ArkUINodeHandle node, ArkUINodeHandle backButtonNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* backButton = reinterpret_cast<FrameNode*>(backButtonNode);
+    CHECK_NULL_VOID(backButton);
+    NavDestinationModelNG::SetCustomBackButtonNode(frameNode, backButton);
+}
+
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -272,6 +365,15 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetRecoverable = ResetNavDestinationRecoverable,
         .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
         .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
+        .setNavDestinationCustomTitle = SetNavDestinationCustomTitle,
+        .getNavDestinationCustomTitle = GetNavDestinationCustomTitle,
+        .setNavDestinationTitleHeight = SetNavDestinationTitleHeight,
+        .setNavDestinationTitlebarOptions = SetNavDestinationTitlebarOptions,
+        .setNavDestinationOnCoordScrollStartAction = SetNavDestinationOnCoordScrollStartAction,
+        .setNavDestinationOnCoordScrollUpdateAction = SetNavDestinationOnCoordScrollUpdateAction,
+        .setNavDestinationOnCoordScrollEndAction = SetNavDestinationOnCoordScrollEndAction,
+        .setNavDestinationSystemBarStyle = SetNavDestinationSystemBarStyle,
+        .setCustomBackButtonNode = SetCustomBackButtonNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

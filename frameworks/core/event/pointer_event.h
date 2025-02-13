@@ -54,6 +54,7 @@ enum class PointerAction : int32_t {
     POINTER_ACTION_ROTATE_BEGIN = 20,
     POINTER_ACTION_ROTATE_UPDATE = 21,
     POINTER_ACTION_ROTATE_END = 22,
+    PULL_CANCEL = 37,
 };
 
 struct DragPointerEvent final : public PointerEvent {
@@ -72,7 +73,7 @@ struct DragPointerEvent final : public PointerEvent {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t targetWindowId = -1;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
-    std::vector<KeyCode> pressedKeyCodes_;
+    std::vector<KeyCode> pressedKeyCodes;
     PointerAction action = PointerAction::UNKNOWN;
     std::vector<DragPointerEvent> history;
     int32_t displayId = 0;
@@ -109,9 +110,9 @@ struct DragPointerEvent final : public PointerEvent {
         return displayY;
     }
 
-    void UpdatePressedKeyCodes(std::vector<KeyCode> pressedKeyCodes)
+    void UpdatePressedKeyCodes(std::vector<KeyCode> keyCodes)
     {
-        pressedKeyCodes_ = pressedKeyCodes;
+        pressedKeyCodes = keyCodes;
     }
 };
 } // namespace OHOS::Ace

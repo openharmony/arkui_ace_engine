@@ -57,6 +57,11 @@ public:
         return previousOrientation_;
     }
 
+    static bool ReportChangeEvent(int32_t nodeId, const std::string& compName,
+        const std::string& eventName, const PickerDate& pickerDate);
+    static bool CanReportChangeEvent(PickerDate& pickerDate, const PickerDate& newPickerDate);
+    static bool GetReportChangeEventDate(PickerDate& pickerDate, const std::string& eventData);
+
 private:
     static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode,
         const RefPtr<FrameNode>& calendarDialogNode);
@@ -91,7 +96,8 @@ private:
     static void OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,
         const DialogEvent& onChange, const CalendarSettingData& settingData);
     static void UpdateBackgroundStyle(const RefPtr<RenderContext>& renderContext,
-        const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme);
+        const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme,
+        const RefPtr<FrameNode>& dialogNode);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
@@ -118,6 +124,10 @@ private:
     static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
     static void SetWeekTextDirection(const TextDirection& dialogDirection, const TextDirection& calendarDirection,
         const RefPtr<FrameNode>& weekNode);
+    static DialogEvent GetChangeEvent(const CalendarSettingData& settingData, const RefPtr<FrameNode>& frameNode,
+        const std::map<std::string, NG::DialogEvent>& dialogEvent);
+    static bool ReportChangeEvent(const RefPtr<FrameNode>& frameNode, const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
     static constexpr double deviceHeightLimit = 640.0;
     static void UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
         RefPtr<CalendarTheme>& theme);

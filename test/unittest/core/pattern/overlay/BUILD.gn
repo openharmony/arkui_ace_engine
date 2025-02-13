@@ -17,6 +17,7 @@ ace_unittest("overlay_manager_test_ng") {
   type = "new"
   sources = [
     "$ace_root/interfaces/napi/kits/promptaction/prompt_controller.cpp",
+    "$ace_root/test/mock/core/common/mock_window.cpp",
     "overlay_dialog_transition_test_ng.cpp",
     "overlay_manager_content_test_ng.cpp",
     "overlay_manager_dialog_test_ng.cpp",

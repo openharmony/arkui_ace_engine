@@ -51,6 +51,7 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
 {
     bool hasResult = false;
     RectF result;
+    RectF preBox;
     auto maxBottom = contentRect.GetY() + SystemProperties::GetDevicePhysicalHeight();
     for (const auto& box : boxes) {
         auto caculateBottom = box.Bottom() + textStartY;
@@ -58,7 +59,15 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
         if (isReachingBottom && !hasResult) {
             result = box;
             hasResult = true;
+            auto isBoxExceedContent = GreatOrEqual(result.Top() + textStartY, contentRect.Bottom()) &&
+                LessNotEqual(preBox.Bottom() + textStartY, contentRect.Bottom());
+            isBoxExceedContent = isBoxExceedContent || (GreatOrEqual(result.Top() + textStartY, maxBottom) &&
+                LessNotEqual(preBox.Bottom() + textStartY, maxBottom));
+            CHECK_NULL_RETURN(!isBoxExceedContent, preBox);
             continue;
+        }
+        if (!hasResult) {
+            preBox = box;
         }
         if (hasResult && box.Bottom() == result.Bottom()) {
             result = box;
@@ -87,8 +96,10 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
     auto data = CalculateTextDragData(hostPattern, dragNode);
     TAG_LOGI(AceLogTag::ACE_TEXT, "CreateDragNode SelectPositionInfo startX = %{public}f, startY = %{public}f,\
-             endX = %{public}f, endY = %{public}f", data.selectPosition_.startX_, data.selectPosition_.startY_,
-             data.selectPosition_.endX_, data.selectPosition_.endY_);
+             endX = %{public}f, endY = %{public}f, globalX = %{public}f, globalY = %{public}f",
+             data.selectPosition_.startX_, data.selectPosition_.startY_,
+             data.selectPosition_.endX_, data.selectPosition_.endY_,
+             data.selectPosition_.globalX_, data.selectPosition_.globalY_);
     dragPattern->Initialize(hostPattern->GetDragParagraph(), data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
 
@@ -119,6 +130,9 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
+    while (!boxes.empty() && NearZero(boxes.back().Width())) {
+        boxes.pop_back();
+    }
     auto globalOffset = pattern->GetParentGlobalOffset();
     CalculateFloatTitleOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);

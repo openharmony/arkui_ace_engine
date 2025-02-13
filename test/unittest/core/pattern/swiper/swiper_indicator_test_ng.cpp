@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,7 +131,9 @@ HWTEST_F(SwiperIndicatorTestNg, OnIndicatorChangeEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Click item(index:1)
@@ -250,7 +252,9 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick003, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleTouchClick001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Click item(index:1)
@@ -281,7 +285,9 @@ HWTEST_F(SwiperIndicatorTestNg, HandleTouchClick001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleLongPress001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Touch and move right
@@ -337,7 +343,9 @@ HWTEST_F(SwiperIndicatorTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
@@ -356,7 +364,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002,
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperInitIndicator006, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
@@ -397,7 +407,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     GestureEvent info;
     TouchLocationInfo touchLocationInfo("down", 0);
@@ -422,7 +434,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, Tes
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto displayCount = pattern_->GetLayoutProperty<SwiperLayoutProperty>()->GetDisplayCount().value_or(1);
     auto childrenSize = pattern_->RealTotalCount();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
@@ -577,7 +591,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 3);
@@ -679,7 +695,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex004, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0020, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     GestureEvent info;
     info.mainDelta_ = 1.0f;

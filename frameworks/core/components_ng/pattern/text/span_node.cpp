@@ -434,14 +434,14 @@ void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const
     const TextStyle& textStyle, const TextStyle& aiSpanStyle)
 {
     int32_t spanContentLength = static_cast<int32_t>(spanContent.length());
-    int32_t spanStart = position - spanContentLength;
+    int32_t spanStart = this->position - spanContentLength;
     if (needRemoveNewLine) {
         spanStart -= 1;
     }
     int32_t preEnd = spanStart;
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
-        if (aiSpan.start >= position || preEnd >= position) {
+        if (aiSpan.start >= this->position || preEnd >= this->position) {
             break;
         }
         int32_t aiSpanStartInSpan = std::max(spanStart, aiSpan.start);
@@ -451,15 +451,20 @@ void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const
             aiSpanMap.erase(aiSpanMap.begin());
             continue;
         }
+        /*
+        | content has been handled | normal text | aiSpan text style | remain text   |
+        spanStart(fix)             preEnd        aiSpanStartInSpan   aiSpanEndInSpan spanStart + spanContentLength(fix)
+        */
         int32_t contentStart = preEnd - spanStart;
         if (preEnd < aiSpanStartInSpan) {
             UpdateTextStyle(spanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd),
-                builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
-            contentStart = contentStart + aiSpanStartInSpan - preEnd;
+                builder, textStyle, this->selectedStart - contentStart, this->selectedEnd - contentStart);
+            contentStart = contentStart + aiSpanStartInSpan - preEnd; // aiSpan's relative offset from span
         }
         auto displayContent = UtfUtils::Str8DebugToStr16(aiSpan.content)
             .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(displayContent, builder, aiSpanStyle, selectedStart - contentStart, selectedEnd - contentStart);
+        UpdateTextStyle(displayContent, builder, aiSpanStyle,
+            this->selectedStart - contentStart, this->selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
             return;
@@ -509,47 +514,39 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
 }
 
 void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Paragraph>& builder,
-    const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd)
+    const TextStyle& textStyle, int32_t selStart, int32_t selEnd)
 {
     if (!IsDragging()) {
         UpdateContentTextStyle(content, builder, textStyle);
     } else {
+        // for content such as Hellow Wrold, update text style for three parts:
+        // [0, selStart), [selStart, selEnd), [selEnd, content.length) through UpdateContentTextStyle
+        auto contentLength = static_cast<int32_t>(content.length());
+        CHECK_NULL_VOID(selEnd > 0);
+        selStart = selStart < 0 ? 0: selStart;
+        selEnd = selEnd > contentLength ? contentLength : selEnd;
         if (content.empty()) {
             builder->PushStyle(textStyle);
             builder->PopStyle();
             return;
         }
-        auto contentLength = static_cast<int32_t>(content.length());
         if (selStart > 0) {
             UpdateContentTextStyle(
                 TextEmojiProcessor::SubU16string(0, selStart, content, false, true), builder, textStyle);
         }
-        auto finalSelStart = selStart;
-        if (finalSelStart < 0) {
-            finalSelStart = 0;
-        }
-        auto finalSelEnd = selEnd;
-        if (finalSelEnd < 0) {
-            finalSelEnd = 0;
-        }
-        if (finalSelEnd > 0 && finalSelEnd > contentLength) {
-            finalSelEnd = contentLength;
-        }
-        if (finalSelStart < contentLength) {
-            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (selStart < contentLength) {
             TextStyle selectedTextStyle = textStyle;
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
             Color textDecorationColor = selectedTextStyle.GetTextDecorationColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextDecorationColor(textDecorationColor);
             UpdateContentTextStyle(
-                TextEmojiProcessor::SubU16string(finalSelStart, finalSelEnd - finalSelStart, content, false, true),
+                TextEmojiProcessor::SubU16string(selStart, selEnd - selStart, content, false, true),
                 builder, selectedTextStyle);
         }
-
-        if (finalSelEnd < contentLength) {
+        if (selEnd < contentLength) {
             UpdateContentTextStyle(
-                TextEmojiProcessor::SubU16string(finalSelEnd, content.length() - finalSelEnd, content, false, true),
+                TextEmojiProcessor::SubU16string(selEnd, content.length() - selEnd, content, false, true),
                 builder, textStyle);
         }
     }

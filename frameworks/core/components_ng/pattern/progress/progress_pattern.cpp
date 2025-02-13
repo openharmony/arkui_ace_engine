@@ -226,7 +226,8 @@ void ProgressPattern::SetFocusStyle()
         isFocusTextColorSet_ = true;
     }
 
-    if (!renderContext->HasBackShadow() && focusShadowStyle_ != ShadowStyle::None) {
+    if (!renderContext->HasBackShadow() && focusShadowStyle_ != ShadowStyle::None
+        && !renderContext->HasBorderRadius()) {
         Shadow shadow;
         if (!GetShadowFromTheme(focusShadowStyle_, shadow)) {
             shadow = Shadow::CreateShadow(focusShadowStyle_);
@@ -259,6 +260,7 @@ void ProgressPattern::ClearFocusStyle()
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
         renderContext->SetShadowRadius(0.0f);
+        renderContext->ResetBorderRadius();
         isFocusShadowSet_ = false;
     }
 
@@ -447,12 +449,18 @@ void ProgressPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusPadding = appTheme->GetFocusOutPaddingVp();
     auto focusDistance = paintWidth / 2 + focusPadding;
-    auto focusRadius =
-        std::min(contentSize.Width(), contentSize.Height()) * 0.5 + static_cast<float>(focusDistance.ConvertToPx());
+    auto focusRadius = GetBorderRadiusValues() + static_cast<float>(focusDistance.ConvertToPx());
     paintRect.SetRect(RectF(contentOffset.GetX() - focusDistance.ConvertToPx(),
         contentOffset.GetY() - focusDistance.ConvertToPx(), contentSize.Width() + 2 * focusDistance.ConvertToPx(),
         contentSize.Height() + 2 * focusDistance.ConvertToPx()));
     paintRect.SetCornerRadius(focusRadius);
+    if (isFocusShadowSet_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(focusRadius)));
+    }
 }
 
 void ProgressPattern::OnModifyDone()

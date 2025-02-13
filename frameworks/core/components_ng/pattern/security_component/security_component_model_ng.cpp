@@ -56,9 +56,10 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     property->UpdateSymbolIconStyle(symbolIcon);
     property->UpdateBackgroundType(backgroundType);
 
+    bool isNullSymbolIcon = !symbolIcon ||
+                            symbolIcon == static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL);
     if ((text == static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) ||
-        ((icon == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) &&
-        (symbolIcon == static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)))) {
+        ((icon == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) && isNullSymbolIcon)) {
         property->UpdateTextIconSpace(Dimension(0.0));
     }
 
@@ -207,7 +208,7 @@ void SecurityComponentModelNG::SetDefaultSymbolIconStyle(
     CHECK_NULL_VOID(iconProp);
     SymbolSourceInfo symbolSourceInfo(symbolId);
     if (isButtonVisible) {
-        iconProp->UpdateSymbolColorList({Color::BLACK});
+        iconProp->UpdateSymbolColorList({secCompTheme->GetDefaultSymbolIconColor()});
     } else {
         iconProp->UpdateSymbolColorList({secCompTheme->GetIconColorNoBg()});
     }

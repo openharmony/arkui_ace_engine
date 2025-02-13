@@ -115,8 +115,11 @@ export struct ProgressButtonV2 {
           .borderRadius(this.buttonBorderRadius)
           .width('100%')
           .hoverEffect(HoverEffect.None)
-          .style(this.progressButtonRadius ?
-            { borderRadius: this.getProgressButtonRadius() } : {})
+          .style({
+            borderColor: this.colorOptions?.borderColor?.color ?
+              this.colorOptions?.borderColor?.color : this.containerBorderColor,
+            borderRadius: this.getProgressButtonRadius()
+          })
           .clip(false)
           .enabled(this.isEnabled)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)

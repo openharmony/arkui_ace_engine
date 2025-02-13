@@ -51,6 +51,14 @@ public:
         maxSpace_ = maxSpace;
         minSpace_ = minSpace;
     }
+    float GetSpaceDelta() const
+    {
+        return spaceDelta_;
+    }
+    void SetSpaceDelta(float delta)
+    {
+        spaceDelta_ = delta;
+    }
 
 private:
     RefPtr<SpringMotion> spring_;
@@ -106,6 +114,8 @@ public:
     {
         return space_;
     }
+    bool HasSpaceDelta() const;
+    void ResetSpaceDelta();
 
     static constexpr float DEFAULT_CONDUCTIVITY = 0.7f;
     static constexpr float DEFAULT_INTENSITY = 0.3f;

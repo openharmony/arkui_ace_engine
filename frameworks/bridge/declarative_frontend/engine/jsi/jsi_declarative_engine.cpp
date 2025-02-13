@@ -443,7 +443,11 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     arkRuntime->SetPkgAliasList(pkgAliasMap_);
     arkRuntime->SetpkgContextInfoList(pkgContextInfoMap_);
 #endif
-
+    auto container = Container::Current();
+    if (container) {
+        auto uid = container->GetAppRunningUniqueId();
+        runtime_->SetUniqueId(uid);
+    }
     runtime_->SetLogPrint(PrintLog);
     std::string libraryPath = "";
     if (debuggerMode) {
@@ -847,7 +851,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
             return;
         }
         panda::Local<panda::ObjectRef> rootView = iter->second.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = JsiObjectTemplate::GetNativeViewPartialUpdate(rootView);
+        auto* jsView = JsiObjectTemplate::GetNativeView(rootView, arkRuntime->GetEcmaVm());
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -867,7 +871,7 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = JsiObjectTemplate::GetNativeViewPartialUpdate(rootView);
+        auto* jsView = JsiObjectTemplate::GetNativeView(rootView, arkRuntime->GetEcmaVm());
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -890,7 +894,7 @@ void JsiDeclarativeEngineInstance::FlushReload()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = JsiObjectTemplate::GetNativeViewPartialUpdate(rootView);
+        auto* jsView = JsiObjectTemplate::GetNativeView(rootView, arkRuntime->GetEcmaVm());
         if (jsView != nullptr) {
             jsView->MarkNeedUpdate();
         }
@@ -1295,7 +1299,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion](
                                 NativeEngine* nativeEngine) {
         if (nativeEngine == nullptr) {
             return;

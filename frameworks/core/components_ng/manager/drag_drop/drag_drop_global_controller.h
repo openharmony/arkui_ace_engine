@@ -49,7 +49,20 @@ public:
     PreDragStatus GetPreDragStatus() const;
     void UpdateDragFilterShowingStatus(bool isShowing);
     bool IsDragFilterShowing() const;
+    bool IsOnOnDropPhase();
+    void SetIsOnOnDropPhase(bool isOnOnDropPhase);
+    bool RequestDragEndCallback(int32_t requestId, DragRet dragResult,
+        std::function<void(const DragRet&)> stopDragCallback);
+    int32_t NotifyDragResult(int32_t requestId, int32_t result);
+    int32_t NotifyDragEndPendingDone(int32_t requestId);
 
+    void SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus);
+
+    DragStartRequestStatus GetDragStartRequestStatus();
+
+    void SetAsyncDragCallback(std::function<void()> asyncDragCallbac);
+
+    std::function<void()> GetAsyncDragCallback();
 private:
     DragDropGlobalController() = default;
 
@@ -64,6 +77,15 @@ private:
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
 
     bool isDragFilterShowing_ = false;
+
+    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
+    std::function<void()> asyncDragCallback_;
+
+    // use for async on drop
+    bool isOnOnDropPhase_ = false;
+    int32_t requestId_ = -1;
+    std::function<void(const DragRet&)> stopDragCallback_ = nullptr;
+    DragRet dragResult_ = DragRet::DRAG_FAIL;
 };
 
 } // namespace OHOS::Ace::NG

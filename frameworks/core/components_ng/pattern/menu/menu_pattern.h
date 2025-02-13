@@ -281,6 +281,24 @@ public:
         return options_;
     }
 
+    std::vector<RefPtr<FrameNode>>& GetEmbeddedMenuItems()
+    {
+        return embeddedMenuItems_;
+    }
+
+    void AddEmbeddedMenuItem(const RefPtr<FrameNode>& menuItem)
+    {
+        embeddedMenuItems_.emplace_back(menuItem);
+    }
+
+    void RemoveEmbeddedMenuItem(const RefPtr<FrameNode>& menuItem)
+    {
+        auto iter = std::find(embeddedMenuItems_.begin(), embeddedMenuItems_.end(), menuItem);
+        if (iter != embeddedMenuItems_.end()) {
+            embeddedMenuItems_.erase(iter);
+        }
+    }
+
     void RemoveParentHoverStyle();
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
@@ -584,9 +602,22 @@ public:
     {
         return pathParams_;
     }
+
+    void SetCustomNode(WeakPtr<UINode> customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_.Upgrade();
+    }
+
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
+
+    bool IsSelectOverlayDefaultModeRightClickMenu();
 
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
@@ -732,9 +763,11 @@ private:
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
+    std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     Rect menuWindowRect_;
+    WeakPtr<UINode> customNode_ = nullptr;
     std::optional<MenuPathParams> pathParams_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);

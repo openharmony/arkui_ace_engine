@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -826,8 +826,9 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
     svgNode->SetAttr("strokeDashoffset", "2.0");
     EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineDash().dashOffset, 2.0);
 
-    svgNode->SetAttr("transform-origin", "test_transform-origin");
-    EXPECT_EQ(svgNode->GetBaseAttributes().transformOrigin, "test_transform-origin");
+    svgNode->SetAttr("transform-origin", "10 10");
+    EXPECT_EQ(Dimension(10), svgNode->GetBaseAttributes().transformOrigin.first);
+    EXPECT_EQ(Dimension(10), svgNode->GetBaseAttributes().transformOrigin.second);
 
     svgNode->SetAttr("xlink:href", "test_xlink:href");
     EXPECT_NE(svgNode->GetBaseAttributes().href, "test_xlink:href");

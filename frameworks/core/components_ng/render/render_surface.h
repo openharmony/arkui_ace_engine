@@ -118,6 +118,8 @@ public:
 
     virtual void SetPatternType(const std::string& type) {}
 
+    virtual void SetBufferUsage(const std::string& usage) {}
+
     virtual void SetSurfaceQueueSize(int32_t queueSize) {}
 
     virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height, float offsetX, float offsetY) {};

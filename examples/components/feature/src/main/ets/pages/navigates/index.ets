@@ -27,6 +27,7 @@ export const navigatesRoute: RouteGroup = {
     { name: 'tabContent', label: '页签内容/TabContent' },
     { name: 'tabs', label: '页签容器/Tabs' },
     { name: 'navDestination', label: '导航/NavDestination' },
+    { name: 'toolbar', label: '工具栏/ToolBar' }
   ]
 };
 
@@ -42,4 +43,6 @@ export function NavigatesDestination(name: string, route: Route) {
   } else if (name === 'navigates/navDestination') {
     NavDestinationBootcamp({ title: route.label })
   }
+  } else if (name === 'navigates/toolbar') {
+    ToolBarBootcamp({ title: route.label });
 }

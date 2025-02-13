@@ -209,6 +209,7 @@ const f2 = 'arkui_button_size_change';
 const g2 = 'arkui_button_spacing_change';
 const h2 = 'arkui_color_mode_locked';
 const i2 = 'arkui_button_right_offset_change';
+const p5 = 'arkui_custom_title_row_update';
 const j2 = {
     bundleName: '',
     moduleName: '',
@@ -934,7 +935,6 @@ class c3 extends ViewPU {
         if (!this.hideSplit && this.isFocused) {
             this.showMenuTimeoutId = setTimeout(() => {
                 this.isShowMenu = true;
-                this.menuDisappearTimer(i1);
             }, h1);
         }
     }
@@ -944,6 +944,9 @@ class c3 extends ViewPU {
         }
     }
     aboutToAppear() {
+    }
+    onDidBuild() {
+        ContainerModal.callNative(p5);
     }
     MenuBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1115,6 +1118,7 @@ class c3 extends ViewPU {
             LongPressGesture.onAction(() => {
                 this.onMenuWidthChange();
                 this.isShowMenu = !this.hideSplit;
+                this.menuDisappearTimer(i1);
             });
             LongPressGesture.pop();
             TapGesture.create();
@@ -1129,9 +1133,11 @@ class c3 extends ViewPU {
                 if (isHover) {
                     this.onMenuWidthChange();
                     this.onShowMenuWithTimer();
+                    this.cancelMenuDisappearTimer();
                 }
                 else {
                     this.onCancelMenuTimer();
+                    this.menuDisappearTimer(j1);
                 }
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {

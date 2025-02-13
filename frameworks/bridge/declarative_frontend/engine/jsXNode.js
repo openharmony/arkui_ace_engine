@@ -701,7 +701,7 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
     let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
     if (nodeController) {
         nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-        nodeController._value = -1;
+        nodeController._nodeContainerId._value = -1;
         NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
     }
 };
@@ -763,6 +763,12 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var ExpandMode;
+(function (ExpandMode) {
+    ExpandMode[ExpandMode["NOT_EXPAND"] = 0] = "NOT_EXPAND";
+    ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
+    ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
+})(ExpandMode || (ExpandMode = {}));
 class FrameNode {
     constructor(uiContext, type, options) {
         if (uiContext === undefined) {
@@ -1017,8 +1023,8 @@ class FrameNode {
         }
         targetParent._childList.set(this._nodeId, this);
     }
-    getChild(index, isExpanded) {
-        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
+    getChild(index, expandMode) {
+        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -1028,6 +1034,12 @@ class FrameNode {
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
+    getFirstChildIndexWithoutExpand() {
+        return getUINativeModule().frameNode.getFirstChildIndexWithoutExpand(this.getNodePtr());
+    }
+    getLastChildIndexWithoutExpand() {
+        return getUINativeModule().frameNode.getLastChildIndexWithoutExpand(this.getNodePtr());
     }
     getFirstChild(isExpanded) {
         const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), isExpanded);
@@ -1293,6 +1305,12 @@ class FrameNode {
     }
     triggerOnRecycle() {
         getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
+    }
+    reuse() {
+        this.triggerOnReuse();
+    }
+    recycle() {
+        this.triggerOnRecycle();
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -1654,21 +1672,21 @@ class typeNode {
         return creator(context, options);
     }
     static getAttribute(node, nodeType) {
-        if (node === undefined || node === null || node.getNodeType() != nodeType) {
+        if (node === undefined || node === null || node.getNodeType() !== nodeType) {
             return undefined;
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
             return undefined;
         }
         let attribute = __attributeMap__.get(nodeType);
-        if (attribute === undefined || attribute == null) {
+        if (attribute === undefined || attribute === null) {
             return undefined;
         }
         return attribute(node);
     }
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
-            node.getNodeType() != nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+            node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
             throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
@@ -2646,5 +2664,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter
+    typeNode, NodeAdapter, ExpandMode
 };

@@ -456,7 +456,7 @@ void KeyEventManager::DelKeyboardShortcutNode(int32_t nodeId)
     while (iter != keyboardShortcutNode_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (!frameNode) {
-            keyboardShortcutNode_.erase(iter++);
+            iter = keyboardShortcutNode_.erase(iter);
             continue;
         }
         if (frameNode->GetId() == nodeId) {
@@ -543,7 +543,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         auto dragDropMgr = GetDragDropManager(GetInstanceId());
         if (dragDropMgr && dragDropMgr->IsMSDPDragging()) {
             dragDropMgr->SetIsDragCancel(true);
-            dragDropMgr->OnDragEnd(DragPointerEvent(0, 0), "");
+            dragDropMgr->OnDragEnd(dragDropMgr->GetPreDragPointerEvent(), "", nullptr, true);
             dragDropMgr->SetIsDragCancel(false);
             return true;
         }

@@ -55,10 +55,10 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak001, Tes
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_ELLIPSIS);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), OVERFLOW_ELLIPSIS);
 }
 
@@ -78,7 +78,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak002, Tes
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_ELLIPSIS);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
 }
 
@@ -99,7 +99,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak003, Tes
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
     layoutProperty_->UpdateWordBreak(WORDBREAK_ALL);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetWordBreak(), WORDBREAK_ALL);
 }
 
@@ -119,7 +119,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak004, Tes
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), OVERFLOW_ELLIPSIS);
 }
 
@@ -138,7 +138,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak005, Tes
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), OVERFLOW_ELLIPSIS);
 }
 
@@ -157,7 +157,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak006, Tes
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
 }
 

@@ -36,6 +36,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -68,6 +69,7 @@ constexpr Dimension CHECK_MARK_SIZE_INCORRECT_VALUE = Dimension(-1.0);
 constexpr Dimension CHECK_MARK_WIDTH = Dimension(5.0);
 constexpr int32_t MIRROR_FRAME_OFFSET_Y_ZERO = 0;
 const bool SELECT_STATE = true;
+const int32_t VERSION_TWELVE = 12;
 RefPtr<PipelineContext> pipeline = nullptr;
 } // namespace
 
@@ -2877,5 +2879,117 @@ HWTEST_F(CheckBoxTestNG, CheckBoxNGTest0132, TestSize.Level1)
      */
     EXPECT_EQ(CheckBoxModelNG::GetCheckboxName(node), NAME);
     EXPECT_EQ(CheckBoxModelNG::GetCheckboxGroup(node), GROUP_NAME);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0133
+ * @tc.desc: Test CheckBox InitOnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0133, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto eventHub = frameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * test event.action != KeyAction::DOWN
+     */
+    KeyEvent keyEventOne(KeyCode::KEY_FUNCTION, KeyAction::UP);
+    EXPECT_FALSE(eventHub->ProcessOnKeyEventInternal(keyEventOne));
+    /**
+     * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    EXPECT_FALSE(eventHub->ProcessOnKeyEventInternal(keyEventTwo));
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventThr(KeyCode::KEY_FUNCTION, KeyAction::DOWN);
+    EXPECT_TRUE(eventHub->ProcessOnKeyEventInternal(keyEventThr));
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0134
+ * @tc.desc: Test CheckBox theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0134, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create frameNode
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: create mock theme manager, set checkbox theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+
+    /**
+     * @tc.steps: call checkBoxTheme the GetHoverPaddingSize
+     */
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipelineBase = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineBase, nullptr);
+    auto checkBoxTheme = pipelineBase->GetTheme<CheckboxTheme>();
+    ASSERT_NE(checkBoxTheme, nullptr);
+    checkBoxTheme->hoverPaddingSize_ = CHECK_MARK_SIZE;
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxTheme->GetHoverPaddingSize(), CHECK_MARK_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxPaintMethodTest0135
+ * @tc.desc: Test CheckBox PaintMethod PaintCheckBox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest0135, TestSize.Level1)
+{
+    /**
+     * @tc.steps: MockContainer.apiTargetVersion_ = VERSION_TWELVE.
+     */
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
+
+    /**
+     * @tc.steps: create GeometryNode
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    /**
+     * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox will be called.
+     */
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;
+    checkBoxPaintMethod.checkboxModifier_->SetCheckboxStyle(CheckBoxStyle::SQUARE_STYLE);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
+    MockContainer::TearDown();
 }
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "gesture_recognizer.h"
+#include "pan_recognizer.h"
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -317,10 +319,8 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         if (currentFingers_ == fingers_) {
-            auto velocityTrackerIter = panVelocity_.GetVelocityMap().find(event.id);
-            if (velocityTrackerIter != panVelocity_.GetVelocityMap().end() &&
-                std::abs(panVelocity_.GetMainAxisVelocity()) <= MIN_SPEED_THRESHOLD) {
-                velocityTrackerIter->second.DumpVelocityPoints();
+            if (std::abs(panVelocity_.GetMainAxisVelocity()) <= MIN_SPEED_THRESHOLD) {
+                DumpVelocityInfo(event.id);
             }
             // last one to fire end.
             isStartTriggered_ = false;
@@ -366,10 +366,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     UpdateAxisPointInVelocityTracker(event, true);
     time_ = event.time;
 
-    auto velocityTrackerIter = panVelocity_.GetVelocityMap().find(event.id);
-    if (velocityTrackerIter != panVelocity_.GetVelocityMap().end()) {
-        velocityTrackerIter->second.DumpVelocityPoints();
-    }
+    DumpVelocityInfo(event.id);
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
         "PanVelocity main axis velocity is %{public}f", panVelocity_.GetMainAxisVelocity());
 
@@ -515,7 +512,6 @@ bool PanRecognizer::HandlePanAccept()
         return true;
     }
     if (CheckLimitFinger()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return false;
     }
     if (IsBridgeMode()) {
@@ -753,11 +749,20 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    UpdateCallbackState(callback);
     if (callback && *callback && IsEnabled() && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+    }
+}
+
+void PanRecognizer::CheckCallbackState()
+{
+    if ((callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) &&
+        currentFingers_ == 0) {
+        SendCallbackMsg(onActionEnd_);
     }
 }
 
@@ -1043,5 +1048,15 @@ void PanRecognizer::DispatchPanStartedToPerf(const TouchEvent& event)
         return;
     }
     pMonitor->RecordInputEvent(FIRST_MOVE, PERF_TOUCH_EVENT, inputTime);
+}
+
+void PanRecognizer::DumpVelocityInfo(int32_t fingerId)
+{
+    auto velocityTrackerIter = panVelocity_.GetVelocityMap().find(fingerId);
+    if (velocityTrackerIter != panVelocity_.GetVelocityMap().end()) {
+        velocityTrackerIter->second.DumpVelocityPoints();
+    } else {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Dump velocity fail with fingerId:%{public}d", fingerId);
+    }
 }
 } // namespace OHOS::Ace::NG

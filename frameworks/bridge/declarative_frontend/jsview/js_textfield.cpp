@@ -21,9 +21,7 @@
 #include <vector>
 #include "base/utils/utf_helper.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -1091,9 +1089,7 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit");
     };
     TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -1213,9 +1209,7 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
     };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -1716,16 +1710,16 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
 
 void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
-    auto jsValue = info[0];
-    if (!jsValue->IsNumber()) {
-        return;
-    }
-    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
-    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
-        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+    auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        TextFieldModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
     TextFieldModel::GetInstance()->

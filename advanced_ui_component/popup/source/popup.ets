@@ -18,6 +18,10 @@ import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
 
+const RESOURCE_TYPE_STRING = 10003;
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
+
 interface IconTheme {
   size: SizeOptions;
   margin: LocalizedMargin;
@@ -210,12 +214,51 @@ export function Popup(options: PopupOptions) {
   })
 }
 
+function isValidString(dimension: string, regex: RegExp): boolean {
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+}
+
+function isValidResource(context: Context | undefined, value: Resource) {
+  const resourceManager = context?.resourceManager;
+  if (value === void (0) || value === null || resourceManager === void (0)) {
+    return false;
+  }
+  if (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+    value.type !== RESOURCE_TYPE_FLOAT) {
+    return false;
+  }
+
+  if (value.type === RESOURCE_TYPE_INTEGER || value.type === RESOURCE_TYPE_FLOAT) {
+    if (resourceManager.getNumber(value.id) >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(resourceManager.getStringSync(value.id))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 @Component
 export struct PopupComponent {
   private onClose: () => void = noop;
   private theme: PopupTheme = defaultTheme;
   @Prop icon: PopupIconOptions = { image: '' };
   @Prop maxWidth?: Dimension;
+  @Prop messageMaxWidth?: number = 0;
   @Prop title: PopupTextOptions = { text: '' };
   @Prop message: PopupTextOptions = { text: '' };
   @Prop popupDirection: Direction = Direction.Auto;
@@ -376,7 +419,7 @@ export struct PopupComponent {
     }
     if (this.showClose || this.showClose === void (0)) {
       if (this.messageMaxWidth != undefined) {
-        if(this.maxWidth > px2vp(defaultDisplaySync.width)) {
+        if(this.maxWidth != undefined && this.maxWidth > px2vp(defaultDisplaySync.width)) {
           textMaxWeight = px2vp(defaultDisplaySync.width)
         } else {
           textMaxWeight = this.messageMaxWidth
@@ -459,14 +502,21 @@ export struct PopupComponent {
   }
 
   private getWindowsPadding(): LocalizedPadding {
-    return {
-      top: this.theme.windows.padding.top,
-      bottom: LengthMetrics.vp(this.theme.windows.padding.bottom.value -
-        (this.theme.button.textMargin.bottom.value / 2)),
-      start: LengthMetrics.vp(this.theme.windows.padding.start.value -
-        (this.theme.button.margin.end.value / 2)),
-      end: this.theme.windows.padding.end
+    let top = this.theme.windows.padding.top;
+    let bottom = LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
+    let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
+    let end = this.theme.windows.padding.end;
+    let resolvedMaxWidth = this.toVp(this.maxWidth);
+    if (resolvedMaxWidth === 0) {
+      start = LengthMetrics.vp(0);
+      end = LengthMetrics.vp(0);
     }
+    return {
+      top: top,
+      bottom: bottom,
+      start: start,
+      end: end
+    };
   }
 
   onWillApplyTheme(theme: Theme): void {
@@ -538,6 +588,12 @@ export struct PopupComponent {
 
   private toVp(value: Dimension | Length | undefined): number {
     let defaultDisplaySync: display.Display | undefined = undefined;
+     try {
+      defaultDisplaySync = display.getDefaultDisplaySync()
+    } catch (error) {
+      console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+      return Number.NEGATIVE_INFINITY;
+    }
     if (value === void (0)) {
       return Number.NEGATIVE_INFINITY
     }

@@ -14,9 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_list.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/axis.h"
 #include "base/log/ace_scoring_log.h"
@@ -531,9 +529,7 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachStart");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachStart");
             return;
         };
         ListModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -551,9 +547,7 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachEnd");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachEnd");
             return;
         };
         ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
@@ -588,9 +582,7 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollStop");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollStop");
             return;
         };
         ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
@@ -780,9 +772,7 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "List.onItemDrop");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "List.onItemDrop");
     };
     ListModel::GetInstance()->SetOnItemDrop(onItemDrop);
 }

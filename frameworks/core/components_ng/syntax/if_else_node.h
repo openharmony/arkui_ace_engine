@@ -43,7 +43,7 @@ public:
         return true;
     }
 
-    void SetBranchId(int32_t value, std::list<int32_t>& removedElmtId);
+    void SetBranchId(int32_t value, std::list<int32_t>& removedElmtId, std::list<int32_t>& reservedElmtId);
 
     int32_t GetBranchId() const
     {
@@ -53,6 +53,10 @@ public:
     void FlushUpdateAndMarkDirty() override;
 
     bool TryRetake(const std::string& id);
+
+    void CollectRetakenNodes(const RefPtr<UINode>& node);
+
+    bool GetRetakenElmtIds(std::list<int32_t>& retakenElmtIds);
 
 private:
 
@@ -64,6 +68,8 @@ private:
     // set by CompareBranchId
     // unset by FlushUpdateAndMarkDirty
     bool branchIdChanged_ = false;
+
+    std::list<int32_t> retakenElmtIds_;
 
     ACE_DISALLOW_COPY_AND_MOVE(IfElseNode);
 };

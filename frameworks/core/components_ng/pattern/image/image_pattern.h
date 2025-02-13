@@ -396,6 +396,7 @@ public:
     {
         return externalDecodeFormat_;
     }
+    void AddPixelMapToUiManager();
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -423,6 +424,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
 
     void OnModifyDone() override;
     void UpdateGestureAndDragWhenModify();
@@ -513,7 +515,6 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent();
-
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
@@ -585,6 +586,7 @@ private:
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
+    bool isNeedReset_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

@@ -51,64 +51,48 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     if (panRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSPanRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSPanRecognizer>());
-        currentRecognizer->SetRecognizer(panRecognizer);
-        currentRecognizer->SetPanGestureOptions(
-            panRecognizer->GetFingers(), panRecognizer->GetDistance(), panRecognizer->GetDirection());
+        currentRecognizer->Update(panRecognizer);
+        return recognizerObj;
+    }
+    auto pinchRecognizer = AceType::DynamicCast<NG::PinchRecognizer>(target);
+    if (pinchRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSPinchRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSPinchRecognizer>());
+        currentRecognizer->Update(pinchRecognizer);
+        return recognizerObj;
+    }
+    auto tapRecognizer = AceType::DynamicCast<NG::ClickRecognizer>(target);
+    if (tapRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSTapRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSTapRecognizer>());
+        currentRecognizer->Update(tapRecognizer);
+        return recognizerObj;
+    }
+    auto longPressRecognizer = AceType::DynamicCast<NG::LongPressRecognizer>(target);
+    if (longPressRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSLongPressRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSLongPressRecognizer>());
+        currentRecognizer->Update(longPressRecognizer);
+        return recognizerObj;
+    }
+    auto rotationRecognizer = AceType::DynamicCast<NG::RotationRecognizer>(target);
+    if (rotationRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSRotationRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSRotationRecognizer>());
+        currentRecognizer->Update(rotationRecognizer);
+        return recognizerObj;
+    }
+    auto swipeRecognizer = AceType::DynamicCast<NG::SwipeRecognizer>(target);
+    if (swipeRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSSwipeRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSSwipeRecognizer>());
+        currentRecognizer->Update(swipeRecognizer);
         return recognizerObj;
     }
     JSRef<JSObject> recognizerObj = JSClass<JSGestureRecognizer>::NewInstance();
     auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSGestureRecognizer>());
-    currentRecognizer->SetRecognizer(target);
+    currentRecognizer->Update(target);
     return recognizerObj;
-}
-
-void JSEventTargetInfo::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSEventTargetInfo>::Declare("EventTargetInfo");
-    JSClass<JSEventTargetInfo>::CustomMethod("getId", &JSEventTargetInfo::GetInspectorId);
-    JSClass<JSEventTargetInfo>::Bind(globalObj, &JSEventTargetInfo::Constructor, &JSEventTargetInfo::Destructor);
-}
-
-void JSScrollableTargetInfo::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSScrollableTargetInfo>::Declare("ScrollableTargetInfo");
-    JSClass<JSScrollableTargetInfo>::CustomMethod("isBegin", &JSScrollableTargetInfo::IsBegin);
-    JSClass<JSScrollableTargetInfo>::CustomMethod("isEnd", &JSScrollableTargetInfo::IsEnd);
-    JSClass<JSScrollableTargetInfo>::CustomMethod("getId", &JSEventTargetInfo::GetInspectorId);
-    JSClass<JSScrollableTargetInfo>::Inherit<JSEventTargetInfo>();
-    JSClass<JSScrollableTargetInfo>::Bind(
-        globalObj, &JSScrollableTargetInfo::Constructor, &JSScrollableTargetInfo::Destructor);
-}
-
-void JSGestureRecognizer::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSGestureRecognizer>::Declare("GestureRecognizer");
-    JSClass<JSGestureRecognizer>::CustomMethod("getTag", &JSGestureRecognizer::GetTag);
-    JSClass<JSGestureRecognizer>::CustomMethod("getType", &JSGestureRecognizer::GetType);
-    JSClass<JSGestureRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
-    JSClass<JSGestureRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
-    JSClass<JSGestureRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
-    JSClass<JSGestureRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
-    JSClass<JSGestureRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
-    JSClass<JSGestureRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
-    JSClass<JSGestureRecognizer>::Bind(
-        globalObj, &JSGestureRecognizer::Constructor, &JSGestureRecognizer::Destructor);
-}
-
-void JSPanRecognizer::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSPanRecognizer>::Declare("PanRecognizer");
-    JSClass<JSPanRecognizer>::CustomMethod("getTag", &JSGestureRecognizer::GetTag);
-    JSClass<JSPanRecognizer>::CustomMethod("getType", &JSGestureRecognizer::GetType);
-    JSClass<JSPanRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
-    JSClass<JSPanRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
-    JSClass<JSPanRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
-    JSClass<JSPanRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
-    JSClass<JSPanRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
-    JSClass<JSPanRecognizer>::CustomMethod("getPanGestureOptions", &JSPanRecognizer::GetPanGestureOptions);
-    JSClass<JSPanRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
-    JSClass<JSPanRecognizer>::Inherit<JSGestureRecognizer>();
-    JSClass<JSPanRecognizer>::Bind(globalObj, &JSPanRecognizer::Constructor, &JSPanRecognizer::Destructor);
 }
 
 } // namespace OHOS::Ace::Framework

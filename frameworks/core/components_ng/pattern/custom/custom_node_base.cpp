@@ -178,6 +178,7 @@ void CustomNodeBase::Reset()
     appearFunc_ = nullptr;
     destroyFunc_ = nullptr;
     didBuildFunc_ = nullptr;
+    setActiveFunc_ = nullptr;
 }
 
 void CustomNodeBase::SetJSViewName(std::string&& name)

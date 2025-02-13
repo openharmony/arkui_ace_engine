@@ -253,6 +253,11 @@ public:
         return isStackSubmenuHeader_;
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
+    RefPtr<FrameNode> GetEmbeddedMenu() const
+    {
+        return embeddedMenu_;
+    }
+    void HideEmbedded();
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
     void SetBgColor(const Color& color);
@@ -387,6 +392,7 @@ public:
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
+    void RegisterOnPress();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();
     void InitFocusPadding();
@@ -443,6 +449,7 @@ private:
     void SetAccessibilityAction();
     bool IsSelectOverlayMenu();
     void RecordChangeEvent() const;
+    bool ParseMenuBlurStyleEffect(MenuParam& param, const RefPtr<RenderContext>& parseMenuBlurStyleEffect);
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 
@@ -460,7 +467,7 @@ private:
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
     bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
 
-    void OnPress(const TouchEventInfo& info);
+    void OnPress(const UIState& state);
     bool OnSelectProcess();
     void OptionOnModifyDone(const RefPtr<FrameNode>& host);
     void UpdateIconSrc();
@@ -510,9 +517,11 @@ private:
     RefPtr<FrameNode> clickableArea_ = nullptr;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> onTouchEvent_;
+    std::function<void(UIState)> onPressEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<ClickEvent> onClickEvent_;
     bool onTouchEventSet_ = false;
+    bool onPressEventSet_ = false;
     bool onHoverEventSet_ = false;
     bool onKeyEventSet_ = false;
     bool onClickEventSet_ = false;

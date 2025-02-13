@@ -17,9 +17,7 @@
 
 #include <optional>
 #include <string>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -941,9 +939,7 @@ void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {stringValue, dataObject};
         func->Execute(param);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit");
     };
     SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -1064,9 +1060,7 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -1439,20 +1433,20 @@ void JSSearch::SetStopBackPress(const JSCallbackInfo& info)
 
 void JSSearch::SetKeyboardAppearance(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
-    auto jsValue = info[0];
-    if (!jsValue->IsNumber()) {
+    auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;
     }
-    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
-    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
-        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
-        return;
-    }
-    SearchModel::GetInstance()->
-        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+    SearchModel::GetInstance()->SetKeyboardAppearance(
+        static_cast<KeyboardAppearance>(keyboardAppearance));
 }
 
 JSRef<JSVal> JSSearch::CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo)

@@ -1448,7 +1448,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent003, TestSize.Level1)
     pattern->blockPress_ = true;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
 
     pattern->textSelector_.Update(0, 3);
     pattern->blockPress_ = false;
@@ -1735,7 +1735,7 @@ HWTEST_F(TextTestTwoNg, HandleLongPress002, TestSize.Level1)
     EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream).WillRepeatedly(Return(true));
     EXPECT_CALL(*paragraph, GetWordBoundary).WillRepeatedly(Return(false));
     std::vector<RectF> rects { RectF(0, 0, 20, 20) };
-    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).Times(2).WillRepeatedly(SetArgReferee<2>(rects));
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).Times(1).WillRepeatedly(SetArgReferee<2>(rects));
     /**
      * @tc.steps: step1. create frameNode and pattern
      */

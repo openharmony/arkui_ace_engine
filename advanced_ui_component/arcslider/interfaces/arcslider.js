@@ -1335,6 +1335,7 @@ __decorate([
 
 export default {
     ArcSlider,
+    ArcSliderPosition,
     ArcSliderOptions,
     ArcSliderValueOptions,
     ArcSliderLayoutOptions,

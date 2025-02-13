@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/observer_handler.h"
 
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
@@ -53,6 +55,11 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
             NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state);
             navigationHandleFunc_(info);
         }
+        return;
+    }
+    // api 16 trigger onActive and onInactive observer
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && (
+        state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
         return;
     }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
@@ -147,17 +154,8 @@ UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNa
     return navDestinationSwitchHandleFunc_;
 }
 
-std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(const RefPtr<UINode>& current)
 {
-    CHECK_NULL_RETURN(node, nullptr);
-    auto current = AceType::DynamicCast<UINode>(node);
-    while (current) {
-        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            break;
-        }
-        current = current->GetParent();
-    }
-    CHECK_NULL_RETURN(current, nullptr);
     auto nav = AceType::DynamicCast<FrameNode>(current);
     CHECK_NULL_RETURN(nav, nullptr);
     auto pattern = nav->GetPattern<NavDestinationPattern>();
@@ -181,6 +179,51 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
         GetNavigationId(pattern), pattern->GetName(),
         state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()),
         mode, std::to_string(uniqueId));
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
+            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+            break;
+        }
+        current = current->GetFirstChild();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        CHECK_NULL_RETURN(current->GetParent(), nullptr);
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
+            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
 }
 
 std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)

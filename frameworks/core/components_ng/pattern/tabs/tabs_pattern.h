@@ -79,6 +79,9 @@ public:
     void SetAnimationEndEvent(AnimationEndEvent&& event);
 
     void SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    void SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>&& event);
+
     ChangeEventPtr GetTabBarClickEvent()
     {
         return onTabBarClickEvent_;
@@ -149,8 +152,8 @@ public:
 
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
-    void UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
-        const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    void UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
+        const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
 
 private:
     void OnAttachToFrameNode() override;
@@ -177,6 +180,7 @@ private:
     TabAnimateMode animateMode_ = TabAnimateMode::CONTENT_FIRST;
     ChangeEventWithPreIndexPtr onChangeEvent_;
     ChangeEventPtr selectedEvent_;
+    ChangeEventPtr unselectedEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;

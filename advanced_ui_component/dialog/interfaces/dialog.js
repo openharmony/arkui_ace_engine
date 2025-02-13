@@ -1563,8 +1563,8 @@ export class ConfirmDialog extends ViewPU {
         this.content = '';
         this.checkTips = '';
         this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
-        this.primaryButton = { value: "" };
-        this.secondaryButton = { value: "" };
+        this.primaryButton = null;
+        this.secondaryButton = null;
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
@@ -2773,6 +2773,7 @@ class CustomDialogContentComponent extends ViewPU {
         }, WithTheme);
         this.observeComponentCreation2((h16, i16) => {
             Scroll.create();
+            Scroll.edgeEffect(EdgeEffect.None, { alwaysEnabled: false });
             Scroll.backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
             Color.Transparent : {
                     'id': -1,

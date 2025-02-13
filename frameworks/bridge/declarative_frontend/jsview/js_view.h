@@ -93,7 +93,11 @@ public:
         LOGE("jsViewFunction_ is null");
     }
 
-    void RenderJSExecution();
+    void RenderJSExecution(int64_t deadline, bool& isTimeout);
+
+    virtual void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
+
+    virtual void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) {};
 
     virtual void MarkNeedUpdate() = 0;
 
@@ -166,6 +170,7 @@ public:
 
     virtual void OnDumpInfo(const std::vector<std::string>& params) {}
 
+    static JSView* GetNativeView(JSRef<JSObject> obj);
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -189,6 +194,8 @@ private:
     std::array<int32_t, PRIMARY_ID_STACK_SIZE> primaryIdStack_{};
     bool isStatic_ = false;
     std::function<void()> notifyRenderDone_;
+    bool executedAboutToRender_ = false;
+    bool executedOnRenderDone_ = false;
 };
 
 class JSViewFullUpdate : public JSView {
@@ -307,7 +314,13 @@ public:
 
     void Destroy(JSView* parentCustomView) override;
 
-    RefPtr<AceType> InitialRender();
+    void DoRenderJSExecution(int64_t deadline, bool& isTimeout) override;
+
+    RefPtr<AceType> InitialRender(int64_t deadline, bool& isTimeout);
+
+    void PrebuildComponentsInMultiFrame(int64_t deadline, bool& isTimeout);
+
+    void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) override;
 
     RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
@@ -423,8 +436,6 @@ public:
     void JSGetDialogController(const JSCallbackInfo& info);
 
     bool JSAllowReusableV2Descendant();
-
-    static JSView* GetNativeViewPartialUpdate(JSRef<JSObject> obj);
 private:
     void MarkNeedUpdate() override;
 
@@ -432,6 +443,7 @@ private:
     // used for code branching in lambda given to ComposedComponent
     // render callback
     bool isFirstRender_ = true;
+    PrebuildPhase prebuildPhase_ = PrebuildPhase::NONE;
 
     /* list of update function result is a triple (tuple with three entries)
     <0> elmtId
@@ -457,6 +469,7 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
+    bool executedRender_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
@@ -57,6 +58,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -226,7 +230,7 @@ void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = JsiObjectTemplate::GetNativeViewPartialUpdate(obj);
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -576,6 +580,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEffectComponent::JSBind(globalObj);
 #endif
     JSFormLink::JSBind(globalObj);
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+    JSFormButton::JSBind(globalObj);
+#endif
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
@@ -588,14 +595,17 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
-#endif
     JSGestureRecognizer::JSBind(globalObj);
     JSEventTargetInfo::JSBind(globalObj);
     JSScrollableTargetInfo::JSBind(globalObj);
     JSPanRecognizer::JSBind(globalObj);
+    JSTapRecognizer::JSBind(globalObj);
+    JSLongPressRecognizer::JSBind(globalObj);
+    JSSwipeRecognizer::JSBind(globalObj);
+    JSPinchRecognizer::JSBind(globalObj);
+    JSRotationRecognizer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

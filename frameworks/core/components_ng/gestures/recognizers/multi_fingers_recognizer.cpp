@@ -41,9 +41,9 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         PointF localPoint(point.second.x, point.second.y);
         NGGestureRecognizer::Transform(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
-        FingerInfo fingerInfo = { point.second.originalId, point.second.GetOffset(),
-            Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(), point.second.sourceType,
-            point.second.sourceTool };
+        FingerInfo fingerInfo = { point.second.originalId, point.second.operatingHand, point.second.GetOffset(),
+            Offset(localPoint.GetX(), localPoint.GetY()),
+            point.second.GetScreenOffset(), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
         if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
             && point.second.pointers.size() >= touchPoints_.size()) {
@@ -87,6 +87,7 @@ void MultiFingersRecognizer::OnFinishGestureReferee(int32_t touchId, bool isBloc
     if (IsNeedResetStatus()) {
         ResetStatusOnFinish(isBlocked);
     }
+    CheckCallbackState();
 }
 
 void MultiFingersRecognizer::CleanRecognizerState()

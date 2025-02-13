@@ -497,6 +497,9 @@ HWTEST_F(RichEditorEditTestOneNg, ShowHandles001, TestSize.Level1)
     richEditorPattern->ShowHandles(false);
     EXPECT_EQ(richEditorPattern->showSelect_, true);
 
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
     richEditorPattern->isSpanStringMode_ = true;
     auto pasteStr = richEditorPattern->GetPasteStr();
     richEditorPattern->InsertValueByPaste(pasteStr);

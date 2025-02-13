@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -112,8 +113,7 @@ enum class LevelMode {
 
 enum class ImmersiveMode {
     DEFAULT = 0,
-    PAGE,
-    FULL,
+    EXTEND,
 };
 
 class DialogAlignmentUtils {
@@ -253,6 +253,8 @@ struct DialogProperties {
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -272,6 +274,7 @@ struct DialogProperties {
     // These attributes is used for CustomDialog.
     RefPtr<AceType> customComponent;         // Used for CustomDialog in declarative.
     std::function<void(bool)> onStatusChanged; // Called when dialog appear or disappear.
+    bool isUserCreatedDialog = false; // used for user create dialog for navdestination lifecycle
 
     // These attributes is used for ActionSheet.
     std::vector<ActionSheetInfo> sheetsInfo;
@@ -292,6 +295,7 @@ struct DialogProperties {
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
+    std::optional<double> levelOrder;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
@@ -304,6 +308,7 @@ struct PromptDialogAttr {
     bool showInSubWindow = false;
     bool isModal = false;
     bool enableHoverMode = false;
+    bool isUserCreatedDialog = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::function<void(const int32_t& info, const int32_t& instanceId)> customOnWillDismiss;
@@ -313,6 +318,8 @@ struct PromptDialogAttr {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -334,6 +341,7 @@ struct PromptDialogAttr {
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
+    std::optional<double> levelOrder;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;

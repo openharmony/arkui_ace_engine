@@ -134,7 +134,7 @@ private:
         std::set<WeakPtr<ImageLoadingContext>> ctxs_;
     };
 
-    static std::mutex taskMtx_;
+    static std::timed_mutex taskMtx_;
     static std::unordered_map<std::string, Task> tasks_;
 };
 

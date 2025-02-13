@@ -506,7 +506,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
      */
     const int focusNodeId = 10007;
     auto focusNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, focusNodeId, nullptr);
-    focusNode->eventHub_ = AceType::MakeRefPtr<ButtonEventHub>();
+    focusNode->GetEventHub<ButtonEventHub>();
     focusNode->eventHub_->GetOrCreateFocusHub(FocusType::NODE);
     ASSERT_NE(focusNode->GetFocusHub(), nullptr);
 

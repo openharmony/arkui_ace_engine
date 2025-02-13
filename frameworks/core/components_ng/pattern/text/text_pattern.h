@@ -82,6 +82,7 @@ public:
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+        ResetOriginCaretPosition();
     }
 
     ~TextPattern() override;
@@ -569,7 +570,7 @@ public:
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
-    void SetStyledString(const RefPtr<SpanString>& value);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
@@ -778,6 +779,10 @@ public:
     void OnColorConfigurationUpdate() override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+    bool GetOriginCaretPosition(OffsetF& offset) const;
+    void ResetOriginCaretPosition();
+    bool RecordOriginCaretPosition(const OffsetF& offset);
 
 protected:
     int32_t GetClickedSpanPosition()
@@ -991,7 +996,8 @@ private:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS,
+                                             .surfaceName = std::nullopt };
     }
 
     SourceTool GetCurrentDragTool() const
@@ -1062,6 +1068,9 @@ private:
     bool isAutoScrollByMouse_ = false;
     bool shiftFlag_ = false;
     std::string textDetectTypes_ = "";
+    // Used to record original caret position for "shift + up/down"
+    // Less than 0 is invalid, initialized as invalid in constructor
+    OffsetF originCaretPosition_;
 };
 } // namespace OHOS::Ace::NG
 

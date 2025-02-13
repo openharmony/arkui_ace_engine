@@ -18,26 +18,27 @@ class RefInfo {
   private static setMapProxy: SetMapProxyHandler = new SetMapProxyHandler(true);
   private static arrayProxy: ArrayProxyHandler = new ArrayProxyHandler(true);
   private static objectProxy: ObjectProxyHandler = new ObjectProxyHandler(true);
+  public static readonly MAKE_OBSERVED_PROXY = Symbol('__make_observed_proxy');
 
   static get(target: Object): any {
     if (!target || typeof target !== 'object') {
       stateMgmtConsole.warn(`makeObserved target is not a valid object, return target directly`);
-      return { proxy: target };
+      return { [RefInfo.MAKE_OBSERVED_PROXY]: target };
     }
     // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
     if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {
       stateMgmtConsole.warn(`${target.constructor.name} is Observed ${ObservedObject.IsObservedObject(target)}, IsObservedV2 ${ObserveV2.IsObservedObjectV2(target)} or makeObserved proxy value ${ObserveV2.IsMakeObserved(target)}. makeObserved will stop work`);
-      return { proxy: target };
+      return { [RefInfo.MAKE_OBSERVED_PROXY]: target };
     }
     let ret = RefInfo.obj2ref.get(target);
     if (!ret) {
       if (Array.isArray(target) || SendableType.isArray(target)) {
-        ret = { proxy: new Proxy(target, RefInfo.arrayProxy) };
+        ret = { [RefInfo.MAKE_OBSERVED_PROXY]: new Proxy(target, RefInfo.arrayProxy) };
       } else if (target instanceof Set || SendableType.isSet(target) ||
         target instanceof Map || SendableType.isMap(target)) {
-        ret = { proxy: new Proxy(target, RefInfo.setMapProxy) };
+        ret = { [RefInfo.MAKE_OBSERVED_PROXY]: new Proxy(target, RefInfo.setMapProxy) };
       } else {
-        ret = { proxy: new Proxy(target, RefInfo.objectProxy) };
+        ret = { [RefInfo.MAKE_OBSERVED_PROXY]: new Proxy(target, RefInfo.objectProxy) };
       }
       RefInfo.obj2ref.set(target, ret);
     }

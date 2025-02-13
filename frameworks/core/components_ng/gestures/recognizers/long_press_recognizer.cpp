@@ -65,7 +65,11 @@ void LongPressRecognizer::OnAccepted()
     UpdateFingerListInfo();
     SendCallbackMsg(onActionUpdate_, false);
     SendCallbackMsg(onAction_, false, true);
+    if (isLimitFingerCount_ && hasRepeated_) {
+        return;
+    }
     if (repeat_) {
+        hasRepeated_ = true;
         StartRepeatTimer();
     }
 }
@@ -174,8 +178,12 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
+        if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+            SendCallbackMsg(onAction_, false, true);
+        }
         SendCallbackMsg(onActionUpdate_, false);
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
+            hasRepeated_ = false;
             SendCallbackMsg(onActionEnd_, false);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
@@ -211,6 +219,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    touchPoints_[event.id].operatingHand = event.operatingHand;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     time_ = event.time;

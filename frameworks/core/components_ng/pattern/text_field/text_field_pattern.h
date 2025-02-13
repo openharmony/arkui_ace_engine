@@ -691,6 +691,7 @@ public:
     bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position, bool moveContent = true);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
+    void HandleSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
     OffsetF GetDragUpperLeftCoordinates() override;
@@ -700,6 +701,7 @@ public:
         return selectController_->GetSelectedRects();
     }
     std::vector<RectF> GetTextBoxesForSelect();
+    void AdjustSelectedBlankLineWidth(RectF& rect);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1010,7 +1012,7 @@ public:
     void ClearFocusStyle();
     void ProcessFocusStyle();
     bool OnBackPressed() override;
-    bool IsStopBackPress() const;
+    bool IsStopBackPress() const override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     bool CheckMousePressedOverScrollBar(GestureEvent& info);
@@ -2162,6 +2164,7 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isPreviewTextOverCount_ = false;
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;

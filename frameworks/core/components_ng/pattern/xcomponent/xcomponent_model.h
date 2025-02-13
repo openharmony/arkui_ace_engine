@@ -32,7 +32,7 @@ using SurfaceCreatedEvent = std::function<void(const std::string&, const std::st
 using SurfaceChangedEvent = std::function<void(const std::string&, const NG::RectF&)>;
 using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 
-class XComponentModel {
+class ACE_FORCE_EXPORT XComponentModel {
 public:
     static XComponentModel* GetInstance();
     static bool IsBackGroundColorAvailable(const XComponentType& type)

@@ -71,6 +71,22 @@ void DragDropInitiatingStateBase::PrepareFinalPixelMapForDragThroughTouch(
     taskScheduler->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIPrepareScaledPixel", PriorityType::VIP);
 }
 
+void DragDropInitiatingStateBase::FireCustomerOnDragEnd()
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto eventHub = frameNode ->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->FireCustomerOnDragEnd(pipelineContext, eventHub);
+}
+
 void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
     auto machine = GetStateMachine();
@@ -184,5 +200,18 @@ bool DragDropInitiatingStateBase::CheckStatusForPanActionBegin(
         return false;
     }
     return true;
+}
+
+int32_t DragDropInitiatingStateBase::GetCurDuration(const TouchEvent& touchEvent, int32_t curDuration)
+{
+    int64_t currentTimeStamp = GetSysTimestamp();
+    auto machine = GetStateMachine();
+    CHECK_NULL_RETURN(machine, 0);
+    int64_t eventTimeStamp = static_cast<int64_t>(touchEvent.time.time_since_epoch().count());
+    if (currentTimeStamp > eventTimeStamp) {
+        curDuration = curDuration - static_cast<int32_t>((currentTimeStamp- eventTimeStamp) / TIME_BASE);
+        curDuration = curDuration < 0 ? 0: curDuration;
+    }
+    return curDuration;
 }
 } // namespace OHOS::Ace::NG

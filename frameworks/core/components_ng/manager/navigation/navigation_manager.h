@@ -165,11 +165,13 @@ public:
 
     std::vector<int32_t> FindNavigationInTargetParent(int32_t targetId);
 
-    void FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle);
+    void FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
     void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
     void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
+
+    void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
 private:
     struct DumpMapKey {
@@ -185,6 +187,10 @@ private:
             return nodeId < o.nodeId;
         }
     };
+
+    bool IsOverlayValid(const RefPtr<UINode>& frameNode);
+
+    bool IsCustomDialogValid(const RefPtr<UINode>& node);
 
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
@@ -202,7 +208,6 @@ private:
     bool isInAnimation_ = false;
     bool isNodeAddAnimation_ = false;
     bool hasCacheNavigationNodeEnable_ = false;
-    bool lastWindowShow_ = true;
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;

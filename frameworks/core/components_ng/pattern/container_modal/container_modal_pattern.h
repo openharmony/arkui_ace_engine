@@ -58,12 +58,12 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        pipeline->AddWindowFocusChangedCallback(host->GetId());
+        pipeline->AddWindowActivateChangedCallback(host->GetId());
     }
 
-    void OnWindowFocused() override;
+    void OnWindowActivated() override;
 
-    void OnWindowUnfocused() override;
+    void OnWindowDeactivated() override;
 
     virtual void OnWindowForceUnfocused();
 
@@ -163,6 +163,7 @@ public:
     void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height);
     void UpdateGestureRowVisible();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
+    bool GetContainerModalTitleVisible(bool isImmersive);
     virtual void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
     virtual bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
@@ -202,6 +203,8 @@ public:
     {
         return false;
     }
+
+    void InitAllTitleRowLayoutProperty();
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)

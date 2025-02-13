@@ -41,7 +41,6 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
-#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
@@ -409,7 +408,7 @@ public:
         return sharedRuntime_;
     }
 
-    void SetParentId(int32_t parentId)
+    void SetParentId(int32_t parentId) override
     {
         parentId_ = parentId;
     }
@@ -432,7 +431,7 @@ public:
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
-    int32_t GetParentId() const
+    int32_t GetParentId() const override
     {
         return parentId_;
     }
@@ -485,6 +484,8 @@ public:
     static void OnHide(int32_t instanceId);
     static void OnActive(int32_t instanceId);
     static void OnInactive(int32_t instanceId);
+    static void ActiveWindow(int32_t instanceId);
+    static void UnActiveWindow(int32_t instanceId);
     static void OnNewWant(int32_t instanceId, const std::string& data);
     static bool OnStartContinuation(int32_t instanceId);
     static std::string OnSaveData(int32_t instanceId);
@@ -555,6 +556,10 @@ public:
     {
         isFormRender_ = isFormRender;
     }
+
+    void SetAppRunningUniqueId(const std::string& uniqueId) override;
+
+    const std::string& GetAppRunningUniqueId() const override;
 
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
@@ -636,6 +641,7 @@ public:
 
     bool IsLauncherContainer() override;
     bool IsScenceBoardWindow() override;
+    bool IsCrossAxisWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
@@ -785,16 +791,6 @@ public:
         isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
-    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
-    {
-        containerHandler_ = containerHandler;
-    }
-
-    WeakPtr<ContainerHandler> GetContainerHandler()
-    {
-        return containerHandler_;
-    }
-
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
     {
         singleHandTransform_ = singleHandTransform;
@@ -806,6 +802,10 @@ public:
     }
 
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
+
+    Rect GetDisplayAvailableRect() const override;
+
+    void GetExtensionConfig(AAFwk::WantParams& want);
 
 private:
     virtual bool MaybeRelease() override;
@@ -837,8 +837,10 @@ private:
     void DispatchUIExtDataConsume(
         NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     void RegisterUIExtDataSendToHost();
-    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
-    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool FireUIExtDataSendToHost(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -904,6 +906,8 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    std::string uniqueId_;
+
     // For custom drag event
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
@@ -916,8 +920,6 @@ private:
     std::vector<std::string> paramUie_;
     std::optional<bool> isTouchEventsPassThrough_;
 
-    // for common handler
-    WeakPtr<ContainerHandler> containerHandler_;
     SingleHandTransform singleHandTransform_;
 };
 

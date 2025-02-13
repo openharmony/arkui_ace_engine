@@ -35,10 +35,11 @@ const std::string EVENT_NAME_RIGHT_SPLIT_CLICK = "arkui_custom_right_split_click
 const std::string EVENT_NAME_BUTTON_POINT_LIGHT_ANIM = "arkui_custom_button_point_light_anim";
 const std::string EVENT_NAME_BUTTON_RECT_CHANGE = "arkui_custom_button_rect_change";
 const std::string EVENT_NAME_MENU_WIDTH_CHANGE = "arkui_custom_menu_width_change";
+const std::string EVENT_NAME_TITLE_ROW_UPDATE = "arkui_custom_title_row_update";
 
 const int32_t EVENT_NAME_MENU_WIDTH_CHANGE_PARAM_COUNT = 2;
 
-std::map<std::string, std::function<void(const JSCallbackInfo& info)>> nativeFucMap_;
+static std::map<std::string, std::function<void(const JSCallbackInfo& info)>> g_nativeFuncMap;
 } // namespace
 
 void JSContainerModal::OnMaxBtnClick(const JSCallbackInfo& info)
@@ -123,6 +124,14 @@ void JSContainerModal::CallMenuWidthChange(const JSCallbackInfo& info)
     pattern->CallMenuWidthChange(resId);
 }
 
+void JSContainerModal::CallTitleRowUpdate(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallTitleRowUpdate");
+    auto pattern = GetContainerModalPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitAllTitleRowLayoutProperty();
+}
+
 RefPtr<NG::ContainerModalPatternEnhance> JSContainerModal::GetContainerModalPattern()
 {
     auto pipelineContext = NG::PipelineContext::GetCurrentContextPtrSafely();
@@ -167,6 +176,18 @@ void JSContainerModal::CallWindowNative(const JSCallbackInfo& info)
 
 void JSContainerModal::CallNative(const JSCallbackInfo& info)
 {
+    g_nativeFuncMap = {
+        { EVENT_NAME_CUSTOM_MAX_CLICK, JSContainerModal::OnMaxBtnClick },
+        { EVENT_NAME_MIN_CLICK, JSContainerModal::OnMinBtnClick },
+        { EVENT_NAME_CLOSE_CLICK, JSContainerModal::OnCloseBtnClick },
+        { EVENT_NAME_LEFT_SPLIT_CLICK, JSContainerModal::OnLeftSplitClick },
+        { EVENT_NAME_RIGHT_SPLIT_CLICK, JSContainerModal::OnRightSplitClick },
+        { EVENT_NAME_BUTTON_POINT_LIGHT_ANIM, JSContainerModal::AddButtonPointLightAnim },
+        { EVENT_NAME_BUTTON_RECT_CHANGE, JSContainerModal::CallButtonsRectChange },
+        { EVENT_NAME_MENU_WIDTH_CHANGE, JSContainerModal::CallMenuWidthChange },
+        { EVENT_NAME_TITLE_ROW_UPDATE, JSContainerModal::CallTitleRowUpdate},
+    };
+
     TAG_LOGI(AceLogTag::ACE_APPBAR, "callNative");
     if (info.Length() < 1) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "callNative param erro");
@@ -178,8 +199,8 @@ void JSContainerModal::CallNative(const JSCallbackInfo& info)
     }
     std::string eventName = info[0]->ToString();
     if (eventName.rfind("arkui", 0) == 0) {
-        auto it = nativeFucMap_.find(eventName);
-        if (it == nativeFucMap_.end()) {
+        auto it = g_nativeFuncMap.find(eventName);
+        if (it == g_nativeFuncMap.end()) {
             TAG_LOGI(AceLogTag::ACE_APPBAR, "Event not found: %{public}s", eventName.c_str());
             return;
         }
@@ -191,17 +212,6 @@ void JSContainerModal::CallNative(const JSCallbackInfo& info)
 
 void JSContainerModal::JSBind(BindingTarget globalObj)
 {
-    nativeFucMap_ = {
-        { EVENT_NAME_CUSTOM_MAX_CLICK, JSContainerModal::OnMaxBtnClick },
-        { EVENT_NAME_MIN_CLICK, JSContainerModal::OnMinBtnClick },
-        { EVENT_NAME_CLOSE_CLICK, JSContainerModal::OnCloseBtnClick },
-        { EVENT_NAME_LEFT_SPLIT_CLICK, JSContainerModal::OnLeftSplitClick },
-        { EVENT_NAME_RIGHT_SPLIT_CLICK, JSContainerModal::OnRightSplitClick },
-        { EVENT_NAME_BUTTON_POINT_LIGHT_ANIM, JSContainerModal::AddButtonPointLightAnim },
-        { EVENT_NAME_BUTTON_RECT_CHANGE, JSContainerModal::CallButtonsRectChange },
-        { EVENT_NAME_MENU_WIDTH_CHANGE, JSContainerModal::CallMenuWidthChange },
-    };
-
     JSClass<JSContainerModal>::Declare("ContainerModal");
     JSClass<JSContainerModal>::StaticMethod("callNative", &JSContainerModal::CallNative);
     JSClass<JSContainerModal>::InheritAndBind<JSContainerBase>(globalObj);

@@ -130,6 +130,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->RegisterWindowSizeCallback();
     pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -957,6 +958,7 @@ void TextFieldModelNG::SetKeyboardAppearance(KeyboardAppearance value)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearance(value);
 }
 
@@ -1603,7 +1605,7 @@ Font TextFieldModelNG::GetPlaceholderFont(FrameNode* frameNode)
         TextFieldLayoutProperty, PlaceholderFontWeight, fontWeight, frameNode, fontWeight);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, PlaceholderFontFamily, fontFamilies, frameNode, fontFamilies);
-    Font value { fontWeight, fontSize, fontStyle, fontFamilies };
+    Font value { fontWeight, fontSize, fontStyle, fontFamilies, std::nullopt, std::nullopt, std::nullopt };
     return value;
 }
 
