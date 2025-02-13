@@ -26,6 +26,7 @@ export const navigatesRoute: RouteGroup = {
     { name: 'swiper', label: '轮播/Swiper' },
     { name: 'tabContent', label: '页签内容/TabContent' },
     { name: 'tabs', label: '页签容器/Tabs' },
+    { name: 'toolbar', label: '工具栏/ToolBar' },
     { name: 'stepper', label: '步骤导航/Stepper' }
   ]
 };
@@ -38,7 +39,9 @@ export function NavigatesDestination(name: string, route: Route) {
     TabContentBootcamp({ title: route.label })
   } else if (name === 'navigates/tabs') {
     TabsBootcamp({ title: route.label })
-  } else if (name == 'navigates/stepper') {
+  } else if (name === 'navigates/toolbar') {
+    ToolBarBootcamp({ title: route.label })
+  } else if (name === 'navigates/stepper') {
     StepperBootcamp({ title: route.label })
   }
 }
