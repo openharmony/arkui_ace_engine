@@ -2228,10 +2228,21 @@ typedef enum {
     ARKUI_ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001,
     /** The buffer is not large enough. */
     ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002,
-    /** The event is not cloned pointer event. */
+    /**
+     * @error The event is not a clone event.
+     * @since 16
+     */
     ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT = 180003,
-    /** post cloned pointer event failed. */
-    ARKUI_ERROR_CODE_POST_CLONED_POINTER_EVENT_FAILED = 180004,
+    /**
+     * @error The component status is abnormal.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL = 180004,
+    /**
+     * @error No component hit to respond to the event.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT = 180005,
     /** invalid styled string */
     ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
     /** The uiContext is invalid. */
