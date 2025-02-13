@@ -1990,27 +1990,27 @@ typedef enum {
 /**
  * @brief Defines the keyboard style of input box
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /**
      * Default appearance mode, won't adopt immersive styles.
-     * @since 16
+     * @since 15
      */
     ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE = 0,
     /**
      * Immersive mode.
-     * @since 16
+     * @since 15
      */
     ARKUI_KEYBOARD_APPEARANCE_IMMERSIVE = 1,
     /**
      * Light immersive style.
-     * @since 16
+     * @since 15
      */
     ARKUI_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE = 2,
     /**
      * Dark immersive style.
-     * @since 16
+     * @since 15
      */
     ARKUI_KEYBOARD_APPEARANCE_DARK_IMMERSIVE = 3,
 } ArkUI_KeyboardAppearance;
