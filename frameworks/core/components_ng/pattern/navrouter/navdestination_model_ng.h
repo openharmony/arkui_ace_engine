@@ -38,6 +38,7 @@ public:
     void SetOnWillShow(std::function<void()>&& willShow) override;
     void SetOnWillHide(std::function<void()>&& willHide) override;
     void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
+    void SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& popCallback) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetHideToolBar(bool hideToolBar, bool animated) override;
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);

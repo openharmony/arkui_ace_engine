@@ -86,7 +86,13 @@ public:
 
     void SetNavPathInfo(const RefPtr<NavPathInfo>& pathInfo)
     {
-        if (navDestinationContext_) {
+        if (!navDestinationContext_) {
+            return;
+        }
+        auto oldInfo = navDestinationContext_->GetNavPathInfo();
+        if (oldInfo) {
+            oldInfo->UpdateNavPathInfo(pathInfo);
+        } else {
             navDestinationContext_->SetNavPathInfo(pathInfo);
         }
     }
