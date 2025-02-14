@@ -153,6 +153,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSViewAbstract::ParseDialogCallback(constructorArg, onWillDismissFunc);
         instance->dialogProperties_.onWillDismiss = onWillDismissFunc;
 
+        JSViewAbstract::ParseAppearDialogCallback(info, instance->dialogProperties_);
+
         // Parses autoCancel.
         JSRef<JSVal> autoCancelValue = constructorArg->GetProperty("autoCancel");
         if (autoCancelValue->IsBoolean()) {

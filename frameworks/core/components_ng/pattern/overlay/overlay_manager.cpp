@@ -2498,6 +2498,10 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
     Maskarg.autoCancel = dialogProps.autoCancel;
     Maskarg.onWillDismiss = dialogProps.onWillDismiss;
     Maskarg.maskColor = dialogProps.maskColor;
+    Maskarg.onWillAppear = dialogProps.onWillAppear;
+    Maskarg.onDidAppear = dialogProps.onDidAppear;
+    Maskarg.onWillDisappear = dialogProps.onWillDisappear;
+    Maskarg.onDidDisappear = dialogProps.onDidDisappear;
     return ShowDialog(Maskarg, nullptr, false);
 }
 
@@ -2522,6 +2526,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to create dialog node");
         return nullptr;
     }
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
     BeforeShowDialog(dialog);
     PutLevelOrder(dialog, dialogProps.levelOrder);
     if (dialogProps.transitionEffect != nullptr) {
