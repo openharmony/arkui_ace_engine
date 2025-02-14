@@ -878,7 +878,6 @@ private:
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
-    bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
