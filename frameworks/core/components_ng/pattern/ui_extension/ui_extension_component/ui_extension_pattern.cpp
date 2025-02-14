@@ -1907,7 +1907,7 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow();
+    auto rect = host->GetTransformRectRelativeToWindow(true);
     VectorF finalScale = host->GetTransformScaleRelativeToWindow();
     
     rectInfo.left = static_cast<int32_t>(rect.Left());

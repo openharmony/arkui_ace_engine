@@ -500,7 +500,7 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    RectF GetTransformRectRelativeToWindow() const;
+    RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,

@@ -3558,13 +3558,16 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
-RectF FrameNode::GetTransformRectRelativeToWindow() const
+RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, RectF());
     RectF rect = context->GetPaintRectWithTransform();
     auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
+        if (checkBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
         rect = ApplyFrameNodeTranformToRect(rect, parent);
         parent = parent->GetAncestorNodeOfFrame(true);
     }
