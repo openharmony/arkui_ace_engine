@@ -3195,7 +3195,7 @@ export struct GaugeBootcamp {
 
               CompEventMonopolizationBlocks({
                 enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
-                compMonopolizeEvents: $enableCompMonopolizeEvents
+                compMonopolizeEvents: $compMonopolizeEvents
               })
 
               CompCursorControlBlocks({
