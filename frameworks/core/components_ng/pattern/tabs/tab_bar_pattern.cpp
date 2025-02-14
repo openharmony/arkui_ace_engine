@@ -65,7 +65,6 @@ constexpr float MAX_FLING_VELOCITY = 4200.0f;
 
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const auto TRANSLATE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
-const auto TRANSLATE_DELAY = 2000;
 const auto TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_FRAME_RATE = 120;
 const auto TRANSLATE_FRAME_RATE_RANGE =
@@ -142,21 +141,6 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
 
     if (delay == 0) {
         StartShowTabBarImmediately();
-    } else {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        showTabBarTask_.Reset([weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto pipeline = pattern->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            pattern->showTabBarTask_.Reset(nullptr);
-            pattern->StartShowTabBarImmediately();
-            pipeline->RequestFrame();
-        });
-        taskExecutor->PostDelayedTask(showTabBarTask_, TaskExecutor::TaskType::UI, delay, "ArkUITabBarTranslate");
     }
 }
 
@@ -241,9 +225,6 @@ void TabBarPattern::StartHideTabBar()
         CHECK_NULL_VOID(pattern);
         pattern->isTabBarHiding_ = false;
         pattern->tabBarState_ = TabBarState::HIDE;
-        if (pattern->showTabBarTask_) {
-            pattern->StartShowTabBar(TRANSLATE_DELAY);
-        }
     };
     AnimationUtils::Animate(option, propertyCallback, finishCallback);
     isTabBarHiding_ = true;
