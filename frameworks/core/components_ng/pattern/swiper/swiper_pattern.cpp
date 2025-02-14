@@ -2128,7 +2128,8 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
         return;
     }
 
-    auto preloadTask = [weak = WeakClaim(this), indexSet]() {
+    auto preloadTask = [weak = WeakClaim(this), id = GetHostInstanceId(), indexSet]() {
+        ContainerScope scope(id);
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
         auto host = swiperPattern->GetHost();
@@ -5015,7 +5016,8 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad)
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weak = WeakClaim(RawPtr(child)), forEachIndexSet]() {
+            [weak = WeakClaim(RawPtr(child)), id = host->GetInstanceId(), forEachIndexSet]() {
+                ContainerScope scope(id);
                 auto node = weak.Upgrade();
                 CHECK_NULL_VOID(node);
                 auto forEachNode = AceType::DynamicCast<ForEachNode>(node);
