@@ -16,26 +16,73 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "accessor_test_utils.h"
 #include "node_api.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_style.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+const auto RES_NAME_ID = NamedResourceId { "aa.bb.cc", Converter::ResourceType::STRING };
+const auto RES_NAME_ID_ANY = "res_name_any";
+const auto RES_NAME_ID_EMPTY = NamedResourceId { "res_name_empty", Converter::ResourceType::STRING };
+const auto RES_NUMBER_ID = IntResourceId { 11111, Converter::ResourceType::STRING };
+const auto RES_INVALID_ID = IntResourceId { -1, Converter::ResourceType::STRING };
+const std::string RES_DATA_URL = "/super.example.com";
+const std::string RES_DATA_URL_ANY = "any string not url";
+const std::string RES_DATA_URL_OTHER = "example.com/";
+const std::string RES_DATA_EMPTY = "";
+const std::vector<std::tuple<std::string, Ark_Resource, std::string>> resourceTestPlan = {
+    { RES_DATA_URL, CreateResource(RES_NAME_ID), "super.example.com" },
+    { RES_DATA_URL_ANY, CreateResource(RES_NAME_ID_ANY, Converter::ResourceType::STRING), "any string not url" },
+    { RES_DATA_EMPTY, CreateResource(RES_NAME_ID_EMPTY), "" },
+    { RES_DATA_URL_OTHER, CreateResource(RES_NUMBER_ID), "example.com" },
+    { RES_DATA_URL, CreateResource(RES_INVALID_ID), "" },
+};
+const std::vector<std::tuple<std::string, Ark_Buffer, std::string>> responseBufferTestPlan = {
+    { RES_DATA_URL, Converter::ArkValue<Ark_Buffer>(RES_DATA_URL, nullptr), "/super.example.com" },
+    { RES_DATA_URL_ANY, Converter::ArkValue<Ark_Buffer>(RES_DATA_URL_ANY, nullptr), "any string not url" },
+    { RES_DATA_URL_OTHER, Converter::ArkValue<Ark_Buffer>(RES_DATA_URL_OTHER, nullptr), "example.com/" },
+    { RES_DATA_EMPTY, Converter::ArkValue<Ark_Buffer>(RES_DATA_EMPTY, nullptr), "" },
+};
+} // namespace
 class WebResourceResponseAccessorTest : public AccessorTestBase<GENERATED_ArkUIWebResourceResponseAccessor,
     &GENERATED_ArkUIAccessors::getWebResourceResponseAccessor, WebResourceResponsePeer> {
 public:
+    static void SetUpTestCase()
+    {
+        AccessorTestBase::SetUpTestCase();
+        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
+        themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
+            .WillRepeatedly(testing::Return(themeConstants_));
+        themeConstants_->LoadTheme(0);
+    }
     void SetUp() override
     {
         AccessorTestBase::SetUp();
         peer_->handler = Referenced::MakeRefPtr<WebResponse>();
         ASSERT_NE(peer_->handler, nullptr);
     }
+    static void TearDownTestCase()
+    {
+        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+        themeManager_ = nullptr;
+        themeConstants_ = nullptr;
+    }
+
+private:
+    inline static RefPtr<MockThemeManager> themeManager_;
+    inline static RefPtr<ThemeConstants> themeConstants_;
 };
 
 /**
@@ -143,23 +190,58 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_setResponseDataResourceTest
+ * @tc.name: setResponseDataResourceTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_setResponseDataResourceTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, setResponseDataResourceTest, TestSize.Level1)
 {
-    // test need to be implemented for Ark_Resource
+    Ark_Union_String_Number_Resource_Buffer initvalueResponse;
+    ASSERT_NE(accessor_->setResponseData, nullptr);
+    // Initial setup
+    AddResource(RES_NAME_ID, RES_DATA_URL);
+    AddResource(RES_NAME_ID_ANY, RES_DATA_URL_ANY);
+    AddResource(RES_NAME_ID_EMPTY, RES_DATA_EMPTY);
+    AddResource(RES_NUMBER_ID, RES_DATA_URL_OTHER);
+    AddResource(RES_INVALID_ID, RES_DATA_URL);
+    auto responseData = std::get<1>(resourceTestPlan[0]);
+    initvalueResponse = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Resource>(responseData);
+    auto checkValue = [this, &initvalueResponse](
+        const std::string& input, const Ark_Resource& value, const std::string& expectedStr) {
+        Ark_Union_String_Number_Resource_Buffer data = initvalueResponse;
+        data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Resource>(value);
+        accessor_->setResponseData(peer_, &data);
+        auto result = peer_->handler->GetResourceUrl();
+        EXPECT_EQ(result, expectedStr);
+    };
+    for (const auto& [input, value, expected] : resourceTestPlan) {
+        checkValue(input, value, expected);
+    }
 }
 
 /**
- * @tc.name: DISABLED_setResponseDataArrayBufferTest
+ * @tc.name: setResponseDataArrayBufferTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_setResponseDataArrayBufferTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, setResponseDataArrayBufferTest, TestSize.Level1)
 {
-    // test need to be implemented for Ark_ArrayBuffer
+    Ark_Union_String_Number_Resource_Buffer initvalueResponse;
+    ASSERT_NE(accessor_->setResponseData, nullptr);
+    // Initial setup
+    auto responseData = std::get<1>(responseBufferTestPlan[0]);
+    initvalueResponse = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>(responseData);
+    auto checkValue = [this, &initvalueResponse](
+        const std::string& input, const Ark_Buffer& value, const std::string& expectedStr) {
+        Ark_Union_String_Number_Resource_Buffer data = initvalueResponse;
+        data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>(value);
+        accessor_->setResponseData(peer_, &data);
+        auto result = peer_->handler->GetData();
+        EXPECT_EQ(result, expectedStr);
+    };
+    for (const auto& [input, value, expected] : responseBufferTestPlan) {
+        checkValue(input, value, expected);
+    }
 }
 
 /**

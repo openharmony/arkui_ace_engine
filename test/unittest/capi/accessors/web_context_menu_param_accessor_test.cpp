@@ -242,4 +242,35 @@ HWTEST_F(WebContextMenuParamAccessorTest, getEditStateFlagsTest, TestSize.Level1
     EXPECT_EQ(value, accessor_->getEditStateFlags(peer_));
 }
 
+/**
+ * @tc.name: getPreviewWidthTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuParamAccessorTest, getPreviewWidthTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPreviewWidth, nullptr);
+
+    int32_t value = 11;
+
+    mockHandler_->mockPreviewWidth = value;
+    auto result = accessor_->getPreviewWidth(peer_);
+    EXPECT_EQ(value, result);
+}
+
+/**
+ * @tc.name: getPreviewHeightTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuParamAccessorTest, getPreviewHeightTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPreviewHeight, nullptr);
+
+    int32_t value = 12;
+
+    mockHandler_->mockPreviewHeight = value;
+    auto result = accessor_->getPreviewHeight(peer_);
+    EXPECT_EQ(value, result);
+}
 } // namespace OHOS::Ace::NG

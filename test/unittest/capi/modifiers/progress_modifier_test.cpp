@@ -14,6 +14,7 @@
  */
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "generated/type_helpers.h"
 
 #include "core/components/progress/progress_theme.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -74,6 +75,8 @@ namespace  {
     const auto ATTRIBUTE_SCALE_WIDTH_DEFAULT_VALUE = "0.00px";
     const auto ATTRIBUTE_ENABLE_SMOOTH_EFFECT_NAME = "enableSmoothEffect";
     const auto ATTRIBUTE_ENABLE_SMOOTH_EFFECT_DEFAULT_VALUE = "true";
+    const auto RES_NAME_ID = "RES_NAME_ID";
+    const auto RES_NAME_NEG_ID = "RES_NAME_NEG_ID";
 } // namespace
 
 class ProgressModifierTest : public ModifierTestBase<GENERATED_ArkUIProgressModifier,
@@ -83,6 +86,8 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
         SetupTheme<ProgressTheme>();
+        AddResource(RES_NAME_ID, 22.55_px);
+        AddResource(RES_NAME_NEG_ID, -56.73_px);
     }
 };
 
@@ -302,13 +307,44 @@ HWTEST_F(ProgressModifierTest, setLinearStyleValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setLinearStyleStrokeRadiusValidValues
+ * @tc.name: setLinearStyleStrokeRadiusValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleStrokeRadiusValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setLinearStyleStrokeRadiusValidValues, TestSize.Level1)
 {
-    // attribute linearStyle.strokeRadius is blocked
+    Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions options;
+    Ark_LinearStyleOptions linerStyle;
+    linerStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    linerStyle.strokeWidth = Converter::ArkValue<Opt_Length>(50._px);
+    options =
+        Converter::ArkUnion<Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
+            Ark_LinearStyleOptions>(linerStyle);
+    auto checkValue =
+        [this](const Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions& input,
+            const std::string& expectedStr) {
+            modifier_->setStyle(node_, &input);
+            auto strResult = GetStringAttribute(node_, ATTRIBUTE_LINEAR_STYLE_NAME);
+            auto result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_RADIUS_NAME);
+            EXPECT_EQ(result, expectedStr);
+        };
+    auto value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(12.34);
+    TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options).strokeRadius = value;
+    checkValue(options, "12.34vp");
+
+    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_String>("1.00");
+    TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options).strokeRadius = value;
+    checkValue(options, "1.00fp");
+
+    auto strokeRes = CreateResource(RES_NAME_ID, Converter::ResourceType::FLOAT);
+    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
+    TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options).strokeRadius = value;
+    checkValue(options, "22.55px");
+
+    strokeRes = CreateResource(RES_NAME_NEG_ID, Converter::ResourceType::FLOAT);
+    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
+    TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options).strokeRadius = value;
+    checkValue(options, "25.00px");
 }
 
 /*
