@@ -14,12 +14,11 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
-
+#include "core/common/container.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::Framework {
 const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE,
