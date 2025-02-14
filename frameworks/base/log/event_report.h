@@ -211,6 +211,7 @@ public:
     static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                   const std::string& pageName);
     static void ReportDragInfo(const DragInfo& dragInfo);
+    static void ReportReusedNodeSkipMeasureApp();
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
