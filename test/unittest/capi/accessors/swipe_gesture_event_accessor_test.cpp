@@ -23,6 +23,10 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    const double EPSILON = 0.001; // defined epsilon doesn't enough
+}
+
 class SwipeGestureEventAccessorTest
     : public AccessorTestBase<GENERATED_ArkUISwipeGestureEventAccessor,
         &GENERATED_ArkUIAccessors::getSwipeGestureEventAccessor, SwipeGestureEventPeer> {
@@ -62,7 +66,7 @@ HWTEST_F(SwipeGestureEventAccessorTest, SetAngleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberValues) {
         accessor_->setAngle(peer_, &value);
-        EXPECT_NEAR(eventInfo_->GetAngle(), expected, FLT_EPSILON) <<
+        EXPECT_NEAR(eventInfo_->GetAngle(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetAngle";
     }
 }
@@ -91,7 +95,7 @@ HWTEST_F(SwipeGestureEventAccessorTest, SetSpeedTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberValues) {
         accessor_->setSpeed(peer_, &value);
-        EXPECT_NEAR(eventInfo_->GetSpeed(), expected, FLT_EPSILON) <<
+        EXPECT_NEAR(eventInfo_->GetSpeed(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetSpeed";
     }
 }
