@@ -19,6 +19,9 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -44,6 +47,21 @@ public:
 class MockPanGestureModel : public PanGestureModelNG {
 public:
     MOCK_METHOD(void, Create, (int32_t, const PanDirection&, double));
+};
+
+class MockPinchGestureModel : public PinchGestureModelNG {
+public:
+    MOCK_METHOD(void, Create, (int32_t, double));
+};
+
+class MockSwipeGestureModel : public SwipeGestureModelNG {
+public:
+    MOCK_METHOD(void, Create, (int32_t, const SwipeDirection&, double));
+};
+
+class MockRotationGestureModel : public RotationGestureModelNG {
+public:
+    MOCK_METHOD(void, Create, (int32_t, double));
 };
 
 class CommonMethodModifierTest14 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -137,6 +155,85 @@ HWTEST_F(CommonMethodModifierTest14, gesture_Pan_Test, TestSize.Level1)
     modifier_->setPriorityGesture(node_, &type, &mask);
     modifier_->setParallelGesture(node_, &type, &mask);
     PanGestureModelNG::SetMock(nullptr);
+    delete mockModel;
+}
+
+/*
+ * @tc.name: gesture_Pinch_Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest14, gesture_Pinch_Test, TestSize.Level1)
+{
+    auto mockModel = new MockPinchGestureModel();
+    PinchGestureModelNG::SetMock(mockModel);
+    EXPECT_CALL(*mockModel, Create(_, _)).Times(3);
+
+    PinchGestureEventPeer peer;
+    auto event = std::make_shared<PinchGestureEvent>();
+    event->SetFingerList({ FingerInfo(), FingerInfo() });
+    peer.SetEventInfo(event);
+
+    Ark_PinchGestureInterface interface = { .handle = &peer };
+    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_PinchGestureInterface>(interface);
+    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    modifier_->setGesture(node_, &type, &mask);
+    modifier_->setPriorityGesture(node_, &type, &mask);
+    modifier_->setParallelGesture(node_, &type, &mask);
+    PinchGestureModelNG::SetMock(nullptr);
+    delete mockModel;
+}
+
+/*
+ * @tc.name: gesture_Swipe_Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest14, gesture_Swipe_Test, TestSize.Level1)
+{
+    auto mockModel = new MockSwipeGestureModel();
+    SwipeGestureModelNG::SetMock(mockModel);
+    EXPECT_CALL(*mockModel, Create(_, _, _)).Times(3);
+
+    SwipeGestureEventPeer peer;
+    auto event = std::make_shared<SwipeGestureEvent>();
+    event->SetFingerList({ FingerInfo() });
+    peer.SetEventInfo(event);
+
+    Ark_SwipeGestureInterface interface = { .handle = &peer };
+    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_SwipeGestureInterface>(interface);
+    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    modifier_->setGesture(node_, &type, &mask);
+    modifier_->setPriorityGesture(node_, &type, &mask);
+    modifier_->setParallelGesture(node_, &type, &mask);
+    SwipeGestureModelNG::SetMock(nullptr);
+    delete mockModel;
+}
+
+/*
+ * @tc.name: gesture_Rotation_Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest14, gesture_Rotation_Test, TestSize.Level1)
+{
+    auto mockModel = new MockRotationGestureModel();
+    RotationGestureModelNG::SetMock(mockModel);
+    EXPECT_CALL(*mockModel, Create(_, _)).Times(3);
+
+    RotationGestureEventPeer peer;
+    auto event = std::make_shared<RotationGestureEvent>();
+    event->SetFingerList({ FingerInfo(), FingerInfo() });
+    event->SetAngle(10);
+    peer.SetEventInfo(event);
+
+    Ark_RotationGestureInterface interface = { .handle = &peer };
+    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_RotationGestureInterface>(interface);
+    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    modifier_->setGesture(node_, &type, &mask);
+    modifier_->setPriorityGesture(node_, &type, &mask);
+    modifier_->setParallelGesture(node_, &type, &mask);
+    RotationGestureModelNG::SetMock(nullptr);
     delete mockModel;
 }
 }
