@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <ctime>
 #include <string>
 #include <sys/time.h>
+#include "ui/base/utils/utils.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
@@ -115,8 +116,8 @@ void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
-void TextClockPattern::UpdateTextLayoutProperty(
-    RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+void TextClockPattern::UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>& layoutProperty,
+    RefPtr<TextLayoutProperty>& textLayoutProperty, const TextStyle& textStyleTheme)
 {
     if (layoutProperty->GetFontSize().has_value()) {
         textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
@@ -124,9 +125,9 @@ void TextClockPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetFontWeight().has_value()) {
         textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
     }
-    if (layoutProperty->GetTextColor().has_value()) {
-        textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().value());
-    }
+    textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().has_value()
+                                            ? layoutProperty->GetTextColor().value()
+                                            : textStyleTheme.GetTextColor());
     if (layoutProperty->GetFontFamily().has_value() && !layoutProperty->GetFontFamily().value().empty()) {
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
@@ -139,6 +140,23 @@ void TextClockPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetFontFeature().has_value()) {
         textLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
     }
+}
+
+bool TextClockPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textNode = GetTextNode();
+    CHECK_NULL_RETURN(textNode, false);
+    auto textClockProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_RETURN(textClockProperty, false);
+
+    if (!textClockProperty->HasTextColor()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        textNode->MarkModifyDone();
+        OnModifyDone();
+    }
+    return false;
 }
 
 void TextClockPattern::OnModifyDone()
@@ -154,8 +172,14 @@ void TextClockPattern::OnModifyDone()
     CHECK_NULL_VOID(textLayoutProperty);
     auto textClockProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_VOID(textClockProperty);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(textTheme);
+
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
-    UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
+    UpdateTextLayoutProperty(textClockProperty, textLayoutProperty, textTheme->GetTextStyleClock());
     hourWest_ = GetHoursWest();
     delayTask_.Cancel();
     UpdateTimeText();

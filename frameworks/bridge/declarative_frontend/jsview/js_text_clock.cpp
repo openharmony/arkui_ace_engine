@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/text_clock_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -91,11 +90,8 @@ void JSTextClock::Create(const JSCallbackInfo& info)
 {
     auto controller = TextClockModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        SetFontDefault();
-        JSTextClockTheme::ApplyTheme();
         return;
     }
-    JSTextClockTheme::ApplyTheme();
     JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
     if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->ToNumber<int32_t>())) {
@@ -143,25 +139,16 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
-void JSTextClock::SetFontDefault()
-{
-    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
-    TextClockModel::GetInstance()->InitFontDefault(textTheme->GetTextStyle());
-}
-
 void JSTextClock::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         return;
     }
     Color textColor;
-    if (!ParseJsColor(info[0], textColor) && !JSTextClockTheme::ObtainTextColor(textColor)) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        textColor = theme->GetTextStyle().GetTextColor();
+    if (!ParseJsColor(info[0], textColor)) {
+        TextClockModel::GetInstance()->ResetTextColor();
+        return;
     }
-
     TextClockModel::GetInstance()->SetTextColor(textColor);
 }
 
