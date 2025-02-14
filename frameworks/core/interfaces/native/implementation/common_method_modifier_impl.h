@@ -40,7 +40,8 @@
 namespace OHOS::Ace::NG {
 
 void CreateGesture(FrameNode *frameNode,
-    const Ark_GestureType* gesture, const GestureMask& mask, const GesturePriority& priority);
+    const Ark_GestureType* gesture,
+    const GestureMask& mask, const GesturePriority& priority);
 
 } // OHOS::Ace::NG
 
