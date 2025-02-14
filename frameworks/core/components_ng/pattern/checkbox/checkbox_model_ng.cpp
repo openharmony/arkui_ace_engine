@@ -205,6 +205,26 @@ void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle check
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle, frameNode);
 }
 
+void CheckBoxModelNG::SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (name.has_value()) {
+        eventHub->SetName(name.value());
+    }
+}
+
+void CheckBoxModelNG::SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (groupName.has_value()) {
+        eventHub->SetGroupName(groupName.value());
+    }
+}
+
 bool CheckBoxModelNG::GetSelect(FrameNode* frameNode)
 {
     bool value = false;
@@ -304,6 +324,22 @@ void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+std::string CheckBoxModelNG::GetCheckboxName(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetName();
+}
+
+std::string CheckBoxModelNG::GetCheckboxGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetGroupName();
 }
 
 } // namespace OHOS::Ace::NG

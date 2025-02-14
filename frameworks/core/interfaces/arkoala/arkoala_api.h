@@ -771,6 +771,8 @@ enum ArkUINodeType {
     ARKUI_BADGE,
     ARKUI_TEXT_CLOCK,
     ARKUI_TEXT_TIMER,
+    ARKUI_CHECK_BOX_GROUP,
+    ARKUI_XCOMPONENT_TEXTURE,
 };
 
 enum ArkUIEventCategory {
@@ -944,6 +946,8 @@ enum ArkUIEventSubKind {
     ON_ALPHABET_INDEXER_CREAT_CHANGE_EVENT,
 
     ON_SELECT_SELECT = ARKUI_MAX_EVENT_NUM * ARKUI_SELECT,
+
+    ON_CHECKBOX_GROUP_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CHECK_BOX_GROUP,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -3643,6 +3647,11 @@ struct ArkUICheckboxModifier {
     ArkUI_Float64 (*getCheckMarkSize)(ArkUINodeHandle node);
     ArkUI_Float64 (*getCheckMarkWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
+    void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
+    void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
+    
+    ArkUI_CharPtr (*getCheckboxName)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getCheckboxGroup)(ArkUINodeHandle node);
 };
 
 struct ArkUICheckboxGroupModifier {
@@ -3662,6 +3671,16 @@ struct ArkUICheckboxGroupModifier {
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
+    void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
+
+    ArkUI_CharPtr (*getCheckboxGroupName)(ArkUINodeHandle node);
+    ArkUI_Bool (*getCheckboxGroupSelectAll)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getCheckboxGroupSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getCheckboxGroupUnSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getCheckboxGroupMarkColor)(ArkUINodeHandle node);
+    ArkUI_Float64 (*getCheckboxGroupMarkSize)(ArkUINodeHandle node);
+    ArkUI_Float64 (*getCheckboxGroupMarkWidth)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCheckboxGroupStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageSpanModifier {
