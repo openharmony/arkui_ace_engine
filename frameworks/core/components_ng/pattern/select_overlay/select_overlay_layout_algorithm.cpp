@@ -812,8 +812,14 @@ void SelectOverlayLayoutAlgorithm::UpdateMainWindowOffset(LayoutWrapper* layoutW
     CHECK_NULL_VOID(container);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto isExpandDisplay = selectTheme->GetExpandDisplay();
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
     auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
-    mainWindowOffset_ = OffsetF(displayWindowRect.Left(), displayWindowRect.Top());
+    if (isExpandDisplay || isFreeMultiWindow) {
+        mainWindowOffset_ = OffsetF(displayWindowRect.Left(), displayWindowRect.Top());
+    }
     containerModalOffset_ = info_->containerModalOffset;
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
         "UpdateMainWindowOffset mainWindowOffset : %{public}s containerModalOffset : %{public}s",

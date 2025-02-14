@@ -255,7 +255,7 @@ void Container::DestroyToastSubwindow(int32_t instanceId)
 void Container::DestroySelectOverlaySubwindow(int32_t instanceId)
 {
     auto subwindow = SubwindowManager::GetInstance()->GetSelectOverlaySubwindow(instanceId);
-    if (subwindow && subwindow->IsToastSubWindow()) {
+    if (subwindow && subwindow->GetIsSelectOverlaySubWindow()) {
         subwindow->DestroyWindow();
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Destroy selectOverlay subwindow, instanceId is %{public}d", instanceId);
     }

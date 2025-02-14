@@ -182,6 +182,16 @@ public:
         return isRosenWindowCreate_;
     }
 
+    void SetIsSelectOverlaySubWindow(bool isSelectOverlaySubWindow)
+    {
+        isSelectOverlaySubWindow_ = isSelectOverlaySubWindow;
+    }
+
+    bool GetIsSelectOverlaySubWindow() const
+    {
+        return isSelectOverlaySubWindow_;
+    }
+
     virtual void ClearToast() = 0;
     virtual void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback) = 0;
@@ -213,6 +223,7 @@ private:
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
     bool isRosenWindowCreate_ = false;
+    bool isSelectOverlaySubWindow_ = false;
     ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
     // toast main window ID
     uint32_t mainWindowId_ = 0;
