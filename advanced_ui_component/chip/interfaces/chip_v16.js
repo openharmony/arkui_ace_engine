@@ -48,456 +48,6 @@ export var AccessibilitySelectedType;
     o5[o5['SELECTED'] = 2] = 'SELECTED';
 })(AccessibilitySelectedType || (AccessibilitySelectedType = {}));
 
-export const defaultTheme = {
-    prefixIcon: {
-        normalSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        smallSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        fillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_focus_fill'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActivatedColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-    },
-    label: {
-        normalFontSize: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_font_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallFontSize: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_font_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusFontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_focus_text'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActiveFontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_activated_focus_font_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        fontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_font_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedFontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_activated_fontcolor'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        fontFamily: 'HarmonyOS Sans',
-        fontWeight: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_text_font_weight'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        normalMargin: {
-            left: 6,
-            right: 6,
-            top: 0,
-            bottom: 0
-        },
-        smallMargin: {
-            left: 4,
-            right: 4,
-            top: 0,
-            bottom: 0
-        },
-        defaultFontSize: 14,
-        localizedNormalMargin: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(0),
-            bottom: LengthMetrics.vp(0)
-        },
-        localizedSmallMargin: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(0),
-            bottom: LengthMetrics.vp(0),
-        }
-    },
-    suffixIcon: {
-        normalSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        smallSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        fillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_focus_fill'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActivatedColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        defaultDeleteIcon: {
-            'id': -1,
-            'type': 20000,
-            params: ['sys.media.ohos_ic_public_cancel', 16, 16],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusable: false,
-        isShowMargin: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_show_close_icon_margin'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-    },
-    defaultSymbol: {
-        normalFontColor: [{
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }],
-        activatedFontColor: [{
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }],
-        normalSymbolFontSize: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_icon_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
-        smallSymbolFontSize: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_icon_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
-        defaultEffect: -1,
-    },
-    chipNode: {
-        suitAgeScale: 1.75,
-        minLabelWidth: 12,
-        normalHeight: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_height'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallHeight: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_height'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        enabled: true,
-        activated: false,
-        backgroundColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_background_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedBackgroundColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_container_activated_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusOutlineColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.ohos_id_color_focused_outline'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusOutlineMargin: 2,
-        borderColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_border_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        defaultBorderWidth: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_border_width'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedBorderColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_activated_border_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        normalBorderRadius: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_border_radius_normal'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallBorderRadius: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_border_radius_small'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        borderWidth: 2,
-        focusBtnScaleX: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_focused_btn_scale'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusBtnScaleY: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_focused_btn_scale'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        localizedNormalPadding: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(4),
-            bottom: LengthMetrics.vp(4)
-        },
-        localizedSmallPadding: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(4),
-            bottom: LengthMetrics.vp(4)
-        },
-        hoverBlendColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_hover_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        pressedBlendColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_press_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusBgColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActivatedBgColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_container_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
-        normalShadowStyle: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_shadow_style'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallShadowStyle: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_shadow_style'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        breakPointConstraintWidth: {
-            breakPointMinWidth: 128,
-            breakPointSmMaxWidth: 156,
-            breakPointMdMaxWidth: 280,
-            breakPointLgMaxWidth: 400
-        }
-    }
-};
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
@@ -588,7 +138,456 @@ export class ChipComponent extends ViewPU {
         if (typeof a5 === 'function') {
             this.paramsGenerator_ = a5;
         }
-        this.theme = defaultTheme;
+        this.theme = {
+            prefixIcon: {
+                normalSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                smallSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                fillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_usually_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_active_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_focus_fill'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActivatedColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_activated_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            },
+            label: {
+                normalFontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_font_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallFontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_font_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusFontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_focus_text'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActiveFontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_activated_focus_font_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                fontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_font_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedFontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_activated_fontcolor'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                fontFamily: 'HarmonyOS Sans',
+                fontWeight: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_text_font_weight'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                normalMargin: {
+                    left: 6,
+                    right: 6,
+                    top: 0,
+                    bottom: 0
+                },
+                smallMargin: {
+                    left: 4,
+                    right: 4,
+                    top: 0,
+                    bottom: 0
+                },
+                defaultFontSize: 14,
+                localizedNormalMargin: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(0),
+                    bottom: LengthMetrics.vp(0)
+                },
+                localizedSmallMargin: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(0),
+                    bottom: LengthMetrics.vp(0),
+                }
+            },
+            suffixIcon: {
+                normalSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                smallSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                fillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_usually_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_active_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_focus_fill'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActivatedColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_activated_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                defaultDeleteIcon: {
+                    'id': -1,
+                    'type': 20000,
+                    params: ['sys.media.ohos_ic_public_cancel', 16, 16],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusable: false,
+                isShowMargin: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_show_close_icon_margin'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            },
+            defaultSymbol: {
+                normalFontColor: [{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_usually_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }],
+                activatedFontColor: [{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_active_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }],
+                normalSymbolFontSize: LengthMetrics.resource({
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_icon_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }).value,
+                smallSymbolFontSize: LengthMetrics.resource({
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_icon_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }).value,
+                defaultEffect: -1,
+            },
+            chipNode: {
+                suitAgeScale: 1.75,
+                minLabelWidth: 12,
+                normalHeight: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_height'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallHeight: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_height'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                enabled: true,
+                activated: false,
+                backgroundColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_background_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedBackgroundColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_container_activated_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusOutlineColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.ohos_id_color_focused_outline'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusOutlineMargin: 2,
+                borderColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_border_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                defaultBorderWidth: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_border_width'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedBorderColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_activated_border_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                normalBorderRadius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_border_radius_normal'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallBorderRadius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_border_radius_small'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                borderWidth: 2,
+                focusBtnScaleX: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_focused_btn_scale'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusBtnScaleY: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_focused_btn_scale'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                localizedNormalPadding: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(4),
+                    bottom: LengthMetrics.vp(4)
+                },
+                localizedSmallPadding: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(4),
+                    bottom: LengthMetrics.vp(4)
+                },
+                hoverBlendColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_hover_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                pressedBlendColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_press_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusBgColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActivatedBgColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_container_activated_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
+                normalShadowStyle: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_shadow_style'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallShadowStyle: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_shadow_style'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                breakPointConstraintWidth: {
+                    breakPointMinWidth: 128,
+                    breakPointSmMaxWidth: 156,
+                    breakPointMdMaxWidth: 280,
+                    breakPointLgMaxWidth: 400
+                }
+            }
+        };
         this.__chipSize = new SynchedPropertyObjectOneWayPU(x4.chipSize, this, 'chipSize');
         this.__allowClose = new SynchedPropertySimpleOneWayPU(x4.allowClose, this, 'allowClose');
         this.__closeOptions = new SynchedPropertyObjectOneWayPU(x4.closeOptions, this, 'closeOptions');
@@ -1095,7 +1094,7 @@ export class ChipComponent extends ViewPU {
                     return;
                 }
                 let k1 = m1.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
-                let l1 = m1.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose && !this.suffixIcon?.src &&
+                let l1 = m1.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false && !this.suffixIcon?.src &&
                 this.isSuffixIconFocusStyleCustomized;
                 if (k1 || l1) {
                     this.deleteChip();
