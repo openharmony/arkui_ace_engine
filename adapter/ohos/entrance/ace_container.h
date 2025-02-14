@@ -807,6 +807,8 @@ public:
 
     void GetExtensionConfig(AAFwk::WantParams& want);
 
+    void SetIsFocusActive(bool isFocusActive);
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

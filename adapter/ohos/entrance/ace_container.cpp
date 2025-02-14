@@ -3970,4 +3970,11 @@ void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)
     CHECK_NULL_VOID(uiWindow_);
     uiWindow_->GetExtensionConfig(want);
 }
+
+void AceContainer::SetIsFocusActive(bool isFocusActive)
+{
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetIsFocusActive(isFocusActive);
+}
 } // namespace OHOS::Ace::Platform
