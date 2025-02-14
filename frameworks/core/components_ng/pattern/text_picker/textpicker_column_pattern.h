@@ -527,7 +527,7 @@ private:
     double GetDragDeltaLessThanJumpInterval(
         double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
     void RegisterWindowStateChangedCallback();
-    void UnregisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
 
     void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir);
 
