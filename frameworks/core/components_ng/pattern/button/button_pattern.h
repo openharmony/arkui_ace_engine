@@ -84,8 +84,10 @@ public:
         CHECK_NULL_RETURN(host, false);
         auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_RETURN(host, false);
-        return layoutProperty->HasAspectRatio() &&
+        auto isNeedAdjust = layoutProperty->HasAspectRatio() &&
                layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
+
+        return isNeedAdjust;
     }
 
     void SetClickedColor(const Color& color)
@@ -131,9 +133,9 @@ public:
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
         auto textStyle = buttonTheme->GetTextStyle();
-        json->PutExtAttr(
-            "type", host->GetTag() == "Toggle" ? "ToggleType.Button"
-            :ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str(), filter);
+        auto buttonType = layoutProperty->GetType().value_or(ButtonType::CAPSULE);
+        json->PutExtAttr("type", host->GetTag() == "Toggle" ? "ToggleType.Button" :
+            ConvertButtonTypeToString(buttonType).c_str(), filter);
         json->PutExtAttr("fontSize",
             layoutProperty->GetFontSizeValue(layoutProperty->HasLabel() ? textStyle.GetFontSize() : Dimension(0))
                 .ToString()
@@ -238,6 +240,9 @@ public:
                 break;
             case ButtonType::CIRCLE:
                 result = "ButtonType.Circle";
+                break;
+            case ButtonType::ROUNDED_RECTANGLE:
+                result = "ButtonType.ROUNDED_RECTANGLE";
                 break;
             default:
                 break;
@@ -368,6 +373,7 @@ protected:
     void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
+    void CheckLocalizedBorderRadiuses();
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
