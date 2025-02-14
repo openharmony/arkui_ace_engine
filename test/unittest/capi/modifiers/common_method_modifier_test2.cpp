@@ -77,6 +77,9 @@ static const float VALID_VAL = 123.4567f;
 static const Opt_Length OPT_LEN_EMPTY = Converter::ArkValue<Opt_Length>(Ark_Empty());
 static const Opt_Length OPT_LEN_VALID = Converter::ArkValue<Opt_Length>(VALID_VAL);
 
+constexpr double OFFSET_X = 60.4;
+constexpr double OFFSET_Y = 85.5;
+
 static const Ark_Rectangle ARK_RECT_EMPTY {
     OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY
 };
@@ -97,6 +100,10 @@ bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionR
         lhs.GetOffset() == rhs.GetOffset();
 }
 } // namespace
+
+namespace GeneratedModifier {
+    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+}
 
 namespace Converter {
     struct BlurOptions {
@@ -222,6 +229,101 @@ HWTEST_F(CommonMethodModifierTest2, setMouseResponseRegionTest, TestSize.Level1)
     ASSERT_FALSE(gestureEventHub->GetMouseResponseRegion().empty());
     EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().front() == EXPECTED_DIM_RECT_VALID);
     EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().back() == EXPECTED_DIM_RECT_DEFAULT);
+}
+
+/*
+ * @tc.name: setOnClick0Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnClick0Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnClick0, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        Ark_Int32 offsetX = -1;
+        Ark_Int32 offsetY = -1;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
+        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetClickEventAccessor();
+        checkEvent = {
+            .resourceId = resourceId,
+            .offsetX = accessor->getWindowX(peer),
+            .offsetY = accessor->getWindowY(peer),
+        };
+        accessor->destroyPeer(peer);
+    };
+
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, contextId);
+    modifier_->setOnClick0(node_, &func);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
+    
+    gestureEventHub->ActClick();
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
+    EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
+}
+
+/*
+ * @tc.name: setOnClick1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnClick1, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        Ark_Int32 offsetX = -1;
+        Ark_Int32 offsetY = -1;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
+        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetClickEventAccessor();
+        checkEvent = {
+            .resourceId = resourceId,
+            .offsetX = accessor->getWindowX(peer),
+            .offsetY = accessor->getWindowY(peer),
+        };
+        accessor->destroyPeer(peer);
+    };
+
+    const int32_t contextId = 123;
+    auto distanceThreshold = Converter::ArkValue<Ark_Number>(1.0);
+    auto func = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, contextId);
+    modifier_->setOnClick1(node_, &func, &distanceThreshold);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
+    
+    gestureEventHub->ActClick();
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
+    EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
 }
 
 /*
