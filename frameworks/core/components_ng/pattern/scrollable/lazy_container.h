@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
  */
 class LazyContainer : virtual public Pattern {
     DECLARE_ACE_TYPE(LazyContainer, Pattern);
+
 public:
     int32_t GetTotalChildCount() override
     {
@@ -41,12 +42,11 @@ protected:
     {
         adapter_.Reset();
     }
-    void JumpToItem(int32_t index);
 
     /**
      * @brief Pass latest layout range info to adapter.
      */
-    void UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx);
+    void UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout);
 
     /**
      * @brief Pass scroll offset to adapter.
@@ -58,6 +58,16 @@ private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;
 
     RefPtr<ScrollWindowAdapter> adapter_;
+};
+
+/**
+ * @brief Lazy container with linear layout (List, Swiper, WaterFlow)
+ *
+ */
+class LinearLazyContainer : public LazyContainer {
+    DECLARE_ACE_TYPE(LinearLazyContainer, LazyContainer);
+private:
+    RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
 };
 } // namespace OHOS::Ace::NG
 

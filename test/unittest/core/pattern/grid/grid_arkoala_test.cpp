@@ -31,16 +31,10 @@ private:
             node->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(450.0f)));
             return node;
         });
-        auto adapter = pattern_->GetOrCreateScrollWindowAdapter();
-        adapter->RegisterUpdater([&](int32_t s, void* pointer) {
-            // frontend
-            std::cout << "update " << s << std::endl;
-            lazy_.Update(s, pointer);
-        });
-        adapter->SetTotalCount(itemCnt);
+        lazy_.Register();
     }
 
-    MockKoalaLazyForEach lazy_ { nullptr, 0, nullptr };
+    MockKoalaLazyForEach lazy_;
 };
 
 /**
@@ -180,5 +174,29 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
     EXPECT_EQ(lazy_.GetRange(), std::pair(36, 42));
     EXPECT_EQ(GetChildRect(frameNode_, 38).ToString(), "RectT (0.00, 466.00) - [240.00 x 450.00]");
     EXPECT_EQ(pattern_->info_.startIndex_, 36);
+}
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump on ScrollWindowAdapter with MockKoala
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridArkoalaTest, Jump001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(8.0f));
+    InitMockLazy(100);
+    CreateDone(frameNode_);
+    IncrementAndLayout(__LINE__);
+
+    pattern_->ScrollToIndex(90);
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(pattern_->info_.jumpIndex_, -2);
+    EXPECT_EQ(pattern_->info_.startIndex_, 90);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 45);
+    EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (240.00, 466.00) - [240.00 x 450.00]");
 }
 } // namespace OHOS::Ace::NG

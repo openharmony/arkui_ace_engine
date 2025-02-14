@@ -14,14 +14,14 @@
  */
 
 #include "staggered_fill_algorithm.h"
+
 #include <algorithm>
 #include <cstdint>
 
 #include "staggered_section_filler.h"
 
 #include "core/components_ng/base/fill_algorithm.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 
 namespace OHOS::Ace::NG {
 std::optional<int32_t> StaggeredFillAlgorithm::StartIdx() const
@@ -79,14 +79,15 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
 {
     InitSections(totalCnt, axis, viewport);
 
-    if (InstanceOf<WaterFlowLayoutProperty>(props_)) {
-        measurer_ = MakeRefPtr<FlowItemMeasurer>(
-            [this](int32_t index) {
-                auto& section = GetSection(index);
-                return section.userDefMainLen ? section.userDefMainLen(index) : -1.0f;
-            },
-            axis, viewport.MainSize(axis), DynamicCast<WaterFlowLayoutProperty>(props_));
-    }
+    measurer_ = Measurer::Construct(
+        props_,
+        [this](int32_t index) {
+            auto& section = GetSection(index);
+            return section.userDefMainLen ? section.userDefMainLen(index) : -1.0f;
+        },
+        axis, viewport);
+
+    UpdateSyncCachedCnt();
 
     for (auto& section : sections_) {
         section.PruneFront(0.0f);
@@ -94,19 +95,27 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
     }
 }
 
-bool StaggeredFillAlgorithm::CanFillMore(
-    Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction)
+bool StaggeredFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction)
 {
-    const bool isEdgeItem = direction == FillDirection::END ? idx == EndIdx() : idx == StartIdx();
+    auto startIdx = StartIdx();
+    auto endIdx = EndIdx();
+    const bool isEdgeItem = direction == FillDirection::END ? idx == endIdx : idx == startIdx;
     if (GetSection(idx).Contains(idx) && !isEdgeItem) {
         return true;
     }
-    return direction == FillDirection::END ? CanFillMoreAtEnd(scrollWindowSize.MainSize(axis), axis)
-                                           : CanFillMoreAtStart(axis);
+    if (direction == FillDirection::END ? CanFillMoreAtEnd(scrollWindowSize.MainSize(axis), axis)
+                                        : CanFillMoreAtStart(axis)) {
+        return true;
+    }
+    if (direction == FillDirection::START) {
+    }
+    if (!startIdx || !endIdx) {
+        return true;
+    }
+    return idx >= 0 && idx > *startIdx - syncCacheCnt_ && idx < *endIdx + syncCacheCnt_;
 }
 
-void StaggeredFillAlgorithm::FillPrev(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
+void StaggeredFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     auto& section = GetSection(index);
     if (section.Contains(index)) {
@@ -120,8 +129,7 @@ void StaggeredFillAlgorithm::FillPrev(
     filler.Fill(measurer_, node, index, 0.0f);
 }
 
-void StaggeredFillAlgorithm::FillNext(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
+void StaggeredFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     auto& section = GetSection(index);
     if (section.Contains(index)) {
@@ -134,8 +142,7 @@ void StaggeredFillAlgorithm::FillNext(
     filler.Fill(measurer_, node, index, viewport.MainSize(axis));
 }
 
-void StaggeredFillAlgorithm::FillMarkItem(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
+void StaggeredFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     auto& section = GetSection(index);
     if (!section.Contains(index)) {
@@ -150,15 +157,9 @@ void StaggeredFillAlgorithm::FillMarkItem(
 
 void StaggeredFillAlgorithm::InitSections(int32_t totalCnt, Axis axis, const SizeF& frameSize)
 {
-    // factory method
-    if (InstanceOf<WaterFlowLayoutProperty>(props_)) {
-        auto pattern = props_->GetHost()->GetPattern<WaterFlowPattern>();
-        CHECK_NULL_VOID(pattern);
-        WaterFlowSectionInitializer initializer(frameSize, axis, totalCnt);
-        auto newSections = initializer.Init(pattern->GetSections(), DynamicCast<WaterFlowLayoutProperty>(props_));
-        if (!SectionInitializer::Compare(sections_, newSections)) {
-            sections_ = newSections;
-        }
+    auto newSections = SectionInitializer::InitSections(props_, frameSize, axis, totalCnt);
+    if (!SectionInitializer::Compare(sections_, newSections)) {
+        sections_ = newSections;
     }
 }
 
@@ -193,5 +194,13 @@ int32_t StaggeredFillAlgorithm::GetMarkIndex()
         section.PruneFront(0.0f);
     }
     return StartIdx().value_or(0);
+}
+
+void StaggeredFillAlgorithm::UpdateSyncCachedCnt()
+{
+    if (InstanceOf<SwiperLayoutProperty>(props_)) {
+        // SwiperLayout always measures 1 extra item in the opposite direction. set syncCache to 1 to adapt
+        syncCacheCnt_ = 1;
+    }
 }
 } // namespace OHOS::Ace::NG

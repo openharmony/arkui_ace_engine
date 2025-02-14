@@ -27,8 +27,8 @@
 #include "core/components_ng/pattern/scrollable/lazy_container.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT WaterFlowPattern : public ScrollablePattern, public LazyContainer {
-    DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern);
+class ACE_EXPORT WaterFlowPattern : public ScrollablePattern, public LinearLazyContainer {
+    DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern, LinearLazyContainer);
 
 public:
     bool UpdateCurrentOffset(float delta, int32_t source) override;
@@ -216,8 +216,6 @@ private:
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
 
     void TriggerPostLayoutEvents();
-
-    RefPtr<FillAlgorithm> CreateFillAlgorithm() override;
 
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;

@@ -17,7 +17,19 @@
 #include <gtest/gtest.h>
 
 #include "core/components_ng/base/scroll_window_adapter.h"
+#include "core/components_ng/pattern/pattern.h"
+
 namespace OHOS::Ace::NG {
+void MockKoalaLazyForEach::Register()
+{
+    auto adapter = parent_->GetPattern()->GetOrCreateScrollWindowAdapter();
+    adapter->RegisterUpdater([this](int32_t s, void* pointer) {
+        // frontend
+        std::cout << "update " << s << std::endl;
+        Update(s, pointer);
+    });
+    adapter->SetTotalCount(totalCnt_);
+}
 
 void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
 {
@@ -54,7 +66,7 @@ void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
     }
 
     range_ = { visibleRange.indexUp_, visibleRange.indexDown_ };
-    // remove not used items
+    // remove unused items
     for (auto it = itemCache_.begin(); it != itemCache_.end();) {
         if (it->first < visibleRange.indexUp_ || it->first > visibleRange.indexDown_) {
             parent_->RemoveChild(it->second);

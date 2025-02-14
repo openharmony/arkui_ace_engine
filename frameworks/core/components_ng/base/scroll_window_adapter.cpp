@@ -69,7 +69,6 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 
 FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirection direction)
 {
-    CHECK_NULL_RETURN(fillAlgorithm_->IsReady(), nullptr);
     // check range.
     if (direction == FillDirection::START && (markIndex_ <= 0)) {
         return nullptr;

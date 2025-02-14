@@ -1146,6 +1146,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         indexsInAnimation_.clear();
     }
 
+    UpdateLayoutRange(GetAxis(), std::nullopt, isInit);
+
     const auto& paddingProperty = props->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }
@@ -2436,6 +2438,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
+    UpdateOffset(offset);
     HandleSwiperCustomAnimation(offset);
     MarkDirtyNodeSelf();
 }
