@@ -14,15 +14,53 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+struct ASTCdata {
+    std::vector<std::string> sources;
+    int32_t column;
+};
+} // namespace
+
+namespace Converter {
+template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ASTCResource& src)
+{
+    auto sources = OptConvert<ASTCdata>(src);
+    if (sources) {
+        dst.reset();
+    }
+}
+
+template<>
+void AssignCast(std::optional<ASTCdata>& dst, const Ark_ASTCResource& src)
+{
+    auto sources = Convert<std::vector<std::string>>(src.sources);
+    if (sources.empty()) {
+        dst.reset();
+        return;
+    }
+    dst->sources = std::move(sources);
+    dst->column = Convert<int32_t>(src.column);
+}
+} // Converter
+} // OHOS::Ace::NG
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MediaCachedImageModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    RefPtr<PixelMap> pixmap = nullptr;
+    auto frameNode = ImageModelNG::CreateFrameNode(id, "", pixmap, "", "", false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // MediaCachedImageModifier
 namespace MediaCachedImageInterfaceModifier {
@@ -32,8 +70,18 @@ void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    //auto convValue = Converter::OptConvert<type_name>(*src);
-    //MediaCachedImageModelNG::SetSetMediaCachedImageOptions(frameNode, convValue);
+    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
+    // Note.
+    // This function should skip InitImage invocation if info's optional is empty.
+    if (info) {
+        if (info->GetPixmap()) {
+            auto pixelMap = info->GetPixmap(); // GetPixmap return const RefPtr
+            ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+        } else {
+            ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                info->GetModuleName(), info->GetIsUriPureNumber());
+        }
+    }
 }
 } // MediaCachedImageInterfaceModifier
 const GENERATED_ArkUIMediaCachedImageModifier* GetMediaCachedImageModifier()
