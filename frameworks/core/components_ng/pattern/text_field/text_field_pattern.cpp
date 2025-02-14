@@ -5310,7 +5310,9 @@ bool TextFieldPattern::CharLineChanged(int32_t caretPosition)
     }
     CaretMetricsF caretMetrics;
     CalcCaretMetricsByPosition(caretPosition, caretMetrics);
-    return !NearEqual(caretMetrics.offset.GetY(), selectController_->GetCaretRect().GetY());
+    // the cursor is aligned with the text at the bottom
+    return !NearEqual(caretMetrics.offset.GetY() + caretMetrics.height,
+        selectController_->GetCaretRect().GetY() + selectController_->GetCaretRect().Height());
 }
 
 bool TextFieldPattern::CursorMoveLeftOperation()
@@ -5511,6 +5513,15 @@ bool TextFieldPattern::CursorMoveEnd()
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
+float TextFieldPattern::GetFontSizePx()
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    return layoutProperty->GetFontSizeValue(theme->GetFontSize()).ConvertToPx();
+}
+
 bool TextFieldPattern::CursorMoveUpOperation()
 {
     if (!IsTextArea()) {
@@ -5518,8 +5529,15 @@ bool TextFieldPattern::CursorMoveUpOperation()
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
-    // multiply by 0.5f to convert to the grapheme center point of the previous line.
-    auto offsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5f;
+    float fontSzie = GetFontSizePx();
+    float lineHeight = 0.0f;
+    if (fontSize > selectController_->GetCaretRect().Height()) {
+        lineHeight = fontSize;
+    } else {
+        // multiply by 0.5f to convert to the grapheme center point of the previous line.
+        lineHeight = PreferredLineHeight() * 0.5f;
+    }
+    auto offsetY = selectController_->GetCaretRect().GetY() - lineHeight;
     if (offsetY < textRect_.GetY()) {
         return CursorMoveToParagraphBegin();
     }
@@ -5546,8 +5564,15 @@ bool TextFieldPattern::CursorMoveDownOperation()
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
-    // multiply by 1.5f to convert to the grapheme center point of the next line.
-    auto offsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5f;
+    float fontSzie = GetFontSizePx();
+    float lineHeight = 0.0f;
+    if (fontSize > selectController_->GetCaretRect().Height()) {
+        lineHeight = fontSize;
+    } else {
+        // multiply by 1.5f to convert to the grapheme center point of the next line.
+        lineHeight = PreferredLineHeight() * 1.5f;
+    }
+    auto offsetY = selectController_->GetCaretRect().GetY() + lineHeight;
     if (offsetY > textRect_.GetY() + textRect_.Height() && !IsSelected()) {
         return CursorMoveToParagraphEnd();
     }
@@ -6086,8 +6111,9 @@ void TextFieldPattern::HandleOnPageUp()
         return;
     }
     auto border = GetBorderWidthProperty();
+    float frameRectHeight = std::max(frameRect_.Height(), GetFontSizePx());
     float maxFrameHeight =
-        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
+        frameRectHeight - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
     OnScrollCallback(maxFrameHeight, SCROLL_FROM_JUMP);
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), GetPaddingTop() + GetBorderTop(border));
@@ -6101,8 +6127,9 @@ void TextFieldPattern::HandleOnPageDown()
         return;
     }
     auto border = GetBorderWidthProperty();
+    float frameRectHeight = std::max(frameRect_.Height(), GetFontSizePx());
     float maxFrameHeight =
-        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
+        frameRectHeight - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
     OnScrollCallback(-maxFrameHeight, SCROLL_FROM_JUMP);
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), maxFrameHeight);

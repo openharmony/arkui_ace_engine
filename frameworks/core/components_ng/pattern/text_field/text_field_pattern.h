@@ -1667,6 +1667,7 @@ public:
     void AddInsertCommand(const std::u16string& insertValue, InputReason reason);
     void AddInputCommand(const InputCommandInfo& inputCommandInfo);
     void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
+    float GetFontSizePx();
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
