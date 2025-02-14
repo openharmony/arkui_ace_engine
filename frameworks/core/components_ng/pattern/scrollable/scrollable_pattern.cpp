@@ -1707,7 +1707,7 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     mouseOffsetX -= info.GetOffsetX();
     mouseOffsetY -= info.GetOffsetY();
     SuggestOpIncGroup(true);
-    if (!IsItemSelected(info)) {
+    if (!IsItemSelected(mouseOffsetX, mouseOffsetY)) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);

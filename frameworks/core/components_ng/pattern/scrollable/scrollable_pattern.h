@@ -965,7 +965,7 @@ private:
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const GestureEvent& info)
+    virtual bool IsItemSelected(float offsetX, float offsetY)
     {
         return false;
     }

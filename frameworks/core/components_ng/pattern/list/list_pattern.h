@@ -490,7 +490,7 @@ private:
 
     // multiSelectable
     void ClearMultiSelect() override;
-    bool IsItemSelected(const GestureEvent& info) override;
+    bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
