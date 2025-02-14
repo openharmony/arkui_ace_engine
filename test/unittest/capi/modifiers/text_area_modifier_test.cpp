@@ -18,14 +18,16 @@
 #include "generated/test_fixtures.h"
 
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -48,6 +50,7 @@ const std::string COLOR_TRANSPARENT = "#00000000";
 const auto COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::COLOR);
 const auto COLOR_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
 const auto WRONG_COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::STRING);
+const auto ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE = false;
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
@@ -1864,6 +1867,56 @@ HWTEST_F(TextAreaModifierTest, setTextOverflowTestTextOverflowValidValues, TestS
     for (auto& [input, value, expected] : TEXT_OVERFLOW_VALID_TEST_PLAN) {
         checkValue(input, expected, value);
     }
+}
+
+/*
+ * @tc.name: setCustomKeyboardDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setCustomKeyboardDefaultValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetCustomKeyboardOption(), ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setCustomKeyboardValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    static auto expectedCustomNode = CreateNode();
+    ASSERT_NE(expectedCustomNode, nullptr);
+    static const FrameNode* expectedParentNode = frameNode;
+    static FrameNode* actualParentNode = nullptr;
+    static const CustomNodeBuilder customBuilder = {
+        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
+            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+        }
+    };
+    KeyboardOptions keyboardOptions = { .supportAvoidance = true };
+    auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_EQ(actualParentNode, expectedParentNode);
+    ASSERT_TRUE(pattern->GetCustomKeyboardOption());
+
+    keyboardOptions = { .supportAvoidance = false };
+    optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
+    ASSERT_EQ(actualParentNode, expectedParentNode);
+    ASSERT_FALSE(pattern->GetCustomKeyboardOption());
 }
 
 /*
