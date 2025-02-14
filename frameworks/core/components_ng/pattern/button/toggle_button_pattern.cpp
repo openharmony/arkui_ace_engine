@@ -80,7 +80,7 @@ void ToggleButtonPattern::OnModifyDone()
         changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(toggleTheme);
@@ -116,27 +116,6 @@ void ToggleButtonPattern::InitEvent()
     InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
-}
-
-void ToggleButtonPattern::HandleEnabled()
-{
-    if (UseContentModifier()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto enabled = eventHub->IsEnabled();
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
-    CHECK_NULL_VOID(theme);
-    auto alpha = theme->GetDisabledAlpha();
-    auto originalOpacity = renderContext->GetOpacityValue(1.0);
-    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void ToggleButtonPattern::GetIsTextFade()
@@ -515,9 +494,6 @@ void ToggleButtonPattern::InitTouchEvent()
         if (info.GetTouches().empty()) {
             return;
         }
-        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
-            buttonPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
@@ -529,7 +505,7 @@ void ToggleButtonPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchAfterEvent(touchListener_);
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void ToggleButtonPattern::OnTouchDown()
@@ -598,16 +574,10 @@ void ToggleButtonPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH &&
-            (info.IsPreventDefault() || buttonPattern->isTouchPreventDefault_)) {
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "toggle button preventDefault successfully");
-            buttonPattern->isTouchPreventDefault_ = false;
-            return;
-        }
         buttonPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickAfterEvent(clickListener_);
+    gesture->AddClickEvent(clickListener_);
 }
 
 void ToggleButtonPattern::OnClick()
@@ -766,14 +736,14 @@ void ToggleButtonPattern::OnColorConfigurationUpdate()
 bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     bool result = false;
-    auto node = GetHost();
-    CHECK_NULL_RETURN(node, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto toggleTheme = pipeline->GetTheme<ToggleTheme>(themeScopeId);
     CHECK_NULL_RETURN(toggleTheme, false);
-    auto renderContext = node->GetRenderContext();
+    auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
 
     auto paintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
@@ -787,7 +757,7 @@ bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         renderContext->UpdateBackgroundColor(toggleTheme->GetBackgroundColor());
         result = true;
     }
-    node->MarkDirtyNode();
+    host->MarkDirtyNode();
     return result;
 }
 

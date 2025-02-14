@@ -36,10 +36,8 @@ class ArkThemeWhiteList {
         'Radio',
         'Scroll',
         'Select',
-        'Slider',
         'Swiper',
         'Text',
-        'TextClock',
     ];
 
     /**

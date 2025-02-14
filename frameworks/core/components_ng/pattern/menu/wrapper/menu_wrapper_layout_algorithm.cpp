@@ -27,10 +27,9 @@ void CheckLayoutConstraint(LayoutConstraintF& constraint, const RefPtr<FrameNode
     menuWrapperPattern->SetChildLayoutConstraint(constraint);
 
     CHECK_NULL_VOID(menuWrapperPattern->GetIsFirstShow());
-    auto currentId = Container::CurrentId();
-    auto parentContainerId =
-        currentId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    auto pipeline = menuWrapper->GetContextRefPtr();
+    auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
     CHECK_NULL_VOID(subWindow);
     auto subwindowRect = subWindow->GetRect();
     // after the size of subwindow is changed, flush layout before updating windowSize to root node will result in an

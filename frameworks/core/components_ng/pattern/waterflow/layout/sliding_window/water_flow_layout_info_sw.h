@@ -198,6 +198,7 @@ public:
 
     inline void CacheItemHeight(int32_t idx, float height)
     {
+        heightSum_ -= idxToHeight_[idx];
         idxToHeight_[idx] = height;
         heightSum_ += height;
     }

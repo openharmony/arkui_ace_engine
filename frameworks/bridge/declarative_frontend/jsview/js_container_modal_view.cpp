@@ -35,6 +35,7 @@ const std::string EVENT_NAME_RIGHT_SPLIT_CLICK = "arkui_custom_right_split_click
 const std::string EVENT_NAME_BUTTON_POINT_LIGHT_ANIM = "arkui_custom_button_point_light_anim";
 const std::string EVENT_NAME_BUTTON_RECT_CHANGE = "arkui_custom_button_rect_change";
 const std::string EVENT_NAME_MENU_WIDTH_CHANGE = "arkui_custom_menu_width_change";
+const std::string EVENT_NAME_TITLE_ROW_UPDATE = "arkui_custom_title_row_update";
 
 const int32_t EVENT_NAME_MENU_WIDTH_CHANGE_PARAM_COUNT = 2;
 
@@ -123,6 +124,14 @@ void JSContainerModal::CallMenuWidthChange(const JSCallbackInfo& info)
     pattern->CallMenuWidthChange(resId);
 }
 
+void JSContainerModal::CallTitleRowUpdate(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallTitleRowUpdate");
+    auto pattern = GetContainerModalPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitAllTitleRowLayoutProperty();
+}
+
 RefPtr<NG::ContainerModalPatternEnhance> JSContainerModal::GetContainerModalPattern()
 {
     auto pipelineContext = NG::PipelineContext::GetCurrentContextPtrSafely();
@@ -176,6 +185,7 @@ void JSContainerModal::CallNative(const JSCallbackInfo& info)
         { EVENT_NAME_BUTTON_POINT_LIGHT_ANIM, JSContainerModal::AddButtonPointLightAnim },
         { EVENT_NAME_BUTTON_RECT_CHANGE, JSContainerModal::CallButtonsRectChange },
         { EVENT_NAME_MENU_WIDTH_CHANGE, JSContainerModal::CallMenuWidthChange },
+        { EVENT_NAME_TITLE_ROW_UPDATE, JSContainerModal::CallTitleRowUpdate},
     };
 
     TAG_LOGI(AceLogTag::ACE_APPBAR, "callNative");

@@ -1165,8 +1165,6 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    virtual void SetupSubRootElement() = 0;
-
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
     void SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);

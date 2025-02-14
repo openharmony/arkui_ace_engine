@@ -274,6 +274,9 @@ std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNo
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_RETURN(context, nullptr);
     auto rsNode = context->GetRSNode();
+    if (node->GetIsDelete()) {
+        rsNode->SetDrawNode();
+    }
     return rsNode;
 }
 

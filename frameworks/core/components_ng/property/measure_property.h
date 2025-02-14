@@ -154,12 +154,16 @@ public:
 
     bool PercentWidth() const
     {
-        return width_ && width_->GetDimension().Unit() == DimensionUnit::PERCENT;
+        return width_ && (width_->GetDimension().Unit() == DimensionUnit::PERCENT ||
+                             (width_->GetDimension().Unit() == DimensionUnit::CALC &&
+                                 width_->CalcValue().find("%") != std::string::npos));
     }
 
     bool PercentHeight() const
     {
-        return height_ && height_->GetDimension().Unit() == DimensionUnit::PERCENT;
+        return height_ && (height_->GetDimension().Unit() == DimensionUnit::PERCENT ||
+                              (height_->GetDimension().Unit() == DimensionUnit::CALC &&
+                                  height_->CalcValue().find("%") != std::string::npos));
     }
 
     std::string ToString() const

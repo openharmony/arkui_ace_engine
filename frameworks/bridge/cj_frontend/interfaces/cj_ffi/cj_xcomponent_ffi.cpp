@@ -14,39 +14,19 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_xcomponent_ffi.h"
+#include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 
 #include <cstddef>
 
 #include "cj_lambda.h"
 
-#include "bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
-#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace::Framework;
-
-namespace OHOS::Ace {
-XComponentModel* XComponentModel::GetInstance()
-{
-#ifdef NG_BUILD
-    static NG::XComponentModelNG instance;
-    return &instance;
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::XComponentModelNG instance;
-        return &instance;
-    } else {
-        static Framework::XComponentModelImpl instance;
-        return &instance;
-    }
-#endif
-}
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 NativeXComponentController::NativeXComponentController() : FFIData()
@@ -55,6 +35,70 @@ NativeXComponentController::NativeXComponentController() : FFIData()
     CHECK_NULL_VOID(controller);
     SetController(controller);
     LOGI("Native XComponent Controller constructed: %{public}" PRId64, GetID());
+}
+
+void NativeXComponentController::SetXComponentControllerOnCreated(
+    const WeakPtr<NG::FrameNode>& targetNode, int64_t controllerId)
+{
+    LOGI("SetXComponentControllerOnCreated: %{public}" PRId64, controllerId);
+    auto onSurfaceCreated = [remoteId = controllerId, node = targetNode](
+                                const std::string& surfaceId, const std::string& xcomponentId) {
+        PipelineContext::SetCallBackNode(node);
+        LOGI("CJ XComponent[%{public}s] ControllerOnCreated surfaceId:%{public}s",
+            xcomponentId.c_str(), surfaceId.c_str());
+        auto func = CJRuntimeDelegate::GetInstance()->GetCJXcompCtrFuncs().atCXComponentControllerOnSurfaceCreated;
+        if (!func) {
+            LOGE("CJXcompCtr: OnSurfaceCreated is empty.");
+        }
+        func(remoteId, std::stoll(surfaceId));
+    };
+    XComponentModel::GetInstance()->SetControllerOnCreated(std::move(onSurfaceCreated));
+}
+
+void NativeXComponentController::SetXComponentControllerOnChanged(
+    const WeakPtr<NG::FrameNode>& targetNode, int64_t controllerId)
+{
+    LOGI("SetXComponentControllerOnChanged: %{public}" PRId64, controllerId);
+    auto onSurfaceChanged = [remoteId = controllerId, node = targetNode](
+                                const std::string& surfaceId, const NG::RectF& rect) {
+        PipelineContext::SetCallBackNode(node);
+        LOGI("CJ XComponent ControllerOnChanged surfaceId:%{public}s", surfaceId.c_str());
+        auto func = CJRuntimeDelegate::GetInstance()->GetCJXcompCtrFuncs().atCXComponentControllerOnSurfaceChanged;
+        if (!func) {
+            LOGE("CJXcompCtr: OnSurfaceChanged is empty.");
+        }
+        CJRectResult rectRes { rect.Left(), rect.Top(), rect.Width(), rect.Height() };
+        func(remoteId, std::stoll(surfaceId), rectRes);
+    };
+    XComponentModel::GetInstance()->SetControllerOnChanged(std::move(onSurfaceChanged));
+}
+
+void NativeXComponentController::SetXComponentControllerOnDestroyed(
+    const WeakPtr<NG::FrameNode>& targetNode, int64_t controllerId)
+{
+    LOGI("SetXComponentControllerOnDestroyed: %{public}" PRId64, controllerId);
+    auto onSurfaceDestroyed = [remoteId = controllerId, node = targetNode](
+                                const std::string& surfaceId, const std::string& xcomponentId) {
+        PipelineContext::SetCallBackNode(node);
+        LOGI("CJ XComponent[%{public}s] ControllerOnDestroyed surfaceId:%{public}s",
+            xcomponentId.c_str(), surfaceId.c_str());
+        auto func = CJRuntimeDelegate::GetInstance()->GetCJXcompCtrFuncs().atCXComponentControllerOnSurfaceDestroyed;
+        if (!func) {
+            LOGE("CJXcompCtr: OnSurfaceDestroyed is empty.");
+        }
+        func(remoteId, std::stoll(surfaceId));
+    };
+    XComponentModel::GetInstance()->SetControllerOnDestroyed(std::move(onSurfaceDestroyed));
+}
+
+void NativeXComponentController::SetXComponentControllerCallback(int64_t controllerId)
+{
+    LOGI("SetXComponentControllerCallback start");
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    SetXComponentControllerOnCreated(targetNode, controllerId);
+    SetXComponentControllerOnChanged(targetNode, controllerId);
+    SetXComponentControllerOnDestroyed(targetNode, controllerId);
+    LOGI("SetXComponentControllerCallback end");
 }
 
 void NativeXComponentController::SetController(const std::shared_ptr<InnerXComponentController>& controller)
@@ -163,10 +207,11 @@ void FfiOHOSAceFrameworkXComponentCreate(
 {
     auto controller = FFIData::GetData<NativeXComponentController>(controllerId);
     CHECK_NULL_VOID(controller->GetInnerController());
+    std::optional<std::string> libraryNameOpt = std::nullopt;
 
     XComponentModel::GetInstance()->Create(
-        id, static_cast<XComponentType>(xcomponentType), libraryName, controller->GetInnerController());
-    XComponentModel::GetInstance()->SetSoPath(libraryName);
+        id, static_cast<XComponentType>(xcomponentType), libraryNameOpt, controller->GetInnerController());
+    controller->SetXComponentControllerCallback(controller->GetID());
 }
 
 const char* FfiOHOSAceFrameworkXComponentControllerGetSurfaceId(int64_t selfID)

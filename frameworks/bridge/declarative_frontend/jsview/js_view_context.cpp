@@ -95,11 +95,11 @@ std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
     { ERROR_CODE_INTERNAL_ERROR, "Internal error." },
     { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
         "2. Incorrect parameter types; 3. Parameter verification failed." },
-    { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
-    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
-    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
-    { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The target does not exist. " },
-    { ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE, "The target node is not in the component tree. " }
+    { ERROR_CODE_DIALOG_CONTENT_ERROR, "The ComponentContent is incorrect. " },
+    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "The ComponentContent already exists. " },
+    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "The ComponentContent cannot be found. " },
+    { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The targetId does not exist. " },
+    { ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE, "The node of targetId is not in the component tree. " }
 };
 
 void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
@@ -361,6 +361,17 @@ AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionCon
     }
     auto delay = obj->GetPropertyValue<int32_t>("delay", 0);
     auto iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
+    JSRef<JSVal> rateRangeObjectArgs = obj->GetProperty("expectedFrameRateRange");
+    if (rateRangeObjectArgs->IsObject()) {
+        JSRef<JSObject> rateRangeObj = JSRef<JSObject>::Cast(rateRangeObjectArgs);
+        int32_t fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
+        int32_t fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
+        int32_t fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[keyframe] SetExpectedFrameRateRange"
+            "{%{public}d, %{public}d, %{public}d}", fRRmin, fRRmax, fRRExpected);
+        RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+        option.SetFrameRateRange(frameRateRange);
+    }
     option.SetDelay(delay);
     option.SetIteration(iterations);
     return option;
@@ -913,7 +924,6 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
             return;
         }
     }
-    sheetStyle.instanceId = Container::CurrentId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "paramCnt: %{public}d, contentId: %{public}d, targetId: %{public}d",
         paramCnt, sheetContentNode->GetId(), targetId);
     auto ret = ViewContextModel::GetInstance()->OpenBindSheet(sheetContentNode,
@@ -1053,9 +1063,10 @@ void JSViewContext::JSOpenPopup(const JSCallbackInfo& info)
         JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
     }
     auto ret = JSViewAbstract::OpenPopup(popupParam, popupContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1080,9 +1091,10 @@ bool UpdateParsePopupParam(const JSCallbackInfo& info, RefPtr<PopupParam>& popup
             popupParam->SetTargetId(param->GetTargetId());
         }
     } else {
-        if (result != ERROR_CODE_INTERNAL_ERROR) {
-            ReturnPromise(info, result);
+        if (result == ERROR_CODE_INTERNAL_ERROR) {
+            result = ERROR_CODE_NO_ERROR;
         }
+        ReturnPromise(info, result);
         return false;
     }
     auto isShowInSubWindow = param->IsShowInSubWindow();
@@ -1124,9 +1136,10 @@ void JSViewContext::JSUpdatePopup(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::UpdatePopup(popupParam, popupContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1143,9 +1156,10 @@ void JSViewContext::JSClosePopup(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::ClosePopup(popupContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1198,10 +1212,11 @@ void JSViewContext::JSOpenMenu(const JSCallbackInfo& info)
         return;
     }
     NG::MenuParam menuParam;
+    JSRef<JSObject> menuObj;
     if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
-        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
-        JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+        menuObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
     }
+    JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
     auto ret = JSViewAbstract::OpenMenu(menuParam, menuContentNode, targetId);
     if (ret != ERROR_CODE_INTERNAL_ERROR) {
         ReturnPromise(info, ret);

@@ -719,6 +719,7 @@ int32_t NavDestinationGroupNode::DoSystemFadeTransition(bool isEnter)
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
+    SetIsOnAnimation(true);
     auto option = BuildAnimationOption(
         Curves::SHARP, BuildTransitionFinishCallback(), SYSTEM_FADE_TRANSITION_DURATION, SYSTEM_FADE_TRANSITION_DELAY);
     renderContext->OpacityAnimation(option, isEnter ? 0.0f : 1.0f, isEnter ? 1.0f : 0.0f);
@@ -732,6 +733,7 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
+    SetIsOnAnimation(true);
     if ((operation == NavigationOperation::POP) ^ isEnter) {
         // translate animation
         bool isRight = (systemTransitionType_ & NavigationSystemTransitionType::SLIDE_RIGHT)
@@ -781,6 +783,7 @@ int32_t NavDestinationGroupNode::DoSystemEnterExplodeTransition(NavigationOperat
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
+    SetIsOnAnimation(true);
     if (operation == NavigationOperation::POP) {
         // mask animation
         DoMaskAnimation(BuildAnimationOption(Curves::FRICTION, nullptr, SYSTEM_EXPLODE_TRANSITION_MASK_DURATION),
@@ -811,6 +814,7 @@ int32_t NavDestinationGroupNode::DoSystemExitExplodeTransition(NavigationOperati
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
+    SetIsOnAnimation(true);
     if (operation == NavigationOperation::POP) {
         // opacity animation
         renderContext->OpacityAnimation(
@@ -966,6 +970,7 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 auto parent = navDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(navDestination);
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             } else if (navDestination->HasStandardBefore()) {
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);

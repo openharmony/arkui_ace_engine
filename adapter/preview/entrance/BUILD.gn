@@ -44,6 +44,7 @@ ohos_source_set("preview_entrance_source") {
       "ace_container.cpp",
       "ace_preview_helper.cpp",
       "ace_resource_register.cpp",
+      "ace_translate_manager.cpp",
       "ace_view_preview.cpp",
       "clipboard/clipboard_impl.cpp",
       "clipboard/clipboard_proxy_impl.cpp",
@@ -61,6 +62,7 @@ ohos_source_set("preview_entrance_source") {
       "touch_event_convertor.cpp",
       "udmf/udmf_impl.cpp",
       "ui_content_impl.cpp",
+      "ui_session/ui_session_manager_preview.cpp",
       "vibrator/vibrator_utils.cpp",
       "xcollie/xcollieInterface_impl.cpp",
     ]

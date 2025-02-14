@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
 class CheckBoxPaintProperty;
+class DatePickerPattern;
 class ACE_EXPORT DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
@@ -177,6 +178,8 @@ private:
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);
     static DialogEvent GetDateChangeEvent(const RefPtr<FrameNode>& frameNode,
         const std::map<std::string, NG::DialogEvent>& dialogEvent);
+    static void ToggleTitleDisplay(
+        RefPtr<DatePickerPattern>& datePickerPattern, RefPtr<DatePickerPattern>& monthDaysPickerPattern);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;

@@ -32,9 +32,7 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -173,7 +171,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
             renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
         }
     }
-    UpdateBackgroundStyle(renderContext, dialogProperties, theme);
+    UpdateBackgroundStyle(renderContext, dialogProperties, theme, childNode);
 }
 
 void CalendarDialogView::OperationsToPattern(
@@ -1007,14 +1005,41 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
 }
 
 void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& renderContext,
-    const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme)
+    const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme,
+    const RefPtr<FrameNode>& dialogNode)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         CHECK_NULL_VOID(calendarTheme);
+        auto contentRenderContext = dialogNode->GetRenderContext();
+        CHECK_NULL_VOID(contentRenderContext);
+        auto pipeLineContext = dialogNode->GetContext();
+        CHECK_NULL_VOID(pipeLineContext);
         BlurStyleOption styleOption;
+        if (dialogProperties.blurStyleOption.has_value()) {
+            styleOption = dialogProperties.blurStyleOption.value();
+            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
+            }
+        }
         styleOption.blurStyle = static_cast<BlurStyle>(
             dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
+        if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
+            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+        }
         renderContext->UpdateBackBlurStyle(styleOption);
+        if (dialogProperties.effectOption.has_value()) {
+            if (dialogProperties.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
+            }
+            if (contentRenderContext->GetBackBlurStyle().has_value()) {
+                contentRenderContext->UpdateBackBlurStyle(std::nullopt);
+            }
+            contentRenderContext->UpdateBackgroundEffect(dialogProperties.effectOption.value());
+        }
         renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
     }
 }
@@ -1243,7 +1268,7 @@ bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& co
     value->Put("year", pickerDate.GetYear());
     value->Put("month", pickerDate.GetMonth());
     value->Put("day", pickerDate.GetDay());
-    UiSessionManager::GetInstance().ReportComponentChangeEvent(nodeId, "event", value);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
 #endif
     return true;
 }

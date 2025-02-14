@@ -219,7 +219,7 @@ int32_t SwitchPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
     CHECK_NULL_RETURN(paintWrapper, defaultValue);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, defaultValue);
-    auto host = renderContext->GetUnsafeHost();
+    auto host = renderContext->GetHost();
     CHECK_NULL_RETURN(host, defaultValue);
     return host->GetThemeScopeId();
 }

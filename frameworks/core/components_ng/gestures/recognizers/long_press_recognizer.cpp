@@ -65,7 +65,11 @@ void LongPressRecognizer::OnAccepted()
     UpdateFingerListInfo();
     SendCallbackMsg(onActionUpdate_, false);
     SendCallbackMsg(onAction_, false, true);
+    if (isLimitFingerCount_ && hasRepeated_) {
+        return;
+    }
     if (repeat_) {
+        hasRepeated_ = true;
         StartRepeatTimer();
     }
 }
@@ -179,6 +183,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
         SendCallbackMsg(onActionUpdate_, false);
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
+            hasRepeated_ = false;
             SendCallbackMsg(onActionEnd_, false);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;

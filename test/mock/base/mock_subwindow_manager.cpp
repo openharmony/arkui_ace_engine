@@ -46,7 +46,7 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
 
 void SubwindowManager::HideSubWindowNG() {}
 
-const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
+const RefPtr<Subwindow> SubwindowManager::GetCurrentWindow()
 {
     return g_currentWindow;
 }

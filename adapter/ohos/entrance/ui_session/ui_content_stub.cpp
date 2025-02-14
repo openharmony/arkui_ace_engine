@@ -104,6 +104,9 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             SendTranslateResultStrInner(data, reply, option);
             break;
         }
+        case GET_CURRENT_SHOWING_IMAGE: {
+            GetCurrentImagesShowingInner(data, reply, option);
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -126,8 +129,8 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
         return FAILED;
     }
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance().SaveReportStub(report, processId);
-    UiSessionManager::GetInstance().SendBaseInfo(processId);
+    UiSessionManager::GetInstance()->SaveReportStub(report, processId);
+    UiSessionManager::GetInstance()->SendBaseInfo(processId);
     return NO_ERROR;
 }
 
@@ -216,7 +219,7 @@ int32_t UiContentStub::ResetTranslateTextInner(MessageParcel& data, MessageParce
 int32_t UiContentStub::GetWebViewCurrentLanguageInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance().SaveTranslateId(processId);
+    UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
     reply.WriteInt32(GetWebViewCurrentLanguage(nullptr));
     return NO_ERROR;
 }
@@ -232,7 +235,7 @@ int32_t UiContentStub::StartWebViewTranslateInner(MessageParcel& data, MessagePa
 {
     std::string extraData = data.ReadString();
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance().SaveTranslateId(processId);
+    UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
     reply.WriteInt32(StartWebViewTranslate(extraData, nullptr));
     return NO_ERROR;
 }
@@ -258,6 +261,14 @@ int32_t UiContentStub::SendTranslateResultStrInner(MessageParcel& data, MessageP
     int32_t nodeId = data.ReadInt32();
     std::string result = data.ReadString();
     reply.WriteInt32(SendTranslateResult(nodeId, result));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("pixel", processId);
+    reply.WriteInt32(GetCurrentImagesShowing(nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

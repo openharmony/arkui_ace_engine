@@ -22,6 +22,7 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr float DEFAULT_SIZE_VALUE = -1.0f;
 } // namespace
 ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -298,6 +299,72 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupOptions(ArkUIRuntime
     auto modifier = GetArkUINodeModifiers()->getCheckboxGroupModifier();
     CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
     modifier->setCheckboxGroupName(nativeNode, group.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+template<typename T>
+panda::Local<panda::JSValueRef> String2StringValueWithVM(const EcmaVM* vm, T val)
+{
+    if constexpr (std::is_same_v<T, std::string>) {
+        return panda::StringRef::NewFromUtf8(vm, val.c_str());
+    } else if constexpr (std::is_same_v<T, const char*>) {
+        return panda::StringRef::NewFromUtf8(vm, val);
+    } else if constexpr (std::is_same_v<T, std::u16string>) {
+        return panda::StringRef::NewFromUtf16(vm, val.c_str());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                             const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        panda::Local<panda::NumberRef> statusParam = panda::NumberRef::New(vm, eventInfo->GetStatus());
+        int32_t i = 0;
+        auto valueArray = panda::ArrayRef::New(vm);
+        for (std::string str : eventInfo->GetNameList()) {
+            panda::Local<panda::StringRef> item = String2StringValueWithVM(vm, str.c_str());
+            panda::ArrayRef::SetValueAt(vm, valueArray, i++, item);
+        }
+        auto resultObj = panda::ObjectRef::New(vm);
+        resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "name"), valueArray);
+        resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "status"), statusParam);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { resultObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupOnChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupOnChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

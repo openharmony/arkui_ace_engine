@@ -81,7 +81,7 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
     NavDestinationMode mode = context->GetMode();
     int32_t uniqueId = context->GetUniqueId();
     info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param,
-        navDestinationId, mode, std::to_string(uniqueId));
+        navDestinationId, mode, uniqueId);
 }
 
 void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestination,

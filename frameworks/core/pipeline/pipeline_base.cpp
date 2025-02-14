@@ -786,7 +786,8 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     if (currentContainer && !currentContainer->IsSubContainer()) {
 #ifdef OHOS_STANDARD_SYSTEM
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow() &&
+            !subwindow->NeedAvoidKeyboard()) {
             // subwindow is shown, main window no need to handle the keyboard event
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
             CheckAndUpdateKeyboardInset(keyboardHeight);
@@ -807,7 +808,8 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow() &&
+            !subwindow->NeedAvoidKeyboard()) {
             // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
             CheckAndUpdateKeyboardInset(keyboardHeight);

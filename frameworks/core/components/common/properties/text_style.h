@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,8 @@ enum class FontWeight {
     MEDIUM,
     REGULAR,
 };
+
+constexpr uint32_t DEFAULT_MAX_FONT_FAMILY_LENGTH = Infinity<uint32_t>();
 
 enum class FontStyle {
     NORMAL,
@@ -258,6 +260,7 @@ public:
     TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight, FontStyle fontStyle,
         const Color& textColor);
     TextStyle(double fontSize) : fontSize_(fontSize) {}
+    TextStyle(const Color& textColor) : textColor_(textColor) {}
     ~TextStyle() = default;
 
     bool operator==(const TextStyle& rhs) const;

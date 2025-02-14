@@ -635,7 +635,34 @@ ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
     }
     return TextPickerModelNG::GetSelectedSize(frameNode);
 }
-
+void SetTextPickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange =
+        reinterpret_cast<std::function<void(const std::vector<std::string>&, const std::vector<double>&)>*>(callback);
+    TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(*onChange));
+}
+void ResetTextPickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetOnCascadeChange(frameNode, nullptr);
+}
+void SetTextPickerOnScrollStopExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange =
+        reinterpret_cast<std::function<void(const std::vector<std::string>&, const std::vector<double>&)>*>(callback);
+    TextPickerModelNG::SetOnScrollStop(frameNode, std::move(*onChange));
+}
+void ResetTextPickerOnScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetOnScrollStop(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -668,8 +695,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .setTextPickerValue = SetTextPickerValue,
         .setTextPickerColumnWidths = SetTextPickerColumnWidths,
         .resetTextPickerColumnWidths = ResetTextPickerColumnWidths,
-        .getTextPickerColumnWidthsSize = GetTextPickerColumnWidthsSize,
         .getTextPickerColumnWidths = GetTextPickerColumnWidths,
+        .getTextPickerColumnWidthsSize = GetTextPickerColumnWidthsSize,
         .setTextPickerDivider = SetTextPickerDivider,
         .resetTextPickerDivider = ResetTextPickerDivider,
         .setTextPickerGradientHeight = SetTextPickerGradientHeight,
@@ -687,6 +714,10 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .resetTextPickerEnableHapticFeedback = ResetTextPickerEnableHapticFeedback,
         .setTextPickerDigitalCrownSensitivity = SetTextPickerDigitalCrownSensitivity,
         .resetTextPickerDigitalCrownSensitivity = ResetTextPickerDigitalCrownSensitivity,
+        .setTextPickerOnChange = SetTextPickerOnChangeExt,
+        .resetTextPickerOnChange = ResetTextPickerOnChange,
+        .setTextPickerOnScrollStop = SetTextPickerOnScrollStopExt,
+        .resetTextPickerOnScrollStop = ResetTextPickerOnScrollStop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

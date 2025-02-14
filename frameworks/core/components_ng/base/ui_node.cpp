@@ -248,7 +248,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
 
     // the node set isInDestroying state when destroying in pop animation
     // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return children_.end();
     }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
@@ -375,6 +375,19 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     AfterMountToParent();
 }
 
+void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChildAfter(AceType::Claim(this), siblingNode);
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
+}
+
 void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     OnConfigurationUpdate(configurationChange);
@@ -391,7 +404,7 @@ void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationC
 
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return false;
     }
     // The recursive flag will used by RenderContext, if recursive flag is false,
@@ -733,7 +746,7 @@ void UINode::DetachFromMainTree(bool recursive)
     if (!onMainTree_) {
         return;
     }
-    if (IsInDestroying()) {
+    if (IsDestroyingState()) {
         return;
     }
     onMainTree_ = false;
@@ -1959,7 +1972,7 @@ void UINode::SetDestroying(bool isDestroying, bool cleanStatus)
 
     isInDestroying_ = isDestroying;
     for (const auto& child : GetChildren()) {
-        if (child->GetTag() == "BuilderProxyNode") {
+        if (child->IsReusableNode()) {
             child->SetDestroying(isDestroying, false);
         } else {
             child->SetDestroying(isDestroying, cleanStatus);

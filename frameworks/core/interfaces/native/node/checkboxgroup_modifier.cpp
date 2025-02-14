@@ -167,6 +167,25 @@ void SetCheckboxGroupName(ArkUINodeHandle node, ArkUI_CharPtr group)
     CheckBoxGroupModelNG::SetCheckboxGroupName(frameNode, std::string(group));
 }
 
+void SetCheckboxGroupOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void (const BaseEventInfo*)>*>(callback);
+        CheckBoxGroupModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        CheckBoxGroupModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetCheckboxGroupOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetOnChange(frameNode, nullptr);
+}
+
 ArkUI_CharPtr GetCheckboxGroupName(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -244,6 +263,8 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         .setCheckboxGroupStyle = SetCheckboxGroupStyle,
         .resetCheckboxGroupStyle = ResetCheckboxGroupStyle,
         .setCheckboxGroupName = SetCheckboxGroupName,
+        .setCheckboxGroupOnChange=SetCheckboxGroupOnChange,
+        .resetCheckboxGroupOnChange=ResetCheckboxGroupOnChange,
         .getCheckboxGroupName = GetCheckboxGroupName,
         .getCheckboxGroupSelectAll = GetCheckboxGroupSelectAll,
         .getCheckboxGroupSelectedColor = GetCheckboxGroupSelectedColor,

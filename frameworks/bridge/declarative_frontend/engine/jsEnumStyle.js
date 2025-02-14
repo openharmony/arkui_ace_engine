@@ -3823,3 +3823,9 @@ let TextMenuShowMode;
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
   TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
 })(TextMenuShowMode || (TextMenuShowMode = {}));
+
+let KeyProcessingMode;
+(function (KeyProcessingMode) {
+  KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
+  KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
+})(KeyProcessingMode || (KeyProcessingMode = {}));

@@ -90,7 +90,6 @@ private:
     void OnAttachToFrameNode() override;
     void InitParameters();
     void OnModifyDone() override;
-    void HandleEnabled();
     void OnAfterModifyDone() override;
     void InitClickEvent();
     void InitButtonAndText();
@@ -153,7 +152,6 @@ private:
     bool isPress_ = false;
     bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();
-    bool isTouchPreventDefault_ = false;
     bool isTextFadeOut_ = false;
     bool isHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);

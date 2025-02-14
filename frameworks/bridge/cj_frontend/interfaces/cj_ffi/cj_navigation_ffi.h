@@ -24,6 +24,8 @@ using VectorNavigationItemHandle = void*;
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationCreate();
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationCreateWithPathInfos(int64_t pathInfos);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavDestination(void (*builder)(const char*));
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitle(const char* title);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleWithBuilder(void (*builder)());
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetSubTitle(const char* subTitle);
@@ -35,6 +37,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilder(void (*builder
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideBackButton(bool isHide);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetMode(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnTitleModeChanged(void (*callback)(int32_t));
 }
 

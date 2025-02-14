@@ -48,6 +48,14 @@ void CJRuntimeDelegate::RegisterCJFuncs(AtCPackage funcs)
     }
 }
 
+void CJRuntimeDelegate::RegisterCJXCompCtrFuncs(AtCXComponentCallback funcs)
+{
+    if (!atCXcompCtrLoaded_) {
+        atCXcompCtr_ = funcs;
+        atCXcompCtrLoaded_ = true;
+    }
+}
+
 bool CJRuntimeDelegate::LoadAtCPackage()
 {
     if (!atCPackageLoaded_) {

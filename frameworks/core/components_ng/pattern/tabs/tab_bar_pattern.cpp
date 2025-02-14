@@ -65,7 +65,6 @@ constexpr float MAX_FLING_VELOCITY = 4200.0f;
 
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const auto TRANSLATE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
-const auto TRANSLATE_DELAY = 2000;
 const auto TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_FRAME_RATE = 120;
 const auto TRANSLATE_FRAME_RATE_RANGE =
@@ -142,21 +141,6 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
 
     if (delay == 0) {
         StartShowTabBarImmediately();
-    } else {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        showTabBarTask_.Reset([weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto pipeline = pattern->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            pattern->showTabBarTask_.Reset(nullptr);
-            pattern->StartShowTabBarImmediately();
-            pipeline->RequestFrame();
-        });
-        taskExecutor->PostDelayedTask(showTabBarTask_, TaskExecutor::TaskType::UI, delay, "ArkUITabBarTranslate");
     }
 }
 
@@ -241,9 +225,6 @@ void TabBarPattern::StartHideTabBar()
         CHECK_NULL_VOID(pattern);
         pattern->isTabBarHiding_ = false;
         pattern->tabBarState_ = TabBarState::HIDE;
-        if (pattern->showTabBarTask_) {
-            pattern->StartShowTabBar(TRANSLATE_DELAY);
-        }
     };
     AnimationUtils::Animate(option, propertyCallback, finishCallback);
     isTabBarHiding_ = true;
@@ -478,14 +459,13 @@ void TabBarPattern::BeforeCreateLayoutWrapper()
     }
 }
 
-void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
+void TabBarPattern::AddTabBarItemClickAndTouchEvent(const RefPtr<FrameNode>& tabBarItem)
 {
     CHECK_NULL_VOID(tabBarItem);
     auto tabBarItemId = tabBarItem->GetId();
     if (clickEvents_.find(tabBarItemId) != clickEvents_.end()) {
         return;
     }
-
     auto eventHub = tabBarItem->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
@@ -501,6 +481,23 @@ void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     clickEvents_[tabBarItemId] = clickEvent;
     gestureHub->AddClickEvent(clickEvent);
+
+    if (touchEvents_.find(tabBarItemId) != touchEvents_.end()) {
+        return;
+    }
+    auto touchCallback = [weak = WeakClaim(this), tabBarItemId](const TouchEventInfo& info) {
+        auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
+        auto host = tabBar->GetHost();
+        CHECK_NULL_VOID(host);
+        auto index = host->GetChildFlatIndex(tabBarItemId).second;
+        for (auto touchInfo : info.GetTouches()) {
+            tabBar->HandleTouchEvent(touchInfo.GetTouchType(), index);
+        }
+    };
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    touchEvents_[tabBarItemId] = touchEvent;
+    gestureHub->AddTouchEvent(touchEvent);
 }
 
 void TabBarPattern::AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem)
@@ -594,7 +591,24 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
             }
         }
     };
-    dragEvent_ = MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
+        auto index = tabBar->CalculateSelectedIndex(info.GetLocalLocation());
+        if (tabBar->dialogNode_) {
+            tabBar->HandleClick(info.GetSourceDevice(), index);
+            tabBar->CloseDialog();
+        }
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)] {
+        auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
+        if (tabBar->dialogNode_) {
+            tabBar->CloseDialog();
+        }
+    };
+    dragEvent_ = MakeRefPtr<DragEvent>(
+        nullptr, std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
@@ -729,26 +743,6 @@ std::pair<float, float> TabBarPattern::GetOverScrollInfo(const SizeF& size)
     return std::make_pair(overScroll, mainSize);
 }
 
-void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
-{
-    if (touchEvent_) {
-        return;
-    }
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        for (auto touchInfo : info.GetTouches()) {
-            auto touchType = touchInfo.GetTouchType();
-            if ((!pattern->touchingIndex_.has_value() && pattern->InsideTabBarRegion(touchInfo)) ||
-                touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-                pattern->HandleTouchEvent(touchInfo);
-            }
-        }
-    };
-    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gestureHub->AddTouchEvent(touchEvent_);
-}
-
 bool TabBarPattern::InsideTabBarRegion(const TouchLocationInfo& locationInfo)
 {
     auto host = GetHost();
@@ -813,7 +807,7 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
     }
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (index < 0 || index >= totalCount) {
-        if (hoverIndex_.has_value() && !touchingIndex_.has_value()) {
+        if (hoverIndex_.has_value() && touchingIndex_.empty()) {
             HandleMoveAway(hoverIndex_.value());
         }
         hoverIndex_.reset();
@@ -821,7 +815,7 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
     }
     auto mouseAction = info.GetAction();
     if (mouseAction == MouseAction::MOVE || mouseAction == MouseAction::WINDOW_ENTER) {
-        if (touchingIndex_.has_value()) {
+        if (!touchingIndex_.empty()) {
             hoverIndex_ = index;
             return;
         }
@@ -852,7 +846,7 @@ void TabBarPattern::HandleHoverEvent(bool isHover)
     }
     isHover_ = isHover;
     if (!isHover_ && hoverIndex_.has_value()) {
-        if (!touchingIndex_.has_value()) {
+        if (touchingIndex_.empty()) {
             HandleMoveAway(hoverIndex_.value());
         }
         hoverIndex_.reset();
@@ -1089,7 +1083,6 @@ void TabBarPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     InitScrollableEvent(layoutProperty, gestureHub);
-    InitTouch(gestureHub);
     InitHoverEvent();
     InitMouseEvent();
     SetSurfaceChangeCallback();
@@ -1164,7 +1157,6 @@ void TabBarPattern::RemoveTabBarEventCallback()
         if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             gestureHub->RemoveScrollableEvent(tabBarPattern->scrollableEvent_);
         }
-        gestureHub->RemoveTouchEvent(tabBarPattern->touchEvent_);
         if (tabBarPattern->tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
             gestureHub->RemoveDragEvent();
             gestureHub->SetLongPressEvent(nullptr);
@@ -1180,9 +1172,13 @@ void TabBarPattern::RemoveTabBarEventCallback()
             CHECK_NULL_VOID(childHub);
             auto childGestureHub = childHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(childGestureHub);
-            auto iter = tabBarPattern->clickEvents_.find(frameNode->GetId());
-            if (iter != tabBarPattern->clickEvents_.end()) {
-                childGestureHub->RemoveClickEvent(iter->second);
+            auto clickIter = tabBarPattern->clickEvents_.find(frameNode->GetId());
+            if (clickIter != tabBarPattern->clickEvents_.end()) {
+                childGestureHub->RemoveClickEvent(clickIter->second);
+            }
+            auto touchIter = tabBarPattern->touchEvents_.find(frameNode->GetId());
+            if (touchIter != tabBarPattern->touchEvents_.end()) {
+                childGestureHub->RemoveTouchEvent(touchIter->second);
             }
         }
     };
@@ -1206,7 +1202,6 @@ void TabBarPattern::AddTabBarEventCallback()
         if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             gestureHub->AddScrollableEvent(tabBarPattern->scrollableEvent_);
         }
-        gestureHub->AddTouchEvent(tabBarPattern->touchEvent_);
         for (const auto& childNode : host->GetChildren()) {
             CHECK_NULL_VOID(childNode);
             auto frameNode = AceType::DynamicCast<FrameNode>(childNode);
@@ -1215,9 +1210,13 @@ void TabBarPattern::AddTabBarEventCallback()
             CHECK_NULL_VOID(childHub);
             auto childGestureHub = childHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(childGestureHub);
-            auto iter = tabBarPattern->clickEvents_.find(frameNode->GetId());
-            if (iter != tabBarPattern->clickEvents_.end()) {
-                childGestureHub->AddClickEvent(iter->second);
+            auto clickIter = tabBarPattern->clickEvents_.find(frameNode->GetId());
+            if (clickIter != tabBarPattern->clickEvents_.end()) {
+                childGestureHub->AddClickEvent(clickIter->second);
+            }
+            auto touchIter = tabBarPattern->touchEvents_.find(frameNode->GetId());
+            if (touchIter != tabBarPattern->touchEvents_.end()) {
+                childGestureHub->AddTouchEvent(touchIter->second);
             }
         }
         tabBarPattern->InitLongPressAndDragEvent();
@@ -1942,37 +1941,24 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
+void TabBarPattern::HandleTouchEvent(TouchType touchType, int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto touchType = info.GetTouchType();
-    auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    if (touchType == TouchType::UP && dialogNode_) {
-        HandleClick(info.GetSourceDevice(), index);
-        CloseDialog();
-    } else if (touchType == TouchType::CANCEL && dialogNode_) {
-        CloseDialog();
-    }
-
-    if (IsContainsBuilder()) {
-        return;
-    }
-
     auto totalCount = host->TotalChildCount() - MASK_COUNT;
-    if (totalCount < 0) {
+    if (IsContainsBuilder() || totalCount < 0) {
         return;
     }
 
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
         HandleTouchDown(index);
-        touchingIndex_ = index;
+        touchingIndex_.insert(index);
         return;
     }
 
-    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && touchingIndex_.has_value()) {
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         HandleTouchUp(index);
-        touchingIndex_.reset();
+        touchingIndex_.erase(index);
     }
 }
 
@@ -2007,7 +1993,6 @@ void TabBarPattern::HandleTouchDown(int32_t index)
     if (removeSwiperEventCallback) {
         removeSwiperEventCallback();
     }
-    SetTouching(true);
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -2025,16 +2010,13 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    if (IsTouching()) {
-        SetTouching(false);
-        if (hoverIndex_.has_value() && touchingIndex_.value_or(-1) == index) {
-            PlayPressAnimation(index, GetSubTabBarHoverColor(index), AnimationType::HOVERTOPRESS);
-            return;
-        }
-        PlayPressAnimation(touchingIndex_.value_or(-1), Color::TRANSPARENT, AnimationType::PRESS);
-        if (hoverIndex_.has_value()) {
-            PlayPressAnimation(hoverIndex_.value(), GetSubTabBarHoverColor(hoverIndex_.value()), AnimationType::HOVER);
-        }
+    if (hoverIndex_.value_or(-1) == index) {
+        PlayPressAnimation(index, GetSubTabBarHoverColor(index), AnimationType::HOVERTOPRESS);
+        return;
+    }
+    PlayPressAnimation(index, Color::TRANSPARENT, AnimationType::PRESS);
+    if (hoverIndex_.has_value()) {
+        PlayPressAnimation(hoverIndex_.value(), GetSubTabBarHoverColor(hoverIndex_.value()), AnimationType::HOVER);
     }
 }
 
@@ -3583,15 +3565,6 @@ void TabBarPattern::RemoveIsFocusActiveUpdateEvent()
 void TabBarPattern::UpdateFocusToSelectedNode(bool isFocusActive)
 {
     if (!isFocusActive) {
-        return;
-    }
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE ||
-        (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && !tabTheme->GetIsChangeFocusTextStyle())) {
-        FocusCurrentOffset(focusIndicator_);
         return;
     }
     auto childFocusNode = GetCurrentFocusNode();

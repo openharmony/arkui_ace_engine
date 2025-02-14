@@ -795,6 +795,16 @@ class UIContext {
         }
         return this.textMenuController_;
     }
+
+    freezeUINode(idOrUniqueId, isFreeze) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof idOrUniqueId === "string") {
+            getUINativeModule().common.freezeUINodeById(idOrUniqueId, isFreeze);
+        } else if (typeof idOrUniqueId === "number") {
+            getUINativeModule().common.freezeUINodeByUniqueId(idOrUniqueId, isFreeze);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {
@@ -943,6 +953,15 @@ class FocusController {
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.configWindowMask(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setKeyProcessingMode(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setKeyProcessingMode(value);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
@@ -1301,6 +1320,20 @@ class PromptAction {
         }
     }
 
+    getTopOrder() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.__getTopOrder__();
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    getBottomOrder() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.__getBottomOrder__();
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     openPopup(content, target, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let argLength = arguments.length;
@@ -1519,6 +1552,16 @@ class OverlayManager {
             this.ohos_overlayManager.addFrameNode(content.getFrameNode(), index);
         } else {
             this.ohos_overlayManager.addFrameNode(content.getFrameNode());
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    addComponentContentWithOrder(content, levelOrder) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof levelOrder !== 'undefined') {
+            this.ohos_overlayManager.addFrameNodeWithOrder(content.getFrameNode(), levelOrder);
+        } else {
+            this.ohos_overlayManager.addFrameNodeWithOrder(content.getFrameNode());
         }
         __JSScopeUtil__.restoreInstanceId();
     }

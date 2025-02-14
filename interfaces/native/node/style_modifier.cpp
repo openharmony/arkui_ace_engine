@@ -6747,11 +6747,24 @@ void ResetButtonLabel(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonLabel(node->uiNodeHandle);
 }
 
+bool IsLegelType(int type)
+{
+    switch (type) {
+        case ARKUI_BUTTON_TYPE_NORMAL:
+        case ARKUI_BUTTON_TYPE_CAPSULE:
+        case ARKUI_BUTTON_TYPE_CIRCLE:
+        case ARKUI_BUTTON_ROUNDED_RECTANGLE:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 int32_t SetButtonType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (LessNotEqual(actualSize, 0) ||
-        !InRegion(ARKUI_BUTTON_TYPE_NORMAL, ARKUI_BUTTON_ROUNDED_RECTANGLE, item->value[NUM_0].i32)) {
+    if (LessNotEqual(actualSize, 0) || !IsLegelType(item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
@@ -11379,11 +11392,7 @@ int32_t SetCalendarPickerStartDate(ArkUI_NodeHandle node, const ArkUI_AttributeI
     auto startYear = StringToInt(date[NUM_0].c_str());
     auto startMonth = StringToInt(date[NUM_1].c_str());
     auto startDay = StringToInt(date[NUM_2].c_str());
-    if (startYear > 0 && startMonth > 0 && startDay > 0) {
-        startYear = static_cast<uint32_t>(startYear);
-        startMonth = static_cast<uint32_t>(startMonth);
-        startDay = static_cast<uint32_t>(startDay);
-    } else {
+    if (startYear <= 0 || startMonth <= 0 || startDay <= 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!IsValidDate(startYear, startMonth, startDay)) {
@@ -11422,11 +11431,7 @@ int32_t SetCalendarPickerEndDate(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     auto endYear = StringToInt(date[NUM_0].c_str());
     auto endMonth = StringToInt(date[NUM_1].c_str());
     auto endDay = StringToInt(date[NUM_2].c_str());
-    if (endYear > 0 && endMonth > 0 && endDay > 0) {
-        endYear = static_cast<uint32_t>(endYear);
-        endMonth = static_cast<uint32_t>(endMonth);
-        endDay = static_cast<uint32_t>(endDay);
-    } else {
+    if (endYear <= 0 || endMonth <= 0 || endDay <= 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!IsValidDate(endYear, endMonth, endDay)) {

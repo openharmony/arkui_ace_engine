@@ -78,6 +78,7 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
+    std::tuple<bool, bool, bool> CheckHoverStatus();
     void OnModifyDone() override;
     void InitNavigationArrow();
     void InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub);

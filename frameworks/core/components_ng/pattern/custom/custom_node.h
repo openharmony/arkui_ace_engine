@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 // CustomNode is the frame node of @Component struct.
-class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
+class ACE_FORCE_EXPORT CustomNode : public UINode, public CustomNodeBase {
     DECLARE_ACE_TYPE(CustomNode, UINode, CustomNodeBase);
 
 public:
@@ -73,7 +73,7 @@ public:
         return 1;
     }
 
-    void Render();
+    bool Render(int64_t deadline = 0);
 
     void SetCompleteReloadFunc(RenderFunction&& func) override
     {
@@ -155,6 +155,8 @@ private:
     bool prevJsActive_ = true;
     std::list<ExtraInfo> extraInfos_;
     WeakPtr<UINode> navigationNode_;
+    std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;
+    int32_t prebuildFrameRounds_ = 0;
 };
 } // namespace OHOS::Ace::NG
 
