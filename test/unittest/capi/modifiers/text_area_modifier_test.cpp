@@ -1903,7 +1903,7 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
             CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
         }
     };
-    KeyboardOptions keyboardOptions = { .supportAvoidance = true };
+    Ark_KeyboardOptions keyboardOptions = { .supportAvoidance = Converter::ArkValue<Opt_Boolean>(true) };
     auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
 
     modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
@@ -1912,7 +1912,7 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
     ASSERT_EQ(actualParentNode, expectedParentNode);
     ASSERT_TRUE(pattern->GetCustomKeyboardOption());
 
-    keyboardOptions = { .supportAvoidance = false };
+    keyboardOptions = { .supportAvoidance = Converter::ArkValue<Opt_Boolean>(false) };
     optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
     modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
     ASSERT_EQ(actualParentNode, expectedParentNode);
