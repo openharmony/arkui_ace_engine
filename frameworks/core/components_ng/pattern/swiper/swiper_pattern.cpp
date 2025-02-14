@@ -5042,18 +5042,22 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     CHECK_NULL_VOID(props);
     const auto arrowProps = arrowNode->GetLayoutProperty<SwiperArrowLayoutProperty>();
     CHECK_NULL_VOID(arrowProps);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
     arrowProps->UpdateDirection(props->GetDirection().value_or(Axis::HORIZONTAL));
     arrowProps->UpdateIndex(props->GetIndex().value_or(0));
     arrowProps->UpdateLoop(props->GetLoop().value_or(true));
     arrowProps->UpdateEnabled(paintProps->GetEnabled().value_or(true));
-    arrowProps->UpdateDisplayArrow(props->GetDisplayArrowValue());
-    arrowProps->UpdateHoverShow(props->GetHoverShowValue());
-    arrowProps->UpdateIsShowBackground(props->GetIsShowBackgroundValue());
-    arrowProps->UpdateBackgroundSize(props->GetBackgroundSizeValue());
-    arrowProps->UpdateBackgroundColor(props->GetBackgroundColorValue());
-    arrowProps->UpdateArrowSize(props->GetArrowSizeValue());
-    arrowProps->UpdateArrowColor(props->GetArrowColorValue());
-    arrowProps->UpdateIsSidebarMiddle(props->GetIsSidebarMiddleValue());
+    arrowProps->UpdateDisplayArrow(props->GetDisplayArrowValue(false));
+    arrowProps->UpdateHoverShow(props->GetHoverShowValue(false));
+    arrowProps->UpdateIsShowBackground(props->GetIsShowBackgroundValue(theme->GetIsShowArrowBackground()));
+    arrowProps->UpdateBackgroundSize(props->GetBackgroundSizeValue(theme->GetSmallArrowBackgroundSize()));
+    arrowProps->UpdateBackgroundColor(props->GetBackgroundColorValue(theme->GetSmallArrowBackgroundColor()));
+    arrowProps->UpdateArrowSize(props->GetArrowSizeValue(theme->GetSmallArrowSize()));
+    arrowProps->UpdateArrowColor(props->GetArrowColorValue(theme->GetSmallArrowColor()));
+    arrowProps->UpdateIsSidebarMiddle(props->GetIsSidebarMiddleValue(theme->GetIsSidebarMiddle()));
 }
 
 void SwiperPattern::SetAccessibilityAction()

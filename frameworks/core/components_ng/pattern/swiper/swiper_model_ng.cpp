@@ -705,11 +705,6 @@ void SwiperModelNG::SetAutoPlayOptions(FrameNode* frameNode, const SwiperAutoPla
 
 void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters)
 {
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(theme);
-
     if (swiperArrowParameters.isShowBackground.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, IsShowBackground, swiperArrowParameters.isShowBackground.value(), frameNode);
