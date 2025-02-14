@@ -684,8 +684,8 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     bool isCustomFont = false;
     for (const auto& familyName : fontFamilies) {
         bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-        if (customFont) {
-            isCustomFont = true;
+        if (!customFont) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FontRegister failed id:%{public}d", frameNode->GetId());
         }
     }
     if (isCustomFont || fontManager->IsDefaultFontChanged()) {

@@ -498,8 +498,8 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
         bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
             bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (customFont) {
-                isCustomFont = true;
+            if (!customFont) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "Span FontRegister failed id:%{public}d", frameNode->GetId());
             }
         }
         if (isCustomFont) {
