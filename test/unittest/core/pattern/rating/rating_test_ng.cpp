@@ -2227,4 +2227,23 @@ HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
     ratingPattern->HandleHoverEvent(false);
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::NONE);
 }
+
+/**
+ * @tc.name: RatingOnChangeEventTest002
+ * @tc.desc: Test Rating onChange event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingOnChangeEventTest002, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    std::string unknownRatingScore;
+    auto onChange = [&unknownRatingScore](const std::string& ratingScore) { unknownRatingScore = ratingScore; };
+    rating.SetOnChange(frameNode, onChange);
+    EXPECT_NE(eventHub->changeEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG
