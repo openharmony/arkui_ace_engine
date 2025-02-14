@@ -2933,7 +2933,7 @@ int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI
     }
     auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!fullImpl) {
-        return ARKUI_ERROR_CODE_POST_CLONED_POINTER_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     int32_t res = fullImpl->getNodeModifiers()->getCommonModifier()->postTouchEvent(node->uiNodeHandle, touchEvent);
     return res;

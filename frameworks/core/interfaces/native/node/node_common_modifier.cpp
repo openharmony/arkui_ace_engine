@@ -104,7 +104,6 @@ const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
-constexpr int32_t POST_CLONED_EVENT_FAILED = 180004;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -6562,27 +6561,27 @@ ArkUI_Int32 PostTouchEventToFrameNode(ArkUINodeHandle node, TouchEvent& touchEve
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     if (!frameNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenode is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
     if (!frameNodePtr) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenodeptr is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto pipelineContext = frameNodePtr->GetContext();
     if (!pipelineContext) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent pipeline context is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto postEventManager = pipelineContext->GetPostEventManager();
     if (!postEventManager) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event manager is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     bool res = postEventManager->PostEvent(frameNodePtr, touchEvent);
     if (!res) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event fail!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -6591,7 +6590,7 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
 {
     if (!arkUITouchEvent) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent touchevent is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     TouchEvent touchEvent;
     touchEvent.type = static_cast<TouchType>(arkUITouchEvent->action);
