@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1340,529 +1340,561 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_048, TestSize.Leve
 
 /**
  * @tc.name: UpdatePreNavDesZIndex001
- * @tc.desc: Increase the coverage of NavigationPattern::UpdatePreNavDesZIndex function.
+ * @tc.desc: Branch: if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) = false
+ *           Condition: replaceVal != 0 = false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, UpdatePreNavDesZIndex001, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
     navigationStack->mockReplace_->isReplace_ = 0;
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationContentNode = FrameNode::CreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    navigationNode->contentNode_ = navigationContentNode;
+    auto firsthNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto firsthNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    firsthNavDestinationContext->UpdateZIndex(-1);
+    firsthNavDestinationNode->renderContext_ = firsthNavDestinationContext;
+    firsthNavDestinationNode->index_ = 0;
+    navigationNode->hideNodes_.emplace_back(std::make_pair(firsthNavDestinationNode, true));
+    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preTopNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    preTopNavDestinationContext->UpdateZIndex(0);
+    preTopNavDestinationNode->renderContext_ = preTopNavDestinationContext;
+    preTopNavDestinationNode->index_ = 1;
+    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    newTopNavDestinationContext->UpdateZIndex(0);
+    newTopNavDestinationNode->renderContext_ = newTopNavDestinationContext;
+    newTopNavDestinationNode->index_ = 2;
 
-    RefPtr<FrameNode> preTopNavDestinationNode = nullptr;
-    RefPtr<FrameNode> newTopNavDestinationNode = nullptr;
-    EXPECT_EQ(navigationPattern->navigationStack_->GetReplaceValue(), 0);
-    navigationPattern->UpdatePreNavDesZIndex(nullptr, nullptr, 0);
+    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestinationNode, newTopNavDestinationNode, 0);
+    EXPECT_EQ(preTopNavDestinationContext->GetZIndex(), 0);
+    EXPECT_EQ(firsthNavDestinationContext->GetZIndex(), -1);
+    NavigationPatternTestTwoNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePreNavDesZIndex002
+ * @tc.desc: Branch: if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) = false
+ *           Condition: replaceVal != 0 = true, preTopNavDestination = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, UpdatePreNavDesZIndex002, TestSize.Level1)
+{
+    NavigationPatternTestTwoNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationStack->mockReplace_->isReplace_ = 1;
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationContentNode = FrameNode::CreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    navigationNode->contentNode_ = navigationContentNode;
+    auto firsthNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto firsthNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    firsthNavDestinationContext->UpdateZIndex(-1);
+    firsthNavDestinationNode->renderContext_ = firsthNavDestinationContext;
+    firsthNavDestinationNode->index_ = 0;
+    navigationNode->hideNodes_.emplace_back(std::make_pair(firsthNavDestinationNode, true));
+    auto preTopNavDestinationNode = nullptr;
+    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    newTopNavDestinationContext->UpdateZIndex(0);
+    newTopNavDestinationNode->renderContext_ = newTopNavDestinationContext;
+    newTopNavDestinationNode->index_ = 2;
+
+    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestinationNode, newTopNavDestinationNode, 0);
+    EXPECT_EQ(firsthNavDestinationContext->GetZIndex(), -1);
+    NavigationPatternTestTwoNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePreNavDesZIndex003
+ * @tc.desc: Branch: if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) = false
+ *           Condition: replaceVal != 0 = true, preTopNavDestination = true, newTopNavDestination = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, UpdatePreNavDesZIndex003, TestSize.Level1)
+{
+    NavigationPatternTestTwoNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationStack->mockReplace_->isReplace_ = 1;
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationContentNode = FrameNode::CreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    navigationNode->contentNode_ = navigationContentNode;
+    auto firsthNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto firsthNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    firsthNavDestinationContext->UpdateZIndex(-1);
+    firsthNavDestinationNode->renderContext_ = firsthNavDestinationContext;
+    firsthNavDestinationNode->index_ = 0;
+    navigationNode->hideNodes_.emplace_back(std::make_pair(firsthNavDestinationNode, true));
+    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preTopNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    preTopNavDestinationContext->UpdateZIndex(0);
+    preTopNavDestinationNode->renderContext_ = preTopNavDestinationContext;
+    preTopNavDestinationNode->index_ = 4;
+    auto newTopNavDestinationNode = nullptr;
+
+    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestinationNode, newTopNavDestinationNode, 0);
+    EXPECT_EQ(preTopNavDestinationContext->GetZIndex(), 0);
+    EXPECT_EQ(firsthNavDestinationContext->GetZIndex(), -1);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: UpdatePreNavDesZIndex004
- * @tc.desc: Increase the coverage of NavigationPattern::UpdatePreNavDesZIndex function.
+ * @tc.desc: Branch: if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) = true
+ *           Condition: replaceVal != 0 = true, preTopNavDestination = true, newTopNavDestination = true
+ *           Branch: if (!iter->second) = true
+ *           Branch: if (!iter->second) = false, if (!navDestination) = true
+ *           Branch: if (!iter->second) = false, if (!navDestination) = false, if (!navDestinationContext) = true
+ *           Branch: if (!iter->second) = false, if (!navDestination) = false, if (!navDestinationContext) = false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, UpdatePreNavDesZIndex004, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
     navigationStack->mockReplace_->isReplace_ = 1;
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto navigationContentNode =
-        FrameNode::CreateFrameNode("NavigationContent", 301, AceType::MakeRefPtr<Pattern>());
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationContentNode = FrameNode::CreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     navigationNode->contentNode_ = navigationContentNode;
+    // Make !iter->second true
     navigationNode->hideNodes_.emplace_back(std::make_pair(nullptr, false));
+    // Make !iter->second false and !navDestination true
     navigationNode->hideNodes_.emplace_back(std::make_pair(nullptr, true));
-    preTopNavDestinationNode->renderContext_ = nullptr;
-    navigationNode->hideNodes_.emplace_back(std::make_pair(preTopNavDestinationNode, true));
-    navigationNode->hideNodes_.emplace_back(std::make_pair(newTopNavDestinationNode, true));
+    // Make !iter->second false and !navDestination false and !navDestinationContext true
+    auto thirdNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    thirdNavDestinationNode->renderContext_ = nullptr;
+    thirdNavDestinationNode->index_ = 2;
+    navigationNode->hideNodes_.emplace_back(std::make_pair(thirdNavDestinationNode, true));
+    // Make !iter->second false and !navDestination false and !navDestinationContext false
+    auto fourthNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto fourthNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    fourthNavDestinationContext->UpdateZIndex(-1);
+    fourthNavDestinationNode->renderContext_ = fourthNavDestinationContext;
+    fourthNavDestinationNode->index_ = 3;
+    navigationNode->hideNodes_.emplace_back(std::make_pair(fourthNavDestinationNode, true));
+    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preTopNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    preTopNavDestinationContext->UpdateZIndex(0);
+    preTopNavDestinationNode->renderContext_ = preTopNavDestinationContext;
+    preTopNavDestinationNode->index_ = 4;
+    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestinationContext = AceType::MakeRefPtr<MockRenderContext>();
+    newTopNavDestinationContext->UpdateZIndex(0);
+    newTopNavDestinationNode->renderContext_ = newTopNavDestinationContext;
+    newTopNavDestinationNode->index_ = 5;
 
-    EXPECT_NE(navigationPattern->navigationStack_->GetReplaceValue(), 0);
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_NE(newTopNavDestinationNode, nullptr);
     navigationPattern->UpdatePreNavDesZIndex(preTopNavDestinationNode, newTopNavDestinationNode, 0);
+    EXPECT_EQ(preTopNavDestinationContext->GetZIndex(), -1);
+    EXPECT_EQ(fourthNavDestinationContext->GetZIndex(), -2);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: DealTransitionVisibility001
- * @tc.desc: Increase the coverage of NavigationPattern::DealTransitionVisibility function.
+ * @tc.desc: Branch: if (!renderContext->HasDisappearTransition()) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, DealTransitionVisibility001, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    renderContext->hasDisappearTransition_ = false;
-
     navDestinationNode->renderContext_ = renderContext;
-    auto renderContextTest = navDestinationNode->GetRenderContext();
-    EXPECT_FALSE(renderContextTest->HasDisappearTransition());
+    renderContext->hasDisappearTransition_ = false;
+    renderContext->transitionOutCallback_ = nullptr;
+    navDestinationNode->transitionType_ = PageTransitionType::EXIT_PUSH;
+
     navigationPattern->DealTransitionVisibility(navDestinationNode, true, false);
+    EXPECT_EQ(renderContext->transitionOutCallback_, nullptr);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: DealTransitionVisibility002
- * @tc.desc: Increase the coverage of NavigationPattern::DealTransitionVisibility function.
+ * @tc.desc: Branch: if (!renderContext->HasDisappearTransition()) = false
+ *           Branch: if (isNavBar) = false
+ *           Branch: if (GetTransitionType() != EXIT_PUSH) = false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, DealTransitionVisibility002, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    bool isNavBar = false;
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    // Make HasDisappearTransition return true
-    renderContext->hasDisappearTransition_ = true;
     navDestinationNode->renderContext_ = renderContext;
-    // Make GetTransitionType return EXIT_PUSH
     navDestinationNode->transitionType_ = PageTransitionType::EXIT_PUSH;
+    renderContext->hasDisappearTransition_ = true;
+    renderContext->transitionOutCallback_ = nullptr;
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->SetJsActive(false);
+    navDestinationNode->children_.emplace_back(customNode);
 
-    // Create the callback
-    auto renderContextTest = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
-    EXPECT_TRUE(renderContextTest->HasDisappearTransition());
-    EXPECT_FALSE(isNavBar);
-    navigationPattern->DealTransitionVisibility(navDestinationNode, true, isNavBar);
-
-    renderContextTest->transitionOutCallback_();
-
-    // Make GetTransitionType return not EXIT_PUSH
-    navDestinationNode->transitionType_ = PageTransitionType::ENTER;
-
-    renderContextTest->transitionOutCallback_();
+    navigationPattern->DealTransitionVisibility(navDestinationNode, true, false);
+    ASSERT_NE(renderContext->transitionOutCallback_, nullptr);
+    renderContext->transitionOutCallback_();
+    EXPECT_TRUE(customNode->GetJsActive());
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: DealTransitionVisibility003
- * @tc.desc: Increase the coverage of NavigationPattern::DealTransitionVisibility function.
+ * @tc.desc: Branch: if (!renderContext->HasDisappearTransition()) = false
+ *           Branch: if (isNavBar) = false
+ *           Branch: if (GetTransitionType() != EXIT_PUSH) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, DealTransitionVisibility003, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
-        "NavBar", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    bool isNavBar = true;
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    // Make HasDisappearTransition return true
+    navDestinationNode->renderContext_ = renderContext;
+    navDestinationNode->transitionType_ = PageTransitionType::ENTER;
     renderContext->hasDisappearTransition_ = true;
+    renderContext->transitionOutCallback_ = nullptr;
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->SetJsActive(false);
+    navDestinationNode->children_.emplace_back(customNode);
+
+    navigationPattern->DealTransitionVisibility(navDestinationNode, true, false);
+    ASSERT_NE(renderContext->transitionOutCallback_, nullptr);
+    renderContext->transitionOutCallback_();
+    EXPECT_FALSE(customNode->GetJsActive());
+    NavigationPatternTestTwoNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: DealTransitionVisibility004
+ * @tc.desc: Branch: if (!renderContext->HasDisappearTransition()) = false
+ *           Branch: if (isNavBar) = true
+ *           Branch: if (GetTransitionType() != EXIT_PUSH) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, DealTransitionVisibility004, TestSize.Level1)
+{
+    NavigationPatternTestTwoNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
     navBarNode->renderContext_ = renderContext;
-    // Make GetTransitionType return EXIT_PUSH
     navBarNode->transitionType_ = PageTransitionType::EXIT_PUSH;
+    renderContext->hasDisappearTransition_ = true;
+    renderContext->transitionOutCallback_ = nullptr;
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->SetJsActive(false);
+    navBarNode->children_.emplace_back(customNode);
 
-    // Create the callback
-    auto renderContextTest = AceType::DynamicCast<MockRenderContext>(navBarNode->GetRenderContext());
-    EXPECT_TRUE(renderContextTest->HasDisappearTransition());
-    EXPECT_TRUE(isNavBar);
-    navigationPattern->DealTransitionVisibility(navBarNode, true, isNavBar);
+    navigationPattern->DealTransitionVisibility(navBarNode, true, true);
+    ASSERT_NE(renderContext->transitionOutCallback_, nullptr);
+    renderContext->transitionOutCallback_();
+    EXPECT_TRUE(customNode->GetJsActive());
+    NavigationPatternTestTwoNg::TearDownTestSuite();
+}
 
-    renderContextTest->transitionOutCallback_();
-
-    // Make GetTransitionType return not EXIT_PUSH
+/**
+ * @tc.name: DealTransitionVisibility005
+ * @tc.desc: Branch: if (!renderContext->HasDisappearTransition()) = false
+ *           Branch: if (isNavBar) = true
+ *           Branch: if (GetTransitionType() != EXIT_PUSH) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, DealTransitionVisibility005, TestSize.Level1)
+{
+    NavigationPatternTestTwoNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    navBarNode->renderContext_ = renderContext;
     navBarNode->transitionType_ = PageTransitionType::ENTER;
+    renderContext->hasDisappearTransition_ = true;
+    renderContext->transitionOutCallback_ = nullptr;
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->SetJsActive(false);
+    navBarNode->children_.emplace_back(customNode);
 
-    renderContextTest->transitionOutCallback_();
+    navigationPattern->DealTransitionVisibility(navBarNode, true, true);
+    ASSERT_NE(renderContext->transitionOutCallback_, nullptr);
+    renderContext->transitionOutCallback_();
+    EXPECT_FALSE(customNode->GetJsActive());
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: AddToDumpManager001
- * @tc.desc: Increase the coverage of NavigationPattern::AddToDumpManager function.
+ * @tc.desc: Branch: if (!node || !context) = true
+ *           Condition: !node = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager001, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
     navigationPattern->frameNode_ = nullptr;
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->dumpMap_.clear();
 
-    EXPECT_EQ(navigationPattern->GetHost(), nullptr);
     navigationPattern->AddToDumpManager();
+    EXPECT_EQ(navigationMgr->dumpMap_.size(), 0);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: AddToDumpManager002
- * @tc.desc: Increase the coverage of NavigationPattern::AddToDumpManager function.
+ * @tc.desc: Branch: if (!node || !context) = true
+ *           Condition: !node = false, !context = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager002, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->dumpMap_.clear();
+    auto pipeline = MockPipelineContext::pipeline_;
     MockPipelineContext::pipeline_ = nullptr;
 
-    EXPECT_NE(navigationPattern->GetHost(), nullptr);
-    EXPECT_EQ(PipelineContext::GetCurrentContext(), nullptr);
     navigationPattern->AddToDumpManager();
+    EXPECT_EQ(navigationMgr->dumpMap_.size(), 0);
+    MockPipelineContext::pipeline_ = pipeline;
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: AddToDumpManager003
- * @tc.desc: Increase the coverage of NavigationPattern::AddToDumpManager function.
+ * @tc.desc: Branch: if (!node || !context) = false
+ *           Condition: !node = false, !context = false
+ *           Branch: if (!mgr) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager003, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    context->navigationMgr_ = nullptr;
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->dumpMap_.clear();
+    pipelineContext->navigationMgr_ = nullptr;
 
-    EXPECT_NE(navigationPattern->GetHost(), nullptr);
-    EXPECT_EQ(context->GetNavigationManager(), nullptr);
     navigationPattern->AddToDumpManager();
+    EXPECT_EQ(navigationMgr->dumpMap_.size(), 0);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: AddToDumpManager004
- * @tc.desc: Increase the coverage of NavigationPattern::AddToDumpManager function.
+ * @tc.desc: Branch: if (!mgr) = false
+ *           Branch: if (!pattern) = false
+ *           Branch: if (!stack) = false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager004, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        navigationNodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->dumpMap_.clear();
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->children_.emplace_back(navigationNode);
 
-    auto hostNode = navigationPattern->GetHost();
-    EXPECT_NE(hostNode, nullptr);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto navigationMgr = context->GetNavigationManager();
-    EXPECT_NE(navigationMgr, nullptr);
     navigationPattern->AddToDumpManager();
-
-    auto dump = navigationMgr->dumpMap_.find(NavigationManager::DumpMapKey(hostNode->GetId(), hostNode->GetDepth()));
+    auto dump = navigationMgr->dumpMap_.find(
+        NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth()));
+    ASSERT_NE(dump, navigationMgr->dumpMap_.end());
     ASSERT_NE(dump->second, nullptr);
-    EXPECT_NE(navigationPattern->GetNavigationStack(), nullptr);
     dump->second(0);
+    EXPECT_NE(navigationPattern, nullptr);
+    EXPECT_NE(navigationPattern->GetNavigationStack(), nullptr);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: AddToDumpManager005
- * @tc.desc: Increase the coverage of NavigationPattern::AddToDumpManager function.
+ * @tc.desc: Branch: if (!pattern) = false
+ *           Branch: if (!stack) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager005, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        navigationNodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->dumpMap_.clear();
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->children_.emplace_back(navigationNode);
 
-    auto hostNode = navigationPattern->GetHost();
-    EXPECT_NE(hostNode, nullptr);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto navigationMgr = context->GetNavigationManager();
-    EXPECT_NE(navigationMgr, nullptr);
     navigationPattern->AddToDumpManager();
-
-    auto dump = navigationMgr->dumpMap_.find(NavigationManager::DumpMapKey(hostNode->GetId(), hostNode->GetDepth()));
+    auto dump = navigationMgr->dumpMap_.find(
+        NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth()));
+    ASSERT_NE(dump, navigationMgr->dumpMap_.end());
     ASSERT_NE(dump->second, nullptr);
-    EXPECT_EQ(navigationPattern->GetNavigationStack(), nullptr);
     dump->second(0);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    EXPECT_EQ(navigationPattern->GetNavigationStack(), nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
- * @tc.name: RefreshFocusToDestination001
- * @tc.desc: Increase the coverage of NavigationPattern::RefreshFocusToDestination function.
+ * @tc.name: CheckContentNeedMeasure001
+ * @tc.desc: Branch: if (!IsAutoHeight) = true
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestTwoNg, RefreshFocusToDestination001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestTwoNg, CheckContentNeedMeasure001, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->calcLayoutConstraint_ = nullptr;
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 201,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navigationNode->SetContentNode(contentNode);
+    contentNode->isFreeze_ = true;
+    contentNode->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
 
-    auto newTopNavPath = navigationPattern->navigationStack_->GetTopNavPath();
-    EXPECT_FALSE(newTopNavPath.has_value());
-    navigationPattern->RefreshFocusToDestination();
+    navigationPattern->CheckContentNeedMeasure(navigationNode);
+    EXPECT_EQ(contentNode->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
 /**
- * @tc.name: RefreshFocusToDestination002
- * @tc.desc: Increase the coverage of NavigationPattern::RefreshFocusToDestination function.
+ * @tc.name: CheckContentNeedMeasure002
+ * @tc.desc: Branch: if (!IsAutoHeight) = false
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestTwoNg, RefreshFocusToDestination002, TestSize.Level1)
+HWTEST_F(NavigationPatternTestTwoNg, CheckContentNeedMeasure002, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("NavBar", 201, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    // Make GetTopNavPath having value
-    navigationStack->navPathList_.emplace_back(std::make_pair("Null", nullptr));
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make IsCurrentFocus return false
-    auto navBarFocus = navBarNode->GetFocusHub();
-    ASSERT_NE(navBarFocus, nullptr);
-    navBarFocus->currentFocus_ = false;
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    ASSERT_NE(navigationLayoutProperty->calcLayoutConstraint_, nullptr);
+    navigationLayoutProperty->calcLayoutConstraint_->selfIdealSize =
+        CalcSize(NG::CalcLength(100.0f), NG::CalcLength("auto"));
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 201,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navigationNode->SetContentNode(contentNode);
+    contentNode->isFreeze_ = true;
+    contentNode->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
 
-    auto newTopNavPath = navigationPattern->navigationStack_->GetTopNavPath();
-    EXPECT_TRUE(newTopNavPath.has_value());
-    EXPECT_FALSE(navBarFocus->IsCurrentFocus());
-    navigationPattern->RefreshFocusToDestination();
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: RefreshFocusToDestination003
- * @tc.desc: Increase the coverage of NavigationPattern::RefreshFocusToDestination function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, RefreshFocusToDestination003, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("NavBar", 201, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    // Make newTopNavDestination not nullptr
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    // Make GetTopNavPath having value
-    navigationStack->navPathList_.emplace_back(std::make_pair("Page01", navDestinationNode));
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make IsCurrentFocus return true
-    auto navBarFocus = navBarNode->GetFocusHub();
-    ASSERT_NE(navBarFocus, nullptr);
-    navBarFocus->currentFocus_ = true;
-
-    auto newTopNavPath = navigationPattern->navigationStack_->GetTopNavPath();
-    EXPECT_TRUE(newTopNavPath.has_value());
-    EXPECT_TRUE(navBarFocus->IsCurrentFocus());
-    EXPECT_FALSE(navigationPattern->GetIsFocusable(navDestinationNode));
-    navigationPattern->RefreshFocusToDestination();
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: DumpInfo001
- * @tc.desc: Increase the coverage of NavigationPattern::DumpInfo() function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, DumpInfo001, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("NavBar", 201, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-
-    EXPECT_NE(navigationPattern->navigationStack_, nullptr);
-    navigationPattern->DumpInfo();
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: DumpInfo002
- * @tc.desc: Increase the coverage of NavigationPattern::DumpInfo() function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, DumpInfo002, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("NavBar", 201, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-
-    EXPECT_EQ(navigationPattern->navigationStack_, nullptr);
-    navigationPattern->DumpInfo();
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: DumpInfo003
- * @tc.desc: Increase the coverage of NavigationPattern::DumpInfo(std::unique_ptr<JsonValue>& json) function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, DumpInfo003, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("NavBar", 201, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-
-    EXPECT_NE(navigationPattern->navigationStack_, nullptr);
-    std::unique_ptr<JsonValue> info = JsonUtil::ParseJsonString("info");
-    navigationPattern->DumpInfo(info);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: DumpInfo004
- * @tc.desc: Increase the coverage of NavigationPattern::DumpInfo(std::unique_ptr<JsonValue>& json) function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, DumpInfo004, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("NavBar", 201, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-
-    EXPECT_EQ(navigationPattern->navigationStack_, nullptr);
-    std::unique_ptr<JsonValue> info = JsonUtil::ParseJsonString("info");
-    navigationPattern->DumpInfo(info);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FollowStdNavdestinationAnimation003
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation003, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make preTopNavDestination not nullptr
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    // Make newTopNavDestination not nullptr
-    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    bool isPopPage = true;
-
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_NE(newTopNavDestinationNode, nullptr);
-    EXPECT_TRUE(isPopPage);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, isPopPage);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FollowStdNavdestinationAnimation004
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation004, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make preTopNavDestination not nullptr
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    // Make newTopNavDestination not nullptr
-    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    bool isPopPage = false;
-
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_NE(newTopNavDestinationNode, nullptr);
-    EXPECT_FALSE(isPopPage);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, isPopPage);
+    navigationPattern->CheckContentNeedMeasure(navigationNode);
+    EXPECT_EQ(contentNode->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
