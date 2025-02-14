@@ -24,9 +24,6 @@
 namespace OHOS::Ace::Napi {
 namespace {
 const int32_t CLAMP_PARAM_TOTAL = 2;
-const double ORDER_DEFAULT = 0.0;
-const double ORDER_MIN = -100000.0;
-const double ORDER_MAX = 100000.0;
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
 {
@@ -86,14 +83,13 @@ napi_value JSLevelOrder::JSClamp(napi_env env, napi_callback_info info)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[1], &valueType);
     if (valueType != napi_number) {
-        levelOrder->SetOrder(ORDER_DEFAULT);
+        levelOrder->SetOrder(NG::LevelOrder::ORDER_DEFAULT);
         return thisArg;
     }
 
-    double order = ORDER_DEFAULT;
+    double order = NG::LevelOrder::ORDER_DEFAULT;
     napi_get_value_double(env, argv[1], &order);
-    double effectiveOrder = order < ORDER_MIN ? ORDER_MIN : (order > ORDER_MAX ? ORDER_MAX : order);
-    levelOrder->SetOrder(effectiveOrder);
+    levelOrder->SetOrder(order);
     return thisArg;
 }
 
