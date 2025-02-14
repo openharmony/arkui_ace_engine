@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
+#include <cstdlib>
+#include <vector>
 
+#include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -519,6 +522,35 @@ ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
     return 0;
 }
 
+ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::SCROLL_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), currentNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    currentNode->SetIsCrossLanguageAttributeSetting(attributeSetting);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Bool GetCrossLanguageOptions(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    return currentNode->isCrossLanguageAttributeSetting();
+}
+
+ArkUI_Bool CheckIfCanCrossLanguageAttributeSetting(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    return currentNode -> IsCNode() ? currentNode->isCrossLanguageAttributeSetting() : false;
+}
+
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -656,7 +688,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
         SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
         GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, SetDrawCompleteEvent,
-        ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent };
+        ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, SetCrossLanguageOptions, GetCrossLanguageOptions,
+        CheckIfCanCrossLanguageAttributeSetting };
     return &modifier;
 }
 

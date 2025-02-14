@@ -790,6 +790,15 @@ public:
     virtual void AddCustomProperty(const std::string& key, const std::string& value) {}
     virtual void RemoveCustomProperty(const std::string& key) {}
 
+    bool isCrossLanguageAttributeSetting() const
+    {
+        return isCrossLanguageAttributeSetting_;
+    }
+
+    void SetIsCrossLanguageAttributeSetting(bool isCrossLanguageAttributeSetting)
+    {
+        isCrossLanguageAttributeSetting_ = isCrossLanguageAttributeSetting;
+    }
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -927,6 +936,7 @@ private:
     bool isFreeze_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
+    bool isCrossLanguageAttributeSetting_ = false;
 };
 
 } // namespace OHOS::Ace::NG
