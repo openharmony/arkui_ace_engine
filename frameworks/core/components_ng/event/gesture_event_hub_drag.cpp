@@ -702,8 +702,12 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
     TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropInfo is empty.");
     ACE_SCOPED_TRACE("drag: handling without preview");
     if (!dragDropInfo.pixelMap) {
-        GenerateMousePixelMap(info);
-        dragDropInfo.pixelMap = pixelMap_;
+        if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && GetTextDraggable() && pixelMap_) {
+            dragDropInfo.pixelMap = pixelMap_;
+        } else {
+            GenerateMousePixelMap(info);
+            dragDropInfo.pixelMap = pixelMap_;
+        }
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !dragDropInfo.pixelMap) {
         TAG_LOGD(AceLogTag::ACE_DRAG, "no any pixmap got, get node snapshot final try");
