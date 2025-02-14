@@ -238,7 +238,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMinFontScale(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    double minFontScale;
+    double minFontScale = 0.0;
     if (ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale)) {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setMinFontScale(nativeNode,
             static_cast<float>(minFontScale));
@@ -263,7 +263,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    double maxFontScale;
+    double maxFontScale = 0.0;
     if (ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale)) {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setMaxFontScale(nativeNode,
             static_cast<float>(maxFontScale));
