@@ -3592,7 +3592,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .object: Use the {@link ArkUI_ProgressLinearStyleOption} object to get the style. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_PROGRESS_LINEAR_STYLE,
 

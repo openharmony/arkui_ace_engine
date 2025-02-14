@@ -217,7 +217,7 @@ typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 /**
  * @brief Set the linear progress indicator style.
  *
- * @since 16
+ * @since 15
  */
 typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
 
@@ -4189,7 +4189,7 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle);
  *
  * @return Returns a <b>ProgressLinearStyleOption</b> instance.
  * <br> If the result returns nullptr, there may be out of memory.
- * @since 16
+ * @since 15
  */
 ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create(void);
 
@@ -4197,7 +4197,7 @@ ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create(void)
  * @brief Destroy linear progress indicator style information.
  *
  * @param option Linear progress indicator style information.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_Destroy(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4206,7 +4206,7 @@ void OH_ArkUI_ProgressLinearStyleOption_Destroy(ArkUI_ProgressLinearStyleOption*
  *
  * @param option Linear progress indicator style information.
  * @param enabled Whether to enable the scan effect. Default value: false.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
 
@@ -4216,7 +4216,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(ArkUI_ProgressLinea
  * @param option Linear progress indicator style information.
  * @param enabled Whether to enable the smooth effect. When this effect is enabled, the progress change to
  * the set value takes place gradually. Otherwise, it takes place immediately. Default value: true.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
 
@@ -4226,7 +4226,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(ArkUI_ProgressLin
  * @param option Linear progress indicator style information.
  * @param strokeWidth Stroke width of the progress indicator. It cannot be set in percentage.
  * Default value: 4.0vp.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(ArkUI_ProgressLinearStyleOption* option, float strokeWidth);
 
@@ -4236,7 +4236,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(ArkUI_ProgressLinearStyle
  * @param option Linear progress indicator style information.
  * @param strokeRadius Rounded corner radius of the progress indicator. Value range: [0, strokeWidth/2].
  * Default value: strokeWidth/2.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(ArkUI_ProgressLinearStyleOption* option, float strokeRadius);
 
@@ -4245,7 +4245,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(ArkUI_ProgressLinearStyl
  *
  * @param option Linear progress indicator style information.
  * @return Whether to enable the scan effect.
- * @since 16
+ * @since 15
  */
 bool OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4254,7 +4254,7 @@ bool OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(ArkUI_ProgressLinea
  *
  * @param option Linear progress indicator style information.
  * @return Whether to enable the smooth effect.
- * @since 16
+ * @since 15
  */
 bool OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4263,7 +4263,7 @@ bool OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(ArkUI_ProgressLin
  *
  * @param option Linear progress indicator style information.
  * @return Stroke width of the progress indicator.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4272,7 +4272,7 @@ float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyl
  *
  * @param option Linear progress indicator style information.
  * @return Rounded corner radius of the progress indicator.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearStyleOption* option);
 
