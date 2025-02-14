@@ -1501,4 +1501,100 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
     auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_EQ(result, nullptr);
 }
+
+/**
+ * @tc.name: DialogPatternTest032
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogPatternTest032, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step3. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step4. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step5. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    props.isSysBlurStyle = true;
+    props.blurStyleOption->policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    props.blurStyleOption->blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    pattern->UpdateContentRenderContext(dialogNode, props);
+
+    auto renderContext = pattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+
+    EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_NE(renderContext->GetBackBlurStyle()->policy, props.blurStyleOption->policy);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, props.blurStyleOption->blurStyle);
+}
+
+/**
+ * @tc.name: DialogPatternTest033
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogPatternTest033, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step3. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step4. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step5. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    props.isSysBlurStyle = true;
+    props.effectOption->policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    pattern->UpdateContentRenderContext(dialogNode, props);
+
+    auto renderContext = pattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+
+    EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
+    EXPECT_NE(renderContext->GetBackgroundEffect()->policy, props.effectOption->policy);
+}
 } // namespace OHOS::Ace::NG
