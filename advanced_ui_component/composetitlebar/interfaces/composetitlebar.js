@@ -1109,7 +1109,7 @@ class ImageMenuItem extends ViewPU {
                                 }
                                 if (y2.type === TouchType.Up || y2.type === TouchType.Cancel) {
                                     this.isOnClick = false;
-                                    if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+                                    if (this.fontSize >= this.minFontSize) {
                                         this.dialogController?.close();
                                     }
                                 }
@@ -1243,7 +1243,7 @@ class ImageMenuItem extends ViewPU {
                                 }
                                 if (j2.type === TouchType.Up || j2.type === TouchType.Cancel) {
                                     this.isOnClick = false;
-                                    if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+                                    if (this.fontSize >= this.minFontSize) {
                                         this.dialogController?.close();
                                     }
                                 }
