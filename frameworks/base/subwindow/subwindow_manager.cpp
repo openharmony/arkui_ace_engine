@@ -116,6 +116,17 @@ void SubwindowManager::AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Sub
     }
 }
 
+void SubwindowManager::OnDestroyContainer(int32_t subInstanceId)
+{
+    if (subInstanceId < MIN_SUBCONTAINER_ID) {
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "remove subwindow from map, subInstanceId is %{public}d", subInstanceId);
+    std::lock_guard<std::mutex> lock(instanceSubwindowMutex_);
+    instanceSubwindowMap_.erase(subInstanceId);
+}
+
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
 {
     if (!subwindow) {
@@ -205,7 +216,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
     if (result != subwindowMap_.end()) {
         return result->second;
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
             searchKey.ToString().c_str());
         return nullptr;
     }
@@ -232,7 +243,7 @@ const RefPtr<Subwindow> SubwindowManager::GetToastSubwindow(int32_t instanceId)
     if (result != toastWindowMap_.end()) {
         return result->second;
     }
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in toastWindowMap_, searchKey is %{public}s.",
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in toastWindowMap_, searchKey is %{public}s.",
         searchKey.ToString().c_str());
     return nullptr;
 }
@@ -245,7 +256,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSystemToastWindow(int32_t instanceI
     if (result != systemToastWindowMap_.end()) {
         return result->second;
     }
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in systemToastWindowMap_, searchKey is %{public}s.",
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in systemToastWindowMap_, searchKey is %{public}s.",
         searchKey.ToString().c_str());
     return nullptr;
 }
@@ -601,9 +612,9 @@ void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");
     CHECK_NULL_VOID(dialogNode);
-    auto pipline = dialogNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipline);
-    auto subwindow = GetSubwindow(pipline->GetInstanceId());
+    auto pipeline = dialogNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto subwindow = GetSubwindow(pipeline->GetInstanceId());
     if (!subwindow) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get subwindow failed.");
         return;
@@ -1365,9 +1376,10 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId)
         displayId = container->GetCurrentDisplayId();
     }
 
+    auto foldstatus = container ? container->GetCurrentFoldStatus() : FoldStatus::UNKNOWN;
     auto isSuperFoldDisplay = SystemProperties::IsSuperFoldDisplayDevice() &&
                               (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID);
-    searchKey.foldStatus = isSuperFoldDisplay ? container->GetCurrentFoldStatus() : FoldStatus::UNKNOWN;
+    searchKey.foldStatus = isSuperFoldDisplay ? foldstatus : FoldStatus::UNKNOWN;
     searchKey.displayId = displayId;
     return searchKey;
 }
@@ -1416,7 +1428,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSelectOverlaySubwindow(int32_t inst
     if (result != selectOverlayWindowMap_.end()) {
         return result->second;
     }
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in selectOverlayWindowMap_, searchKey is %{public}s.",
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in selectOverlayWindowMap_, searchKey is %{public}s.",
         searchKey.ToString().c_str());
     return nullptr;
 }

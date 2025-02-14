@@ -184,6 +184,7 @@ public:
     void SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId);
     void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
+    void OnDestroyContainer(int32_t subInstanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);

@@ -670,7 +670,7 @@ public:
     ~FoldScreenListener() = default;
     void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
     {
-        LOGI("fold status is changed, foldStatus: %{public}d", foldStatus);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "fold status is changed, foldStatus: %{public}d", foldStatus);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
@@ -702,7 +702,7 @@ public:
     ~FoldDisplayModeListener() = default;
     void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
     {
-        LOGI("display mode is changed, displayMode: %{public}d", displayMode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "display mode is changed, displayMode: %{public}d", displayMode);
         if (!isDialog_) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -2371,6 +2371,7 @@ void UIContentImpl::Destroy()
     }
     ContainerScope::RemoveAndCheck(instanceId_);
     UnregisterDisplayManagerCallback();
+    SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()

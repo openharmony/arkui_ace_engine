@@ -206,6 +206,7 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
         auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
         if (!display) {
             TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "failed to GetVisibleAreaDisplayInfoById");
+            return size;
         }
         size = Size(display->GetWidth(), display->GetHeight());
     }
@@ -2045,9 +2046,15 @@ bool SubwindowOhos::CheckHostWindowStatus() const
 
 bool SubwindowOhos::Close()
 {
+    if (isClosing_) {
+        return true;
+    }
+
     CHECK_NULL_RETURN(window_, false);
     window_->UnregisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
+    isClosing_ = true;
     OHOS::Rosen::WMError ret = window_->Close();
+    isClosing_ = false;
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to close the dialog subwindow.");
         return false;
