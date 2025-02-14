@@ -3880,7 +3880,7 @@ HWTEST_F(TextTestNg, TextPattern016, TestSize.Level1)
     int32_t newHeight = 1;
     int32_t prevWidth = 0;
     int32_t prevHeight = 0;
-    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, WindowSizeChangeReason::DRAG);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 
     /**
@@ -3890,7 +3890,7 @@ HWTEST_F(TextTestNg, TextPattern016, TestSize.Level1)
     newHeight = 1;
     prevWidth = 1;
     prevHeight = 1;
-    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, WindowSizeChangeReason::DRAG);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 }
 

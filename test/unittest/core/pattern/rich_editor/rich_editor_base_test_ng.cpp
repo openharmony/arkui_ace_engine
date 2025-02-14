@@ -838,7 +838,7 @@ void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEd
     EXPECT_FALSE(controller->GetShowMagnifier());
 
     controller->SetLocalOffset(localOffset);
-    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1);
+    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1, WindowSizeChangeReason::DRAG);
     EXPECT_FALSE(controller->GetShowMagnifier());
 
     controller->SetLocalOffset(localOffset);

@@ -8107,10 +8107,11 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
     return copyOption_ != CopyOptions::None && BetweenSelection(globalOffset);
 }
 
-void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
+void RichEditorPattern::HandleSurfaceChanged(
+    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type)
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
-        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
         UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
