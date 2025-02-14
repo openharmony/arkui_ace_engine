@@ -389,7 +389,7 @@ void SwiperArrowPattern::UpdateArrowContent()
     CHECK_NULL_VOID(symbolLayoutProperty);
     auto swiperLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
