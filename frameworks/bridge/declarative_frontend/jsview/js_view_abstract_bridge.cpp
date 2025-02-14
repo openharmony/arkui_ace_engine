@@ -26,12 +26,8 @@ void JSViewAbstractBridge::GetBackgroundBlurStyleOption(napi_value napiVal, Blur
     if (value.IsEmpty() || !value->IsObject()) {
         return;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
-
-    auto blurStyleValue = obj->GetProperty("backgroundBlurStyleOptions");
-    if (blurStyleValue->IsObject()) {
-        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, styleOption);
-    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(value);
+    JSViewAbstract::ParseBlurStyleOption(object, styleOption);
 }
 
 void JSViewAbstractBridge::GetBackgroundEffect(napi_value napiVal, EffectOption& styleOption)
@@ -40,11 +36,7 @@ void JSViewAbstractBridge::GetBackgroundEffect(napi_value napiVal, EffectOption&
     if (value.IsEmpty() || !value->IsObject()) {
         return;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
-
-    auto effectOptionValue = obj->GetProperty("backgroundEffect");
-    if (effectOptionValue->IsObject()) {
-        JSViewAbstract::ParseEffectOption(effectOptionValue, styleOption);
-    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(value);
+    JSViewAbstract::ParseEffectOption(object, styleOption);
 }
 } // namespace OHOS::Ace::Framework
