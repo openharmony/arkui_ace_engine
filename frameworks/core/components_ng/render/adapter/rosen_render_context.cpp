@@ -641,7 +641,9 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     if (!flag && !debugBoundaryModifier_) {
         return;
     }
-    CHECK_NULL_VOID(NeedDebugBoundary());
+    if (!NeedDebugBoundary()) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
