@@ -787,6 +787,7 @@ enum ArkUIEventCategory {
     MIXED_EVENT = 11,
     DRAG_EVENT = 12,
     KEY_INPUT_EVENT = 13, // KEY_EVENT is already defined as a macro in wincon.h
+    TEXT_INPUT_CHANGE = 15,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -852,6 +853,7 @@ enum ArkUIEventSubKind {
     ON_TEXT_INPUT_DID_INSERT,
     ON_TEXT_INPUT_WILL_DELETE,
     ON_TEXT_INPUT_DID_DELETE,
+    ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT,
 
     ON_TEXTAREA_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTAREA,
     ON_TEXTAREA_SUBMIT,
@@ -866,6 +868,7 @@ enum ArkUIEventSubKind {
     ON_TEXT_AREA_DID_INSERT,
     ON_TEXT_AREA_WILL_DELETE,
     ON_TEXT_AREA_DID_DELETE,
+    ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT,
 
     ON_SWIPER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SWIPER,
     ON_SWIPER_ANIMATION_START,
@@ -1048,6 +1051,14 @@ struct ArkUIAPIEventTextInput {
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
 
+struct ArkUIAPIEventTextInputMixed {
+    // used by c-api, should be the first place.
+    void* nativeStringPtr;
+    void* extendStringPtr;
+    ArkUI_Int32 numArgs;
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
+};
+
 #define ARKUI_CALLBACK_ARGS_COUNT 12
 
 struct ArkUIAPIEventCallback {
@@ -1138,6 +1149,7 @@ struct ArkUINodeEvent {
         ArkUIMixedEvent mixedEvent;
         ArkUIDragEvent dragEvent;
         ArkUIKeyEvent keyEvent;
+        ArkUIAPIEventTextInputMixed textChangeEvent;
     };
 };
 
@@ -3308,6 +3320,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaWidth)(ArkUINodeHandle node);
     void (*setTextAreaEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaEnableHapticFeedback)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextAreaLetterSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextAreaEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3507,6 +3521,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputWidth)(ArkUINodeHandle node);
     void (*setTextInputEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputEnableHapticFeedback)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextInputLetterSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
