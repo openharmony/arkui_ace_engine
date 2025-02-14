@@ -5038,7 +5038,7 @@ typedef enum {
      * 
      * @since 16
      */
-    NODE_SCROLL_BACK_TO_TOP,
+    NODE_SCROLL_BACK_TO_TOP = 1002021,
     
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
