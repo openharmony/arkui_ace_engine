@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::Framework {
 const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE,
@@ -66,6 +67,9 @@ void JSKeyboardAvoid::GetKeyboardAvoidMode(const JSCallbackInfo& info)
             break;
     }
     auto returnValue = JSVal(ToJSValue(obj));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        returnValue = JSVal(ToJSValue(static_cast<int32_t>(mode)));
+    }
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
