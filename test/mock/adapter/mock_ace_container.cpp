@@ -40,6 +40,17 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
     return nullptr;
 }
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
 uint32_t AceContainer::GetParentWindowType() const
 {
     return DEFAULT_WINDOW_TYPE;

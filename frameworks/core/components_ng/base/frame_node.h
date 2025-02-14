@@ -409,7 +409,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;
+    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary) const;
 
     std::string& GetNodeName()
     {
@@ -449,11 +449,21 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
-    RectF GetTransformRectRelativeToWindow() const;
+    VectorF GetTransformScaleRelativeToWindow() const;
 
-    OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+    RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
+    // deprecated, please use GetPaintRectOffsetNG.
+    // this function only consider transform of itself when calculate transform,
+    // do not consider the transform of its ansestors
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
+
+    // returns a node's offset relative to root.
+    // and accumulate every ancestor node's graphic properties such as rotate and transform
+    // @param excludeSelf default false, set true can exclude self.
+    // @param checkBoundary default false. should be true if you want check boundary of window scene
+    // for getting the offset to window.
+    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false, bool checkBoundary = false) const;
 
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
 
@@ -461,7 +471,8 @@ public:
 
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
-    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
+    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(
+        bool excludeSelf = false, bool checkBoundary = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;
 
@@ -716,7 +727,7 @@ public:
         return viewPort_;
     }
 
-    std::optional<RectF> GetViewPort() const;
+    std::optional<RectF> GetViewPort(bool checkBoundary = false) const;
 
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
@@ -1139,6 +1150,16 @@ public:
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
     void FireFrameNodeDestructorCallback();
 
+    bool CheckTopWindowBoundary() const
+    {
+        return topWindowBoundary_;
+    }
+
+    void SetTopWindowBoundary(bool topWindowBoundary)
+    {
+        topWindowBoundary_ = topWindowBoundary;
+    }
+
 protected:
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
@@ -1165,8 +1186,6 @@ private:
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
-
-    OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
     void LayoutOverlay();
@@ -1396,6 +1415,8 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+
+    bool topWindowBoundary_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

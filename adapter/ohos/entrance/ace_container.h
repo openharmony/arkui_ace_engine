@@ -58,6 +58,9 @@ class FontManager;
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
+using DataHandlerErr = OHOS::Rosen::DataHandlerErr;
+using SubSystemId = OHOS::Rosen::SubSystemId;
+using DataConsumeCallback = OHOS::Rosen::DataConsumeCallback;
 
 struct ParsedConfig {
     std::string colorMode;
@@ -81,6 +84,17 @@ struct ParsedConfig {
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
                  preferredLanguage.empty() && fontId.empty());
     }
+};
+
+struct SingleHandTransform {
+    SingleHandTransform() = default;
+    SingleHandTransform(float x, float y, float scaleX, float scaleY)
+        : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
+ 
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
 };
 
 using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
@@ -304,6 +318,8 @@ public:
 
     bool DumpInfo(const std::vector<std::string>& params);
 
+    bool DumpRSNodeByStringID(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
@@ -509,6 +525,10 @@ public:
         isFormRender_ = isFormRender;
     }
 
+    void SetAppRunningUniqueId(const std::string& uniqueId) override;
+
+    const std::string& GetAppRunningUniqueId() const override;
+
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -707,6 +727,17 @@ public:
         isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
+
+    void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
+    {
+        singleHandTransform_ = singleHandTransform;
+    }
+
+    const SingleHandTransform& GetSingleHandTransform() const
+    {
+        return singleHandTransform_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -730,6 +761,14 @@ private:
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
+
+    void RegisterUIExtDataConsumer();
+    void UnRegisterUIExtDataConsumer();
+    void DispatchUIExtDataConsume(
+        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void RegisterUIExtDataSendToHost();
+    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -794,6 +833,8 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    std::string uniqueId_;
+
     // For custom drag event
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
@@ -803,6 +844,9 @@ private:
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
     std::optional<bool> isTouchEventsPassThrough_;
+
+    // for single hand mode
+    SingleHandTransform singleHandTransform_;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -1493,6 +1493,24 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
+void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
+        return;
+    }
+    auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        TextFieldModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
+        return;
+    }
+    TextFieldModel::GetInstance()->
+        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+}
+
 void JSTextField::SetDecoration(const JSCallbackInfo& info)
 {
     do {
@@ -1753,4 +1771,12 @@ void JSTextField::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSTextField::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
 } // namespace OHOS::Ace::Framework

@@ -111,6 +111,8 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
+    JSClass<JSTextArea>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
+    JSClass<JSTextArea>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

@@ -48,7 +48,7 @@ public:
     static RectF GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect);
 
     template<class T>
-    RefPtr<T> GetPattern()
+    RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(hostTextBase_.Upgrade());
     }
@@ -294,6 +294,7 @@ protected:
     }
     virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
     bool GetClipHandleViewPort(RectF& rect);
+    bool CalculateClippedRect(RectF& rect);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
     virtual bool IsClipHandleWithViewPort()

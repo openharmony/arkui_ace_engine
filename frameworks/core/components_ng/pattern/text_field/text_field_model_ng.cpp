@@ -856,6 +856,15 @@ void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
 }
 
+void TextFieldModelNG::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
+}
+
 void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
@@ -1655,6 +1664,22 @@ bool TextFieldModelNG::GetBlurOnSubmit(FrameNode* frameNode)
     return pattern->GetBlurOnSubmit();
 }
 
+void TextFieldModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
+}
+
+int32_t TextFieldModelNG::GetKeyboardAppearance(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return static_cast<int32_t>(pattern->GetKeyboardAppearance());
+}
+
 void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2092,5 +2117,15 @@ RefPtr<Referenced> TextFieldModelNG::GetJSTextEditableController(FrameNode* fram
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetJSTextEditableController();
+}
+
+void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress);
+}
+
+void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, frameNode);
 }
 } // namespace OHOS::Ace::NG

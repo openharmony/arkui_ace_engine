@@ -91,6 +91,8 @@ public:
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnableHapticFeedback(bool state) override;
+    void SetStopBackPress(bool isStopBackPress) override;
+    void SetKeyboardAppearance(KeyboardAppearance value) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -160,6 +162,8 @@ public:
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetId(FrameNode* frameNode, const std::string& key);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
 
 private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,

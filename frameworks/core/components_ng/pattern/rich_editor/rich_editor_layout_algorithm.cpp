@@ -259,7 +259,8 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffsetNG(false, true)
+        - context->GetRootRect().GetOffset();
     MultipleParagraphLayoutAlgorithm::Layout(layoutWrapper);
 }
 

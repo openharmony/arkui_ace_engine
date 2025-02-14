@@ -1135,6 +1135,29 @@ void ResetTextInputUserUnderlineColor(ArkUINodeHandle node)
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }
 
+void SetTextInputKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetKeyboardAppearance(frameNode));
+}
+
+void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 void SetTextInputWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1821,6 +1844,20 @@ void ResetTextInputEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStopBackPress(frameNode, true);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1881,7 +1918,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText,
         SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
         SetTextInputWidth, ResetTextInputWidth, SetTextInputEnableHapticFeedback, ResetTextInputEnableHapticFeedback,
-        GetTextInputLetterSpacing, GetTextInputEnablePreviewText };
+        GetTextInputLetterSpacing, GetTextInputEnablePreviewText,
+        SetStopBackPress, ResetStopBackPress, SetTextInputKeyboardAppearance, GetTextInputKeyboardAppearance,
+        ResetTextInputKeyboardAppearance };
     return &modifier;
 }
 
@@ -1968,8 +2007,8 @@ void SetOnTextInputChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
         eventWithPreview.kind = TEXT_INPUT_CHANGE;
         eventWithPreview.extraParam = reinterpret_cast<intptr_t>(extraParam);
         eventWithPreview.textChangeEvent.subKind = ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT;
-        eventWithPreview.textChangeEvent.nativeStringPtr = reinterpret_cast<char*>(value.c_str());
-        eventWithPreview.textChangeEvent.extendStringPtr = reinterpret_cast<char*>(previewText.value.c_str());
+        eventWithPreview.textChangeEvent.nativeStringPtr = const_cast<char*>(value.c_str());
+        eventWithPreview.textChangeEvent.extendStringPtr = const_cast<char*>(previewText.value.c_str());
         eventWithPreview.textChangeEvent.numArgs = previewText.offset;
         SendArkUIAsyncEvent(&eventWithPreview);
     };

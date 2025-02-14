@@ -163,7 +163,7 @@ bool LayoutWrapper::CheckValidSafeArea()
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     // if self does not have opts, check parent's
     if (!opts) {
-        auto parent = host->GetAncestorNodeOfFrame();
+        auto parent = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_RETURN(parent, false);
         CHECK_NULL_RETURN(parent->GetLayoutProperty(), false);
         auto&& parentOpts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
@@ -238,7 +238,7 @@ void LayoutWrapper::AdjustNotExpandNode()
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto geometryNode = GetGeometryNode();
@@ -291,7 +291,7 @@ void LayoutWrapper::ExpandSafeArea()
     ExpandHelper(opts, frame);
 
     AdjustFixedSizeNode(frame);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     auto parentScrollable = (parent && parent->GetPattern<ScrollablePattern>());
     // restore to local offset
     auto diff = originGlobal.GetOffset() - frame.GetOffset();
@@ -373,7 +373,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     const auto& parentGeometryNode = parent->GetGeometryNode();
     CHECK_NULL_VOID(parentGeometryNode);
@@ -426,7 +426,7 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
     // calculate page expand based on querying node
     auto recursiveHost = host;
     if (!fromSelf) {
-        auto parent = host->GetAncestorNodeOfFrame();
+        auto parent = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
         recursiveHost = parent;
     }
@@ -574,7 +574,7 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
         return OffsetF();
     }
     // if parent already expanded into keyboard, offset shouldn't be applied again
-    auto parent = GetHostNode()->GetAncestorNodeOfFrame();
+    auto parent = GetHostNode()->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();
         if (pattern && pattern->CheckCustomAvoidKeyboard()) {
@@ -586,7 +586,7 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
         if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
             return OffsetF();
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     auto host = GetHostNode();
     CHECK_NULL_RETURN(host, OffsetF());
@@ -610,7 +610,7 @@ float LayoutWrapper::GetPageCurrentOffset()
             pageId = parent->GetPageId();
             break;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     auto pageNode = stageManager->GetPageById(pageId);
     if (pageId <= 0) {
@@ -686,7 +686,7 @@ void LayoutWrapper::AddNodeFlexLayouts()
     }
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto frameNodeParent = host->GetAncestorNodeOfFrame();
+    auto frameNodeParent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(frameNodeParent);
     if (frameNodeParent->GetTag() == V2::FLEX_ETS_TAG) {
         auto parent = host->GetParent();

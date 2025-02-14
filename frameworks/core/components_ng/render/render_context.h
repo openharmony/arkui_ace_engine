@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "base/geometry/ng/offset_t.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -136,6 +137,8 @@ public:
     virtual void SetOuterBorderColor(const BorderColorProperty& value) {};
 
     virtual void SetOuterBorderWidth(const BorderWidthProperty& value) {};
+
+    virtual void SetExtraOffset(const std::optional<OffsetF>& offset) {};
 
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
@@ -363,6 +366,11 @@ public:
     virtual void GetPointWithRevert(PointF& point) {}
 
     virtual void GetPointWithTransform(PointF& point) {}
+
+    virtual Matrix4 GetMatrixWithTransformRotate()
+    {
+        return {};
+    }
 
     virtual void GetPointTransform(PointF& point) {}
 

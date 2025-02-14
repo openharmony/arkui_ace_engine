@@ -595,12 +595,14 @@ private:
 
 class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
 public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate, WeakPtr<PipelineBase> context)
+        : webDelegate_(webDelegate), context_(context) {}
     ~WebAvoidAreaChangedListener() = default;
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
 private:
     WeakPtr<WebDelegate> webDelegate_;
+    WeakPtr<PipelineBase> context_;
 };
 
 enum class ScriptItemType {
@@ -804,6 +806,7 @@ public:
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

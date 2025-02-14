@@ -82,6 +82,7 @@ public:
     void SetType(TextInputType type) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
     void SetEnableHapticFeedback(bool state) override {};
+    void SetKeyboardAppearance(KeyboardAppearance value) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

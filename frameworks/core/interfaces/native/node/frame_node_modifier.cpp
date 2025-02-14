@@ -475,6 +475,50 @@ void ResetSystemColorModeChangeEvent(ArkUINodeHandle node)
     ViewAbstract::SetSystemColorModeChangeEvent(frameNode, nullptr);
 }
 
+ArkUI_Int32 SetDrawCompleteEvent(ArkUINodeHandle node, void* userData, void (*onDraw)(void*))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto onDrawCallBack = [userData, onDraw]() {
+        if (!onDraw) {
+            return;
+        }
+        onDraw(userData);
+    };
+    ViewAbstract::SetDrawCompleteEvent(frameNode, std::move(onDrawCallBack));
+    return 0;
+}
+
+ArkUI_Int32 ResetDrawCompleteEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    ViewAbstract::SetDrawCompleteEvent(frameNode, nullptr);
+    return 0;
+}
+
+ArkUI_Int32 SetLayoutEvent(ArkUINodeHandle node, void* userData, void (*onLayout)(void*))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto onLayoutCallBack = [userData, onLayout]() {
+        if (!onLayout) {
+            return;
+        }
+        onLayout(userData);
+    };
+    ViewAbstract::SetLayoutEvent(frameNode, std::move(onLayoutCallBack));
+    return 0;
+}
+
+ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    ViewAbstract::SetLayoutEvent(frameNode, nullptr);
+    return 0;
+}
+
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -611,7 +655,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetLayoutSize, GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
         SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
         SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
-        GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty };
+        GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, SetDrawCompleteEvent,
+        ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent };
     return &modifier;
 }
 

@@ -680,6 +680,22 @@ void ResetTextAreaLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextAreaKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetTextAreaKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 void SetTextAreaWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1682,6 +1698,20 @@ void ResetTextAreaEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStopBackPress(frameNode, true);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1725,7 +1755,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
         GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions, SetTextAreaWidth,
         ResetTextAreaWidth, SetTextAreaEnableHapticFeedback, ResetTextAreaEnableHapticFeedback,
-        GetTextAreaLetterSpacing, GetTextAreaEnablePreviewText };
+        GetTextAreaLetterSpacing, GetTextAreaEnablePreviewText,
+        SetStopBackPress, ResetStopBackPress, SetTextAreaKeyboardAppearance, ResetTextAreaKeyboardAppearance };
     return &modifier;
 }
 
@@ -1800,8 +1831,8 @@ void SetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
         eventWithPreview.kind = TEXT_INPUT_CHANGE;
         eventWithPreview.extraParam = reinterpret_cast<intptr_t>(extraParam);
         eventWithPreview.textChangeEvent.subKind = ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
-        eventWithPreview.textChangeEvent.nativeStringPtr = reinterpret_cast<char*>(value.c_str());
-        eventWithPreview.textChangeEvent.extendStringPtr = reinterpret_cast<char*>(previewText.value.c_str());
+        eventWithPreview.textChangeEvent.nativeStringPtr = const_cast<char*>(value.c_str());
+        eventWithPreview.textChangeEvent.extendStringPtr = const_cast<char*>(previewText.value.c_str());
         eventWithPreview.textChangeEvent.numArgs = previewText.offset;
         SendArkUIAsyncEvent(&eventWithPreview);
     };

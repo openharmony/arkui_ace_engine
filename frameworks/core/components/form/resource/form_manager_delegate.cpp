@@ -607,6 +607,15 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnGetRectRelativeToWindow(top, left);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
+    
+    auto &&onCheckManagerDelegate = [weak = WeakClaim(this)](bool &checkFlag) {
+        auto formManagerDelegate = weak.Upgrade();
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - onCheckManagerDelegate formManagerDelegate is null");
+            checkFlag = false;
+        }
+    };
+    renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)

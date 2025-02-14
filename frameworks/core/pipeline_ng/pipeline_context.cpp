@@ -678,9 +678,15 @@ void PipelineContext::InspectDrew()
         auto needRenderNode = std::move(needRenderNode_);
         for (auto&& nodeWeak : needRenderNode) {
             auto node = nodeWeak.Upgrade();
-            if (node) {
+            if (!node) {
+                continue;
+            }
+            if (node->GetInspectorId().has_value()) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
+            auto eventHub = node->GetEventHub<NG::EventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireDrawCompletedNDKCallback(Claim(this));
         }
     }
 }
@@ -788,7 +794,7 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
         node->Measure(std::nullopt);
         node->Layout();
     } else {
-        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(false);
         {
             ACE_SCOPED_TRACE("FlushUITaskWithSingleDirtyNodeMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                              "[pageId:%d][depth:%d]",
@@ -1094,9 +1100,6 @@ void PipelineContext::SetupRootElement()
             }
         }
     }
-#endif
-#ifdef WINDOW_SCENE_SUPPORTED
-    uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
@@ -2016,6 +2019,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         context->SetKeyboardAction(KeyboardAction::NONE);
     };
     FlushUITasks();
+    // flush ui tasks when dirty layout nodes exist: the previous ui tasks may generate dirty nodes.
+    // if dirty nodes exist, they will be carried into the keyboard avoid animation, causing abnormal animation.
+    FlushDirtyPropertyNodesWhenExist();
     SetIsLayouting(true);
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 
@@ -2024,6 +2030,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::FlushDirtyPropertyNodesWhenExist()
+{
+    if ((!IsDirtyLayoutNodesEmpty() || !dirtyPropertyNodes_.empty()) && !IsLayouting()) {
+        FlushUITasks();
+    }
 }
 
 bool PipelineContext::UsingCaretAvoidMode()
@@ -2131,7 +2144,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(host, newKeyboardOffset);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
-    auto paintOffset = host->GetPaintRectOffset();
+    auto paintOffset = host->GetPaintRectOffset(false, true);
     auto frameSize = geometryNode->GetFrameSize();
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
         frameSize.Height(), rootSize);
@@ -2525,6 +2538,7 @@ void PipelineContext::OnTouchEvent(
     if (scalePoint.type == TouchType::MOVE) {
         if (isEventsPassThrough) {
             scalePoint.isPassThroughMode = true;
+            eventManager_->FlushTouchEventsEnd({ scalePoint });
             eventManager_->DispatchTouchEvent(scalePoint);
             hasIdleTasks_ = true;
             RequestFrame();

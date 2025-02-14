@@ -1120,6 +1120,16 @@ public:
         return declaration_->GetAdsBlockedEventId();
     }
 
+    void SetOptimizeParserBudgetEnabled(bool enable)
+    {
+        isParserBudgetOptimized_ = enable;
+    }
+
+    bool GetOptimizeParserBudgetEnabled() const
+    {
+        return isParserBudgetOptimized_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1195,6 +1205,7 @@ private:
     CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
     std::tuple<bool, bool> native_video_player_config_{false, false};
     std::string shared_render_process_token_;
+    bool isParserBudgetOptimized_ = false;
 };
 
 } // namespace OHOS::Ace

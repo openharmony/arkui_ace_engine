@@ -818,4 +818,16 @@ void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
     accessibilityHoverPriority_ = hoverPriority;
 }
 
+void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl)
+{
+    getWindowScenePositionImpl_ = getWindowScenePositionImpl;
+}
+
+void AccessibilityProperty::GetWindowScenePosition(WindowSceneInfo& windowSceneInfo)
+{
+    if (getWindowScenePositionImpl_ == nullptr) {
+        return;
+    }
+    getWindowScenePositionImpl_(windowSceneInfo);
+}
 } // namespace OHOS::Ace::NG

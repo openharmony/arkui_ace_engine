@@ -37,6 +37,16 @@ bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
 {
     return false;
 }
+
+void UIExtensionManager::TransferAccessibilityRectInfo()
+{
+}
+
+void UIExtensionManager::RegisterBusinessDataConsumeCallback(
+    UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback)
+{
+}
+
 std::pair<int64_t, int64_t> UIExtensionManager::UnWrapExtensionAbilityId(
     int64_t extensionOffset,
     int64_t elementId)

@@ -51,6 +51,16 @@ void FunctionDeleter(void *env, void *nativePointer, void *data)
 
 thread_local EcmaVM* ArkJSRuntime::threadVm_ = nullptr;
 
+void ArkJSRuntime::SetUniqueId(const std::string& uniqueId)
+{
+    uniqueId_ = uniqueId;
+}
+
+const std::string& ArkJSRuntime::GetUniqueId() const
+{
+    return uniqueId_;
+}
+
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
     RuntimeOption option;
@@ -407,7 +417,7 @@ void ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& t
     if (!exception.IsEmpty() && !exception->IsHole()) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
-        uncaughtErrorHandler_(errorPtr, shared_from_this());
+        uncaughtErrorHandler_(errorPtr, shared_from_this(), uniqueId_);
     }
 }
 

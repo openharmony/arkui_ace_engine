@@ -455,7 +455,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->RemoveDisappearingChild(inNode);
         state_ = State::ACTIVE;
         MarkLayoutDirty(inNode, 1);
-        if (auto inNodeParent = inNode->GetAncestorNodeOfFrame()) {
+        if (auto inNodeParent = inNode->GetAncestorNodeOfFrame(false)) {
             MarkLayoutDirty(inNodeParent);
         }
         hasInAnim_ = true;
@@ -505,7 +505,7 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
     CHECK_NULL_VOID(inRenderContext);
     AnimationUtils::Animate(option, [&]() {
         if (inRenderContext->HasSandBox()) {
-            auto parent = inNode->GetAncestorNodeOfFrame();
+            auto parent = inNode->GetAncestorNodeOfFrame(false);
             if (inNodeParentHasScales && parent) {
                 inRenderContext->SetSandBox(parent->GetTransformRectRelativeToWindow().GetOffset());
             } else {
@@ -583,7 +583,7 @@ bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
     auto node = frameNode.Upgrade();
     CHECK_NULL_RETURN(node, false);
     if (IsNodeInAndActive(frameNode)) {
-        auto parentNode = node->GetAncestorNodeOfFrame();
+        auto parentNode = node->GetAncestorNodeOfFrame(false);
         if (parentNode) {
             MarkLayoutDirty(node);
             MarkLayoutDirty(parentNode);

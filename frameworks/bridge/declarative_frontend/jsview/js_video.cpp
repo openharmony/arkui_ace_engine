@@ -185,6 +185,21 @@ void JSVideo::JsObjectFit(const JSCallbackInfo& info)
     VideoModel::GetInstance()->SetObjectFit(imageFit);
 }
 
+void JSVideo::JsSurfaceBackgroundColor(const JSCallbackInfo& info)
+{
+    Color backgroundColor = Color::BLACK;
+    if (ParseColorMetricsToColor(info[0], backgroundColor) && backgroundColor != Color::TRANSPARENT) {
+        backgroundColor = Color::BLACK;
+    }
+
+    VideoModel::GetInstance()->SetSurfaceBackgroundColor(backgroundColor);
+}
+
+void JSVideo::JsSetShortcutKeyEnabled(const JSCallbackInfo& info)
+{
+    VideoModel::GetInstance()->SetShortcutKeyEnabled(info[0]->IsBoolean() ? info[0]->ToBoolean() : false);
+}
+
 void JSVideo::JsOnStart(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -413,6 +428,8 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("controls", &JSVideo::JsControls, opt);
     JSClass<JSVideo>::StaticMethod("loop", &JSVideo::JsLoop, opt);
     JSClass<JSVideo>::StaticMethod("objectFit", &JSVideo::JsObjectFit, opt);
+    JSClass<JSVideo>::StaticMethod("surfaceBackgroundColor", &JSVideo::JsSurfaceBackgroundColor, opt);
+    JSClass<JSVideo>::StaticMethod("enableShortcutKey", &JSVideo::JsSetShortcutKeyEnabled, opt);
 
     JSClass<JSVideo>::StaticMethod("onStart", &JSVideo::JsOnStart);
     JSClass<JSVideo>::StaticMethod("onPause", &JSVideo::JsOnPause);

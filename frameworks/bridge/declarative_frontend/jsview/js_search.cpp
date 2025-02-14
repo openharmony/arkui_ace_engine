@@ -140,6 +140,8 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
+    JSClass<JSSearch>::StaticMethod("stopBackPress", &JSSearch::SetStopBackPress);
+    JSClass<JSSearch>::StaticMethod("keyboardAppearance", &JSSearch::SetKeyboardAppearance);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1214,5 +1216,32 @@ void JSSearch::SetEnableHapticFeedback(const JSCallbackInfo& info)
         state = info[0]->ToBoolean();
     }
     SearchModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
+void JSSearch::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
+void JSSearch::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
+        return;
+    }
+    auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
+        return;
+    }
+    SearchModel::GetInstance()->SetKeyboardAppearance(
+        static_cast<KeyboardAppearance>(keyboardAppearance));
 }
 } // namespace OHOS::Ace::Framework

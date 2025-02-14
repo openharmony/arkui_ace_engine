@@ -87,23 +87,34 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "No need to show handle when using mouse");
         return false;
     }
-
-    auto contentRect = pattern->GetTextContentRect();
-    auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-    RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame();
-    visibleContentRect = GetVisibleContentRect();
-    if (visibleContentRect.IsEmpty()) {
+    auto visibleRect = GetVisibleRect();
+    if (visibleRect.IsEmpty()) {
         return false;
     }
     auto paintLeft = paintRect.Left() + paintRect.Width() / 2.0f;
     PointF bottomPoint = { paintLeft, paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
-    visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
-    visibleContentRect.SetWidth(visibleContentRect.Width() + DOUBLE * BOX_EPSILON);
-    visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
-    visibleContentRect.SetHeight(visibleContentRect.Height() + DOUBLE * BOX_EPSILON);
-    return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
+    visibleRect.SetLeft(visibleRect.GetX() - BOX_EPSILON);
+    visibleRect.SetWidth(visibleRect.Width() + DOUBLE * BOX_EPSILON);
+    visibleRect.SetTop(visibleRect.GetY() - BOX_EPSILON);
+    visibleRect.SetHeight(visibleRect.Height() + DOUBLE * BOX_EPSILON);
+    return visibleRect.IsInRegion(bottomPoint) && visibleRect.IsInRegion(topPoint);
+}
+
+RectF RichEditorSelectOverlay::GetVisibleRect()
+{
+    RectF visibleRect;
+    auto pattern = GetPattern<Pattern>();
+    CHECK_NULL_RETURN(pattern, visibleRect);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, visibleRect);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, visibleRect);
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    auto paintOffset = host->GetPaintRectWithTransform().GetOffset();
+    visibleRect = RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
+    CalculateClippedRect(visibleRect);
+    return visibleRect;
 }
 
 void RichEditorSelectOverlay::OnResetTextSelection()

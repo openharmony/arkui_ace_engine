@@ -2680,7 +2680,7 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     flag = flag && isVertical();
     if (flag) {
         ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
-        auto parent = host->GetAncestorNodeOfFrame();
+        auto parent = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
         parent->SetSuggestOpIncActivatedOnce();
         host->SetSuggestOpIncActivatedOnce();
