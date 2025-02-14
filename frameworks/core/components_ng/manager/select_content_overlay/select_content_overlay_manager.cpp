@@ -881,7 +881,7 @@ bool SelectContentOverlayManager::IsTouchInHandleLevelOverlayArea(const PointF& 
     selectOverlayNode = DynamicCast<SelectOverlayNode>(handleNode_.Upgrade());
     CHECK_NULL_RETURN(selectOverlayNode, false);
     auto localPoint = point;
-    ConvertPointRelativeToNode(selectOverlayNode->GetAncestorNodeOfFrame(false), localPoint);
+    ConvertPointRelativeToNode(selectOverlayNode->GetAncestorNodeOfFrame(true), localPoint);
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
 }
 
@@ -970,7 +970,7 @@ void SelectContentOverlayManager::ConvertPointRelativeToNode(const RefPtr<FrameN
     auto parent = node;
     while (parent && parent != rootNode) {
         nodeStack.push(parent);
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_VOID(!nodeStack.empty());
     PointF temp(point.GetX(), point.GetY());
