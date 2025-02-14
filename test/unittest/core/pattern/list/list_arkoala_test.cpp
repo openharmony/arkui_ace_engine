@@ -87,4 +87,27 @@ HWTEST_F(ListArkoalaTest, Basic001, TestSize.Level1)
     EXPECT_FALSE(lazy_.NeedRecompose());
     EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, -31.00) - [480.00 x 90.00]");
 }
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump on ScrollWindowAdapter with MockKoala
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListArkoalaTest, Jump001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetSpace(Dimension(10.0f));
+    InitMockLazy(100);
+    CreateDone(frameNode_);
+    IncrementAndLayout(__LINE__);
+
+    pattern_->ScrollToIndex(90);
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(90, 99));
+    EXPECT_EQ(pattern_->GetStartIndex(), 90);
+    EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (0.00, 590.00) - [240.00 x 90.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 94).ToString(), "RectT (0.00, 690.00) - [240.00 x 90.00]");
+}
 } // namespace OHOS::Ace::NG

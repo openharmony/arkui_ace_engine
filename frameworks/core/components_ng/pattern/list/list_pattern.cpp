@@ -655,6 +655,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
+        UpdateLayoutRange(GetAxis(), *jumpIndex_, false);
         jumpIndex_.reset();
     }
     if (targetIndex_) {

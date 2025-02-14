@@ -597,7 +597,10 @@ public:
         return nullptr;
     }
 
-    virtual int32_t GetTotalChildCount()
+    /**
+     * @brief To override FrameNode::GetTotalChildCount in Arkoala
+     */
+    virtual int32_t GetTotalChildCount() const
     {
         return -1;
     }

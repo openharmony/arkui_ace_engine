@@ -31,9 +31,9 @@ void LazyContainer::UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx,
     if (adapter_) {
         adapter_->UpdateViewport(GetHost()->GetGeometryNode()->GetFrameSize(), axis);
         if (markIdx && *markIdx >= 0) {
-            adapter_->UpdateMarkItem(*markIdx, true);
+            adapter_->UpdateMarkItem(*markIdx);
         } else if (firstLayout) {
-            adapter_->UpdateMarkItem(0, true);
+            adapter_->UpdateMarkItem(0);
         }
     }
 }

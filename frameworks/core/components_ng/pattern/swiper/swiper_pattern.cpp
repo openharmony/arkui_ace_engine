@@ -154,6 +154,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
     if (jumpIndex_) {
         algo->SetJumpIndex(jumpIndex_.value());
+        UpdateLayoutRange(GetAxis(), *jumpIndex_, false);
     } else if (targetIndex_) {
         algo->SetTargetIndex(targetIndex_.value());
     }
@@ -1595,6 +1596,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
         FireWillHideEvent(currentIndex_);
     }
     if (IsVisibleChildrenSizeLessThanSwiper()) {
+        std::cout << "1599\n";
         return;
     }
 
@@ -1606,6 +1608,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopFadeAnimation();
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
+    std::cout << "jump to " << index << "\n";
     jumpIndex_ = index;
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
@@ -1847,6 +1850,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
     auto targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
     targetIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(targetIndex, displayCount) : targetIndex;
     if (targetIndex_.has_value() && targetIndex_.value() == targetIndex) {
+        std::cout << "return 1852\n";
         return;
     }
 
@@ -4203,7 +4207,7 @@ int32_t SwiperPattern::TotalCount() const
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, 1);
     auto displayCount = props->GetDisplayCount().value_or(1);
-    auto totalCount = RealTotalCount();
+    auto totalCount = ArkoalaEnabled() ? GetTotalChildCount() : RealTotalCount();
     if (IsSwipeByGroup() && displayCount != 0) {
         totalCount =
             static_cast<int32_t>(std::ceil(static_cast<float>(totalCount) / static_cast<float>(displayCount))) *

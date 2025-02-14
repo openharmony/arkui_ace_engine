@@ -19,14 +19,14 @@
 #include "core/components_ng/pattern/pattern.h"
 namespace OHOS::Ace::NG {
 /**
- * @brief Base class of all components that support lazy load in ArkUI 2.0
+ * @brief Base class of all components that support lazy load in ArkUI 2.0 (Arkoala)
  *
  */
 class LazyContainer : virtual public Pattern {
     DECLARE_ACE_TYPE(LazyContainer, Pattern);
 
 public:
-    int32_t GetTotalChildCount() override
+    int32_t GetTotalChildCount() const override
     {
         return adapter_ ? adapter_->GetTotalCount() : -1;
     }
@@ -41,6 +41,11 @@ protected:
     void ResetAdapter()
     {
         adapter_.Reset();
+    }
+
+    bool ArkoalaEnabled() const
+    {
+        return adapter_;
     }
 
     /**
@@ -66,6 +71,7 @@ private:
  */
 class LinearLazyContainer : public LazyContainer {
     DECLARE_ACE_TYPE(LinearLazyContainer, LazyContainer);
+
 private:
     RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
 };

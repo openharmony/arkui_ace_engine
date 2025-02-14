@@ -44,6 +44,13 @@ std::optional<int32_t> StaggeredFillAlgorithm::EndIdx() const
     return std::nullopt;
 }
 
+void StaggeredFillAlgorithm::MarkJump()
+{
+    for (auto& section : sections_) {
+        section.ClearItems();
+    }
+}
+
 bool StaggeredFillAlgorithm::CanFillMoreAtStart(Axis axis)
 {
     const auto item = StartIdx();
@@ -146,10 +153,9 @@ void StaggeredFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, Fram
 {
     auto& section = GetSection(index);
     if (!section.Contains(index)) {
-        if (index != 0) {
-            LOGW("non-init mark item not recorded previously %{public}d", index);
+        if (!section.IsEmpty()) {
+            LOGW("data is corrupted, section is %s when inserting mark item %d", section.ToString().c_str(), index);
         }
-        // check section endPos
         auto filler = SectionEndFiller(section, viewport.MainSize(axis));
         filler.Fill(measurer_, node, index, viewport.MainSize(axis));
     }

@@ -95,4 +95,25 @@ HWTEST_F(SwiperArkoalaTest, Basic001, TestSize.Level1)
     EXPECT_FALSE(lazy_.NeedRecompose());
     EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (-351.00, 0.00) - [480.00 x 800.00]");
 }
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump on ScrollWindowAdapter with MockKoala
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArkoalaTest, Jump001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetItemSpace(Dimension(5.0f));
+    InitMockLazy(100);
+    CreateDone(frameNode_);
+    IncrementAndLayout(__LINE__);
+
+    pattern_->ChangeIndex(8, false);
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(pattern_->GetStartIndex(), 8);
+    EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (0.00, 590.00) - [240.00 x 90.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 94).ToString(), "RectT (0.00, 690.00) - [240.00 x 90.00]");
+}
 } // namespace OHOS::Ace::NG
