@@ -19,10 +19,12 @@
 #include <vector>
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/models/alert_dialog_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
@@ -391,6 +393,35 @@ void ParseAlertDialogLevelMode(DialogProperties& properties, JSRef<JSObject> obj
     }
 }
 
+void ParseAlertLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    if (properties.isShowInSubWindow) {
+        return;
+    }
+
+    auto levelOrderValue = obj->GetProperty("levelOrder");
+    if (!levelOrderValue->IsObject()) {
+        return;
+    }
+    napi_value levelOrderApi = JsConverter::ConvertJsValToNapiValue(levelOrderValue);
+    CHECK_NULL_VOID(levelOrderApi);
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    NG::LevelOrder* levelOrder = nullptr;
+    napi_status status = napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
+    if (status != napi_ok || !levelOrder) {
+        LOGE("Failed to unwrap LevelOrder.");
+        return;
+    }
+
+    double order = levelOrder->GetOrder();
+    properties.levelOrder = std::make_optional(order);
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -472,6 +503,8 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseDialogCallback(obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 
+        JSViewAbstract::ParseAppearDialogCallback(args, properties);
+
         // Parse showInSubWindowValue.
         auto showInSubWindowValue = obj->GetProperty("showInSubWindow");
         if (showInSubWindowValue->IsBoolean()) {
@@ -506,8 +539,11 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         }
         // Parse transition.
         properties.transitionEffect = ParseJsTransitionEffect(args);
+        ParseAlertLevelOrder(properties, obj);
         JSViewAbstract::SetDialogProperties(obj, properties);
         JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
+        JSViewAbstract::SetDialogBlurStyleOption(obj, properties);
+        JSViewAbstract::SetDialogEffectOption(obj, properties);
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }
 }

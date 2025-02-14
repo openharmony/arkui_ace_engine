@@ -276,6 +276,7 @@ public:
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnAxisEvent(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
+    static void JsOnHoverMove(const JSCallbackInfo& info);
     static void JsOnAccessibilityHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
@@ -471,6 +472,7 @@ public:
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
     static void JsAccessibilityDefaultFocus(const JSCallbackInfo& info);
     static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
+    static void JsAccessibilityScrollTriggerable(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -516,6 +518,7 @@ public:
     static void JsNotifyDragStartRequest(const JSCallbackInfo& info);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
+    static void ParseAppearDialogCallback(const JSCallbackInfo& info, DialogProperties& dialogProperties);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static RefPtr<PipelineBase> GetPipelineContext()
@@ -667,6 +670,8 @@ public:
         NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 

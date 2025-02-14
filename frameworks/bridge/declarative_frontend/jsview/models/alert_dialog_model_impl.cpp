@@ -48,7 +48,7 @@ void AlertDialogModelImpl::SetShowDialog(const DialogProperties& arg)
                         context->ShowDialog(arg, false, "AlertDialog");
                     }
                 },
-                TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog");
         }
     }
 }

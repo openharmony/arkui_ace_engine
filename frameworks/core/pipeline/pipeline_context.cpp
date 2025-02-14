@@ -860,7 +860,7 @@ void PipelineContext::SetupRootElement()
     requestedRenderNode_.Reset();
 }
 
-void PipelineContext::SetupSubRootElement()
+RefPtr<Element> PipelineContext::SetupSubRootElement()
 {
     LOGI("Set up SubRootElement!");
 
@@ -887,7 +887,7 @@ void PipelineContext::SetupSubRootElement()
     if (!rootElement_) {
         LOGE("Set up SubRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return;
+        return RefPtr<Element>();
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -904,7 +904,7 @@ void PipelineContext::SetupSubRootElement()
     cardTransitionController_->RegisterTransitionListener();
     requestedRenderNode_.Reset();
     LOGI("Set up SubRootElement success!");
-    return;
+    return rootElement_;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const

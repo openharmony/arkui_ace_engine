@@ -298,7 +298,7 @@ public:
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
-    bool GetContainerModalTitleVisible() override;
+    bool GetContainerModalTitleVisible(bool isImmersive) override;
     void SetContainerModalTitleHeight(int32_t height) override;
     void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
@@ -398,7 +398,7 @@ public:
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
-    bool SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId) override;
+    bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
 
 private:
     UIContentErrorCode InitializeInner(

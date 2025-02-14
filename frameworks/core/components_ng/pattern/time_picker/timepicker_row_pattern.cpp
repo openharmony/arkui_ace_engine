@@ -142,6 +142,24 @@ void TimePickerRowPattern::ColumnPatternInitHapticController()
     }
 }
 
+void TimePickerRowPattern::ColumnPatternStopHaptic()
+{
+    if (!isEnableHaptic_) {
+        return;
+    }
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (!columnNode) {
+            continue;
+        }
+        auto timePickerColumnPattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (!timePickerColumnPattern) {
+            continue;
+        }
+        timePickerColumnPattern->StopHaptic();
+    }
+}
+
 bool TimePickerRowPattern::IsCircle()
 {
     auto host = GetHost();
@@ -324,11 +342,7 @@ void TimePickerRowPattern::OnModifyDone()
     isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
-
     ClearFocus();
-    isHapticChanged_ = false;
-    isForceUpdate_ = false;
-    isDateTimeOptionUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -668,7 +682,11 @@ PickerTime TimePickerRowPattern::GetCurrentEnterTime()
     CHECK_NULL_RETURN(minutePickerColumnPattern, time);
 
     if (GetHour24()) {
-        time.SetHour(hourPickerColumnPattern->GetEnterIndex()); // hour from 0 to 23, index from 0 to 23
+        if (IsStartEndTimeDefined()) {
+            time.SetHour(hourPickerColumnPattern->GetEnterIndex() + startTime_.GetHour());
+        } else {
+            time.SetHour(hourPickerColumnPattern->GetEnterIndex()); // hour from 0 to 23, index from 0 to 23
+        }
     } else if (amPmColumn) {
         auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_RETURN(amPmPickerColumnPattern, time);

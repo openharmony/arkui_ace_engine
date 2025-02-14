@@ -129,8 +129,8 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
         return FAILED;
     }
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance().SaveReportStub(report, processId);
-    UiSessionManager::GetInstance().SendBaseInfo(processId);
+    UiSessionManager::GetInstance()->SaveReportStub(report, processId);
+    UiSessionManager::GetInstance()->SendBaseInfo(processId);
     return NO_ERROR;
 }
 
@@ -219,7 +219,7 @@ int32_t UiContentStub::ResetTranslateTextInner(MessageParcel& data, MessageParce
 int32_t UiContentStub::GetWebViewCurrentLanguageInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance().SaveProcessId("translate", processId);
+    UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
     reply.WriteInt32(GetWebViewCurrentLanguage(nullptr));
     return NO_ERROR;
 }
@@ -235,7 +235,7 @@ int32_t UiContentStub::StartWebViewTranslateInner(MessageParcel& data, MessagePa
 {
     std::string extraData = data.ReadString();
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance().SaveProcessId("translate", processId);
+    UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
     reply.WriteInt32(StartWebViewTranslate(extraData, nullptr));
     return NO_ERROR;
 }
@@ -267,7 +267,7 @@ int32_t UiContentStub::SendTranslateResultStrInner(MessageParcel& data, MessageP
 int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance().SaveProcessId("pixel", processId);
+    UiSessionManager::GetInstance()->SaveProcessId("pixel", processId);
     reply.WriteInt32(GetCurrentImagesShowing(nullptr));
     return NO_ERROR;
 }

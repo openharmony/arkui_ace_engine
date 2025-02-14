@@ -928,9 +928,14 @@ bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
 }
 
-bool FormManagerDelegate::IsFormBundleLocked(const std::string& bundleName, int64_t formId)
+bool FormManagerDelegate::IsFormBundleExempt(int64_t formId)
 {
-    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleLocked(bundleName, formId);
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleExempt(formId);
+}
+
+bool FormManagerDelegate::IsFormBundleProtected(const std::string& bundleName, int64_t formId)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleProtected(bundleName, formId);
 }
 
 void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
@@ -1117,8 +1122,14 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const App
         wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
     }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
-        formInfo.enableBlurBackground);
+    auto disableBlurBackground = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_BLUR_BACKGROUND,
+        false);
+    if (disableBlurBackground) {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY, false);
+    } else {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
+            formInfo.enableBlurBackground);
+    }
 }
 
 

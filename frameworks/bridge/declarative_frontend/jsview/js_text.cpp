@@ -456,7 +456,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -467,7 +467,7 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -580,7 +580,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -652,7 +652,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -816,10 +816,6 @@ void JSText::SetOnCopy(const JSCallbackInfo& info)
 
 void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
-    if ((AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN))) {
-        JSViewAbstract::JsOnDragStart(info);
-        return;
-    }
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
@@ -949,7 +945,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     // SelectionMenuOptions
     NG::SelectMenuParam menuParam;
     menuParam.isValid = isValidTextSpanType;
-    if (info.Length() > resquiredParameterCount) {
+    if (info.Length() > static_cast<uint32_t>(resquiredParameterCount)) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
             ParseMenuParam(info, argsMenuOptions, menuParam);
@@ -1067,7 +1063,11 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
+    } else {
+        JSClass<JSText>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
+    }
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);

@@ -331,6 +331,7 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    customWant_ = std::make_shared<Want>(want);
     auto wantPtr = std::make_shared<Want>(want);
     AAFwk::WantParams configParam;
     container->GetExtensionConfig(configParam);
@@ -383,6 +384,7 @@ void SecuritySessionWrapperImpl::DestroySession()
     if (dataHandler) {
         dataHandler->UnregisterDataConsumer(subSystemId_);
     }
+    customWant_ = nullptr;
     session_ = nullptr;
 }
 
@@ -398,7 +400,7 @@ int32_t SecuritySessionWrapperImpl::GetSessionId() const
 
 const std::shared_ptr<AAFwk::Want> SecuritySessionWrapperImpl::GetWant()
 {
-    return session_ ? session_->GetSessionInfo().want : nullptr;
+    return session_ ? customWant_ : nullptr;
 }
 /******************************* End: About session ***************************************/
 
@@ -783,7 +785,7 @@ void SecuritySessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& p
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;
@@ -819,7 +821,7 @@ int32_t SecuritySessionWrapperImpl::GetInstanceIdFromHost() const
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessData(
-    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const  AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;

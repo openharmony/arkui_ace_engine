@@ -1319,6 +1319,8 @@ frameworks/bridge/declarative_frontend/jsview/js_video_controller.cpp @arkuilayo
 frameworks/bridge/declarative_frontend/jsview/js_video_controller.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_video.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_video.h @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.cpp @arkuievent
+frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h @arkuievent
@@ -1920,6 +1922,7 @@ frameworks/core/components/common/properties/animatable_path.h @arkuiframework
 frameworks/core/components/common/properties/animation_option.h @arkuiframework
 frameworks/core/components/common/properties/blend_mode.h @arkuiframework
 frameworks/core/components/common/properties/blur_parameter.h @arkuiframework
+frameworks/core/components/common/properties/blur_style_option.h @arkuievent
 frameworks/core/components/common/properties/border.cpp @arkuilayout
 frameworks/core/components/common/properties/border_edge.cpp @arkuilayout
 frameworks/core/components/common/properties/border_edge.h @arkuilayout
@@ -3176,4 +3179,4 @@ test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
 test/unittest/interfaces/ @arkuiframework
-
+test/unittest/interfaces/ui_input_event_test.cpp @arkuievent

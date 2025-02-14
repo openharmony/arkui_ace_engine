@@ -769,6 +769,14 @@ public:
     {
         return OffsetF();
     }
+
+    virtual bool AddNodeToRsTree()
+    {
+        return false;
+    }
+
+    virtual void SetDrawNode() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

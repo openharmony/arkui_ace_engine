@@ -1696,6 +1696,7 @@ bool FocusHub::PaintAllFocusState()
         return onPaintFocusStateCallback_();
     }
     if (focusStyleType_ != FocusStyleType::NONE) {
+        focusManager->SetLastFocusStateNode(AceType::Claim(this));
         return false;
     }
 

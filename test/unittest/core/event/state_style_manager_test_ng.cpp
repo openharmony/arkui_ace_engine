@@ -564,4 +564,69 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest017, TestSize.Level1)
     stateStyleMgr->FireStateFunc(UI_STATE_PRESSED, stateStyleMgr->currentState_, hasScrollingParent);
     EXPECT_EQ(true, hasScrollingParent);
 }
+
+/**
+ * @tc.name: StateStyleTest018
+ * @tc.desc: test AddSupportedUIStateWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest018, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL, [](UIState){}, true);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL));
+       
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, true);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
+
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, false);
+    bool flag = (stateStyleMgr->userStateStyleSubscribers_.first & UI_STATE_PRESSED) == UI_STATE_PRESSED;
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: StateStyleTest019
+ * @tc.desc: test RemoveSupportedUIState
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest019, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_NORMAL, true);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL));
+    EXPECT_FALSE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
+
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED, [](UIState){}, true);
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED, [](UIState){}, false);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
+
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_PRESSED, true);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
+
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_PRESSED, false);
+    EXPECT_FALSE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
+}
+
+/**
+ * @tc.name: StateStyleTest020
+ * @tc.desc: test HandleStateChangeInternal
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest020, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, true);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL | UI_STATE_PRESSED));
+    stateStyleMgr->HandleStateChangeInternal(UI_STATE_PRESSED, stateStyleMgr->currentState_, true);
+    EXPECT_TRUE(stateStyleMgr->innerStateStyleSubscribers_.second);
+
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, false);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL | UI_STATE_PRESSED));
+    stateStyleMgr->HandleStateChangeInternal(UI_STATE_PRESSED, stateStyleMgr->currentState_, false);
+    EXPECT_TRUE(stateStyleMgr->userStateStyleSubscribers_.second);
+}
 } // namespace OHOS::Ace::NG

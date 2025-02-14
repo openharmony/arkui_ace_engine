@@ -465,7 +465,7 @@ abstract class ViewPU extends PUV2ViewBase
         this.viewPropertyHasChanged(varName, dependentElmtIds);
       };
       if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
-        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
       }
       PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
       return;
@@ -518,7 +518,7 @@ abstract class ViewPU extends PUV2ViewBase
         this.uiNodeNeedUpdateV2(elmtId);
       };
       if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
-        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
       }
       PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
       return;

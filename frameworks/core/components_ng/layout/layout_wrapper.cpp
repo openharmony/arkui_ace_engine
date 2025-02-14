@@ -99,7 +99,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     bool isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(host);
     // apply keyboard avoidance on Page or Overlay
     if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
-        GetHostTag() == V2::OVERLAY_ETS_TAG) {
+        GetHostTag() == V2::OVERLAY_ETS_TAG || GetHostTag() == V2::ORDER_OVERLAY_ETS_TAG) {
         CHECK_NULL_RETURN(IsActive(), false);
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);

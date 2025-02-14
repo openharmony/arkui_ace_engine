@@ -80,5 +80,10 @@ Rect AceContainer::GetDisplayAvailableRect() const
     return Rect();
 }
 
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
+}
+
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 } // namespace OHOS::Ace::Platform

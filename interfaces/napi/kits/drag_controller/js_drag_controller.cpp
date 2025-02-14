@@ -908,9 +908,7 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(dragNodePipeline, false);
     auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
-    float defaultPixelMapScale =
-        asyncCtx->dragPointerEvent.sourceType == SOURCE_TYPE_MOUSE ? 1.0f : NG::DEFALUT_DRAG_PPIXELMAP_SCALE;
-    auto scale = asyncCtx->windowScale * defaultPixelMapScale;
+    auto scale = asyncCtx->windowScale;
     CHECK_NULL_RETURN(pixelMap, false);
     RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     CHECK_NULL_RETURN(refPixelMap, false);
@@ -918,7 +916,7 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     if (badgeNumber.has_value()) {
         asyncCtx->badgeNumber = badgeNumber.value();
     }
-    data = { false, asyncCtx->badgeNumber, defaultPixelMapScale, false,
+    data = { false, asyncCtx->badgeNumber, 1.0f, false,
         NG::OffsetF(), NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(asyncCtx->instanceId), refPixelMap };
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
     if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
@@ -938,6 +936,16 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
     return true;
+}
+
+void HideDragPreviewWindow(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([asyncCtx]() { NG::DragControllerFuncWrapper::HideDragPreviewWindow(asyncCtx->instanceId); },
+        TaskExecutor::TaskType::UI, "ArkUIHideDragPreviewWindow", PriorityType::VIP);
 }
 
 void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& ret)
@@ -970,6 +978,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
+        HideDragPreviewWindow(asyncCtx);
         HandleDragEnd(asyncCtx, dragNotifyMsg);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
@@ -1170,6 +1179,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         return false;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
+        HideDragPreviewWindow(asyncCtx);
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(

@@ -19,9 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -813,9 +811,7 @@ void SearchPattern::OnClickButtonAndImage()
     if (!event.IsKeepEditable()) {
         textFieldPattern->StopEditing();
     }
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Search.onSubmit");
-#endif
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -1715,6 +1711,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("enablePreviewText", textFieldPattern->GetSupportPreviewText(), filter);
     textFieldPattern->ToJsonValueSelectOverlay(json, filter);
     json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
+    json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -2703,31 +2700,6 @@ float SearchPattern::GetMinFontScale()
         minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
     }
     return minFontScale;
-}
-
-bool SearchPattern::IsShowCancelButton()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_RETURN(textFieldFrameNode, false);
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    auto style = static_cast<int16_t>(layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT));
-    bool isEventEnabled = IsEventEnabled(textFieldPattern->GetTextUtf16Value(), style);
-    return isEventEnabled;
-}
-
-bool SearchPattern::IsShowSearchButton()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    auto searchButton = layoutProperty->GetSearchButton();
-    return searchButton.has_value();
 }
 
 } // namespace OHOS::Ace::NG

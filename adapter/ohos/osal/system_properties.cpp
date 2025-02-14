@@ -66,6 +66,8 @@ constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
+constexpr int32_t FOLD_TYPE_TWO = 2;
+constexpr int32_t FOLD_TYPE_FOUR = 4;
 
 bool IsOpIncEnabled()
 {
@@ -244,6 +246,11 @@ bool IsAccessibilityEnabled()
 bool IsDebugEnabled()
 {
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
+}
+
+bool IsContainerDeleteFlag()
+{
+    return (system::GetParameter("persist.container.delete", "true") == "true");
 }
 
 bool IsLayoutDetectEnabled()
@@ -469,6 +476,7 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
 ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
@@ -683,6 +691,11 @@ ACE_WEAK_SYM float SystemProperties::GetFontScale()
 {
     // Default value of font size scale is 1.0.
     return fontScale_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return containerDeleteFlag_;
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
@@ -989,6 +1002,9 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
         auto type = StringUtils::StringToInt(foldScreenTypeStr);
+        if (type == FOLD_TYPE_FOUR) {
+            type = FOLD_TYPE_TWO;
+        }
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }

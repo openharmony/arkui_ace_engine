@@ -163,7 +163,7 @@ public:
     void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height);
     void UpdateGestureRowVisible();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
-    bool GetContainerModalTitleVisible();
+    bool GetContainerModalTitleVisible(bool isImmersive);
     virtual void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
     virtual bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
@@ -203,6 +203,8 @@ public:
     {
         return false;
     }
+
+    void InitAllTitleRowLayoutProperty();
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)

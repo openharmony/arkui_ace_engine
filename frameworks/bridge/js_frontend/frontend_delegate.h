@@ -31,6 +31,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/common/utils/componentInfo.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "interfaces/inner_api/ace/constants.h"
@@ -199,6 +200,16 @@ public:
     virtual void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
         std::function<void(int32_t)> &&callback) {};
 
+    virtual std::optional<double> GetTopOrder()
+    {
+        return std::nullopt;
+    }
+
+    virtual std::optional<double> GetBottomOrder()
+    {
+        return std::nullopt;
+    }
+
     virtual RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(void* value)
     {
         return nullptr;
@@ -310,6 +321,7 @@ public:
 
     virtual void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) {}
+    virtual void AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder) {}
     virtual void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
     virtual void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
     virtual void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
@@ -360,6 +372,15 @@ public:
     }
 
     virtual void CallNativeHandler(const std::string& event, const std::string& params) {}
+
+    virtual void GetBackgroundBlurStyleOption(napi_value value, BlurStyleOption& styleOption)
+    {
+        JSViewAbstractBridge::GetBackgroundBlurStyleOption(value, styleOption);
+    }
+    virtual void GetBackgroundEffect(napi_value value, EffectOption& styleOption)
+    {
+        JSViewAbstractBridge::GetBackgroundEffect(value, styleOption);
+    }
 
 protected:
     RefPtr<AssetManager> assetManager_;

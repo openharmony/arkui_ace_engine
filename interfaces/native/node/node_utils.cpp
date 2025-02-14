@@ -507,6 +507,20 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    ArkUI_Float32 tempOffset[2];
+    impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToParent(node->uiNodeHandle, &tempOffset, false);
+    globalOffset->x = tempOffset[0];
+    globalOffset->y = tempOffset[1];
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

@@ -283,6 +283,7 @@ public:
 
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController();
+    void StopHaptic();
     void SetSelectedMarkListener(std::function<void(std::string& selectedColumnId)>& listener);
     void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const std::string &strColumnId);
@@ -428,6 +429,7 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool stopHaptic_ = false;
     bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 

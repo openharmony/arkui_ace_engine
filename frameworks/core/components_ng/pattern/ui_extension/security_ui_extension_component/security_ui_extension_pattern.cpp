@@ -969,19 +969,19 @@ int32_t SecurityUIExtensionPattern::GetInstanceIdFromHost() const
 }
 
 bool SecurityUIExtensionPattern::SendBusinessDataSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SecurityUIExtension SendBusinessDataSyncReply businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply, subSystemId);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, data, reply, subSystemId);
 }
 
 bool SecurityUIExtensionPattern::SendBusinessData(
-    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessData(code, std::move(data), type, subSystemId);
+    return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 
 void SecurityUIExtensionPattern::OnUIExtBusinessReceiveReply(
@@ -1051,7 +1051,7 @@ AccessibilityParentRectInfo SecurityUIExtensionPattern::GetAccessibilityRectInfo
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow();
+    auto rect = host->GetTransformRectRelativeToWindow(true);
     VectorF finalScale = host->GetTransformScaleRelativeToWindow();
     
     rectInfo.left = static_cast<int32_t>(rect.Left());
@@ -1084,16 +1084,16 @@ void SecurityUIExtensionPattern::TransferAccessibilityRectInfo()
     data.SetParam("scaleY", parentRectInfo.scaleY);
     UIEXT_LOGI("SecUEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
         parentRectInfo.scaleX, parentRectInfo.scaleY);
-    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), BusinessDataSendType::ASYNC);
+    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
 }
 
 void SecurityUIExtensionPattern::UpdateWMSUIExtProperty(
-    UIContentBusinessCode code, AAFwk::Want data, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId)
 {
     if (state_ != AbilityState::FOREGROUND) {
         UIEXT_LOGI("SecUEC UpdateWMSUIExtProperty state=%{public}s.", ToString(state_));
         return;
     }
-    SendBusinessData(code, std::move(data), BusinessDataSendType::ASYNC, subSystemId);
+    SendBusinessData(code, data, BusinessDataSendType::ASYNC, subSystemId);
 }
 } // namespace OHOS::Ace::NG

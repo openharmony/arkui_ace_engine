@@ -40,6 +40,9 @@ void SequencedRecognizer::OnAccepted()
 
 void SequencedRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         (*callback)(info);

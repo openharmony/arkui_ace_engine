@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/log/event_report.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/templates_parser.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 void AddCacheItemsInFront(
@@ -1419,6 +1421,9 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             if (currentIndex < info_.childrenCount_) {
                 TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
                     info_.childrenCount_);
+                std::string subErrorType = "can not get item at:" + std::to_string(currentIndex) +
+                                           ", total items:" + std::to_string(info_.childrenCount_);
+                EventReport::ReportScrollableErrorEvent("Grid", ScrollableErrorType::GET_CHILD_FAILED, subErrorType);
             }
             LargeItemNextLineHeight(currentMainLineIndex_, layoutWrapper);
             break;

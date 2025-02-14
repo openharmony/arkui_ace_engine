@@ -24,8 +24,8 @@ interface CrossLanguageOptions {
 }
 
 enum ExpandMode {
-  EXPAND = 0,
-  NOT_EXPAND = 1,
+  NOT_EXPAND = 0,
+  EXPAND = 1,
   LAZY_EXPAND = 2,
 }
 
@@ -1025,14 +1025,14 @@ class typeNode {
   }
   
   static getAttribute(node: FrameNode, nodeType: string): ArkComponent {
-    if (node === undefined || node === null || node.getNodeType() != nodeType) {
+    if (node === undefined || node === null || node.getNodeType() !== nodeType) {
       return undefined;
     }
     if (!node.checkIfCanCrossLanguageAttributeSetting()) {
       return undefined;
     }
     let attribute = __attributeMap__.get(nodeType);
-    if (attribute === undefined || attribute == null) {
+    if (attribute === undefined || attribute === null) {
       return undefined;
     }
     return attribute(node);
@@ -1040,7 +1040,7 @@ class typeNode {
 
   static bindController(node: FrameNode, controller: Scroller, nodeType: string): void {
     if (node === undefined || node === null || controller === undefined || controller === null ||
-      node.getNodeType() != nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+      node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
       throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
     }
     if (!node.checkIfCanCrossLanguageAttributeSetting()) {

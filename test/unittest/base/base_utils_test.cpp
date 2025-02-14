@@ -1232,57 +1232,6 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest073, TestSize.Level1)
 }
 
 /**
- * @tc.name: BaseUtilsTest074
- * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates
- * @tc.type: FUNC
- */
-HWTEST_F(BaseUtilsTest, BaseUtilsTest074, TestSize.Level1)
-{
-    std::u16string emojiStr = u"";
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(-1, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, emojiStr), false);
-}
-
-/**
- * @tc.name: BaseUtilsTest075
- * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates
- * @tc.type: FUNC
- */
-HWTEST_F(BaseUtilsTest, BaseUtilsTest075, TestSize.Level1)
-{
-    std::u16string emojiStr = u"哈哈😁";
-    int32_t len = static_cast<int32_t>(emojiStr.length());
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(-1, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len - 1, emojiStr), true);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len, emojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len + 1, emojiStr), false);
-}
-
-/**
- * @tc.name: BaseUtilsTest076
- * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates when a emoji is truncated
- * @tc.type: FUNC
- */
-HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
-{
-    std::u16string emojiStr = u"哈哈😁😁";
-    int32_t len = static_cast<int32_t>(emojiStr.length());
-    std::u16string subEmojiStr = emojiStr.substr(0, len - 1);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, subEmojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, subEmojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, subEmojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(3, subEmojiStr), true);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len - 1, subEmojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len, subEmojiStr), false);
-    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len + 1, subEmojiStr), false);
-}
-
-/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC

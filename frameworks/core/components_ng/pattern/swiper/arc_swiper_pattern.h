@@ -81,11 +81,10 @@ private:
 
     void ResetAnimationParam() override;
     void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
-    void CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context);
     void UsePropertyAnimation(const OffsetF& offset);
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
-    void PlayScrollAnimation(float offset) override;
+    void PlayScrollAnimation(float currentDelta, float currentIndexOffset) override;
     void ResetCurrentFrameNodeAnimation() override;
     void ResetParentNodeColor() override;
     RefPtr<Curve> GetCurve() const override;
@@ -94,12 +93,12 @@ private:
     int32_t CalcTime(int32_t time);
     void ResetFrameNodeAnimation(const RefPtr<FrameNode>& frameNode, bool resetBackgroundcolor);
     void ClearAnimationFinishList();
-    void HorizontalScrollAnimation();
+    void HorizontalScrollAnimation(float offset);
     void PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
     void PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<Color> GetEntryNodeBackgroundColor(const RefPtr<FrameNode>& frameNode);
 
-    void VerticalScrollAnimation();
+    void VerticalScrollAnimation(float offset);
     void PlayVerticalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
     void PlayVerticalScrollEntryAnimation(float swiperWidth, float startPosj, const RefPtr<FrameNode>& frameNode);
 
@@ -141,7 +140,7 @@ private:
     void PlayVerticalExitOffsetAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, bool rollBack);
     void PlayVerticalEntryOffsetAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, bool rollBack);
     void PlayVerticalScrollEntryBackgroundAnimation(float percent, const RefPtr<FrameNode>& frameNode);
-
+    void PlayVerticalEntryBlurAnimation(const RefPtr<FrameNode>& frameNode, bool rollBack);
     std::shared_ptr<Color> preNodeBackgroundColor_;
     std::shared_ptr<Color> entryNodeBackgroundColor_;
     std::shared_ptr<Color> parentNodeBackgroundColor_;
@@ -183,6 +182,9 @@ private:
     bool isHandleCrownActionEnd_ = false;
     int32_t oldCurrentIndex_ = -1;
 #endif
+    bool canChangeDirectionFlag_ = false;
+    bool scrollToLeft_ = false;
+    bool scrollToTop_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H

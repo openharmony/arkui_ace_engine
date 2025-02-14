@@ -3840,7 +3840,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern10, TestSize.Level1)
      */
     topSheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     topSheetNode->GetGeometryNode()->SetFrameSize(SizeF({ 500, 500 }));
-    topSheetPattern->FireOnHeightDidChange(0);
+    topSheetPattern->FireOnHeightDidChange();
     EXPECT_EQ(topSheetNode->GetGeometryNode()->GetFrameSize().Height(), 500);
 
     /**
@@ -3850,7 +3850,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern10, TestSize.Level1)
     topSheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     topSheetPattern->SetCurrentHeight(500);
     topSheetPattern->currentOffset_ = 0;
-    topSheetPattern->FireOnHeightDidChange(0);
+    topSheetPattern->FireOnHeightDidChange();
     EXPECT_EQ(topSheetPattern->height_, 500);
 }
 

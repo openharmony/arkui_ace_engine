@@ -260,6 +260,20 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class BindMenuModifier extends ModifierWithKey<ArkBindMenu> {
+  constructor(value: ArkBindMenu) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('bindMenu');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBindMenu(node);
+    } else {
+      getUINativeModule().common.setBindMenu(node, this.value.content, this.value.options);
+    }
+  }
+}
+
 class WidthModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
@@ -446,7 +460,7 @@ class PositionModifier extends ModifierWithKey<Position | Edges | LocalizedEdges
       }
     }
   }
-  
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
       !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
@@ -2004,6 +2018,21 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   }
 }
 
+declare type HoverMoveEventCallback = (event: HoverEvent) => void;
+class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
+  constructor(value: HoverMoveEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onHoverMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnHoverMove(node);
+    } else {
+      getUINativeModule().common.setOnHoverMove(node, this.value);
+    }
+  }
+}
+
 declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   constructor(value: MouseEventCallback) {
@@ -2773,15 +2802,15 @@ class BackgroundBrightnessInternalModifier extends ModifierWithKey<BrightnessOpt
     if (reset) {
       getUINativeModule().common.resetBackgroundBrightnessInternal(node);
     } else {
-      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
         this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
-  }                       
+  }
 
   checkObjectDiff(): boolean {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
       && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
       && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2795,7 +2824,7 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
     if (reset) {
       getUINativeModule().common.resetForegroundBrightness(node);
     } else {
-      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
         this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
   }
@@ -2803,7 +2832,7 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
   checkObjectDiff(): boolean {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
       && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
       && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -3168,6 +3197,20 @@ class AccessibilityUseSamePageModifier extends ModifierWithKey<AccessibilitySame
       getUINativeModule().common.resetAccessibilityUseSamePage(node);
     } else {
       getUINativeModule().common.setAccessibilityUseSamePage(node, this.value);
+    }
+  }
+}
+
+class AccessibilityScrollTriggerableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityScrollTriggerable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityScrollTriggerable(node);
+    } else {
+      getUINativeModule().common.setAccessibilityScrollTriggerable(node, this.value);
     }
   }
 }
@@ -4024,6 +4067,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onHoverMove(event: (event?: HoverMoveEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
+    return this;
+  }
+
   hoverEffect(value: HoverEffect): this {
     modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
@@ -4654,7 +4702,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
     return this;
   }
-  
+
   key(value: string): this {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
@@ -4686,7 +4734,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
-    throw new Error('Method not implemented.');
+    let arkBindMenu = new ArkBindMenu();
+    arkBindMenu.content = content;
+    arkBindMenu.options = options;
+    modifierWithKey(this._modifiersWithKeys, BindMenuModifier.identity, BindMenuModifier, arkBindMenu);
+    return this;
   }
 
   bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this {
@@ -4799,12 +4851,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
     return this;
   }
-  
+
   accessibilityRole(value: AccessibilityRoleType): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityRoleModifier.identity, AccessibilityRoleModifier, value);
     return this;
   }
-  
+
   onAccessibilityFocus(value: AccessibilityFocusCallback): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
     return this;
@@ -4830,6 +4882,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityUseSamePage(value: AccessibilitySamePageMode): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityUseSamePageModifier.identity, AccessibilityUseSamePageModifier, value);
+    return this;
+  }
+
+  accessibilityScrollTriggerable(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
     return this;
   }
 
@@ -4929,6 +4990,7 @@ class UICommonEvent {
   private _onFocusEvent?: () => void;
   private _onBlur?: () => void;
   private _onHoverEvent?: (isHover: boolean, event: HoverEvent) => void;
+  private _onHoverMoveEvent?: (event: HoverEvent) => void;
   private _onMouseEvent?: (event: MouseEvent) => void;
   private _onSizeChangeEvent?: SizeChangeCallback;
   private _onVisibleAreaApproximateChange?: VisibleAreaChangeCallback;
@@ -4940,7 +5002,7 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   // the first param is used to indicate frameNode
-  // the second param is used to indicate the callback 
+  // the second param is used to indicate the callback
   // the third param is used to indicate the instanceid
   // other options will be indicated after them
   setOnClick(callback: (event: ClickEvent) => void): void {
@@ -4982,6 +5044,10 @@ class UICommonEvent {
   setOnHover(callback: (isHover: boolean, event: HoverEvent) => void): void {
     this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
+  }
+  setOnHoverMove(callback: (event: HoverMoveEvent) => void): void {
+    this._onHoverMoveEvent = callback;
+    getUINativeModule().frameNode.setOnHoverMove(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback: (event: MouseEvent) => void): void {
     this._onMouseEvent = callback;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -217,27 +217,27 @@ void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
 
 RefPtr<DisplayInfo> Container::GetDisplayInfo()
 {
-    return DisplayInfoUtils::GetInstance().GetDisplayInfo(currentDisplayId_);
+    return displayManager_->GetDisplayInfo(currentDisplayId_);
 }
 
 void Container::InitIsFoldable()
 {
-    DisplayInfoUtils::GetInstance().InitIsFoldable();
+    displayManager_->InitIsFoldable();
 }
 
 bool Container::IsFoldable()
 {
-    return DisplayInfoUtils::GetInstance().IsFoldable();
+    return displayManager_->GetIsFoldable();
 }
 
 FoldStatus Container::GetCurrentFoldStatus()
 {
-    return DisplayInfoUtils::GetInstance().GetCurrentFoldStatus();
+    return displayManager_->GetCurrentFoldStatus();
 }
 
 std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
 {
-    return DisplayInfoUtils::GetInstance().GetCurrentFoldCreaseRegion();
+    return displayManager_->GetCurrentFoldCreaseRegion();
 }
 
 void Container::DestroyToastSubwindow(int32_t instanceId)

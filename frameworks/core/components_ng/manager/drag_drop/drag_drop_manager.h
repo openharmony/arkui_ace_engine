@@ -117,6 +117,11 @@ public:
     void OnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& node = nullptr);
     void OnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
+        const RefPtr<FrameNode>& node = nullptr, const bool keyEscape = false);
+    bool HandleUIExtensionComponentDragCancel(const RefPtr<FrameNode>& preTargetFrameNode,
+        const RefPtr<FrameNode>& dragFrameNode, const bool keyEscape, const DragPointerEvent& pointerEvent,
+        const Point& point);
+    void OnDragPullCancel(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& node = nullptr);
     void HandleOnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& dragFrameNode);
@@ -585,6 +590,11 @@ public:
 
     int32_t CancelUDMFDataLoading(const std::string& key);
 
+    const DragPointerEvent& GetPreDragPointerEvent() const
+    {
+        return preDragPointerEvent_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -641,6 +651,7 @@ private:
     RefPtr<FrameNode> itemDragOverlayNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
+    DragPointerEvent preDragPointerEvent_;
     uint64_t preTimeStamp_ = 0L;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;

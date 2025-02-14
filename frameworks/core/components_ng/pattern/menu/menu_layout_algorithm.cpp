@@ -2939,7 +2939,7 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow)
         isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
         if (isUIExtensionSubWindow_) {
             canExpandCurrentWindow_ = true;
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
             CHECK_NULL_VOID(subwindow);
             auto rect = subwindow->GetUIExtensionHostWindowRect();
             UIExtensionHostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -2956,7 +2956,17 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, menuWindowRect);
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
-    displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    CHECK_NULL_RETURN(menuPattern, menuWindowRect);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, menuWindowRect);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, menuWindowRect);
+    auto isMenuHide = menuWrapperPattern->IsHide();
+    if (isMenuHide) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "Notify Menu Rect %{public}s, menu is hide, skip", rect.ToString().c_str());
+    } else {
+        displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    }
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     auto availableRect = OverlayManager::GetDisplayAvailableRect(menuPattern->GetHost());
@@ -3004,8 +3014,10 @@ bool MenuLayoutAlgorithm::HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(innerMenuPattern, false);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, false);
-    return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED &&
-           menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0;
+    auto isEmbeddedMenu =
+        layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED;
+    return isEmbeddedMenu && menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0 &&
+           !menuWrapperPattern->GetForceUpdateEmbeddedMenu();
 }
 
 std::string MenuLayoutAlgorithm::MoveTo(double x, double y)

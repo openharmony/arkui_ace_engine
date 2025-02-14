@@ -24,9 +24,7 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
@@ -486,6 +484,7 @@ void AceContainer::InitializeFrontend()
             auto cjFrontend = CJUtils::LoadCjFrontend(useNewPipeline_, useStageModel_);
             if (cjFrontend == nullptr) {
                 LOGE("Create cj frontend failed.");
+                return;
             }
             frontend_ = AceType::Claim(reinterpret_cast<Frontend*>(cjFrontend));
         } else {
@@ -2278,11 +2277,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-        UiSessionManager::GetInstance().SaveTranslateManager(uiTranslateManager);
+        UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
         pipeline->SaveTranslateManager(uiTranslateManager);
-#endif
     } else {
         LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -2293,11 +2290,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    UiSessionManager::GetInstance().SaveTranslateManager(uiTranslateManager);
+    UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
     pipeline->SaveTranslateManager(uiTranslateManager);
-#endif
 #endif
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
@@ -3257,6 +3252,12 @@ bool AceContainer::IsScenceBoardWindow()
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
 
+bool AceContainer::IsCrossAxisWindow()
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetCrossAxisState() == Rosen::CrossAxisState::STATE_CROSS;
+}
+
 bool AceContainer::IsUIExtensionWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
@@ -3862,7 +3863,7 @@ void AceContainer::DispatchUIExtDataConsume(
 }
 
 bool AceContainer::FireUIExtDataSendToHost(
-    NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type)
+    NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type)
 {
     if (code == NG::UIContentBusinessCode::UNDEFINED) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
@@ -3892,7 +3893,8 @@ bool AceContainer::FireUIExtDataSendToHost(
     return true;
 }
 
-bool AceContainer::FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+bool AceContainer::FireUIExtDataSendToHostReply(
+    NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply)
 {
     if (code == NG::UIContentBusinessCode::UNDEFINED) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
@@ -3919,18 +3921,18 @@ bool AceContainer::FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, 
 void AceContainer::RegisterUIExtDataSendToHost()
 {
     auto uiExtDataSendSyncReply = [weak = WeakClaim(this)](
-                                      uint32_t customId, AAFwk::Want&& data, AAFwk::Want& reply) -> bool {
+        uint32_t customId, const AAFwk::Want& data, AAFwk::Want& reply) -> bool {
         auto container = weak.Upgrade();
         CHECK_NULL_RETURN(container, false);
         return container->FireUIExtDataSendToHostReply(
-            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+            static_cast<NG::UIContentBusinessCode>(customId), data, reply);
     };
     auto uiExtDataSend = [weak = WeakClaim(this)](
-                             uint32_t customId, AAFwk::Want&& data, NG::BusinessDataSendType type) -> bool {
+        uint32_t customId, const AAFwk::Want& data, NG::BusinessDataSendType type) -> bool {
         auto container = weak.Upgrade();
         CHECK_NULL_RETURN(container, false);
         return container->FireUIExtDataSendToHost(
-            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), type);
+            static_cast<NG::UIContentBusinessCode>(customId), data, type);
     };
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     CHECK_NULL_VOID(ngPipeline);
@@ -3960,7 +3962,7 @@ Rect AceContainer::GetDisplayAvailableRect() const
         return Rect();
     }
 
-    return DisplayInfoUtils::GetInstance().GetDisplayAvailableRect(uiWindow_->GetDisplayId());
+    return displayManager_->GetDisplayAvailableRect(uiWindow_->GetDisplayId());
 }
 
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)

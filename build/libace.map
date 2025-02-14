@@ -154,6 +154,7 @@
       OHOS::Ace::NavigationModel::*;
       OHOS::Ace::NavigatorModel::*;
       OHOS::Ace::SlidingPanelModel::*;
+      OHOS::Ace::ParticleModel::*;
       OHOS::Ace::PathModel::*;
       OHOS::Ace::PatternLockModel::*;
       OHOS::Ace::PolygonModel::*;
@@ -199,6 +200,9 @@
       OHOS::Ace::VideoModel::*;
       OHOS::Ace::WebModel::*;
       OHOS::Ace::ImageInfoConfig::*;
+      OHOS::Ace::RecycleViewModel::*;
+      OHOS::Ace::NG::RecycleDummyNode::*;
+      OHOS::Ace::XComponentModel::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -232,6 +236,8 @@
       OHOS::Ace::NG::Matrix2D::*;
       OHOS::Ace::NG::CanvasPattern::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
+      OHOS::Ace::DatePickerDialogModel::*;
+      OHOS::Ace::TimePickerModel::*;
       OHOS::Ace::DOM_ROOT_NODE_ID_BASE;
       OHOS::Ace::ComponentGroupElement::*;
       OHOS::Ace::ComposedComponent::*;
@@ -339,11 +345,11 @@
       vtable?for?OHOS::Ace::NG::GestureGroup;
       vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
-      vtable?for?OHOS::Ace::NG::XComponentModelNG;
-      vtable?for?OHOS::Ace::Framework::XComponentModelImpl;
       vtable?for?OHOS::Ace::NG::XComponentControllerNG;
       vtable?for?OHOS::Ace::NG::ViewAbstractModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
+      vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
+      vtable?for?OHOS::Ace::NG::TimePickerModelNG;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -437,6 +443,10 @@
       OHOS::Ace::Kit::View::*;
       OHOS::Ace::Kit::Column::*;
       OHOS::Ace::Kit::Text::*;
+      OHOS::Ace::NG::NavigationStack::*;
+      OHOS::Ace::NG::CustomNode::*;
+      OHOS::Ace::NavDestinationModel::*;
+      OHOS::Ace::NavDestinationModelNG::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
@@ -480,12 +490,16 @@
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
       vtable?for?OHOS::Ace::NG::ParallelPagePattern;
       vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
-      vtable?for?OHOS::Ace::NG::ContainerModalView;      
+      vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
       vtable?for?OHOS::Ace::NG::ScrollBarModelNG;
       vtable?for?OHOS::Ace::NG::ScrollableModelNG;
+      vtable?for?OHOS::Ace::NG::NavigationStack;
+      vtable?for?OHOS::Ace::NG::CustomNode;
+      vtable?for?OHOS::Ace::NavDestinationModel;
+      vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -494,6 +508,7 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+      VTT?for?OHOS::Ace::NG::NavigationStack;
 
       OHOS::Ace::LinearColor::TRANSPARENT;
 

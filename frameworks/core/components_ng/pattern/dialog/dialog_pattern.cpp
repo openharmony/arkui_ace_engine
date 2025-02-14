@@ -289,13 +289,8 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         RecordEvent(buttonIdx);
     }
     if (dialogProperties_.isShowInSubWindow) {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto currentId = Container::CurrentId();
-        if (!container->IsSubContainer()) {
-            currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
-        }
-
+        auto pipeline = host->GetContextRefPtr();
+        auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
         SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId());
         SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
@@ -331,12 +326,36 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;
+    auto pipeLineContext = contentNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeLineContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
+        if (props.blurStyleOption.has_value()) {
+            styleOption = props.blurStyleOption.value();
+            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(contentNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(contentNode->GetId());
+            }
+        }
         styleOption.blurStyle = static_cast<BlurStyle>(
             props.backgroundBlurStyle.value_or(dialogTheme_->GetDialogBackgroundBlurStyle()));
+        if (props.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
+            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+        }
         contentRenderContext->UpdateBackBlurStyle(styleOption);
+        if (props.effectOption.has_value()) {
+            if (props.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(contentNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(contentNode->GetId());
+            }
+            if (contentRenderContext->GetBackBlurStyle().has_value()) {
+                contentRenderContext->UpdateBackBlurStyle(std::nullopt);
+            }
+            contentRenderContext->UpdateBackgroundEffect(props.effectOption.value());
+        }
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetColorBgWithBlur()));
     } else {
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetBackgroundColor()));
@@ -1752,6 +1771,8 @@ void DialogPattern::DumpObjectProperty()
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     if (isFoldStatusChanged_ || type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d",
+            type, isFoldStatusChanged_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         InitHostWindowRect();
@@ -1772,8 +1793,8 @@ void DialogPattern::InitHostWindowRect()
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
-        container = AceEngine::Get().GetContainer(currentId);
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(parentContainerId);
         CHECK_NULL_VOID(container);
     }
 
@@ -1784,6 +1805,7 @@ void DialogPattern::InitHostWindowRect()
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     }
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "InitHostWindowRect: %{public}s", hostWindowRect_.ToString().c_str());
 }
 
 void DialogPattern::DumpInfo(std::unique_ptr<JsonValue>& json)

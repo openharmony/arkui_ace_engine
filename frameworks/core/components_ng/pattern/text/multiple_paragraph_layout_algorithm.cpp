@@ -79,9 +79,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto contentModifier = pattern->GetContentModifier();
 
     auto themeScopeId = frameNode->GetThemeScopeId();
-    textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
-            pipeline->GetTheme<TextTheme>(themeScopeId));
+    textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
+        pipeline->GetTheme<TextTheme>(themeScopeId));
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
         !(textLayoutProperty->GetFontFamily().has_value())) {
@@ -215,6 +214,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     }
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
+    }
+    if (lineStyle->HasHalfLeading()) {
+        pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
     }
     if (layoutWrapper) {
         pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
@@ -416,7 +418,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .indent = textStyle.GetTextIndent()
+        .indent = textStyle.GetTextIndent(),
+        .halfLeading = textStyle.GetHalfLeading()
         };
 }
 

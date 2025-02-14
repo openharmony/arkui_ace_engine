@@ -252,6 +252,8 @@ public:
 
     static std::string GetLanguage();
 
+    static bool GetContainerDeleteFlag();
+
     static std::string GetRegion();
 
     static std::string GetNewPipePkg();
@@ -696,6 +698,7 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test

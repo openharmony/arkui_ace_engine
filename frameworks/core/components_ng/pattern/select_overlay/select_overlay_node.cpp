@@ -1504,10 +1504,9 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptions(bool isAttachToMoreButton,
     if (!moreOrBackSymbol_) {
         moreOrBackSymbol_ = BuildMoreOrBackSymbol();
     }
-    if (isAttachToMoreButton) {
-        backButton_->RemoveChild(moreOrBackSymbol_);
-    } else {
-        moreButton_->RemoveChild(moreOrBackSymbol_);
+    auto button = isAttachToMoreButton ? backButton_ : moreButton_;
+    if (button) {
+        button->RemoveChild(moreOrBackSymbol_);
     }
     moreOrBackSymbol_->MountToParent(isAttachToMoreButton ? moreButton_ : backButton_);
     auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
@@ -2950,6 +2949,9 @@ void SelectOverlayNode::OnCustomSelectMenuAppear()
     auto info = pattern->GetSelectOverlayInfo();
     CHECK_NULL_VOID(info);
     bool isHideMenu = info->menuInfo.menuDisable || !info->menuInfo.menuIsShow;
+    if (isHideMenu) {
+        eventHub->FireMenuVisibilityChangeEvent(true);
+    }
     eventHub->FireMenuVisibilityChangeEvent(!isHideMenu);
 }
 

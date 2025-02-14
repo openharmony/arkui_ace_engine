@@ -51,6 +51,8 @@ enum class FontWeight {
     REGULAR,
 };
 
+constexpr uint32_t DEFAULT_MAX_FONT_FAMILY_LENGTH = Infinity<uint32_t>();
+
 enum class FontStyle {
     NORMAL,
     ITALIC,

@@ -17,6 +17,7 @@
 
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -182,7 +183,7 @@ void TabsTestNg::CreateTabContentTabBarStyle(TabBarStyle tabBarStyle)
 {
     TabContentModelNG tabContentModel = CreateTabContent();
     tabContentModel.SetTabBarStyle(tabBarStyle);
-    tabContentModel.SetTabBar("text", "icon", std::nullopt, nullptr, true);
+    tabContentModel.SetTabBar("text", IMAGE_SRC_URL, std::nullopt, nullptr, true);
     ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
@@ -226,14 +227,6 @@ void TabsTestNg::HandleHoverEvent(bool isHover)
     tabBarPattern_->HandleHoverEvent(isHover);
 }
 
-void TabsTestNg::HandleTouchEvent(TouchType type, Offset location)
-{
-    TouchLocationInfo touchInfo(0);
-    touchInfo.SetTouchType(type);
-    touchInfo.SetLocalLocation(location);
-    tabBarPattern_->HandleTouchEvent(touchInfo);
-}
-
 GestureEvent TabsTestNg::CreateDragInfo(bool moveDirection)
 {
     GestureEvent info;
@@ -265,6 +258,21 @@ AssertionResult TabsTestNg::CurrentIndex(int32_t expectIndex)
         }
     }
     return AssertionSuccess();
+}
+
+RefPtr<TabBarModifier> TabsTestNg::OnDraw()
+{
+    RefPtr<NodePaintMethod> paint = tabBarPattern_->CreateNodePaintMethod();
+    RefPtr<TabBarPaintMethod> tabBarPaint = AceType::DynamicCast<TabBarPaintMethod>(paint);
+    auto tabBarPaintWrapper = tabBarNode_->CreatePaintWrapper();
+    tabBarPaint->UpdateContentModifier(AceType::RawPtr(tabBarPaintWrapper));
+
+    auto modifier = tabBarPaint->GetContentModifier(nullptr);
+    auto tabBarModifier = AceType::DynamicCast<TabBarModifier>(modifier);
+    Testing::MockCanvas canvas;
+    DrawingContext drawingContext = { canvas, TABS_WIDTH, TABS_HEIGHT };
+    tabBarModifier->onDraw(drawingContext);
+    return tabBarModifier;
 }
 
 /**
@@ -698,6 +706,8 @@ HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, DragSwiper001, TestSize.Level1)
 {
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
@@ -705,8 +715,40 @@ HWTEST_F(TabsTestNg, DragSwiper001, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     swiperPattern_->HandleDragStart(info);
     swiperPattern_->HandleDragUpdate(info);
+    FlushUITasks();
     swiperPattern_->HandleDragEnd(info.GetMainVelocity());
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(), 1);
+    MockAnimationManager::Enable(false);
+}
+
+/**
+ * @tc.name: DragSwiper002
+ * @tc.desc: Could drag swiper, change tabBar index
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, DragSwiper002, TestSize.Level1)
+{
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+
+    GestureEvent info = CreateDragInfo(true);
+    swiperPattern_->HandleDragStart(info);
+    swiperPattern_->HandleDragUpdate(info);
+    FlushUITasks();
+    swiperPattern_->HandleDragEnd(info.GetMainVelocity());
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(), 1);
+    MockAnimationManager::Enable(false);
 }
 } // namespace OHOS::Ace::NG

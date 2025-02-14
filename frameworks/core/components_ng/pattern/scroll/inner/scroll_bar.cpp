@@ -577,7 +577,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag start");
     ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
-        scrollPositionCallback_(0, SCROLL_FROM_START);
+        scrollPositionCallback_(0, SCROLL_FROM_START, false);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(0, NG::SceneStatus::START);
         }
@@ -606,7 +606,9 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
             offset = -offset;
         }
         ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
-        scrollPositionCallback_(offset, SCROLL_FROM_BAR);
+        auto isMouseWheelScroll =
+            info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+        scrollPositionCallback_(offset, SCROLL_FROM_BAR, isMouseWheelScroll);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
                                                                 : info.GetMainVelocity() / info.GetMainDelta() * offset,
@@ -670,7 +672,7 @@ void ScrollBar::ProcessFrictionMotion(double value)
 {
     if (scrollPositionCallback_) {
         auto offset = CalcPatternOffset(value - frictionPosition_);
-        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING)) {
+        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING, false)) {
             if (frictionController_ && frictionController_->IsRunning()) {
                 frictionController_->Stop();
             }
@@ -689,7 +691,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    ResponseLinkResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult, bool inBarRect)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -699,6 +701,16 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetE
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
         panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+        GestureJudgeFunc sysJudge = nullptr;
+        if (inBarRect) {
+            sysJudge = [](const RefPtr<GestureInfo>& gestureInfo,
+                          const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+                auto inputEventType = gestureInfo->GetInputEventType();
+                return inputEventType == InputEventType::AXIS ? GestureJudgeResult::CONTINUE
+                                                              : GestureJudgeResult::REJECT;
+            };
+        }
+        panRecognizer_->SetSysGestureJudge(sysJudge);
         result.emplace_front(panRecognizer_);
         responseLinkResult.emplace_back(panRecognizer_);
     }

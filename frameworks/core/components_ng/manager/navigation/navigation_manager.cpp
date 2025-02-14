@@ -419,7 +419,7 @@ void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t
     NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
     auto currentLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
     NavigationPattern::FireNavigationLifecycle(node, currentLifecycle, activeReason);
-    NavDestinationLifecycle lowerLifecycle;
+    NavDestinationLifecycle lowerLifecycle = NavDestinationLifecycle::ON_ACTIVE;
     if (lifecycle == NavDestinationLifecycle::ON_ACTIVE) {
         lowerLifecycle = NavDestinationLifecycle::ON_INACTIVE;
     }
@@ -431,10 +431,6 @@ void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t
 
 void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
 {
-    // showActionSheet is not support
-    if (node && node->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
-        return;
-    }
     NavDestinationLifecycle lowerLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
     NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
     auto pipelineContext = pipeline_.Upgrade();
@@ -450,7 +446,7 @@ void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int3
         : static_cast<int32_t>(rootNode->GetChildren().size());
     // find lower layer node below node
     for (auto index = curNodeIndex - 1; index >= 0; index--) {
-        auto child = rootNode->GetChildAtIndex(index);
+        auto child = AceType::DynamicCast<FrameNode>(rootNode->GetChildAtIndex(index));
         if (!child) {
             continue;
         }
@@ -463,8 +459,12 @@ void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int3
             NavigationPattern::FireNavigationLifecycle(child, lowerLifecycle, activeReason);
             return;
         }
-        // if lower layer is dialog or overlay, don't need to trigger lifecycle
-        if (tag == V2::DIALOG_ETS_TAG || tag == V2::ALERT_DIALOG_ETS_TAG || tag == V2::OVERLAY_ETS_TAG) {
+        if (IsOverlayValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "overlay has onShow");
+            return;
+        }
+        if (IsCustomDialogValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom dialog onShow");
             return;
         }
     }
@@ -483,5 +483,43 @@ void NavigationManager::FireSubWindowLifecycle(const RefPtr<UINode>& node, int32
     auto navigationManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navigationManager);
     navigationManager->FireLowerLayerLifecycle(node, lifecycle, reason);
+}
+
+bool NavigationManager::IsOverlayValid(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() != V2::OVERLAY_ETS_TAG) {
+        return false;
+    }
+    auto overlays = node->GetChildren();
+    // check overlay is visible, if overlay is visible, don't need fire active lifecycle
+    for (auto index = 0; index < static_cast<int32_t>(overlays.size()); index++) {
+        auto overlay = AceType::DynamicCast<FrameNode>(node->GetChildAtIndex(index));
+        if (!overlay) {
+            continue;
+        }
+        auto layoutProperty = overlay->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NavigationManager::IsCustomDialogValid(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    // if lower layer is dialog, don't need to trigger lifecycle
+    auto pattern = frameNode->GetPattern();
+    if (!InstanceOf<DialogPattern>(pattern)) {
+        return false;
+    }
+    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+    if (!dialogPattern) {
+        return false;
+    }
+    auto dialogProperty = dialogPattern->GetDialogProperties();
+    // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
+    return dialogProperty.isUserCreatedDialog;
 }
 } // namespace OHOS::Ace::NG

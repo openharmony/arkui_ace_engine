@@ -201,10 +201,12 @@ class __Repeat<T> implements RepeatAPI<T> {
 
         if (typeof options?.reusable === 'boolean') {
             this.config.reusable = options.reusable;
-        } else {
+        } else if (options?.reusable === null) {
             this.config.reusable = true;
             stateMgmtConsole.warn(
-                `Repeat.reusable is not set or not a boolean value. Use default setting: reusable = true`);
+                `Repeat.reusable type should be boolean. Use default setting: reusable = true`);
+        } else {
+            this.config.reusable = true;
         }
         return this;
     }

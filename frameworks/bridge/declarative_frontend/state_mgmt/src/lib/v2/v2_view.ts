@@ -509,7 +509,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 this.uiNodeNeedUpdateV2(elmtId);
             };
             if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
-                PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>);
+                PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
             }
             PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
             return;

@@ -121,7 +121,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement() override;
+    void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
@@ -247,6 +247,9 @@ public:
 
     void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
+    
+    void HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr);
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -411,7 +414,7 @@ public:
     void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
         bool keyboardHeightChanged);
     float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
-        float height, SizeF& rootSize);
+        float height, SizeF& rootSize, bool isInline = false);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -1105,6 +1108,30 @@ public:
     void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
     void FlushPendingDeleteCustomNode();
 
+    void HandleSpecialContainerNode();
+
+    void AddPositionZNode(int32_t nodeId)
+    {
+        positionZNodes_.insert(nodeId);
+    }
+
+    void DeletePositionZNode(int32_t nodeId)
+    {
+        auto it = positionZNodes_.find(nodeId);
+        if (it != positionZNodes_.end()) {
+            positionZNodes_.erase(it);
+        }
+    }
+
+    std::set<int32_t> GetPositionZNodes()
+    {
+        return positionZNodes_;
+    }
+
+    void ClearPositionZNodes()
+    {
+        positionZNodes_.clear();
+    }
     bool IsWindowSizeDragging() const
     {
         return isWindowSizeDragging_;
@@ -1355,6 +1382,8 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
     std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
+
+    std::set<int32_t> positionZNodes_;
 
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;

@@ -413,8 +413,7 @@ public:
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f, "
-             "instanceId_ %{public}d",
-            keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
+             "instanceId_ %{public}d", keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
         CHECK_NULL_VOID(info->type_ == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
@@ -427,7 +426,7 @@ public:
             ContainerScope scope(instanceId_);
             auto manager = pipeline->GetSafeAreaManager();
             CHECK_NULL_VOID(manager);
-            manager->SetRawKeyboardHeight(keyboardRect.Height());
+            manager->SetKeyboardInfo(keyboardRect.Height());
             auto uiExtMgr = pipeline->GetUIExtensionManager();
             if (uiExtMgr) {
                 SetUIExtensionImeShow(keyboardRect);
@@ -671,19 +670,24 @@ public:
     ~FoldScreenListener() = default;
     void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
     {
+        LOGI("fold status is changed, foldStatus: %{public}d", foldStatus);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [container, foldStatus] {
+            [instanceId = instanceId_, container, foldStatus] {
                 auto context = container->GetPipelineContext();
                 CHECK_NULL_VOID(context);
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
+                if (SystemProperties::IsSuperFoldDisplayDevice()) {
+                    SubwindowManager::GetInstance()->HideMenuNG(false);
+                    SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
+                }
             },
-            TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
     }
 
 private:
@@ -698,6 +702,7 @@ public:
     ~FoldDisplayModeListener() = default;
     void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
     {
+        LOGI("display mode is changed, displayMode: %{public}d", displayMode);
         if (!isDialog_) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -711,7 +716,7 @@ public:
                     auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                     context->OnFoldDisplayModeChanged(aceDisplayMode);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged");
             return;
         }
         auto container = Platform::DialogContainer::GetContainer(instanceId_);
@@ -726,7 +731,7 @@ public:
                 auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                 context->OnFoldDisplayModeChanged(aceDisplayMode);
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged");
     }
 
 private:
@@ -753,7 +758,7 @@ public:
                 SubwindowManager::GetInstance()->ClearMenuNG(instanceId, targetId, true, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
-            TaskExecutor::TaskType::UI, "ArkUITouchOutsideSubwindowClear", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUITouchOutsideSubwindowClear");
     }
 
 private:
@@ -971,6 +976,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     auto errorCode = InitializeInner(window, name, storage, true);
     AddWatchSystemParameter();
     RegisterLinkJumpCallback();
+    UpdateWindowBlur();
     return errorCode;
 }
 
@@ -2175,7 +2181,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // setLogFunc of current app
     AddAlarmLogFunc();
     InitUISessionManagerCallbacks(pipeline);
-    UiSessionManager::GetInstance().SaveBaseInfo(std::string("bundleName:")
+    UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
                                                      .append(moduleName)
@@ -4209,12 +4215,12 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
     }
 }
 
-bool UIContentImpl::GetContainerModalTitleVisible()
+bool UIContentImpl::GetContainerModalTitleVisible(bool isImmersive)
 {
     ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return NG::ContainerModalViewEnhance::GetContainerModalTitleVisible(pipeline);
+    return NG::ContainerModalViewEnhance::GetContainerModalTitleVisible(pipeline, isImmersive);
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
@@ -4639,12 +4645,12 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
                 CHECK_NULL_VOID(pipeline);
                 ContainerScope scope(pipeline->GetInstanceId());
                 pipeline->GetInspectorTree();
-                UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+                UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
             },
             TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-    UiSessionManager::GetInstance().SaveInspectorTreeFunction(callback);
+    UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
     auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         CHECK_NULL_VOID(pipeline);
@@ -4659,7 +4665,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-    UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
+    UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
     auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         CHECK_NULL_VOID(pipeline);
@@ -4673,10 +4679,10 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             },
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
-    UiSessionManager::GetInstance().SaveGetPixelMapFunction(getPixelMapCallback);
+    UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
 }
 
-bool UIContentImpl::SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
+bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
