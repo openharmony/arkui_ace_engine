@@ -20,6 +20,7 @@
 
 // sorted part of the code
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "frameworks/core/gestures/drag_event.h"
 
 namespace OHOS::Ace::NG::AccessorTestFixtures {
 // Fixture 'Boolean' for type 'Ark_Boolean'
@@ -33,5 +34,9 @@ extern const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtur
 extern const std::vector<std::tuple<std::string, double, Ark_Int32>> testFixtureDoubleArkInt32Values;
 extern const std::vector<std::tuple<std::string, double, Ark_Int32>> testFixtureDoubleArkInt32_half_Values;
 extern const std::vector<std::tuple<std::string, double, double, Ark_Int32>> testFixtureVelocity_half_Values;
+extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureNumberFloatAnythingValidValues;
+extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVelocityValues;
+extern const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
+    testFixtureEnumDragBehaviorValues;
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
 #endif
