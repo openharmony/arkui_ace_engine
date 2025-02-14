@@ -199,6 +199,24 @@ typedef enum {
 } ArkUI_ModifierKeyName;
 
 /**
+ * @brief Enumerates the action types for axis events.
+ *
+ * @since 15
+ */
+enum {
+    /** The axis event is abnormal. */
+    UI_AXIS_EVENT_ACTION_NONE = 0,
+    /** The axis event begins. */
+    UI_AXIS_EVENT_ACTION_BEGIN = 1,
+    /** The axis event is updated. */
+    UI_AXIS_EVENT_ACTION_UPDATE = 2,
+    /** The axis event ends. */
+    UI_AXIS_EVENT_ACTION_END = 3,
+    /** The axis event is canceled. */
+    UI_AXIS_EVENT_ACTION_CANCEL = 4,
+};
+
+/**
  * @brief Obtains the type of this UI input event.
  *
  * @param event Indicates the pointer to the current UI input event.
@@ -675,6 +693,15 @@ double OH_ArkUI_AxisEvent_GetHorizontalAxisValue(const ArkUI_UIInputEvent* event
  * @since 12
  */
 double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Obtains the action type of the current axis event.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @return Returns the action type of the current axis event.
+ * @since 15
+ */
+int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
 
 /**
  * @brief Sets how the component behaves during hit testing.
