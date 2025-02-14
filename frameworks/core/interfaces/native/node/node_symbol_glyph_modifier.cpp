@@ -179,7 +179,7 @@ void SetMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale)
     SymbolModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 
-void ReSetMinFontScale(ArkUINodeHandle node)
+void ResetMinFontScale(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
