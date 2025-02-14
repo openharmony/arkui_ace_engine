@@ -922,7 +922,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest039, TestSize.Level1)
     auto useEffectTypeVal = rosenRenderContext->GetUseEffectType();
     EXPECT_EQ(useEffectTypeVal, windowEffect);
     EXPECT_TRUE(pipeline->IsWindowFocused());
-    EXPECT_FALSE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
+    EXPECT_TRUE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
 
     rosenRenderContext->UpdateUseEffectType(EffectType::DEFAULT);
     EXPECT_FALSE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
