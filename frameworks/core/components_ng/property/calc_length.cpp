@@ -36,17 +36,19 @@ ScaleProperty ScaleProperty::CreateScaleProperty(PipelineBase* context)
     return scaleProperty;
 }
 
-bool CalcLength::NormalizeToPx(
-    double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const
+bool CalcLength::NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result,
+    const std::vector<std::string>& rpnexp) const
 {
     // don't use this function for calc.
     if (!calcValue_.empty()) {
         result = StringExpression::CalculateExp(
-            calcValue_, [vpScale, fpScale, lpxScale, parentLength](const Dimension& dim) -> double {
+            calcValue_,
+            [vpScale, fpScale, lpxScale, parentLength](const Dimension& dim) -> double {
                 double result = -1.0;
                 dim.NormalizeToPx(vpScale, fpScale, lpxScale, parentLength, result);
                 return result;
-            });
+            },
+            rpnexp);
         return result >= 0;
     }
     return dimension_.NormalizeToPx(vpScale, fpScale, lpxScale, parentLength, result);
