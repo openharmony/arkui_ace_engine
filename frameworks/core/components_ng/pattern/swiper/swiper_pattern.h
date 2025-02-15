@@ -331,6 +331,15 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
+    
+    void ResetIndicatorParameters()
+    {
+        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+            swiperParameters_ = nullptr;
+        } else {
+            swiperDigitalParameters_ = nullptr;
+        }
+    }
 
     virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
 
