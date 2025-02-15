@@ -974,6 +974,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd) {
       this.isPrebuilding_ = true;
       PUV2ViewBase.prebuildingElmtId_ = this.id__();
+      if (!PUV2ViewBase.prebuildFuncQueues.has(this.id__())) {
+        PUV2ViewBase.prebuildFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+      }
     } else if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.ExecutePrebuildCmd) {
       this.isPrebuilding_ = true;
       PUV2ViewBase.prebuildingElmtId_ = this.id__();
@@ -986,11 +989,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   protected isNeedBuildPrebuildCmd(): boolean {
-    const needBuild: boolean = PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd &&
-      ViewStackProcessor.CheckIsPrebuildTimeout();
-    if (needBuild && !PUV2ViewBase.prebuildFuncQueues.has(this.id__())) {
-      PUV2ViewBase.prebuildFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
-    }
+    const needBuild: boolean = PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd;
     return needBuild;
   }
 

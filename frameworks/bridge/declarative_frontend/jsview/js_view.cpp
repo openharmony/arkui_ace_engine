@@ -95,21 +95,15 @@ void JSView::JSBind(BindingTarget object)
     JSViewFullUpdate::JSBind(object);
 }
 
-void JSView::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
-{
-    jsViewFunction_->ExecuteRender();
-}
-
 void JSView::RenderJSExecution(int64_t deadline, bool& isTimeout)
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (!jsViewFunction_) {
         return;
     }
-    if (!executedAboutToRender_) {
+    {
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
-        executedAboutToRender_ = true;
     }
     if (!jsViewFunction_) {
         return;
@@ -117,22 +111,18 @@ void JSView::RenderJSExecution(int64_t deadline, bool& isTimeout)
     {
         ACE_SCORING_EVENT("Component.Build");
         ViewStackModel::GetInstance()->PushKey(viewId_);
-        DoRenderJSExecution(deadline, isTimeout);
+        jsViewFunction_->ExecuteRender();
         ViewStackModel::GetInstance()->PopKey();
-        if (isTimeout) {
-            return;
-        }
     }
     if (!jsViewFunction_) {
         return;
     }
-    if (!executedOnRenderDone_) {
+    {
         ACE_SCORING_EVENT("Component.OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
         if (notifyRenderDone_) {
             notifyRenderDone_();
         }
-        executedOnRenderDone_ = true;
     }
 }
 
@@ -875,6 +865,42 @@ void JSViewPartialUpdate::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
         executedRender_ = true;
     }
     PrebuildComponentsInMultiFrame(deadline, isTimeout);
+}
+
+void JSViewPartialUpdate::RenderJSExecution(int64_t deadline, bool& isTimeout)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+    if (!jsViewFunction_) {
+        return;
+    }
+    if (!executedAboutToRender_) {
+        ACE_SCORING_EVENT("Component.AboutToRender");
+        jsViewFunction_->ExecuteAboutToRender();
+        executedAboutToRender_ = true;
+    }
+    if (!jsViewFunction_) {
+        return;
+    }
+    {
+        ACE_SCORING_EVENT("Component.Build");
+        ViewStackModel::GetInstance()->PushKey(viewId_);
+        DoRenderJSExecution(deadline, isTimeout);
+        ViewStackModel::GetInstance()->PopKey();
+        if (isTimeout) {
+            return;
+        }
+    }
+    if (!jsViewFunction_) {
+        return;
+    }
+    if (!executedOnRenderDone_) {
+        ACE_SCORING_EVENT("Component.OnRenderDone");
+        jsViewFunction_->ExecuteOnRenderDone();
+        if (notifyRenderDone_) {
+            notifyRenderDone_();
+        }
+        executedOnRenderDone_ = true;
+    }
 }
 
 void JSViewPartialUpdate::SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline)
