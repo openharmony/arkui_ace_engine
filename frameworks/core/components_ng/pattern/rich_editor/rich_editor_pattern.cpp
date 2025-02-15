@@ -165,12 +165,12 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     if (value->GetLength() != styledString_->GetLength() && value->GetLength() > maxLength_.value_or(INT_MAX)) {
         auto subLength = CalculateTruncationLength(value->GetU16string(), maxLength_.value_or(INT_MAX));
         if (subLength == 0) {
-            IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
+            IF_TRUE(IsPreviewTextInputting() && !previewTextRecord_.previewTextExiting, NotifyExitTextPreview(true));
             return;
         }
         subValue = value->GetSubSpanString(0, subLength);
     }
-    IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
+    IF_TRUE(IsPreviewTextInputting() && !previewTextRecord_.previewTextExiting, NotifyExitTextPreview(true));
     CloseSelectOverlay();
     ResetSelection();
     styledString_->RemoveCustomSpan();
@@ -5069,7 +5069,10 @@ void RichEditorPattern::FinishTextPreview()
 void RichEditorPattern::FinishTextPreviewInner(bool deletePreviewText)
 {
     CHECK_NULL_VOID(previewTextRecord_.previewTextHasStarted);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "FinishTextPreviewInner");
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "FinishTextPreviewInner, deleteText=%{public}d, previewContent is empty=%{public}d", deletePreviewText,
+        previewTextRecord_.previewContent.empty());
+    previewTextRecord_.previewTextExiting = true;
     IF_TRUE(deletePreviewText && !previewTextRecord_.previewContent.empty(),
         DeleteByRange(nullptr, previewTextRecord_.startOffset, previewTextRecord_.endOffset));
     previewTextRecord_.Reset();
