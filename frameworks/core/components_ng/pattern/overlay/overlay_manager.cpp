@@ -5446,6 +5446,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
                 sheetHeight_ = largeHeight;
                 break;
             }
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM:
             [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
