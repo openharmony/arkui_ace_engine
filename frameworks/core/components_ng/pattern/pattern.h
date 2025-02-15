@@ -665,6 +665,11 @@ public:
         return host->GetThemeScopeId();
     }
 
+    virtual bool ReusedNodeSkipMeasure()
+    {
+        return false;
+    }
+
     virtual void OnFocusNodeChange(FocusReason focusReason) {}
     virtual void OnCollectRemoved() {}
     virtual std::string GetCurrentLanguage()
