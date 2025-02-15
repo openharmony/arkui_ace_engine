@@ -402,6 +402,10 @@ void SheetPresentationPattern::RegisterHoverModeChangeCallback()
     auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto sheetType = pattern->GetSheetType();
+        if (sheetType != SheetType::SHEET_CENTER) {
+            return;
+        }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
