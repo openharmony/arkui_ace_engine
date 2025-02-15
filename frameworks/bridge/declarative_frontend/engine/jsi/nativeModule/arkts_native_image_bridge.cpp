@@ -622,6 +622,8 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     Color color;
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         GetArkUINodeModifiers()->getImageModifier()->setFillColor(nativeNode, color.GetValue());
+    } else if (ArkTSUtils::ParseJsColorContent(vm, colorArg)) {
+        GetArkUINodeModifiers()->getImageModifier()->resetImageFill(nativeNode);
     } else {
         GetArkUINodeModifiers()->getImageModifier()->resetFillColor(nativeNode);
     }

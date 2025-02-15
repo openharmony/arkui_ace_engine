@@ -584,6 +584,16 @@ void JSImage::SetSourceSize(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetImageSourceSize(JSViewAbstract::ParseSize(info));
 }
 
+bool JSImage::ParseColorContent(const JSRef<JSVal>& jsValue)
+{
+    if (jsValue.IsEmpty() || jsValue->IsNull() || !jsValue->IsObject()) {
+        return false;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("colorContent_");
+    return !typeVal.IsEmpty() && typeVal->IsString() && typeVal->ToString() == "ORIGIN";
+}
+
 void JSImage::SetImageFill(const JSCallbackInfo& info)
 {
     if (ImageModel::GetInstance()->GetIsAnimation()) {
@@ -595,6 +605,10 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
+        if (ParseColorContent(info[0])) {
+            ImageModel::GetInstance()->ResetImageFill();
+            return;
+        }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             return;
         }
