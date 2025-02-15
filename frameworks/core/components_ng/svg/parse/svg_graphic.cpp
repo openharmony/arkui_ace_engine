@@ -19,7 +19,7 @@
 #include "core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "core/components_ng/svg/parse/svg_pattern.h"
 #include "core/components_ng/svg/parse/svg_radial_gradient.h"
-
+#include "core/components_ng/svg/parse/svg_transform.h"
 namespace OHOS::Ace::NG {
 namespace {
     constexpr double HALF = 0.5;
@@ -765,5 +765,20 @@ std::optional<Color> SvgGraphic::GetFillColor()
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_RETURN(svgContext, std::nullopt);
     return svgContext->GetFillColor();
+}
+
+void SvgGraphic::ApplyTransform(RSRecordingPath& path)
+{
+    auto matrix = RSMatrix();
+    if (attributes_.transformVec.size() == 1) {
+        if (attributes_.transformVec[0].funcType == "translate") {
+            auto ret = NGSvgTransform::CreateTranslate(attributes_.transformVec[0].paramVec, matrix);
+            if (ret) {
+                LOGD("SvgGraphic::ApplyTransform calling translate");
+                path.Transform(matrix);
+            }
+        }
+        return;
+    }
 }
 } // namespace OHOS::Ace::NG
