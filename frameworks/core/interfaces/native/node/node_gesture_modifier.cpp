@@ -642,7 +642,7 @@ TouchRecognizerMap* CreateTouchRecognizers(
         auto self = std::find_if(touchTargetList.begin(), touchTargetList.end(),
             [frameNode](
                 const RefPtr<TouchEventTarget>& target) -> bool { return (target->GetAttachedNode() == frameNode); });
-        if (AceType::DynamicCast<NG::NGGestureRecognizer>(*self)) {
+        if ((self == touchTargetList.end()) || AceType::DynamicCast<NG::NGGestureRecognizer>(*self)) {
             continue;
         }
         for (auto iter = touchTargetList.begin(); iter != self; iter++) {
