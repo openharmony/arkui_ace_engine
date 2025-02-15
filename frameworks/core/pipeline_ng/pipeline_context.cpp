@@ -2489,7 +2489,7 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
-    if (!SystemProperties::GetFocusCanBeActive()) {
+    if (!SystemProperties::GetFocusCanBeActive() && isFocusActive) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusActive false");
         return false;
     }
