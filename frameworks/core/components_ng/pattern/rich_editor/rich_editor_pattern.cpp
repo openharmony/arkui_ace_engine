@@ -7914,7 +7914,8 @@ void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType ri
     std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
     std::function<void()>& onDisappear)
 {
-    TextPattern::BindSelectionMenu(richEditorType, type, menuBuilder, onAppear, onDisappear);
+    TextPattern::BindSelectionMenu(
+        richEditorType, type, menuBuilder, { .onAppear = onAppear, .onDisappear = onDisappear });
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()

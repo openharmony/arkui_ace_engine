@@ -3286,6 +3286,7 @@ let TextSpanType;
   TextSpanType[TextSpanType['TEXT'] = 0] = 'TEXT';
   TextSpanType[TextSpanType['IMAGE'] = 1] = 'IMAGE';
   TextSpanType[TextSpanType['MIXED'] = 2] = 'MIXED';
+  TextSpanType[TextSpanType['DEFAULT'] = 3] = 'DEFAULT';
 })(TextSpanType || (TextSpanType = {}));
 
 let TextResponseType;
@@ -3293,6 +3294,7 @@ let TextResponseType;
   TextResponseType[TextResponseType['RIGHT_CLICK'] = 0] = 'RIGHT_CLICK';
   TextResponseType[TextResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
+  TextResponseType[TextResponseType['DEFAULT'] = 3] = 'DEFAULT';
 })(TextResponseType || (TextResponseType = {}));
 
 let NativeEmbedStatus;
