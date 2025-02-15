@@ -524,12 +524,12 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     }
 
     CheckLoopChange();
-    oldIndex_ = currentIndex_;
+    auto lastCurrentIndex = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
     userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
-    auto oldIndex = GetLoopIndex(oldIndex_);
+    auto oldIndex = GetLoopIndex(lastCurrentIndex);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
-        oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
+        oldIndex = GetLoopIndex(lastCurrentIndex, oldChildrenSize_.value());
         UpdateIndicatorOnChildChange();
         StartAutoPlay();
         InitArrow();
@@ -552,7 +552,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         needAdjustIndex_ = false;
     }
 
-    if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)
+    if (lastCurrentIndex != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)
         || hadCachedCapture != hasCachedCapture_) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
@@ -576,9 +576,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         }
         currentDelta_ = 0.0f;
     }
-    if (oldIndex_ != currentIndex_ && !isInit_ && !IsUseCustomAnimation()) {
+    if (lastCurrentIndex != currentIndex_ && !isInit_ && !IsUseCustomAnimation()) {
         FireWillShowEvent(currentIndex_);
-        FireWillHideEvent(oldIndex_);
+        FireWillHideEvent(lastCurrentIndex);
     }
 
     UpdateIgnoreBlankOffsetWithIndex();
