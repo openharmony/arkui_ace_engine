@@ -2123,6 +2123,7 @@ void DragDropManager::DragStartAnimation(
             GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height,
                 gatherNodeCenter, renderContext->GetBorderRadius() };
             UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+            UpdateGatherNodePosition(overlayManager, info.imageNode);
             UpdateTextNodePosition(info.textNode, newOffset);
         },
         option.GetOnFinishEvent());
