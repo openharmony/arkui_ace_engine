@@ -55,6 +55,7 @@ protected:
     static void SetOnContentWillChange(const JSCallbackInfo& info);
     static void SetAnimateMode(const JSCallbackInfo& info);
     static void SetEdgeEffect(const JSCallbackInfo& info);
+    static void SetPageFlipMode(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

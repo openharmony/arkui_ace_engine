@@ -110,6 +110,7 @@ float CalculateFriction(float gamma)
 }
 
 constexpr int32_t COMPONENT_SWIPER_FLING = 1;
+constexpr int32_t PAGE_FLIP_MODE_SIZE = 2;
 const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
     AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
 
@@ -1741,7 +1742,7 @@ void SwiperPattern::ShowNext()
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
-    if (preIndex || usePropertyAnimation_) {
+    if (preIndex || usePropertyAnimation_ || translateAnimationIsRunning_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ + 1)) {
@@ -1796,7 +1797,7 @@ void SwiperPattern::ShowPrevious()
     StopFadeAnimation();
     StopIndicatorAnimation();
 
-    if (preIndex || usePropertyAnimation_) {
+    if (preIndex || usePropertyAnimation_ || translateAnimationIsRunning_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ - 1)) {
@@ -2165,6 +2166,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d", info.GetSourceTool());
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+                pattern->isFirstAxisAction_ = true;
                 return;
             }
             pattern->FireAndCleanScrollingListener();
@@ -2179,6 +2181,12 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+                if (pattern->isFirstAxisAction_) {
+                    pattern->isFirstAxisAction_ = false;
+                } else if (pattern->pageFlipMode_ == PageFlipMode::SINGLE &&
+                        (pattern->usePropertyAnimation_ || pattern->translateAnimationIsRunning_)) {
+                    return;
+                }
                 if (!pattern->CheckSwiperPanEvent(info.GetMainDelta())) {
                     return;
                 }
@@ -6003,5 +6011,14 @@ void SwiperPattern::CheckSpecialItemCount() const
     CHECK_NULL_VOID(swiperNode);
     swiperNode->SetSpecialItemCount(indicatorId_.has_value() + leftButtonId_.has_value() + rightButtonId_.has_value() +
                                     leftCaptureId_.has_value() + rightCaptureId_.has_value());
+}
+
+void SwiperPattern::SetPageFlipMode(int32_t pageFlipMode)
+{
+    if (pageFlipMode < 0 || pageFlipMode > PAGE_FLIP_MODE_SIZE - 1) {
+        pageFlipMode_ = PageFlipMode::CONTINUOUS;
+        return;
+    }
+    pageFlipMode_ = static_cast<PageFlipMode>(pageFlipMode);
 }
 } // namespace OHOS::Ace::NG
