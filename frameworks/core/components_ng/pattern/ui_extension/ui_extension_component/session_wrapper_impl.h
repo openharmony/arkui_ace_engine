@@ -113,6 +113,18 @@ public:
 private:
     int32_t GetFrameNodeId() const;
     void InitAllCallback();
+    void InitForegroundCallback();
+    void InitBackgroundCallback();
+    void InitDestructionCallback();
+    void InitTransferAbilityResultFunc();
+    void InitTransferExtensionDataFunc();
+    void InitNotifyRemoteReadyFunc();
+    void InitNotifySyncOnFunc();
+    void InitNotifyAsyncOnFunc();
+    void InitNotifyBindModalFunc();
+    void InitNotifyGetAvoidAreaByTypeFunc();
+    void InitNotifyExtensionEventFunc();
+    void InitGetStatusBarHeightFunc();
     void UpdateSessionConfig();
     RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
