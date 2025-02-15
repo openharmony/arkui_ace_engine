@@ -1216,4 +1216,24 @@ bool TextPickerPattern::NeedAdaptForAging()
     }
     return false;
 }
+
+void TextPickerPattern::SetDisableTextStyleAnimation(bool isDisableTextStyleAnimation)
+{
+    isDisableTextStyleAnimation_ = isDisableTextStyleAnimation;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetDisableTextStyleAnimation(isDisableTextStyleAnimation);
+    }
+}
 } // namespace OHOS::Ace::NG
