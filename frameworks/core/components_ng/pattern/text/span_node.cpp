@@ -221,6 +221,7 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
     spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->MarkDirty();
 }
 
 void SpanNode::DumpInfo()

@@ -457,9 +457,9 @@ public:
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
-    virtual std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const
+    virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const
     {
-        std::list<ParagraphManager::ParagraphInfo> res;
+        std::vector<ParagraphManager::ParagraphInfo> res;
         CHECK_NULL_RETURN(pManager_, res);
         return pManager_->GetParagraphs();
     }

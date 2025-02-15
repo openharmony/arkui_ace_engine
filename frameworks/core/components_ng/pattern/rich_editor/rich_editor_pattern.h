@@ -131,6 +131,29 @@ struct CaretOffsetInfo {
     float caretHeightLine = 0.0f;
 };
 enum class PositionType { DEFAULT, PARAGRAPH_START, PARAGRAPH_END, LINE_START, LINE_END };
+struct SysScale {
+    double dipScale = 1.0;
+    double logicScale = 1.0;
+    double fontScale = 1.0;
+    double fontWeightScale = 1.0;
+    bool operator==(const SysScale& rhs) const
+    {
+        return NearEqual(dipScale, rhs.dipScale)
+            && NearEqual(logicScale, rhs.logicScale)
+            && NearEqual(fontScale, rhs.fontScale)
+            && NearEqual(fontWeightScale, rhs.fontWeightScale);
+    }
+    bool operator!=(const SysScale& rhs) const
+    {
+        return !operator==(rhs);
+    }
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << dipScale << ", " << logicScale << ", " << fontScale << ", " << fontWeightScale;
+        return ss.str();
+    }
+};
 
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
@@ -339,7 +362,24 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_);
+        HandleSysScaleChanged();
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_, &paragraphCache_);
+    }
+
+    void HandleSysScaleChanged()
+    {
+        auto ctx = GetContext();
+        if (!ctx) {
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "context is nullptr, handle scale failed");
+            return;
+        }
+        SysScale sysScale{ ctx->GetDipScale(), ctx->GetLogicScale(), ctx->GetFontScale(), ctx->GetFontWeightScale() };
+        if (sysScale != lastSysScale_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
+                lastSysScale_.ToString().c_str(), sysScale.ToString().c_str());
+            lastSysScale_ = sysScale;
+            paragraphCache_.Clear();
+        }
     }
 
     FocusPattern GetFocusPattern() const override
@@ -695,7 +735,7 @@ public:
         return caretSpanIndex_;
     }
 
-    std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const override
+    std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const override
     {
         return paragraphs_.GetParagraphs();
     }
@@ -1532,7 +1572,7 @@ private:
     std::u16string pasteStr_;
 
     // still in progress
-    ParagraphManager paragraphs_;
+    RichEditorParagraphManager paragraphs_;
     RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
@@ -1624,6 +1664,8 @@ private:
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
+    SysScale lastSysScale_;
 };
 } // namespace OHOS::Ace::NG
 
