@@ -26,6 +26,7 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
@@ -49,6 +50,8 @@ constexpr double DEFAULT_FONT_SIZE = 12;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+constexpr float STROKEWIDTH_DEFAULT_VALUE = 4.0f;
+
 /**
  * @param colors color value
  * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
@@ -418,6 +421,25 @@ ArkUI_Uint32 GetProgressColor(ArkUINodeHandle node)
     return ProgressModelNG::GetColor(frameNode).GetValue();
 }
 
+void GetProgressLinearStyle(ArkUINodeHandle node, ArkUIProgressLinearStyleOption& option)
+{
+    auto* frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    option.scanEffectEnable = paintProperty->GetEnableLinearScanEffect().value_or(false);
+    option.smoothEffectEnable = paintProperty->GetEnableSmoothEffect().value_or(true);
+    auto strokeWidth = layoutProperty->GetStrokeWidth().value_or(
+        Dimension(STROKEWIDTH_DEFAULT_VALUE, DimensionUnit::VP)).Value();
+    option.strokeWidth = strokeWidth;
+    auto strokeRadius = paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth / 2.0f, DimensionUnit::VP)).Value();
+    strokeRadius = std::min(strokeWidth / 2.0f, strokeRadius);
+    option.strokeRadius = strokeRadius;
+}
+
 void SetProgressInitialize(
     ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle)
 {
@@ -443,7 +465,8 @@ const ArkUIProgressModifier* GetProgressModifier()
     static const ArkUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
         SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
         ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
-        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
+        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize,
+        GetProgressLinearStyle };
     return &modifier;
 }
 
