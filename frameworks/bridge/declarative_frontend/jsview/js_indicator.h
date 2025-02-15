@@ -96,6 +96,15 @@ public:
         }
     }
 
+    void ResetSwiperNode()
+    {
+        swiperNode_ = nullptr;
+        auto controller = GetController();
+        if (hasController_ && GetController()) {
+            controller->ResetSwiperNode();
+        }
+    }
+
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<NG::IndicatorController> controller_;
