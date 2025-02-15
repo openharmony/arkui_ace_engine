@@ -878,7 +878,7 @@ typedef enum {
 /**
  * @brief Enumerates the page flipping modes using the mouse wheel for the <b>Swiper</b> component.
  *
- * @since 14
+ * @since 15
  */
 typedef enum {
     /** When the mouse wheel is scrolled continuously, multiple pages are flipped, which is determined by the number of

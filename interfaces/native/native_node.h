@@ -5561,7 +5561,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_PageFlipMode}:\n
      * .value[0].i32: page flipping mode using the mouse wheel. \n
      *
-     * @since 14
+     * @since 15
      */
     NODE_SWIPER_PAGE_FLIP_MODE,
 
