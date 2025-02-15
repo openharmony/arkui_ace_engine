@@ -309,6 +309,14 @@ struct CJBaseEvent {
     int64_t deviceId;
 };
 
+struct NativeFont {
+    double size;
+    int32_t sizeUnit;
+    const char* weight;
+    const char* family;
+    uint32_t style;
+};
+
 struct AtCPackage;
 
 struct AtCOHOSAceFrameworkCJInstanceLoadEntryParams {
