@@ -660,6 +660,7 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
 
 std::unordered_map<std::string, std::function<void()>> GetSystemCallback(const std::shared_ptr<SelectOverlayInfo>& info)
 {
+    CHECK_NULL_RETURN(info, {});
     std::unordered_map<std::string, std::function<void()>> systemCallback = {
         { OH_DEFAULT_CUT, info->menuCallback.onCut }, { OH_DEFAULT_COPY, info->menuCallback.onCopy },
         { OH_DEFAULT_SELECT_ALL, info->menuCallback.onSelectAll }, { OH_DEFAULT_PASTE, info->menuCallback.onPaste },
