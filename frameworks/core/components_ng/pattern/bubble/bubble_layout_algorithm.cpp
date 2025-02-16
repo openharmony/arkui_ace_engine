@@ -1174,15 +1174,42 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         default:
             break;
     }
-    if ((xMax < xMin && !isGreatWrapperWidth_) || yMax < yMin) {
-        return OffsetF(0.0f, 0.0f);
-    } else if (xMax < xMin && isGreatWrapperWidth_) {
+    if ((LessNotEqual(xMax, xMin) && !isGreatWrapperWidth_) || LessNotEqual(yMax, yMin)) {
+        if (!CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax)) {
+            return OffsetF(0.0f, 0.0f);
+        }
+    } else if (LessNotEqual(xMax, xMin) && isGreatWrapperWidth_) {
         auto y = std::clamp(position.GetY(), yMin, yMax);
         return OffsetF(0.0f, y + yTargetOffset);
     }
     auto result = GetBubblePosition(position, xMin, xMax, yMin, yMax);
     CheckArrowPosition(result, width, height);
     return result;
+}
+
+bool BubbleLayoutAlgorithm::CheckIfNeedRemoveArrow(float& xMin, float& xMax, float& yMin, float& yMax)
+{
+    if (!showArrow_ || !avoidKeyboard_) {
+        return false;
+    }
+    bool isHorizontal = false;
+    if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
+        isHorizontal = true;
+    }
+    if ((isHorizontal && LessNotEqual(yMax, yMin)) || (!isHorizontal && LessNotEqual(xMax, xMin))) {
+        return false;
+    }
+    if (isHorizontal && GreatOrEqual(xMax + BUBBLE_ARROW_HEIGHT.ConvertToPx(), xMin)) {
+        xMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        showArrow_ = false;
+        return true;
+    }
+    if (!isHorizontal && GreatOrEqual(yMax + BUBBLE_ARROW_HEIGHT.ConvertToPx(), yMin)) {
+        yMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        showArrow_ = false;
+        return true;
+    }
+    return false;
 }
 
 OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float xMin,
