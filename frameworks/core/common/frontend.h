@@ -76,7 +76,7 @@ struct WindowConfig {
     }
 };
 
-enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ };
+enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, KOALA };
 struct PageTarget;
 
 class ACE_FORCE_EXPORT Frontend : public AceType {

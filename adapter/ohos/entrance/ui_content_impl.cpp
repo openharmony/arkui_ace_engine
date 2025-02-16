@@ -719,6 +719,10 @@ private:
     int32_t targetId_ = -1;
 };
 
+typedef int (*LoadVirtualMachineFunc)(int, const char*, const char*, void*);
+typedef void* (*GetVMAddrFunc)();
+typedef void* (*StartApplicationFunc)(const char*, const char*);
+typedef bool (*RunApplicationFunc)(int, int);
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
     CHECK_NULL_VOID(context);
@@ -729,6 +733,43 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     moduleName_ = hapModuleInfo->name;
     StoreConfiguration(context->GetConfiguration());
 }
+
+    
+    if (bundleName_ == "com.example.trivial.application") { 
+        void* handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
+        if (!handle) {
+            LOGW("Koala Cannot open library: %s", dlerror());
+            return;
+        }
+
+        // Clear any existing error
+        dlerror();
+
+        // Get the function pointer for LoadVirtualMachine
+        LoadVirtualMachineFunc LoadVirtualMachine = (LoadVirtualMachineFunc)dlsym(
+            handle, "LoadVirtualMachine");
+        auto* GetVMAddr = (GetVMAddrFunc)(dlsym(handle, "GetVMAddr"));
+        const char* dlsym_error = dlerror();
+        if (dlsym_error) {
+            LOGW("Koala Cannot load symbol 'LoadVirtualMachine': %s", dlsym_error);
+            dlclose(handle);
+            return;
+        }
+
+        const char* classPath = "/data/storage/el1/bundle/libs/arm";
+        const char* nativePath = "/data/storage/el1/bundle/libs/arm";
+        // Call the function
+        int vmRes = LoadVirtualMachine(2, classPath, nativePath, nullptr);
+        if (vmRes != 0) {
+            LOGW("Koala load vm failed %d", vmRes);
+            return;
+        }
+        runtime_ = GetVMAddr();
+        LOGI("Koala runtime = %p", runtime_);
+        // Close the library
+        dlclose(handle);
+    }
+    LOGI("Koala end of function 770");
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
     : runtime_(runtime), isFormRender_(isCard)
@@ -784,6 +825,56 @@ void UIContentImpl::DestroyCallback() const
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
+namespace {
+void RunArkoala()
+{
+    LOGI("Koala error = %d", errorCode);
+    // void* handle = dlopen("/data/app/el1/bundle/public/com.example.trivial.application/libs/arm/libvmloader.so", RTLD_LAZY | RTLD_LOCAL);
+    void* handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
+    if (!handle) {
+        LOGW("Koala Cannot open library: %s", dlerror());
+        return errorCode;
+    }
+
+    // Clear any existing error
+    dlerror();
+    // Get the function pointer
+    StartApplicationFunc StartApplication =
+        (StartApplicationFunc)dlsym(handle, "StartApplication");
+    const char* dlsym_error = dlerror();
+    if (dlsym_error) {
+        LOGW("Koala cannot load symbol startApp: %s", dlsym_error);
+        dlclose(handle);
+        return errorCode;
+    }
+
+    LOGI("Koala start application");
+    const char* appUrl = "ComExampleTrivialApplication";
+    const char* appParams = "ArkTSLoaderParam";
+    void* result = StartApplication(appUrl, appParams);
+
+    LOGI("Koala result rootPointer = %p", result);
+    auto container = Platform::AceContainer::GetContainer(ContainerScope::Current());
+    CHECK_NULL_VOID(container);
+    auto taskExec = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExec);
+    taskExec->PostDelayedTask([handle]() {
+        RunApplicationFunc RunApp = (RunApplicationFunc)dlsym(handle, "RunApplication");
+        const char* dlsym_error = dlerror();
+        if (dlsym_error) {
+            LOGW("Koala cannot load symbol startApp: %s", dlsym_error);
+            dlclose(handle);
+            return errorCode;
+        }
+        while (!RunApp(0, 0)) {
+            LOGW("Koala run app failed");
+            //post task AGAIN
+        }
+        dlclose(handle);
+    }, TaskExecutor::TaskType::UI, 100, "ArkoalaRunApp", PriorityType::HIGH);
+}
+} // namespace
+
 UIContentErrorCode UIContentImpl::InitializeInner(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter)
 {
@@ -807,6 +898,10 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.
     errorCode = Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
+    if (errorCode > 0 && startUrl_ == "arkoala") {
+        ContainerScope scope(instanceId_);
+        RunArkoala();
+    }
     CHECK_ERROR_CODE_RETURN(errorCode);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
@@ -1766,6 +1861,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
+    if (startUrl_ == "arkoala") {
+        frontendType = FrontendType::KOALA;
+    }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
             std::make_unique<ContentEventCallback>(
@@ -1972,14 +2070,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
     if (runtime_) {
-        auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
-        if (!storage) {
-            container->SetLocalStorage(nullptr, context);
+        if (startUrl_ == "arkoala") { // temp
+            LOGI("Koala skip casting runtime");
         } else {
-            auto env = reinterpret_cast<napi_env>(nativeEngine);
-            napi_ref ref = nullptr;
-            napi_create_reference(env, storage, 1, &ref);
-            container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
+            auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+            if (!storage) {
+                container->SetLocalStorage(nullptr, context);
+            } else {
+                auto env = reinterpret_cast<napi_env>(nativeEngine);
+                napi_ref ref = nullptr;
+                napi_create_reference(env, storage, 1, &ref);
+                container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
+            }
         }
     }
 
