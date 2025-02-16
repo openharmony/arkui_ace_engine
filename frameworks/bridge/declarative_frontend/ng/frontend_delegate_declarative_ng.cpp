@@ -1375,13 +1375,12 @@ void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(
 void FrontendDelegateDeclarativeNG::AddFrameNodeWithOrder(
     const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder)
 {
-    auto task = [node, levelOrder, containerId = Container::CurrentId()](
-        const RefPtr<NG::OverlayManager>& overlayManager) {
-        CHECK_NULL_VOID(overlayManager);
-        ContainerScope scope(containerId);
-        overlayManager->AddFrameNodeWithOrder(node, levelOrder);
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNodeWithOrder", nullptr);
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->AddFrameNodeWithOrder(node, levelOrder);
 }
 
 void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
