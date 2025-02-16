@@ -682,8 +682,9 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             func->Execute(*clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::u16string label = u"";
-            if (!node.Invalid()) {
-                auto pattern = node.GetRawPtr()->GetPattern();
+            auto frameNode = node.Upgrade();
+            if (frameNode) {
+                auto pattern = frameNode->GetPattern();
                 CHECK_NULL_VOID(pattern);
                 auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
                 CHECK_NULL_VOID(layoutProperty);
