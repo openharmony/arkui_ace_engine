@@ -4014,15 +4014,14 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     auto options = imageItem->options;
-    auto imageInfo = CreateImageSourceInfo(options);
-    imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
-    auto index = host->GetChildren().size();
-    imageNode->MountToParent(host, index);
-    auto gesture = imageNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    gesture->SetHitTestMode(HitTestMode::HTMNONE);
+    imageLayoutProperty->UpdateImageSourceInfo(CreateImageSourceInfo(options));
+    imageNode->MountToParent(host, host->GetChildren().size());
+    SetImageNodeGesture(imageNode);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
+        auto imagePattern = imageNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetSyncLoad(imgAttr.syncLoad);
         if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
@@ -4043,12 +4042,27 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
             imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
             imageRenderCtx->SetClipToBounds(true);
         }
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
+            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+            paintProperty->ResetDrawingColorFilter();
+        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
+            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+            paintProperty->ResetColorFilter();
+        }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageItem->imageNodeId = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
     childNodes_.emplace_back(imageNode);
+}
+
+void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)
+{
+    auto gesture = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetHitTestMode(HitTestMode::HTMNONE);
 }
 
 ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
@@ -4069,14 +4083,18 @@ ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& optio
     if (options.moduleName.has_value()) {
         moduleName = options.moduleName.value();
     }
+    ImageSourceInfo info;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!options.imagePixelMap.has_value()) {
-        return { src, bundleName, moduleName };
+        info = ImageSourceInfo{ src, bundleName, moduleName };
+    } else {
+        info = ImageSourceInfo(pixMap);
     }
-    return ImageSourceInfo(pixMap);
 #else
-    return { src, bundleName, moduleName };
+    info = ImageSourceInfo{ src, bundleName, moduleName };
 #endif
+    info.SetIsUriPureNumber(options.isUriPureNumber.value_or(false));
+    return info;
 }
 
 void TextPattern::ProcessSpanString()

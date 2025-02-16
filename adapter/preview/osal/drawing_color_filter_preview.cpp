@@ -18,6 +18,7 @@
 #ifdef USE_ROSEN_DRAWING
 #include "base/utils/utils.h"
 #include "color_filter_napi/js_color_filter.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #endif
 
 namespace OHOS::Ace {
@@ -62,5 +63,10 @@ void* DrawingColorFilterPreview::GetDrawingColorFilterSptrAddr()
 #else
     return static_cast<void*>(&colorFilter_);
 #endif
+}
+
+napi_value DrawingColorFilterPreview::GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine)
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace
