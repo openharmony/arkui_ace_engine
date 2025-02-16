@@ -880,6 +880,7 @@ void FormManagerDelegate::ReAddForm()
         wantCache_.RemoveParam(PARAM_FORM_MIGRATE_FORM_KEY);
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
     auto ret =
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {
