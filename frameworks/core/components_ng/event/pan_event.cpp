@@ -154,4 +154,10 @@ void PanEventActuator::SetPanEventType(GestureTypeName typeName)
     gestureInfo->SetIsSystemGesture(true);
 }
 
+void PanEventActuator::DumpVelocityInfo(int32_t fingerId)
+{
+    if (panRecognizer_) {
+        panRecognizer_->DumpVelocityInfo(fingerId);
+    }
+}
 } // namespace OHOS::Ace::NG

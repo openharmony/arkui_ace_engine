@@ -113,6 +113,7 @@ constexpr int32_t COMPONENT_SWIPER_FLING = 1;
 constexpr int32_t PAGE_FLIP_MODE_SIZE = 2;
 const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
     AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
+constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 
 } // namespace
 
@@ -2210,6 +2211,17 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
                 return;
             }
             pattern->HandleDragEnd(info.GetMainVelocity());
+            auto velocity = info.GetMainVelocity();
+            if (std::abs(velocity) <= NEW_MIN_TURN_PAGE_VELOCITY &&
+                std::abs(velocity) > MIN_DUMP_VELOCITY_THRESHOLD) {
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                auto eventHub = host->GetEventHub<EventHub>();
+                CHECK_NULL_VOID(eventHub);
+                auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+                CHECK_NULL_VOID(gestureEventHub);
+                gestureEventHub->DumpVelocityInfoFroPanEvent(info.GetPointerId());
+            }
         }
     };
 
