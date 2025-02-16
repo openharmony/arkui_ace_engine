@@ -390,11 +390,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
         ASSERT_NE(event.ptr, nullptr);
         auto peer = reinterpret_cast<HoverEventPeer*>(event.ptr);
         auto hoverEventInfo = peer->GetEventInfo();
+        ASSERT_NE(hoverEventInfo, nullptr);
         EXPECT_EQ(hoverEventInfo->GetType(), expectedType);
         GeneratedModifier::GetHoverEventAccessor()->destroyPeer(peer);
         checkEvent = {
-            .nodeId = resourceId,
-            .isHover = Converter::Convert<bool>(isHover),
+            .nodeId = resourceId, .isHover = Converter::Convert<bool>(isHover),
             .deviceType = hoverEventInfo->GetSourceDevice()
         };
     };
@@ -604,6 +604,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchTest, TestSize.Level1)
         ASSERT_NE(parameter.ptr, nullptr);
         auto peer = reinterpret_cast<TouchEventPeer*>(parameter.ptr);
         auto touchEventInfo = peer->GetEventInfo();
+        ASSERT_NE(touchEventInfo, nullptr);
         EXPECT_EQ(touchEventInfo->GetType(), expectedType);
         GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
         checkEvent = { .resId = resourceId };

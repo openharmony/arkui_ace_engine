@@ -608,7 +608,9 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
         auto eventPtr = touchEventOpt.value().ptr;
         ASSERT_NE(eventPtr, nullptr);
         auto peer = reinterpret_cast<TouchEventPeer*>(eventPtr);
+        ASSERT_NE(peer, nullptr);
         auto touchEventInfo = peer->GetEventInfo();
+        ASSERT_NE(touchEventInfo, nullptr);
         EXPECT_EQ(touchEventInfo->GetType(), expectedType);
         GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
         checkEvent = {

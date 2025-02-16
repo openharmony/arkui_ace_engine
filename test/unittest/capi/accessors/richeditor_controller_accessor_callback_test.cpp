@@ -290,6 +290,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestOnHover, Test
         ASSERT_NE(event.ptr, nullptr);
         auto peer = reinterpret_cast<HoverEventPeer*>(event.ptr);
         auto hoverEventInfo = peer->GetEventInfo();
+        ASSERT_NE(hoverEventInfo, nullptr);
         EXPECT_EQ(hoverEventInfo->GetType(), expectedType);
         GeneratedModifier::GetHoverEventAccessor()->destroyPeer(peer);
         checkEvent = {

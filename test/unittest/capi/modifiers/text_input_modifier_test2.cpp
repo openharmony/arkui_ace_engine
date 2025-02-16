@@ -179,6 +179,7 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
         auto peer = reinterpret_cast<SubmitEventPeer*>(event.ptr);
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
+        ASSERT_NE(submitEventInfo, nullptr);
         EXPECT_EQ(submitEventInfo->GetText(), TEST_VALUE);
         GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
         EXPECT_EQ(resourceId, expectedResId);
