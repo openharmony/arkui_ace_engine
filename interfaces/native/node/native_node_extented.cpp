@@ -32,6 +32,10 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
 constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
+constexpr float DEFAULT_SIZE_18 = 18.0f;
+constexpr float DEFAULT_SIZE_24 = 24.0f;
+constexpr float DEFAULT_SIZE_32 = 32.0f;
+constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -519,6 +523,301 @@ int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indic
 {
     CHECK_NULL_RETURN(indicator, 0);
     return indicator->maxDisplayCount.value;
+}
+
+ArkUI_SwiperDigitIndicator* OH_ArkUI_SwiperDigitIndicator_Create()
+{
+    ArkUI_SwiperDigitIndicator* indicator = new ArkUI_SwiperDigitIndicator;
+    indicator->type = ARKUI_SWIPER_INDICATOR_TYPE_DIGIT;
+    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->fontColor = ArkUI_OptionalUint { 0, 0xFF000000 };         // rgb? 0xFF182431
+    indicator->selectedFontColor = ArkUI_OptionalUint { 0, 0xFF000000 }; // 0xFF182431
+    indicator->fontSize = ArkUI_OptionalFloat { 0, 14.0f };              // px fp?
+    indicator->selectedFontSize = ArkUI_OptionalFloat { 0, 14.0f };
+    indicator->fontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
+    indicator->selectedFontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
+    return indicator;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_Dispose(ArkUI_SwiperDigitIndicator* indicator)
+{
+    delete indicator;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetStartPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimLeft.isSet = 1;
+    indicator->dimLeft.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetStartPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimLeft.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetTopPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimTop.isSet = 1;
+    indicator->dimTop.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetTopPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimTop.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetEndPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimRight.isSet = 1;
+    indicator->dimRight.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetEndPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimRight.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetBottomPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimBottom.isSet = 1;
+    indicator->dimBottom.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetBottomPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimBottom.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetFontColor(ArkUI_SwiperDigitIndicator* indicator, uint32_t color)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->fontColor.isSet = 1;
+    indicator->fontColor.value = color;
+}
+
+uint32_t OH_ArkUI_SwiperDigitIndicator_GetFontColor(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->fontColor.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontColor(ArkUI_SwiperDigitIndicator* indicator, uint32_t selectedColor)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedFontColor.isSet = 1;
+    indicator->selectedFontColor.value = selectedColor;
+}
+
+uint32_t OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->selectedFontColor.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetFontSize(ArkUI_SwiperDigitIndicator* indicator, float size)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->fontSize.isSet = 1;
+    indicator->fontSize.value = size;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetFontSize(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->fontSize.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize(ArkUI_SwiperDigitIndicator* indicator, float size)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedFontSize.isSet = 1;
+    indicator->selectedFontSize.value = size;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetSelectedFontSize(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->selectedFontSize.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetFontWeight(ArkUI_SwiperDigitIndicator* indicator, ArkUI_FontWeight fontWeight)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->fontWeight.isSet = 1;
+    indicator->fontWeight.value = static_cast<uint32_t>(fontWeight);
+}
+
+ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetFontWeight(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, static_cast<ArkUI_FontWeight>(0));
+    return static_cast<ArkUI_FontWeight>(indicator->fontWeight.value);
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontWeight(
+    ArkUI_SwiperDigitIndicator* indicator, ArkUI_FontWeight selectedFontWeight)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedFontWeight.isSet = 1;
+    indicator->selectedFontWeight.value = static_cast<uint32_t>(selectedFontWeight);
+}
+
+ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetSelectedFontWeight(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, static_cast<ArkUI_FontWeight>(0));
+    return static_cast<ArkUI_FontWeight>(indicator->selectedFontWeight.value);
+}
+
+ArkUI_SwiperArrowStyle* OH_ArkUI_SwiperArrowStyle_Create()
+{
+    ArkUI_SwiperArrowStyle* arrowStyle = new ArkUI_SwiperArrowStyle;
+    arrowStyle->showBackground = ArkUI_OptionalInt { 0, 0 };
+    arrowStyle->showSidebarMiddle = ArkUI_OptionalInt { 0, 0 };
+    arrowStyle->backgroundSize = ArkUI_OptionalFloat { 0, DEFAULT_SIZE_24 };
+    arrowStyle->backgroundColor = ArkUI_OptionalUint { 0, 0x00000000 };
+    arrowStyle->arrowSize = ArkUI_OptionalFloat { 0, DEFAULT_SIZE_18 };
+    arrowStyle->arrowColor = ArkUI_OptionalUint { 0, 0x00182431 };
+    return arrowStyle;
+}
+
+void OH_ArkUI_SwiperArrowStyle_Destroy(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    delete arrowStyle;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetShowBackground(ArkUI_SwiperArrowStyle* arrowStyle, int32_t showBackground)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    if (showBackground != 0 && showBackground != 1) {
+        return;
+    }
+    arrowStyle->showBackground.isSet = 1;
+    arrowStyle->showBackground.value = showBackground;
+}
+
+int32_t OH_ArkUI_SwiperArrowStyle_GetShowBackground(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0);
+    return arrowStyle->showBackground.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle(ArkUI_SwiperArrowStyle* arrowStyle, int32_t showSidebarMiddle)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    if (showSidebarMiddle != 0 && showSidebarMiddle != 1) {
+        return;
+    }
+    arrowStyle->showSidebarMiddle.isSet = 1;
+    arrowStyle->showSidebarMiddle.value = showSidebarMiddle;
+    if (showSidebarMiddle == 1) {
+        if (!arrowStyle->backgroundSize.isSet) {
+            arrowStyle->backgroundSize.value = DEFAULT_SIZE_32;
+        }
+        if (!arrowStyle->backgroundColor.isSet) {
+            arrowStyle->backgroundColor.value = 0x19182431;
+        }
+        if (!arrowStyle->arrowSize.isSet) {
+            arrowStyle->arrowSize.value = DEFAULT_SIZE_24;
+        }
+    }
+}
+
+int32_t OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0);
+    return arrowStyle->showSidebarMiddle.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(ArkUI_SwiperArrowStyle* arrowStyle, float backgroundSize)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    arrowStyle->backgroundSize.isSet = 1;
+    arrowStyle->backgroundSize.value = backgroundSize;
+}
+
+float OH_ArkUI_SwiperArrowStyle_GetBackgroundSize(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, DEFAULT_SIZE_24);
+    if (arrowStyle->showSidebarMiddle.value == 1) {
+        if (!arrowStyle->backgroundSize.isSet) {
+            return DEFAULT_SIZE_32;
+        }
+    }
+    if (!arrowStyle->backgroundSize.isSet) {
+        return DEFAULT_SIZE_24;
+    }
+    return arrowStyle->backgroundSize.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(ArkUI_SwiperArrowStyle* arrowStyle, uint32_t backgroundColor)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    arrowStyle->backgroundColor.isSet = 1;
+    arrowStyle->backgroundColor.value = backgroundColor;
+}
+
+uint32_t OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0x00000000);
+    if (arrowStyle->showSidebarMiddle.value == 1) {
+        if (!arrowStyle->backgroundColor.isSet) {
+            return 0x19182431;
+        }
+    }
+    if (!arrowStyle->backgroundColor.isSet) {
+        return 0x00000000;
+    }
+    return arrowStyle->backgroundColor.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetArrowSize(ArkUI_SwiperArrowStyle* arrowStyle, float arrowSize)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    if (arrowStyle->showBackground.value == 1) {
+        arrowSize = arrowStyle->backgroundSize.value * ARROW_SIZE_COEFFICIENT;
+    }
+    arrowStyle->arrowSize.isSet = 1;
+    arrowStyle->arrowSize.value = arrowSize;
+}
+
+float OH_ArkUI_SwiperArrowStyle_GetArrowSize(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, DEFAULT_SIZE_18);
+    if (arrowStyle->showBackground.value == 1) {
+        return arrowStyle->backgroundSize.value * ARROW_SIZE_COEFFICIENT;
+    }
+    if (arrowStyle->showSidebarMiddle.value == 1) {
+        if (!arrowStyle->arrowSize.isSet) {
+            return DEFAULT_SIZE_24;
+        }
+    }
+    if (!arrowStyle->arrowSize.isSet) {
+        return DEFAULT_SIZE_18;
+    }
+    return arrowStyle->arrowSize.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetArrowColor(ArkUI_SwiperArrowStyle* arrowStyle, uint32_t arrowColor)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    arrowStyle->arrowColor.isSet = 1;
+    arrowStyle->arrowColor.value = arrowColor;
+}
+
+uint32_t OH_ArkUI_SwiperArrowStyle_GetArrowColor(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0x00182431);
+    return arrowStyle->arrowColor.value;
 }
 
 ArkUI_StyledString* OH_ArkUI_StyledString_Create(

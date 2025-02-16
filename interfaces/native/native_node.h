@@ -5389,16 +5389,22 @@ typedef enum {
     NODE_SWIPER_INDEX,
 
     /**
-     * @brief Defines the number of elements to display per page.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: index value of the child component. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: index value of the child component. \n
-     *
-     */
+    * @brief Defines the number of elements to display per page.
+    * This attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: number of elements to display per page. \n
+    * .value[1]?.i32: whether to turn pages by group. The value <b>0</b> means to turn pages by child element,
+    * and <b>1</b> means to turn pages by group. This parameter is supported since API version 16. \n
+    * .string?: this parameter can only be set to 'auto'. When 'auto' is set, the value[] parameters are ignored.
+    * This parameter is supported since API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: number of elements to display per page. \n
+    * .value[1].i32: whether to turn pages by group. This parameter is supported since API version 16. \n
+    * .string: 'auto' or empty string.
+    *
+    */
     NODE_SWIPER_DISPLAY_COUNT,
 
     /**
@@ -5417,20 +5423,24 @@ typedef enum {
     NODE_SWIPER_DISABLE_SWIPE,
 
     /**
-     * @brief Defines whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
-     * The parameter type is {@link ArkUI_SwiperArrow}.\n
-     * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
-     * The parameter type is {@link ArkUI_SwiperArrow}.\n
-     * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
-     *
-     */
+    * @brief Defines whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
+    * This attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
+    * The parameter type is {@link ArkUI_SwiperArrow}.\n
+    * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
+    * .?object: arrow style. The parameter type is {@link ArkUI_SwiperArrowStyle}. \n
+    * This parameter is supported since API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
+    * The parameter type is {@link ArkUI_SwiperArrow}.\n
+    * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
+    * .object: arrow style. The parameter type is {@link ArkUI_SwiperArrowStyle}. \n
+    * This parameter is supported since API version 16. \n
+    *
+    */
     NODE_SWIPER_SHOW_DISPLAY_ARROW,
 
     /**
@@ -5469,6 +5479,14 @@ typedef enum {
     * \n
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: number of cached items in the swiper adapter. \n
+    * .value[1]?.i32: whether the cached items will be displayed. \n
+    * The value <b>0</b> indicates that cached items will not be displayed, \n
+    * and <b>1</b> indicates that cached nodes will be displayed. The default value is <b>0</b>. \n
+    * This parameter is supported from API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: number of cached items in the swiper adapter. \n
+    * .value[1].i32: whether the cached items will be displayed. This parameter is supported from API version 16. \n
     */
     NODE_SWIPER_CACHED_COUNT,
 
@@ -5503,17 +5521,24 @@ typedef enum {
     NODE_SWIPER_NEXT_MARGIN,
 
     /**
-     * @brief Sets the navigation point indicator of the dot style for the swiper.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: navigation point indicator type. The parameter type is {@link ArkUI_SwiperIndicatorType}. \n
-     * .object: navigation point indicator. The parameter type is {@link ArkUI_SwiperIndicator}. \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: navigation point indicator type. The parameter type is {@link ArkUI_SwiperIndicatorType}. \n
-     * .object: navigation point indicator. The parameter type is {@link ArkUI_SwiperIndicator}. \n
-     *
-     */
+    * @brief Defines the navigation indicator type of the swiper.
+    * The attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+    * .object: The parameter type is {@link ArkUI_SwiperIndicator} when the indicator type \n
+    * is <b>ARKUI_SWIPER_INDICATOR_TYPE_DOT</b>. The parameter type is {@link ArkUI_SwiperDigitIndicator}
+    * when the indicator type is <b>ARKUI_SWIPER_INDICATOR_TYPE_DIGIT</b>. \n
+    * {@link ArkUI_SwiperDigitIndicator} is supported since API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+    * .object: The parameter type is {@link ArkUI_SwiperIndicator} when the indicator type \n
+    * is <b>ARKUI_SWIPER_INDICATOR_TYPE_DOT</b>. The parameter type is {@link ArkUI_SwiperDigitIndicator}
+    * when the indicator type is <b>ARKUI_SWIPER_INDICATOR_TYPE_DIGIT</b>. \n
+    * {@link ArkUI_SwiperDigitIndicator} is supported since API version 16. \n
+    *
+    */
     NODE_SWIPER_INDICATOR,
 
     /**
@@ -5564,6 +5589,23 @@ typedef enum {
      * @since 15
      */
     NODE_SWIPER_PAGE_FLIP_MODE,
+    
+    /**
+     * @brief Defines the minimum main axis size of child element for swiper to works out the display count.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: minimum main axis size of the child element, Unit: vp. \n
+     * .value[1]?.i32: whether to turn pages by group. The value <b>0</b> means to turn pages by child element,
+     * and <b>1</b> means to turn pages by group. The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: minimum main axis size of the child element, Unit: vp. \n
+     * .value[1].i32: whether to turn pages by group. \n
+     *
+     * @since 16
+     */
+    NODE_SWIPER_AUTO_FILL,
 
     /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
