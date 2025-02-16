@@ -58,6 +58,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
+#include "base/thread/task_dependency_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
@@ -2441,7 +2442,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetAccessibilityEventCallback(accessibilityEventCallback);
 
     if (GetSettings().usePlatformAsUIThread) {
-        FrameReport::GetInstance().Init();
+        std::string frameReportInitTaskKey = "FrameReportInit";
+        TaskDependencyManager::GetInstance()->PostTaskToBg([] {
+                ACE_SCOPED_TRACE("FrameReport INIT");
+                FrameReport::GetInstance().Init();
+            }, frameReportInitTaskKey);
     } else {
         taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI,
             "ArkUIFrameReportInit", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));

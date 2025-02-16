@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H
 
+#include <atomic>
 #include <cstdarg>
 #include <cstdint>
 #include <cstring>
@@ -303,6 +304,10 @@ private:
 
     static LogLevel level_;
 };
+
+static std::atomic<bool> skipBacktrace = false;
+
+void SetSkipBacktrace(bool inputFlag);
 
 bool LogBacktrace(size_t maxFrameNums = 256);
 } // namespace OHOS::Ace

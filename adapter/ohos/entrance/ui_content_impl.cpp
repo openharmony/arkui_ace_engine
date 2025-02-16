@@ -87,6 +87,8 @@
 #include "base/log/log.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/thread/background_task_executor.h"
+#include "base/thread/task_dependency_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
@@ -2172,7 +2174,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
 
-    InitializeSafeArea(container);
+    std::string safeAreaTaskKey = "SafeArea";
+    TaskDependencyManager::GetInstance()->PostTaskToBg([container, this] {
+            OHOS::Ace::SetSkipBacktrace(true);
+            this->InitializeSafeArea(container);
+            OHOS::Ace::SetSkipBacktrace(false);
+        },
+        safeAreaTaskKey);
+
     InitializeDisplayAvailableRect(container);
     InitDragSummaryMap(container);
 
@@ -2195,10 +2204,26 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(",abilityName:")
                                                      .append(abilityName));
     UpdateFontScale(context->GetConfiguration());
-    auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
-    if (thpExtraManager->Init()) {
-        pipeline->SetTHPExtraManager(thpExtraManager);
-    }
+    std::string unimportantTaskKey = "UnimportantTask";
+    TaskDependencyManager::GetInstance()->PostTaskToBg([pipelineWeak = WeakPtr(pipeline)] {
+            auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+            if (thpExtraManager->Init()) {
+                auto pipeline = pipelineWeak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [pipelineWeak = WeakPtr(pipeline), thpExtraManager] () {
+                        auto pipeline = pipelineWeak.Upgrade();
+                        CHECK_NULL_VOID(pipeline);
+                        pipeline->SetTHPExtraManager(thpExtraManager);
+                    },
+                    TaskExecutor::TaskType::UI,
+                    "thpExtraManagerInitFinish");
+            }
+        },
+        unimportantTaskKey);
+    TaskDependencyManager::GetInstance()->Wait(safeAreaTaskKey);
     return errorCode;
 }
 
