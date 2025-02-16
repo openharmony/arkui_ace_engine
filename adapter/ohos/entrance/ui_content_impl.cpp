@@ -732,8 +732,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
     StoreConfiguration(context->GetConfiguration());
-}
-
     
     if (bundleName_ == "com.example.trivial.application") { 
         void* handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
@@ -770,6 +768,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
         dlclose(handle);
     }
     LOGI("Koala end of function 770");
+}
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
     : runtime_(runtime), isFormRender_(isCard)
