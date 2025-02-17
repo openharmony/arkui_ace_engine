@@ -93,7 +93,7 @@ bool IsTouchExplorationEnabled(const RefPtr<FrameNode>& root)
     CHECK_NULL_RETURN(pipeline, true);
     auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(jsAccessibilityManager, true);
-    auto accessibilityWorkMode = jsAccessibilityManager->GetAccessibilityWorkMode();
+    auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
     return accessibilityWorkMode.isTouchExplorationEnabled;
 }
 
