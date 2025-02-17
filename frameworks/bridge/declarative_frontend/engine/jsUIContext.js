@@ -1216,6 +1216,13 @@ class AtomicServiceBar {
         this.ohos_atomicServiceBar.setIconColor(color);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getBarRect() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let rect = this.ohos_atomicServiceBar.getBarRect();
+        __JSScopeUtil__.restoreInstanceId();
+        return rect;
+    }
 }
 
 class OverlayManager {
