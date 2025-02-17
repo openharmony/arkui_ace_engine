@@ -44,7 +44,7 @@ void CheckBoxGroupPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(checkBoxTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -65,6 +65,18 @@ void CheckBoxGroupPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
+
+    auto checkBoxGroupPaintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(checkBoxGroupPaintProperty);
+    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupSelectedColorFlagByUser()) {
+        checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColor(checkBoxTheme->GetActiveColor());
+    }
+    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupUnSelectedColorFlagByUser()) {
+        checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColor(checkBoxTheme->GetInactiveColor());
+    }
+    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupCheckMarkColorFlagByUser()) {
+        checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColor(checkBoxTheme->GetPointColor());
+    }
 }
 
 void CheckBoxGroupPattern::SetAccessibilityAction()
@@ -521,7 +533,9 @@ FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
     auto activeColor = checkBoxTheme->GetActiveColor();
     FocusPaintParam focusPaintParam;
@@ -559,7 +573,9 @@ void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parame
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(checkBoxTheme);
     paintParameters.borderWidth = checkBoxTheme->GetBorderWidth().ConvertToPx();
     paintParameters.borderRadius = checkBoxTheme->GetBorderRadius().ConvertToPx();

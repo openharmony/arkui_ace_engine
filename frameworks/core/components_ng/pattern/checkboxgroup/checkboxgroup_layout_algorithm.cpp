@@ -22,7 +22,8 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    InitializeParam(layoutWrapper->GetHostNode()->GetThemeScopeId());
+    auto themeScopeId = layoutWrapper->GetHostNode() ? layoutWrapper->GetHostNode()->GetThemeScopeId() : 0;
+    InitializeParam(themeScopeId);
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {

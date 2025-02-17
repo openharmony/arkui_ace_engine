@@ -29,22 +29,10 @@ class InspectorFilter;
 
 class CheckBoxGroupPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintProperty, PaintProperty)
-private:
-    WeakPtr<FrameNode> host_;
 
 public:
     CheckBoxGroupPaintProperty() = default;
     ~CheckBoxGroupPaintProperty() override = default;
-
-    void SetHost(const WeakPtr<FrameNode>& host)
-    {
-        host_ = host;
-    }
-
-    RefPtr<FrameNode> GetHost() const
-    {
-        return host_.Upgrade();
-    }
 
     RefPtr<PaintProperty> Clone() const override
     {

@@ -94,6 +94,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest001
     theme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
     theme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. Call InitializeParam
@@ -124,6 +125,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest002
     theme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
     theme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. Call InitializeParam
@@ -158,6 +160,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest003
     theme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
     theme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. Call InitializeParam
@@ -192,6 +195,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest004
     theme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
     theme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. Call InitializeParam
@@ -352,6 +356,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest009
     theme->defaultWidth_ = Dimension(CHECKBOXGROUP_COMPONENT_WIDTH);
     theme->defaultHeight_ = Dimension(CHECKBOXGROUP_COMPONENT_WIDTH / 2);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto layoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
 
@@ -396,6 +401,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest001
     theme->defaultWidth_ = Dimension(CHECKBOXGROUP_COMPONENT_WIDTH);
     theme->defaultHeight_ = Dimension(CHECKBOXGROUP_COMPONENT_WIDTH / 2);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto layoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
 

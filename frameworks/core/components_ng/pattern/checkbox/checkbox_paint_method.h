@@ -38,7 +38,8 @@ public:
             auto offset = paintWrapper->GetContentOffset();
             auto pipeline = PipelineBase::GetCurrentContextSafely();
             CHECK_NULL_RETURN(pipeline, nullptr);
-            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+            auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetUnsafeHost() : nullptr;
+            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
             CHECK_NULL_RETURN(checkBoxTheme, nullptr);
             auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
             CHECK_NULL_RETURN(paintProperty, nullptr);
@@ -129,7 +130,7 @@ public:
         if (paintProperty->HasCheckBoxUnSelectedColor()) {
             auto pipeline = PipelineBase::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipeline);
-            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
             CHECK_NULL_VOID(checkBoxTheme);
             checkboxModifier_->SetHasUnselectedColor(
                 paintProperty->GetCheckBoxUnSelectedColorValue() != checkBoxTheme->GetInactiveColor());
