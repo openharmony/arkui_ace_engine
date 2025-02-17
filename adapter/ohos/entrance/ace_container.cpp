@@ -3808,7 +3808,7 @@ void AceContainer::RegisterUIExtDataConsumer()
                                         std::optional<AAFwk::Want>& reply) -> int32_t {
         auto container = weak.Upgrade();
         CHECK_NULL_RETURN(container, 0);
-        container->DispatchUIExtDataConsume(static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+        container->DispatchUIExtDataConsume(static_cast<NG::UIContentBusinessCode>(customId), data, reply);
         return 0;
     };
     auto result = dataHandler->RegisterDataConsumer(SubSystemId::ARKUI_UIEXT, std::move(uiExtDataConsumeCallback));
@@ -3831,14 +3831,13 @@ void AceContainer::UnRegisterUIExtDataConsumer()
 }
 
 void AceContainer::DispatchUIExtDataConsume(
-    NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+    NG::UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
 {
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(taskExecutor_);
-    AAFwk::Want businessData = data;
     if (reply.has_value()) {
         taskExecutor_->PostSyncTask(
-            [weak = WeakClaim(this), code, businessData, &reply] {
+            [weak = WeakClaim(this), code, data, &reply] {
                 auto container = weak.Upgrade();
                 CHECK_NULL_VOID(container);
                 ContainerScope scop(container->GetInstanceId());
@@ -3847,12 +3846,12 @@ void AceContainer::DispatchUIExtDataConsume(
                 CHECK_NULL_VOID(ngPipeline);
                 auto uiExtManager = ngPipeline->GetUIExtensionManager();
                 CHECK_NULL_VOID(uiExtManager);
-                uiExtManager->DispatchBusinessDataConsumeReply(code, businessData, reply);
+                uiExtManager->DispatchBusinessDataConsumeReply(code, data, reply);
             },
             TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeReplyCallback");
     } else {
         taskExecutor_->PostTask(
-            [weak = WeakClaim(this), code, businessData] {
+            [weak = WeakClaim(this), code, data] {
                 auto container = weak.Upgrade();
                 CHECK_NULL_VOID(container);
                 ContainerScope scop(container->GetInstanceId());
@@ -3861,7 +3860,7 @@ void AceContainer::DispatchUIExtDataConsume(
                 CHECK_NULL_VOID(ngPipeline);
                 auto uiExtManager = ngPipeline->GetUIExtensionManager();
                 CHECK_NULL_VOID(uiExtManager);
-                uiExtManager->DispatchBusinessDataConsume(code, businessData);
+                uiExtManager->DispatchBusinessDataConsume(code, data);
             },
             TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeCallback");
     }
