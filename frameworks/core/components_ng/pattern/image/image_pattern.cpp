@@ -1407,6 +1407,8 @@ void ImagePattern::DumpRenderInfo()
     if (fillColor.has_value()) {
         auto color = fillColor.value();
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
+    } else {
+        DumpLog::GetInstance().AddDesc("fillColor: Null");
     }
 
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;

@@ -2038,6 +2038,18 @@ class TransitionEffect {
   }
 }
 
+class ColorContent {
+  colorContent_ = '';
+
+  constructor(colorContent) {
+    this.colorContent_ = colorContent;
+  }
+
+  static get ORIGIN() {
+    return new ColorContent('ORIGIN');
+  }
+}
+
 class TextMenuItemId {
   id_ = '';
 
