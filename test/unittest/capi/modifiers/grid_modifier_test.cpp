@@ -368,7 +368,8 @@ HWTEST_F(GridModifierTest, setGridOptionsGetRectByIndex, TestSize.Level1)
         arkRes.value1 = ArkValue<Ark_Number>(1);
         CallbackHelper(continuation).Invoke(arkRes);
     };
-    auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number_Number_Number>(nullptr, inputCallback, expectedResId);
+    auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number_Number_Number>
+                                                    (nullptr, inputCallback, expectedResId);
     auto optFunc = Converter::ArkValue<Opt_Callback_Number_Tuple_Number_Number_Number_Number>(func);
     Opt_Scroller inputValue0;
     Ark_GridLayoutOptions layoutOptions;
