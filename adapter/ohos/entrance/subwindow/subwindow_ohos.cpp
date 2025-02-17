@@ -143,7 +143,11 @@ void SubwindowOhos::SetToastWindowOption(RefPtr<Platform::AceContainer>& parentC
 {
     if (toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TOAST);
+        if (GetIsSelectOverlaySubWindow()) {
+            windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TEXT_MENU);
+        } else {
+            windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TOAST);
+        }
     }
     windowOption->SetWindowType(toastWindowType);
     if (parentContainer->IsUIExtensionWindow()) {
@@ -239,9 +243,10 @@ void SubwindowOhos::InitContainer()
         } else if (GetAboveApps()) {
             auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
             isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-            auto mainWindowId = GetMainWindowId();
+            auto isSelectOverlay = GetIsSelectOverlaySubWindow();
+            auto mainWindowId = isSelectOverlay ? parentWindowId : GetMainWindowId();
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
-            windowTag = "TOAST_TOPMOST_";
+            windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {

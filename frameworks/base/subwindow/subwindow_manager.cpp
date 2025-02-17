@@ -1396,7 +1396,7 @@ int32_t SubwindowManager::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlay
     // Get the parent window ID before the asynchronous operation
     auto mainWindowId = container->GetParentMainWindowId(windowId);
     auto subwindow = GetOrCreateSelectOverlayWindow(containerId, windowType, mainWindowId);
-    if (!subwindow) {
+    if (!IsSubwindowExist(subwindow)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Get or create SelectOverlay subwindow failed.");
         return -1;
     }
@@ -1440,6 +1440,12 @@ void SubwindowManager::AddSelectOverlaySubwindow(int32_t instanceId, RefPtr<Subw
         return;
     }
 
+    if (!subwindow->GetIsRosenWindowCreate()) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add selectOverlay subwindow failed, subwindow is invalid.");
+        subwindow->DestroyWindow();
+        return;
+    }
+
     SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
         "Add selectOverlay subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,
@@ -1463,8 +1469,15 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSelectOverlayWindow(
             TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Create selectOverlay subwindow failed.");
             return nullptr;
         }
+        subwindow->SetIsSelectOverlaySubWindow(true);
         subwindow->SetToastWindowType(windowType);
         subwindow->SetMainWindowId(mainWindowId);
+        subwindow->InitContainer();
+        if (!subwindow->GetIsRosenWindowCreate()) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Create selectOverlay subwindow failed, subwindow is invalid.");
+            subwindow->DestroyWindow();
+            return nullptr;
+        }
         AddSelectOverlaySubwindow(containerId, subwindow);
     }
     return subwindow;
