@@ -1405,4 +1405,9 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool value)
 {
     // cross platform is not support now;
 }
+
+void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
+{
+    // cross platform is not support now;
+}
 } // namespace OHOS::Ace::NG

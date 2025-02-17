@@ -1349,4 +1349,11 @@ void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
 }
+
+void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
 } // namespace OHOS::Ace::NG
