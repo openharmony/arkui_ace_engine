@@ -3309,6 +3309,8 @@ struct ArkUIGridItemModifier {
     void (*setGridItemColumnEnd)(ArkUINodeHandle node, ArkUI_Int32 columnEnd);
     void (*resetGridItemColumnEnd)(ArkUINodeHandle node);
     void (*setGridItemOptions)(ArkUINodeHandle node, ArkUI_Int32 style);
+    void (*setGridItemOnSelect)(ArkUINodeHandle node, void* callback);
+    void (*resetGridItemOnSelect)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollableModifier {
@@ -3427,6 +3429,8 @@ struct ArkUIListItemModifier {
     void (*resetSelectable)(ArkUINodeHandle node);
     void (*setListItemSwipeAction)(ArkUINodeHandle node, ArkUIListItemSwipeActionOptionHandle option);
     void (*resetListItemSwipeAction)(ArkUINodeHandle node);
+    void (*setListItemOnSelectCallback)(ArkUINodeHandle node, void* callback);
+    void (*resetListItemOnSelectCallback)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollBarModifier {
@@ -3507,6 +3511,20 @@ struct ArkUITabsModifier {
     void (*resetTabsOnSelected)(ArkUINodeHandle node);
     void (*setCachedMaxCount)(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode);
     void (*resetCachedMaxCount)(ArkUINodeHandle node);
+    void (*setTabsOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnChange)(ArkUINodeHandle node);
+    void (*setTabsOnTabBarClick)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnTabBarClick)(ArkUINodeHandle node);
+    void (*setTabsOnAnimationStart)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnAnimationStart)(ArkUINodeHandle node);
+    void (*setTabsOnAnimationEnd)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnAnimationEnd)(ArkUINodeHandle node);
+    void (*setTabsOnGestureSwipe)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnGestureSwipe)(ArkUINodeHandle node);
+    void (*setTabsOnContentWillChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnContentWillChange)(ArkUINodeHandle node);
+    void (*setTabsIsCustomAnimation)(ArkUINodeHandle node, ArkUI_Bool isCustom);
+    void (*resetTabsIsCustomAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {
@@ -3521,6 +3539,10 @@ struct ArkUIStepperItemModifier {
 struct ArkUITabContentModifier {
     void (*setTabContentBuilder)(ArkUINodeHandle node, ArkUI_Int32 methodId);
     void (*setTabContentLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
+    void (*setTabContentOnWillShow)(ArkUINodeHandle node, void* callback);
+    void (*resetTabContentOnWillShow)(ArkUINodeHandle node);
+    void (*setTabContentOnWillHide)(ArkUINodeHandle node, void* callback);
+    void (*resetTabContentOnWillHide)(ArkUINodeHandle node);
 };
 
 struct ArkUITabsControllerModifier {
@@ -4616,6 +4638,12 @@ struct ArkUIRefreshModifier {
     ArkUI_Float32 (*getPullDownRatio)(ArkUINodeHandle node);
     ArkUI_Float32 (*getRefreshOffset)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Bool (*getPullToRefresh)(ArkUINodeHandle node);
+    void (*setRefreshOnStateChangeCallback)(ArkUINodeHandle node, void* callback);
+    void (*resetRefreshOnStateChangeCallback)(ArkUINodeHandle node);
+    void (*setOnRefreshingCallback)(ArkUINodeHandle node, void* callback);
+    void (*resetOnRefreshingCallback)(ArkUINodeHandle node);
+    void (*setRefreshOnOffsetChangeCallback)(ArkUINodeHandle node, void* callback);
+    void (*resetRefreshOnOffsetChangeCallback)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {
@@ -4684,6 +4712,12 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetAutoCollapse)(ArkUINodeHandle node);
     void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setOnIndexerSelect)(ArkUINodeHandle node, void* callback);
+    void (*resetOnIndexerSelect)(ArkUINodeHandle node);
+    void (*setOnRequestPopupData)(ArkUINodeHandle node, void* callback);
+    void (*resetOnRequestPopupData)(ArkUINodeHandle node);
+    void (*setOnPopupSelected)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPopupSelected)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {

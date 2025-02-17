@@ -897,6 +897,7 @@ declare class ArkRefreshComponent extends ArkComponent implements RefreshAttribu
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     onStateChange(callback: (state: RefreshStatus) => void): this;
     onRefreshing(callback: () => void): this;
+    onOffsetChange(callback: Callback<number>): this;
 }
 declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
