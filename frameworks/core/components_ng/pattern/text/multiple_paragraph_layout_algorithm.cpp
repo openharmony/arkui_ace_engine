@@ -98,6 +98,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 
+    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
+    textStyle.SetSymbolType(symbolType);
+
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
     textStyle_ = textStyle;

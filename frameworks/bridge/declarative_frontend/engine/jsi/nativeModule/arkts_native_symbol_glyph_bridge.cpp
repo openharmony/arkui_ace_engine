@@ -29,6 +29,7 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
 } // namespace
 
 ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -217,7 +218,14 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolGlyphInitialize(ArkUIRuntimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     uint32_t symbolId = 0;
     ArkTSUtils::ParseJsSymbolId(vm, valueArg, symbolId);
-    GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolGlyphInitialize(nativeNode, symbolId);
+    if (symbolId > SYSTEM_SYMBOL_BOUNDARY) {
+        std::string symbolFontFamilyName;
+        ArkTSUtils::ParseJsSymbolFontFamilyName(vm, valueArg, symbolFontFamilyName);
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setCustomSymbolGlyphInitialize(nativeNode, symbolId,
+            symbolFontFamilyName.c_str());
+    } else {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolGlyphInitialize(nativeNode, symbolId);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

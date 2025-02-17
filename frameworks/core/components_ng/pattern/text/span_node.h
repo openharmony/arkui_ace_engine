@@ -217,6 +217,7 @@ public:
     int32_t selectedStart = -1; // relative offset from span, [selectedStart, selectedEnd)
     int32_t selectedEnd = -1;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
+    bool UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle);
     void UpdateSymbolSpanParagraph(
         const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder,
         bool isDragging = false);
@@ -470,6 +471,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
     DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolType, SymbolType);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);

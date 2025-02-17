@@ -1315,6 +1315,8 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->UpdateSymbolColorList(options.style.value().GetSymbolColorList());
         spanNode->UpdateSymbolRenderingStrategy(options.style.value().GetRenderStrategy());
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
+        spanNode->UpdateSymbolType(options.style.value().GetSymbolType());
+        spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = u"  ";
