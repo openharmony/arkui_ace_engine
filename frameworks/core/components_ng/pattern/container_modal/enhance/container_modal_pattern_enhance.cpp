@@ -548,8 +548,8 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
     CHECK_NULL_RETURN(menuList, nullptr);
     auto subWindowManger = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subWindowManger, nullptr);
-    if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
-            !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
+    auto menuSubwindow = subWindowManger->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    if ((!menuSubwindow || !menuSubwindow->GetShown())) {
         ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
         MenuParam menuParam {};
         menuParam.type = MenuType::CONTEXT_MENU;

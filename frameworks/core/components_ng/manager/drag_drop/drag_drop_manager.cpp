@@ -1942,9 +1942,8 @@ OffsetF DragDropManager::GetTouchOffsetRelativeToSubwindow(int32_t containerId, 
     auto windowOffset = window->GetCurrentWindowRect().GetOffset();
     touchOffset.SetX(touchOffset.GetX() + windowOffset.GetX());
     touchOffset.SetY(touchOffset.GetY() + windowOffset.GetY());
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(
-        containerId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(containerId)
-                                           : containerId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId, SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subwindow, OffsetF(x, y));
     auto subwindowOffset = subwindow->GetWindowRect().GetOffset();
     touchOffset.SetX(touchOffset.GetX() - subwindowOffset.GetX());
@@ -2005,7 +2004,7 @@ float DragDropManager::GetCurrentDistance(float x, float y)
     auto distance = sqrt(pow(curPointerOffset_.GetX() - x, 2) + pow(curPointerOffset_.GetY() - y, 2));
     CHECK_NULL_RETURN(info_.imageNode, distance);
     auto containerId = Container::CurrentId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subwindow, distance);
     auto overlayManager = subwindow->GetOverlayManager();
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(info_.imageNode);
@@ -2515,8 +2514,8 @@ double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& 
 
 const RefPtr<NG::OverlayManager> DragDropManager::GetDragAnimationOverlayManager(int32_t containerId)
 {
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId >= MIN_SUBCONTAINER_ID ?
-        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId, SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subwindow, nullptr);
     return subwindow->GetOverlayManager();
 }

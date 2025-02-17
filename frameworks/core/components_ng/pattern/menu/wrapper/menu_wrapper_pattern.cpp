@@ -688,7 +688,7 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     if (GetIsSelectOverlaySubWindowWrapper()) {
         subwindowManager->SetSelectOverlayHotAreas(rects, host->GetId(), GetContainerId());
     } else {
-        subwindowManager->SetHotAreas(rects, host->GetId(), GetContainerId());
+        subwindowManager->SetHotAreas(rects, SubwindowType::TYPE_MENU, host->GetId(), GetContainerId());
     }
 }
 

@@ -37,6 +37,16 @@ enum class ToastWindowType {
     TOAST_WINDOW_COUNT
 };
 
+enum class SubwindowType {
+    TYPE_SYSTEM_TOP_MOST_TOAST = 0,
+    TYPE_TOP_MOST_TOAST,
+    TYPE_MENU,
+    TYPE_POPUP,
+    TYPE_DIALOG,
+    TYPE_SELECT_MENU,
+    SUB_WINDOW_TYPE_COUNT,
+};
+
 class ACE_EXPORT Subwindow : public AceType {
     DECLARE_ACE_TYPE(Subwindow, AceType)
 
