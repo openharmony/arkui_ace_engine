@@ -95,6 +95,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
+    void MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;

@@ -2529,8 +2529,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     }
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
     BeforeShowDialog(dialog);
-    auto levelOrder =
-        dialogProps.levelOrder.has_value() ? dialogProps.levelOrder : std::make_optional(LevelOrder::ORDER_DEFAULT);
+    auto levelOrder = dialogProps.levelOrder;
     if (dialogProps.transitionEffect != nullptr) {
         SetDialogTransitionEffect(dialog, levelOrder);
     } else {
@@ -2560,8 +2559,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     BeforeShowDialog(dialog);
-    auto levelOrder =
-        dialogProps.levelOrder.has_value() ? dialogProps.levelOrder : std::make_optional(LevelOrder::ORDER_DEFAULT);
+    auto levelOrder = dialogProps.levelOrder;
     if (dialogProps.transitionEffect != nullptr) {
         SetDialogTransitionEffect(dialog, levelOrder);
     } else {
@@ -2691,8 +2689,7 @@ void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
     }
 
     callback(showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId());
-    auto levelOrder =
-        dialogProps.levelOrder.has_value() ? dialogProps.levelOrder : std::make_optional(LevelOrder::ORDER_DEFAULT);
+    auto levelOrder = dialogProps.levelOrder;
     if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
         dialogProps.maskTransitionEffect != nullptr) {
         SetDialogTransitionEffect(dialog, levelOrder);
@@ -2936,6 +2933,40 @@ RefPtr<FrameNode> OverlayManager::GetPrevOverlayNodeWithOrder(std::optional<doub
     auto orderOverlayNode = prevNode->GetParent();
     CHECK_NULL_RETURN(orderOverlayNode, nullptr);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get prev OrderOverlayNode with order. nodeId: %{public}d",
+        orderOverlayNode->GetId());
+    return DynamicCast<FrameNode>(orderOverlayNode);
+}
+
+RefPtr<FrameNode> OverlayManager::GetBottomOrderFirstNode(std::optional<double> levelOrder)
+{
+    if (!levelOrder.has_value()) {
+        return nullptr;
+    }
+
+    for (auto iter = dialogLevelOrderMap_.begin(); iter != dialogLevelOrderMap_.end(); iter++) {
+        auto& nodeVector = iter->second;
+        if (nodeVector.empty()) {
+            continue;
+        }
+
+        auto nodeIter = nodeVector.begin();
+        return DynamicCast<FrameNode>(*nodeIter);
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> OverlayManager::GetBottomOrderFirstOverlayNode(std::optional<double> levelOrder)
+{
+    if (!levelOrder.has_value()) {
+        return nullptr;
+    }
+
+    auto nextNode = GetBottomOrderFirstNode(levelOrder);
+    CHECK_NULL_RETURN(nextNode, nullptr);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get next FrameNode with order. nodeId: %{public}d", nextNode->GetId());
+    auto orderOverlayNode = nextNode->GetParent();
+    CHECK_NULL_RETURN(orderOverlayNode, nullptr);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get next OrderOverlayNode with order. nodeId: %{public}d",
         orderOverlayNode->GetId());
     return DynamicCast<FrameNode>(orderOverlayNode);
 }
@@ -6715,6 +6746,12 @@ RefPtr<FrameNode> OverlayManager::CreateOverlayNodeWithOrder(std::optional<doubl
         return orderOverlayNode;
     }
 
+    auto nextNode = GetBottomOrderFirstOverlayNode(levelOrder);
+    if (nextNode) {
+        rootNode->AddChildBefore(orderOverlayNode, nextNode);
+        return orderOverlayNode;
+    }
+
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto stageManager = pipelineContext->GetStageManager();
@@ -7525,9 +7562,16 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
     if (prevNode) {
         TAG_LOGI(AceLogTag::ACE_DIALOG, "Get prev FrameNode with order. nodeId: %{public}d", prevNode->GetId());
         node->MountToParentAfter(rootNode, prevNode);
-    } else {
-        node->MountToParent(rootNode);
+        return;
     }
+
+    auto nextNode = GetBottomOrderFirstNode(levelOrder);
+    if (nextNode) {
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "Get next FrameNode with order. nodeId: %{public}d", nextNode->GetId());
+        node->MountToParentBefore(rootNode, nextNode);
+        return;
+    }
+    node->MountToParent(rootNode);
 }
 
 void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node)
@@ -7574,11 +7618,23 @@ bool OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
         if (prevNode) {
             TAG_LOGI(AceLogTag::ACE_DIALOG, "Get prev FrameNode with order. nodeId: %{public}d", prevNode->GetId());
             serviceContainer->AddChildAfter(node, prevNode);
-        } else {
-            auto childNode = FindChildNodeByKey(child, "AtomicServiceMenubarRowId");
-            CHECK_NULL_RETURN(childNode, false);
-            serviceContainer->AddChildBefore(node, childNode);
+            node->MarkModifyDone();
+            node->MarkDirtyNode();
+            return true;
         }
+
+        auto nextNode = GetBottomOrderFirstNode(levelOrder);
+        if (nextNode) {
+            TAG_LOGI(AceLogTag::ACE_DIALOG, "Get next FrameNode with order. nodeId: %{public}d", nextNode->GetId());
+            serviceContainer->AddChildBefore(node, nextNode);
+            node->MarkModifyDone();
+            node->MarkDirtyNode();
+            return true;
+        }
+
+        auto childNode = FindChildNodeByKey(child, "AtomicServiceMenubarRowId");
+        CHECK_NULL_RETURN(childNode, false);
+        serviceContainer->AddChildBefore(node, childNode);
         node->MarkModifyDone();
         node->MarkDirtyNode();
         return true;
