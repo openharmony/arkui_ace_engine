@@ -65,6 +65,7 @@ struct FocusEvent {
     FocusIntension intension;
     const NonPointerEvent& event;
     static FocusIntension GetFocusIntension(const NonPointerEvent& event);
+    static FocusIntension GetFocusIntensionFromKey(KeyIntention keyIntention);
 };
 
 class ACE_EXPORT FocusCallbackEvents : public virtual AceType {

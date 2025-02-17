@@ -61,7 +61,12 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
             return FocusIntension::SPACE;
         default:;
     }
-    switch (keyEvent.keyIntention) {
+    return GetFocusIntensionFromKey(keyEvent.keyIntention);
+}
+
+FocusIntension FocusEvent::GetFocusIntensionFromKey(KeyIntention keyIntention)
+{
+    switch (keyIntention) {
         case KeyIntention::INTENTION_SELECT:
             return FocusIntension::SELECT;
         case KeyIntention::INTENTION_ESCAPE:
