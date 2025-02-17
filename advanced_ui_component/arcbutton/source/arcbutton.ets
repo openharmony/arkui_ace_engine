@@ -131,7 +131,7 @@ class Constants {
   public static readonly TEXT_HORIZONTAL_MARGIN = 24;
   public static readonly TEXT_MARGIN_TOP = 10;
   public static readonly TEXT_MARGIN_BOTTOM = 16;
-  public static readonly EMPHASIZED_NORMAL_BTN_COLOR = $r('sys.color.comp_background_tertiary');
+  public static readonly EMPHASIZED_NORMAL_BTN_COLOR = $r('sys.color.comp_background_emphasize');
   public static readonly EMPHASIZED_TEXT_COLOR = '#FFFFFF';
   public static readonly EMPHASIZED_PRESSED_BTN_COLOR = '#357FFF';
   public static readonly EMPHASIZED_DISABLE_BTN_COLOR = '#1F71FF';

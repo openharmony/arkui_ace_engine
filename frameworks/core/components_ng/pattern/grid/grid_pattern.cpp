@@ -248,11 +248,11 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const GestureEvent& info)
+bool GridPattern::IsItemSelected(float offsetX, float offsetY)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(offsetX, offsetY);
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
@@ -381,7 +381,8 @@ float GridPattern::GetMainGap() const
 bool GridPattern::IsFadingBottom() const
 {
     float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
-    if (LessNotEqual(info_.totalHeightOfItemsInView_, mainSize) && info_.startIndex_ == 0) {
+    if (info_.startIndex_ == 0 && (info_.endIndex_ == info_.childrenCount_ - 1) &&
+        LessNotEqual(info_.totalHeightOfItemsInView_, mainSize)) {
         return Positive(info_.currentOffset_);
     } else {
         return !info_.offsetEnd_;

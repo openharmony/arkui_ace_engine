@@ -159,10 +159,10 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
     CHECK_NULL_VOID(buttonTheme);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childWrapper);
-    auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
-    childWrapper->Measure(childConstraint);
-    auto textSize = childWrapper->GetGeometryNode()->GetContentSize();
     if (buttonLayoutProperty->HasFontSize() || buttonLayoutProperty->HasControlSize()) {
+        auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+        childWrapper->Measure(childConstraint);
+        auto textSize = childWrapper->GetGeometryNode()->GetContentSize();
         // Fonsize is set. When the font height is larger than the button height, make the button fit the font
         // height.
         if (GreatOrEqual(textSize.Height(), layoutConstraint.maxSize.Height())) {

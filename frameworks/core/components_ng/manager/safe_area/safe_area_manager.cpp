@@ -235,12 +235,18 @@ bool SafeAreaManager::IsAtomicService() const
 
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 {
+    if (windowTypeConfig_.isSceneBoardWindow && scbSystemSafeArea_.has_value()) {
+        return scbSystemSafeArea_.value();
+    }
     return systemSafeArea_;
 }
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
     if (IsSafeAreaValid() && useCutout_) {
+        if (windowTypeConfig_.isSceneBoardWindow && scbCutoutSafeArea_.has_value()) {
+            return scbCutoutSafeArea_.value();
+        }
         return cutoutSafeArea_;
     }
     return {};
@@ -248,6 +254,9 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeAreaWithoutProcess() const
 {
+    if (windowTypeConfig_.isSceneBoardWindow && scbCutoutSafeArea_.has_value()) {
+        return scbCutoutSafeArea_.value();
+    }
     return cutoutSafeArea_;
 }
 
@@ -271,16 +280,8 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
     auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
-    return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
-}
-
-// Effective only in API 16 and later versions
-SafeAreaInsets SafeAreaManager::GetScbSafeArea() const
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, {});
     if (!windowTypeConfig_.isSceneBoardWindow) {
-        return GetSafeAreaWithoutProcess();
+        return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
     }
     SafeAreaInsets scbSafeArea;
     if (scbSystemSafeArea_.has_value()) {
@@ -389,6 +390,17 @@ std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
     std::vector<WeakPtr<FrameNode>> result;
     std::copy(needExpandNodes_.begin(), needExpandNodes_.end(), std::back_inserter(result));
     return result;
+}
+
+void SafeAreaManager::SetKeyboardInfo(float height)
+{
+    SetRawKeyboardHeight(height);
+    keyboardOrientation_ = -1;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    keyboardOrientation_ = static_cast<int32_t>(displayInfo->GetRotation());
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)

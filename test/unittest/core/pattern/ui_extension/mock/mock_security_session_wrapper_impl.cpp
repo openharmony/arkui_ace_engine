@@ -276,13 +276,13 @@ void SecuritySessionWrapperImpl::NotifyUieDump(
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     return false;
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessData(
-    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     return false;
 }

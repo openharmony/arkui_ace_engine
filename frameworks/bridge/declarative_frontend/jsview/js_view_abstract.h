@@ -166,6 +166,12 @@ public:
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void MenuDefaultParam(NG::MenuParam& menuParam);
+    static void ParseContentMenuCommonParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam);
+    static int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId);
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+    static int32_t CloseMenu(const RefPtr<NG::UINode>& customNode);
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
@@ -268,7 +274,9 @@ public:
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
+    static void JsOnAxisEvent(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
+    static void JsOnHoverMove(const JSCallbackInfo& info);
     static void JsOnAccessibilityHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
@@ -278,6 +286,7 @@ public:
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
+    static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
@@ -366,9 +375,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void JsConstraintSize(const JSCallbackInfo& info);
     static void JsLayoutPriority(const JSCallbackInfo& info);
-    static void JsPixelRound(const JSCallbackInfo& info);
     static void JsLayoutWeight(const JSCallbackInfo& info);
-    static void JsChainWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
@@ -431,6 +438,7 @@ public:
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsTabStop(const JSCallbackInfo& info);
+    static void JsNextFocus(const JSCallbackInfo& info);
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);
@@ -464,6 +472,7 @@ public:
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
     static void JsAccessibilityDefaultFocus(const JSCallbackInfo& info);
     static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
+    static void JsAccessibilityScrollTriggerable(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -509,6 +518,7 @@ public:
     static void JsNotifyDragStartRequest(const JSCallbackInfo& info);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
+    static void ParseAppearDialogCallback(const JSCallbackInfo& info, DialogProperties& dialogProperties);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static RefPtr<PipelineBase> GetPipelineContext()
@@ -660,6 +670,8 @@ public:
         NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 

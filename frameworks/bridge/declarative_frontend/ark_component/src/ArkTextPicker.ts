@@ -49,8 +49,10 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
   onCancel(callback: () => void): this {
     throw new Error('Method not implemented.');
   }
-  onChange(callback: (value: string | string[], index: number | number[]) => void): this {
-    throw new Error('Method not implemented.');
+  onChange(callback: Optional<OnTextPickerChangeCallback>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerOnChangeModifier.identity, TextpickerOnChangeModifier, callback);
+    return this;
   }
   selectedIndex(value: number | number[]): this {
     modifierWithKey(
@@ -86,6 +88,11 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
   digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this {
     modifierWithKey(
       this._modifiersWithKeys, TextpickerDigitalCrownSensitivityModifier.identity, TextpickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
+  onScrollStop(callback: (value: string | string[], index: number | number[]) => void) : this{
+    modifierWithKey(
+      this._modifiersWithKeys,TextpickerOnScrollStopModifier.identity,TextpickerOnScrollStopModifier,callback);
     return this;
   }
 }
@@ -344,7 +351,32 @@ class TextpickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
     }
   }
 }
-
+class TextpickerOnChangeModifier extends ModifierWithKey<Optional<OnTextPickerChangeCallback>>{
+  constructor(value: Optional<OnTextPickerChangeCallback>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetOnChange(node);
+    } else {
+      getUINativeModule().textpicker.setOnChange(node, this.value);
+    }
+  }
+}
+class TextpickerOnScrollStopModifier extends ModifierWithKey<(value: string | string[], index: number | number[]) => void>{
+  constructor(value:(value: string | string[], index: number | number[]) => void){
+     super(value);
+  }
+  static identity: Symbol = Symbol('textpickerOnScrollStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().textpicker.setOnScrollStop(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.TextPicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

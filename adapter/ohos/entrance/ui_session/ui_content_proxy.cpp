@@ -491,4 +491,30 @@ int32_t UIContentServiceProxy::SendTranslateResult(int32_t nodeId, std::string r
     }
     return NO_ERROR;
 }
+
+int32_t UIContentServiceProxy::GetCurrentImagesShowing(
+    const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetCurrentImagesShowing write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("write processId failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportServiceStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetShowingImageCallback(finishCallback);
+    if (Remote()->SendRequest(GET_CURRENT_SHOWING_IMAGE, data, reply, option) != ERR_NONE) {
+        LOGW("GetCurrentImagesShowing send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

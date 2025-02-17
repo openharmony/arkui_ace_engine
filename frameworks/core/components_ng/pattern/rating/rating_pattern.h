@@ -104,6 +104,11 @@ public:
         return state_;
     }
 
+    bool IsNeedFocusStyle()
+    {
+        return isNeedFocusStyle_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);
@@ -163,6 +168,7 @@ private:
     bool IsIndicator();
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    bool IsRatingImageReady(uint32_t imageStateCode);
 
     std::optional<RatingMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -197,6 +203,7 @@ private:
     bool hasInit_ = false;
     bool isHover_ = false;
     bool isfocus_ = false;
+    bool isNeedFocusStyle_ = false;
     double focusRatingScore_ = 0.0;
     double lastRatingScore_ = 0.0;
     RatingModifier::RatingAnimationType state_;
@@ -215,7 +222,6 @@ private:
     std::optional<ImageSourceInfo> focusBackgroundImageSourceInfo_ = std::nullopt;
     // get XTS inspector value
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

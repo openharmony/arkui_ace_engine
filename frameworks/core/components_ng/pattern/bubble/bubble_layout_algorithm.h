@@ -182,6 +182,7 @@ private:
     OffsetF AdjustPosition(const OffsetF& position, float width, float height, float space);
     OffsetF AdjustPositionNew(const OffsetF& position, float width, float height);
     OffsetF GetBubblePosition(const OffsetF& position, float xMin, float xMax, float yMin, float yMax);
+    bool CheckIfNeedRemoveArrow(float& xMin, float& xMax, float& yMin, float& yMax);
     void CheckArrowPosition(OffsetF& position, float width, float height);
     bool IsUIExtensionWindow();
     void HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);

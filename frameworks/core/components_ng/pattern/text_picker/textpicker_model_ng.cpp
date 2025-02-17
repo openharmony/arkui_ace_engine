@@ -55,6 +55,12 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = textPickerDialog.backgroundBlurStyle.value();
     }
+    if (textPickerDialog.blurStyleOption.has_value()) {
+        properties.blurStyleOption = textPickerDialog.blurStyleOption.value();
+    }
+    if (textPickerDialog.effectOption.has_value()) {
+        properties.effectOption = textPickerDialog.effectOption.value();
+    }
     if (textPickerDialog.shadow.has_value()) {
         properties.shadow = textPickerDialog.shadow.value();
     }
@@ -602,12 +608,11 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     stack->Push(textPickerNode);
     rangeValue_.clear();
-#ifdef ARKUI_WEARABLE
+
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = textPickerNode->GetRenderContext();
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
     }
-#endif
 }
 
 void TextPickerModelNG::SetIsCascade(bool isCascade)

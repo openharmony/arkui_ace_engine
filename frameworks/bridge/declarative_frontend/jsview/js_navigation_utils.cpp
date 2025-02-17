@@ -30,6 +30,7 @@ constexpr char PADDING_START_PROPERTY[] = "paddingStart";
 constexpr char PADDING_END_PROPERTY[] = "paddingEnd";
 constexpr char MAIN_TITLE_MODIFIER[] = "mainTitleModifier";
 constexpr char SUB_TITLE_MODIFIER[] = "subTitleModifier";
+constexpr char TEXT_HIDE_PROPERTY[] = "hideItemValue";
 
 void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
     const JSRef<JSObject>& itemObject)
@@ -222,6 +223,21 @@ void JSNavigationUtils::ParseToolbarOptions(const JSCallbackInfo& info, NG::Navi
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
         ParseBarOptions(info[1], options.brOptions);
+    }
+}
+
+void JSNavigationUtils::ParseHideToolBarText(const JSCallbackInfo& info, bool& hideText)
+{
+    if (info.Length() > 1) {
+        if (!info[1]->IsObject()) {
+            return;
+        }
+        auto optObj = JSRef<JSObject>::Cast(info[1]);
+        auto hideTextProperty = optObj->GetProperty(TEXT_HIDE_PROPERTY);
+        bool isHideText;
+        if (JSViewAbstract::ParseJsBool(hideTextProperty, isHideText)) {
+            hideText = isHideText;
+        }
     }
 }
 

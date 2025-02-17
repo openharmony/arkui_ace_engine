@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
@@ -185,6 +186,13 @@ public:
 
     // Get MultiModal ptr.
     virtual uintptr_t GetMutilModalPtr() const
+    {
+        return 0;
+    }
+
+    virtual void SetParentId(int32_t parentId) {}
+
+    virtual int32_t GetParentId() const
     {
         return 0;
     }
@@ -499,6 +507,11 @@ public:
         return false;
     }
 
+    virtual bool IsCrossAxisWindow()
+    {
+        return false;
+    }
+
     virtual bool IsUIExtensionWindow()
     {
         return false;
@@ -683,6 +696,16 @@ public:
         return false;
     }
 
+    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    WeakPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
+    }
+
     void SetCurrentDisplayId(uint64_t displayId)
     {
         currentDisplayId_ = displayId;
@@ -704,6 +727,13 @@ public:
         return false;
     }
 
+    virtual std::vector<Rect> GetCurrentFoldCreaseRegion();
+
+    virtual Rect GetDisplayAvailableRect() const
+    {
+        return Rect();
+    }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
@@ -721,6 +751,9 @@ protected:
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
+    // for common handler
+    WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
     std::string bundleName_;

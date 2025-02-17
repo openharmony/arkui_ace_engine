@@ -429,6 +429,11 @@ public:
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
 
+    int32_t GetLaneIdx4Divider() const
+    {
+        return laneIdx4Divider_;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -481,8 +486,10 @@ protected:
     float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
+    void ReportGetChildError(const std::string& funcName, int32_t index) const;
 
     Axis axis_ = Axis::VERTICAL;
+    int32_t laneIdx4Divider_ = 0;
     LayoutConstraintF childLayoutConstraint_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;

@@ -2400,11 +2400,11 @@ HWTEST_F(SelectOverlayManagerTestNg, IsRightClickSubWindowMenu02, TestSize.Level
 }
 
 /**
- * @tc.name: IsSeletctOverlaySubWindowMenu01
- * @tc.desc: test IsSeletctOverlaySubWindowMenu
+ * @tc.name: IsSelectOverlaySubWindowMenu01
+ * @tc.desc: test IsSelectOverlaySubWindowMenu
  * @tc.type: FUNC
  */
-HWTEST_F(SelectOverlayManagerTestNg, IsSeletctOverlaySubWindowMenu01, TestSize.Level1)
+HWTEST_F(SelectOverlayManagerTestNg, IsSelectOverlaySubWindowMenu01, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. CreateSelectOverlay
@@ -2434,15 +2434,15 @@ HWTEST_F(SelectOverlayManagerTestNg, IsSeletctOverlaySubWindowMenu01, TestSize.L
     ASSERT_NE(selectOverlayPattern, nullptr);
     selectOverlayPattern->SetIsMenuShowInSubWindow(true);
     EXPECT_EQ(selectOverlayPattern->GetIsMenuShowInSubWindow(), true);
-    EXPECT_EQ(content->IsSeletctOverlaySubWindowMenu(), true);
+    EXPECT_EQ(content->IsSelectOverlaySubWindowMenu(), true);
 }
 
 /**
- * @tc.name: IsSeletctOverlaySubWindowMenu02
- * @tc.desc: test IsSeletctOverlaySubWindowMenu
+ * @tc.name: IsSelectOverlaySubWindowMenu02
+ * @tc.desc: test IsSelectOverlaySubWindowMenu
  * @tc.type: FUNC
  */
-HWTEST_F(SelectOverlayManagerTestNg, IsSeletctOverlaySubWindowMenu02, TestSize.Level1)
+HWTEST_F(SelectOverlayManagerTestNg, IsSelectOverlaySubWindowMenu02, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. CreateSelectOverlay
@@ -2460,6 +2460,6 @@ HWTEST_F(SelectOverlayManagerTestNg, IsSeletctOverlaySubWindowMenu02, TestSize.L
     EXPECT_EQ(selectOverlayManager_->GetMenuShowMode(), TextMenuShowMode::PREFER_WINDOW);
     bool animation = true;
     content->CreateSelectOverlay(info, animation);
-    EXPECT_EQ(content->IsSeletctOverlaySubWindowMenu(), false);
+    EXPECT_EQ(content->IsSelectOverlaySubWindowMenu(), false);
 }
 } // namespace OHOS::Ace::NG

@@ -454,6 +454,8 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnWindowActivated() {}
+    virtual void OnWindowDeactivated() {}
     virtual void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) {}
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
@@ -661,6 +663,11 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, 0);
         return host->GetThemeScopeId();
+    }
+
+    virtual bool ReusedNodeSkipMeasure()
+    {
+        return false;
     }
 
     virtual void OnFocusNodeChange(FocusReason focusReason) {}

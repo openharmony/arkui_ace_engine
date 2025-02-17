@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 
+#include "base/log/event_report.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -159,6 +160,7 @@ public:
         PreviewRange replacedRange;
         bool isSpanSplit = false;
         bool needUpdateCaret = true;
+        bool previewTextExiting = false;
 
         std::string ToString() const
         {
@@ -169,6 +171,7 @@ public:
             JSON_STRING_PUT_INT(jsonValue, endOffset);
             JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
             JSON_STRING_PUT_BOOL(jsonValue, needUpdateCaret);
+            JSON_STRING_PUT_BOOL(jsonValue, previewTextExiting);
 
             return jsonValue->ToString();
         }
@@ -183,6 +186,7 @@ public:
             needReplaceText = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
             isSpanSplit = false;
+            previewTextExiting = false;
         }
 
         bool IsValid() const
@@ -221,8 +225,9 @@ public:
             touchMoveOffset.reset();
         }
 
-        void UpdateOriginCaretColor(ColorMode colorMode)
+        void UpdateOriginCaretColor()
         {
+            auto colorMode = SystemProperties::GetColorMode();
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
@@ -288,6 +293,10 @@ public:
         CHECK_NULL_VOID(property && !style.empty());
         property->UpdatePreviewTextStyle(style);
     }
+
+    int32_t CheckPreviewTextValidate(const std::string& previewTextValue, const PreviewRange range) override;
+
+    int32_t CheckPreviewTextValidate(const std::u16string& previewTextValue, const PreviewRange range) override;
 
     const Color& GetPreviewTextDecorationColor() const;
 
@@ -724,7 +733,8 @@ public:
     bool BetweenSelection(const Offset& globalOffset);
     bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+        WindowSizeChangeReason type) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
@@ -771,6 +781,7 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void RichEditorErrorReport(RichEditorInfo& info);
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
@@ -1097,7 +1108,7 @@ public:
         isStopBackPress_ = isStopBackPress;
     }
 
-    bool IsStopBackPress() const
+    bool IsStopBackPress() const override
     {
         return isStopBackPress_;
     }

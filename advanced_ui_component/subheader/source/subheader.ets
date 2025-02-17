@@ -528,7 +528,7 @@ export struct SubHeader {
   @Builder
   rightAreaParent(): void {
     if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
-      Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Button({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false }) {
         this.rightArea();
       }
       .focusable(this.operationItem ? true : false)
@@ -890,12 +890,13 @@ export struct SubHeader {
   @Builder
   ArrowStyle(): void {
     Row() {
-      Image($r('sys.media.ohos_ic_public_arrow_right'))
-        .fillColor(this.subHeaderTheme.iconArrowColor)
+      SymbolGlyph($r('sys.symbol.chevron_right'))
+        .fontSize(RIGHT_SINGLE_ICON_SIZE)
+        .fontColor([this.subHeaderTheme.iconArrowColor])
+        .draggable(false)
+        .focusable(true)
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
-        .draggable(false)
-        .matchTextDirection(true)
     }
     .justifyContent(FlexAlign.End)
   }
@@ -904,7 +905,7 @@ export struct SubHeader {
   TextArrowStyle(textArrow: OperationOption): void {
     if (textArrow && textArrow.value && textArrow.value.toString().length > 0) {
       Stack() {
-        Button({ type: ButtonType.Normal, stateEffect: false }) {
+        Button({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false }) {
           TextArrowLayout() {
             ForEach([INDEX_ZERO, INDEX_ONE], (index: number) => {
               if (index === INDEX_ZERO) {
@@ -948,12 +949,10 @@ export struct SubHeader {
       Row() {
         Button({ type: ButtonType.Normal, stateEffect: false }) {
           SymbolGlyph($r('sys.symbol.chevron_right'))
-            .fontSize(OPERATE_ITEM_LENGTH)
+            .fontSize(RIGHT_SINGLE_ICON_SIZE)
             .fontColor([this.subHeaderTheme.iconArrowColor])
             .draggable(false)
             .focusable(true)
-            .minFontScale(DEFAULT_FONT_SCALE)
-            .maxFontScale(DEFAULT_FONT_SCALE)
             .width(ARROW_ICON_WIDTH)
             .height(OPERATE_ITEM_LENGTH)
         }

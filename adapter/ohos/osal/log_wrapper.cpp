@@ -158,8 +158,16 @@ const std::string LogWrapper::GetIdWithReason()
 }
 #endif
 
+void SetSkipBacktrace(bool inputFlag)
+{
+    skipBacktrace.store(inputFlag);
+}
+
 bool LogBacktrace(size_t maxFrameNums)
 {
+    if (skipBacktrace.load()) {
+        return true;
+    }
     static const char* (*pfnGetTrace)(size_t, size_t);
 #ifdef _GNU_SOURCE
     if (!pfnGetTrace) {

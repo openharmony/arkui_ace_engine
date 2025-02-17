@@ -31,11 +31,9 @@
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#endif
-#ifdef ARKUI_WEARABLE
-#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -85,21 +83,18 @@ enum class OptionIndex {
     COLUMN_INDEX_6
 };
 
-#ifdef ARKUI_WEARABLE
-class TextPickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<int32_t> {
-#else
+
 class TextPickerColumnPattern : public LinearLayoutPattern {
-#endif
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
 
 public:
-#ifdef ARKUI_WEARABLE
-    TextPickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils(-1) {};
-#else
     TextPickerColumnPattern() : LinearLayoutPattern(true) {};
-#endif
-
-    ~TextPickerColumnPattern() override = default;
+    ~TextPickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     bool IsAtomicNode() const override
     {
@@ -419,10 +414,15 @@ public:
     }
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void StopHapticController();
-#ifndef ARKUI_WEARABLE
-    void SetSelectedMarkListener(std::function<void(int& focusId)>& listener);
-    void SetSelectedMark(bool focus, bool notify = true, bool reRender = true);
+    void SetSelectedMarkListener(std::function<void(int& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const int strColumnId);
+#ifdef SUPPORT_DIGITAL_CROWN
+    int32_t& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
 #endif
 
 private:
@@ -438,18 +438,13 @@ private:
 
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-    void SetSelectedMarkFocus();
-#ifdef ARKUI_WEARABLE
-    void SetSelectedMarkPaint(bool paint) override;
-    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
-#endif
-
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownBeginEvent(const CrownEvent& event) override;
-    void HandleCrownMoveEvent(const CrownEvent& event) override;
-    void HandleCrownEndEvent(const CrownEvent& event) override;
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
 #endif
-
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
@@ -621,6 +616,15 @@ private:
     uint32_t currentEnterIndex_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<TextPickerColumnPattern>;
+    PickerColumnPatternCircleUtils<TextPickerColumnPattern> *circleUtils_ = nullptr;
+    int32_t selectedColumnId_ = -1;
+    std::function<void(int& selectedColumnId)> focusedListerner_ = nullptr;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

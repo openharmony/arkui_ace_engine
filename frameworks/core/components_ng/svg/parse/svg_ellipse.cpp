@@ -54,7 +54,8 @@ RSRecordingPath SvgEllipse::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgEllipse::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    if (path_.has_value() && lengthRule_ == lengthRule) {
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
         return path_.value();
     }
     auto rx = GreatNotEqual(ellipseAttr_.rx.Value(), 0.0) ?
@@ -70,6 +71,10 @@ RSRecordingPath SvgEllipse::AsPath(const SvgLengthScaleRule& lengthRule)
 
     RSRect rect = RSRect(left, top, rx + rx + left, ry + ry + top);
     path.AddOval(rect);
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
+    }
     return path;
 }
 

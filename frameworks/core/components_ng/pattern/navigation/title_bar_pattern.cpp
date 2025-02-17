@@ -1646,6 +1646,7 @@ void TitleBarPattern::HandleMenuLongPressActionEnd()
         CHECK_NULL_VOID(theme);
         renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
         renderContext->ResetBlendBgColor();
+        moveIndex_.reset();
     }
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

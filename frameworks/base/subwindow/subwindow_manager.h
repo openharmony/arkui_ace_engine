@@ -35,10 +35,11 @@ namespace OHOS::Ace {
 struct SubwindowKey {
     int32_t instanceId;
     uint64_t displayId;
+    FoldStatus foldStatus;
 
     bool operator==(const SubwindowKey& other) const
     {
-        return other.instanceId == instanceId && other.displayId == displayId;
+        return other.instanceId == instanceId && other.displayId == displayId && other.foldStatus == foldStatus;
     }
 
     std::string ToString() const
@@ -77,14 +78,15 @@ public:
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
     void RemoveSubwindow(int32_t instanceId);
 
-    // Get the subwindow of instance, return the window or nullptr.
+    // Get the subwindow of parent instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
-    const RefPtr<Subwindow> GetSubwindow(int32_t instanceId, uint64_t displayId);
-    const RefPtr<Subwindow> GetOrCreateSubwindow(int32_t instanceId);
+
+    // Get the subwindow of subInstance, return the window or nullptr.
+    const RefPtr<Subwindow> GetSubwindowById(int32_t subinstanceId);
 
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
-    const RefPtr<Subwindow>& GetCurrentWindow();
+    const RefPtr<Subwindow> GetCurrentWindow();
     Rect GetParentWindowRect();
 
     RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow);
@@ -122,6 +124,8 @@ public:
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT std::optional<double> GetTopOrder();
+    ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
@@ -158,11 +162,12 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
     const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
-    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
     bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
@@ -179,15 +184,17 @@ public:
     void SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId);
     void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
+    void OnDestroyContainer(int32_t subInstanceId);
 
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow();
+    RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
         uint32_t mainWindowId);
     const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
     SubwindowKey GetCurrentSubwindowKey(int32_t instanceId);
+    void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -201,6 +208,9 @@ private:
     std::mutex subwindowMutex_;
     SubwindowMixMap subwindowMap_;
     static thread_local RefPtr<Subwindow> currentSubwindow_;
+
+    std::mutex instanceSubwindowMutex_;
+    SubwindowMap instanceSubwindowMap_;
 
     std::mutex toastMutex_;
     SubwindowMixMap toastWindowMap_;

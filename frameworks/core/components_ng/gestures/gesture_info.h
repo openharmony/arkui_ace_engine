@@ -175,6 +175,11 @@ public:
         isLimitFingerCount_ = limitFingerCount;
     }
 
+    bool GetLimitFingerCount() const
+    {
+        return isLimitFingerCount_;
+    }
+
     void SetTag(std::string tag)
     {
         if (gestureInfo_) {

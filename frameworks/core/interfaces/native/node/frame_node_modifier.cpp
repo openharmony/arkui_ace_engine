@@ -21,11 +21,12 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
-    EXPAND = 0,
-    NOT_EXPAND,
+    NOT_EXPAND = 0,
+    EXPAND,
     LAZY_EXPAND,
 };
 
@@ -893,6 +894,15 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     return ERROR_CODE_NO_ERROR;
 }
 
+void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto delegate = EngineHelper::GetDelegateByContainer(container);
+    CHECK_NULL_VOID(delegate);
+    delegate->SetKeyProcessingMode(mode);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -968,6 +978,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setCrossLanguageOptions = SetCrossLanguageOptions,
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
+        .setKeyProcessingMode = SetKeyProcessingMode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

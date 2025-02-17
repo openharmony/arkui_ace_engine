@@ -40,7 +40,7 @@ public:
     }
 };
 
-class NavigationStack : public virtual AceType {
+class ACE_FORCE_EXPORT NavigationStack : public virtual AceType {
     DECLARE_ACE_TYPE(NG::NavigationStack, AceType)
 public:
     NavigationStack() = default;

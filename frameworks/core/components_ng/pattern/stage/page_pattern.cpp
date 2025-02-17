@@ -381,7 +381,9 @@ bool PagePattern::OnBackPressed()
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 #endif
     if (onBackPressed_) {
-        return onBackPressed_();
+        bool result = onBackPressed_();
+        CheckIsNeedForceExitWindow(result);
+        return result;
     }
     return false;
 }
@@ -392,6 +394,35 @@ void PagePattern::BuildSharedTransitionMap()
     CHECK_NULL_VOID(host);
     sharedTransitionMap_.clear();
     IterativeAddToSharedMap(host, sharedTransitionMap_);
+}
+
+void PagePattern::CheckIsNeedForceExitWindow(bool result)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetInstallationFree() || !result) {
+        // if is not atommic service and result is false, don't process.
+        return;
+    }
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    int32_t pageSize =
+        stageManager->GetStageNode() ? static_cast<int32_t>(stageManager->GetStageNode()->GetChildren().size()) : 0;
+    if (pageSize != 1) {
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        container->TerminateUIExtension();
+    } else {
+        auto windowManager = context->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowPerformBack();
+    }
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "page onbackpress intercepted, exit window.");
 }
 
 void PagePattern::ReloadPage()
@@ -562,9 +593,6 @@ void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, P
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    auto context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
     renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
@@ -581,9 +609,6 @@ void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect,
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
     renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    auto context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
 }
 
 RefPtr<PageTransitionEffect> PagePattern::GetDefaultPageTransition(PageTransitionType type)
@@ -911,10 +936,6 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
-    if (type == PageTransitionType::ENTER_PUSH) {
-        auto renderContext = inPage->GetRenderContext();
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);

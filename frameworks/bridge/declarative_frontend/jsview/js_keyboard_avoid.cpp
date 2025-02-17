@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
-
+#include "core/common/container.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
@@ -66,6 +66,9 @@ void JSKeyboardAvoid::GetKeyboardAvoidMode(const JSCallbackInfo& info)
             break;
     }
     auto returnValue = JSVal(ToJSValue(obj));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        returnValue = JSVal(ToJSValue(static_cast<int32_t>(mode)));
+    }
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }

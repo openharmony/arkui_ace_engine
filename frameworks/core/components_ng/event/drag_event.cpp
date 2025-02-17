@@ -266,7 +266,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(nullptr);
-    dragDropManager->SetIsDragNodeNeedClean(false);
     if (!DragDropFuncWrapper::IsGlobalStatusSuitableForDragging() ||
         !DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict) ||
         IsBelongToMultiItemNode(frameNode)) {
@@ -274,6 +273,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     }
     lastTouchFingerId_ = touchRestrict.touchEvent.id;
     dragDropManager->SetIsDisableDefaultDropAnimation(false);
+    dragDropManager->SetIsDragNodeNeedClean(false);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenuUsingGesture =
         focusHub == nullptr ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -413,7 +413,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->RemoveDeadlineTimer();
+        
         if (dragDropManager->IsAboutToPreview()) {
             dragDropManager->ResetDragging();
         }
@@ -429,6 +429,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(actuator->userCallback_);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
+        if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
+            auto frameNode = gestureHub->GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto eventHub = frameNode->GetEventHub<EventHub>();
+            CHECK_NULL_VOID(eventHub);
+            auto pipeline = frameNode->GetContextRefPtr();
+            gestureHub->FireCustomerOnDragEnd(pipeline, eventHub);
+        }
         actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
             actuator->textPixelMap_ = nullptr;
@@ -802,7 +810,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     taskExecutor->PostDelayedTask(
         preDragStatusCallback, TaskExecutor::TaskType::UI, curDuration, "ArkUIPreDragLongPressTimer");
 }
-
 void DragEventActuator::ResetDragStatus()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1064,11 +1071,6 @@ void DragEventActuator::CreatePreviewNode(
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    auto context = imageNode->GetContext();
-    if (context) {
-        context->FlushUITaskWithSingleDirtyNode(imageNode);
-    }
-    FlushSyncGeometryNodeTasks();
 }
 
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
@@ -1365,6 +1367,13 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
         actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
             actuator->HideTextAnimation();
+            auto frameNode = gestureHub->GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto context = frameNode->GetContextRefPtr();
+            CHECK_NULL_VOID(context);
+            auto dragDropManager = context->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            dragDropManager->SetIsDragNodeNeedClean(true);
         } else {
             actuator->HidePixelMap();
             actuator->HideFilter();
@@ -1466,7 +1475,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 CHECK_NULL_VOID(callback);
                 callback(onPreDragStatus);
             },
-            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
     } else {
         onPreDragFunc(onPreDragStatus);
     }
@@ -2018,7 +2027,13 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto touchPoint = Point(
-        info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
+        info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY(),
+        info.GetTouches().front().GetScreenLocation().GetX(), info.GetTouches().front().GetScreenLocation().GetY());
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDragMoveLastPoint(touchPoint);
     if (isRestartDrag) {
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
@@ -2026,11 +2041,6 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
             HandleDragDampingMove(
                 touchPoint, info.GetTouches().front().GetFingerId(), isRestartDrag);
         }
-        auto pipeline = frameNode->GetContextRefPtr();
-        CHECK_NULL_VOID(pipeline);
-        auto dragDropManager = pipeline->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetDragMoveLastPoint(touchPoint);
         return;
     }
     auto focusHub = frameNode->GetFocusHub();
@@ -2046,11 +2056,6 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
         }
         HandleTouchMoveEvent();
     }
-    auto pipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetDragMoveLastPoint(touchPoint);
 }
 
 void DragEventActuator::HandleTouchUpEvent()

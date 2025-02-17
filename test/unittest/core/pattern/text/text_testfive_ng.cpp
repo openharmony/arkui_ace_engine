@@ -2622,14 +2622,14 @@ HWTEST_F(TextTestFiveNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateMaxLines(0);
 
-    pattern->HandleSurfaceChanged(100, 100, 100, 100);
-    pattern->HandleSurfaceChanged(100, 100, 10, 100);
-    pattern->HandleSurfaceChanged(100, 100, 100, 10);
-    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+    pattern->HandleSurfaceChanged(100, 100, 100, 100, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 10, 100, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 100, 10, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 10, 10, WindowSizeChangeReason::DRAG);
 
     manager->shareOverlayInfo_->menuInfo.menuType = OptionMenuType::MOUSE_MENU;
 
-    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+    pattern->HandleSurfaceChanged(100, 100, 10, 10, WindowSizeChangeReason::DRAG);
     EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
 }
 

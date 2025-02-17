@@ -14,6 +14,8 @@
  */
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -395,7 +397,7 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
     imagePattern->animator_->AttachScheduler(pipeline);
     SystemProperties::debugEnabled_ = true;
     imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
-    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATION;
     imagePattern->OnVisibleAreaChange(true, 1.0f);
     EXPECT_EQ(imagePattern->animator_->status_, OHOS::Ace::Animator::Status::RUNNING);
 }
@@ -1114,7 +1116,7 @@ HWTEST_F(ImagePatternTestNg, ImageSetExternalDecodeFormat001, TestSize.Level1)
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ImagePattern>();
-    
+
     /**
      * @tc.cases: case1. default.
      */

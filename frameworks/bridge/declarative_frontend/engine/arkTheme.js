@@ -1089,10 +1089,7 @@ ArkThemeWhiteList.whiteList = [
     'QRCode',
     'Radio',
     'Scroll',
-    'Select',
-    'Slider',
     'Swiper',
     'Text',
-    'TextClock',
     'Toggle',
 ];

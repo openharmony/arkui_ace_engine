@@ -55,6 +55,7 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, double value);
     static void SetRatingOptions(FrameNode* frameNode, double rating = .0, bool indicator = false);
+    static void SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H

@@ -15,6 +15,8 @@
 
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -360,7 +362,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level1)
      * @tc.steps: step1. Test ImageType
      * @tc.expected: BASE
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::BASE);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::BASE);
 
     //切换Image数据源
     std::vector<ImageProperties> images;
@@ -384,7 +386,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level1)
      * @tc.steps: step2. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATION);
 }
 
 /**
@@ -1090,7 +1092,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level1)
      * @tc.steps: step1. Test ImageType
      * @tc.expected: BASE
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::BASE);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::BASE);
 
     //切换Image数据源
     std::vector<ImageProperties> images;
@@ -1114,7 +1116,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level1)
      * @tc.steps: step2. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATION);
 }
 
 /**
@@ -1896,15 +1898,15 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Le
     DirtySwapConfig config;
     config.skipMeasure = false;
     imagePattern->isLayouted_ = false;
-    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATION;
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(imagePattern->isLayouted_);
     imagePattern->isLayouted_ = false;
-    imagePattern->imageType_ = ImagePattern::ImageType::BASE;
+    imagePattern->imageType_ = ImageType::BASE;
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(imagePattern->isLayouted_);
     imagePattern->isLayouted_ = true;
-    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATION;
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(imagePattern->isLayouted_);
 }
@@ -1918,7 +1920,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnImageModifyDone0052, TestSize.Level1)
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    imagePattern->imageType_ = ImagePattern::ImageType::UNDEFINED;
+    imagePattern->imageType_ = ImageType::UNDEFINED;
     imagePattern->OnModifyDone();
     imagePattern->OnImageModifyDone();
     EXPECT_FALSE(imagePattern->isSelected_);
@@ -2076,7 +2078,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAttachToFrameNode0060, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
-    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATION;
     imagePattern->OnAttachToFrameNode();
     EXPECT_TRUE(imagePattern->GetIsAnimation());
 }
@@ -2173,10 +2175,10 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level1)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    auto imageType = ImagePattern::ImageType::BASE;
+    auto imageType = ImageType::BASE;
     auto res = imagePattern->GetImageType();
     EXPECT_EQ(res, imageType);
-    imageType = ImagePattern::ImageType::ANIMATION;
+    imageType = ImageType::ANIMATION;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = false;
     image.Create(imageInfoConfig, pixMap);
@@ -2212,7 +2214,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     auto res = imagePattern->GetImageType();
-    auto imageType = ImagePattern::ImageType::ANIMATION;
+    auto imageType = ImageType::ANIMATION;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = true;
     image.Create(imageInfoConfig, pixMap);
@@ -2247,7 +2249,7 @@ HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level1)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    auto imageType = ImagePattern::ImageType::UNDEFINED;
+    auto imageType = ImageType::UNDEFINED;
     auto res = imagePattern->GetImageType();
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = false;
@@ -2256,7 +2258,7 @@ HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level1)
      * @tc.steps: step3. call ResetImage.
      * @tc.expected: GetImageType value is ANIMATION.
      */
-    imageType = ImagePattern::ImageType::ANIMATION;
+    imageType = ImageType::ANIMATION;
     imagePattern->SetImageType(imageType);
     image.ResetImage();
     EXPECT_NE(res, imageType);
@@ -2287,7 +2289,7 @@ HWTEST_F(ImageTestThreeNg, ResetImage0066, TestSize.Level1)
      */
     RefPtr<PixelMap> pixMap = nullptr;
     auto res = imagePattern->GetImageType();
-    auto imageType = ImagePattern::ImageType::ANIMATION;
+    auto imageType = ImageType::ANIMATION;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = true;
     image.ResetImage();

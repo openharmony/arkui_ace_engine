@@ -65,7 +65,7 @@ private:
         CallbackFuncPairList& callbackFuncPairList);
     void AddCallbackToList(napi_env env, napi_value cb, napi_handle_scope scope, RegisterType type,
         const std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onFunc);
-    void DeleteCallbackFromList(int argc, napi_env env, napi_value cb, RegisterType type);
+    void DeleteCallbackFromList(uint32_t argc, napi_env env, napi_value cb, RegisterType type);
     std::list<std::function<void(const RefPtr<NG::UIExtensionProxy>&)>> GetOnFuncList(RegisterType type);
     RegisterType GetRegisterType(const std::string& strType);
 

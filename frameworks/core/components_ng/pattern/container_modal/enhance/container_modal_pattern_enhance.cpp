@@ -264,24 +264,6 @@ RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
     return controlButtonsNode->GetChildAtIndex(originIndex);
 }
 
-void ContainerModalPatternEnhance::OnWindowFocused()
-{
-    ContainerModalPattern::OnWindowFocused();
-    isHoveredMenu_ = false;
-}
-
-void ContainerModalPatternEnhance::OnWindowUnfocused()
-{
-    if (SubwindowManager::GetInstance()->GetCurrentWindow() &&
-        SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
-        isFocus_ = false;
-        isHoveredMenu_ = true;
-        return;
-    }
-    ContainerModalPattern::OnWindowUnfocused();
-    isHoveredMenu_ = false;
-}
-
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 {
     if (!GetIsFocus()) {
@@ -498,7 +480,7 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_MAXIMIZE);
             windowManager->WindowMaximize(true);
         }
-        containerNode->OnWindowFocused();
+        containerNode->OnWindowActivated();
     });
     eventHub->AddGesture(tapGesture);
 }
@@ -529,7 +511,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowFocused();
+    GetHost()->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
@@ -695,6 +677,11 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
     auto floatingTitleRow = GetFloatingTitleRow();
     auto customTitleRow = GetCustomTitleRow();
     auto gestureRow = GetGestureRow();
+    if (enableContainerModalGesture_) {
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    }
     EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
     EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
     EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
@@ -777,7 +764,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick()
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowFocused();
+    GetHost()->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick()
@@ -839,6 +826,9 @@ void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name
     auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
     controlButtonsNode->FireCustomCallback(name, value);
+    auto customTitleNode = GetCustomTitleNode();
+    CHECK_NULL_VOID(customTitleNode);
+    customTitleNode->FireCustomCallback(name, value);
 }
 
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
@@ -846,7 +836,20 @@ CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
     auto buttonRow = GetButtonRowByInspectorId();
     CHECK_NULL_RETURN(buttonRow, CalcLength(Dimension(0, DimensionUnit::VP)));
     auto width = buttonRow->GetGeometryNode()->GetFrameRect().Width();
-    return CalcLength(Dimension(width, DimensionUnit::VP));
+    if (NearZero(width)) {
+        // If the width is 0, initialize the width according to UX specifications.
+        int32_t buttonNum = 0;
+        const auto& children = buttonRow->GetChildren();
+        for (const auto& child : children) {
+            auto childButton = AceType::DynamicCast<FrameNode>(child);
+            if (childButton && childButton->IsVisible()) {
+                buttonNum++;
+            }
+        }
+        return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
+                          CONTROL_BUTTON_ROW_LEFT_PADDING + CONTROL_BUTTON_ROW_RIGHT_PADDING);
+    }
+    return CalcLength(Dimension(width, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
 }
 
 bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)

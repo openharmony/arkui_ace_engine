@@ -317,6 +317,7 @@ public:
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
     virtual void UpdateWindowFocusState(bool isFocused) {}
+    virtual void UpdateWindowActiveState(bool isActive) {}
     /**
      * @brief Only clip the content & foreground layer by @c rect.
      * @param rect - offset of @c rect is relative to FrameRect.
@@ -768,6 +769,14 @@ public:
     {
         return OffsetF();
     }
+
+    virtual bool AddNodeToRsTree()
+    {
+        return false;
+    }
+
+    virtual void SetDrawNode() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

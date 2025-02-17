@@ -77,6 +77,22 @@ void EventHub::SetSupportedStates(UIState state)
     stateStyleMgr_->SetSupportedStates(state);
 }
 
+void EventHub::AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)> callback, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner);
+}
+
+void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->RemoveSupportedUIState(state, isInner);
+}
+
 void EventHub::SetCurrentUIState(UIState state, bool flag)
 {
     if (!stateStyleMgr_) {
@@ -130,7 +146,7 @@ void EventHub::PostEnabledTask()
         enabledFunc_ = callback;
         return;
     }
-    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState", PriorityType::VIP);
+    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
 }
 
 void EventHub::FireEnabledTask()

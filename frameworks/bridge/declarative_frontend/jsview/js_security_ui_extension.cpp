@@ -33,7 +33,7 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-    constexpr int ARGC_TWO = 2;
+    constexpr uint8_t ARGC_TWO = 2;
     const CalcDimension SECURITY_UEC_MIN_WIDTH(10.0f, DimensionUnit::VP);
     const CalcDimension SECURITY_UEC_MIN_HEIGHT(10.0f, DimensionUnit::VP);
 }
@@ -159,7 +159,7 @@ void JSSecurityUIExtensionProxy::AddCallbackToList(
 }
 
 void JSSecurityUIExtensionProxy::DeleteCallbackFromList(
-    int argc, napi_env env, napi_value cb, RegisterType type)
+    uint32_t argc, napi_env env, napi_value cb, RegisterType type)
 {
     if (argc == 1) {
         if (type == RegisterType::SYNC) {

@@ -15,6 +15,8 @@
 
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -739,7 +741,7 @@ HWTEST_F(ImageTestNg, ImageFillColor002, TestSize.Level1)
     // Obtain the ImageRenderProperty associated with the FrameNode.
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr); // Ensure the render property is valid.
-    
+
     // Test resetting the image fill color with frameNode.
     image.ResetImageFill(&(*frameNode));
     EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), false); // Fill color should not exist after reset.
@@ -1845,7 +1847,7 @@ HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level1)
     auto imageLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(imageLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(imageLayoutAlgorithm));
-    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    pattern->SetImageType(ImageType::ANIMATION);
     /**
      * @tc.steps: step3. call measure and layout with no child.
      */

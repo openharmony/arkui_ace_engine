@@ -484,6 +484,20 @@ void SetSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
     NavigationModelNG::SetSystemBarStyle(frameNode, contentColor);
 }
 
+void SetEnableToolBarAdaptation(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, enable);
+}
+
+void ResetEnableToolBarAdaptation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -535,6 +549,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setOnCoordScrollUpdateAction = SetOnCoordScrollUpdateAction,
         .setOnCoordScrollEndAction = SetOnCoordScrollEndAction,
         .setSystemBarStyle = SetSystemBarStyle,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -573,6 +589,8 @@ const CJUINavigationModifier* GetCJUINavigationModifier()
         .resetNavBarWidth = ResetNavBarWidth,
         .setNavIgnoreLayoutSafeArea = SetNavIgnoreLayoutSafeArea,
         .resetNavIgnoreLayoutSafeArea = ResetNavIgnoreLayoutSafeArea,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

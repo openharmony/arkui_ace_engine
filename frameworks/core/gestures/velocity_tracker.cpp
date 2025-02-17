@@ -121,7 +121,7 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
 }
 } // namespace
 
-void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
+void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
     if (isFirstPoint_) {
         firstTrackPoint_ = event;
@@ -136,8 +136,6 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
     std::chrono::duration<double> diffTime = event.time - lastTimePoint_;
     lastTimePoint_ = event.time;
     lastPosition_ = event.GetOffset();
-    // judge duration is 500ms.
-    static const double range = 0.5;
     if (end) {
         Offset oriDelta;
         if (isFirstPoint_) {
@@ -205,9 +203,11 @@ void VelocityTracker::DumpVelocityPoints() const
         const auto& xVal = axis.GetXVals();
         const auto& yVal = axis.GetYVals();
         int32_t i = static_cast<int32_t>(xVal.size());
+        auto baseVal = yVal[0];
         for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
             --i;
-            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i], yVal[i]);
+            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i],
+                yVal[i] - baseVal);
         }
     };
     func(xAxis_, "xAxis");
