@@ -553,8 +553,8 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
         CHECK_NULL_VOID(securityLayoutProperty);
         securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
     }
-    UpdateIconMargin(layoutWrapper, layoutWrapper);
-    MeasureRow(child, childConstraint);
+    UpdateIconMargin(layoutWrapper);
+    MeasureRow(layoutWrapper, child, childConstraint);
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
     childSize.AddWidth(horInterval_ * 2.0f);
     idealSize.UpdateSizeWithCheck(childSize);
