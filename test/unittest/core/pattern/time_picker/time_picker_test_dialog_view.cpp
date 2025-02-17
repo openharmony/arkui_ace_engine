@@ -501,4 +501,55 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest006, TestSize.Level
     TimePickerDialogView::UpdateTimePickerSwitchEvent(timePickerNode, textNode, dialogTheme, buttonNode, switchEvent);
     EXPECT_NE(buttonNode, nullptr);
 }
+
+/**
+ * @tc.name: TimePickerDialogViewShow044
+ * @tc.desc: Test TimePickerDialogViewShow Show for API 16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewShow044, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+    settingData.isEnableHapticFeedback = true;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    ASSERT_NE(customNode, nullptr);
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    ASSERT_NE(timePickerNode, nullptr);
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    EXPECT_TRUE(timePickerRowPattern->isEnableHaptic_);
+}
 } // namespace OHOS::Ace::NG
