@@ -136,7 +136,7 @@ public:
     void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
     void RegisterUIExtBusinessConsumeReplyCallback(
         UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
-    void TransferAccessibilityRectInfo();
+    void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 
