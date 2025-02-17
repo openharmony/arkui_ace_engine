@@ -147,6 +147,7 @@ protected:
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
     std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
+    static std::shared_mutex translateManagerMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
