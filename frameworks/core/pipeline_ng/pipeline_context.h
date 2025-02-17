@@ -465,7 +465,8 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false,
+        MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
 
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -601,14 +602,27 @@ public:
 
     void SetMouseStyleHoldNode(int32_t id)
     {
-        if (mouseStyleNodeId_ == -1) {
-            mouseStyleNodeId_ = id;
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->SetMouseStyleHoldNode(id);
         }
     }
     void FreeMouseStyleHoldNode(int32_t id)
     {
-        if (mouseStyleNodeId_ == id) {
-            mouseStyleNodeId_ = -1;
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->FreeMouseStyleHoldNode(id);
+        }
+    }
+
+    void FreeMouseStyleHoldNode()
+    {
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->FreeMouseStyleHoldNode();
         }
     }
 

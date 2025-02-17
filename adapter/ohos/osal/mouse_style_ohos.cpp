@@ -118,20 +118,6 @@ int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle)
     return getResult;
 }
 
-bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const
-{
-    int32_t curPointerStyle = -1;
-    if (GetPointerStyle(windowId, curPointerStyle) == -1) {
-        LOGW("ChangePointerStyle: GetPointerStyle return failed");
-        return false;
-    }
-    if (curPointerStyle == static_cast<int32_t>(mouseFormat)) {
-        return true;
-    }
-
-    return SetPointerStyle(windowId, mouseFormat);
-}
-
 void MouseStyleOhos::SetMouseIcon(
     int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const
 {

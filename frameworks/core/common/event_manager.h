@@ -177,6 +177,17 @@ public:
         return refereeNG_;
     }
 
+    RefPtr<MouseStyleManager> GetMouseStyleManager() const
+    {
+        return mouseStyleManager_;
+    }
+
+    void FlushCursorStyleRequests()
+    {
+        CHECK_NULL_VOID(mouseStyleManager_);
+        mouseStyleManager_->VsyncMouseFormat();
+    }
+
     bool DispatchKeyboardShortcut(const KeyEvent& event);
 
     void AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node);
@@ -362,6 +373,7 @@ private:
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
+    RefPtr<MouseStyleManager> mouseStyleManager_;
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
     std::vector<KeyCode> pressedKeyCodes_;
     NG::EventTreeRecord eventTree_;
