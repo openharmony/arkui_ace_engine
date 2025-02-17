@@ -109,7 +109,7 @@ HWTEST_F(TabContentModifierTest, setTabBar0Test_CustomNodeBuilder, TestSize.Leve
     modifier_->setTabBar0(frameNode, &options);
 
     auto pattern = frameNode->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(pattern);
+    ASSERT_NE(pattern, nullptr);
     pattern->GetTabBarParam().ExecuteBuilder();
 
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
