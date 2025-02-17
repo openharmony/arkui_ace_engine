@@ -58,6 +58,23 @@ inline void AssignCast(std::optional<GridItemAlignment>& dst, const Ark_GridItem
         default: LOGE("Unexpected enum value in Ark_GridItemAlignment: %{public}d", src);
     }
 }
+
+template<>
+inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_Tuple_Number_Number& src)
+{
+    dst->rows = Converter::Convert<int32_t>(src.value0);
+    dst->columns = Converter::Convert<int32_t>(src.value1);
+}
+
+template<>
+inline void AssignCast(std::optional<GridItemRect>& dst, const Ark_Tuple_Number_Number_Number_Number& src)
+{
+    dst->rowStart = Converter::Convert<int32_t>(src.value0);
+    dst->rowSpan = Converter::Convert<int32_t>(src.value1);
+    dst->columnStart = Converter::Convert<int32_t>(src.value2);
+    dst->columnSpan = Converter::Convert<int32_t>(src.value3);
+}
+
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -91,10 +108,31 @@ void SetGridOptionsImpl(Ark_NativePointer node,
         if (irregularIndexes) {
             options.irregularIndexes = irregularIndexes.value();
         }
-        // onGetIrregularSizeByIndex and onGetRectByIndex was not implemented
-        // because GENERATED_ArkUIGridEventsReceiver doesn`t support these interfaces
-        LOGE("ARKOALA onGetIrregularSizeByIndex callback need to be supported");
-        LOGE("ARKOALA onGetRectByIndex callback need to be supported");
+        auto onGetIrregularSizeByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number>
+                                    (layoutOptionsOpt.value().onGetIrregularSizeByIndex);
+        if (onGetIrregularSizeByIndex) {
+            auto modelCallback = [callback = CallbackHelper(*onGetIrregularSizeByIndex)]
+            (int32_t value) -> GridItemSize {
+                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
+                auto resultOpt = callback.InvokeWithOptConvertResult
+                                    <GridItemSize, Ark_Tuple_Number_Number, Callback_Tuple_Number_Number_Void>(param);
+                return resultOpt.value_or(GridItemSize());
+            };
+            options.getSizeByIndex = modelCallback;
+        }
+        auto onGetRectByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number_Number_Number>
+                                    (layoutOptionsOpt.value().onGetRectByIndex);
+        if (onGetRectByIndex) {
+            auto modelCallback = [callback = CallbackHelper(*onGetRectByIndex)]
+            (int32_t value) -> GridItemRect {
+                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
+                auto resultOpt = callback.InvokeWithOptConvertResult
+                                    <GridItemRect, Ark_Tuple_Number_Number_Number_Number,
+                                     Callback_Tuple_Number_Number_Number_Number_Void>(param);
+                return resultOpt.value_or(GridItemRect());
+            };
+            options.getRectByIndex = modelCallback;
+        }
         GridModelNG::SetLayoutOptions(frameNode, options);
     }
 
