@@ -837,18 +837,10 @@ void RunArkoalaEventLoop()
         handle = nullptr;
         return;
     }
-    if (!RunApp(0, 0)) {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto taskExec = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExec);
-        taskExec->PostTask(
-            [id = Container::CurrentId()]() {
-                ContainerScope scope(id);
-                RunArkoalaEventLoop();
-            },
-            TaskExecutor::TaskType::UI, "ArkoalaRunApp", PriorityType::HIGH);
-        // run until app exits
+    if (RunApp(0, 0)) {
+        LOGW("Koala exit app when RunApplication returns 1");
+        dlclose(handle);
+        exit(0);
     }
 }
 
@@ -879,11 +871,9 @@ void StartArkoala()
     void* result = StartApplication(appUrl, appParams);
 
     LOGI("Koala result rootPointer = %p", result);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto taskExec = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExec);
-    taskExec->PostDelayedTask(RunArkoalaEventLoop, TaskExecutor::TaskType::UI, 100, "ArkoalaRunApp", PriorityType::HIGH);
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetVsyncListener(RunArkoalaEventLoop);
 }
 } // namespace
 
