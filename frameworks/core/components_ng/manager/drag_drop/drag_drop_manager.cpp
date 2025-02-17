@@ -62,6 +62,12 @@ constexpr int32_t RESERVED_DEVICEID_1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID_2 = 0xAAAAAAFE;
 constexpr uint32_t TASK_DELAY_TIME = 5 * 1000;
 constexpr uint32_t DROP_DELAY_TIME = 2 * 1000;
+constexpr double DEVICE_TYPE_UNKOWN = 0.0;
+constexpr double DEVICE_TYPE_SMALL = 600.0;
+constexpr double DEVICE_TYPE_MEDIUM = 840.0;
+constexpr int32_t SCALE_TYPE_FIRST = 2;
+constexpr int32_t SCALE_TYPE_SECOND = 3;
+constexpr int32_t SCALE_TYPE_THIRD = 4;
 } // namespace
 
 RefPtr<RenderContext> GetMenuRenderContextFromMenuWrapper(const RefPtr<FrameNode>& menuWrapperNode)
@@ -1884,11 +1890,15 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     CHECK_NULL_RETURN(gestureHub, false);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
     auto previewOption = imageNode->GetDragPreviewOption();
-    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption.isScaleEnabled) {
-        dragPreviewInfo.scale = maxWidth / width;
+    auto height = imageNode->GetGeometryNode()->GetFrameRect().Height();
+    auto gestureEvent = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEvent, false);
+    auto scaleData = DragDropManager::GetScaleInfo(width, height, gestureEvent->GetTextDraggable());
+    CHECK_NULL_RETURN(scaleData, false);
+    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width > 0 && height > 0 && previewOption.isScaleEnabled) {
+        dragPreviewInfo.scale = scaleData->scale;
     } else {
         dragPreviewInfo.scale = 1.0f;
     }
@@ -1897,7 +1907,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
     // set menu preview scale only for no scale menu preview.
-    if (isDragWithContextMenu_ && (!previewOption.isScaleEnabled || width < maxWidth)) {
+    if (isDragWithContextMenu_ && (!previewOption.isScaleEnabled || !scaleData->isNeedScale)) {
         auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
         if (imageGestureEventHub) {
             auto menuPreviewScale = imageGestureEventHub->GetMenuPreviewScale();
@@ -1905,9 +1915,9 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
                 GreatNotEqual(menuPreviewScale, 0.0f) ? menuPreviewScale : TOUCH_DRAG_PIXELMAP_SCALE;
         }
     }
-    dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
+    dragPreviewInfo.height = static_cast<double>(height);
     dragPreviewInfo.width = static_cast<double>(width);
-    dragPreviewInfo.maxWidth = maxWidth;
+    dragPreviewInfo.maxWidth = scaleData->shortSide;
     dragPreviewInfo.imageNode = imageNode;
     dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
     dragPreviewInfo.originScale = imageNode->GetTransformScale();
@@ -2511,6 +2521,43 @@ double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& 
     auto columns = columnInfo->GetColumns(gridSizeType);
     double maxWidth = columnInfo->GetWidth(columns);
     return maxWidth;
+}
+
+std::shared_ptr<ScaleDataInfo> DragDropManager::GetScaleInfo(float width, float height, bool textDraggable)
+{
+    auto scaleDataInfo = std::make_shared<ScaleDataInfo>();
+    CHECK_NULL_RETURN(scaleDataInfo, nullptr);
+    scaleDataInfo->shortSide = fmin(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
+    auto shortSide = PipelineBase::Px2VpWithCurrentDensity(scaleDataInfo->shortSide);
+    if (shortSide <= DEVICE_TYPE_UNKOWN) {
+        return scaleDataInfo;
+    } else if (shortSide <= DEVICE_TYPE_SMALL) {
+        scaleDataInfo = DragDropManager::CalculateScale(width, height,
+            textDraggable ? scaleDataInfo->shortSide : scaleDataInfo->shortSide / SCALE_TYPE_FIRST,
+            scaleDataInfo->shortSide / SCALE_TYPE_FIRST);
+    } else if (shortSide <= DEVICE_TYPE_MEDIUM) {
+        scaleDataInfo = CalculateScale(width, height,
+            textDraggable ? scaleDataInfo->shortSide / SCALE_TYPE_FIRST : scaleDataInfo->shortSide / SCALE_TYPE_THIRD,
+            scaleDataInfo->shortSide / SCALE_TYPE_THIRD);
+    } else {
+        scaleDataInfo = CalculateScale(width, height,
+            textDraggable ? scaleDataInfo->shortSide * SCALE_TYPE_FIRST / SCALE_TYPE_SECOND
+                          : scaleDataInfo->shortSide / SCALE_TYPE_SECOND,
+            scaleDataInfo->shortSide / SCALE_TYPE_SECOND);
+    }
+    return scaleDataInfo;
+}
+
+std::shared_ptr<ScaleDataInfo> DragDropManager::CalculateScale(
+    float width, float height, float widthLimit, float heightLimit)
+{
+    auto scaleDataInfo = std::make_shared<ScaleDataInfo>();
+    CHECK_NULL_RETURN(scaleDataInfo, nullptr);
+    if ((width > 0 && height > 0) && (width > widthLimit || height > heightLimit)) {
+        scaleDataInfo->scale = fmin(widthLimit / width, heightLimit / height);
+        scaleDataInfo->isNeedScale = true;
+    }
+    return scaleDataInfo;
 }
 
 const RefPtr<NG::OverlayManager> DragDropManager::GetDragAnimationOverlayManager(int32_t containerId)
