@@ -3374,6 +3374,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
     DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
+        if (dragDropManager_ && dragDropManager_->IsDragging() && event.pullAction != MouseAction::PULL_MOVE) {
+            auto pointerEvent = DragPointerEvent(event.x, event.y, event.screenX, event.screenY);
+            dragDropManager_->DoDragMoveAnimate(pointerEvent);
+        }
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
