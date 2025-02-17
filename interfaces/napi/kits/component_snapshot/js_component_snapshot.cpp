@@ -302,8 +302,8 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't get delegate of ace_engine. param: %{public}s",
-            componentId.c_str());
+            "Can't get delegate of ace_engine. param: " SEC_PLD(%{public}s),
+            SEC_PARAM(componentId.c_str()));
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return result;
@@ -376,8 +376,8 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't get delegate of ace_engine. param: %{public}s",
-            componentId.c_str());
+            "Can't get delegate of ace_engine. param: " SEC_PLD(%{public}s),
+            SEC_PARAM(componentId.c_str()));
         NapiThrow(env, "Delegate is null", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return result;
