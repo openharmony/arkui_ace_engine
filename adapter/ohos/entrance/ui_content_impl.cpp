@@ -723,6 +723,7 @@ typedef int (*LoadVirtualMachineFunc)(int, const char*, const char*, void*);
 typedef void* (*GetVMAddrFunc)();
 typedef void* (*StartApplicationFunc)(const char*, const char*);
 typedef bool (*RunApplicationFunc)(int, int);
+void* handle = nullptr;
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
     CHECK_NULL_VOID(context);
@@ -734,7 +735,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     StoreConfiguration(context->GetConfiguration());
     
     if (bundleName_ == "com.example.trivial.application") { 
-        void* handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
+        handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
         if (!handle) {
             LOGW("Koala Cannot open library: %s", dlerror());
             return;
@@ -751,6 +752,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
         if (dlsym_error) {
             LOGW("Koala Cannot load symbol 'LoadVirtualMachine': %s", dlsym_error);
             dlclose(handle);
+            handle = nullptr;
             return;
         }
 
@@ -764,8 +766,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
         }
         runtime_ = GetVMAddr();
         LOGI("Koala runtime = %p", runtime_);
-        // Close the library
-        dlclose(handle);
     }
     LOGI("Koala end of function 770");
 }
@@ -827,12 +827,10 @@ void UIContentImpl::DestroyCallback() const
 namespace {
 void RunArkoala()
 {
-    LOGI("Koala error = %d", errorCode);
     // void* handle = dlopen("/data/app/el1/bundle/public/com.example.trivial.application/libs/arm/libvmloader.so", RTLD_LAZY | RTLD_LOCAL);
-    void* handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
     if (!handle) {
-        LOGW("Koala Cannot open library: %s", dlerror());
-        return errorCode;
+        LOGW("Koala library not opened: %s", dlerror());
+        return;
     }
 
     // Clear any existing error
@@ -844,7 +842,8 @@ void RunArkoala()
     if (dlsym_error) {
         LOGW("Koala cannot load symbol startApp: %s", dlsym_error);
         dlclose(handle);
-        return errorCode;
+        handle = nullptr;
+        return;
     }
 
     LOGI("Koala start application");
@@ -853,24 +852,24 @@ void RunArkoala()
     void* result = StartApplication(appUrl, appParams);
 
     LOGI("Koala result rootPointer = %p", result);
-    auto container = Platform::AceContainer::GetContainer(ContainerScope::Current());
+    auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto taskExec = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExec);
-    taskExec->PostDelayedTask([handle]() {
+    TaskExecutor::Task task = [handle = handle]() {
+        LOGI("Koala execute runApp");
         RunApplicationFunc RunApp = (RunApplicationFunc)dlsym(handle, "RunApplication");
         const char* dlsym_error = dlerror();
         if (dlsym_error) {
-            LOGW("Koala cannot load symbol startApp: %s", dlsym_error);
+            LOGW("Koala cannot load symbol RunApplication: %s", dlsym_error);
             dlclose(handle);
-            return errorCode;
+            return;
         }
-        while (!RunApp(0, 0)) {
-            LOGW("Koala run app failed");
-            //post task AGAIN
-        }
+        RunApp(0, 0);
         dlclose(handle);
-    }, TaskExecutor::TaskType::UI, 100, "ArkoalaRunApp", PriorityType::HIGH);
+    };
+    handle = nullptr;
+    taskExec->PostDelayedTask(task, TaskExecutor::TaskType::UI, 100, "ArkoalaRunApp", PriorityType::HIGH);
 }
 } // namespace
 
