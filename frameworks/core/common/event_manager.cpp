@@ -344,7 +344,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
-        TouchEvent touchEvent;
+        TouchEvent touchEvent = ConvertAxisEventToTouchEvent(event);
         FalsifyCancelEventAndDispatch(touchEvent);
         responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
@@ -2250,6 +2250,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint)
     TouchEvent falsifyEvent = touchPoint;
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
+    falsifyEvent.sourceType = SourceType::TOUCH;
+    falsifyEvent.isInterpolated = true;
     auto downFingerIds = downFingerIds_;
     for (const auto& iter : downFingerIds) {
         falsifyEvent.id = iter.first;
