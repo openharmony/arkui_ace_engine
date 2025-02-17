@@ -51,10 +51,14 @@ private:
     float GetMenuItemVerticalPadding();
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     void UpdateIconMargin(LayoutWrapper* layoutWrapper);
+    void UpdateIdealSize(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props,
+        std::optional<LayoutConstraintF>& layoutConstraint);
     void MeasureMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
         const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint);
     void MeasureOption(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
         const RefPtr<LayoutProperty>& props, const std::optional<LayoutConstraintF>& layoutConstraint);
+    float CalcRowTopSpace(float rowsHeight, float itemHeight, LayoutWrapper* layoutWrapper,
+        float leftOrRightRowHeight);
     void LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     void LayoutOption(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     void ExtendTextAndRowNode(const RefPtr<LayoutWrapper>& row, const SizeF& optSize,

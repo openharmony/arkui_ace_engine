@@ -62,7 +62,7 @@ void MenuItemLayoutAlgorithm::CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
 {
     auto menuNode = layoutWrapper->GetHostNode();
     auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
-    auto expandingMode;
+    SubMenuExpandingMode expandingMode;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         expandingMode = menuItemPattern ? menuItemPattern->GetExpandingMode() : SubMenuExpandingMode::SIDE;
     } else {
@@ -448,16 +448,9 @@ void MenuItemLayoutAlgorithm::InitPadding(const RefPtr<LayoutProperty>& props,
     padding_ = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
 }
 
-void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
-    const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint)
+void MenuItemLayoutAlgorithm::UpdateIdealSize(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props,
+    std::optional<LayoutConstraintF>& layoutConstraint)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        verInterval_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
-            GetMenuItemVerticalPadding() : GetMenuItemVerticalPadding() - GetBordersHeight(layoutWrapper);
-    }
-    InitPadding(props, layoutConstraint);
-    maxRowWidth_ = layoutConstraint->maxSize.Width() - padding_.Width();
-    // update ideal width if user defined
     const auto& calcConstraint = props->GetCalcLayoutConstraint();
     if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
         calcConstraint->selfIdealSize.value().Width().has_value()) {
@@ -471,12 +464,23 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
             ConvertToPx(calcConstraint->selfIdealSize.value().Width()->GetDimension(), scaleProperty,
                 layoutConstraint->percentReference.Width()));
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
-            calcConstraint->selfIdealSize.value().Height().has_value()) {
-            idealHeight_ = calcConstraint->selfIdealSize.value().Height()->GetDimension().ConvertToPx();
-        }
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        calcConstraint && calcConstraint->selfIdealSize.has_value() &&
+        calcConstraint->selfIdealSize.value().Height().has_value()) {
+        idealHeight_ = calcConstraint->selfIdealSize.value().Height()->GetDimension().ConvertToPx();
     }
+}
+
+void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
+    const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        verInterval_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+            GetMenuItemVerticalPadding() : GetMenuItemVerticalPadding() - GetBordersHeight(layoutWrapper);
+    }
+    InitPadding(props, layoutConstraint);
+    maxRowWidth_ = layoutConstraint->maxSize.Width() - padding_.Width();
+    UpdateIdealSize(layoutWrapper, props, layoutConstraint);
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         maxRowWidth_ =
             std::max(layoutConstraint->minSize.Width(),
@@ -585,6 +589,18 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
     }
 }
 
+float MenuItemLayoutAlgorithm::CalcRowTopSpace(float rowsHeight, float itemHeight,
+    LayoutWrapper* layoutWrapper, float leftOrRightRowHeight)
+{
+    float topSpace;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        topSpace = (rowsHeight - leftOrRightRowHeight) / 2.0f + padding_.top.value_or(0.0f);
+    } else {
+        topSpace = (itemHeight - leftOrRightRowHeight + GetBordersHeight(layoutWrapper)) / 2.0f;
+    }
+    return topSpace;
+}
+
 void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props)
 {
     auto layoutDirection = props->GetNonAutoLayoutDirection();
@@ -604,12 +620,7 @@ void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const
     }
 
     CHECK_NULL_VOID(leftRow);
-    float topSpace;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        topSpace = (rowsHeight - leftRowSize.Height()) / 2.0f + padding_.top.value_or(0.0f);
-    } else {
-        topSpace = (itemHeight - leftRowSize.Height() + GetBordersHeight(layoutWrapper)) / 2.0f;
-    }
+    float topSpace = CalcRowTopSpace(rowsHeight, itemHeight, layoutWrapper, leftRowSize.Height());
     leftRow->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(padding_.left.value_or(horInterval_), topSpace));
     if (layoutDirection == TextDirection::RTL) {
@@ -621,12 +632,7 @@ void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const
     leftRow->Layout();
 
     CHECK_NULL_VOID(rightRow);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        topSpace = (rowsHeight - rightRowSize.Height()) / 2.0f + padding_.top.value_or(0.0f);
-    } else {
-        topSpace = (itemHeight - rightRowSize.Height() + GetBordersHeight(layoutWrapper)) / 2.0f;
-    }
-    
+    topSpace = CalcRowTopSpace(rowsHeight, itemHeight, layoutWrapper, rightRowSize.Height());
     rightRow->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding_.right.value_or(horInterval_) -
             rightRow->GetGeometryNode()->GetFrameSize().Width(), topSpace));
@@ -644,7 +650,7 @@ void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const
     expandableArea->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     expandableArea->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(padding_.left.value_or(horInterval_),
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) 
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)
         ? rowsHeight + padding_.Height() : itemHeight));
     expandableArea->Layout();
 }
