@@ -245,6 +245,7 @@ export function Chip(options: ChipOptions) {
   })
 }
 
+
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = {
