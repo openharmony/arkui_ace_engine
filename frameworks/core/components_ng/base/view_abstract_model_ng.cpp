@@ -96,7 +96,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->UpdateChainedTransition(menuParam.transition);
     }
-    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow && !wrapperPattern->GetIsOpenMenu()) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
         overlayManager->HideMenu(menuNode, targetId, false);
     }
