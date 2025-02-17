@@ -377,7 +377,8 @@ void CheckBoxModelNG::ResetSelectedColor(FrameNode* frameNode)
 void CheckBoxModelNG::ResetUnSelectedColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor, PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser,
+        PROPERTY_UPDATE_RENDER);
 }
 
 void CheckBoxModelNG::ResetUnSelectedColor(FrameNode* frameNode)

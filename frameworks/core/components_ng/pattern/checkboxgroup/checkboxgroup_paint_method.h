@@ -77,7 +77,7 @@ public:
         checkboxGroupModifier_->UpdateAnimatableProperty();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetUnsafeHost() : nullptr;
+        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
         auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
         auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();

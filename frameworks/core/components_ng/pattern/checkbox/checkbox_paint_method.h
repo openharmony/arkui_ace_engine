@@ -38,7 +38,7 @@ public:
             auto offset = paintWrapper->GetContentOffset();
             auto pipeline = PipelineBase::GetCurrentContextSafely();
             CHECK_NULL_RETURN(pipeline, nullptr);
-            auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetUnsafeHost() : nullptr;
+            auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
             auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
             CHECK_NULL_RETURN(checkBoxTheme, nullptr);
             auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
@@ -93,7 +93,7 @@ public:
     {
         CHECK_NULL_VOID(checkboxModifier_);
         CHECK_NULL_VOID(paintWrapper);
-        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetUnsafeHost() : nullptr;
+        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
         checkboxModifier_->InitializeParam(host ? host->GetThemeScopeId() : 0);
         auto size = paintWrapper->GetContentSize();
         float strokePaintSize = size.Width();
