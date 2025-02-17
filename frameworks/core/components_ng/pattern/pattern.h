@@ -192,7 +192,7 @@ public:
     virtual void OnModifyDone()
     {
         CheckLocalized();
-        auto* frameNode = GetUnsafeHostPtr();
+        auto frameNode = GetHost();
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
@@ -203,7 +203,7 @@ public:
         }
         std::list<RefPtr<FrameNode>> childrenList {};
         std::queue<RefPtr<FrameNode>> queue {};
-        queue.emplace(Claim(frameNode));
+        queue.emplace(frameNode);
         RefPtr<FrameNode> parentNode;
         while (!queue.empty()) {
             parentNode = queue.front();
@@ -367,13 +367,8 @@ public:
         return host->GetInstanceId();
     }
 
-    FrameNode* GetUnsafeHostPtr() const
-    {
-        return UnsafeRawPtr(frameNode_);
-    }
-
     PipelineContext* GetContext() {
-        auto frameNode = GetUnsafeHostPtr();
+        auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode->GetContext();
     }

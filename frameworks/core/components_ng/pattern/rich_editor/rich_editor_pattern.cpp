@@ -181,7 +181,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     styledString_->AddCustomSpan();
-    styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
+    styledString_->SetFramNode(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ForceTriggerAvoidOnCaretChange();
 }
@@ -246,7 +246,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         pattern->SetSyncLoad(options.imageAttribute.value().syncLoad);
     }
     auto index = host->GetChildren().size();
-    imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+    imageNodes.push_back(imageNode);
     imageNode->MountToParent(host, index);
     HandleImageDrag(imageNode);
     SetImageLayoutProperty(imageNode, options);
@@ -893,7 +893,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     int32_t spanIndex = TextSpanSplit(insertIndex);
     IF_TRUE(spanIndex == -1, spanIndex = static_cast<int32_t>(host->GetChildren().size()));
 
-    imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+    imageNodes.push_back(imageNode);
     imageNode->MountToParent(host, spanIndex);
     auto renderContext = imageNode->GetRenderContext();
     IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
@@ -908,7 +908,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto userMouseOption = options.userMouseOption;
     if (userMouseOption.onHover) {
         spanItem->onHover_ = std::move(userMouseOption.onHover);
-        hoverableNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+        hoverableNodes.push_back(imageNode);
     }
     placeholderCount_++;
     if (updateCaret) {
@@ -1074,7 +1074,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
     }
-    builderNodes.push_back(WeakClaim(placeholderSpanNode.GetRawPtr()));
+    builderNodes.push_back(placeholderSpanNode);
     placeholderSpanNode->MountToParent(host, spanIndex);
     auto renderContext = placeholderSpanNode->GetRenderContext();
     IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
@@ -3107,7 +3107,7 @@ void RichEditorPattern::HandleBlurEvent()
 {
     auto reason = GetBlurReason();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d, blur reason=%{public}d", frameId_, reason);
-    ClearOnFocusTextField(GetUnsafeHostPtr());
+    ClearOnFocusTextField(GetHost().GetRawPtr());
     IF_PRESENT(multipleClickRecognizer_, Stop());
     CHECK_NULL_VOID(showSelect_ || !IsSelected());
     isLongPress_ = false;
