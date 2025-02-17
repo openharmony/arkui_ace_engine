@@ -5148,6 +5148,11 @@ bool RichEditorPattern::IsIMEOperation(OperationType operationType)
     return operationType == OperationType::IME;
 }
 
+void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
+{
+    InsertValue(UtfUtils::Str8ToStr16(insertValue), isIME);
+}
+
 void RichEditorPattern::InsertValue(const std::u16string& insertValue, bool isIME)
 {
     InsertValueByOperationType(insertValue, isIME ? OperationType::IME : OperationType::DEFAULT);
