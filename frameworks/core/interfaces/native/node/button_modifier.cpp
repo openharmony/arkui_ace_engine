@@ -123,7 +123,8 @@ void SetButtonType(ArkUINodeHandle node, int type)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((ButtonType)type == ButtonType::CAPSULE || (ButtonType)type == ButtonType::CIRCLE ||
-        (ButtonType)type == ButtonType::ARC || (ButtonType)type == ButtonType::NORMAL) {
+        (ButtonType)type == ButtonType::ARC || (ButtonType)type == ButtonType::NORMAL ||
+        (ButtonType)type == ButtonType::ROUNDED_RECTANGLE) {
         ButtonModelNG::SetType(frameNode, type);
     }
 }

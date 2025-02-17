@@ -375,6 +375,19 @@ void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLef
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
 }
 
+void ButtonModelNG::SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
+    const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+    const std::optional<Dimension>& radiusBottomEnd)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopStart = radiusTopStart;
+    borderRadius.radiusTopEnd = radiusTopEnd;
+    borderRadius.radiusBottomStart = radiusBottomStart;
+    borderRadius.radiusBottomEnd = radiusBottomEnd;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
+}
+
 void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
@@ -393,8 +406,13 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());
     } else {
-        // undefined use capsule type.
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            // undefined use ROUNDED_RECTANGLE type.
+            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
+        } else {
+            // undefined use capsule type.
+            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
+        }
     }
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -577,13 +595,21 @@ void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 
 void ButtonModelNG::ResetBorderRadius()
 {
-    ACE_RESET_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ButtonLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE);
 }
 
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 {
     ButtonType value = ButtonType::CAPSULE;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value, frameNode, ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        value = ButtonType::ROUNDED_RECTANGLE;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
+                                                        frameNode, ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
+                                                        frameNode, ButtonType::CAPSULE);
+    }
+
     return value;
 }
 
