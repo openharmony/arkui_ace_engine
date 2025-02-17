@@ -1398,6 +1398,162 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogModelTestNg035
+ * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    ActionSheetModelNG actionSheetModelNg;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+    };
+ 
+    /**
+     * @tc.steps: step2. Call ShowActionSheet.
+     * @tc.expected: Check ShowActionSheet.
+     */
+    actionSheetModelNg.ShowActionSheet(props);
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context->GetOverlayManager();
+    auto dialog = overlayManager->ShowDialog(props, nullptr, false);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+ 
+    dialogPattern->CallDialogWillAppearCallback();
+    dialogPattern->CallDialogDidAppearCallback();
+    dialogPattern->CallDialogWillDisappearCallback();
+    dialogPattern->CallDialogDidDisappearCallback();
+ 
+    EXPECT_EQ(onWillAppearFlag, true);
+    EXPECT_EQ(onDidAppearFlag, true);
+    EXPECT_EQ(onWillDisappearFlag, true);
+    EXPECT_EQ(onDidDisappearFlag, true);
+}
+  
+/**
+ * @tc.name: DialogModelTestNg036
+ * @tc.desc: Test AlertDialogModelNG's SetShowDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    AlertDialogModelNG alertDialogModelNg;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+    };
+  
+    /**
+     * @tc.steps: step2. Call SetShowDialog.
+     * @tc.expected: Check SetShowDialog.
+     */
+    alertDialogModelNg.SetShowDialog(props);
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context->GetOverlayManager();
+    auto dialog = overlayManager->ShowDialog(props, nullptr, false);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+ 
+    dialogPattern->CallDialogWillAppearCallback();
+    dialogPattern->CallDialogDidAppearCallback();
+    dialogPattern->CallDialogWillDisappearCallback();
+    dialogPattern->CallDialogDidDisappearCallback();
+ 
+    EXPECT_EQ(onWillAppearFlag, true);
+    EXPECT_EQ(onDidAppearFlag, true);
+    EXPECT_EQ(onWillDisappearFlag, true);
+    EXPECT_EQ(onDidDisappearFlag, true);
+}
+  
+  /**
+   * @tc.name: DialogModelTestNg037
+   * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
+   * @tc.type: FUNC
+   */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    CustomDialogControllerModelNG controllerModel;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+    };
+    WeakPtr<AceType> controller;
+    std::vector<WeakPtr<AceType>> dialogs;
+    bool pending;
+    bool isShown;
+    std::function<void()> cancelTask;
+    std::function<void()> buildFunc;
+    RefPtr<AceType> dialogComponent;
+    RefPtr<AceType> customDialog;
+    std::list<DialogOperation> dialogOperation;
+   
+    /**
+     * @tc.steps: step2. Call SetOpenDialog.
+     * @tc.expected: Check SetOpenDialog.
+     */
+    controllerModel.SetOpenDialog(props, controller, dialogs, pending,
+        isShown, std::move(cancelTask), std::move(buildFunc), dialogComponent, customDialog, dialogOperation);
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context->GetOverlayManager();
+    auto dialog = overlayManager->ShowDialog(props, nullptr, false);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillAppearCallback();
+    dialogPattern->CallDialogDidAppearCallback();
+    dialogPattern->CallDialogWillDisappearCallback();
+    dialogPattern->CallDialogDidDisappearCallback();
+
+    EXPECT_EQ(onWillAppearFlag, true);
+    EXPECT_EQ(onDidAppearFlag, true);
+    EXPECT_EQ(onWillDisappearFlag, true);
+    EXPECT_EQ(onDidDisappearFlag, true);
+}
+
+/**
  * @tc.name: ComputeInnerLayoutSizeParam001
  * @tc.desc: Test ComputeInnerLayoutSizeParam function
  * @tc.type: FUNC
