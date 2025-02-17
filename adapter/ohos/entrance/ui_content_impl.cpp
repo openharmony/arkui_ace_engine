@@ -826,6 +826,7 @@ void UIContentImpl::DestroyCallback() const
 namespace {
 void RunArkoalaEventLoop()
 {
+    dlerror();
     LOGI("Koala execute runApp");
     CHECK_NULL_VOID(handle);
     RunApplicationFunc RunApp = (RunApplicationFunc)dlsym(handle, "RunApplication");
