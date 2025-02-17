@@ -326,6 +326,7 @@ public:
 
     void SetDateOrder(std::string dateOrder)
     {
+        isDateOrderChange_ = dateOrder != dateOrder_;
         dateOrder_ = dateOrder;
     }
 
@@ -873,6 +874,7 @@ private:
     bool isPicker_ = false;
     bool isFiredDateChange_ = false;
     bool isForceUpdate_ = false;
+    bool isDateOrderChange_ = false;
     std::optional<std::string> firedDateStr_;
     void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
     bool CheckFocusID(int32_t childSize);
