@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 #include "accessor_test_base.h"
+#include "test/unittest/capi/accessors/accessor_test_fixtures.h"
 #include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/unittest/capi/accessors/accessor_test_fixtures.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,9 +58,6 @@ HWTEST_F(PinchGestureEventAccessorTest, GetScaleTest, TestSize.Level1)
         Ark_Int32 arkRes = accessor_->getScale(peer_);
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetScale";
-
-
-        std::printf("pinch_gesture_event: get scale: %d == %d\n", arkRes, expected);
     }
 }
 
@@ -77,8 +74,6 @@ HWTEST_F(PinchGestureEventAccessorTest, SetScaleTest, TestSize.Level1)
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetScale(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetScale";
-
-        std::printf("pinch_gesture_event: set scale: %.2f == %.2f", event->GetScale(), expected);            
     }
 }
 
@@ -96,8 +91,6 @@ HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterXTest, TestSize.Level1)
         Ark_Int32 arkRes = accessor_->getPinchCenterX(peer_);
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetPinchCenterX";
-
-        std::printf("pinch_gesture_event: get centerX: %d == %d\n", arkRes, expected);
     }
 }
 
@@ -114,9 +107,6 @@ HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterXTest, TestSize.Level1)
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetPinchCenter().GetX(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetPinchCenterX";
-
-        std::printf("pinch_gesture_event: set centerX: %.2f == %.2f\n", event->GetPinchCenter().GetX(), expected);
-
     }
 }
 
@@ -134,9 +124,6 @@ HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterYTest, TestSize.Level1)
         Ark_Int32 arkRes = accessor_->getPinchCenterY(peer_);
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetPinchCenterY";
-
-        std::printf("pinch_gesture_event: get centerY: %d == %d\n", arkRes, expected);
-      
     }
 }
 
@@ -153,9 +140,6 @@ HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterYTest, TestSize.Level1)
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetPinchCenter().GetY(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetPinchCenterY";
-
-        std::printf("pinch_gesture_event: set centerY: %.2f == %.2f\n", event->GetPinchCenter().GetY(), expected);
-   
     }
 }
 }
