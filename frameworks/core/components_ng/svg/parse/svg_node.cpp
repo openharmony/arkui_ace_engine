@@ -567,7 +567,7 @@ void SvgNode::OnFilter(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCo
     if (!AceType::InstanceOf<SvgFilter>(refFilter)) {
         return;
     }
-    refFilter->OnFilterEffect(canvas, svgCoordinateSystemContext);
+    refFilter->OnFilterEffect(canvas, svgCoordinateSystemContext, useOffsetX_, useOffsetY_);
 }
 
 void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
