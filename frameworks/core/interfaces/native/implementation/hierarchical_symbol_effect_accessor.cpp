@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HierarchicalSymbolEffectAccessor {
-void DestroyPeerImpl(HierarchicalSymbolEffectPeer* peer)
+void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
 }
 Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
@@ -30,11 +30,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetFillStyleImpl(HierarchicalSymbolEffectPeer* peer)
+Ark_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
 {
     return {};
 }
-void SetFillStyleImpl(HierarchicalSymbolEffectPeer* peer,
+void SetFillStyleImpl(Ark_HierarchicalSymbolEffect peer,
                       Ark_EffectFillStyle fillStyle)
 {
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
-void DestroyPeerImpl(GlobalScope_ohos_arkui_componentSnapshotPeer* peer)
+void DestroyPeerImpl(Ark_GlobalScope_ohos_arkui_componentSnapshot peer)
 {
 }
 Ark_GlobalScope_ohos_arkui_componentSnapshot CtorImpl()

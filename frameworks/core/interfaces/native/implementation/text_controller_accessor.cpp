@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextControllerAccessor {
-void DestroyPeerImpl(TextControllerPeer* peer)
+void DestroyPeerImpl(Ark_TextController peer)
 {
     CHECK_NULL_VOID(peer);
     peer->controller = nullptr;
@@ -37,19 +37,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CloseSelectionMenuImpl(TextControllerPeer* peer)
+void CloseSelectionMenuImpl(Ark_TextController peer)
 {
     CHECK_NULL_VOID(peer && peer->controller);
     peer->controller->CloseSelectionMenu();
 }
-void SetStyledStringImpl(TextControllerPeer* peer,
+void SetStyledStringImpl(Ark_TextController peer,
                          Ark_StyledString value)
 {
     CHECK_NULL_VOID(peer && peer->controller);
     CHECK_NULL_VOID(value);
     peer->controller->SetStyledString(value->spanString);
 }
-Ark_LayoutManager GetLayoutManagerImpl(TextControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
 {
     CHECK_NULL_RETURN(peer && peer->controller, nullptr);
     auto layoutManagerAccessor = GetLayoutManagerAccessor();

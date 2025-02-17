@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
-void DestroyPeerImpl(Path2DPeer* peer)
+void DestroyPeerImpl(Ark_Path2D peer)
 {
     auto peerImpl = reinterpret_cast<Path2DPeerImpl*>(peer);
     if (peerImpl) {
@@ -38,7 +38,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void AddPathImpl(Path2DPeer* peer,
+void AddPathImpl(Ark_Path2D peer,
                  Ark_Path2D path,
                  const Opt_Matrix2D* transform)
 {

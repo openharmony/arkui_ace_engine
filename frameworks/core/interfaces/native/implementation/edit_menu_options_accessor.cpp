@@ -21,7 +21,7 @@ struct EditMenuOptionsPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EditMenuOptionsAccessor {
-void DestroyPeerImpl(EditMenuOptionsPeer* peer)
+void DestroyPeerImpl(Ark_EditMenuOptions peer)
 {
 }
 Ark_EditMenuOptions CtorImpl()
@@ -32,11 +32,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void OnCreateMenuImpl(EditMenuOptionsPeer* peer,
-                      const Array_TextMenuItem* menuItems)
+Array_TextMenuItem OnCreateMenuImpl(Ark_EditMenuOptions peer,
+                                    const Array_TextMenuItem* menuItems)
 {
+    return {};
 }
-Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer,
+Ark_Boolean OnMenuItemClickImpl(Ark_EditMenuOptions peer,
                                 const Ark_TextMenuItem* menuItem,
                                 const Ark_TextRange* range)
 {

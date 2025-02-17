@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
-void DestroyPeerImpl(SwiperContentTransitionProxyPeer* peer)
+void DestroyPeerImpl(Ark_SwiperContentTransitionProxy peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
@@ -33,53 +33,53 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void FinishTransitionImpl(SwiperContentTransitionProxyPeer* peer)
+void FinishTransitionImpl(Ark_SwiperContentTransitionProxy peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->FinishTransition();
 }
-Ark_Int32 GetSelectedIndexImpl(SwiperContentTransitionProxyPeer* peer)
+Ark_Int32 GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     return Converter::ArkValue<Ark_Int32>(peer->handler->GetSelectedIndex());
 }
-void SetSelectedIndexImpl(SwiperContentTransitionProxyPeer* peer,
+void SetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer,
                           const Ark_Number* selectedIndex)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(selectedIndex);
     peer->handler->SetSelectedIndex(Converter::Convert<int32_t>(*selectedIndex));
 }
-Ark_Int32 GetIndexImpl(SwiperContentTransitionProxyPeer* peer)
+Ark_Int32 GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     return Converter::ArkValue<Ark_Int32>(peer->handler->GetIndex());
 }
-void SetIndexImpl(SwiperContentTransitionProxyPeer* peer,
+void SetIndexImpl(Ark_SwiperContentTransitionProxy peer,
                   const Ark_Number* index)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(index);
     peer->handler->SetIndex(Converter::Convert<int32_t>(*index));
 }
-Ark_Int32 GetPositionImpl(SwiperContentTransitionProxyPeer* peer)
+Ark_Int32 GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     return static_cast<Ark_Int32>(peer->handler->GetPosition());
 }
-void SetPositionImpl(SwiperContentTransitionProxyPeer* peer,
+void SetPositionImpl(Ark_SwiperContentTransitionProxy peer,
                      const Ark_Number* position)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(position);
     peer->handler->SetPosition(Converter::Convert<float>(*position));
 }
-Ark_Int32 GetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer)
+Ark_Int32 GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     return static_cast<Ark_Int32>(peer->handler->GetMainAxisLength());
 }
-void SetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer,
+void SetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer,
                            const Ark_Number* mainAxisLength)
 {
     CHECK_NULL_VOID(peer && peer->handler);

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
-void DestroyPeerImpl(ClickEventPeer* peer)
+void DestroyPeerImpl(Ark_ClickEvent peer)
 {
     delete peer;
 }
@@ -31,7 +31,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetDisplayXImpl(ClickEventPeer* peer)
+Ark_Int32 GetDisplayXImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     const auto* info = peer->GetEventInfo();
@@ -42,7 +42,7 @@ Ark_Int32 GetDisplayXImpl(ClickEventPeer* peer)
         "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
 }
-void SetDisplayXImpl(ClickEventPeer* peer,
+void SetDisplayXImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayX)
 {
     CHECK_NULL_VOID(peer);
@@ -56,7 +56,7 @@ void SetDisplayXImpl(ClickEventPeer* peer,
     offset.SetX(x, animation);
     info->SetScreenLocation(offset);
 }
-Ark_Int32 GetDisplayYImpl(ClickEventPeer* peer)
+Ark_Int32 GetDisplayYImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     const auto* info = peer->GetEventInfo();
@@ -67,7 +67,7 @@ Ark_Int32 GetDisplayYImpl(ClickEventPeer* peer)
         "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
 }
-void SetDisplayYImpl(ClickEventPeer* peer,
+void SetDisplayYImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayY)
 {
     CHECK_NULL_VOID(peer);
@@ -81,7 +81,7 @@ void SetDisplayYImpl(ClickEventPeer* peer,
     offset.SetY(y, animation);
     info->SetScreenLocation(offset);
 }
-Ark_Int32 GetWindowXImpl(ClickEventPeer* peer)
+Ark_Int32 GetWindowXImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     const auto* info = peer->GetEventInfo();
@@ -92,7 +92,7 @@ Ark_Int32 GetWindowXImpl(ClickEventPeer* peer)
         "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
 }
-void SetWindowXImpl(ClickEventPeer* peer,
+void SetWindowXImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowX)
 {
     CHECK_NULL_VOID(peer);
@@ -106,7 +106,7 @@ void SetWindowXImpl(ClickEventPeer* peer,
     offset.SetX(x, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Int32 GetWindowYImpl(ClickEventPeer* peer)
+Ark_Int32 GetWindowYImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     const auto* info = peer->GetEventInfo();
@@ -117,7 +117,7 @@ Ark_Int32 GetWindowYImpl(ClickEventPeer* peer)
         "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
 }
-void SetWindowYImpl(ClickEventPeer* peer,
+void SetWindowYImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowY)
 {
     CHECK_NULL_VOID(peer);
@@ -131,25 +131,25 @@ void SetWindowYImpl(ClickEventPeer* peer,
     offset.SetY(y, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Int32 GetScreenXImpl(ClickEventPeer* peer)
+Ark_Int32 GetScreenXImpl(Ark_ClickEvent peer)
 {
     return GetWindowXImpl(peer);
 }
-void SetScreenXImpl(ClickEventPeer* peer,
+void SetScreenXImpl(Ark_ClickEvent peer,
                     const Ark_Number* screenX)
 {
     SetWindowXImpl(peer, screenX);
 }
-Ark_Int32 GetScreenYImpl(ClickEventPeer* peer)
+Ark_Int32 GetScreenYImpl(Ark_ClickEvent peer)
 {
     return GetWindowYImpl(peer);
 }
-void SetScreenYImpl(ClickEventPeer* peer,
+void SetScreenYImpl(Ark_ClickEvent peer,
                     const Ark_Number* screenY)
 {
     SetWindowYImpl(peer, screenY);
 }
-Ark_Int32 GetXImpl(ClickEventPeer* peer)
+Ark_Int32 GetXImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     const auto* info = peer->GetEventInfo();
@@ -160,7 +160,7 @@ Ark_Int32 GetXImpl(ClickEventPeer* peer)
         "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
 }
-void SetXImpl(ClickEventPeer* peer,
+void SetXImpl(Ark_ClickEvent peer,
               const Ark_Number* x)
 {
     CHECK_NULL_VOID(peer);
@@ -174,7 +174,7 @@ void SetXImpl(ClickEventPeer* peer,
     offset.SetX(newX, animation);
     info->SetLocalLocation(offset);
 }
-Ark_Int32 GetYImpl(ClickEventPeer* peer)
+Ark_Int32 GetYImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     const auto* info = peer->GetEventInfo();
@@ -185,7 +185,7 @@ Ark_Int32 GetYImpl(ClickEventPeer* peer)
         "should be replaced with a Ark_Number type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
 }
-void SetYImpl(ClickEventPeer* peer,
+void SetYImpl(Ark_ClickEvent peer,
               const Ark_Number* y)
 {
     CHECK_NULL_VOID(peer);
@@ -199,11 +199,11 @@ void SetYImpl(ClickEventPeer* peer,
     offset.SetY(newY, animation);
     info->SetLocalLocation(offset);
 }
-Callback_Void GetPreventDefaultImpl(ClickEventPeer* peer)
+Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 {
     return {};
 }
-void SetPreventDefaultImpl(ClickEventPeer* peer,
+void SetPreventDefaultImpl(Ark_ClickEvent peer,
                            const Callback_Void* preventDefault)
 {
 }

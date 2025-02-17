@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ParagraphStyleAccessor {
-void DestroyPeerImpl(ParagraphStylePeer* peer)
+void DestroyPeerImpl(Ark_ParagraphStyle peer)
 {
 }
 Ark_ParagraphStyle CtorImpl(const Opt_ParagraphStyleInterface* value)
@@ -30,23 +30,23 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetTextAlignImpl(ParagraphStylePeer* peer)
+Ark_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_Int32 GetTextIndentImpl(ParagraphStylePeer* peer)
+Ark_Int32 GetTextIndentImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_Int32 GetMaxLinesImpl(ParagraphStylePeer* peer)
+Ark_Int32 GetMaxLinesImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_NativePointer GetOverflowImpl(ParagraphStylePeer* peer)
+Ark_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_NativePointer GetWordBreakImpl(ParagraphStylePeer* peer)
+Ark_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }

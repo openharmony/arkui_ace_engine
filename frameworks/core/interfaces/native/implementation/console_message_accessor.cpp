@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 constexpr int MESSAGE_LEVEL_INFO = 2;
 namespace ConsoleMessageAccessor {
-void DestroyPeerImpl(ConsoleMessagePeer* peer)
+void DestroyPeerImpl(Ark_ConsoleMessage peer)
 {
     CHECK_NULL_VOID(peer);
     peer->webConsoleLog = nullptr;
@@ -50,28 +50,28 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetMessageImpl(ConsoleMessagePeer* peer)
+void GetMessageImpl(Ark_ConsoleMessage peer)
 {
     CHECK_NULL_VOID(peer && peer->webConsoleLog);
     peer->webConsoleLog->GetLog();
     // log message need to be returned
     LOGE("ConsoleMessageAccessor::GetMessageImpl - return value need to be supported");
 }
-void GetSourceIdImpl(ConsoleMessagePeer* peer)
+void GetSourceIdImpl(Ark_ConsoleMessage peer)
 {
     CHECK_NULL_VOID(peer && peer->webConsoleLog);
     peer->webConsoleLog->GetSourceId();
     // source id need to be returned
     LOGE("ConsoleMessageAccessor::GetSourceIdImpl - return value need to be supported");
 }
-Ark_Int32 GetLineNumberImpl(ConsoleMessagePeer* peer)
+Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
 {
     CHECK_NULL_RETURN(peer && peer->webConsoleLog, 0);
     return static_cast<Ark_Int32>(peer->webConsoleLog->GetLineNumber());
 }
-Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
+Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webConsoleLog, 0);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
     peer->webConsoleLog->GetLogLevel();
     // log level need to be returned
     LOGE("ConsoleMessageAccessor::GetMessageLevelImpl - return value need to be supported");

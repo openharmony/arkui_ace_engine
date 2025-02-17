@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UrlStyleAccessor {
-void DestroyPeerImpl(UrlStylePeer* peer)
+void DestroyPeerImpl(Ark_UrlStyle peer)
 {
 }
 Ark_UrlStyle CtorImpl(const Ark_String* url)
@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetUrlImpl(UrlStylePeer* peer)
+void GetUrlImpl(Ark_UrlStyle peer)
 {
 }
 } // UrlStyleAccessor

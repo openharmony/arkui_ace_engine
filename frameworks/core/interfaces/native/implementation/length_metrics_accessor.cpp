@@ -21,8 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LengthMetricsAccessor {
-using namespace Converter;
-void DestroyPeerImpl(LengthMetricsPeer* peer)
+void DestroyPeerImpl(Ark_LengthMetrics peer)
 {
     LengthMetricsPeer::Destroy(peer);
 }
@@ -36,25 +35,25 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_LengthMetrics PxImpl(const Ark_Number* value)
 {
-    return LengthMetricsPeer::Create(Dimension(Convert<float>(*value)));
+    return LengthMetricsPeer::Create(Dimension(Converter::Convert<float>(*value)));
 }
 Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
-    return LengthMetricsPeer::Create(OptConvert<Dimension>(*value).value_or(Dimension()));
+    return LengthMetricsPeer::Create(Converter::OptConvert<Dimension>(*value).value_or(Dimension()));
 }
-Ark_NativePointer GetUnitImpl(LengthMetricsPeer* peer)
+Ark_LengthUnit GetUnitImpl(Ark_LengthMetrics peer)
 {
     return {};
 }
-void SetUnitImpl(LengthMetricsPeer* peer,
+void SetUnitImpl(Ark_LengthMetrics peer,
                  Ark_LengthUnit unit)
 {
 }
-Ark_Int32 GetValueImpl(LengthMetricsPeer* peer)
+Ark_Int32 GetValueImpl(Ark_LengthMetrics peer)
 {
     return {};
 }
-void SetValueImpl(LengthMetricsPeer* peer,
+void SetValueImpl(Ark_LengthMetrics peer,
                   const Ark_Number* value)
 {
 }

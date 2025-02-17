@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RenderingContextSettingsAccessor {
-void DestroyPeerImpl(RenderingContextSettingsPeer* peer)
+void DestroyPeerImpl(Ark_RenderingContextSettings peer)
 {
 }
 Ark_RenderingContextSettings CtorImpl(const Opt_Boolean* antialias)
@@ -30,11 +30,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetAntialiasImpl(RenderingContextSettingsPeer* peer)
+Ark_Boolean GetAntialiasImpl(Ark_RenderingContextSettings peer)
 {
     return {};
 }
-void SetAntialiasImpl(RenderingContextSettingsPeer* peer,
+void SetAntialiasImpl(Ark_RenderingContextSettings peer,
                       Ark_Boolean antialias)
 {
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColorFilterAccessor {
-void DestroyPeerImpl(ColorFilterPeer* peer)
+void DestroyPeerImpl(Ark_ColorFilter peer)
 {
 }
 Ark_ColorFilter CtorImpl(const Array_Number* value)

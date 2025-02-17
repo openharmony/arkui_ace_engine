@@ -42,6 +42,6 @@ class NavDestinationContextAccessorTest : public AccessorTestBase<
 HWTEST_F(NavDestinationContextAccessorTest, initialStateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getConfigInRouteMap, nullptr);
-    EXPECT_EQ(accessor_->getConfigInRouteMap(peer_), nullptr);
+    accessor_->getConfigInRouteMap(peer_);
 }
 } // namespace OHOS::Ace::NG

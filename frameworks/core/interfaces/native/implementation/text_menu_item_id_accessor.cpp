@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
-void DestroyPeerImpl(TextMenuItemIdPeer* peer)
+void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
     delete peer;
 }
@@ -40,7 +40,7 @@ Ark_TextMenuItemId OfImpl(const Ark_ResourceStr* id)
     peer->id = Converter::OptConvert<std::string>(*id);
     return peer;
 }
-Ark_Boolean EqualsImpl(TextMenuItemIdPeer* peer,
+Ark_Boolean EqualsImpl(Ark_TextMenuItemId peer,
                        Ark_TextMenuItemId id)
 {
     CHECK_NULL_RETURN(peer && id, false);

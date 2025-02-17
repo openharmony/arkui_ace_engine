@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearGradientAccessor {
-void DestroyPeerImpl(LinearGradientPeer* peer)
+void DestroyPeerImpl(Ark_LinearGradient peer)
 {
 }
 Ark_LinearGradient CtorImpl(const Array_ColorStop* colorStops)

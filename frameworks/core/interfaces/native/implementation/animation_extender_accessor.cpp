@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimationExtenderAccessor {
-void DestroyPeerImpl(AnimationExtenderPeer* peer)
+void DestroyPeerImpl(Ark_AnimationExtender peer)
 {
 }
 Ark_AnimationExtender CtorImpl()

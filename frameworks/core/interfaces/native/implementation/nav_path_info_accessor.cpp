@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathInfoAccessor {
-void DestroyPeerImpl(NavPathInfoPeer* peer)
+void DestroyPeerImpl(Ark_NavPathInfo peer)
 {
 }
 Ark_NavPathInfo CtorImpl(const Ark_String* name,
@@ -33,30 +33,30 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetNameImpl(NavPathInfoPeer* peer)
+void GetNameImpl(Ark_NavPathInfo peer)
 {
 }
-void SetNameImpl(NavPathInfoPeer* peer,
+void SetNameImpl(Ark_NavPathInfo peer,
                  const Ark_String* name)
 {
 }
-void SetParamImpl(NavPathInfoPeer* peer,
+void SetParamImpl(Ark_NavPathInfo peer,
                   const Ark_CustomObject* param)
 {
 }
-Callback_PopInfo_Void GetOnPopImpl(NavPathInfoPeer* peer)
+Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
 {
     return {};
 }
-void SetOnPopImpl(NavPathInfoPeer* peer,
+void SetOnPopImpl(Ark_NavPathInfo peer,
                   const Callback_PopInfo_Void* onPop)
 {
 }
-Ark_Boolean GetIsEntryImpl(NavPathInfoPeer* peer)
+Ark_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
     return {};
 }
-void SetIsEntryImpl(NavPathInfoPeer* peer,
+void SetIsEntryImpl(Ark_NavPathInfo peer,
                     Ark_Boolean isEntry)
 {
 }

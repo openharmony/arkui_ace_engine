@@ -52,7 +52,7 @@ void SetProgressMaskColor(const RefPtr<ProgressMaskProperty>& property, const Ar
 }
 } // namespace
 namespace ProgressMaskAccessor {
-void DestroyPeerImpl(ProgressMaskPeer* peer)
+void DestroyPeerImpl(Ark_ProgressMask peer)
 {
     delete peer;
 }
@@ -71,19 +71,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void UpdateProgressImpl(ProgressMaskPeer* peer,
+void UpdateProgressImpl(Ark_ProgressMask peer,
                         const Ark_Number* value)
 {
     CHECK_NULL_VOID(peer);
     SetProgressMaskValue(peer->GetProperty(), value);
 }
-void UpdateColorImpl(ProgressMaskPeer* peer,
+void UpdateColorImpl(Ark_ProgressMask peer,
                      const Ark_ResourceColor* value)
 {
     CHECK_NULL_VOID(peer);
     SetProgressMaskColor(peer->GetProperty(), value);
 }
-void EnableBreathingAnimationImpl(ProgressMaskPeer* peer,
+void EnableBreathingAnimationImpl(Ark_ProgressMask peer,
                                   Ark_Boolean value)
 {
     CHECK_NULL_VOID(peer);

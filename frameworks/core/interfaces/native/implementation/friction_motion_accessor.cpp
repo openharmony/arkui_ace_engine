@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrictionMotionAccessor {
-void DestroyPeerImpl(FrictionMotionPeer* peer)
+void DestroyPeerImpl(Ark_FrictionMotion peer)
 {
 }
 Ark_FrictionMotion CtorImpl(const Ark_Number* friction,

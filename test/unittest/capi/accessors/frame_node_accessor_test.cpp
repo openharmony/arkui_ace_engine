@@ -657,8 +657,7 @@ HWTEST_F(FrameNodeAccessorTest, DISABLED_GetPositionToWindowWithTransformTest, T
 {
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
     // wait for a correct return type
-    auto position = accessor_->getPositionToWindowWithTransform(peer_);
-    EXPECT_EQ(position, nullptr);
+    accessor_->getPositionToWindowWithTransform(peer_);
 }
 
 } // namespace OHOS::Ace::NG

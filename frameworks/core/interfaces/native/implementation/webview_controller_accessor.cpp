@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebviewControllerAccessor {
-void DestroyPeerImpl(WebviewControllerPeer* peer)
+void DestroyPeerImpl(Ark_WebviewController peer)
 {
 }
 Ark_WebviewController CtorImpl()
@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 void InitializeWebEngineImpl()
 {
 }
-void LoadUrlImpl(WebviewControllerPeer* peer,
+void LoadUrlImpl(Ark_WebviewController peer,
                  const Ark_Union_String_Resource* url,
                  const Opt_Array_WebHeader* headers)
 {

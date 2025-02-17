@@ -42,7 +42,7 @@ namespace OHOS::Ace::NG::Converter {
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
 using namespace Converter;
-void DestroyPeerImpl(DragEventPeer* peer)
+void DestroyPeerImpl(Ark_DragEvent peer)
 {
     delete peer;
 }
@@ -54,7 +54,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetDisplayXImpl(DragEventPeer* peer)
+Ark_Int32 GetDisplayXImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     auto info = peer->dragInfo;
@@ -65,7 +65,7 @@ Ark_Int32 GetDisplayXImpl(DragEventPeer* peer)
         arkScreenX.f32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
-Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
+Ark_Int32 GetDisplayYImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     auto info = peer->dragInfo;
@@ -76,29 +76,29 @@ Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
         arkScreenY.f32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
-Ark_Int32 GetWindowXImpl(DragEventPeer* peer)
+Ark_Int32 GetWindowXImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     CHECK_NULL_RETURN(peer->dragInfo, 0);
     LOGE("Arkoala method DragEventAccessor.GetWindowXImpl return int32_t value");
     return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetX()));
 }
-Ark_Int32 GetWindowYImpl(DragEventPeer* peer)
+Ark_Int32 GetWindowYImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     CHECK_NULL_RETURN(peer->dragInfo, 0);
     LOGE("Arkoala method DragEventAccessor.GetWindowYImpl return int32_t value");
     return ArkValue<Ark_Int32>(static_cast<int32_t>(peer->dragInfo->GetY()));
 }
-Ark_Int32 GetXImpl(DragEventPeer* peer)
+Ark_Int32 GetXImpl(Ark_DragEvent peer)
 {
     return GetWindowXImpl(peer);
 }
-Ark_Int32 GetYImpl(DragEventPeer* peer)
+Ark_Int32 GetYImpl(Ark_DragEvent peer)
 {
     return GetWindowYImpl(peer);
 }
-void SetDataImpl(DragEventPeer* peer,
+void SetDataImpl(Ark_DragEvent peer,
                  Ark_UnifiedData unifiedData)
 {
     CHECK_NULL_VOID(peer);
@@ -106,7 +106,7 @@ void SetDataImpl(DragEventPeer* peer,
     CHECK_NULL_VOID(unifiedData);
     peer->dragInfo->SetData(unifiedData->unifiedData);
 }
-Ark_UnifiedData GetDataImpl(DragEventPeer* peer)
+Ark_UnifiedData GetDataImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->dragInfo, nullptr);
@@ -116,16 +116,16 @@ Ark_UnifiedData GetDataImpl(DragEventPeer* peer)
     unifiedPeer->unifiedData = data;
     return unifiedPeer;
 }
-Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
+Ark_Summary GetSummaryImpl(Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, nullptr);
+    CHECK_NULL_RETURN(info, {});
     auto summary = info->GetSummary();
     LOGE("DragEventAccessor::GetSummaryImpl wrong return data");
     return {};
 }
-void SetResultImpl(DragEventPeer* peer,
+void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
 {
     CHECK_NULL_VOID(peer);
@@ -135,17 +135,17 @@ void SetResultImpl(DragEventPeer* peer,
         peer->dragInfo->SetResult(*result);
     }
 }
-Ark_NativePointer GetResultImpl(DragEventPeer* peer)
+Ark_DragResult GetResultImpl(Ark_DragEvent peer)
 {
     LOGE("DragEventAccessor::GetResultImpl wrong return data");
     return {};
 }
-Ark_NativePointer GetPreviewRectImpl(DragEventPeer* peer)
+Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
 {
     LOGE("DragEventAccessor::GetPreviewRectImpl wrong return data");
     return {};
 }
-Ark_Int32 GetVelocityXImpl(DragEventPeer* peer)
+Ark_Int32 GetVelocityXImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     auto info = peer->dragInfo;
@@ -156,7 +156,7 @@ Ark_Int32 GetVelocityXImpl(DragEventPeer* peer)
         arkVelocityX.f32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
-Ark_Int32 GetVelocityYImpl(DragEventPeer* peer)
+Ark_Int32 GetVelocityYImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     auto info = peer->dragInfo;
@@ -167,7 +167,7 @@ Ark_Int32 GetVelocityYImpl(DragEventPeer* peer)
         arkVelocityY.f32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
-Ark_Int32 GetVelocityImpl(DragEventPeer* peer)
+Ark_Int32 GetVelocityImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, 0);
     auto info = peer->dragInfo;
@@ -178,7 +178,7 @@ Ark_Int32 GetVelocityImpl(DragEventPeer* peer)
         arkVelocity.f32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
-Ark_Boolean GetModifierKeyStateImpl(DragEventPeer* peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_DragEvent peer,
                                     const Array_String* keys)
 {
     auto defaultValue = ArkValue<Ark_Boolean>(false);
@@ -189,17 +189,15 @@ Ark_Boolean GetModifierKeyStateImpl(DragEventPeer* peer,
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
     return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
-Ark_NativePointer GetDragBehaviorImpl(DragEventPeer* peer)
+Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, nullptr);
+    CHECK_NULL_RETURN(info, {});
     auto dragBehavior = info->GetDragBehavior();
-    auto behavior = Converter::ArkValue<Ark_DragBehavior>(dragBehavior);
-    LOGE("DragEventAccessor::GetDragBehaviorImpl wrong return data");
-    return nullptr;
+    return Converter::ArkValue<Ark_DragBehavior>(dragBehavior);
 }
-void SetDragBehaviorImpl(DragEventPeer* peer,
+void SetDragBehaviorImpl(Ark_DragEvent peer,
                          Ark_DragBehavior dragBehavior)
 {
     CHECK_NULL_VOID(peer);
@@ -210,14 +208,14 @@ void SetDragBehaviorImpl(DragEventPeer* peer,
         info->SetDragBehavior(behavior.value());
     }
 }
-Ark_Boolean GetUseCustomDropAnimationImpl(DragEventPeer* peer)
+Ark_Boolean GetUseCustomDropAnimationImpl(Ark_DragEvent peer)
 {
     auto invalid = ArkValue<Ark_Boolean>(false);
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->dragInfo, invalid);
     return ArkValue<Ark_Boolean>(peer->dragInfo->IsUseCustomAnimation());
 }
-void SetUseCustomDropAnimationImpl(DragEventPeer* peer,
+void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
                                    Ark_Boolean useCustomDropAnimation)
 {
     CHECK_NULL_VOID(peer);

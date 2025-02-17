@@ -29,7 +29,7 @@ const auto OPACITY_TOKEN = "opacity";
 const auto MOVE_TOKEN = "move";
 const auto ASYMMETRIC_TOKEN = "asymmetric";
 
-void DestroyPeerImpl(TransitionEffectPeer* peer)
+void DestroyPeerImpl(Ark_TransitionEffect peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
@@ -149,7 +149,7 @@ Ark_TransitionEffect AsymmetricImpl(Ark_TransitionEffect appear,
     };
     return CtorImpl(&type, &effects);
 }
-Ark_TransitionEffect AnimationImpl(TransitionEffectPeer* peer,
+Ark_TransitionEffect AnimationImpl(Ark_TransitionEffect peer,
                                    const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
@@ -159,7 +159,7 @@ Ark_TransitionEffect AnimationImpl(TransitionEffectPeer* peer,
     peer->handler->SetAnimationOption(refOpt);
     return peer;
 }
-Ark_TransitionEffect CombineImpl(TransitionEffectPeer* peer,
+Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
                                  Ark_TransitionEffect transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);

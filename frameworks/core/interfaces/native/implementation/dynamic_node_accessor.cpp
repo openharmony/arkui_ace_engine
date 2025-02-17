@@ -21,7 +21,7 @@ struct DynamicNodePeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DynamicNodeAccessor {
-void DestroyPeerImpl(DynamicNodePeer* peer)
+void DestroyPeerImpl(Ark_DynamicNode peer)
 {
 }
 Ark_DynamicNode CtorImpl()
@@ -32,9 +32,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void OnMoveImpl(DynamicNodePeer* peer,
-                const Opt_OnMoveHandler* handler)
+Ark_CustomObject OnMoveImpl(Ark_DynamicNode peer,
+                            const Opt_OnMoveHandler* handler)
 {
+    return {};
 }
 } // DynamicNodeAccessor
 const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor()

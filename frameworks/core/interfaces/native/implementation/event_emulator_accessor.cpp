@@ -23,7 +23,7 @@ struct EventEmulatorPeer {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventEmulatorAccessor {
-void DestroyPeerImpl(EventEmulatorPeer* peer)
+void DestroyPeerImpl(Ark_EventEmulator peer)
 {
     delete peer;
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureEventAccessor {
-void DestroyPeerImpl(TapGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_TapGestureEvent peer)
 {
     delete peer;
 }

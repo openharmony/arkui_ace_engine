@@ -33,10 +33,10 @@ constexpr int32_t MAX_FLUSH_COUNT = 2;
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_commonAccessor {
-void DestroyPeerImpl(GlobalScope_commonPeer* peer)
+void DestroyPeerImpl(Ark_GlobalScope_common peer)
 {
 }
-Ark_NativePointer GetContextImpl(const Opt_CustomObject* component)
+Ark_Context GetContextImpl(const Opt_CustomObject* component)
 {
     return {};
 }
@@ -44,12 +44,12 @@ void PostCardActionImpl(const Ark_CustomObject* component,
                         const Ark_CustomObject* action)
 {
 }
-Ark_NativePointer Dollar_rImpl(const Ark_String* value,
-                               const Array_CustomObject* params)
+Ark_Resource Dollar_rImpl(const Ark_String* value,
+                          const Array_CustomObject* params)
 {
     return {};
 }
-Ark_NativePointer Dollar_rawfileImpl(const Ark_String* value)
+Ark_Resource Dollar_rawfileImpl(const Ark_String* value)
 {
     return {};
 }

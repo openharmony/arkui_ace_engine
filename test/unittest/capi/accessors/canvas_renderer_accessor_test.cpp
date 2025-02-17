@@ -2004,17 +2004,17 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
     auto repetition = Converter::ArkValue<Opt_String>("repeat");
     bitmapPeer->SetWidth(NUMBER_TEST_PLAN[0]);
     bitmapPeer->SetHeight(NUMBER_TEST_PLAN[1]);
-    auto result = accessor_->createPattern(peer_, arkBitmap, &repetition);
+    auto result = Converter::OptConvert<Ark_CanvasPattern>(accessor_->createPattern(peer_, arkBitmap, &repetition));
     ASSERT_NE(result, nullptr);
-    auto patternPeer = reinterpret_cast<CanvasPatternPeer*>(result);
+    auto patternPeer = result.value();
     ASSERT_NE(patternPeer, nullptr);
     auto rendererPeer = patternPeer->GetCanvasRenderer();
     ASSERT_NE(rendererPeer, nullptr);
     auto pattern = rendererPeer->patterns[rendererPeer->patternCount - 1];
-    ASSERT_NE(patternPeer, nullptr);
-    ASSERT_FALSE(holder->isCalled);
+    EXPECT_NE(patternPeer, nullptr);
+    EXPECT_FALSE(holder->isCalled);
     rendererPeer->TriggerRestoreImpl();
-    ASSERT_TRUE(holder->isCalled);
+    EXPECT_TRUE(holder->isCalled);
     holder->TearDown();
 }
 

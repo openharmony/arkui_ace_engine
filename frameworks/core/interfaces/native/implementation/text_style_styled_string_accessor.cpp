@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextStyle_styled_stringAccessor {
-void DestroyPeerImpl(TextStyle_styled_stringPeer* peer)
+void DestroyPeerImpl(Ark_TextStyle_styled_string peer)
 {
 }
 Ark_TextStyle_styled_string CtorImpl(const Opt_TextStyleInterface* value)
@@ -30,18 +30,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetFontFamilyImpl(TextStyle_styled_stringPeer* peer)
+void GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
 {
 }
-Ark_Int32 GetFontSizeImpl(TextStyle_styled_stringPeer* peer)
-{
-    return {};
-}
-Ark_Int32 GetFontWeightImpl(TextStyle_styled_stringPeer* peer)
+Ark_Int32 GetFontSizeImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }
-Ark_NativePointer GetFontStyleImpl(TextStyle_styled_stringPeer* peer)
+Ark_Int32 GetFontWeightImpl(Ark_TextStyle_styled_string peer)
+{
+    return {};
+}
+Ark_FontStyle GetFontStyleImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }

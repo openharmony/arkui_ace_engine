@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ReplaceSymbolEffectAccessor {
-void DestroyPeerImpl(ReplaceSymbolEffectPeer* peer)
+void DestroyPeerImpl(Ark_ReplaceSymbolEffect peer)
 {
 }
 Ark_ReplaceSymbolEffect CtorImpl(const Opt_EffectScope* scope)
@@ -30,11 +30,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetScopeImpl(ReplaceSymbolEffectPeer* peer)
+Ark_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
 {
     return {};
 }
-void SetScopeImpl(ReplaceSymbolEffectPeer* peer,
+void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
                   Ark_EffectScope scope)
 {
 }

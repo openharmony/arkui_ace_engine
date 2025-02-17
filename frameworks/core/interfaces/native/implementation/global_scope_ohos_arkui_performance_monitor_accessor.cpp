@@ -51,7 +51,7 @@ void AssignCast(std::optional<PerfSourceType>& dst, const Ark_PerfMonitorSourceT
 namespace OHOS::Ace::NG::GeneratedModifier {
 
 namespace GlobalScope_ohos_arkui_performanceMonitorAccessor {
-void DestroyPeerImpl(GlobalScope_ohos_arkui_performanceMonitorPeer* peer)
+void DestroyPeerImpl(Ark_GlobalScope_ohos_arkui_performanceMonitor peer)
 {
 }
 Ark_GlobalScope_ohos_arkui_performanceMonitor CtorImpl()

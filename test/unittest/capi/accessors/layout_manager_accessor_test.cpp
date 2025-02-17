@@ -66,7 +66,7 @@ HWTEST_F(LayoutManagerAccessorTest, DISABLED_GetGlyphPositionAtCoordinate, TestS
 {
     Ark_Number valueX = Converter::ArkValue<Ark_Number>(33);
     Ark_Number valueY = Converter::ArkValue<Ark_Number>(55);
-    ASSERT_NE(accessor_->getGlyphPositionAtCoordinate(peer_, &valueX, &valueY), nullptr);
+    accessor_->getGlyphPositionAtCoordinate(peer_, &valueX, &valueY);
 }
 
 /**
@@ -77,7 +77,7 @@ HWTEST_F(LayoutManagerAccessorTest, DISABLED_GetGlyphPositionAtCoordinate, TestS
 HWTEST_F(LayoutManagerAccessorTest, DISABLED_GetLineMetrics, TestSize.Level1)
 {
     Ark_Number lineNumber = Converter::ArkValue<Ark_Number>(55);
-    ASSERT_NE(accessor_->getLineMetrics(peer_, &lineNumber), nullptr);
+    accessor_->getLineMetrics(peer_, &lineNumber);
 }
 
 /**

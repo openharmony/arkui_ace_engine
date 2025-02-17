@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapAccessor {
-void DestroyPeerImpl(PixelMapPeer* peer)
+void DestroyPeerImpl(Ark_PixelMap peer)
 {
     delete peer;
 }
@@ -32,27 +32,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReadPixelsToBufferSyncImpl(PixelMapPeer* peer,
+void ReadPixelsToBufferSyncImpl(Ark_PixelMap peer,
                                 const Ark_Buffer* dst)
 {
 }
-void WriteBufferToPixelsImpl(PixelMapPeer* peer,
+void WriteBufferToPixelsImpl(Ark_PixelMap peer,
                              const Ark_Buffer* src)
 {
 }
-Ark_Int32 GetIsEditableImpl(PixelMapPeer* peer)
+Ark_Int32 GetIsEditableImpl(Ark_PixelMap peer)
 {
     return {};
 }
-void SetIsEditableImpl(PixelMapPeer* peer,
+void SetIsEditableImpl(Ark_PixelMap peer,
                        Ark_Int32 isEditable)
 {
 }
-Ark_Int32 GetIsStrideAlignmentImpl(PixelMapPeer* peer)
+Ark_Int32 GetIsStrideAlignmentImpl(Ark_PixelMap peer)
 {
     return {};
 }
-void SetIsStrideAlignmentImpl(PixelMapPeer* peer,
+void SetIsStrideAlignmentImpl(Ark_PixelMap peer,
                               Ark_Int32 isStrideAlignment)
 {
 }

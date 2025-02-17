@@ -19,14 +19,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_inspectorAccessor {
-void DestroyPeerImpl(GlobalScope_inspectorPeer* peer)
+void DestroyPeerImpl(Ark_GlobalScope_inspector peer)
 {
 }
-Ark_NativePointer GetInspectorNodesImpl()
+Ark_CustomObject GetInspectorNodesImpl()
 {
     return {};
 }
-Ark_NativePointer GetInspectorNodeByIdImpl(const Ark_Number* id)
+Ark_CustomObject GetInspectorNodeByIdImpl(const Ark_Number* id)
 {
     return {};
 }

@@ -21,7 +21,7 @@ struct ControllerHandlerPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ControllerHandlerAccessor {
-void DestroyPeerImpl(ControllerHandlerPeer* peer)
+void DestroyPeerImpl(Ark_ControllerHandler peer)
 {
 }
 Ark_ControllerHandler CtorImpl()
@@ -32,7 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetWebControllerImpl(ControllerHandlerPeer* peer,
+void SetWebControllerImpl(Ark_ControllerHandler peer,
                           Ark_WebviewController controller)
 {
 }

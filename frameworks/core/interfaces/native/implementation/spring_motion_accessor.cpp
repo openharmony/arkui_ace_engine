@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SpringMotionAccessor {
-void DestroyPeerImpl(SpringMotionPeer* peer)
+void DestroyPeerImpl(Ark_SpringMotion peer)
 {
 }
 Ark_SpringMotion CtorImpl(const Ark_Number* start,

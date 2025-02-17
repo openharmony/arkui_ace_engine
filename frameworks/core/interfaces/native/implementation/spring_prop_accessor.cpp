@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SpringPropAccessor {
-void DestroyPeerImpl(SpringPropPeer* peer)
+void DestroyPeerImpl(Ark_SpringProp peer)
 {
 }
 Ark_SpringProp CtorImpl(const Ark_Number* mass,

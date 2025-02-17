@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineHeightStyleAccessor {
-void DestroyPeerImpl(LineHeightStylePeer* peer)
+void DestroyPeerImpl(Ark_LineHeightStyle peer)
 {
 }
 Ark_LineHeightStyle CtorImpl(Ark_LengthMetrics lineHeight)
@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetLineHeightImpl(LineHeightStylePeer* peer)
+Ark_Int32 GetLineHeightImpl(Ark_LineHeightStyle peer)
 {
     return {};
 }

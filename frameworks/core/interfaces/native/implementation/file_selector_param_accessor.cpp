@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorParamAccessor {
-void DestroyPeerImpl(FileSelectorParamPeer* peer)
+void DestroyPeerImpl(Ark_FileSelectorParam peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
@@ -36,29 +36,30 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetTitleImpl(FileSelectorParamPeer* peer)
+void GetTitleImpl(Ark_FileSelectorParam peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->GetTitle();
     // title need to be returned
     LOGE("FileSelectorParamAccessor::GetTitleImpl - return value need to be supported");
 }
-Ark_NativePointer GetModeImpl(FileSelectorParamPeer* peer)
+Ark_FileSelectorMode GetModeImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetMode();
     // mode need to be returned
     LOGE("FileSelectorParamAccessor::GetModeImpl - return value need to be supported");
     return {};
 }
-void GetAcceptTypeImpl(FileSelectorParamPeer* peer)
+Array_String GetAcceptTypeImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetAcceptType();
     // accept type need to be returned
     LOGE("FileSelectorParamAccessor::GetAcceptTypeImpl - return value need to be supported");
+    return {};
 }
-Ark_Boolean IsCaptureImpl(FileSelectorParamPeer* peer)
+Ark_Boolean IsCaptureImpl(Ark_FileSelectorParam peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, false);
     return Converter::ArkValue<Ark_Boolean>(peer->handler->IsCapture());

@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ICurveAccessor {
-void DestroyPeerImpl(ICurvePeer* peer)
+void DestroyPeerImpl(Ark_ICurve peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
@@ -34,7 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 InterpolateImpl(ICurvePeer* peer,
+Ark_Int32 InterpolateImpl(Ark_ICurve peer,
                           const Ark_Number* fraction)
 {
     CHECK_NULL_RETURN(peer && peer->handler, 0.0f);

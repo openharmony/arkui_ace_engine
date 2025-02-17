@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavExtenderAccessor {
-void DestroyPeerImpl(NavExtenderPeer* peer)
+void DestroyPeerImpl(Ark_NavExtender peer)
 {
     if (peer) {
         delete peer;
