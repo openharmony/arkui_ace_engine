@@ -1372,7 +1372,7 @@ struct SegmentButtonV2ItemContent {
   }
 
   private getSymbolFontSize(): Dimension {
-    if (this.itemSymbolFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSymbolFontSize)) {
+    if (this.itemSymbolFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSymbolFontSize) && this.itemSymbolFontSize.unit !== LengthUnit.PERCENT) {
       return LengthMetricsUtils.getInstance().stringify(this.itemSymbolFontSize);
     }
     return this.theme.itemSymbolFontSize;
@@ -1451,12 +1451,12 @@ struct SegmentButtonV2ItemContent {
 
   private getItemFontSize(): Length {
     if (this.selected) {
-      if (this.itemSelectedFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSelectedFontSize)) {
+      if (this.itemSelectedFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSelectedFontSize)  && this.itemSelectedFontSize.unit !== LengthUnit.PERCENT) {
         return LengthMetricsUtils.getInstance().stringify(this.itemSelectedFontSize);
       }
       return this.theme.itemFontSize;
     }
-    if (this.itemFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemFontSize)) {
+    if (this.itemFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemFontSize) && this.itemFontSize.unit !== LengthUnit.PERCENT) {
       return LengthMetricsUtils.getInstance().stringify(this.itemFontSize);
     }
     return this.theme.itemFontSize;
