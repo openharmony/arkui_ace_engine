@@ -733,8 +733,8 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
     StoreConfiguration(context->GetConfiguration());
-    
-    if (bundleName_ == "com.example.trivial.application") { 
+
+    if (bundleName_ == "com.example.trivial.application") {
         handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
         if (!handle) {
             LOGW("Koala Cannot open library: %s", dlerror());
@@ -745,8 +745,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
         dlerror();
 
         // Get the function pointer for LoadVirtualMachine
-        LoadVirtualMachineFunc LoadVirtualMachine = (LoadVirtualMachineFunc)dlsym(
-            handle, "LoadVirtualMachine");
+        LoadVirtualMachineFunc LoadVirtualMachine = (LoadVirtualMachineFunc)dlsym(handle, "LoadVirtualMachine");
         auto* GetVMAddr = (GetVMAddrFunc)(dlsym(handle, "GetVMAddr"));
         const char* dlsym_error = dlerror();
         if (dlsym_error) {
@@ -825,9 +824,37 @@ void UIContentImpl::DestroyCallback() const
 }
 
 namespace {
-void RunArkoala()
+void RunArkoalaEventLoop()
 {
-    // void* handle = dlopen("/data/app/el1/bundle/public/com.example.trivial.application/libs/arm/libvmloader.so", RTLD_LAZY | RTLD_LOCAL);
+    LOGI("Koala execute runApp");
+    CHECK_NULL_VOID(handle);
+    RunApplicationFunc RunApp = (RunApplicationFunc)dlsym(handle, "RunApplication");
+    const char* dlsym_error = dlerror();
+    if (dlsym_error) {
+        LOGW("Koala cannot load symbol RunApplication: %s", dlsym_error);
+        dlclose(handle);
+        handle = nullptr;
+        return;
+    }
+    if (!RunApp(0, 0)) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto taskExec = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExec);
+        taskExec->PostTask(
+            [id = Container::CurrentId()]() {
+                ContainerScope scope(id);
+                RunArkoalaEventLoop();
+            },
+            TaskExecutor::TaskType::UI, "ArkoalaRunApp", PriorityType::HIGH);
+        // run until app exits
+    }
+}
+
+void StartArkoala()
+{
+    // void* handle = dlopen("/data/app/el1/bundle/public/com.example.trivial.application/libs/arm/libvmloader.so",
+    // RTLD_LAZY | RTLD_LOCAL);
     if (!handle) {
         LOGW("Koala library not opened: %s", dlerror());
         return;
@@ -836,8 +863,7 @@ void RunArkoala()
     // Clear any existing error
     dlerror();
     // Get the function pointer
-    StartApplicationFunc StartApplication =
-        (StartApplicationFunc)dlsym(handle, "StartApplication");
+    StartApplicationFunc StartApplication = (StartApplicationFunc)dlsym(handle, "StartApplication");
     const char* dlsym_error = dlerror();
     if (dlsym_error) {
         LOGW("Koala cannot load symbol startApp: %s", dlsym_error);
@@ -856,20 +882,7 @@ void RunArkoala()
     CHECK_NULL_VOID(container);
     auto taskExec = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExec);
-    TaskExecutor::Task task = [handle = handle]() {
-        LOGI("Koala execute runApp");
-        RunApplicationFunc RunApp = (RunApplicationFunc)dlsym(handle, "RunApplication");
-        const char* dlsym_error = dlerror();
-        if (dlsym_error) {
-            LOGW("Koala cannot load symbol RunApplication: %s", dlsym_error);
-            dlclose(handle);
-            return;
-        }
-        RunApp(0, 0);
-        dlclose(handle);
-    };
-    handle = nullptr;
-    taskExec->PostDelayedTask(task, TaskExecutor::TaskType::UI, 100, "ArkoalaRunApp", PriorityType::HIGH);
+    taskExec->PostDelayedTask(RunArkoalaEventLoop, TaskExecutor::TaskType::UI, 100, "ArkoalaRunApp", PriorityType::HIGH);
 }
 } // namespace
 
@@ -892,13 +905,13 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         errorCode = CommonInitializeForm(window, contentInfo, storage);
         CHECK_ERROR_CODE_RETURN(errorCode);
     }
-    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_, startUrl_.c_str());
     // run page.
     errorCode = Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
     if (errorCode > 0 && startUrl_ == "arkoala") {
         ContainerScope scope(instanceId_);
-        RunArkoala();
+        StartArkoala();
     }
     CHECK_ERROR_CODE_RETURN(errorCode);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
