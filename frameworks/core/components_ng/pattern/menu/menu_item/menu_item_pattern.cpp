@@ -675,9 +675,7 @@ void MenuItemPattern::OnClick()
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
     auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
-    if (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu) {
-        return;
-    }
+    CHECK_EQUAL_VOID(expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu, true);
     if (expandingMode_ == SubMenuExpandingMode::STACK && IsStackSubmenuHeader()) {
         menuWrapperPattern->HideSubMenu();
         return;
@@ -711,8 +709,10 @@ void MenuItemPattern::OnClick()
         ShowSubMenu();
         return;
     }
-    // hide menu when menu item is clicked
-    CloseMenu();
+    // hide menu when menu item is clicked, unless the click is intercepted
+    if (!blockClick_) {
+        CloseMenu();
+    }
 }
 
 void MenuItemPattern::OnTouch(const TouchEventInfo& info)
