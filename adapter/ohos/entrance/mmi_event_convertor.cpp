@@ -328,10 +328,6 @@ MouseButton GetMouseEventButton(int32_t button)
             return MouseButton::RIGHT_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
             return MouseButton::MIDDLE_BUTTON;
-        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_SIDE:
-            return MouseButton::SIDE_BUTTON;
-        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
-            return MouseButton::EXTRA_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD:
             return MouseButton::FORWARD_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK:
