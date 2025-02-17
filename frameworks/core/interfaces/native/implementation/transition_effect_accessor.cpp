@@ -192,4 +192,7 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
     return &TransitionEffectAccessorImpl;
 }
 
+struct TransitionEffectPeer {
+    virtual ~TransitionEffectPeer() = default;
+};
 }
