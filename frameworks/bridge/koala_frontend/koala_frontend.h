@@ -43,14 +43,9 @@ public:
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override {}
 
-    UIContentErrorCode RunPage(const std::string& url, const std::string& params) override
-    {
-        return UIContentErrorCode::NO_ERRORS;
-    }
-    UIContentErrorCode RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) override
-    {
-        return UIContentErrorCode::NO_ERRORS;
-    }
+    UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
+    UIContentErrorCode RunPage(
+        const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) override;
 
     UIContentErrorCode RunPageByNamedRouter(const std::string& name, const std::string& params) override
     {
