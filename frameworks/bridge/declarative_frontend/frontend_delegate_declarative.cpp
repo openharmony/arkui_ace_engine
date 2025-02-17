@@ -3680,8 +3680,6 @@ std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
 }
 bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto overlayManager = context->GetOverlayManager();
@@ -3690,8 +3688,6 @@ bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayMana
 };
 std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarative::GetOverlayManagerOptions()
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, std::nullopt);
     auto overlayManager = context->GetOverlayManager();

@@ -1436,8 +1436,6 @@ void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
 
 bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto overlayManager = context->GetOverlayManager();
@@ -1446,8 +1444,6 @@ bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayMa
 };
 std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarativeNG::GetOverlayManagerOptions()
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, std::nullopt);
     auto overlayManager = context->GetOverlayManager();
