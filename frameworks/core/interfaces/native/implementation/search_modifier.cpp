@@ -303,7 +303,8 @@ void OnSubmit1Impl(Ark_NativePointer node,
     auto onSubmit = [arkCallback = CallbackHelper(*value), node = weakNode](
 		    const std::u16string& value, NG::TextFieldCommonEvent& info) {
         PipelineContext::SetCallBackNode(node);
-        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
+        Converter::ConvContext ctx;
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
         const auto event = Converter::ArkSubmitEventSync(info);
         auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
         arkCallback.Invoke(arkStringValue, eventArkValue);

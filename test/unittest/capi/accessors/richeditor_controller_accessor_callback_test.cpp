@@ -26,12 +26,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace GeneratedModifier {
-const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
-const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
+    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+    const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
+    const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
 }
 
 namespace {
 UserGestureOptions g_gestureOptions;
+UserMouseOptions g_mouseOptions;
 
 class MockRichEditorController : public RichEditorController {
     public:
@@ -51,6 +53,7 @@ class MockRichEditorController : public RichEditorController {
     int32_t AddImageSpan(const ImageSpanOptions& options) override
     {
         g_gestureOptions = options.userGestureOption;
+        g_mouseOptions = options.userMouseOption;
         return 0;
     }
 
@@ -68,6 +71,18 @@ Opt_RichEditorImageSpanOptions GetImageSpanOptions(const Ark_RichEditorGesture& 
         .imageStyle = Converter::ArkValue<Opt_RichEditorImageSpanStyle>(),
         .offset = Converter::ArkValue<Opt_Number>(),
         .onHover = Converter::ArkValue<Opt_OnHoverCallback>(),
+    };
+
+    return Converter::ArkValue<Opt_RichEditorImageSpanOptions>(options);
+}
+
+Opt_RichEditorImageSpanOptions GetImageSpanOptions(const ::OnHoverCallback& hover)
+{
+    Ark_RichEditorImageSpanOptions options = {
+        .gesture = Converter::ArkValue<Opt_RichEditorGesture>(),
+        .imageStyle = Converter::ArkValue<Opt_RichEditorImageSpanStyle>(),
+        .offset = Converter::ArkValue<Opt_Number>(),
+        .onHover = Converter::ArkValue<Opt_OnHoverCallback>(hover),
     };
 
     return Converter::ArkValue<Opt_RichEditorImageSpanOptions>(options);
@@ -255,6 +270,57 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().offsetX, static_cast<int32_t>(OFFSET_X));
     EXPECT_EQ(checkEvent.value().offsetY, static_cast<int32_t>(OFFSET_Y));
+}
+
+/**
+ * @tc.name: addImageSpanTestOnHover
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestOnHover, TestSize.Level1)
+{
+    static const std::string expectedType = "onHover";
+    struct CheckEvent {
+        int32_t nodeId;
+        bool isHover;
+        SourceType deviceType;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onHoverFunc = [](const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event) {
+        ASSERT_NE(event.ptr, nullptr);
+        auto peer = reinterpret_cast<HoverEventPeer*>(event.ptr);
+        auto hoverEventInfo = peer->GetEventInfo();
+        ASSERT_NE(hoverEventInfo, nullptr);
+        EXPECT_EQ(hoverEventInfo->GetType(), expectedType);
+        GeneratedModifier::GetHoverEventAccessor()->destroyPeer(peer);
+        checkEvent = {
+            .nodeId = resourceId,
+            .isHover = Converter::Convert<bool>(isHover),
+            .deviceType = hoverEventInfo->GetSourceDevice()
+        };
+    };
+    auto callbackValue = Converter::ArkValue<::OnHoverCallback>(onHoverFunc, RESOURCE_ID);
+    g_mouseOptions = UserMouseOptions();
+    auto test = [this, &callbackValue](bool isHover, SourceType type) {
+        auto optOptions = GetImageSpanOptions(callbackValue);
+        auto resourceStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(STR_URL);
+        auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
+        ASSERT_EQ(g_mouseOptions.onHover, nullptr);
+        accessor_->addImageSpan(peer_, &value, &optOptions);
+        ASSERT_NE(g_mouseOptions.onHover, nullptr);
+        auto info = HoverInfo();
+        info.SetSourceDevice(type);
+        ASSERT_FALSE(checkEvent.has_value());
+        g_mouseOptions.onHover(isHover, info);
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent.value().nodeId, RESOURCE_ID);
+        EXPECT_EQ(checkEvent.value().deviceType, type);
+        EXPECT_EQ(checkEvent.value().isHover, isHover);
+        g_mouseOptions.onHover = nullptr;
+        checkEvent.reset();
+    };
+    test(true, SourceType::MOUSE);
+    test(false, SourceType::JOYSTICK);
 }
 
 /**
