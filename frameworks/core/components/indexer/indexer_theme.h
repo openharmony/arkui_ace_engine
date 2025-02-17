@@ -243,24 +243,18 @@ private:
     static void ParseTextStyleAttributes(const RefPtr<ThemeStyle>& indexerPattern,
         const RefPtr<IndexerTheme>& theme)
     {
-        std::vector<std::string> fontFamilies;
-        std::string defaultFamily = "HarmonyOS Sans";
-        fontFamilies.emplace_back(defaultFamily);
         theme->seletctTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
         theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
-        theme->seletctTextStyle_.SetFontFamilies(fontFamilies);
         theme->defaultTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));
         theme->defaultTextStyle_.SetFontStyle(FontStyle::NORMAL);
-        theme->defaultTextStyle_.SetFontFamilies(fontFamilies);
         theme->popupTextStyle_.SetFontSize(
             indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::VP)));
         theme->popupTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR)));
         theme->popupTextStyle_.SetFontWeight(FontWeight::MEDIUM);
         theme->popupTextStyle_.SetFontStyle(FontStyle::NORMAL);
-        theme->popupTextStyle_.SetFontFamilies(fontFamilies);
     }
 
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IndexerTheme>& theme)
