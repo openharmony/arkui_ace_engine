@@ -2824,6 +2824,9 @@ struct ArkUIListModifier {
     void (*setListMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool enabled);
     void (*resetListMaintainVisibleContentPosition)(ArkUINodeHandle node);
     ArkUI_Bool (*getListMaintainVisibleContentPosition)(ArkUINodeHandle node);
+    void (*setListStackFromEnd)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*resetListStackFromEnd)(ArkUINodeHandle node);
+    ArkUI_Bool (*getListStackFromEnd)(ArkUINodeHandle node);
     void (*setListFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetListFadingEdge)(ArkUINodeHandle node);

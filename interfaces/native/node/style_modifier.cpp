@@ -6490,6 +6490,37 @@ const ArkUI_AttributeItem* GetListMaintainVisibleContentPosition(ArkUI_NodeHandl
     return &g_attributeItem;
 }
 
+int32_t SetListStackFromEnd(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Bool enabled = false;
+    if (InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        enabled = item->value[NUM_0].i32;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListModifier()->setListStackFromEnd(node->uiNodeHandle, enabled);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListStackFromEnd(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getListModifier()->resetListStackFromEnd(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListStackFromEnd(ArkUI_NodeHandle node)
+{
+    auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getListStackFromEnd(node->uiNodeHandle);
+    //ScrollPagingStatus::VALID is true and VALID value is 2, others is false
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 // TextArea
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -15691,7 +15722,7 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 {
     static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter, SetListCachedCount,
         SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex, SetListDivider,
-        SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition };
+        SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition, SetListStackFromEnd };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15703,7 +15734,7 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
 {
     static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter, GetListCachedCount,
         nullptr, GetListAlignListItem, nullptr, GetListInitialIndex, GetListDivider, nullptr, GetListLanes,
-        GetListScrollSnapAlign, GetListMaintainVisibleContentPosition };
+        GetListScrollSnapAlign, GetListMaintainVisibleContentPosition, GetListStackFromEnd };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -15715,7 +15746,8 @@ void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace, ResetListNodeAdapter,
         ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex,
-        ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition };
+        ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition,
+        ResetListStackFromEnd };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

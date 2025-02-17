@@ -29083,6 +29083,19 @@ class ListMaintainVisibleContentPositionModifier extends ModifierWithKey {
   }
 }
 ListMaintainVisibleContentPositionModifier.identity = Symbol('listMaintainVisibleContentPosition');
+class ListStackFromEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListStackFromEnd(node);
+    } else {
+      getUINativeModule().list.setListStackFromEnd(node, this.value);
+    }
+  }
+}
+ListStackFromEndModifier.identity = Symbol('listStackFromEnd');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -29550,6 +29563,10 @@ class ArkListComponent extends ArkScrollable {
   maintainVisibleContentPosition(value) {
     modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
       ListMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
+  stackFromEnd(value) {
+    modifierWithKey(this._modifiersWithKeys, ListStackFromEndModifier.identity, ListStackFromEndModifier, value);
     return this;
   }
   clip(value) {
