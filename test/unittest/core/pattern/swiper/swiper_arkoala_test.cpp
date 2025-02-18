@@ -113,7 +113,12 @@ HWTEST_F(SwiperArkoalaTest, Jump001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(pattern_->GetStartIndex(), 8);
-    EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (0.00, 590.00) - [240.00 x 90.00]");
-    EXPECT_EQ(GetChildRect(frameNode_, 94).ToString(), "RectT (0.00, 690.00) - [240.00 x 90.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 8).ToString(), "RectT (0.00, 0.00) - [480.00 x 800.00]");
+
+    UpdateOffset(-50.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(7, 10));
+    EXPECT_EQ(GetChildRect(frameNode_, 8).ToString(), "RectT (-50.00, 0.00) - [480.00 x 800.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 9).ToString(), "RectT (435.00, 0.00) - [480.00 x 800.00]");
 }
 } // namespace OHOS::Ace::NG

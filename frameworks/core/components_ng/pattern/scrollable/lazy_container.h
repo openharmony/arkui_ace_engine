@@ -43,7 +43,7 @@ protected:
         adapter_.Reset();
     }
 
-    bool ArkoalaEnabled() const
+    bool ArkoalaLazyEnabled() const
     {
         return adapter_;
     }
