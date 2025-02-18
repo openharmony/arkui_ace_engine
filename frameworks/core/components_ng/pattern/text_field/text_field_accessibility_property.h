@@ -73,6 +73,8 @@ protected:
     void SetSpecificSupportAction() override;
 
 private:
+    bool IsShowCount() const;
+    bool IsShowError() const;
     std::string errorText_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldAccessibilityProperty);
