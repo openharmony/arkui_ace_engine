@@ -522,6 +522,28 @@ ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
     return 0;
 }
 
+ArkUI_Int32 RequestFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
+    return static_cast<ArkUI_Int32>(ViewAbstract::RequestFocus(frameNode));
+}
+
+void ClearFocus(ArkUI_Int32 instanceId)
+{
+    ViewAbstract::ClearFocus(instanceId);
+}
+
+void FocusActivate(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive)
+{
+    ViewAbstract::FocusActivate(instanceId, isActive, isAutoInactive);
+}
+
+void SetAutoFocusTransfer(ArkUI_Int32 instanceId, bool isAutoFocusTransfer)
+{
+    ViewAbstract::SetAutoFocusTransfer(instanceId, isAutoFocusTransfer);
+}
+
 ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -688,7 +710,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
         SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
         GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, SetDrawCompleteEvent,
-        ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, SetCrossLanguageOptions, GetCrossLanguageOptions,
+        ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, RequestFocus, ClearFocus, FocusActivate,
+        SetAutoFocusTransfer, SetCrossLanguageOptions, GetCrossLanguageOptions,
         CheckIfCanCrossLanguageAttributeSetting };
     return &modifier;
 }

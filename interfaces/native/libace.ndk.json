@@ -2521,6 +2521,22 @@
     },
     {
         "first_introduced": "15",
+        "name": "OH_ArkUI_FocusRequest"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusClear"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusActivate"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusSetAutoTransfer"
+    },
+    {
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_Create"
     },
     {
