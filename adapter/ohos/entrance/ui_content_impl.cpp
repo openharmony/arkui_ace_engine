@@ -824,57 +824,58 @@ void UIContentImpl::DestroyCallback() const
 }
 
 namespace {
-void RunArkoalaEventLoop()
-{
-    dlerror();
-    LOGI("Koala execute runApp");
-    CHECK_NULL_VOID(handle);
-    RunApplicationFunc RunApp = (RunApplicationFunc)dlsym(handle, "RunApplication");
-    const char* dlsym_error = dlerror();
-    if (dlsym_error) {
-        LOGW("Koala cannot load symbol RunApplication: %s", dlsym_error);
-        dlclose(handle);
-        handle = nullptr;
-        return;
-    }
-    if (RunApp(0, 0)) {
-        LOGW("Koala exit app when RunApplication returns 1");
-        dlclose(handle);
-        exit(0);
-    }
-}
+// void RunArkoalaEventLoop()
+// {
+//     dlerror();
+//     LOGI("Koala execute runApp");
+//     CHECK_NULL_VOID(handle);
+//     RunApplicationFunc RunApp = (RunApplicationFunc)dlsym(handle, "RunApplication");
+//     const char* dlsym_error = dlerror();
+//     if (dlsym_error) {
+//         LOGW("Koala cannot load symbol RunApplication: %s", dlsym_error);
+//         dlclose(handle);
+//         handle = nullptr;
+//         return;
+//     }
+//     if (RunApp(0, 0)) {
+//         LOGW("Koala exit app when RunApplication returns 1");
+//         dlclose(handle);
+//         exit(0);
+//     }
+// }
 
-void StartArkoala()
-{
-    // void* handle = dlopen("/data/app/el1/bundle/public/com.example.trivial.application/libs/arm/libvmloader.so",
-    // RTLD_LAZY | RTLD_LOCAL);
-    if (!handle) {
-        LOGW("Koala library not opened: %s", dlerror());
-        return;
-    }
+/* temp solution, now re-implemented with ani in KoalaFrontend */
+// void StartArkoala()
+// {
+//     // void* handle = dlopen("/data/app/el1/bundle/public/com.example.trivial.application/libs/arm/libvmloader.so",
+//     // RTLD_LAZY | RTLD_LOCAL);
+//     if (!handle) {
+//         LOGW("Koala library not opened: %s", dlerror());
+//         return;
+//     }
 
-    // Clear any existing error
-    dlerror();
-    // Get the function pointer
-    StartApplicationFunc StartApplication = (StartApplicationFunc)dlsym(handle, "StartApplication");
-    const char* dlsym_error = dlerror();
-    if (dlsym_error) {
-        LOGW("Koala cannot load symbol startApp: %s", dlsym_error);
-        dlclose(handle);
-        handle = nullptr;
-        return;
-    }
+//     // Clear any existing error
+//     dlerror();
+//     // Get the function pointer
+//     StartApplicationFunc StartApplication = (StartApplicationFunc)dlsym(handle, "StartApplication");
+//     const char* dlsym_error = dlerror();
+//     if (dlsym_error) {
+//         LOGW("Koala cannot load symbol startApp: %s", dlsym_error);
+//         dlclose(handle);
+//         handle = nullptr;
+//         return;
+//     }
 
-    LOGI("Koala start application");
-    const char* appUrl = "ComExampleTrivialApplication";
-    const char* appParams = "ArkTSLoaderParam";
-    void* result = StartApplication(appUrl, appParams);
+//     LOGI("Koala start application");
+//     const char* appUrl = "ComExampleTrivialApplication";
+//     const char* appParams = "ArkTSLoaderParam";
+//     void* result = StartApplication(appUrl, appParams);
 
-    LOGI("Koala result rootPointer = %p", result);
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetVsyncListener(RunArkoalaEventLoop);
-}
+//     LOGI("Koala result rootPointer = %p", result);
+//     auto pipeline = NG::PipelineContext::GetCurrentContext();
+//     CHECK_NULL_VOID(pipeline);
+//     pipeline->SetVsyncListener(RunArkoalaEventLoop);
+// }
 } // namespace
 
 UIContentErrorCode UIContentImpl::InitializeInner(
@@ -900,10 +901,6 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         instanceId_, startUrl_.c_str());
     // run page.
     errorCode = Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
-    if (errorCode > 0 && startUrl_ == "arkoala") {
-        ContainerScope scope(instanceId_);
-        StartArkoala();
-    }
     CHECK_ERROR_CODE_RETURN(errorCode);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
@@ -1863,7 +1860,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
-    if (startUrl_ == "arkoala") {
+    if (bundleName_ == "com.example.trivial.application") { // TODO: use AbilityContext to distinguish KoalaFrontend
         frontendType = FrontendType::KOALA;
     }
     auto container =

@@ -18,6 +18,7 @@ ohos_source_set("koala_frontend") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   configs = [ "$ace_root:ace_config" ]
+  include_dirs = [ "//arkcompiler/runtime_core/static_core" ]
 
   sources = [ "koala_frontend.cpp" ]
   external_deps = [ "hilog:libhilog" ]

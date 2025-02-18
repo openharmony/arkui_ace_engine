@@ -466,7 +466,7 @@ void AceContainer::InitializeFrontend()
             return;
         }
     } else if (type_ == FrontendType::KOALA) {
-        frontend_ = MakeRefPtr<KoalaFrontend>();
+        frontend_ = MakeRefPtr<KoalaFrontend>(sharedRuntime_);
     } else {
         LOGE("Frontend type not supported");
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);

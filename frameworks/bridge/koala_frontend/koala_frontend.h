@@ -17,29 +17,33 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_KOALA_FRONTEND_KOALA_FRONTEND_H
 
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
+typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 namespace OHOS::Ace {
 /**
  * @brief Proxy class to interact with Koala frontend and static ArkTS runtime.
- * 
+ *
  */
 class ACE_EXPORT KoalaFrontend : public Frontend {
     DECLARE_ACE_TYPE(KoalaFrontend, Frontend);
 
 public:
-    KoalaFrontend() = default;
+    explicit KoalaFrontend(void* runtime) : env_(reinterpret_cast<ets_env*>(runtime)) {}
     ~KoalaFrontend() override = default;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
     {
+        taskExecutor_ = taskExecutor;
         return true;
     }
 
     void Destroy() override {}
 
-    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override {}
+    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override {}
 
@@ -175,6 +179,9 @@ public:
     void HotReload() override {}
 
 private:
+    RefPtr<TaskExecutor> taskExecutor_;
+    RefPtr<NG::PipelineContext> pipeline_;
+    ets_env* env_; // ani_env
     bool foregroundFrontend_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(KoalaFrontend);
 };

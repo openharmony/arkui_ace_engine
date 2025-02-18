@@ -13,15 +13,115 @@
  * limitations under the License.
  */
 #include "bridge/koala_frontend/koala_frontend.h"
- namespace OHOS::Ace {
 
- UIContentErrorCode KoalaFrontend::RunPage(
-     const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
- {
-     return UIContentErrorCode::NO_ERRORS;
- }
- UIContentErrorCode KoalaFrontend::RunPage(const std::string& url, const std::string& params)
- {
-     return UIContentErrorCode::NO_ERRORS;
- }
- } // namespace OHOS::Ace
+#include "interfaces/inner_api/ace/constants.h"
+#include "plugins/ets/runtime/napi/ets_napi.h"
+
+#include "core/pipeline_ng/pipeline_context.h"
+namespace OHOS::Ace {
+
+UIContentErrorCode KoalaFrontend::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    return UIContentErrorCode::NO_ERRORS;
+}
+
+namespace {
+/* copied from arkcompiler_ets_frontend vmloader.cc*/
+struct AppInfo {
+    const char* className;
+    const char* createMethodName;
+    const char* createMethodSig;
+    const char* startMethodName;
+    const char* startMethodSig;
+    const char* enterMethodName;
+    const char* enterMethodSig;
+    const char* emitEventMethodName;
+    const char* emitEventMethodSig;
+};
+/* copied from arkcompiler_ets_frontend vmloader.cc*/
+const AppInfo koalaAppInfo = {
+    "@koalaui/arkts-arkui/Application/Application",
+    "createApplication",
+    "Lstd/core/String;Lstd/core/String;Z:L@koalaui/arkts-arkui/Application/Application;",
+    "start",
+    ":J",
+    "enter",
+    "II:Z",
+    "emitEvent",
+    "IIII:V",
+};
+
+void TryEmitError(EtsEnv& env)
+{
+    if (env.ErrorCheck()) {
+        env.ErrorDescribe();
+        env.ErrorClear();
+    }
+}
+
+void RunArkoalaEventLoop(EtsEnv& env, ets_object app)
+{
+    ets_class appClass = env.FindClass(koalaAppInfo.className);
+    if (!appClass) {
+        LOGE("Cannot load main class %s\n", koalaAppInfo.className);
+        return;
+    }
+    ets_method enter = env.Getp_method(appClass, koalaAppInfo.enterMethodName, nullptr /*appInfo->enterMethodSig */);
+    if (!enter) {
+        LOGE("Cannot find enter method %s", koalaAppInfo.enterMethodName);
+        TryEmitError(env);
+        return;
+    }
+    LOGI("Koala run event loop, method = %p, app = %p", enter, app);
+    auto terminate = env.CallBooleanMethod((ets_object)(app), (ets_method)(enter), (ets_int)0, (ets_int)0);
+    TryEmitError(env);
+    if (terminate) {
+        exit(0);
+    }
+}
+} // namespace
+
+UIContentErrorCode KoalaFrontend::RunPage(const std::string& url, const std::string& params)
+{
+    ets_class appClass = env_->FindClass(koalaAppInfo.className);
+    if (!appClass) {
+        LOGE("Cannot load main class %s\n", koalaAppInfo.className);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ets_method create = env_->GetStaticp_method(appClass, koalaAppInfo.createMethodName, koalaAppInfo.createMethodSig);
+    if (!create) {
+        LOGE("Cannot find create method %s\n", koalaAppInfo.createMethodName);
+        TryEmitError(*env_);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
+    std::string appParams = "ArkTSLoaderParam";
+    auto* app = env_->NewGlobalRef(env_->CallStaticObjectMethod(
+        appClass, create, env_->NewStringUTF(appUrl.c_str()), env_->NewStringUTF(appParams.c_str()), false));
+    if (!app) {
+        LOGE("createApplication returned null");
+        TryEmitError(*env_);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    auto* start = env_->Getp_method(appClass, koalaAppInfo.startMethodName, koalaAppInfo.startMethodSig);
+    // TODO: pass app entry point!
+    env_->CallLongMethod((ets_object)(app), start);
+
+    // // init event loop
+    CHECK_NULL_RETURN(pipeline_ && taskExecutor_, UIContentErrorCode::NULL_POINTER);
+    auto listener = [env = env_, app]() {
+        LOGI("Koala run event loop DONOTHING");
+        RunArkoalaEventLoop(*env, app);
+    };
+    LOGI("Koala post task run");
+    pipeline_->SetVsyncListener(listener);
+
+    return UIContentErrorCode::NO_ERRORS;
+}
+
+void KoalaFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    pipeline_ = DynamicCast<NG::PipelineContext>(context);
+}
+} // namespace OHOS::Ace
