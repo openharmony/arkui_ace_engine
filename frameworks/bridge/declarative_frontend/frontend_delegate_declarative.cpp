@@ -44,6 +44,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
@@ -78,13 +79,17 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
-void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
+    const RefPtr<NG::OverlayManager>& overlay)
 {
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    if (overlay) {
+        overlayManager = overlay;
+    }
     context->GetTaskExecutor()->PostTask(
         [task = std::move(task), weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -1577,7 +1582,7 @@ void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo)
             ContainerScope scope(containerId);
             overlayManager->ShowToast(updatedToastInfo);
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast", nullptr);
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
@@ -1635,7 +1640,12 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
                 CHECK_NULL_VOID(dialog);
             }
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            NG::DialogManager::ShowInEmbeddedOverlay(
+                std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+        } else {
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
+        }
         return;
     }
     std::unordered_map<std::string, EventMarker> callbackMarkers;
@@ -1720,6 +1730,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1811,7 +1824,11 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
         .onWillDisappear = dialogAttr.onWillDisappear,
-        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode };
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+    };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -1857,7 +1874,12 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
                 overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
             }
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayOpenCustomDialog");
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            NG::DialogManager::ShowInEmbeddedOverlay(
+                std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+        } else {
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
+        }
         return;
     } else {
         LOGW("not support old pipeline");
@@ -1872,20 +1894,35 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
+    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;
 }
 
 void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
     std::function<void(int32_t)> &&callback)
 {
-    auto task = [node, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
-        overlayManager->CloseCustomDialog(node, std::move(callback));
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
-    return;
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    auto parent = NG::DialogManager::GetInstance().GetDialogNodeByContentNode(nodePtr);
+    if (parent) {
+        auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(parent);
+        if (currentOverlay) {
+            overlayManager = currentOverlay;
+        }
+    }
+    context->GetTaskExecutor()->PostTask(
+        [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+            overlayManager->CloseCustomDialog(node, std::move(callback));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
 
 void FrontendDelegateDeclarative::UpdateCustomDialog(
@@ -1908,7 +1945,7 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
         LOGI("begin to update custom dialog.");
         overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog", nullptr);
     return;
 }
 
@@ -1963,6 +2000,12 @@ void FrontendDelegateDeclarative::ShowActionMenuInnerNG(DialogProperties& dialog
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     taskExecutor_->PostTask(
         [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -2033,6 +2076,9 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -3402,7 +3448,7 @@ void FrontendDelegateDeclarative::AddFrameNodeToOverlay(const RefPtr<NG::FrameNo
         ContainerScope scope(containerId);
         overlayManager->AddFrameNodeToOverlay(node, index);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3412,7 +3458,7 @@ void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fram
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3422,7 +3468,7 @@ void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>&
         ContainerScope scope(containerId);
         overlayManager->ShowNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayShowNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3432,7 +3478,7 @@ void FrontendDelegateDeclarative::HideNodeOnOverlay(const RefPtr<NG::FrameNode>&
         ContainerScope scope(containerId);
         overlayManager->HideNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayHideNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayHideNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::ShowAllNodesOnOverlay()
@@ -3442,7 +3488,7 @@ void FrontendDelegateDeclarative::ShowAllNodesOnOverlay()
         ContainerScope scope(containerId);
         overlayManager->ShowAllNodesOnOverlay();
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayShowAllNodes");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowAllNodes", nullptr);
 }
 
 void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
@@ -3452,7 +3498,7 @@ void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
         ContainerScope scope(containerId);
         overlayManager->HideAllNodesOnOverlay();
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes", nullptr);
 }
 
 RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEffect(void* value)

@@ -262,6 +262,8 @@ public:
         visibilityChangeCallback_ = std::move(callback);
     }
 
+    bool IsNeedCallbackBackPressed();
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;

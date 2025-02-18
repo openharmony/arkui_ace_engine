@@ -2252,6 +2252,10 @@ bool PipelineContext::OnBackPressed()
             auto lastPage = stageManager->GetLastPage();
             CHECK_NULL_VOID(lastPage);
             bool isEntry = false;
+            auto pagePattern = lastPage->GetPattern<NG::PagePattern>();
+            if (pagePattern) {
+                isEntry = pagePattern->IsNeedCallbackBackPressed();
+            }
             auto navigationGroupNode =
                 AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage, isEntry));
             if (navigationGroupNode) {

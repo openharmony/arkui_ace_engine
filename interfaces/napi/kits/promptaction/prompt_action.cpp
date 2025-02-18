@@ -45,6 +45,8 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
+const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -567,6 +569,9 @@ struct PromptAsyncContext {
     napi_ref onWillAppearRef = nullptr;
     napi_ref onWillDisappearRef = nullptr;
     napi_value keyboardAvoidModeApi = nullptr;
+    napi_value dialogLevelModeApi = nullptr;
+    napi_value dialogLevelUniqueId = nullptr;
+    napi_value dialogImmersiveModeApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1093,6 +1098,34 @@ int32_t GetDialogKeyboardAvoidMode(napi_env env, napi_value keyboardAvoidModeApi
     return 0;
 }
 
+void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+    LevelMode& dialogLevelMode, int32_t& dialogLevelUniqueId, ImmersiveMode& dialogImmersiveMode)
+{
+    int32_t mode = 0;
+    int32_t immersiveMode = 0;
+    napi_valuetype levelModeValueType = napi_undefined;
+    napi_typeof(env, asyncContext->dialogLevelModeApi, &levelModeValueType);
+    if (levelModeValueType == napi_number) {
+        napi_get_value_int32(env, asyncContext->dialogLevelModeApi, &mode);
+    }
+    if (!asyncContext->showInSubWindowBool && mode >= 0 && mode < static_cast<int32_t>(DIALOG_LEVEL_MODE.size())) {
+        dialogLevelMode = DIALOG_LEVEL_MODE[mode];
+    }
+    napi_valuetype levelUniquedIdValueType = napi_undefined;
+    napi_typeof(env, asyncContext->dialogLevelUniqueId, &levelUniquedIdValueType);
+    if (levelUniquedIdValueType == napi_number) {
+        napi_get_value_int32(env, asyncContext->dialogLevelUniqueId, &dialogLevelUniqueId);
+    }
+    napi_valuetype immersiveModeValueType = napi_undefined;
+    napi_typeof(env, asyncContext->dialogImmersiveModeApi, &immersiveModeValueType);
+    if (immersiveModeValueType == napi_number) {
+        napi_get_value_int32(env, asyncContext->dialogImmersiveModeApi, &immersiveMode);
+    }
+    if (immersiveMode >= 0 && immersiveMode < static_cast<int32_t>(DIALOG_IMMERSIVE_MODE.size())) {
+        dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[immersiveMode];
+    }
+}
+
 void GetNapiNamedBoolProperties(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
     napi_valuetype valueType = napi_undefined;
@@ -1152,6 +1185,9 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "onWillAppear", &asyncContext->onWillAppear);
     napi_get_named_property(env, argv[index], "onWillDisappear", &asyncContext->onWillDisappear);
     napi_get_named_property(env, argv[index], "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
+    napi_get_named_property(env, argv[index], "levelMode", &asyncContext->dialogLevelModeApi);
+    napi_get_named_property(env, argv[index], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
+    napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
 }
@@ -1279,7 +1315,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<HoverModeAreaType> hoverModeArea;
-
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -1302,6 +1340,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "backgroundBlurStyle", &asyncContext->backgroundBlurStyleApi);
             napi_get_named_property(env, argv[0], "enableHoverMode", &asyncContext->enableHoverMode);
             napi_get_named_property(env, argv[0], "hoverModeArea", &asyncContext->hoverModeAreaApi);
+            napi_get_named_property(env, argv[0], "levelMode", &asyncContext->dialogLevelModeApi);
+            napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
+            napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
             GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
@@ -1327,6 +1368,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
             }
+            GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
@@ -1460,6 +1502,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .shadow = shadowProps,
         .hoverModeArea = hoverModeArea,
         .onLanguageChange = onLanguageChange,
+        .dialogLevelMode = dialogLevelMode,
+        .dialogLevelUniqueId = dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogImmersiveMode,
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1548,6 +1593,9 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = Container::CurrentIdSafely();
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -1559,6 +1607,9 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "showInSubWindow", &asyncContext->showInSubWindow);
             napi_get_named_property(env, argv[0], "isModal", &asyncContext->isModal);
+            napi_get_named_property(env, argv[0], "levelMode", &asyncContext->dialogLevelModeApi);
+            napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
+            napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             if (!HasProperty(env, argv[0], "buttons")) {
                 DeleteContextAndThrowError(env, asyncContext, "Required input parameters are missing.");
@@ -1576,6 +1627,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
             }
+            GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
@@ -1667,6 +1719,9 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         .title = asyncContext->titleString,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
+        .dialogLevelMode = dialogLevelMode,
+        .dialogLevelUniqueId = dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogImmersiveMode,
     };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -1867,6 +1922,10 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     auto transitionEffectProps = GetTransitionProps(env, asyncContext);
     PromptDialogAttr lifeCycleAttr = GetDialogLifeCycleCallback(env, asyncContext);
     int32_t mode = GetDialogKeyboardAvoidMode(env, asyncContext->keyboardAvoidModeApi);
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
+    GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
     PromptDialogAttr promptDialogAttr = { .autoCancel = asyncContext->autoCancelBool,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
@@ -1893,7 +1952,11 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .onDidDisappear = lifeCycleAttr.onDidDisappear,
         .onWillAppear = lifeCycleAttr.onWillAppear,
         .onWillDisappear = lifeCycleAttr.onWillDisappear,
-        .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode] };
+        .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
+        .dialogLevelMode = dialogLevelMode,
+        .dialogLevelUniqueId = dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogImmersiveMode
+    };
     return promptDialogAttr;
 }
 

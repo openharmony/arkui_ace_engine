@@ -24,6 +24,7 @@
 #include "native_node.h"
 #include "node_extened.h"
 #include "node_model.h"
+#include "native_dialog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -489,6 +490,60 @@ HWTEST_F(DialogModelTest, DialogModelTest033, TestSize.Level1)
     ArkUI_OnWillDismissEvent eventHandler = OnWillDismissEvent;
     int32_t ret = RegisterOnWillDismiss(nativeDialogHandle, eventHandler);
     ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest038
+ * @tc.desc: Test SetLevelMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest038, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelMode(nativeDialogHandle, ARKUI_LEVEL_MODE_OVERLAY);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ret = SetLevelMode(nativeDialogHandle, static_cast<ArkUI_LevelMode>(-1));
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest039
+ * @tc.desc: Test SetLevelUniqueId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest039, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelUniqueId(nativeDialogHandle, 0);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ret = SetLevelUniqueId(nativeDialogHandle, -1);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest040
+ * @tc.desc: Test SetImmersiveMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest040, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetImmersiveMode(nativeDialogHandle, ARKUI_IMMERSIVE_MODE_DEFAULT);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ret = SetImmersiveMode(nativeDialogHandle, static_cast<ArkUI_ImmersiveMode>(-1));
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     Dispose(nativeDialogHandle);
     nativeDialogHandle = nullptr;
 }

@@ -481,12 +481,20 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    CHECK_NULL_RETURN(!overlayManager_->IsModalEmpty(), false);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    return overlayManager_->RemoveOverlay(true);
+    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        return overlayManager_->RemoveOverlay(true);
+    }
+    return false;
+}
+
+bool PagePattern::IsNeedCallbackBackPressed()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    return overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), true);
 }
 
 void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
