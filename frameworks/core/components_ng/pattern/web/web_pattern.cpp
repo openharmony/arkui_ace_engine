@@ -80,6 +80,7 @@
 #include "core/components_ng/pattern/web/transitional_node_info.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/event_info_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
@@ -1337,30 +1338,7 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
         pattern->touchEventInfo_ = info;
         pattern->isMouseEvent_ = false;
-        const auto& changedPoint = info.GetChangedTouches().front();
-        if (changedPoint.GetTouchType() == TouchType::DOWN ||
-            changedPoint.GetTouchType() == TouchType::UP) {
-            if (pattern->touchEventQueue_.size() < TOUCH_EVENT_MAX_SIZE) {
-                pattern->touchEventQueue_.push(info);
-            }
-        }
-
-        if (changedPoint.GetTouchType() == TouchType::DOWN) {
-            pattern->HandleTouchDown(info, false);
-            return;
-        }
-        if (changedPoint.GetTouchType() == TouchType::MOVE) {
-            pattern->HandleTouchMove(info, false);
-            return;
-        }
-        if (changedPoint.GetTouchType() == TouchType::UP) {
-            pattern->HandleTouchUp(info, false);
-            return;
-        }
-        if (changedPoint.GetTouchType() == TouchType::CANCEL) {
-            pattern->HandleTouchCancel(info);
-            return;
-        }
+        pattern->HandleTouchEvent(info);
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
@@ -1375,6 +1353,14 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TouchEventInfo touchEventInfo("touchEvent");
+        if (EventInfoConvertor::ConvertMouseToTouchIfNeeded(info, touchEventInfo)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "Convert mouse event to touch event: button %{public}d, action %{public}d.",
+                (int)info.GetButton(), (int)info.GetAction());
+            touchEventInfo.SetTouchEventsEnd(true);
+            pattern->HandleTouchEvent(touchEventInfo);
+            return;
+        }
         pattern->HandleMouseEvent(info);
     };
 
@@ -1398,6 +1384,34 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    const auto& changedPoint = info.GetChangedTouches().front();
+    if (changedPoint.GetTouchType() == TouchType::DOWN ||
+        changedPoint.GetTouchType() == TouchType::UP) {
+        if (touchEventQueue_.size() < TOUCH_EVENT_MAX_SIZE) {
+            touchEventQueue_.push(info);
+        }
+    }
+
+    if (changedPoint.GetTouchType() == TouchType::DOWN) {
+        HandleTouchDown(info, false);
+        return;
+    }
+    if (changedPoint.GetTouchType() == TouchType::MOVE) {
+        HandleTouchMove(info, false);
+        return;
+    }
+    if (changedPoint.GetTouchType() == TouchType::UP) {
+        HandleTouchUp(info, false);
+        return;
+    }
+    if (changedPoint.GetTouchType() == TouchType::CANCEL) {
+        HandleTouchCancel(info);
+        return;
+    }
 }
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
