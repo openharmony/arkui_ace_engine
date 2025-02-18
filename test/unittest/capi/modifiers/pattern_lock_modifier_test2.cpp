@@ -54,7 +54,7 @@ HWTEST_F(PatternLockModifierTest2, setPatternLockOptionsTest, TestSize.Level1)
 
     // create the external PatternLockController peer and attach modifier to it
     GeneratedModifier::PatternLockControllerPeerImpl peer;
-    auto controller = Converter::ArkValue<Opt_PatternLockController>(Ark_Materialized{.ptr=&peer});
+    auto controller = Converter::ArkValue<Opt_PatternLockController>(&peer);
     modifier_->setPatternLockOptions(node_, &controller);
 
     // check initial state of invoke checker

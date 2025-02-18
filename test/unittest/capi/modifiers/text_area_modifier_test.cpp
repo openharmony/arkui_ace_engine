@@ -682,7 +682,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
     auto onSubmitFunc = [](Ark_Int32 resourceId, const Ark_EnterKeyType enterKeyType, const Opt_SubmitEvent event) {
         auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
         ASSERT_TRUE(eventValue);
-        auto peer = reinterpret_cast<SubmitEventPeer*>(eventValue.value().ptr);
+        auto peer = eventValue.value();
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
         ASSERT_NE(submitEventInfo, nullptr);
@@ -1701,7 +1701,7 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     Ark_TextAreaOptions options;
     options.text = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE);
     options.placeholder = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_PLACEHOLDER_VALUE);
-    options.controller = Converter::ArkValue<Opt_TextAreaController>(peer);
+    options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
     auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
     modifier_->setTextAreaOptions(node_, &optionsDef);
 
@@ -1739,7 +1739,7 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
         inputValue = value;
         options.text = inputValue;
         options.placeholder = inputValue;
-        options.controller = Converter::ArkValue<Opt_TextAreaController>(peer);
+        options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
         auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
         modifier_->setTextAreaOptions(node_, &optionsDef);
 
@@ -1946,7 +1946,7 @@ HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
 
     Callback_ResourceStr_Void arkCallback = Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_text(node_, &arkCallback);
+    modifier_->set_onChangeEvent_text(node_, &arkCallback);
 
     PreviewText previewText {.offset = -1, .value = ""};
     ASSERT_EQ(checkEvent.has_value(), false);

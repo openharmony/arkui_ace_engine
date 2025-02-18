@@ -308,15 +308,13 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTestController, TestSize.Leve
     auto controllerAccessor = GeneratedModifier::GetTextInputControllerAccessor();
     ASSERT_NE(controllerAccessor, nullptr);
 
-    Ark_TextInputController controller;
-    controller.ptr = controllerAccessor->ctor();
-    ASSERT_NE(controller.ptr, nullptr);
-    auto peer = reinterpret_cast<TextInputControllerPeer*>(controller.ptr);
+    auto peer = controllerAccessor->ctor();
+    ASSERT_NE(peer, nullptr);
     EXPECT_EQ(peer->GetController(), nullptr);
 
     options.placeholder = ArkValue<Opt_ResourceStr>();
     options.text = ArkValue<Opt_ResourceStr>();
-    options.controller = ArkValue<Opt_TextInputController>(controller);
+    options.controller = ArkValue<Opt_TextInputController>(peer);
 
     auto optOptions = ArkValue<Opt_TextInputOptions>(options);
     modifier_->setTextInputOptions(node_, &optOptions);
@@ -675,7 +673,7 @@ HWTEST_F(TextInputModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
 
     Callback_ResourceStr_Void arkCallback = Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_text(node_, &arkCallback);
+    modifier_->set_onChangeEvent_text(node_, &arkCallback);
 
     PreviewText previewText {.offset = -1, .value = ""};
     ASSERT_EQ(checkEvent.has_value(), false);

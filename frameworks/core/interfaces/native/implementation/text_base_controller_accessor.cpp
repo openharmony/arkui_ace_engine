@@ -25,7 +25,7 @@ void DestroyPeerImpl(TextBaseControllerPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextBaseController CtorImpl()
 {
     LOGE("TextBaseControllerPeer is an abstract class.");
     return nullptr;
@@ -50,7 +50,7 @@ void CloseSelectionMenuImpl(TextBaseControllerPeer* peer)
     CHECK_NULL_VOID(peer);
     peer->CloseSelectionMenu();
 }
-Ark_NativePointer GetLayoutManagerImpl(TextBaseControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(TextBaseControllerPeer* peer)
 {
     CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
     auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());

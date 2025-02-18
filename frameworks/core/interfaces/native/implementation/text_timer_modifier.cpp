@@ -70,7 +70,7 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(opts->controller);
     auto textTimerController = TextTimerModelNG::InitTextController(frameNode);
     CHECK_NULL_VOID(textTimerController);
-    TextTimerControllerPeer* peerPtr = reinterpret_cast<TextTimerControllerPeer*>(opts->controller->ptr);
+    TextTimerControllerPeer* peerPtr = opts->controller.value();
     CHECK_NULL_VOID(peerPtr);
     peerPtr->SetController(textTimerController);
 }

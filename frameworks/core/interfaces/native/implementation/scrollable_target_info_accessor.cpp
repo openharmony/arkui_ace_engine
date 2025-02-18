@@ -29,7 +29,7 @@ void DestroyPeerImpl(ScrollableTargetInfoPeer* peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_NativePointer CtorImpl()
+Ark_ScrollableTargetInfo CtorImpl()
 {
     auto peer = AceType::MakeRefPtr<ScrollableTargetInfoPeer>();
     peer->IncRefCount();

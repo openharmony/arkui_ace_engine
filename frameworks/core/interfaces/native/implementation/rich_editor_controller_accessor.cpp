@@ -14,11 +14,11 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
-#include "rich_editor_controller_peer_impl.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "rich_editor_controller_peer_impl.h"
+#include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 
@@ -289,7 +289,7 @@ void DestroyPeerImpl(RichEditorControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<RichEditorControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -456,29 +456,26 @@ Ark_NativePointer GetSelectionImpl(RichEditorControllerPeer* peer)
     return peerImpl->GetSelectionImpl();
 }
 void FromStyledStringImpl(RichEditorControllerPeer* peer,
-                          const Ark_StyledString* value)
+                          Ark_StyledString value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(value->ptr);
 
-    auto* rawSpanStringBasePtr = reinterpret_cast<SpanStringBase*>(value->ptr);
-    RefPtr<SpanStringBase> updateSpanStyle;
-    updateSpanStyle = rawSpanStringBasePtr;
+    RefPtr<SpanStringBase> updateSpanStyle = value->spanString;
     if (updateSpanStyle) {
         peerImpl->FromStyledStringImpl(updateSpanStyle);
     }
 }
-Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer,
-                                     const Ark_RichEditorRange* value)
+Ark_StyledString ToStyledStringImpl(RichEditorControllerPeer* peer,
+                                    const Ark_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     CHECK_NULL_RETURN(value, nullptr);
     auto options = Converter::Convert<RangeOptions>(*value);
     RefPtr<SpanStringBase> ret = peerImpl->ToStyledStringImpl(options);
-    return reinterpret_cast<Ark_NativePointer>(ret.GetRawPtr());
+    return StyledStringPeer::Create(ret);
 }
 } // RichEditorControllerAccessor
 const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor()

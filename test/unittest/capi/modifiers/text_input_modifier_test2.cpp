@@ -176,7 +176,7 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
 
     auto onSubmitFunc = [](Ark_Int32 resourceId, Ark_EnterKeyType enterKeyType, const Ark_SubmitEvent event) {
-        auto peer = reinterpret_cast<SubmitEventPeer*>(event.ptr);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
         ASSERT_NE(submitEventInfo, nullptr);

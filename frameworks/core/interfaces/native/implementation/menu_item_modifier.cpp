@@ -215,8 +215,8 @@ void LabelFontColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     MenuItemModelNG::SetLabelFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -241,7 +241,7 @@ const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()
         MenuItemAttributeModifier::ContentFontColorImpl,
         MenuItemAttributeModifier::LabelFontImpl,
         MenuItemAttributeModifier::LabelFontColorImpl,
-        MenuItemAttributeModifier::__onChangeEvent_selectedImpl,
+        MenuItemAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIMenuItemModifierImpl;
 }

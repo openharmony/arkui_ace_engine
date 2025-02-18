@@ -47,7 +47,7 @@ void DestroyPeerImpl(VideoControllerPeer* peer)
         }
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_VideoController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<VideoControllerPeerImpl>();
     peerImpl->IncRefCount();

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/pattern/mock_canvas_pattern.h"
-#include "accessor_test_base.h"
-#include "canvas_rendering_context2d_accessor_test.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
+#include "core/interfaces/native/implementation/rendering_context_settings_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "test/mock/core/pattern/mock_canvas_pattern.h"
+
+#include "accessor_test_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,7 +31,7 @@ using namespace Converter;
 
 namespace {
 const Opt_RenderingContextSettings DEFAULT_SETTINGS =
-    ArkValue<Opt_RenderingContextSettings>(ArkValue<Opt_Boolean>(false));
+    ArkValue<Opt_RenderingContextSettings>(RenderingContextSettingsPeer::Create(false));
 
 class MockCanvasPattern : public CanvasPattern {
 public:

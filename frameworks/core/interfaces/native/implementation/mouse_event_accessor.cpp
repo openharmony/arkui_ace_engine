@@ -54,7 +54,7 @@ void DestroyPeerImpl(MouseEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_MouseEvent CtorImpl()
 {
     return new MouseEventPeer();
 }
@@ -69,7 +69,7 @@ Ark_NativePointer GetButtonImpl(MouseEventPeer* peer)
     CHECK_NULL_RETURN(info, nullptr);
     LOGE("Arkoala method MouseEventAccessor.GetButtonImpl return nullptr value but should return enum MouseButton");
     LOGE("return info->GetButton();");
-    return nullptr;
+    return {};
 }
 void SetButtonImpl(MouseEventPeer* peer,
                    Ark_MouseButton button)
@@ -89,7 +89,7 @@ Ark_NativePointer GetActionImpl(MouseEventPeer* peer)
     CHECK_NULL_RETURN(info, nullptr);
     LOGE("Arkoala method MouseEventAccessor.GetButtonImpl return nullptr value but should return enum MouseAction");
     LOGE("return info->GetAction();");
-    return nullptr;
+    return {};
 }
 void SetActionImpl(MouseEventPeer* peer,
                    Ark_MouseAction action)
@@ -294,6 +294,10 @@ void SetYImpl(MouseEventPeer* peer,
     localLocation.SetY(yConvert, animation);
     info->SetLocalLocation(localLocation);
 }
+Callback_Void GetStopPropagationImpl(MouseEventPeer* peer)
+{
+    return {};
+}
 void SetStopPropagationImpl(MouseEventPeer* peer,
                             const Callback_Void* stopPropagation)
 {
@@ -329,6 +333,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetXImpl,
         MouseEventAccessor::GetYImpl,
         MouseEventAccessor::SetYImpl,
+        MouseEventAccessor::GetStopPropagationImpl,
         MouseEventAccessor::SetStopPropagationImpl,
     };
     return &MouseEventAccessorImpl;

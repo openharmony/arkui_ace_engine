@@ -119,7 +119,7 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestController, TestSize.Level1)
     });
 
     // create the external TabsController peer and attach it to modifier
-    GeneratedModifier::TabsControllerPeerImpl peer;
+    TabsControllerPeer peer;
     optionsOpt.value.controller = Converter::ArkValue<Opt_TabsController>(&peer);
     modifier_->setTabsOptions(node_, &optionsOpt);
 

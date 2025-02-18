@@ -28,7 +28,7 @@ void DestroyPeerImpl(WebControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_WebController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<WebControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -161,7 +161,7 @@ Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer)
     ContainerScope scope(peerImpl->GetInstanceId());
     LOGE("WebControllerAccessor::GetHitTestImpl is not fully implemented");
     peerImpl->GetController()->GetHitTestResult();
-    return nullptr;
+    return {};
 }
 void RequestFocusImpl(WebControllerPeer* peer)
 {
@@ -208,7 +208,7 @@ void ForwardImpl(WebControllerPeer* peer)
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->Forward();
 }
-Ark_NativePointer GetCookieManagerImpl(WebControllerPeer* peer)
+Ark_WebCookie GetCookieManagerImpl(WebControllerPeer* peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);

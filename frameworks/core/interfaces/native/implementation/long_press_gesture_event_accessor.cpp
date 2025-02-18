@@ -23,7 +23,7 @@ void DestroyPeerImpl(LongPressGestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_LongPressGestureEvent CtorImpl()
 {
     return new LongPressGestureEventPeer();
 }
@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean GetRepeatImpl(LongPressGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetRepeatImpl(LongPressGestureEventPeer* peer,
                    Ark_Boolean repeat)

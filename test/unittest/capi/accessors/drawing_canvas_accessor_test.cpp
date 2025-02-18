@@ -61,9 +61,9 @@ public:
 
         PixelMapPeer pixelMapPeer;
         pixelMapPeer.pixelMap = pixelMap;
-        Ark_PixelMap arkPixelmap = Ark_Materialized { .ptr = &pixelMapPeer };
+        Ark_PixelMap arkPixelmap = &pixelMapPeer;
 
-        peer_ = static_cast<DrawingCanvasPeerImpl *>(accessor_->ctor(&arkPixelmap));
+        peer_ = static_cast<DrawingCanvasPeerImpl *>(accessor_->ctor(arkPixelmap));
         ASSERT_NE(peer_, nullptr);
         pattern_ = new MockPattern();
         auto pattern = AceType::Claim(pattern_);

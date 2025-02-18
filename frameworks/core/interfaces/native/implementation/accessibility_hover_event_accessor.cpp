@@ -23,7 +23,7 @@ void DestroyPeerImpl(AccessibilityHoverEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_AccessibilityHoverEvent CtorImpl()
 {
     return new AccessibilityHoverEventPeer();
 }
@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer GetTypeImpl(AccessibilityHoverEventPeer* peer)
 {
-    return nullptr;
+    return {};
 }
 void SetTypeImpl(AccessibilityHoverEventPeer* peer,
                  Ark_AccessibilityHoverType type)
@@ -41,7 +41,7 @@ void SetTypeImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetXImpl(AccessibilityHoverEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetXImpl(AccessibilityHoverEventPeer* peer,
               const Ark_Number* x)
@@ -49,7 +49,7 @@ void SetXImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetYImpl(AccessibilityHoverEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetYImpl(AccessibilityHoverEventPeer* peer,
               const Ark_Number* y)
@@ -57,7 +57,7 @@ void SetYImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetDisplayXImpl(AccessibilityHoverEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetDisplayXImpl(AccessibilityHoverEventPeer* peer,
                      const Ark_Number* displayX)
@@ -65,7 +65,7 @@ void SetDisplayXImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetDisplayYImpl(AccessibilityHoverEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetDisplayYImpl(AccessibilityHoverEventPeer* peer,
                      const Ark_Number* displayY)
@@ -73,7 +73,7 @@ void SetDisplayYImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetWindowXImpl(AccessibilityHoverEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetWindowXImpl(AccessibilityHoverEventPeer* peer,
                     const Ark_Number* windowX)
@@ -81,7 +81,7 @@ void SetWindowXImpl(AccessibilityHoverEventPeer* peer,
 }
 Ark_Int32 GetWindowYImpl(AccessibilityHoverEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetWindowYImpl(AccessibilityHoverEventPeer* peer,
                     const Ark_Number* windowY)

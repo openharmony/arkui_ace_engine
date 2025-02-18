@@ -24,8 +24,18 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class GlobalScopeCommonAccessorTest : public AccessorTestBase<GENERATED_ArkUIGlobalScope_commonAccessor,
+class GlobalScopeCommonAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIGlobalScope_commonAccessor,
     &GENERATED_ArkUIAccessors::getGlobalScope_commonAccessor, GlobalScope_commonPeer> {
+    void SetUp(void) override
+    {
+        // Skip AccessorTestCtorBase's setup, since we don't have peer_
+        AccessorTestBaseParent::SetUp();
+    }
+
+    void *CreatePeerInstance() override
+    {
+        return nullptr;
+    }
 };
 
 /**

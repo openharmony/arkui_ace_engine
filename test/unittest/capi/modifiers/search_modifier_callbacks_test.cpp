@@ -124,9 +124,7 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     EXPECT_NE(frameNode, nullptr);
 
-    Ark_SearchController arkController;
-    arkController.ptr = controllerPtr;
-    options.controller = Converter::ArkValue<Opt_SearchController>(arkController);
+    options.controller = Converter::ArkValue<Opt_SearchController>(controllerPtr);
     auto optOptions = ArkValue<Opt_SearchOptions>(options);
 
     modifier_->setSearchOptions(node_, &optOptions);
@@ -441,7 +439,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit1Test, TestSize.Level1)
         auto value = Converter::Convert<std::string>(searchContent);
         auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
         ASSERT_TRUE(eventValue);
-        auto peer = reinterpret_cast<SubmitEventPeer*>(eventValue.value().ptr);
+        auto peer = eventValue.value();
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
         ASSERT_NE(submitEventInfo, nullptr);

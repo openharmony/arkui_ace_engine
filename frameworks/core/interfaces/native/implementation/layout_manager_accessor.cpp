@@ -27,7 +27,7 @@ void DestroyPeerImpl(LayoutManagerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_LayoutManager CtorImpl()
 {
     return new LayoutManagerPeer();
 }
@@ -55,7 +55,7 @@ Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer,
         Converter::Convert<int32_t>(*y)
     );
     LOGE("LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl Incorrect return value type.");
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
                                      const Ark_Number* lineNumber)
@@ -65,7 +65,7 @@ Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
     CHECK_NULL_RETURN(handler, nullptr);
     TextLineMetrics result = handler->GetLineMetrics(Converter::Convert<int32_t>(*lineNumber));
     LOGE("LayoutManagerAccessor::GetLineMetricsImpl Incorrect return value type.");
-    return nullptr;
+    return {};
 }
 void GetRectsForRangeImpl(LayoutManagerPeer* peer,
                           const Ark_TextRange* range,

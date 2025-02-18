@@ -26,7 +26,7 @@ void DestroyPeerImpl(FileSelectorResultPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_FileSelectorResult CtorImpl()
 {
     return new FileSelectorResultPeer();
 }

@@ -171,10 +171,9 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
-    Ark_Materialized px { .ptr = &pixelMapPeer };
     auto array = new Ark_ImageFrameInfo[] {
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(px),
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(&pixelMapPeer),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
             .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),

@@ -24,7 +24,7 @@ void DestroyPeerImpl(GestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_GestureEvent CtorImpl()
 {
     return new GestureEventPeer();
 }

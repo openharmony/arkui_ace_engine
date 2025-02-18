@@ -252,7 +252,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick0Test, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
@@ -299,7 +299,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {

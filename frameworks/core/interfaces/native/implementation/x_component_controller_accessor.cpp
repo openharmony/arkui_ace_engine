@@ -28,7 +28,7 @@ void DestroyPeerImpl(XComponentControllerPeer* peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_NativePointer CtorImpl()
+Ark_XComponentController CtorImpl()
 {
     auto peer = Referenced::MakeRefPtr<XComponentControllerPeer>();
     peer->IncRefCount();
@@ -55,7 +55,7 @@ Ark_NativePointer GetXComponentContextImpl(XComponentControllerPeer* peer)
     CHECK_NULL_RETURN(peer && peer->controller, 0);
     LOGE("XComponentControllerAccessor::GetXComponentContextImpl - return context object need to be supported");
 #endif //XCOMPONENT_SUPPORTED
-    return nullptr;
+    return {};
 }
 void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer,
                                   const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
@@ -106,7 +106,7 @@ Ark_NativePointer GetXComponentSurfaceRectImpl(XComponentControllerPeer* peer)
     peer->controller->GetSurfaceSize(width, height);
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceRectImpl - return value need to be supported");
 #endif //XCOMPONENT_SUPPORTED
-    return nullptr;
+    return {};
 }
 void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer,
                                       const Ark_SurfaceRotationOptions* rotationOptions)
@@ -125,7 +125,7 @@ Ark_NativePointer GetXComponentSurfaceRotationImpl(XComponentControllerPeer* pee
     bool lock = peer->controller->GetSurfaceRotation();
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceRotationImpl - return value need to be supported");
 #endif //XCOMPONENT_SUPPORTED
-    return nullptr;
+    return {};
 }
 void OnSurfaceCreatedImpl(XComponentControllerPeer* peer,
                           const Ark_String* surfaceId)

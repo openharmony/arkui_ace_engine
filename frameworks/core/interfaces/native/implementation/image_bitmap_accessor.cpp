@@ -28,7 +28,7 @@ void DestroyPeerImpl(ImageBitmapPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl(const Ark_String* src)
+Ark_ImageBitmap CtorImpl(const Ark_String* src)
 {
     auto peer = new ImageBitmapPeer();
     auto stringSrc = Converter::Convert<std::string>(*src);

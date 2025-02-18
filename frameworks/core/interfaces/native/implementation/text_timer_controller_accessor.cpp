@@ -26,7 +26,7 @@ void DestroyPeerImpl(TextTimerControllerPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TextTimerController CtorImpl()
 {
     return new TextTimerControllerPeer();
 }

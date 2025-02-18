@@ -275,8 +275,8 @@ void MinContentWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(width);
     SideBarContainerModelNG::SetMinContentWidth(frameNode, width);
 }
-void __onChangeEvent_showSideBarImpl(Ark_NativePointer node,
-                                     const Callback_Boolean_Void* callback)
+void _onChangeEvent_showSideBarImpl(Ark_NativePointer node,
+                                    const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -308,7 +308,7 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         SideBarContainerAttributeModifier::SideBarPositionImpl,
         SideBarContainerAttributeModifier::DividerImpl,
         SideBarContainerAttributeModifier::MinContentWidthImpl,
-        SideBarContainerAttributeModifier::__onChangeEvent_showSideBarImpl,
+        SideBarContainerAttributeModifier::_onChangeEvent_showSideBarImpl,
     };
     return &ArkUISideBarContainerModifierImpl;
 }

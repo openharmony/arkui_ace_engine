@@ -27,7 +27,7 @@ void DestroyPeerImpl(DrawModifierPeer* peer)
     peer->drawModifier = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_DrawModifier CtorImpl()
 {
     auto peer = new DrawModifierPeer();
     peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();

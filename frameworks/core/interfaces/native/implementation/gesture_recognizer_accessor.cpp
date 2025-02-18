@@ -32,7 +32,7 @@ void DestroyPeerImpl(GestureRecognizerPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_GestureRecognizer CtorImpl()
 {
     return new GestureRecognizerPeer();
 }
@@ -78,29 +78,27 @@ Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
     ret = reinterpret_cast<Ark_NativePointer>(&state);
     return ret;
 }
-Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
+Ark_EventTargetInfo GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto attachNode = peer->GetRecognizer() ? peer->GetRecognizer()->GetAttachedNode().Upgrade() : nullptr;
-    CHECK_NULL_RETURN(attachNode, reinterpret_cast<Ark_NativePointer>(GetEventTargetInfoAccessor()->ctor()));
+    CHECK_NULL_RETURN(attachNode, GetEventTargetInfoAccessor()->ctor());
     RefPtr<Pattern> pattern;
     if (auto swiperPattern = attachNode->GetPattern<SwiperPattern>()) {
         pattern = swiperPattern;
     } else if (auto scrollablePattern = attachNode->GetPattern<ScrollablePattern>()) {
         pattern = scrollablePattern;
     }
-    Ark_NativePointer result;
+    Ark_EventTargetInfo result{};
     if (pattern) {
-        auto scrollableTargetInfoPeer = reinterpret_cast<ScrollableTargetInfoPeer*>(
-            GetScrollableTargetInfoAccessor()->ctor());
+        auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->ctor();
         scrollableTargetInfoPeer->SetPattern(pattern);
         scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
-        result = reinterpret_cast<Ark_NativePointer>(scrollableTargetInfoPeer);
+        result = scrollableTargetInfoPeer;
     } else {
-        auto eventTargetInfoPeer = reinterpret_cast<EventTargetInfoPeer*>(
-            GetEventTargetInfoAccessor()->ctor());
+        auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->ctor();
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
-        result = reinterpret_cast<Ark_NativePointer>(eventTargetInfoPeer);
+        result = eventTargetInfoPeer;
     }
     return result;
 }

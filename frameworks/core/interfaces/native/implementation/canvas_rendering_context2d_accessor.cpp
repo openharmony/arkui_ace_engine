@@ -15,11 +15,12 @@
 #include <utility>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "canvas_rendering_context2d_peer_impl.h"
 #include "drawing_rendering_context_peer_impl.h"
-#include "core/interfaces/native/utility/callback_helper.h"
+#include "rendering_context_settings_peer.h"
 
 #include "arkoala_api_generated.h"
 
@@ -45,11 +46,7 @@ namespace Converter {
 template<>
 inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
 {
-    dst = Converter::OptConvert<bool>(src.antialias);
-}
-inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
-{
-    dst = Converter::OptConvert<bool>(src.antialias);
+    dst = src->antialias;
 }
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
@@ -63,7 +60,7 @@ void DestroyPeerImpl(CanvasRenderingContext2DPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
+Ark_CanvasRenderingContext2D CtorImpl(const Opt_RenderingContextSettings* settings)
 {
     CHECK_NULL_RETURN(settings, nullptr);
 

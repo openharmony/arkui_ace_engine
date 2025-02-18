@@ -307,7 +307,7 @@ HWTEST_F(WebModifierTest2, onOverrideUrlLoadingTest, TestSize.Level1)
         const Ark_WebResourceRequest parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.ptr)
+            .peer = parameter,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -470,7 +470,7 @@ HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
         const Ark_WebKeyboardCallbackInfo parameter, const Callback_WebKeyboardOptions_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<WebKeyboardControllerPeer*>(parameter.controller.ptr),
+            .peer = parameter.controller,
             .attributes = Converter::Convert<std::map<std::string, std::string>>(parameter.attributes)
         };
         CallbackHelper(continuation).Invoke(Ark_WebKeyboardOptions {
@@ -604,7 +604,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo data) {
         auto touchEventOpt = Converter::OptConvert<Ark_TouchEvent>(data.touchEvent);
         ASSERT_TRUE(touchEventOpt.has_value());
-        auto eventPtr = touchEventOpt.value().ptr;
+        auto eventPtr = touchEventOpt.value();
         ASSERT_NE(eventPtr, nullptr);
         auto peer = reinterpret_cast<TouchEventPeer*>(eventPtr);
         ASSERT_NE(peer, nullptr);

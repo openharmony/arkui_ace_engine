@@ -118,8 +118,8 @@ void ContentModifierImpl(Ark_NativePointer node,
     //RadioModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
 }
-void __onChangeEvent_checkedImpl(Ark_NativePointer node,
-                                 const Callback_Boolean_Void* callback)
+void _onChangeEvent_checkedImpl(Ark_NativePointer node,
+                                const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -141,7 +141,7 @@ const GENERATED_ArkUIRadioModifier* GetRadioModifier()
         RadioAttributeModifier::OnChangeImpl,
         RadioAttributeModifier::RadioStyleImpl,
         RadioAttributeModifier::ContentModifierImpl,
-        RadioAttributeModifier::__onChangeEvent_checkedImpl,
+        RadioAttributeModifier::_onChangeEvent_checkedImpl,
     };
     return &ArkUIRadioModifierImpl;
 }

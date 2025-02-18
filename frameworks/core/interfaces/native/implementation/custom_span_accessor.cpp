@@ -24,7 +24,7 @@ namespace CustomSpanAccessor {
 void DestroyPeerImpl(CustomSpanPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_CustomSpan CtorImpl()
 {
     return nullptr;
 }
@@ -35,7 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer,
                                 const Ark_CustomSpanMeasureInfo* measureInfo)
 {
-    return nullptr;
+    return {};
 }
 void OnDrawImpl(CustomSpanPeer* peer,
                 const Ark_DrawContext* context,

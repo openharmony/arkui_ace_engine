@@ -27,7 +27,7 @@ void DestroyPeerImpl(HttpAuthHandlerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_HttpAuthHandler CtorImpl()
 {
     return new HttpAuthHandlerPeer();
 }

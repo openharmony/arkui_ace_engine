@@ -22,7 +22,7 @@ namespace MeasurableAccessor {
 void DestroyPeerImpl(MeasurablePeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_Measurable CtorImpl()
 {
     return nullptr;
 }
@@ -33,19 +33,19 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_NativePointer MeasureImpl(MeasurablePeer* peer,
                               const Ark_ConstraintSizeOptions* constraint)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetMarginImpl(MeasurablePeer* peer)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetPaddingImpl(MeasurablePeer* peer)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetBorderWidthImpl(MeasurablePeer* peer)
 {
-    return nullptr;
+    return {};
 }
 } // MeasurableAccessor
 const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()

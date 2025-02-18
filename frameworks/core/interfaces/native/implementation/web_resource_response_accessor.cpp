@@ -31,7 +31,7 @@ void DestroyPeerImpl(WebResourceResponsePeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_WebResourceResponse CtorImpl()
 {
     return new WebResourceResponsePeer();
 }
@@ -50,7 +50,7 @@ Ark_NativePointer GetResponseDataExImpl(WebResourceResponsePeer* peer)
 {
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseDataExImpl - return value need to be supported");
-    return 0;
+    return {};
 }
 void GetResponseEncodingImpl(WebResourceResponsePeer* peer)
 {

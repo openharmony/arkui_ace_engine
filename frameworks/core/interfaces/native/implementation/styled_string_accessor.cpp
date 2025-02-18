@@ -64,6 +64,7 @@ BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
 template<>
 ImageSpanAttribute Convert(const Ark_ImageAttachment& src)
 {
+#ifdef WRONG_TYPE
     const auto optLayoutStyle = OptConvert<Ark_ImageAttachmentLayoutStyle>(src.layoutStyle);
     return {
         .size = OptConvert<ImageSpanSize>(src.size),
@@ -73,20 +74,28 @@ ImageSpanAttribute Convert(const Ark_ImageAttachment& src)
         .borderRadius = OptConvert<BorderRadiusProperty>(src.layoutStyle),
         .paddingProp = optLayoutStyle ? OptConvert<MarginProperty>(optLayoutStyle->padding) : std::nullopt
     };
+#else
+    return {};
+#endif
 }
 
 template<>
 ImageSpanOptions Convert(const Ark_ImageAttachment& src)
 {
+#ifdef WRONG_TYPE
     return {
         .imagePixelMap = OptConvert<RefPtr<PixelMap>>(src.value),
         .imageAttribute = OptConvert<ImageSpanAttribute>(src)
     };
+#else
+    return {};
+#endif
 }
 
 template<>
 Font Convert(const Ark_TextStyle_styled_string& src)
 {
+#ifdef WRONG_TYPE
     return {
         .fontWeight = OptConvert<FontWeight>(src.fontWeight),
         .fontSize = OptConvert<Dimension>(src.fontSize),
@@ -94,6 +103,9 @@ Font Convert(const Ark_TextStyle_styled_string& src)
         .fontColor = OptConvert<Color>(src.fontColor),
         .fontFamiliesNG = OptConvert<FontFamilies>(src.fontFamily).value_or(FontFamilies()).families
     };
+#else
+    return {};
+#endif
 }
 
 struct DecorationSpanOptions {
@@ -105,29 +117,45 @@ struct DecorationSpanOptions {
 template<>
 DecorationSpanOptions Convert(const Ark_DecorationStyle& src)
 {
+#ifdef WRONG_TYPE
     return {
         .type = OptConvert<TextDecoration>(src.type).value_or(TextDecoration::NONE),
         .color = OptConvert<Color>(src.color),
         .style = OptConvert<TextDecorationStyle>(src.style)
     };
+#else
+    return {};
+#endif
 }
 
 template<>
 Dimension Convert(const Ark_LetterSpacingStyle& src)
 {
+#ifdef WRONG_TYPE
     return Convert<Dimension>(src.letterSpacing);
+#else
+    return {};
+#endif
 }
 
 template<>
 Dimension Convert(const Ark_BaselineOffsetStyle& src)
 {
+#ifdef WRONG_TYPE
     return Convert<Dimension>(src.baselineOffset);
+#else
+    return {};
+#endif
 }
 
 template<>
 Dimension Convert(const Ark_LineHeightStyle& src)
 {
+#ifdef WRONG_TYPE
     return Convert<Dimension>(src.lineHeight);
+#else
+    return {};
+#endif
 }
 
 template<>
@@ -140,7 +168,11 @@ GestureStyle Convert(const Ark_GestureStyle& src)
 template<>
 std::vector<Shadow> Convert(const Ark_TextShadowStyle& src)
 {
+#ifdef WRONG_TYPE
     return Convert<std::vector<Shadow>>(src.textShadow);
+#else
+    return {};
+#endif
 }
 
 template<>
@@ -179,6 +211,7 @@ LeadingMargin Convert(const Ark_LeadingMarginPlaceholder& src)
 template<>
 SpanParagraphStyle Convert(const Ark_ParagraphStyle& src)
 {
+#ifdef WRONG_TYPE
     return {
         .align = OptConvert<TextAlign>(src.textAlign),
         .maxLines = OptConvert<int32_t>(src.maxLines),
@@ -187,18 +220,29 @@ SpanParagraphStyle Convert(const Ark_ParagraphStyle& src)
         .leadingMargin = OptConvert<LeadingMargin>(src.leadingMargin),
         .textIndent = OptConvert<Dimension>(src.textIndent)
     };
+#else
+    return {};
+#endif
 }
 
 template<>
 TextBackgroundStyle Convert(const Ark_BackgroundColorStyle& src)
 {
+#ifdef WRONG_TYPE
     return Convert<TextBackgroundStyle>(src.textBackgroundStyle);
+#else
+    return {};
+#endif
 }
 
 template<>
 std::string Convert(const Ark_UrlStyle& src)
 {
+#ifdef WRONG_TYPE
     return Convert<std::string>(src.url);
+#else
+    return {};
+#endif
 }
 
 // The information for the Ark_StyleOptions converter.
@@ -274,6 +318,7 @@ struct StyleOptionsData {
 template<>
 RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
 {
+#ifdef WRONG_TYPE
     StyleOptionsData data(src);
     Converter::VisitUnion(src.styledValue,
         [&data](const auto& style) {
@@ -301,6 +346,9 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
         []() {}
     );
     return data.result;
+#else
+    return nullptr;
+#endif
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -309,6 +357,9 @@ namespace {
 void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
 {
     for (auto& style : styles) {
+        if (style == nullptr) {
+            continue;
+        }
         if (style->GetStartIndex() < 0 || style->GetStartIndex() >= maxLength) {
             style->UpdateStartIndex(0);
         }
@@ -324,12 +375,12 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 namespace StyledStringAccessor {
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
-    delete peer;
+    StyledStringPeer::Destroy(peer);
 }
-Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
-                           const Opt_Array_StyleOptions* styles)
+Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                          const Opt_Array_StyleOptions* styles)
 {
-    auto peer = new StyledStringPeer();
+    auto peer = StyledStringPeer::Create();
     if (value) {
         Converter::VisitUnion(*value,
             [&peer, styles](const Ark_String& arkText) {
@@ -395,21 +446,19 @@ void GetStylesImpl(StyledStringPeer* peer,
     LOGE("StyledStringAccessor::GetStylesImpl - return value need to be supported");
 }
 Ark_Boolean EqualsImpl(StyledStringPeer* peer,
-                       const Ark_StyledString* other)
+                       Ark_StyledString other)
 {
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->spanString, false);
     CHECK_NULL_RETURN(other, false);
-    CHECK_NULL_RETURN(other->ptr, false);
-    auto otherPeer = reinterpret_cast<StyledStringPeer *>(other->ptr);
-    CHECK_NULL_RETURN(otherPeer->spanString, false);
-    return peer->spanString->IsEqualToSpanString(otherPeer->spanString);
+    CHECK_NULL_RETURN(other->spanString, false);
+    return peer->spanString->IsEqualToSpanString(other->spanString);
 }
-Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
-                                      const Ark_Number* start,
-                                      const Opt_Number* length)
+Ark_StyledString SubStyledStringImpl(StyledStringPeer* peer,
+                                     const Ark_Number* start,
+                                     const Opt_Number* length)
 {
-    Ark_NativePointer ret = nullptr;
+    Ark_StyledString ret = nullptr;
     CHECK_NULL_RETURN(peer, ret);
     CHECK_NULL_RETURN(peer->spanString, ret);
     CHECK_NULL_RETURN(start, ret);
@@ -425,11 +474,7 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
     }
     auto spanString = peer->spanString->GetSubSpanString(startSpan, lengthSpan);
     CHECK_NULL_RETURN(spanString, ret);
-    auto spanPeerCtor = GetStyledStringAccessor()->ctor(nullptr, nullptr);
-    auto spanPeer = reinterpret_cast<StyledStringPeer *>(spanPeerCtor);
-    spanPeer->spanString = spanString;
-    ret = reinterpret_cast<Ark_NativePointer>(spanPeer);
-    return ret;
+    return StyledStringPeer::Create(spanString);
 }
 void FromHtmlImpl(const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
@@ -440,24 +485,19 @@ void FromHtmlImpl(const Ark_String* html,
     // StyledString need to be returned
     LOGE("StyledStringAccessor::FromHtmlImpl - return value need to be supported");
 }
-void ToHtmlImpl(const Ark_StyledString* styledString)
+void ToHtmlImpl(Ark_StyledString styledString)
 {
     CHECK_NULL_VOID(styledString);
-    auto peer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->spanString);
-    auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(peer->spanString.GetRawPtr());
+    CHECK_NULL_VOID(styledString->spanString);
+    auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(styledString->spanString.GetRawPtr());
     LOGE("StyledStringAccessor::ToHtmlImpl - return value need to be supported");
 }
-void MarshallingImpl(const Ark_StyledString* styledString)
+void MarshallingImpl(Ark_StyledString styledString)
 {
     CHECK_NULL_VOID(styledString);
-    StyledStringPeer* peer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->spanString);
-    auto spanStringRawPtr = peer->spanString.GetRawPtr();
+    CHECK_NULL_VOID(styledString->spanString);
     std::vector<uint8_t> tlvData;
-    spanStringRawPtr->EncodeTlv(tlvData);
+    styledString->spanString->EncodeTlv(tlvData);
 
     size_t bufferSize = tlvData.size();
     auto data = tlvData.data();
@@ -471,14 +511,14 @@ void UnmarshallingImpl(const Ark_Buffer* buffer,
     auto str = Converter::Convert<std::string>(*buffer);
     std::vector<uint8_t> vec(str.begin(), str.end());
     auto spanString = SpanString::DecodeTlv(vec);
-    StyledStringPeer *peer = new StyledStringPeer();
+    StyledStringPeer *peer = StyledStringPeer::Create();
     peer->spanString = spanString;
-    Opt_StyledString styledString = Converter::ArkValue<Opt_StyledString>(*peer);
+    Opt_StyledString styledString = Converter::ArkValue<Opt_StyledString>(peer);
     Converter::ArkArrayHolder<Array_String> errorHolder(errorsStr);
     auto error = errorHolder.OptValue<Opt_Array_String>();
     // StyledString need to be returned
     peer->spanString = nullptr;
-    delete peer;
+    StyledStringPeer::Destroy(peer);
     LOGE("StyledStringAccessor::UnmarshallingImpl - return value need to be supported");
 }
 Ark_Int32 GetLengthImpl(StyledStringPeer* peer)

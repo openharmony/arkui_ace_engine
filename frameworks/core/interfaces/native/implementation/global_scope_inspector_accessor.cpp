@@ -22,21 +22,13 @@ namespace GlobalScope_inspectorAccessor {
 void DestroyPeerImpl(GlobalScope_inspectorPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 Ark_NativePointer GetInspectorNodesImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetInspectorNodeByIdImpl(const Ark_Number* id)
 {
-    return nullptr;
+    return {};
 }
 void RegisterVsyncCallbackImpl(const Callback_String_Void* callback_)
 {
@@ -52,8 +44,6 @@ const GENERATED_ArkUIGlobalScope_inspectorAccessor* GetGlobalScope_inspectorAcce
 {
     static const GENERATED_ArkUIGlobalScope_inspectorAccessor GlobalScope_inspectorAccessorImpl {
         GlobalScope_inspectorAccessor::DestroyPeerImpl,
-        GlobalScope_inspectorAccessor::CtorImpl,
-        GlobalScope_inspectorAccessor::GetFinalizerImpl,
         GlobalScope_inspectorAccessor::GetInspectorNodesImpl,
         GlobalScope_inspectorAccessor::GetInspectorNodeByIdImpl,
         GlobalScope_inspectorAccessor::RegisterVsyncCallbackImpl,

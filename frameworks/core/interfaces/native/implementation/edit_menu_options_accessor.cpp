@@ -24,7 +24,7 @@ namespace EditMenuOptionsAccessor {
 void DestroyPeerImpl(EditMenuOptionsPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_EditMenuOptions CtorImpl()
 {
     return nullptr;
 }
@@ -40,7 +40,7 @@ Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer,
                                 const Ark_TextMenuItem* menuItem,
                                 const Ark_TextRange* range)
 {
-    return 0;
+    return {};
 }
 } // EditMenuOptionsAccessor
 const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()

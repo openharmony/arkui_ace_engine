@@ -27,12 +27,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrameNodeAccessor {
 void DestroyPeerImpl(FrameNodePeer* peer)
 {
-    peer->node = nullptr;
-    delete peer;
+    FrameNodePeer::Destroy(peer);
 }
-Ark_NativePointer CtorImpl(const Ark_UIContext* uiContext)
+Ark_FrameNode CtorImpl(const Ark_UIContext* uiContext)
 {
-    auto peer = new FrameNodePeer(uiContext);
+    auto peer = FrameNodePeer::Create(uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     peer->node->SetExclusiveEventForChild(true);
@@ -51,7 +50,7 @@ Ark_Boolean IsModifiableImpl(FrameNodePeer* peer)
     return Converter::ArkValue<Ark_Boolean>(isModifiable);
 }
 void AppendChildImpl(FrameNodePeer* peer,
-                     const Ark_FrameNode* node)
+                     Ark_FrameNode node)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->node);
@@ -59,18 +58,17 @@ void AppendChildImpl(FrameNodePeer* peer,
     CHECK_NULL_VOID(currentUINodeRef);
 
     CHECK_NULL_VOID(node);
-    CHECK_NULL_VOID(node->ptr);
-    auto childNode = reinterpret_cast<UINode*>(node->ptr);
+    auto childNode = AceType::DynamicCast<UINode>(node->node);
     CHECK_NULL_VOID(childNode);
     if (childNode->GetParent() != nullptr) {
         return;
     }
-    currentUINodeRef->AddChild(Referenced::Claim<UINode>(childNode));
+    currentUINodeRef->AddChild(childNode);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 void InsertChildAfterImpl(FrameNodePeer* peer,
-                          const Ark_FrameNode* child,
-                          const Ark_FrameNode* sibling)
+                          Ark_FrameNode child,
+                          Ark_FrameNode sibling)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->node);
@@ -78,21 +76,19 @@ void InsertChildAfterImpl(FrameNodePeer* peer,
     CHECK_NULL_VOID(currentUINodeRef);
 
     CHECK_NULL_VOID(child);
-    CHECK_NULL_VOID(child->ptr);
-    auto childNode = reinterpret_cast<UINode*>(child->ptr);
+    auto childNode = AceType::DynamicCast<UINode>(child->node);
     CHECK_NULL_VOID(childNode);
     if (childNode->GetParent() != nullptr) {
         return;
     }
     CHECK_NULL_VOID(sibling);
-    CHECK_NULL_VOID(sibling->ptr);
-    auto siblingNode = reinterpret_cast<UINode*>(sibling->ptr);
-    auto index = currentUINodeRef->GetChildIndex(Referenced::Claim<UINode>(siblingNode));
-    currentUINodeRef->AddChild(Referenced::Claim<UINode>(childNode), index + 1);
+    auto siblingNode = AceType::DynamicCast<UINode>(sibling->node);
+    auto index = currentUINodeRef->GetChildIndex(siblingNode);
+    currentUINodeRef->AddChild(childNode, index + 1);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 void RemoveChildImpl(FrameNodePeer* peer,
-                     const Ark_FrameNode* node)
+                     Ark_FrameNode node)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->node);
@@ -100,11 +96,10 @@ void RemoveChildImpl(FrameNodePeer* peer,
     CHECK_NULL_VOID(currentUINodeRef);
 
     CHECK_NULL_VOID(node);
-    CHECK_NULL_VOID(node->ptr);
-    auto childNode = reinterpret_cast<UINode*>(node->ptr);
+    auto childNode = AceType::DynamicCast<UINode>(node->node);
     CHECK_NULL_VOID(childNode);
 
-    currentUINodeRef->RemoveChild(Referenced::Claim<UINode>(childNode));
+    currentUINodeRef->RemoveChild(childNode);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 void ClearChildrenImpl(FrameNodePeer* peer)
@@ -116,8 +111,8 @@ void ClearChildrenImpl(FrameNodePeer* peer)
     currentUINodeRef->Clean();
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
-Ark_NativePointer GetChildImpl(FrameNodePeer* peer,
-                               const Ark_Number* index)
+Ark_FrameNode GetChildImpl(FrameNodePeer* peer,
+                           const Ark_Number* index)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->node, nullptr);
@@ -125,17 +120,16 @@ Ark_NativePointer GetChildImpl(FrameNodePeer* peer,
     auto indexInt = Converter::Convert<int32_t>(*index);
     CHECK_NULL_RETURN(indexInt > -1, nullptr);
     LOGW("FrameNodeAccessor::GetChildImpl work only for case: IsExpanded is false");
-    return peer->node->GetFrameNodeChildByIndex(indexInt, false, false);
+    return FrameNodePeer::Create(peer->node->GetFrameNodeChildByIndex(indexInt, false, false));
 }
-Ark_NativePointer GetFirstChildImpl(FrameNodePeer* peer)
+Ark_FrameNode GetFirstChildImpl(FrameNodePeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->node, nullptr);
     auto child = peer->node->GetFirstChild();
     CHECK_NULL_RETURN(child, nullptr);
-    return AceType::DynamicCast<FrameNode>(child.GetRawPtr());
+    return FrameNodePeer::Create(AceType::DynamicCast<FrameNode>(child));
 }
-
 RefPtr<FrameNode> GetParentNode(RefPtr<FrameNode> nodeRef)
 {
     auto parent = nodeRef->GetParent();
@@ -145,8 +139,7 @@ RefPtr<FrameNode> GetParentNode(RefPtr<FrameNode> nodeRef)
     return (parent == nullptr || parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::STAGE_ETS_TAG)
                ? nullptr : AceType::DynamicCast<FrameNode>(parent);
 }
-
-Ark_NativePointer GetNextSiblingImpl(FrameNodePeer* peer)
+Ark_FrameNode GetNextSiblingImpl(FrameNodePeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->node, nullptr);
@@ -156,9 +149,9 @@ Ark_NativePointer GetNextSiblingImpl(FrameNodePeer* peer)
     auto index = parent->GetFrameNodeIndex(peer->node, false);
     CHECK_NULL_RETURN(index > -1, nullptr);
     auto sibling = parent->GetFrameNodeChildByIndex(index + 1, false, false);
-    return sibling;
+    return FrameNodePeer::Create(sibling);
 }
-Ark_NativePointer GetPreviousSiblingImpl(FrameNodePeer* peer)
+Ark_FrameNode GetPreviousSiblingImpl(FrameNodePeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->node, nullptr);
@@ -168,14 +161,14 @@ Ark_NativePointer GetPreviousSiblingImpl(FrameNodePeer* peer)
     auto index = parent->GetFrameNodeIndex(peer->node, false);
     CHECK_NULL_RETURN(index > 0, nullptr);
     auto sibling = parent->GetFrameNodeChildByIndex(index - 1, false, false);
-    return sibling;
+    return FrameNodePeer::Create(sibling);
 }
-Ark_NativePointer GetParentImpl(FrameNodePeer* peer)
+Ark_FrameNode GetParentImpl(FrameNodePeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->node, nullptr);
     auto parent = GetParentNode(peer->node);
-    return parent.GetRawPtr();
+    return FrameNodePeer::Create(parent);
 }
 Ark_Int32 GetChildrenCountImpl(FrameNodePeer* peer)
 {
@@ -210,7 +203,7 @@ Ark_NativePointer GetPositionToWindowWithTransformImpl(FrameNodePeer* peer)
     // return the result of method invokation
     // wait for Ark_NativePointer change to a correct type which is acceptable to "offset" data
     peer->node->GetPositionToWindowWithTransform();
-    return nullptr;
+    return {};
 }
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()

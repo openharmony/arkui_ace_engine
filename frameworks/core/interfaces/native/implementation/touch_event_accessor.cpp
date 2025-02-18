@@ -23,7 +23,7 @@ void DestroyPeerImpl(TouchEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TouchEvent CtorImpl()
 {
     return new TouchEventPeer();
 }
@@ -36,7 +36,7 @@ void GetHistoricalPointsImpl(TouchEventPeer* peer)
 }
 Ark_NativePointer GetTypeImpl(TouchEventPeer* peer)
 {
-    return nullptr;
+    return {};
 }
 void SetTypeImpl(TouchEventPeer* peer,
                  Ark_TouchType type)
@@ -50,9 +50,17 @@ void SetChangedTouchesImpl(TouchEventPeer* peer,
                            const Array_TouchObject* changedTouches)
 {
 }
+Callback_Void GetStopPropagationImpl(TouchEventPeer* peer)
+{
+    return {};
+}
 void SetStopPropagationImpl(TouchEventPeer* peer,
                             const Callback_Void* stopPropagation)
 {
+}
+Callback_Void GetPreventDefaultImpl(TouchEventPeer* peer)
+{
+    return {};
 }
 void SetPreventDefaultImpl(TouchEventPeer* peer,
                            const Callback_Void* preventDefault)
@@ -70,7 +78,9 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
         TouchEventAccessor::SetTypeImpl,
         TouchEventAccessor::SetTouchesImpl,
         TouchEventAccessor::SetChangedTouchesImpl,
+        TouchEventAccessor::GetStopPropagationImpl,
         TouchEventAccessor::SetStopPropagationImpl,
+        TouchEventAccessor::GetPreventDefaultImpl,
         TouchEventAccessor::SetPreventDefaultImpl,
     };
     return &TouchEventAccessorImpl;

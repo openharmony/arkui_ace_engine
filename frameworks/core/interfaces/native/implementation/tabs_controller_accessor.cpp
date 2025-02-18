@@ -27,7 +27,7 @@ void DestroyPeerImpl(TabsControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TabsController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<TabsControllerPeerImpl>();
     peerImpl->IncRefCount();

@@ -36,7 +36,7 @@ void DestroyPeerImpl(TimePickerDialogPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TimePickerDialog CtorImpl()
 {
     return new TimePickerDialogPeer();
 }

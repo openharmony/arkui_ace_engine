@@ -24,7 +24,7 @@ void DestroyPeerImpl(SwipeGestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_SwipeGestureEvent CtorImpl()
 {
     return new SwipeGestureEventPeer();
 }

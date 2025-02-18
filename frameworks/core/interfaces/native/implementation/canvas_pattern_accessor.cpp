@@ -28,7 +28,7 @@ void DestroyPeerImpl(CanvasPatternPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_CanvasPattern CtorImpl()
 {
     return new CanvasPatternPeer();
 }
@@ -42,7 +42,7 @@ void SetTransformImpl(CanvasPatternPeer* peer,
     CHECK_NULL_VOID(peer);
     auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
     CHECK_NULL_VOID(opt);
-    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
+    auto matrixPeer = opt.value();
     CHECK_NULL_VOID(matrixPeer);
     auto param = matrixPeer->transform;
     if (LessNotEqual(param.scaleX, SCALE_LIMIT_MIN) || LessNotEqual(param.scaleY, SCALE_LIMIT_MIN)) {

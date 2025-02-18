@@ -27,7 +27,7 @@ void DestroyPeerImpl(EventTargetInfoPeer* peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_NativePointer CtorImpl()
+Ark_EventTargetInfo CtorImpl()
 {
     auto peer = AceType::MakeRefPtr<EventTargetInfoPeer>();
     peer->IncRefCount();

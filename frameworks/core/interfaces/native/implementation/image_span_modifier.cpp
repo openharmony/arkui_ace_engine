@@ -99,12 +99,12 @@ void OnErrorImpl(Ark_NativePointer node,
     ImageSpanView::SetOnError(frameNode, std::move(onError));
 }
 void AltImpl(Ark_NativePointer node,
-             const Ark_PixelMap* value)
+             Ark_PixelMap value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(value->ptr);
+    auto pixelMapPeer = value;
     if (pixelMapPeer) {
         ImageModelNG::SetAlt(frameNode, ImageSourceInfo(pixelMapPeer->pixelMap));
     }

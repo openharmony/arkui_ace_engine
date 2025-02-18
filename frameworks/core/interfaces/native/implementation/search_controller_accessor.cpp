@@ -25,7 +25,7 @@ void DestroyPeerImpl(SearchControllerPeer* peer)
     peer->controller_ = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_SearchController CtorImpl()
 {
     return new SearchControllerPeer();
 }

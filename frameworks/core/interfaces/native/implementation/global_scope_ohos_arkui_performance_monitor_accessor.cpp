@@ -54,7 +54,7 @@ namespace GlobalScope_ohos_arkui_performanceMonitorAccessor {
 void DestroyPeerImpl(GlobalScope_ohos_arkui_performanceMonitorPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_GlobalScope_ohos_arkui_performanceMonitor CtorImpl()
 {
     return nullptr;
 }
@@ -83,12 +83,12 @@ void EndImpl(const Ark_String* scene)
     CHECK_NULL_VOID(pMonitor);
     pMonitor->End(sceneId, false);
 }
-void RecordInputEventTimeImpl(Ark_PerfMonitorActionType type,
+void RecordInputEventTimeImpl(Ark_PerfMonitorActionType actionType,
                               Ark_PerfMonitorSourceType sourceType,
                               const Ark_Number* time)
 {
     CHECK_NULL_VOID(time);
-    auto action = Converter::OptConvert<PerfActionType>(type).value_or(PerfActionType::UNKNOWN_ACTION);
+    auto action = Converter::OptConvert<PerfActionType>(actionType).value_or(PerfActionType::UNKNOWN_ACTION);
     auto source = Converter::OptConvert<PerfSourceType>(sourceType).value_or(PerfSourceType::UNKNOWN_SOURCE);
     auto timestamp = Converter::Convert<int32_t>(*time);
     LOGE("ARKOALA GlobalScope_ohos_arkui_performanceMonitorAccessor::RecordInputEventTimeImpl - "

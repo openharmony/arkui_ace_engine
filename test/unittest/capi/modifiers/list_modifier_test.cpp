@@ -343,7 +343,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     Ark_ListOptions listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(1),
         .space = Converter::ArkValue<Opt_Union_Number_String>
             (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(55.7f)),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
 
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
@@ -364,7 +364,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     // index, space are undefined
     listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(Ark_Empty()),
         .space = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty()),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -376,7 +376,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     // space as string
     listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(3), .space =
         Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("88.9px")),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -396,7 +396,7 @@ HWTEST_F(ListModifierTest, setListOptionsNegativeTest, TestSize.Level1)
 // space and index are negative
     Ark_ListOptions listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(-7), .space =
         Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(-9)),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);

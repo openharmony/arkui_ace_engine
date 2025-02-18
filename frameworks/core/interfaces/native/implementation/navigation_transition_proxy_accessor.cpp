@@ -55,7 +55,7 @@ void DestroyPeerImpl(NavigationTransitionProxyPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_NavigationTransitionProxy CtorImpl()
 {
     return new NavigationTransitionProxyPeer();
 }

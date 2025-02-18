@@ -85,7 +85,7 @@ HWTEST_F(CanvasPatternAccessorTest, setTransformTest, TestSize.Level1)
 
     Ark_Matrix2D arkMatrix;
     auto peer = new Matrix2DPeer();
-    arkMatrix.ptr = peer;
+    arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
     auto valD = DEFAULT_DOUBLE_VALUE;
     peer->transform.scaleX = SCALE_VALUE;

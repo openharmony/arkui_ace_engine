@@ -28,12 +28,6 @@ struct KeyboardOptions {
 };
 }
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-class WebCookiePeerImpl : public Referenced {
-    // this is a stub because all WebCookieAccessor interfaces are deprecated
-};
-} // OHOS::Ace::NG::GeneratedModifier
-
 namespace OHOS::Ace::NG::Converter {
 /*
  * Keep this enum in sync with the same enum in frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h

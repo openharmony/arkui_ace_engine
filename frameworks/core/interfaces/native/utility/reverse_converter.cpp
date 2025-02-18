@@ -71,15 +71,14 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::
     const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
         GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
     peer->SetEventInfo(src);
-    dst.ptr = peer;
+    dst = peer;
 }
 
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-    const auto peer = reinterpret_cast<DragEventPeer*>(
-        GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor());
+    const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
     peer->dragInfo = info;
-    dragEvent.ptr = peer;
+    dragEvent = peer;
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -97,7 +96,7 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
-    dst.ptr = LengthMetricsPeer::Create(src);
+    dst = LengthMetricsPeer::Create(src);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -124,16 +123,6 @@ void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
 {
     dst.alwaysEnabled = src;
-}
-
-void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
-{
-    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
-}
-
-void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src)
-{
-    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<TextAreaControllerPeer&>(src));
 }
 
 void AssignArkValue(Ark_Length& dst, const double& src)
@@ -290,7 +279,7 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
         case ARK_LENGTH_UNIT_LPX: du = DimensionUnit::LPX; break;
         default: du = DimensionUnit::INVALID;
     }
-    return { LengthMetricsPeer::Create(Dimension(value, du)) };
+    return LengthMetricsPeer::Create(Dimension(value, du));
 }
 
 void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx)

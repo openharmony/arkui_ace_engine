@@ -24,7 +24,7 @@ void DestroyPeerImpl(TextEditControllerExPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextEditControllerEx CtorImpl()
 {
     LOGE("TextEditControllerExPeer is an abstract class.");
     return nullptr;
@@ -60,7 +60,7 @@ Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
     // fix a return value
     CHECK_NULL_RETURN(peer, 0);
     peer->GetPreviewText();
-    return 0;
+    return {};
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

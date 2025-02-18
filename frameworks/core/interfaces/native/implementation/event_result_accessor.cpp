@@ -26,7 +26,7 @@ void DestroyPeerImpl(EventResultPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_EventResult CtorImpl()
 {
     return new EventResultPeer();
 }

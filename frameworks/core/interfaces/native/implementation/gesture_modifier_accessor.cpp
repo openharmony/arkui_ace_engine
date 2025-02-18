@@ -24,7 +24,7 @@ namespace GestureModifierAccessor {
 void DestroyPeerImpl(GestureModifierPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_GestureModifier CtorImpl()
 {
     return nullptr;
 }

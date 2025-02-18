@@ -23,7 +23,7 @@ void DestroyPeerImpl(TapGestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TapGestureEvent CtorImpl()
 {
     return new TapGestureEventPeer();
 }

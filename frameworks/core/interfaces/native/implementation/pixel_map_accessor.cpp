@@ -24,7 +24,7 @@ void DestroyPeerImpl(PixelMapPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_PixelMap CtorImpl()
 {
     return new PixelMapPeer();
 }
@@ -42,7 +42,7 @@ void WriteBufferToPixelsImpl(PixelMapPeer* peer,
 }
 Ark_Int32 GetIsEditableImpl(PixelMapPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetIsEditableImpl(PixelMapPeer* peer,
                        Ark_Int32 isEditable)
@@ -50,7 +50,7 @@ void SetIsEditableImpl(PixelMapPeer* peer,
 }
 Ark_Int32 GetIsStrideAlignmentImpl(PixelMapPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetIsStrideAlignmentImpl(PixelMapPeer* peer,
                               Ark_Int32 isStrideAlignment)

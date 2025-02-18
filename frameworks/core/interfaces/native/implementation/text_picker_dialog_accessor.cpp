@@ -34,7 +34,7 @@ void DestroyPeerImpl(TextPickerDialogPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TextPickerDialog CtorImpl()
 {
     return new TextPickerDialogPeer();
 }

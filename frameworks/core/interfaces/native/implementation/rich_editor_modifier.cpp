@@ -178,13 +178,10 @@ void SetRichEditorOptions0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     // obtain the internal RichEditorController
     RefPtr<RichEditorBaseControllerBase> internalController = RichEditorModelNG::GetRichEditorController(frameNode);
-    void *ptr = internalController.GetRawPtr();
-    RichEditorController *rawPtr = reinterpret_cast<RichEditorController *>(ptr);
-    CHECK_NULL_VOID(rawPtr);
-    WeakPtr<RichEditorController> controller;
-    controller = rawPtr;
+    auto controller = AceType::DynamicCast<RichEditorController>(internalController);
+    CHECK_NULL_VOID(controller);
 
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::RichEditorControllerPeerImpl *>(value->controller.ptr);
+    auto peerImplPtr = reinterpret_cast<RichEditorControllerPeerImpl *>(value->controller);
     CHECK_NULL_VOID(peerImplPtr);
 
     // pass the internal controller to external management
@@ -200,13 +197,10 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     // obtain the internal Styled String RichEditorController
     RefPtr<RichEditorBaseControllerBase> internalController =
         RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
-    void *ptr = internalController.GetRawPtr();
-    RichEditorStyledStringController *rawPtr = reinterpret_cast<RichEditorStyledStringController *>(ptr);
-    CHECK_NULL_VOID(rawPtr);
-    WeakPtr<RichEditorStyledStringController> controller;
-    controller = rawPtr;
+    auto controller = AceType::DynamicCast<RichEditorStyledStringController>(internalController);
+    CHECK_NULL_VOID(controller);
 
-    auto peerImplPtr = reinterpret_cast<RichEditorStyledStringControllerPeer *>(options->controller.ptr);
+    auto peerImplPtr = options->controller;
     CHECK_NULL_VOID(peerImplPtr);
 
     // pass the internal controller to external management
@@ -488,12 +482,12 @@ void OnCopyImpl(Ark_NativePointer node,
     RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //RichEditorModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGW("RichEditor modifier :: EditMenuOptionsImpl() needs onCreateMenuCallback, onMenuItemClick input");
 }

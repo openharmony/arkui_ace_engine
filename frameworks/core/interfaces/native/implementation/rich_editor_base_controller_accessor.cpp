@@ -82,7 +82,7 @@ void DestroyPeerImpl(RichEditorBaseControllerPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorBaseController CtorImpl()
 {
     return new RichEditorBaseControllerPeer();
 }
@@ -114,7 +114,7 @@ Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     LOGW("RichEditorBaseControllerAccessor:: GetTypingStyleImpl is not implemented");
-    return nullptr;
+    return {};
 }
 void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer,
                         const Ark_RichEditorTextStyle* value)
@@ -150,7 +150,7 @@ void StopEditingImpl(RichEditorBaseControllerPeer* peer)
     CHECK_NULL_VOID(peer);
     peer->StopEditing();
 }
-Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
 {
     CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
     auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());

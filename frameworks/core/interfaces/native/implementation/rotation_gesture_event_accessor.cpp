@@ -23,7 +23,7 @@ void DestroyPeerImpl(RotationGestureEventPeer* peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_RotationGestureEvent CtorImpl()
 {
     return new RotationGestureEventPeer;
 }
@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Int32 GetAngleImpl(RotationGestureEventPeer* peer)
 {
-    return 0;
+    return {};
 }
 void SetAngleImpl(RotationGestureEventPeer* peer,
                   const Ark_Number* angle)

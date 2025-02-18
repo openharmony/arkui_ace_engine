@@ -24,7 +24,7 @@ namespace IndicatorComponentControllerAccessor {
 void DestroyPeerImpl(IndicatorComponentControllerPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_IndicatorComponentController CtorImpl()
 {
     return nullptr;
 }

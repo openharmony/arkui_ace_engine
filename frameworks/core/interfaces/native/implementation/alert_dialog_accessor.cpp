@@ -126,7 +126,7 @@ void DestroyPeerImpl(AlertDialogPeer* peer)
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_AlertDialog CtorImpl()
 {
     return new AlertDialogPeer();
 }

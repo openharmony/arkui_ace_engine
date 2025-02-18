@@ -649,9 +649,7 @@ namespace OHOS::Ace::NG::Converter {
 
         Ark_Type ArkValue() const
         {
-            return {
-                .ptr = peer_
-            };
+            return peer_;
         }
 
     private:

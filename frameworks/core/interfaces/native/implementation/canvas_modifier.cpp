@@ -16,24 +16,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-GeneratedModifier::DrawingRenderingContextPeerImpl* Convert(const Ark_Materialized &src)
-{
-    return reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl *>(src.ptr);
-}
-template<>
-GeneratedModifier::CanvasRenderingContext2DPeerImpl* Convert(const Ark_Materialized &src)
-{
-    return reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl *>(src.ptr);
-}
-
-} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {
@@ -53,28 +40,29 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(context);
-    auto renderingContext2D = Converter::OptConvert<CanvasRenderingContext2DPeerImpl*>(*context);
-    auto renderingDrawing = Converter::OptConvert<DrawingRenderingContextPeerImpl*>(*context);
 
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
     CHECK_NULL_VOID(pattern);
 
-    if (renderingContext2D) {
-        CanvasRenderingContext2DPeerImpl* peerImplPtr = *renderingContext2D;
-        CHECK_NULL_VOID(peerImplPtr);
-        peerImplPtr->SetInstanceId(Container::CurrentId());
-        peerImplPtr->SetCanvasPattern(pattern);
-        peerImplPtr->UpdateAntiAlias();
-        peerImplPtr->UpdateDensity();
-    } else if (renderingDrawing) {
-        DrawingRenderingContextPeerImpl* peerImplPtr = *renderingDrawing;
-        CHECK_NULL_VOID(peerImplPtr);
+    Converter::VisitUnion(*context,
+        [pattern](const Ark_CanvasRenderingContext2D& peer) {
+            CanvasRenderingContext2DPeerImpl* peerImplPtr = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+            CHECK_NULL_VOID(peerImplPtr);
+            peerImplPtr->SetInstanceId(Container::CurrentId());
+            peerImplPtr->SetCanvasPattern(pattern);
+            peerImplPtr->UpdateAntiAlias();
+            peerImplPtr->UpdateDensity();
+        },
+        [pattern](const Ark_DrawingRenderingContext &peer) {
+            DrawingRenderingContextPeerImpl* peerImplPtr = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
+            CHECK_NULL_VOID(peerImplPtr);
 
-        peerImplPtr->SetInstanceId(Container::CurrentId());
-        peerImplPtr->SetCanvasPattern(pattern);
-    } else {
-        CanvasModelNG::DetachRenderContext(frameNode);
-    }
+            peerImplPtr->SetInstanceId(Container::CurrentId());
+            peerImplPtr->SetCanvasPattern(pattern);
+        },
+        [frameNode]() {
+            CanvasModelNG::DetachRenderContext(frameNode);
+        });
 }
 
 void SetCanvasOptions0Impl(Ark_NativePointer node,
