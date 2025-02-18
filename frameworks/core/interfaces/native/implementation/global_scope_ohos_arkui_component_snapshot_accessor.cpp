@@ -70,8 +70,7 @@ void GetImpl(const Ark_String* id,
         RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&mediaPixelMap);
         static PixelMapPeer peer;
         peer.pixelMap = pixelMapRef;
-        Ark_PixelMap arkPixelMap = { .ptr = &peer };
-        arkCallback.Invoke(arkPixelMap);
+        arkCallback.Invoke(&peer);
     };
     ComponentSnapshot::Get(componentId, std::move(onDone), opts.value_or(SnapshotOptions()));
 }
