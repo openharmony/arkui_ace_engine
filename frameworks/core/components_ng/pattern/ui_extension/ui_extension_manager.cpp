@@ -502,6 +502,20 @@ void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
     }
 }
 
+void UIExtensionManager::SendPageModeToProvider(const int32_t nodeId, const std::string& pageMode)
+{
+    auto it = aliveUIExtensions_.find(nodeId);
+    if(it == aliveUIExtensions_.end()) {
+        return;
+    }
+    auto uiExtension = it->second.Upgrade();
+    CHECK_NULL_VOID(uiExtension);
+    AAFwk::Want data;
+    data.SetParam("pageMode", pageMode);
+    uiExtension->SendBusinessData(
+        UIContentBusinessCode::SEND_PAGE_MODE_TO_UEA, std::move(data), BusinessDataSendType::ASYNC);
+}
+
 void UIExtensionManager::SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline)
 {
     AAFwk::Want data;

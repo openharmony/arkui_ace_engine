@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
@@ -653,7 +654,7 @@ void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importan
     accessibilityProperty->SetAccessibilityLevel(importance);
 }
 
-void ViewAbstractModelNG::SetAccessibilityDefaultFocus()
+void ViewAbstractModelNG::SetAccessibilityDefaultFocus(bool isFocus)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -661,17 +662,26 @@ void ViewAbstractModelNG::SetAccessibilityDefaultFocus()
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->SendFrameNodeToAccessibility(AceType::Claim(frameNode), false);
+    accessibilityManager->AddFrameNodeToDefaultFocusList(AceType::Claim(frameNode), isFocus);
 }
 
-void ViewAbstractModelNG::SetAccessibilityUseSamePage(bool isFullSilent)
+void ViewAbstractModelNG::SetAccessibilityUseSamePage(const std::string& pageMode)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    std::string pageMode = isFullSilent ? "FULL_SILENT" : "SEMI_SILENT";
+    if (pageMode == accessibilityProperty->GetAccessibilitySamePage()) {
+        return;
+    }
     accessibilityProperty->SetAccessibilitySamePage(pageMode);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->SendPageModeToProvider(frameNode->GetId(), pageMode);
+#endif
 }
 
 void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::string& text)
@@ -828,26 +838,30 @@ void ViewAbstractModelNG::SetAccessibilityTextPreferred(FrameNode* frameNode, bo
 
 void ViewAbstractModelNG::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
 {
-    if (!isFocus) {
-        return;
-    }
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->SendFrameNodeToAccessibility(AceType::Claim(frameNode), false);
+    accessibilityManager->AddFrameNodeToDefaultFocusList(AceType::Claim(frameNode), isFocus);
 }
 
 void ViewAbstractModelNG::SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode)
 {
-    if (pageMode.empty()) {
-        return;
-    }
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    if (pageMode == accessibilityProperty->GetAccessibilitySamePage()) {
+        return;
+    }
     accessibilityProperty->SetAccessibilitySamePage(pageMode);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->SendPageModeToProvider(frameNode->GetId(), pageMode);
+#endif
 }
 
 bool ViewAbstractModelNG::GetAccessibilityGroup(FrameNode* frameNode)

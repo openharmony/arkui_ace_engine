@@ -192,20 +192,25 @@ public:
     bool IsSendAccessibilityEvent(const AccessibilityEvent& accessibilityEvent);
     bool IsSendAccessibilityEventForUEA(
         const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
-    bool IsSendAccessibilityEventForHost(AccessibilityEvent accessibilityEvent, const int32_t pageId,
-        const std::string componentType);
+    bool IsSendAccessibilityEventForHost(
+        const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
     void GetComponentTypeAndPageIdByNodeId(const int64_t nodeId, const RefPtr<PipelineBase>& context,
         std::string& componentType, int32_t& pageId);
 
     void SendCacheAccessibilityEvent(int32_t instanceId);
     void SendCacheAccessibilityEventForHost(const int32_t pageId);
-    void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) override;
+
+    void AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node) override;
+    void AddFrameNodeToDefaultFocusList(const RefPtr<NG::FrameNode>& node, bool isFocus) override;
+    void AddDefaultFocusNode(const RefPtr<NG::FrameNode>& defaultFocusNode);
+    void EraseDefaultFocusNode(const RefPtr<NG::FrameNode>& defaultFocusNode);
 
     std::list<WeakPtr<NG::FrameNode>>& GetDefaultFocusList()
     {
         return defaultFocusList_;
     }
 
+    void RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager) override;
     void UpdateFrameNodeState(int32_t nodeId) override;
 
     void UpdatePageMode(const std::string& pageMode) override

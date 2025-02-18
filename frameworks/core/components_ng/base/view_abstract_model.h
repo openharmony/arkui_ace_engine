@@ -423,8 +423,8 @@ public:
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void ResetOnAccessibilityFocus() = 0;
-    virtual void SetAccessibilityDefaultFocus() = 0;
-    virtual void SetAccessibilityUseSamePage(bool isFullSilent) = 0;
+    virtual void SetAccessibilityDefaultFocus(bool isFocus) = 0;
+    virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;
     virtual void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) = 0;
     virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
 

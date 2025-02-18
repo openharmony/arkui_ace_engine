@@ -745,7 +745,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->SendFrameNodeToAccessibility(host, true);
+    accessibilityManager->AddFrameNodeToUecStatusVec(host);
     host->RegisterNodeChangeListener();
     accessibilitySAObserverCallback_ = std::make_shared<UECAccessibilitySAObserverCallback>(
         WeakClaim(this), host->GetAccessibilityId());

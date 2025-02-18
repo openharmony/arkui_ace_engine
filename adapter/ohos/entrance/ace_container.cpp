@@ -2532,6 +2532,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         auto uiExtManager = ngPipeline->GetUIExtensionManager();
         CHECK_NULL_VOID(uiExtManager);
         uiExtManager->SendPageModeRequestToHost(ngPipeline);
+        auto accessibilityManager = ngPipeline->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->RegisterUIExtGetPageModeCallback(uiExtManager);
     }
 }
 
