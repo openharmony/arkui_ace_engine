@@ -4490,21 +4490,39 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(const int64_t elementId,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "search by id: %{public}" PRId64 ", mode: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ArkUI search by id: %{public}" PRId64 ", mode: %{public}d",
         elementId, mode);
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    if (!jsAccessibilityManager) {
+        std::list<AccessibilityElementInfo> infos;
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
+            requestId);
+        return;
+    }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        std::list<AccessibilityElementInfo> infos;
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
+            requestId);
+        return;
+    }
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), splitElementId, requestId, &callback, mode, windowId]() {
             auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager) {
+                std::list<AccessibilityElementInfo> infos;
+                callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+                TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY,
+                         "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d", requestId);
+                return;
+            }
             ACE_SCOPED_TRACE("SearchElementInfoByAccessibilityId");
             jsAccessibilityManager->SearchElementInfoByAccessibilityId(
                 splitElementId, requestId, callback, mode, windowId);
@@ -5242,22 +5260,35 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
     const std::map<std::string, std::string>& actionArguments, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", action: %{public}d", elementId, action);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction elementId: %{public}" PRId64 ", action: %{public}d",
+             elementId, action);
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    if (!jsAccessibilityManager) {
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
+        callback.SetExecuteActionResult(false, requestId);
+        return;
+    }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
+        callback.SetExecuteActionResult(false, requestId);
+        return;
+    }
     auto actionInfo = static_cast<ActionType>(action);
     ActionParam param { actionInfo, actionArguments };
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), splitElementId, param, requestId, &callback, windowId] {
             auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager) {
+                TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
+                callback.SetExecuteActionResult(false, requestId);
+                return;
+            }
             ACE_SCOPED_TRACE("ExecuteAction");
             jsAccessibilityManager->ExecuteAction(splitElementId, param, requestId, callback, windowId);
         },
