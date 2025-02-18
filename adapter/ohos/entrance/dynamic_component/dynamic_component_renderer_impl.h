@@ -78,6 +78,9 @@ public:
 
     void UpdateParentOffsetToWindow(const OffsetF& offset) override;
 
+    void NotifyForeground() override;
+    void NotifyBackground() override;
+
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
@@ -121,6 +124,7 @@ private:
     static std::mutex usingWorkerMutex_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
+    bool isForeground_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRendererImpl);
 };

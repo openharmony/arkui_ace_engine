@@ -432,7 +432,7 @@ void DynamicPattern::InitializeAccessibility()
         accessibilityChildTreeCallback_->OnRegister(
             realHostWindowId, accessibilityManager->GetTreeId());
     }
-    PLATFORM_LOGI("SecurityUIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+    PLATFORM_LOGI("DynamicComponent: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
         accessibilityId, realHostWindowId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
@@ -493,5 +493,36 @@ void DynamicPattern::ResetAccessibilityChildTreeCallback()
         accessibilityChildTreeCallback_->GetAccessibilityId());
     accessibilityChildTreeCallback_.reset();
     accessibilityChildTreeCallback_ = nullptr;
+}
+
+void DynamicPattern::OnVisibleChange(bool visible)
+{
+    PLATFORM_LOGI("The component is changing from '%{public}s' to '%{public}s'.",
+        isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
+    isVisible_ = visible;
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    if (isVisible_) {
+        dynamicComponentRenderer_->NotifyForeground();
+    } else {
+        dynamicComponentRenderer_->NotifyBackground();
+    }
+}
+
+void DynamicPattern::OnWindowShow()
+{
+    PLATFORM_LOGI("The window is being shown and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    if (isVisible_) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->NotifyForeground();
+    }
+}
+
+void DynamicPattern::OnWindowHide()
+{
+    PLATFORM_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    if (isVisible_) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->NotifyBackground();
+    }
 }
 } // namespace OHOS::Ace::NG
