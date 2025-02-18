@@ -928,6 +928,8 @@ struct CustomDialogLayout {
   titleIndex: number = 0;
   contentIndex: number = 1;
   buttonIndex: number = 2;
+  isHasDefaultFocus: boolean = false;
+  isAllFocusFalse: boolean = false;
 
   onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>,
     constraint: ConstraintSizeOptions) {
@@ -1059,6 +1061,7 @@ struct CustomDialogContentComponent {
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
+      .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
       .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
       Color.Transparent : $r('sys.color.comp_background_primary'))
     }
@@ -1107,6 +1110,7 @@ struct CustomDialogContentComponent {
     this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
     this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
     this.initTitleTextAlign();
+    this.setDefaultFocusState(this.buttons);
   }
 
   private updateFontSize(): void {
@@ -1279,6 +1283,29 @@ struct CustomDialogContentComponent {
     }
   }
 
+  /**
+   * set state of button focus
+   */
+  private setDefaultFocusState(buttonList?: ButtonOptions[]): void {
+    if (!buttonList) {
+      return;
+    }
+    let falseNum: number = 0;
+    buttonList.forEach((button: ButtonOptions) => {
+      // 遍历查询按钮中存在是否存在默认按钮
+      if (button.defaultFocus) {
+        this.isHasDefaultFocus = true;
+      }
+      if (button.defaultFocus === false) {
+        falseNum++;
+      }
+    });
+    // 所有按钮defaultFocus都设置为false
+    if (falseNum === buttonList.length) {
+      this.isAllFocusFalse = true;
+    }
+  }
+
   @Builder
   ButtonBuilder(): void {
     Column() {
@@ -1321,26 +1348,26 @@ struct CustomDialogContentComponent {
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons, this.controller)
+        .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons, this.controller)
+        .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons, this.controller)
+        .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons, this.controller)
+        .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
@@ -1462,7 +1489,7 @@ struct CustomDialogContentComponent {
 }
 
 @Extend(Button)
-function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOptions[],
+function setButtonProperties(buttonOptions: ButtonOptions, isHasDefaultFocus: boolean, isAllFocusFalse: boolean,
   controller?: CustomDialogController) {
   .onClick(() => {
     if (buttonOptions.action) {
@@ -1470,7 +1497,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOp
     }
     controller?.close();
   })
-  .defaultFocus(buttonOptions.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
+  .defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.Normal)
@@ -1478,25 +1505,30 @@ function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOp
 }
 
 /**
- * is button list has default focus
+ * is button set default focus
  *
- * @param buttonList button list
- * @returns boolean
+ * @param singleButton button options
+ * @param isHasDefaultFocus is button list has default focus button
+ * @param isAllFocusFalse is all button in button list default focus false
  */
-function isHasDefaultFocus(buttonList?: ButtonOptions[]): boolean {
+function isDefaultFocus(singleButton: ButtonOptions, isHasDefaultFocus: boolean, isAllFocusFalse: boolean): boolean {
   try {
-    let isHasDefaultFocus: boolean = false;
-    buttonList?.forEach((button) => {
-      if (button.defaultFocus) {
-        isHasDefaultFocus = true;
-      }
-    })
-    return isHasDefaultFocus;
+    // 当前按钮为默认按钮
+    if (singleButton.defaultFocus) {
+      return true;
+    }
+    let isDefaultFocus: boolean = false;
+    if (isHasDefaultFocus || isAllFocusFalse) {
+      isDefaultFocus = false; // 存在默认按钮或者所有按钮的defaultFocus都为false
+    } else {
+      isDefaultFocus = true; // 默认第一个按钮获焦
+    }
+    return isDefaultFocus;
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `get defaultFocus exist error, code: ${code}, message: ${message}`);
-    return false;
+    return true;
   }
 }
 

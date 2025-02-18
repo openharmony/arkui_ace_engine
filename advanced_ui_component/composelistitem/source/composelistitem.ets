@@ -863,7 +863,7 @@ export struct ComposeListItem {
     }
     return Math.min(
       this.maxFontScale,
-      (this.getUIContext().getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1
+      (this.getUIContext()?.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1
     )
   }
 
