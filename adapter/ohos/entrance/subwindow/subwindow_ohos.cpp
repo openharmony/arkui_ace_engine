@@ -288,6 +288,7 @@ void SubwindowOhos::InitContainer()
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
         }
         CHECK_NULL_VOID(window_);
+        defaultDisplayId_ = displayId;
     }
     std::string url = "";
     auto subSurface = window_->GetSurfaceNode();
@@ -2127,6 +2128,17 @@ uint64_t SubwindowOhos::GetDisplayId()
         return window_->GetDisplayId();
     }
     return 0;
+}
+
+bool SubwindowOhos::IsSameDisplayWithParentWindow(bool useInitializedId)
+{
+    CHECK_NULL_RETURN(window_, false);
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentContainer, false);
+    auto parentWindow = parentContainer->GetUIWindow(parentContainerId_);
+    CHECK_NULL_RETURN(parentWindow, false);
+    auto displayId = useInitializedId ? defaultDisplayId_ : window_->GetDisplayId();
+    return displayId == parentWindow->GetDisplayId();
 }
 
 void SubwindowOhos::InitializeSafeArea()

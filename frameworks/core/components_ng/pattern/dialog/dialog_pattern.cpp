@@ -1771,11 +1771,44 @@ void DialogPattern::DumpObjectProperty()
         DumpLog::GetInstance().AddDesc("MaskRect: " + dialogProperties_.maskRect.value().ToString());
     }
 }
+
+bool DialogPattern::NeedUpdateHostWindowRect()
+{
+    CHECK_NULL_RETURN(isUIExtensionSubWindow_, false);
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto currentId = pipeline->GetInstanceId();
+    if (currentId < MIN_SUBCONTAINER_ID) {
+        return false;
+    }
+
+    auto container = AceEngine::Get().GetContainer(currentId);
+    CHECK_NULL_RETURN(container, false);
+    if (container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        CHECK_NULL_RETURN(subwindow, false);
+        return subwindow->IsSameDisplayWithParentWindow();
+    }
+
+    return false;
+}
+
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (isFoldStatusChanged_ || type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
-        TAG_LOGI(AceLogTag::ACE_DIALOG, "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d",
-            type, isFoldStatusChanged_);
+    auto forceUpdate = NeedUpdateHostWindowRect();
+    auto isWindowChanged = type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE;
+
+    TAG_LOGI(AceLogTag::ACE_DIALOG,
+        "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d forceUpdate: %{public}d", type,
+        isFoldStatusChanged_, forceUpdate);
+
+    if (isFoldStatusChanged_ || isWindowChanged || forceUpdate) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         InitHostWindowRect();

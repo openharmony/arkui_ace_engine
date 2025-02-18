@@ -948,6 +948,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea(const RefPtr<FrameNode>& frameNode)
             foldCreaseRect = foldCreaseRects.front();
         }
     }
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "safeAreaInsets: %{public}s", safeAreaInsets_.ToString().c_str());
 }
 
 void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip)
