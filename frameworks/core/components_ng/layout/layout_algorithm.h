@@ -175,7 +175,7 @@ public:
 
     bool GetPercentWidth() const
     {
-        return percentHeight_;
+        return percentWidth_;
     }
 
 private:
