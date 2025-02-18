@@ -134,6 +134,7 @@ private:
     bool RegisterDataConsumer();
     void PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data);
     void PostBusinessDataConsumeSyncReply(uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;

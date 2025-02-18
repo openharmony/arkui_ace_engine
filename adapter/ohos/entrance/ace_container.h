@@ -837,7 +837,7 @@ private:
     void RegisterUIExtDataConsumer();
     void UnRegisterUIExtDataConsumer();
     void DispatchUIExtDataConsume(
-        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void RegisterUIExtDataSendToHost();
     bool FireUIExtDataSendToHost(
         NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type);
