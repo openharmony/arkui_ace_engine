@@ -27,17 +27,14 @@ class PinchGestureEventAccessorTest
     : public AccessorTestBase<GENERATED_ArkUIPinchGestureEventAccessor,
           &GENERATED_ArkUIAccessors::getPinchGestureEventAccessor, PinchGestureEventPeer> {
 public:
-    void SetUp(void) override
+    void SetUp() override
     {
         AccessorTestBase::SetUp();
         const double testDensity = 2.0;
         MockPipelineContext::GetCurrent()->SetDensity(testDensity);
-        eventInfo_ = std::make_unique<Ace::PinchGestureEvent>();
-        peer_->SetEventInfo(std::move(eventInfo_));
+        auto eventInfo_ = std::make_shared<Ace::PinchGestureEvent>();
+        peer_->SetEventInfo(eventInfo_);
     }
-
-private:
-    std::unique_ptr<Ace::PinchGestureEvent> eventInfo_;
 };
 
 namespace {
