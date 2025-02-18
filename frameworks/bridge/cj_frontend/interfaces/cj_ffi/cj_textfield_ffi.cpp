@@ -47,6 +47,7 @@ const std::function<void(std::string)> FormatCharFunction(void (*callback)(const
     return result;
 }
 
+constexpr uint32_t DEFAULTMAXLINES = 3;
 } // namespace
 
 extern "C" {
@@ -302,5 +303,42 @@ void FfiOHOSAceFrameworkTextFieldOnPaste(void (*callback)(const char* value))
 void FfiOHOSAceFrameworkTextFieldOnEditChanged(void (*callback)(bool value))
 {
     TextFieldModel::GetInstance()->SetOnEditChanged(CJLambda::Create(callback));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetSelectionMenuHidden(bool value)
+{
+    TextFieldModel::GetInstance()->SetSelectionMenuHidden(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetMaxLines(int32_t value)
+{
+    if (value <= 0) {
+        value = DEFAULTMAXLINES;
+    }
+    TextFieldModel::GetInstance()->SetMaxLines(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetEnableKeyboardOnFocus(bool value)
+{
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetCustomKeyboard(void (*callback)(), bool options)
+{
+    auto builderFunc = CJLambda::Create(callback);
+    TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc), options);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetShowUnderline(bool show)
+{
+    TextFieldModel::GetInstance()->SetShowUnderline(show);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetStyle(int32_t value)
+{
+    if (value < 0 || value > static_cast<int32_t>(InputStyle::INLINE)) {
+        value = static_cast<int32_t>(InputStyle::DEFAULT);
+    }
+    TextFieldModel::GetInstance()->SetInputStyle(static_cast<InputStyle>(value));
 }
 }

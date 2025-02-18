@@ -196,6 +196,10 @@ void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete complet
         ffiCompleteInfo.componentWidth = newInfo.GetComponentWidth();
         ffiCompleteInfo.componentHeight = newInfo.GetComponentHeight();
         ffiCompleteInfo.loadingStatus = newInfo.GetLoadingStatus();
+        ffiCompleteInfo.contentWidth = newInfo.GetContentWidth();
+        ffiCompleteInfo.contentHeight = newInfo.GetContentHeight();
+        ffiCompleteInfo.contentOffsetX = newInfo.GetContentOffsetX();
+        ffiCompleteInfo.contentOffsetY = newInfo.GetContentOffsetY();
         ffiOnComplete(ffiCompleteInfo);
     };
     ImageModel::GetInstance()->SetOnComplete(onComplete);

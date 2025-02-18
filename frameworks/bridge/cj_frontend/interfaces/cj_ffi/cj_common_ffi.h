@@ -133,11 +133,16 @@ struct CJImageComplete {
     double componentWidth;
     double componentHeight;
     int32_t loadingStatus;
+    double contentWidth;
+    double contentHeight;
+    double contentOffsetX;
+    double contentOffsetY;
 };
 
 struct CJImageError {
     double componentWidth;
     double componentHeight;
+    const char* message;
 };
 
 struct CJPosition {
