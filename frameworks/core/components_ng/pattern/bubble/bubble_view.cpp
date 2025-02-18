@@ -982,10 +982,10 @@ bool BubbleView::IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool i
     return true;
 }
 
-PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
+PopupInfo GetPopupInfoHelper(
+    const RefPtr<UINode>& customNode, const std::function<PopupInfo(const RefPtr<OverlayManager>&)>& getPopupInfoFunc)
 {
     PopupInfo popupInfoError;
-    popupInfoError.popupNode = nullptr;
     auto context = customNode->GetContextWithCheck();
     CHECK_NULL_RETURN(context, popupInfoError);
     auto instanceId = context->GetInstanceId();
@@ -993,7 +993,7 @@ PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNod
     if (subwindow) {
         auto overlayManager = subwindow->GetOverlayManager();
         if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
+            auto popupInfo = getPopupInfoFunc(overlayManager);
             if (popupInfo.popupNode) {
                 return popupInfo;
             }
@@ -1001,7 +1001,7 @@ PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNod
     }
     auto overlayManager = context->GetOverlayManager();
     if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
+        auto popupInfo = getPopupInfoFunc(overlayManager);
         if (popupInfo.popupNode) {
             return popupInfo;
         }
@@ -1009,31 +1009,17 @@ PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNod
     return popupInfoError;
 }
 
+PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
+{
+    return GetPopupInfoHelper(customNode, [customNode](const RefPtr<OverlayManager>& overlayManager) {
+        return overlayManager->GetPopupInfoWithExistContent(customNode);
+    });
+}
+
 PopupInfo BubbleView::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId)
 {
-    PopupInfo popupInfoError;
-    popupInfoError.popupNode = nullptr;
-    auto context = customNode->GetContextWithCheck();
-    CHECK_NULL_RETURN(context, popupInfoError);
-    auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
-    if (subwindow) {
-        auto overlayManager = subwindow->GetOverlayManager();
-        if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfo(targetId);
-            if (popupInfo.popupNode) {
-                return popupInfo;
-            }
-        }
-    }
-    auto overlayManager = context->GetOverlayManager();
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfo(targetId);
-        if (popupInfo.popupNode) {
-            return popupInfo;
-        }
-    }
-    return popupInfoError;
+    return GetPopupInfoHelper(customNode,
+        [targetId](const RefPtr<OverlayManager>& overlayManager) { return overlayManager->GetPopupInfo(targetId); });
 }
 
 RefPtr<OverlayManager> BubbleView::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
