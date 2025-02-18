@@ -199,6 +199,16 @@ public:
         hasTransition_ = hasTransition;
     }
 
+    void SetAvoidKeyboard(bool avoidKeyboard)
+    {
+        avoidKeyboard_ = avoidKeyboard;
+    }
+
+    bool GetAvoidKeyboard()
+    {
+        return avoidKeyboard_;
+    }
+
     bool GetHasTransition() const
     {
         return hasTransition_;
@@ -282,6 +292,7 @@ private:
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool isSetMessageColor_ = false;
     Border border_;
+    bool avoidKeyboard_ = false;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

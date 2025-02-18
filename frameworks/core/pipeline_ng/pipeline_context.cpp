@@ -1817,6 +1817,8 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         if (scrollResult) {
             FlushUITasks();
         }
+        MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, safeHeight: %{public}f, "
@@ -1877,6 +1879,8 @@ void PipelineContext::OriginalAvoidanceLogic(
         if (scrollResult) {
             FlushUITasks();
         }
+        MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
@@ -2019,6 +2023,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             context->FlushUITasks();
         }
         context->SetKeyboardAction(KeyboardAction::NONE);
+        context->MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
     // flush ui tasks when dirty layout nodes exist: the previous ui tasks may generate dirty nodes.
@@ -2032,6 +2038,17 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::MarkDirtyOverlay()
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto childNodes = rootNode_->GetChildren();
+    for (auto child: childNodes) {
+        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
 }
 
 void PipelineContext::FlushDirtyPropertyNodesWhenExist()
@@ -2121,6 +2138,8 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         if (scrollResult) {
             context->FlushUITasks();
         }
+        context->MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
     SetIsLayouting(true);
