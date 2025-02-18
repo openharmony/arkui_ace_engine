@@ -73,7 +73,6 @@ void RunArkoalaEventLoop(EtsEnv& env, ets_object app)
         TryEmitError(env);
         return;
     }
-    LOGI("Koala run event loop, method = %p, app = %p", enter, app);
     auto terminate = env.CallBooleanMethod((ets_object)(app), (ets_method)(enter), (ets_int)0, (ets_int)0);
     TryEmitError(env);
     if (terminate) {
@@ -109,13 +108,8 @@ UIContentErrorCode KoalaFrontend::RunPage(const std::string& url, const std::str
     env_->CallLongMethod((ets_object)(app), start);
 
     // // init event loop
-    CHECK_NULL_RETURN(pipeline_ && taskExecutor_, UIContentErrorCode::NULL_POINTER);
-    auto listener = [env = env_, app]() {
-        LOGI("Koala run event loop DONOTHING");
-        RunArkoalaEventLoop(*env, app);
-    };
-    LOGI("Koala post task run");
-    pipeline_->SetVsyncListener(listener);
+    CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
+    pipeline_->SetVsyncListener([env = env_, app]() { RunArkoalaEventLoop(*env, app); });
 
     return UIContentErrorCode::NO_ERRORS;
 }
