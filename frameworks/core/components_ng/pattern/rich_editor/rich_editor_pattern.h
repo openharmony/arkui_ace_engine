@@ -1028,11 +1028,6 @@ public:
         return contentRect_;
     }
 
-    bool IsMoveCaretAnywhere() const
-    {
-        return isMoveCaretAnywhere_;
-    }
-
     void PreferredParagraph();
 
     const RefPtr<Paragraph>& GetPresetParagraph()
@@ -1467,8 +1462,6 @@ private:
     void SetAccessibilityEditAction();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
-    void MoveCaretAnywhere(const Offset& touchOffset);
-    void ShowCaretNoTwinkling(const Offset& textOffset);
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
@@ -1644,7 +1637,6 @@ private:
     bool isTextPreviewSupported_ = true;
     OffsetF movingHandleOffset_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
-    bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
     int32_t selectingFingerId_ = -1;
     bool isTouchSelecting_ = false;
