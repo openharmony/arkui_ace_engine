@@ -533,11 +533,10 @@ export class ToolBar extends ViewPU {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
       Button.accessibilityGroup(true);
-      Button.accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
-      this.toStringFormat(this.toolBarList[index]?.content));
-      Button.accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ??
-        '');
-      Button.accessibilityLevel(this.toStringFormat(this.toolBarList[index]?.accessibilityLevel) ?? 'auto');
+      Button.accessibilityText(this.toolBarList[index]?.accessibilityText ??
+        this.toolBarList[index]?.content);
+      Button.accessibilityDescription(this.toolBarList[index]?.accessibilityDescription ?? '');
+      Button.accessibilityLevel(this.toolBarList[index]?.accessibilityLevel ?? 'auto');
       Button.enabled(this.toolBarList[index]?.state !== ItemState.DISABLE);
       Button.width('100%');
       Button.height('100%');
@@ -745,23 +744,6 @@ export class ToolBar extends ViewPU {
       return this.toolBarList[index]?.activatedTextColor ?? this.toolBarTheme.m2;
     }
     return this.toolBarList[index]?.textColor ?? this.toolBarTheme.l2;
-  }
-
-  toStringFormat(resource) {
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return resource;
-    }
-    else {
-      let p1 = '';
-      try {
-        p1 = getContext()?.resourceManager?.getStringSync(resource?.id);
-      } catch (err) {
-        let code = err?.code;
-        let message = err?.message;
-        hilog.error(0x3900, 'Ace', `Faild to toolBar toStringFormat, code: ${code}, message: ${message}`);
-      }
-      return p1;
-    }
   }
 
   toLengthString(value) {
