@@ -226,6 +226,7 @@ public:
     virtual void DestroyWindow() = 0;
     virtual void ResizeDialogSubwindow() = 0;
     virtual uint64_t GetDisplayId() = 0;
+    virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
 
 private:
     int32_t subwindowId_ = 0;
