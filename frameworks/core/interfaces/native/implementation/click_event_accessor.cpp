@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 
@@ -201,7 +202,13 @@ void SetYImpl(ClickEventPeer* peer,
 }
 Callback_Void GetPreventDefaultImpl(ClickEventPeer* peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        GestureEvent* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetPreventDefault(true);
+    });
+    return callback;
 }
 void SetPreventDefaultImpl(ClickEventPeer* peer,
                            const Callback_Void* preventDefault)

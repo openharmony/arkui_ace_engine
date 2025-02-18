@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 
@@ -52,7 +53,13 @@ void SetChangedTouchesImpl(TouchEventPeer* peer,
 }
 Callback_Void GetStopPropagationImpl(TouchEventPeer* peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        TouchEventInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetStopPropagation(true);
+    });
+    return callback;
 }
 void SetStopPropagationImpl(TouchEventPeer* peer,
                             const Callback_Void* stopPropagation)
@@ -60,7 +67,13 @@ void SetStopPropagationImpl(TouchEventPeer* peer,
 }
 Callback_Void GetPreventDefaultImpl(TouchEventPeer* peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        TouchEventInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetPreventDefault(true);
+    });
+    return callback;
 }
 void SetPreventDefaultImpl(TouchEventPeer* peer,
                            const Callback_Void* preventDefault)
