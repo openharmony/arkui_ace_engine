@@ -725,14 +725,14 @@ HWTEST_F(SheetCoverageTestNg, CheckBuilderChange001, TestSize.Level1)
     RectF oldRect, rect;
     OffsetF oldOrigin, origin;
     sheetPattern->CheckBuilderChange();
-    EXPECT_NE(sheetStyle.sheetMode, SheetMode::AUTO);
+    EXPECT_NE(sheetStyle.sheetHeight.sheetMode, SheetMode::AUTO);
     auto innerCallbackInfo = eventHub->onAreaChangedInnerCallbacks_[contentNode->GetId()];
     ASSERT_NE(innerCallbackInfo, nullptr);
     innerCallbackInfo(oldRect, oldOrigin, rect, origin);
 
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    EXPECT_EQ(sheetStyle.sheetMode, SheetMode::AUTO);
+    EXPECT_EQ(sheetStyle.sheetHeight.sheetMode, SheetMode::AUTO);
     innerCallbackInfo(oldRect, oldOrigin, rect, origin);
     SheetCoverageTestNg::TearDownTestCase();
 }
@@ -1508,20 +1508,20 @@ HWTEST_F(SheetCoverageTestNg, GetHeightBySheetStyle001, TestSize.Level1)
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
-    EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
-    EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
+    EXPECT_NE(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::MEDIUM);
+    EXPECT_NE(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::LARGE);
+    EXPECT_FALSE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     algorithm->GetHeightBySheetStyle();
 
-    algorithm->sheetStyle_.sheetMode = SheetMode::MEDIUM;
-    EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
-    EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
+    algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    EXPECT_EQ(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::MEDIUM);
+    EXPECT_FALSE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     algorithm->GetHeightBySheetStyle();
 
-    algorithm->sheetStyle_.sheetMode = SheetMode::LARGE;
-    algorithm->sheetStyle_.height = 100.0_vp;
-    EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
-    EXPECT_TRUE(algorithm->sheetStyle_.height.has_value());
+    algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::LARGE;
+    algorithm->sheetStyle_.sheetHeight.height = 100.0_vp;
+    EXPECT_EQ(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::LARGE);
+    EXPECT_TRUE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     EXPECT_FALSE(algorithm->SheetInSplitWindow());
     algorithm->GetHeightBySheetStyle();
 
