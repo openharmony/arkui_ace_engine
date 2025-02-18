@@ -522,6 +522,11 @@ struct KeyEvent final : public NonPointerEvent {
     {
         return IsKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
     }
+    bool IsExactlyShiftWith(KeyCode expectCodes) const
+    {
+        return IsExactlyKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) ||
+            IsExactlyKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
+    }
     bool IsNumberKey() const
     {
         return ((KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) ||
