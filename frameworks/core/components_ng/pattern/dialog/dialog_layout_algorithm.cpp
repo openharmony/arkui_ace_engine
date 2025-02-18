@@ -90,7 +90,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     UpdateSafeArea(hostNode);
     isShowInFloatingWindow_ = dialogPattern->IsShowInFloatingWindow();
-    ResizeDialogSubwindow(expandDisplay_, isShowInSubWindow_, isShowInFloatingWindow_);
+    ResizeDialogSubwindow(dialogPattern->IsShowInFreeMultiWindow(), isShowInSubWindow_, isShowInFloatingWindow_);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
@@ -148,8 +148,7 @@ void DialogLayoutAlgorithm::ResizeDialogSubwindow(
 {
     if (expandDisplay && isShowInSubWindow && isShowInFloatingWindow) {
         auto currentId = Container::CurrentId();
-        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
-            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subWindow);
         subWindow->ResizeDialogSubwindow();
     }
@@ -579,9 +578,9 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
-        auto currentId = Container::CurrentIdSafely();
-        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
-            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
+        auto pipeline = frameNode->GetContextRefPtr();
+        auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentIdSafely();
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subWindow);
         auto subOverlayManager = subWindow->GetOverlayManager();
         CHECK_NULL_VOID(subOverlayManager);
@@ -669,7 +668,7 @@ void DialogLayoutAlgorithm::SetSubWindowHotarea(
         }
     }
     rects.emplace_back(rect);
-    SubwindowManager::GetInstance()->SetHotAreas(rects, frameNodeId, subWindowId_);
+    SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_DIALOG, frameNodeId, subWindowId_);
 }
 
 bool DialogLayoutAlgorithm::IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize)

@@ -329,7 +329,6 @@ private:
 
     RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };
 } // namespace OHOS::Ace::NG

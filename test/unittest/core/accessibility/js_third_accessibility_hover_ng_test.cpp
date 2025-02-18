@@ -333,7 +333,6 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest005, Te
     jsAccessibilityManager->RegisterJsThirdProviderInteractionOperation(hostElementId, jsInteractionOperation);
 
     NG::PointF point(1, 1);
-    NG::OffsetF hostOffset(0, 0);
     auto elementInfoListSize = ohAccessibilityProvider->providerMockResult_.elementInfosList_.size();
     for (int32_t i = 0; i < elementInfoListSize; i++) {
         auto leftTopX = 0;
@@ -347,7 +346,7 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest005, Te
 
     auto ret = jsAccessibilityManager->GetElementInfoForThird(-1, rootInfo, hostElementId);
     EXPECT_EQ(ret, true);
-    auto path = jsAccessibilityManager->HoverPathForThird(hostElementId, point, rootInfo, hostOffset);
+    auto path = jsAccessibilityManager->HoverPathForThird(hostElementId, point, rootInfo);
     EXPECT_EQ(path.size(), elementInfoListSize);
 }
 

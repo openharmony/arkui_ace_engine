@@ -101,6 +101,10 @@ public:
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
     virtual void SetLayoutDirection(TextDirection value);
     virtual ControlSize GetControlSize();
+    virtual void BackgroundColor(const Color& color) = 0;
+    virtual void ResetBackgroundColor() = 0;
+    virtual void ResetFontColor() {};
+
 private:
     static std::unique_ptr<SelectModel> instance_;
     static std::mutex mutex_;

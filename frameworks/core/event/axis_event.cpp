@@ -16,6 +16,7 @@
 #include "core/event/axis_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 AxisEvent AxisEvent::CreateScaleEvent(float scale) const
@@ -23,11 +24,11 @@ AxisEvent AxisEvent::CreateScaleEvent(float scale) const
     if (NearZero(scale)) {
         return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
             isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, pressedCodes,
-            targetDisplayId, originalId, isInjected };
+            targetDisplayId, originalId, isInjected, scrollStep };
     }
     return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis, pinchAxisScale,
         rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, pressedCodes,
-        targetDisplayId, originalId, isInjected };
+        targetDisplayId, originalId, isInjected, scrollStep };
 }
 
 Offset AxisEvent::GetOffset() const
@@ -116,6 +117,7 @@ AxisInfo::AxisInfo(const AxisEvent& event, const Offset& localLocation, const Ev
     : BaseEventInfo("onAxis")
 {
     action_ = event.action;
+    scrollStep_ = event.scrollStep;
     verticalAxis_ = static_cast<float>(event.verticalAxis);
     horizontalAxis_ = static_cast<float>(event.horizontalAxis);
     pinchAxisScale_ = static_cast<float>(event.pinchAxisScale);
@@ -124,6 +126,7 @@ AxisInfo::AxisInfo(const AxisEvent& event, const Offset& localLocation, const Ev
     globalLocation_ = event.GetOffset();
     localLocation_ = localLocation;
     screenLocation_ = Offset();
+    SetPressedKeyCodes(event.pressedCodes);
     SetTimeStamp(event.time);
     SetDeviceId(event.deviceId);
     SetSourceDevice(event.sourceType);
@@ -138,6 +141,11 @@ void AxisInfo::SetAction(AxisAction action)
 AxisAction AxisInfo::GetAction() const
 {
     return action_;
+}
+
+int32_t AxisInfo::GetScrollStep() const
+{
+    return scrollStep_;
 }
 
 void AxisInfo::SetVerticalAxis(float axis)
@@ -228,6 +236,7 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.y = static_cast<float>(globalLocation_.GetY());
     axisEvent.screenX = static_cast<float>(screenLocation_.GetX());
     axisEvent.screenY = static_cast<float>(screenLocation_.GetY());
+    axisEvent.scrollStep = scrollStep_;
     axisEvent.horizontalAxis = horizontalAxis_;
     axisEvent.verticalAxis = verticalAxis_;
     axisEvent.pinchAxisScale = pinchAxisScale_;
@@ -236,6 +245,19 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.time = timeStamp_;
     axisEvent.localX = static_cast<float>(localLocation_.GetX());
     axisEvent.localY = static_cast<float>(localLocation_.GetY());
+    const auto& targetLocalOffset = GetTarget().area.GetOffset();
+    const auto& targetOrigin = GetTarget().origin;
+    // width height x y globalx globaly
+    axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+    axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+    axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+    axisEvent.width = GetTarget().area.GetWidth().ConvertToPx();
+    axisEvent.height = GetTarget().area.GetHeight().ConvertToPx();
+    // deviceid
+    axisEvent.deviceId = GetDeviceId();
+    // modifierkeystates
+    axisEvent.modifierKeyState = CalculateModifierKeyState(GetPressedKeyCodes());
     return axisEvent;
 }
 
@@ -281,8 +303,10 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
         event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
     AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
     info.SetScreenLocation(Offset(event.screenX, event.screenY));
+    info.SetSourceTool(event.sourceTool);
+    info.SetStopPropagation(true);
     onAxisCallback_(info);
-    return true;
+    return info.IsStopPropagation();
 }
 
 bool AxisEventChecker::IsAxisEventSequenceCorrect(const AxisEvent& event)

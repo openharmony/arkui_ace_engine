@@ -2038,4 +2038,68 @@ HWTEST_F(DragEventTestNg, DragClog001, TestSize.Level1)
     dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::READY);
     EXPECT_EQ(DragDropGlobalController::GetInstance().GetAsyncDragCallback(), nullptr);
 }
+
+/**
+ * @tc.name: DragEventPreviewLongPressActionTestNG001
+ * @tc.desc: Test DragEventPreviewLongPressActionTestNG001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventPreviewLongPressActionTestNG001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    GestureEventFunc actionStart = [](GestureEvent& info) {};
+    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
+    GestureEventFunc actionEnd = [](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = []() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(std::move(actionStart), std::move(actionUpdate),
+        std::move(actionEnd), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+    EXPECT_NE(dragEventActuator->userCallback_, nullptr);
+    /**
+     * @tc.steps: step2. Invoke OnCollectTouchTarget.
+     * @tc.expected: call OnCollectTouchTarget and create previewLongPressRecognizer_ successful.
+     */
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    EXPECT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    EXPECT_NE(dragEventActuator->previewLongPressRecognizer_->onAction_, nullptr);
+
+    /**
+     * @tc.steps: step3. Test previewLongPressRecognizer_ onAction callback with pan success.
+     * @tc.expected: onAction callback complete successful.
+     */
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
+    GestureEvent info = GestureEvent();
+    (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
+
+    /**
+     * @tc.steps: step4. Test previewLongPressRecognizer_ onAction callback with pan reject.
+     * @tc.expected: onAction callback return.
+     */
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
+    auto panRecognizer = dragEventActuator->panRecognizer_;
+    panRecognizer->disposal_ = GestureDisposal::REJECT;
+    (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
+    EXPECT_TRUE(dragEventActuator->isOnBeforeLiftingAnimation_);
+}
 } // namespace OHOS::Ace::NG

@@ -543,6 +543,9 @@ void JSNavDestination::SetRecoverable(const JSCallbackInfo& info)
 
 void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
 {
+    bool hideText = false;
+    JSNavigationUtils::ParseHideToolBarText(info, hideText);
+    NavDestinationModel::GetInstance()->SetHideItemText(hideText);
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         std::vector<NG::BarItem> toolBarItems;
         if (info[0]->IsArray()) {

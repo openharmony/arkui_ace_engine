@@ -399,11 +399,23 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
     focusButtonRect += OffsetF(focusButtonXOffset, 0);
 
     paintRect.SetRect(focusButtonRect);
-    auto radius = static_cast<RSScalar>(selectorItemRadius_.ConvertToPx());
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radius, radius);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radius, radius);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius, radius);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius, radius);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(selectorItemRadius_);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius().value_or(borderRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusSpace),
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusSpace));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusSpace),
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusSpace));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusSpace),
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusSpace));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusSpace),
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusSpace));
 }
 
 void TextPickerPattern::CalcLeftTotalColumnWidth(
@@ -568,7 +580,7 @@ bool TextPickerPattern::OnCrownEvent(const CrownEvent& event)
             if (!pickerColumnPattern) {
                 continue;
             }
-            auto columnID =  pickerColumnPattern->GetselectedColumnId();
+            auto columnID =  pickerColumnPattern->GetSelectedColumnId();
             if (!pickerColumnPattern->IsCrownEventEnded()) {
                 crownPickerColumnPattern = pickerColumnPattern;
                 break;

@@ -58,7 +58,9 @@ void BarItemLayoutAlgorithm::MeasureToolbarItemText(LayoutWrapper* layoutWrapper
     }
     auto barItemConstraint = barItemLayoutProperty->GetLayoutConstraint().value();
     auto textHeight = geometryNode->GetContentSize().Height();
-    float barItemChildrenTotalHeight = textHeight + (theme->GetToolbarIconSize() + TEXT_TOP_PADDING).ConvertToPx();
+    auto iconSize = hostNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
+    float barItemChildrenTotalHeight = textHeight + (iconSize + TEXT_TOP_PADDING).ConvertToPx();
+
     if (GreatOrEqual(barItemChildrenTotalHeight, constraint.maxSize.Height())) {
         constraint.maxSize.SetHeight(barItemChildrenTotalHeight);
     }
@@ -88,6 +90,17 @@ void BarItemLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const Ref
     textWrapper->Measure(constraint);
 }
 
+float GetIconOffsetY()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return 0.0f;
+    } else {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, 0.0f);
+        return theme->GetToolbarItemIconTopPadding().ConvertToPx();
+    }
+}
+
 float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
     const RefPtr<LayoutProperty>& barItemLayoutProperty, float textHeight)
 {
@@ -103,11 +116,12 @@ float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const Ref
     CHECK_NULL_RETURN(constraint, 0.0f);
     auto offsetX = (constraint->maxSize.Width() - iconSize_.ConvertToPx()) / 2;
 
+    float offsetY = 0.0f;
     if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
         offsetX = 0.0f;
+        offsetY = GetIconOffsetY();
     }
-
-    auto offset = OffsetF(offsetX, 0.0f);
+    OffsetF offset = OffsetF(offsetX, offsetY);
     geometryNode->SetMarginFrameOffset(offset);
     iconWrapper->Layout();
     return 0.0f;
@@ -130,9 +144,21 @@ void BarItemLayoutAlgorithm::LayoutText(LayoutWrapper* layoutWrapper, const RefP
     auto textWidth = geometryNode->GetFrameSize().Width();
     auto offsetX = (constraint->maxSize.Width() - textWidth) / 2;
 
-    if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
-        offsetX = 0.0f;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
+            offsetX = 0.0f;
+        }
+    } else {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        Dimension offsetY = theme->GetToolbarItemIconTopPadding();
+        if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
+            offsetX = 0.0f;
+            offsetY = 0.0_vp;
+        }
+        textOffsetY += offsetY;
     }
+
     auto offset = OffsetF(offsetX, iconOffsetY + static_cast<float>(textOffsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(offset);
     textWrapper->Layout();
@@ -149,7 +175,8 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // get parameters from theme
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    iconSize_ = isUsedInToolbarConfiguratuon ? theme->GetToolbarIconSize() : theme->GetMenuIconSize();
+    Dimension iconSize = hostNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
+    iconSize_ = isUsedInToolbarConfiguratuon ? iconSize : theme->GetMenuIconSize();
     auto size = SizeF(static_cast<float>(iconSize_.ConvertToPx()), static_cast<float>(iconSize_.ConvertToPx()));
     MeasureIcon(layoutWrapper, hostNode, barItemLayoutProperty);
     MeasureText(layoutWrapper, hostNode, barItemLayoutProperty);

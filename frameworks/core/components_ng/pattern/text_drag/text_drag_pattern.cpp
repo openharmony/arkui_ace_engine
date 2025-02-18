@@ -130,6 +130,9 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
+    while (!boxes.empty() && NearZero(boxes.back().Width())) {
+        boxes.pop_back();
+    }
     auto globalOffset = pattern->GetParentGlobalOffset();
     CalculateFloatTitleOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);

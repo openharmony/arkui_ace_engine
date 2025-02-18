@@ -55,8 +55,9 @@ public:
     explicit SubwindowOhos(int32_t instanceId);
     ~SubwindowOhos() = default;
 
-    bool InitContainer() override;
+    void InitContainer() override;
     void ResizeWindow() override;
+    void ResizeWindowForMenu() override;
     NG::RectF GetRect() override;
     void SetRect(const NG::RectF& rect) override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
@@ -139,11 +140,18 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    Rect GetFoldExpandAvailableRect() const override;
     NG::RectF GetWindowRect() const override;
+    bool CheckHostWindowStatus() const override;
     bool IsFreeMultiWindow() const override;
     void OnFreeMultiWindowSwitch(bool enable) override;
     int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
     void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) override;
+
+    bool NeedAvoidKeyboard() override
+    {
+        return needAvoidKeyboard_;
+    }
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -228,6 +236,8 @@ private:
     int32_t popupTargetId_ = -1;
     bool haveDialog_ = false;
     bool isShowed_ = false;
+    bool isClosing_ = false;
+    bool needAvoidKeyboard_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,9 @@ class ButtonGestureModifier implements GestureModifier {
             }
           })
           .onActionEnd(() => {
+            this.controller?.close();
+          })
+          .onActionCancel(() => {
             this.controller?.close();
           })
       )
@@ -152,26 +155,24 @@ export class ToolBarModifier implements AttributeModifier<ColumnAttribute> {
   }
 }
 
+class ToolBarTheme {
+  public iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
+  public iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
+  public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
+  public fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
+}
+
 @Component
 export struct ToolBar {
   @ObjectLink toolBarList: ToolBarOptions;
   controller: TabsController = new TabsController();
   @Prop activateIndex: number = -1;
-  @Prop dividerModifier: DividerModifier = new DividerModifier();
-  @Prop toolBarModifier: ToolBarModifier =
-    new ToolBarModifier()
-      .padding(LengthMetrics.resource($r('sys.float.padding_level12')))
-      .stateEffect(true)
-      .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
-      .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
+  @Prop dividerModifier: DividerModifier;
+  @Prop toolBarModifier: ToolBarModifier;
   @Prop moreText: Resource = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
   @State toolBarItemBackground: ResourceColor[] = [];
-  @State iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
-  @State iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
-  @State fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
-  @State fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
-  @State symbolEffect: SymbolEffect = new SymbolEffect();
+  @State toolBarTheme: ToolBarTheme = new ToolBarTheme();
   @State fontSize: number = 1;
   isFollowSystem: boolean = false;
   maxFontSizeScale: number = 3.2;
@@ -182,46 +183,52 @@ export struct ToolBar {
   }
 
   onWillApplyTheme(theme: Theme) {
-    this.iconPrimaryColor = theme.colors.iconPrimary;
-    this.iconActivePrimaryColor = theme.colors.iconEmphasize;
-    this.fontPrimaryColor = theme.colors.fontPrimary;
-    this.fontActivatedPrimaryColor = theme.colors.fontEmphasize;
+    this.toolBarTheme.iconPrimaryColor = theme.colors.iconPrimary;
+    this.toolBarTheme.iconActivePrimaryColor = theme.colors.iconEmphasize;
+    this.toolBarTheme.fontPrimaryColor = theme.colors.fontPrimary;
+    this.toolBarTheme.fontActivatedPrimaryColor = theme.colors.fontEmphasize;
   }
 
   @Builder
   MoreTabBuilder(index: number) {
-    Column() {
-      SymbolGlyph(PUBLIC_MORE)
-        .fontSize(IMAGE_SIZE)
-        .fontColor([this.iconPrimaryColor])
-        .draggable(false)
-        .margin({ bottom: $r('sys.float.padding_level1') })
-      Text(this.moreText)
-        .fontColor(this.fontPrimaryColor)
-        .fontSize($r('sys.float.ohos_id_text_size_caption'))
-        .fontWeight(FontWeight.Medium)
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .textAlign(TextAlign.Center)
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        SymbolGlyph(PUBLIC_MORE)
+          .fontSize(IMAGE_SIZE)
+          .fontColor([this.toolBarTheme.iconPrimaryColor])
+          .draggable(false)
+          .margin({ bottom: $r('sys.float.padding_level1') })
+        Text(this.moreText)
+          .fontColor(this.toolBarTheme.fontPrimaryColor)
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAlign(TextAlign.Center)
+          .focusable(true)
+          .focusOnTouch(true)
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     }
-    .width('100%')
-    .height('100%')
-    .justifyContent(FlexAlign.Center)
-    .padding({
-      start: LengthMetrics.resource($r('sys.float.padding_level2')),
-      end: LengthMetrics.resource($r('sys.float.padding_level2')),
-    })
-    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .accessibilityText(this.moreText)
+    .accessibilityGroup(true)
     .focusable(true)
     .focusOnTouch(true)
-    .accessibilityGroup(true)
     .focusBox({
       margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
       strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
       strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
     })
+    .width('100%')
+    .height('100%')
     .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y: -10 } })
+    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.toolBarItemBackground[index])
     .onHover((isHover: boolean) => {
       if (isHover) {
@@ -232,7 +239,7 @@ export struct ToolBar {
     })
     .stateStyles({
       pressed: {
-        .backgroundColor((!this.toolBarModifier.stateEffectValue) ?
+        .backgroundColor((!this.toolBarModifier?.stateEffectValue) ?
         this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
       }
     })
@@ -241,53 +248,59 @@ export struct ToolBar {
 
   @Builder
   TabBuilder(index: number) {
-    Column() {
-      if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
-        this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
-        SymbolGlyph()
-          .fontSize(IMAGE_SIZE)
-          .symbolEffect(this.symbolEffect, false)
-          .attributeModifier(this.getToolBarSymbolModifier(index))
-          .margin({ bottom: $r('sys.float.padding_level1') })
-      } else if (Util.isSymbolResource(this.toolBarList[index]?.icon)) {
-        SymbolGlyph(this.toolBarList[index]?.icon)
-          .fontSize(IMAGE_SIZE)
-          .fontColor([this.getIconColor(index)])
-          .margin({ bottom: $r('sys.float.padding_level1') })
-      } else {
-        Image(this.toolBarList[index]?.icon)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor(this.getIconColor(index))
-          .margin({ bottom: $r('sys.float.padding_level1') })
-          .objectFit(ImageFit.Contain)
-          .draggable(false)
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
+          this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
+          SymbolGlyph()
+            .fontSize(IMAGE_SIZE)
+            .symbolEffect(new SymbolEffect(), false)
+            .attributeModifier(this.getToolBarSymbolModifier(index))
+            .margin({ bottom: $r('sys.float.padding_level1') })
+        } else if (Util.isSymbolResource(this.toolBarList[index]?.icon)) {
+          SymbolGlyph(this.toolBarList[index]?.icon)
+            .fontSize(IMAGE_SIZE)
+            .fontColor([this.getIconColor(index)])
+            .margin({ bottom: $r('sys.float.padding_level1') })
+        } else {
+          Image(this.toolBarList[index]?.icon)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor(this.getIconColor(index))
+            .margin({ bottom: $r('sys.float.padding_level1') })
+            .objectFit(ImageFit.Contain)
+            .draggable(false)
+        }
+        Text(this.toolBarList[index]?.content)
+          .fontColor(this.getTextColor(index))
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
+          .minFontSize(9)
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAlign(TextAlign.Center)
+          .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+          .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
       }
-      Text(this.toolBarList[index]?.content)
-        .fontColor(this.getTextColor(index))
-        .fontSize($r('sys.float.ohos_id_text_size_caption'))
-        .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
-        .minFontSize(9)
-        .fontWeight(FontWeight.Medium)
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .textAlign(TextAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .width('100%')
+      .height('100%')
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
     }
-    .justifyContent(FlexAlign.Center)
-    .width('100%')
-    .height('100%')
-    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .padding({
-      start: LengthMetrics.resource($r('sys.float.padding_level2')),
-      end: LengthMetrics.resource($r('sys.float.padding_level2')),
-    })
-    .opacity(this.toolBarList[index]?.state !== ItemState.DISABLE ? 1 : 0.4)
-    .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
     .accessibilityGroup(true)
     .accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
     this.toStringFormat(this.toolBarList[index]?.content))
     .accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ?? '')
     .accessibilityLevel(this.toStringFormat(this.toolBarList[index]?.accessibilityLevel) ?? 'auto')
+    .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
+    .width('100%')
+    .height('100%')
+    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
     .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
     .focusBox({
@@ -306,7 +319,7 @@ export struct ToolBar {
     .stateStyles({
       pressed: {
         .backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ||
-          (!this.toolBarModifier.stateEffectValue) ?
+          (!this.toolBarModifier?.stateEffectValue) ?
         this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
       }
     })
@@ -339,16 +352,16 @@ export struct ToolBar {
 
   private getIconColor(index: number): ResourceColor {
     if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
-      return this.toolBarList[index]?.activatedIconColor ?? this.iconActivePrimaryColor;
+      return this.toolBarList[index]?.activatedIconColor ?? this.toolBarTheme.iconActivePrimaryColor;
     }
-    return this.toolBarList[index]?.iconColor ?? this.iconPrimaryColor;
+    return this.toolBarList[index]?.iconColor ?? this.toolBarTheme.iconPrimaryColor;
   }
 
   private getTextColor(index: number): ResourceColor {
     if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
-      return this.toolBarList[index]?.activatedTextColor ?? this.fontActivatedPrimaryColor;
+      return this.toolBarList[index]?.activatedTextColor ?? this.toolBarTheme.fontActivatedPrimaryColor;
     }
-    return this.toolBarList[index]?.textColor ?? this.fontPrimaryColor;
+    return this.toolBarList[index]?.textColor ?? this.toolBarTheme.fontPrimaryColor;
   }
 
   private toStringFormat(resource: ResourceStr | undefined): string | undefined {
@@ -429,12 +442,19 @@ export struct ToolBar {
   }
 
   refreshData() {
+    this.dividerModifier = this.dividerModifier ? this.dividerModifier : new DividerModifier();
+    this.toolBarModifier = this.toolBarModifier ? this.toolBarModifier : new ToolBarModifier()
+      .padding(LengthMetrics.resource($r('sys.float.padding_level12')))
+      .stateEffect(true)
+      .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
+      .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
     this.menuContent = [];
     for (let i = 0; i < this.toolBarList.length; i++) {
       if (i >= this.moreIndex && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
         this.menuContent[i - this.moreIndex] = {
           value: this.toolBarList[i].content,
-          action: this.toolBarList[i].action as () => void,
+          action: this.toolBarList[i].action ? this.toolBarList[i].action as () => void : () => {
+          },
           enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         }
       } else {
@@ -499,16 +519,16 @@ export struct ToolBar {
       }
       .justifyContent(FlexAlign.Center)
       .constraintSize({
-        minHeight: this.toLengthString(this.toolBarModifier.heightValue),
-        maxHeight: this.toLengthString(this.toolBarModifier.heightValue),
+        minHeight: this.toLengthString(this.toolBarModifier?.heightValue),
+        maxHeight: this.toLengthString(this.toolBarModifier?.heightValue),
       })
       .width('100%')
-      .height(this.toLengthString(this.toolBarModifier.heightValue))
+      .height(this.toLengthString(this.toolBarModifier?.heightValue))
       .padding({
         start: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
-        this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
+          this.toolBarModifier?.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
         end: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
-        this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
+          this.toolBarModifier?.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
       })
     }
     .attributeModifier(this.toolBarModifier)

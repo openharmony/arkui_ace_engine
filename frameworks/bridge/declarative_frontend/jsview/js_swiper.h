@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -76,6 +77,10 @@ protected:
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
+    static void ResetSwiperNode();
+
+    private:
+        static WeakPtr<JSIndicatorController> jSIndicatorController_;
 };
 
 class JSSwiperController final : public Referenced {
@@ -87,34 +92,9 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSSwiperController* scroller);
 
-    void SwipeTo(const JSCallbackInfo& args)
-    {
-        ContainerScope scope(instanceId_);
-        if (args.Length() < 1 || !args[0]->IsNumber()) {
-            LOGE("Param is not valid");
-            return;
-        }
-        if (controller_) {
-            controller_->SwipeTo(args[0]->ToNumber<int32_t>());
-        }
-    }
-
-    void ShowNext(const JSCallbackInfo& args)
-    {
-        ContainerScope scope(instanceId_);
-        if (controller_) {
-            controller_->ShowNext();
-        }
-    }
-
-    void ShowPrevious(const JSCallbackInfo& args)
-    {
-        ContainerScope scope(instanceId_);
-        if (controller_) {
-            controller_->ShowPrevious();
-        }
-    }
-
+    void SwipeTo(const JSCallbackInfo& args);
+    void ShowNext(const JSCallbackInfo& args);
+    void ShowPrevious(const JSCallbackInfo& args);
     void ChangeIndex(const JSCallbackInfo& args);
 
     void FinishAnimation(const JSCallbackInfo& args);

@@ -170,7 +170,7 @@ public:
         }
     }
 
-    void FireOnHeightDidChange(float height);
+    void FireOnHeightDidChange();
 
     bool HasOnHeightDidChange()
     {
@@ -709,6 +709,8 @@ public:
     }
     void OnFontScaleConfigurationUpdate() override;
 
+    void FireCommonCallback();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -760,6 +762,7 @@ private:
     float GetTopAreaInWindow() const;
     void MarkSheetPageNeedRender();
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
+    PipelineContext* GetSheetMainPipeline() const;
     float GetBottomSafeArea();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     bool AvoidKeyboardBeforeTranslate();

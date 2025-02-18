@@ -29,6 +29,8 @@ public:
     static RefPtr<SvgNode> Create();
     RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
     RSRecordingPath AsPath(const Size& viewPort) const override;
+    void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override;
+    void ApplyOpacity(RSCanvas& canvas);
 };
 
 } // namespace OHOS::Ace::NG

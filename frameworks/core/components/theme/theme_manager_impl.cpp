@@ -76,11 +76,14 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/select/select_theme_wrapper.h"
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/checkbox/checkbox_theme_wrapper.h"
+#include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
+#include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
@@ -172,11 +175,14 @@ RefPtr<NG::TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>
 const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
         { CheckboxTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CheckboxThemeWrapper::WrapperBuilder> },
+        { CounterTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CounterThemeWrapper::WrapperBuilder> },
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
+        { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
         { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> },
-        { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> }
+        { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> },
+        { SelectTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SelectThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;

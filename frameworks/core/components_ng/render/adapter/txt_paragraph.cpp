@@ -70,6 +70,7 @@ void TxtParagraph::CreateBuilder()
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.textSplitRatio = TEXT_SPLIT_RATIO;
     style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
+    style.lineStyleHalfLeading = paraStyle_.halfLeading;
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
@@ -535,12 +536,14 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 #ifndef USE_GRAPHIC_TEXT_GINE
         y = textBox.rect.fBottom;
         result.height = textBox.rect.fBottom - textBox.rect.fTop;
+        bool isLtr = textBox.direction == txt::TextDirection::ltr;
 #else
         y = textBox.rect.GetBottom();
         result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+        bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
 #endif
         if (LessNotEqual(y, paragrah->GetHeight())) {
-            result.offset.SetX(MakeEmptyOffsetX());
+            result.offset.SetX(MakeEmptyOffsetX(isLtr));
             result.offset.SetY(y);
             return true;
         }
@@ -575,17 +578,17 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     return true;
 }
 
-float TxtParagraph::MakeEmptyOffsetX()
+float TxtParagraph::MakeEmptyOffsetX(bool isLtr)
 {
     auto width = GetMaxWidth();
     switch (textAlign_) {
         case TextAlign::CENTER:
             return width * 0.5f;
         case TextAlign::END:
-            return width;
+            return isLtr ? width : 0.0f;
         case TextAlign::START:
         default:
-            return 0.0f;
+            return isLtr ? 0.0f : width;
     }
 }
 

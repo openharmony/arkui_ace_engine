@@ -141,16 +141,10 @@ void CheckBoxGroupPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH &&
-            (info.IsPreventDefault() || checkboxPattern->isTouchPreventDefault_)) {
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxGroup preventDefault successfully");
-            checkboxPattern->isTouchPreventDefault_ = false;
-            return;
-        }
         checkboxPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickAfterEvent(clickListener_);
+    gesture->AddClickEvent(clickListener_);
 }
 
 void CheckBoxGroupPattern::InitTouchEvent()
@@ -168,9 +162,6 @@ void CheckBoxGroupPattern::InitTouchEvent()
         if (info.GetTouches().empty()) {
             return;
         }
-        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
-            checkboxPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             checkboxPattern->OnTouchDown();
         }
@@ -180,7 +171,7 @@ void CheckBoxGroupPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchAfterEvent(touchListener_);
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void CheckBoxGroupPattern::InitMouseEvent()

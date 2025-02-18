@@ -283,4 +283,53 @@ HWTEST_F(RecognizerTestNgIssue, PinchRecognizerIssue001, TestSize.Level1)
     EXPECT_EQ(pinchRecognizer->refereeState_, RefereeState::FAIL);
 }
 
+/**
+ * @tc.name: TargetDisplayId001
+ * @tc.desc: Test SetTargetDisplayId GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, TargetDisplayId001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, 1, false);
+    GestureEvent eventInfo;
+    auto onActionStart = [&eventInfo](GestureEvent& info) { eventInfo = info; };
+    longPressRecognizer->SetOnAction(onActionStart);
+
+    TouchEvent downEvent;
+    downEvent.SetId(0)
+        .SetType(TouchType::DOWN)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetDeviceId(2);
+    longPressRecognizer->HandleEvent(downEvent);
+    TouchEvent downFingerOneEvent;
+    downFingerOneEvent.SetId(1)
+        .SetType(TouchType::DOWN)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetDeviceId(2);
+    longPressRecognizer->touchPoints_[1] = downFingerOneEvent;
+    TouchEvent moveEvent;
+    auto moveTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(moveTime);
+    moveEvent.SetId(0)
+        .SetType(TouchType::MOVE)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetScreenX(200.0f)
+        .SetScreenY(200.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetSourceTool(SourceTool::FINGER)
+        .SetTime(TimeStamp(nanoseconds))
+        .SetForce(100.0f)
+        .SetTiltX(10.0f)
+        .SetTiltY(10.0f)
+        .SetTargetDisplayId(2);
+    longPressRecognizer->HandleEvent(moveEvent);
+    longPressRecognizer->OnAccepted();
+    EXPECT_EQ(eventInfo.GetTargetDisplayId(), 2);
+}
 } // namespace OHOS::Ace::NG

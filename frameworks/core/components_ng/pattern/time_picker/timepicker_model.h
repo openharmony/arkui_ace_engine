@@ -32,7 +32,7 @@ struct TimePickerDialogEvent {
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
 };
-class TimePickerModel {
+class ACE_FORCE_EXPORT TimePickerModel {
 public:
     static TimePickerModel* GetInstance();
     virtual ~TimePickerModel() = default;

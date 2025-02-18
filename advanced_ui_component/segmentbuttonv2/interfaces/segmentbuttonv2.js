@@ -13,351 +13,102 @@
  * limitations under the License.
  */
 
-var o =
-  (this && this.o) ||
-  function (o1, target, key, desc) {
-    var c = arguments.length,
-      r =
-        c < 3
-          ? target
-          : desc === null
-          ? (desc = Object.getOwnPropertyDescriptor(target, key))
-          : desc,
-      d;
-    if (typeof Reflect === 'object' && typeof Reflect.j1 === 'function')
-      r = Reflect.j1(o1, target, key, desc);
-    else
-      for (var p1 = o1.length - 1; p1 >= 0; p1--)
-        if ((d = o1[p1]))
-          r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-  };
-if (!('finalizeConstruction' in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
+var j = (this && this.j) || function (t3, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.v3 === "function")
+    r = Reflect.v3(t3, target, key, desc);
+  else
+    for (var u3 = t3.length - 1; u3 >= 0; u3--)
+      if (d = t3[u3])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+if (!("finalizeConstruction" in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 if (PUV2ViewBase.contextStack === undefined) {
-  Reflect.set(PUV2ViewBase, 'contextStack', []);
+  Reflect.set(PUV2ViewBase, "contextStack", []);
 }
 const curves = requireNativeModule('ohos.curves');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const i18n = requireNapi('i18n');
 const util = requireNapi('util');
-const t = 1;
-const u = 2;
-const a1 = 0;
-const b1 = 1;
-const c1 = {
-  buttonBackgroundColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.segment_button_v2_tab_button_background'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  buttonBorderRadius: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_background_corner_radius'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  buttonMinHeight: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_singleline_background_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  l1: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_doubleline_background_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  buttonPadding: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.padding_level1'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedBackgroundColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.segment_button_v2_tab_selected_item_background'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemBorderRadius: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_selected_corner_radius'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+const n4 = 1;
+const o4 = 2;
+const q4 = 0;
+const r4 = 1;
+const s4 = {
+  buttonBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.segment_button_v2_tab_button_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  buttonBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_background_corner_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  buttonMinHeight: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_singleline_background_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  g5: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_doubleline_background_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  buttonPadding: { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.segment_button_v2_tab_selected_item_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_selected_corner_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemSpace: LengthMetrics.vp(0),
-  itemFontSize: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.ohos_id_text_size_button2'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemFontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemFontWeight: FontWeight.Medium,
   itemSelectedFontWeight: FontWeight.Medium,
   itemIconSize: 24,
-  itemIconFillColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedIconFillColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemIconFillColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedIconFillColor: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemSymbolFontSize: 20,
-  itemSymbolFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedSymbolFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemMinHeight: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_singleline_selected_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  m1: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_doubleline_selected_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemSymbolFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedSymbolFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemMinHeight: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_singleline_selected_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  h5: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_doubleline_selected_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemPadding: {
-    top: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level2'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    bottom: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level2'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    start: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level4'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    end: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level4'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
+    top: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    bottom: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
-  itemMaxFontScale: t,
-  n1: t,
-  o1: u,
-  itemMinFontScale: a1,
-  q1: a1,
-  s1: b1,
+  itemMaxFontScale: n4,
+  i5: n4,
+  j5: o4,
+  itemMinFontScale: q4,
+  k5: q4,
+  l5: r4,
 };
-const d1 = {
-  buttonBackgroundColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.segment_button_v2_tab_button_background'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  buttonBorderRadius: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_background_corner_radius'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  buttonMinHeight: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_singleline_background_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  l1: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_doubleline_background_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  buttonPadding: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.padding_level1'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedBackgroundColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.comp_background_emphasize'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemBorderRadius: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_selected_corner_radius'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+const t4 = {
+  buttonBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.segment_button_v2_tab_button_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  buttonBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_background_corner_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  buttonMinHeight: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_singleline_background_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  g5: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_doubleline_background_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  buttonPadding: { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.comp_background_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_selected_corner_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemSpace: LengthMetrics.vp(0),
-  itemFontSize: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.ohos_id_text_size_button2'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_on_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemFontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_on_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemFontWeight: FontWeight.Medium,
   itemSelectedFontWeight: FontWeight.Medium,
   itemIconSize: 24,
-  itemIconFillColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.icon_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedIconFillColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_on_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemIconFillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedIconFillColor: { "id": -1, "type": 10001, params: ['sys.color.font_on_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemSymbolFontSize: 20,
-  itemSymbolFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedSymbolFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_on_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemMinHeight: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_singleline_selected_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  m1: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_doubleline_selected_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemSymbolFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedSymbolFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_on_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemMinHeight: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_singleline_selected_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  h5: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_doubleline_selected_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemPadding: {
-    top: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level2'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    bottom: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level2'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    start: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level4'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    end: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level4'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
+    top: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    bottom: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
-  itemMaxFontScale: t,
-  n1: t,
-  o1: u,
-  itemMinFontScale: a1,
-  q1: a1,
-  s1: b1,
+  itemMaxFontScale: n4,
+  i5: n4,
+  j5: o4,
+  itemMinFontScale: q4,
+  k5: q4,
+  l5: r4,
 };
 let SegmentButtonV2Item = class SegmentButtonV2Item {
   constructor(options) {
@@ -376,24 +127,48 @@ let SegmentButtonV2Item = class SegmentButtonV2Item {
     return !!this.text && (!!this.icon || !!this.symbol);
   }
 };
-o([Trace], SegmentButtonV2Item.prototype, 'text', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'icon', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'symbol', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'enabled', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'textModifier', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'iconModifier', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'symbolModifier', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'accessibilityText', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'accessibilityDescription', void 0);
-o([Trace], SegmentButtonV2Item.prototype, 'accessibilityLevel', void 0);
-o([Computed], SegmentButtonV2Item.prototype, 'isHybrid', null);
-SegmentButtonV2Item = o([ObservedV2], SegmentButtonV2Item);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "text", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "icon", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "symbol", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "enabled", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "textModifier", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "iconModifier", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "symbolModifier", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "accessibilityText", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "accessibilityDescription", void 0);
+j([
+  Trace
+], SegmentButtonV2Item.prototype, "accessibilityLevel", void 0);
+j([
+  Computed
+], SegmentButtonV2Item.prototype, "isHybrid", null);
+SegmentButtonV2Item = j([
+  ObservedV2
+], SegmentButtonV2Item);
 export { SegmentButtonV2Item };
 let SegmentButtonV2Items = class SegmentButtonV2Items extends Array {
-  constructor(n1) {
-    super(typeof n1 === 'number' ? n1 : 0);
-    if (typeof n1 !== 'number' && n1 && n1.length) {
-      for (let options of n1) {
+  constructor(f5) {
+    super(typeof f5 === 'number' ? f5 : 0);
+    if (typeof f5 !== 'number' && f5 && f5.length) {
+      for (let options of f5) {
         if (options) {
           this.push(new SegmentButtonV2Item(options));
         }
@@ -404,284 +179,137 @@ let SegmentButtonV2Items = class SegmentButtonV2Items extends Array {
     return this.some((item) => item.isHybrid);
   }
 };
-o([Computed], SegmentButtonV2Items.prototype, 'hasHybrid', null);
-SegmentButtonV2Items = o([ObservedV2], SegmentButtonV2Items);
+j([
+  Computed
+], SegmentButtonV2Items.prototype, "hasHybrid", null);
+SegmentButtonV2Items = j([
+  ObservedV2
+], SegmentButtonV2Items);
 export { SegmentButtonV2Items };
-const e1 = new SegmentButtonV2Items([]);
+const u4 = new SegmentButtonV2Items([]);
 export class TabSegmentButtonV2 extends ViewV2 {
-  constructor(
-    parent,
-    params,
-    __localStorage,
-    elmtId = -1,
-    paramsLambda,
-    extraInfo
-  ) {
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
-    this.initParam(
-      'items',
-      params && 'items' in params ? params.items : undefined
-    );
-    this.initParam(
-      'selectedIndex',
-      params && 'selectedIndex' in params ? params.selectedIndex : undefined
-    );
-    this.$selectedIndex =
-      '$selectedIndex' in params ? params.$selectedIndex : () => {};
-    this.onItemClicked =
-      'onItemClicked' in params ? params.onItemClicked : () => {};
-    this.initParam(
-      'itemMinFontScale',
-      params && 'itemMinFontScale' in params
-        ? params.itemMinFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemMaxFontScale',
-      params && 'itemMaxFontScale' in params
-        ? params.itemMaxFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemSpace',
-      params && 'itemSpace' in params ? params.itemSpace : undefined
-    );
-    this.initParam(
-      'itemFontSize',
-      params && 'itemFontSize' in params ? params.itemFontSize : undefined
-    );
-    this.initParam(
-      'itemSelectedFontSize',
-      params && 'itemSelectedFontSize' in params
-        ? params.itemSelectedFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemFontColor',
-      params && 'itemFontColor' in params ? params.itemFontColor : undefined
-    );
-    this.initParam(
-      'itemSelectedFontColor',
-      params && 'itemSelectedFontColor' in params
-        ? params.itemSelectedFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemFontWeight',
-      params && 'itemFontWeight' in params ? params.itemFontWeight : undefined
-    );
-    this.initParam(
-      'itemSelectedFontWeight',
-      params && 'itemSelectedFontWeight' in params
-        ? params.itemSelectedFontWeight
-        : undefined
-    );
-    this.initParam(
-      'itemBorderRadius',
-      params && 'itemBorderRadius' in params
-        ? params.itemBorderRadius
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedBackgroundColor',
-      params && 'itemSelectedBackgroundColor' in params
-        ? params.itemSelectedBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'itemIconSize',
-      params && 'itemIconSize' in params ? params.itemIconSize : undefined
-    );
-    this.initParam(
-      'itemIconFillColor',
-      params && 'itemIconFillColor' in params
-        ? params.itemIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedIconFillColor',
-      params && 'itemSelectedIconFillColor' in params
-        ? params.itemSelectedIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontSize',
-      params && 'itemSymbolFontSize' in params
-        ? params.itemSymbolFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontColor',
-      params && 'itemSymbolFontColor' in params
-        ? params.itemSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedSymbolFontColor',
-      params && 'itemSelectedSymbolFontColor' in params
-        ? params.itemSelectedSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemMinHeight',
-      params && 'itemMinHeight' in params ? params.itemMinHeight : undefined
-    );
-    this.initParam(
-      'itemPadding',
-      params && 'itemPadding' in params ? params.itemPadding : undefined
-    );
-    this.initParam(
-      'itemShadow',
-      params && 'itemShadow' in params ? params.itemShadow : undefined
-    );
-    this.initParam(
-      'buttonBackgroundColor',
-      params && 'buttonBackgroundColor' in params
-        ? params.buttonBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundBlurStyle',
-      params && 'buttonBackgroundBlurStyle' in params
-        ? params.buttonBackgroundBlurStyle
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundBlurStyleOptions',
-      params && 'buttonBackgroundBlurStyleOptions' in params
-        ? params.buttonBackgroundBlurStyleOptions
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundEffect',
-      params && 'buttonBackgroundEffect' in params
-        ? params.buttonBackgroundEffect
-        : undefined
-    );
-    this.initParam(
-      'buttonBorderRadius',
-      params && 'buttonBorderRadius' in params
-        ? params.buttonBorderRadius
-        : undefined
-    );
-    this.initParam(
-      'buttonMinHeight',
-      params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined
-    );
-    this.initParam(
-      'buttonPadding',
-      params && 'buttonPadding' in params ? params.buttonPadding : undefined
-    );
-    this.initParam(
-      'languageDirection',
-      params && 'languageDirection' in params
-        ? params.languageDirection
-        : undefined
-    );
+    this.initParam("items", (params && "items" in params) ? params.items : undefined);
+    this.initParam("selectedIndex", (params && "selectedIndex" in params) ? params.selectedIndex : undefined);
+    this.$selectedIndex = "$selectedIndex" in params ? params.$selectedIndex : () => { };
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.initParam("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.initParam("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.initParam("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.initParam("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.initParam("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.initParam("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.initParam("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.initParam("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.initParam("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.initParam("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.initParam("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.initParam("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.initParam("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.initParam("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.initParam("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.initParam("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.initParam("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.initParam("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.initParam("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.initParam("itemShadow", (params && "itemShadow" in params) ? params.itemShadow : undefined);
+    this.initParam("buttonBackgroundColor", (params && "buttonBackgroundColor" in params) ? params.buttonBackgroundColor : undefined);
+    this.initParam("buttonBackgroundBlurStyle", (params && "buttonBackgroundBlurStyle" in params) ? params.buttonBackgroundBlurStyle : undefined);
+    this.initParam("buttonBackgroundBlurStyleOptions", (params && "buttonBackgroundBlurStyleOptions" in params) ? params.buttonBackgroundBlurStyleOptions : undefined);
+    this.initParam("buttonBackgroundEffect", (params && "buttonBackgroundEffect" in params) ? params.buttonBackgroundEffect : undefined);
+    this.initParam("buttonBorderRadius", (params && "buttonBorderRadius" in params) ? params.buttonBorderRadius : undefined);
+    this.initParam("buttonMinHeight", (params && "buttonMinHeight" in params) ? params.buttonMinHeight : undefined);
+    this.initParam("buttonPadding", (params && "buttonPadding" in params) ? params.buttonPadding : undefined);
+    this.initParam("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
     this.finalizeConstruction();
+  }
+  m5(params) {
+    this.n5("items", (params && "items" in params) ? params.items : undefined);
+    this.n5("selectedIndex", (params && "selectedIndex" in params) ? params.selectedIndex : undefined);
+    this.$selectedIndex = "$selectedIndex" in params ? params.$selectedIndex : () => { };
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.n5("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.n5("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.n5("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.n5("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.n5("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.n5("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.n5("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.n5("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.n5("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.n5("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.n5("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.n5("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.n5("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.n5("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.n5("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.n5("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.n5("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.n5("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.n5("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.n5("itemShadow", (params && "itemShadow" in params) ? params.itemShadow : undefined);
+    this.n5("buttonBackgroundColor", (params && "buttonBackgroundColor" in params) ? params.buttonBackgroundColor : undefined);
+    this.n5("buttonBackgroundBlurStyle", (params && "buttonBackgroundBlurStyle" in params) ? params.buttonBackgroundBlurStyle : undefined);
+    this.n5("buttonBackgroundBlurStyleOptions", (params && "buttonBackgroundBlurStyleOptions" in params) ? params.buttonBackgroundBlurStyleOptions : undefined);
+    this.n5("buttonBackgroundEffect", (params && "buttonBackgroundEffect" in params) ? params.buttonBackgroundEffect : undefined);
+    this.n5("buttonBorderRadius", (params && "buttonBorderRadius" in params) ? params.buttonBorderRadius : undefined);
+    this.n5("buttonMinHeight", (params && "buttonMinHeight" in params) ? params.buttonMinHeight : undefined);
+    this.n5("buttonPadding", (params && "buttonPadding" in params) ? params.buttonPadding : undefined);
+    this.n5("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     {
-      this.observeComponentCreation2(
-        (elmtId, isInitialRender) => {
-          if (isInitialRender) {
-            let componentCall = new f1(
-              this,
-              {
-                theme: c1,
-                items: this.items,
-                selectedIndex: this.selectedIndex,
-                $selectedIndex: (selectedIndex) => {
-                  this.$selectedIndex?.(selectedIndex);
-                },
-                onItemClicked: this.onItemClicked,
-                itemMinFontScale: this.itemMinFontScale,
-                itemMaxFontScale: this.itemMaxFontScale,
-                itemSpace: this.itemSpace,
-                itemFontColor: this.itemFontColor,
-                itemSelectedFontColor: this.itemSelectedFontColor,
-                itemFontSize: this.itemFontSize,
-                itemSelectedFontSize: this.itemSelectedFontSize,
-                itemFontWeight: this.itemFontWeight,
-                itemSelectedFontWeight: this.itemSelectedFontWeight,
-                itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
-                itemIconSize: this.itemIconSize,
-                itemIconFillColor: this.itemIconFillColor,
-                itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                itemSymbolFontSize: this.itemSymbolFontSize,
-                itemSymbolFontColor: this.itemSymbolFontColor,
-                itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
-                itemBorderRadius: this.itemBorderRadius,
-                itemMinHeight: this.itemMinHeight,
-                itemPadding: this.itemPadding,
-                itemShadow: this.itemShadow,
-                buttonBackgroundColor: this.buttonBackgroundColor,
-                buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
-                buttonBackgroundBlurStyleOptions:
-                  this.buttonBackgroundBlurStyleOptions,
-                buttonBackgroundEffect: this.buttonBackgroundEffect,
-                buttonBorderRadius: this.buttonBorderRadius,
-                buttonMinHeight: this.buttonMinHeight,
-                buttonPadding: this.buttonPadding,
-                languageDirection: this.languageDirection,
-              },
-              undefined,
-              elmtId,
-              () => {},
-              {
-                page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 295,
-                t1: 5,
-              }
-            );
-            ViewV2.create(componentCall);
-            let paramsLambda = () => {
-              return {
-                theme: c1,
-                items: this.items,
-                selectedIndex: this.selectedIndex,
-                $selectedIndex: (selectedIndex) => {
-                  this.$selectedIndex?.(selectedIndex);
-                },
-                onItemClicked: this.onItemClicked,
-                itemMinFontScale: this.itemMinFontScale,
-                itemMaxFontScale: this.itemMaxFontScale,
-                itemSpace: this.itemSpace,
-                itemFontColor: this.itemFontColor,
-                itemSelectedFontColor: this.itemSelectedFontColor,
-                itemFontSize: this.itemFontSize,
-                itemSelectedFontSize: this.itemSelectedFontSize,
-                itemFontWeight: this.itemFontWeight,
-                itemSelectedFontWeight: this.itemSelectedFontWeight,
-                itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
-                itemIconSize: this.itemIconSize,
-                itemIconFillColor: this.itemIconFillColor,
-                itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                itemSymbolFontSize: this.itemSymbolFontSize,
-                itemSymbolFontColor: this.itemSymbolFontColor,
-                itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
-                itemBorderRadius: this.itemBorderRadius,
-                itemMinHeight: this.itemMinHeight,
-                itemPadding: this.itemPadding,
-                itemShadow: this.itemShadow,
-                buttonBackgroundColor: this.buttonBackgroundColor,
-                buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
-                buttonBackgroundBlurStyleOptions:
-                  this.buttonBackgroundBlurStyleOptions,
-                buttonBackgroundEffect: this.buttonBackgroundEffect,
-                buttonBorderRadius: this.buttonBorderRadius,
-                buttonMinHeight: this.buttonMinHeight,
-                buttonPadding: this.buttonPadding,
-                languageDirection: this.languageDirection,
-              };
-            };
-            componentCall.paramsGenerator_ = paramsLambda;
-          } else {
-            this.updateStateVarsOfChildByElmtId(elmtId, {
-              theme: c1,
+      this.observeComponentCreation2((elmtId, isInitialRender) => {
+        if (isInitialRender) {
+          let componentCall = new v4(this, {
+            theme: s4,
+            items: this.items,
+            selectedIndex: this.selectedIndex,
+            $selectedIndex: (selectedIndex) => {
+              this.$selectedIndex?.(selectedIndex);
+            },
+            onItemClicked: this.onItemClicked,
+            itemMinFontScale: this.itemMinFontScale,
+            itemMaxFontScale: this.itemMaxFontScale,
+            itemSpace: this.itemSpace,
+            itemFontColor: this.itemFontColor,
+            itemSelectedFontColor: this.itemSelectedFontColor,
+            itemFontSize: this.itemFontSize,
+            itemSelectedFontSize: this.itemSelectedFontSize,
+            itemFontWeight: this.itemFontWeight,
+            itemSelectedFontWeight: this.itemSelectedFontWeight,
+            itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
+            itemIconSize: this.itemIconSize,
+            itemIconFillColor: this.itemIconFillColor,
+            itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+            itemSymbolFontSize: this.itemSymbolFontSize,
+            itemSymbolFontColor: this.itemSymbolFontColor,
+            itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+            itemBorderRadius: this.itemBorderRadius,
+            itemMinHeight: this.itemMinHeight,
+            itemPadding: this.itemPadding,
+            itemShadow: this.itemShadow,
+            buttonBackgroundColor: this.buttonBackgroundColor,
+            buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
+            buttonBackgroundBlurStyleOptions: this.buttonBackgroundBlurStyleOptions,
+            buttonBackgroundEffect: this.buttonBackgroundEffect,
+            buttonBorderRadius: this.buttonBorderRadius,
+            buttonMinHeight: this.buttonMinHeight,
+            buttonPadding: this.buttonPadding,
+            languageDirection: this.languageDirection,
+          }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 295, i4: 5 });
+          ViewV2.create(componentCall);
+          let paramsLambda = () => {
+            return {
+              theme: s4,
               items: this.items,
               selectedIndex: this.selectedIndex,
+              $selectedIndex: (selectedIndex) => {
+                this.$selectedIndex?.(selectedIndex);
+              },
+              onItemClicked: this.onItemClicked,
               itemMinFontScale: this.itemMinFontScale,
               itemMaxFontScale: this.itemMaxFontScale,
               itemSpace: this.itemSpace,
@@ -704,18 +332,52 @@ export class TabSegmentButtonV2 extends ViewV2 {
               itemShadow: this.itemShadow,
               buttonBackgroundColor: this.buttonBackgroundColor,
               buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
-              buttonBackgroundBlurStyleOptions:
-                this.buttonBackgroundBlurStyleOptions,
+              buttonBackgroundBlurStyleOptions: this.buttonBackgroundBlurStyleOptions,
               buttonBackgroundEffect: this.buttonBackgroundEffect,
               buttonBorderRadius: this.buttonBorderRadius,
               buttonMinHeight: this.buttonMinHeight,
               buttonPadding: this.buttonPadding,
-              languageDirection: this.languageDirection,
-            });
-          }
-        },
-        { name: 'SimpleSegmentButtonV2' }
-      );
+              languageDirection: this.languageDirection
+            };
+          };
+          componentCall.paramsGenerator_ = paramsLambda;
+        }
+        else {
+          this.updateStateVarsOfChildByElmtId(elmtId, {
+            theme: s4,
+            items: this.items,
+            selectedIndex: this.selectedIndex,
+            itemMinFontScale: this.itemMinFontScale,
+            itemMaxFontScale: this.itemMaxFontScale,
+            itemSpace: this.itemSpace,
+            itemFontColor: this.itemFontColor,
+            itemSelectedFontColor: this.itemSelectedFontColor,
+            itemFontSize: this.itemFontSize,
+            itemSelectedFontSize: this.itemSelectedFontSize,
+            itemFontWeight: this.itemFontWeight,
+            itemSelectedFontWeight: this.itemSelectedFontWeight,
+            itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
+            itemIconSize: this.itemIconSize,
+            itemIconFillColor: this.itemIconFillColor,
+            itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+            itemSymbolFontSize: this.itemSymbolFontSize,
+            itemSymbolFontColor: this.itemSymbolFontColor,
+            itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+            itemBorderRadius: this.itemBorderRadius,
+            itemMinHeight: this.itemMinHeight,
+            itemPadding: this.itemPadding,
+            itemShadow: this.itemShadow,
+            buttonBackgroundColor: this.buttonBackgroundColor,
+            buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
+            buttonBackgroundBlurStyleOptions: this.buttonBackgroundBlurStyleOptions,
+            buttonBackgroundEffect: this.buttonBackgroundEffect,
+            buttonBorderRadius: this.buttonBorderRadius,
+            buttonMinHeight: this.buttonMinHeight,
+            buttonPadding: this.buttonPadding,
+            languageDirection: this.languageDirection
+          });
+        }
+      }, { name: "SimpleSegmentButtonV2" });
     }
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
@@ -723,110 +385,95 @@ export class TabSegmentButtonV2 extends ViewV2 {
     if (params === undefined) {
       return;
     }
-    if ('items' in params) {
-      this.updateParam('items', params.items);
+    if ("items" in params) {
+      this.updateParam("items", params.items);
     }
-    if ('selectedIndex' in params) {
-      this.updateParam('selectedIndex', params.selectedIndex);
+    if ("selectedIndex" in params) {
+      this.updateParam("selectedIndex", params.selectedIndex);
     }
-    if ('itemMinFontScale' in params) {
-      this.updateParam('itemMinFontScale', params.itemMinFontScale);
+    if ("itemMinFontScale" in params) {
+      this.updateParam("itemMinFontScale", params.itemMinFontScale);
     }
-    if ('itemMaxFontScale' in params) {
-      this.updateParam('itemMaxFontScale', params.itemMaxFontScale);
+    if ("itemMaxFontScale" in params) {
+      this.updateParam("itemMaxFontScale", params.itemMaxFontScale);
     }
-    if ('itemSpace' in params) {
-      this.updateParam('itemSpace', params.itemSpace);
+    if ("itemSpace" in params) {
+      this.updateParam("itemSpace", params.itemSpace);
     }
-    if ('itemFontSize' in params) {
-      this.updateParam('itemFontSize', params.itemFontSize);
+    if ("itemFontSize" in params) {
+      this.updateParam("itemFontSize", params.itemFontSize);
     }
-    if ('itemSelectedFontSize' in params) {
-      this.updateParam('itemSelectedFontSize', params.itemSelectedFontSize);
+    if ("itemSelectedFontSize" in params) {
+      this.updateParam("itemSelectedFontSize", params.itemSelectedFontSize);
     }
-    if ('itemFontColor' in params) {
-      this.updateParam('itemFontColor', params.itemFontColor);
+    if ("itemFontColor" in params) {
+      this.updateParam("itemFontColor", params.itemFontColor);
     }
-    if ('itemSelectedFontColor' in params) {
-      this.updateParam('itemSelectedFontColor', params.itemSelectedFontColor);
+    if ("itemSelectedFontColor" in params) {
+      this.updateParam("itemSelectedFontColor", params.itemSelectedFontColor);
     }
-    if ('itemFontWeight' in params) {
-      this.updateParam('itemFontWeight', params.itemFontWeight);
+    if ("itemFontWeight" in params) {
+      this.updateParam("itemFontWeight", params.itemFontWeight);
     }
-    if ('itemSelectedFontWeight' in params) {
-      this.updateParam('itemSelectedFontWeight', params.itemSelectedFontWeight);
+    if ("itemSelectedFontWeight" in params) {
+      this.updateParam("itemSelectedFontWeight", params.itemSelectedFontWeight);
     }
-    if ('itemBorderRadius' in params) {
-      this.updateParam('itemBorderRadius', params.itemBorderRadius);
+    if ("itemBorderRadius" in params) {
+      this.updateParam("itemBorderRadius", params.itemBorderRadius);
     }
-    if ('itemSelectedBackgroundColor' in params) {
-      this.updateParam(
-        'itemSelectedBackgroundColor',
-        params.itemSelectedBackgroundColor
-      );
+    if ("itemSelectedBackgroundColor" in params) {
+      this.updateParam("itemSelectedBackgroundColor", params.itemSelectedBackgroundColor);
     }
-    if ('itemIconSize' in params) {
-      this.updateParam('itemIconSize', params.itemIconSize);
+    if ("itemIconSize" in params) {
+      this.updateParam("itemIconSize", params.itemIconSize);
     }
-    if ('itemIconFillColor' in params) {
-      this.updateParam('itemIconFillColor', params.itemIconFillColor);
+    if ("itemIconFillColor" in params) {
+      this.updateParam("itemIconFillColor", params.itemIconFillColor);
     }
-    if ('itemSelectedIconFillColor' in params) {
-      this.updateParam(
-        'itemSelectedIconFillColor',
-        params.itemSelectedIconFillColor
-      );
+    if ("itemSelectedIconFillColor" in params) {
+      this.updateParam("itemSelectedIconFillColor", params.itemSelectedIconFillColor);
     }
-    if ('itemSymbolFontSize' in params) {
-      this.updateParam('itemSymbolFontSize', params.itemSymbolFontSize);
+    if ("itemSymbolFontSize" in params) {
+      this.updateParam("itemSymbolFontSize", params.itemSymbolFontSize);
     }
-    if ('itemSymbolFontColor' in params) {
-      this.updateParam('itemSymbolFontColor', params.itemSymbolFontColor);
+    if ("itemSymbolFontColor" in params) {
+      this.updateParam("itemSymbolFontColor", params.itemSymbolFontColor);
     }
-    if ('itemSelectedSymbolFontColor' in params) {
-      this.updateParam(
-        'itemSelectedSymbolFontColor',
-        params.itemSelectedSymbolFontColor
-      );
+    if ("itemSelectedSymbolFontColor" in params) {
+      this.updateParam("itemSelectedSymbolFontColor", params.itemSelectedSymbolFontColor);
     }
-    if ('itemMinHeight' in params) {
-      this.updateParam('itemMinHeight', params.itemMinHeight);
+    if ("itemMinHeight" in params) {
+      this.updateParam("itemMinHeight", params.itemMinHeight);
     }
-    if ('itemPadding' in params) {
-      this.updateParam('itemPadding', params.itemPadding);
+    if ("itemPadding" in params) {
+      this.updateParam("itemPadding", params.itemPadding);
     }
-    if ('itemShadow' in params) {
-      this.updateParam('itemShadow', params.itemShadow);
+    if ("itemShadow" in params) {
+      this.updateParam("itemShadow", params.itemShadow);
     }
-    if ('buttonBackgroundColor' in params) {
-      this.updateParam('buttonBackgroundColor', params.buttonBackgroundColor);
+    if ("buttonBackgroundColor" in params) {
+      this.updateParam("buttonBackgroundColor", params.buttonBackgroundColor);
     }
-    if ('buttonBackgroundBlurStyle' in params) {
-      this.updateParam(
-        'buttonBackgroundBlurStyle',
-        params.buttonBackgroundBlurStyle
-      );
+    if ("buttonBackgroundBlurStyle" in params) {
+      this.updateParam("buttonBackgroundBlurStyle", params.buttonBackgroundBlurStyle);
     }
-    if ('buttonBackgroundBlurStyleOptions' in params) {
-      this.updateParam(
-        'buttonBackgroundBlurStyleOptions',
-        params.buttonBackgroundBlurStyleOptions
-      );
+    if ("buttonBackgroundBlurStyleOptions" in params) {
+      this.updateParam("buttonBackgroundBlurStyleOptions", params.buttonBackgroundBlurStyleOptions);
     }
-    if ('buttonBackgroundEffect' in params) {
-      this.updateParam('buttonBackgroundEffect', params.buttonBackgroundEffect);
+    if ("buttonBackgroundEffect" in params) {
+      this.updateParam("buttonBackgroundEffect", params.buttonBackgroundEffect);
     }
-    if ('buttonBorderRadius' in params) {
-      this.updateParam('buttonBorderRadius', params.buttonBorderRadius);
+    if ("buttonBorderRadius" in params) {
+      this.updateParam("buttonBorderRadius", params.buttonBorderRadius);
     }
-    if ('buttonMinHeight' in params) {
-      this.updateParam('buttonMinHeight', params.buttonMinHeight);
+    if ("buttonMinHeight" in params) {
+      this.updateParam("buttonMinHeight", params.buttonMinHeight);
     }
-    if ('buttonPadding' in params) {
-      this.updateParam('buttonPadding', params.buttonPadding);
+    if ("buttonPadding" in params) {
+      this.updateParam("buttonPadding", params.buttonPadding);
     }
-    if ('languageDirection' in params) {
-      this.updateParam('languageDirection', params.languageDirection);
+    if ("languageDirection" in params) {
+      this.updateParam("languageDirection", params.languageDirection);
     }
   }
   rerender() {
@@ -835,317 +482,225 @@ export class TabSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-o([Param], TabSegmentButtonV2.prototype, 'items', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'selectedIndex', void 0);
-o([Event], TabSegmentButtonV2.prototype, '$selectedIndex', void 0);
-o([Event], TabSegmentButtonV2.prototype, 'onItemClicked', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSpace', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemFontSize', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemFontColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSelectedBackgroundColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemIconSize', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSelectedIconFillColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemSelectedSymbolFontColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemPadding', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'itemShadow', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundBlurStyle', void 0);
-o(
-  [Param],
-  TabSegmentButtonV2.prototype,
-  'buttonBackgroundBlurStyleOptions',
-  void 0
-);
-o([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'buttonPadding', void 0);
-o([Param], TabSegmentButtonV2.prototype, 'languageDirection', void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "items", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "selectedIndex", void 0);
+j([
+  Event
+], TabSegmentButtonV2.prototype, "$selectedIndex", void 0);
+j([
+  Event
+], TabSegmentButtonV2.prototype, "onItemClicked", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemMinFontScale", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemMaxFontScale", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSpace", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemFontSize", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSelectedFontSize", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemFontColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSelectedFontColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemFontWeight", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSelectedFontWeight", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemBorderRadius", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSelectedBackgroundColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemIconSize", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemIconFillColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSelectedIconFillColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSymbolFontSize", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSymbolFontColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemSelectedSymbolFontColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemMinHeight", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemPadding", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "itemShadow", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "buttonBackgroundColor", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "buttonBackgroundBlurStyle", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "buttonBackgroundBlurStyleOptions", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "buttonBackgroundEffect", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "buttonBorderRadius", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "buttonMinHeight", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "buttonPadding", void 0);
+j([
+  Param
+], TabSegmentButtonV2.prototype, "languageDirection", void 0);
 export class CapsuleSegmentButtonV2 extends ViewV2 {
-  constructor(
-    parent,
-    params,
-    __localStorage,
-    elmtId = -1,
-    paramsLambda,
-    extraInfo
-  ) {
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
-    this.initParam(
-      'items',
-      params && 'items' in params ? params.items : undefined
-    );
-    this.initParam(
-      'selectedIndex',
-      params && 'selectedIndex' in params ? params.selectedIndex : undefined
-    );
-    this.$selectedIndex =
-      '$selectedIndex' in params ? params.$selectedIndex : () => {};
-    this.onItemClicked =
-      'onItemClicked' in params ? params.onItemClicked : () => {};
-    this.initParam(
-      'itemMinFontScale',
-      params && 'itemMinFontScale' in params
-        ? params.itemMinFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemMaxFontScale',
-      params && 'itemMaxFontScale' in params
-        ? params.itemMaxFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemSpace',
-      params && 'itemSpace' in params ? params.itemSpace : undefined
-    );
-    this.initParam(
-      'itemFontColor',
-      params && 'itemFontColor' in params ? params.itemFontColor : undefined
-    );
-    this.initParam(
-      'itemSelectedFontColor',
-      params && 'itemSelectedFontColor' in params
-        ? params.itemSelectedFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemFontSize',
-      params && 'itemFontSize' in params ? params.itemFontSize : undefined
-    );
-    this.initParam(
-      'itemSelectedFontSize',
-      params && 'itemSelectedFontSize' in params
-        ? params.itemSelectedFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemFontWeight',
-      params && 'itemFontWeight' in params ? params.itemFontWeight : undefined
-    );
-    this.initParam(
-      'itemSelectedFontWeight',
-      params && 'itemSelectedFontWeight' in params
-        ? params.itemSelectedFontWeight
-        : undefined
-    );
-    this.initParam(
-      'itemBorderRadius',
-      params && 'itemBorderRadius' in params
-        ? params.itemBorderRadius
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedBackgroundColor',
-      params && 'itemSelectedBackgroundColor' in params
-        ? params.itemSelectedBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'itemIconSize',
-      params && 'itemIconSize' in params ? params.itemIconSize : undefined
-    );
-    this.initParam(
-      'itemIconFillColor',
-      params && 'itemIconFillColor' in params
-        ? params.itemIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedIconFillColor',
-      params && 'itemSelectedIconFillColor' in params
-        ? params.itemSelectedIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontSize',
-      params && 'itemSymbolFontSize' in params
-        ? params.itemSymbolFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontColor',
-      params && 'itemSymbolFontColor' in params
-        ? params.itemSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedSymbolFontColor',
-      params && 'itemSelectedSymbolFontColor' in params
-        ? params.itemSelectedSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemMinHeight',
-      params && 'itemMinHeight' in params ? params.itemMinHeight : undefined
-    );
-    this.initParam(
-      'itemPadding',
-      params && 'itemPadding' in params ? params.itemPadding : undefined
-    );
-    this.initParam(
-      'itemShadow',
-      params && 'itemShadow' in params ? params.itemShadow : undefined
-    );
-    this.initParam(
-      'buttonBackgroundColor',
-      params && 'buttonBackgroundColor' in params
-        ? params.buttonBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundBlurStyle',
-      params && 'buttonBackgroundBlurStyle' in params
-        ? params.buttonBackgroundBlurStyle
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundBlurStyleOptions',
-      params && 'buttonBackgroundBlurStyleOptions' in params
-        ? params.buttonBackgroundBlurStyleOptions
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundEffect',
-      params && 'buttonBackgroundEffect' in params
-        ? params.buttonBackgroundEffect
-        : undefined
-    );
-    this.initParam(
-      'buttonBorderRadius',
-      params && 'buttonBorderRadius' in params
-        ? params.buttonBorderRadius
-        : undefined
-    );
-    this.initParam(
-      'buttonMinHeight',
-      params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined
-    );
-    this.initParam(
-      'buttonPadding',
-      params && 'buttonPadding' in params ? params.buttonPadding : undefined
-    );
-    this.initParam(
-      'languageDirection',
-      params && 'languageDirection' in params
-        ? params.languageDirection
-        : undefined
-    );
+    this.initParam("items", (params && "items" in params) ? params.items : undefined);
+    this.initParam("selectedIndex", (params && "selectedIndex" in params) ? params.selectedIndex : undefined);
+    this.$selectedIndex = "$selectedIndex" in params ? params.$selectedIndex : () => { };
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.initParam("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.initParam("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.initParam("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.initParam("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.initParam("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.initParam("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.initParam("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.initParam("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.initParam("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.initParam("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.initParam("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.initParam("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.initParam("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.initParam("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.initParam("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.initParam("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.initParam("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.initParam("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.initParam("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.initParam("itemShadow", (params && "itemShadow" in params) ? params.itemShadow : undefined);
+    this.initParam("buttonBackgroundColor", (params && "buttonBackgroundColor" in params) ? params.buttonBackgroundColor : undefined);
+    this.initParam("buttonBackgroundBlurStyle", (params && "buttonBackgroundBlurStyle" in params) ? params.buttonBackgroundBlurStyle : undefined);
+    this.initParam("buttonBackgroundBlurStyleOptions", (params && "buttonBackgroundBlurStyleOptions" in params) ? params.buttonBackgroundBlurStyleOptions : undefined);
+    this.initParam("buttonBackgroundEffect", (params && "buttonBackgroundEffect" in params) ? params.buttonBackgroundEffect : undefined);
+    this.initParam("buttonBorderRadius", (params && "buttonBorderRadius" in params) ? params.buttonBorderRadius : undefined);
+    this.initParam("buttonMinHeight", (params && "buttonMinHeight" in params) ? params.buttonMinHeight : undefined);
+    this.initParam("buttonPadding", (params && "buttonPadding" in params) ? params.buttonPadding : undefined);
+    this.initParam("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
     this.finalizeConstruction();
+  }
+  m5(params) {
+    this.n5("items", (params && "items" in params) ? params.items : undefined);
+    this.n5("selectedIndex", (params && "selectedIndex" in params) ? params.selectedIndex : undefined);
+    this.$selectedIndex = "$selectedIndex" in params ? params.$selectedIndex : () => { };
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.n5("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.n5("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.n5("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.n5("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.n5("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.n5("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.n5("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.n5("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.n5("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.n5("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.n5("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.n5("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.n5("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.n5("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.n5("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.n5("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.n5("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.n5("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.n5("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.n5("itemShadow", (params && "itemShadow" in params) ? params.itemShadow : undefined);
+    this.n5("buttonBackgroundColor", (params && "buttonBackgroundColor" in params) ? params.buttonBackgroundColor : undefined);
+    this.n5("buttonBackgroundBlurStyle", (params && "buttonBackgroundBlurStyle" in params) ? params.buttonBackgroundBlurStyle : undefined);
+    this.n5("buttonBackgroundBlurStyleOptions", (params && "buttonBackgroundBlurStyleOptions" in params) ? params.buttonBackgroundBlurStyleOptions : undefined);
+    this.n5("buttonBackgroundEffect", (params && "buttonBackgroundEffect" in params) ? params.buttonBackgroundEffect : undefined);
+    this.n5("buttonBorderRadius", (params && "buttonBorderRadius" in params) ? params.buttonBorderRadius : undefined);
+    this.n5("buttonMinHeight", (params && "buttonMinHeight" in params) ? params.buttonMinHeight : undefined);
+    this.n5("buttonPadding", (params && "buttonPadding" in params) ? params.buttonPadding : undefined);
+    this.n5("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     {
-      this.observeComponentCreation2(
-        (elmtId, isInitialRender) => {
-          if (isInitialRender) {
-            let componentCall = new f1(
-              this,
-              {
-                theme: d1,
-                items: this.items,
-                selectedIndex: this.selectedIndex,
-                $selectedIndex: (selectedIndex) => {
-                  this.$selectedIndex?.(selectedIndex);
-                },
-                onItemClicked: this.onItemClicked,
-                itemMinFontScale: this.itemMinFontScale,
-                itemMaxFontScale: this.itemMaxFontScale,
-                itemSpace: this.itemSpace,
-                itemFontColor: this.itemFontColor,
-                itemSelectedFontColor: this.itemSelectedFontColor,
-                itemFontSize: this.itemFontSize,
-                itemSelectedFontSize: this.itemSelectedFontSize,
-                itemFontWeight: this.itemFontWeight,
-                itemSelectedFontWeight: this.itemSelectedFontWeight,
-                itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
-                itemIconSize: this.itemIconSize,
-                itemIconFillColor: this.itemIconFillColor,
-                itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                itemSymbolFontSize: this.itemSymbolFontSize,
-                itemSymbolFontColor: this.itemSymbolFontColor,
-                itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
-                itemBorderRadius: this.itemBorderRadius,
-                itemMinHeight: this.itemMinHeight,
-                itemPadding: this.itemPadding,
-                itemShadow: this.itemShadow,
-                buttonBackgroundColor: this.buttonBackgroundColor,
-                buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
-                buttonBackgroundBlurStyleOptions:
-                  this.buttonBackgroundBlurStyleOptions,
-                buttonBackgroundEffect: this.buttonBackgroundEffect,
-                buttonBorderRadius: this.buttonBorderRadius,
-                buttonMinHeight: this.buttonMinHeight,
-                buttonPadding: this.buttonPadding,
-                languageDirection: this.languageDirection,
-              },
-              undefined,
-              elmtId,
-              () => {},
-              {
-                page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 405,
-                t1: 5,
-              }
-            );
-            ViewV2.create(componentCall);
-            let paramsLambda = () => {
-              return {
-                theme: d1,
-                items: this.items,
-                selectedIndex: this.selectedIndex,
-                $selectedIndex: (selectedIndex) => {
-                  this.$selectedIndex?.(selectedIndex);
-                },
-                onItemClicked: this.onItemClicked,
-                itemMinFontScale: this.itemMinFontScale,
-                itemMaxFontScale: this.itemMaxFontScale,
-                itemSpace: this.itemSpace,
-                itemFontColor: this.itemFontColor,
-                itemSelectedFontColor: this.itemSelectedFontColor,
-                itemFontSize: this.itemFontSize,
-                itemSelectedFontSize: this.itemSelectedFontSize,
-                itemFontWeight: this.itemFontWeight,
-                itemSelectedFontWeight: this.itemSelectedFontWeight,
-                itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
-                itemIconSize: this.itemIconSize,
-                itemIconFillColor: this.itemIconFillColor,
-                itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                itemSymbolFontSize: this.itemSymbolFontSize,
-                itemSymbolFontColor: this.itemSymbolFontColor,
-                itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
-                itemBorderRadius: this.itemBorderRadius,
-                itemMinHeight: this.itemMinHeight,
-                itemPadding: this.itemPadding,
-                itemShadow: this.itemShadow,
-                buttonBackgroundColor: this.buttonBackgroundColor,
-                buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
-                buttonBackgroundBlurStyleOptions:
-                  this.buttonBackgroundBlurStyleOptions,
-                buttonBackgroundEffect: this.buttonBackgroundEffect,
-                buttonBorderRadius: this.buttonBorderRadius,
-                buttonMinHeight: this.buttonMinHeight,
-                buttonPadding: this.buttonPadding,
-                languageDirection: this.languageDirection,
-              };
-            };
-            componentCall.paramsGenerator_ = paramsLambda;
-          } else {
-            this.updateStateVarsOfChildByElmtId(elmtId, {
-              theme: d1,
+      this.observeComponentCreation2((elmtId, isInitialRender) => {
+        if (isInitialRender) {
+          let componentCall = new v4(this, {
+            theme: t4,
+            items: this.items,
+            selectedIndex: this.selectedIndex,
+            $selectedIndex: (selectedIndex) => {
+              this.$selectedIndex?.(selectedIndex);
+            },
+            onItemClicked: this.onItemClicked,
+            itemMinFontScale: this.itemMinFontScale,
+            itemMaxFontScale: this.itemMaxFontScale,
+            itemSpace: this.itemSpace,
+            itemFontColor: this.itemFontColor,
+            itemSelectedFontColor: this.itemSelectedFontColor,
+            itemFontSize: this.itemFontSize,
+            itemSelectedFontSize: this.itemSelectedFontSize,
+            itemFontWeight: this.itemFontWeight,
+            itemSelectedFontWeight: this.itemSelectedFontWeight,
+            itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
+            itemIconSize: this.itemIconSize,
+            itemIconFillColor: this.itemIconFillColor,
+            itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+            itemSymbolFontSize: this.itemSymbolFontSize,
+            itemSymbolFontColor: this.itemSymbolFontColor,
+            itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+            itemBorderRadius: this.itemBorderRadius,
+            itemMinHeight: this.itemMinHeight,
+            itemPadding: this.itemPadding,
+            itemShadow: this.itemShadow,
+            buttonBackgroundColor: this.buttonBackgroundColor,
+            buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
+            buttonBackgroundBlurStyleOptions: this.buttonBackgroundBlurStyleOptions,
+            buttonBackgroundEffect: this.buttonBackgroundEffect,
+            buttonBorderRadius: this.buttonBorderRadius,
+            buttonMinHeight: this.buttonMinHeight,
+            buttonPadding: this.buttonPadding,
+            languageDirection: this.languageDirection,
+          }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 405, i4: 5 });
+          ViewV2.create(componentCall);
+          let paramsLambda = () => {
+            return {
+              theme: t4,
               items: this.items,
               selectedIndex: this.selectedIndex,
+              $selectedIndex: (selectedIndex) => {
+                this.$selectedIndex?.(selectedIndex);
+              },
+              onItemClicked: this.onItemClicked,
               itemMinFontScale: this.itemMinFontScale,
               itemMaxFontScale: this.itemMaxFontScale,
               itemSpace: this.itemSpace,
@@ -1168,18 +723,52 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               itemShadow: this.itemShadow,
               buttonBackgroundColor: this.buttonBackgroundColor,
               buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
-              buttonBackgroundBlurStyleOptions:
-                this.buttonBackgroundBlurStyleOptions,
+              buttonBackgroundBlurStyleOptions: this.buttonBackgroundBlurStyleOptions,
               buttonBackgroundEffect: this.buttonBackgroundEffect,
               buttonBorderRadius: this.buttonBorderRadius,
               buttonMinHeight: this.buttonMinHeight,
               buttonPadding: this.buttonPadding,
-              languageDirection: this.languageDirection,
-            });
-          }
-        },
-        { name: 'SimpleSegmentButtonV2' }
-      );
+              languageDirection: this.languageDirection
+            };
+          };
+          componentCall.paramsGenerator_ = paramsLambda;
+        }
+        else {
+          this.updateStateVarsOfChildByElmtId(elmtId, {
+            theme: t4,
+            items: this.items,
+            selectedIndex: this.selectedIndex,
+            itemMinFontScale: this.itemMinFontScale,
+            itemMaxFontScale: this.itemMaxFontScale,
+            itemSpace: this.itemSpace,
+            itemFontColor: this.itemFontColor,
+            itemSelectedFontColor: this.itemSelectedFontColor,
+            itemFontSize: this.itemFontSize,
+            itemSelectedFontSize: this.itemSelectedFontSize,
+            itemFontWeight: this.itemFontWeight,
+            itemSelectedFontWeight: this.itemSelectedFontWeight,
+            itemSelectedBackgroundColor: this.itemSelectedBackgroundColor,
+            itemIconSize: this.itemIconSize,
+            itemIconFillColor: this.itemIconFillColor,
+            itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+            itemSymbolFontSize: this.itemSymbolFontSize,
+            itemSymbolFontColor: this.itemSymbolFontColor,
+            itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+            itemBorderRadius: this.itemBorderRadius,
+            itemMinHeight: this.itemMinHeight,
+            itemPadding: this.itemPadding,
+            itemShadow: this.itemShadow,
+            buttonBackgroundColor: this.buttonBackgroundColor,
+            buttonBackgroundBlurStyle: this.buttonBackgroundBlurStyle,
+            buttonBackgroundBlurStyleOptions: this.buttonBackgroundBlurStyleOptions,
+            buttonBackgroundEffect: this.buttonBackgroundEffect,
+            buttonBorderRadius: this.buttonBorderRadius,
+            buttonMinHeight: this.buttonMinHeight,
+            buttonPadding: this.buttonPadding,
+            languageDirection: this.languageDirection
+          });
+        }
+      }, { name: "SimpleSegmentButtonV2" });
     }
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
@@ -1187,110 +776,95 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     if (params === undefined) {
       return;
     }
-    if ('items' in params) {
-      this.updateParam('items', params.items);
+    if ("items" in params) {
+      this.updateParam("items", params.items);
     }
-    if ('selectedIndex' in params) {
-      this.updateParam('selectedIndex', params.selectedIndex);
+    if ("selectedIndex" in params) {
+      this.updateParam("selectedIndex", params.selectedIndex);
     }
-    if ('itemMinFontScale' in params) {
-      this.updateParam('itemMinFontScale', params.itemMinFontScale);
+    if ("itemMinFontScale" in params) {
+      this.updateParam("itemMinFontScale", params.itemMinFontScale);
     }
-    if ('itemMaxFontScale' in params) {
-      this.updateParam('itemMaxFontScale', params.itemMaxFontScale);
+    if ("itemMaxFontScale" in params) {
+      this.updateParam("itemMaxFontScale", params.itemMaxFontScale);
     }
-    if ('itemSpace' in params) {
-      this.updateParam('itemSpace', params.itemSpace);
+    if ("itemSpace" in params) {
+      this.updateParam("itemSpace", params.itemSpace);
     }
-    if ('itemFontColor' in params) {
-      this.updateParam('itemFontColor', params.itemFontColor);
+    if ("itemFontColor" in params) {
+      this.updateParam("itemFontColor", params.itemFontColor);
     }
-    if ('itemSelectedFontColor' in params) {
-      this.updateParam('itemSelectedFontColor', params.itemSelectedFontColor);
+    if ("itemSelectedFontColor" in params) {
+      this.updateParam("itemSelectedFontColor", params.itemSelectedFontColor);
     }
-    if ('itemFontSize' in params) {
-      this.updateParam('itemFontSize', params.itemFontSize);
+    if ("itemFontSize" in params) {
+      this.updateParam("itemFontSize", params.itemFontSize);
     }
-    if ('itemSelectedFontSize' in params) {
-      this.updateParam('itemSelectedFontSize', params.itemSelectedFontSize);
+    if ("itemSelectedFontSize" in params) {
+      this.updateParam("itemSelectedFontSize", params.itemSelectedFontSize);
     }
-    if ('itemFontWeight' in params) {
-      this.updateParam('itemFontWeight', params.itemFontWeight);
+    if ("itemFontWeight" in params) {
+      this.updateParam("itemFontWeight", params.itemFontWeight);
     }
-    if ('itemSelectedFontWeight' in params) {
-      this.updateParam('itemSelectedFontWeight', params.itemSelectedFontWeight);
+    if ("itemSelectedFontWeight" in params) {
+      this.updateParam("itemSelectedFontWeight", params.itemSelectedFontWeight);
     }
-    if ('itemBorderRadius' in params) {
-      this.updateParam('itemBorderRadius', params.itemBorderRadius);
+    if ("itemBorderRadius" in params) {
+      this.updateParam("itemBorderRadius", params.itemBorderRadius);
     }
-    if ('itemSelectedBackgroundColor' in params) {
-      this.updateParam(
-        'itemSelectedBackgroundColor',
-        params.itemSelectedBackgroundColor
-      );
+    if ("itemSelectedBackgroundColor" in params) {
+      this.updateParam("itemSelectedBackgroundColor", params.itemSelectedBackgroundColor);
     }
-    if ('itemIconSize' in params) {
-      this.updateParam('itemIconSize', params.itemIconSize);
+    if ("itemIconSize" in params) {
+      this.updateParam("itemIconSize", params.itemIconSize);
     }
-    if ('itemIconFillColor' in params) {
-      this.updateParam('itemIconFillColor', params.itemIconFillColor);
+    if ("itemIconFillColor" in params) {
+      this.updateParam("itemIconFillColor", params.itemIconFillColor);
     }
-    if ('itemSelectedIconFillColor' in params) {
-      this.updateParam(
-        'itemSelectedIconFillColor',
-        params.itemSelectedIconFillColor
-      );
+    if ("itemSelectedIconFillColor" in params) {
+      this.updateParam("itemSelectedIconFillColor", params.itemSelectedIconFillColor);
     }
-    if ('itemSymbolFontSize' in params) {
-      this.updateParam('itemSymbolFontSize', params.itemSymbolFontSize);
+    if ("itemSymbolFontSize" in params) {
+      this.updateParam("itemSymbolFontSize", params.itemSymbolFontSize);
     }
-    if ('itemSymbolFontColor' in params) {
-      this.updateParam('itemSymbolFontColor', params.itemSymbolFontColor);
+    if ("itemSymbolFontColor" in params) {
+      this.updateParam("itemSymbolFontColor", params.itemSymbolFontColor);
     }
-    if ('itemSelectedSymbolFontColor' in params) {
-      this.updateParam(
-        'itemSelectedSymbolFontColor',
-        params.itemSelectedSymbolFontColor
-      );
+    if ("itemSelectedSymbolFontColor" in params) {
+      this.updateParam("itemSelectedSymbolFontColor", params.itemSelectedSymbolFontColor);
     }
-    if ('itemMinHeight' in params) {
-      this.updateParam('itemMinHeight', params.itemMinHeight);
+    if ("itemMinHeight" in params) {
+      this.updateParam("itemMinHeight", params.itemMinHeight);
     }
-    if ('itemPadding' in params) {
-      this.updateParam('itemPadding', params.itemPadding);
+    if ("itemPadding" in params) {
+      this.updateParam("itemPadding", params.itemPadding);
     }
-    if ('itemShadow' in params) {
-      this.updateParam('itemShadow', params.itemShadow);
+    if ("itemShadow" in params) {
+      this.updateParam("itemShadow", params.itemShadow);
     }
-    if ('buttonBackgroundColor' in params) {
-      this.updateParam('buttonBackgroundColor', params.buttonBackgroundColor);
+    if ("buttonBackgroundColor" in params) {
+      this.updateParam("buttonBackgroundColor", params.buttonBackgroundColor);
     }
-    if ('buttonBackgroundBlurStyle' in params) {
-      this.updateParam(
-        'buttonBackgroundBlurStyle',
-        params.buttonBackgroundBlurStyle
-      );
+    if ("buttonBackgroundBlurStyle" in params) {
+      this.updateParam("buttonBackgroundBlurStyle", params.buttonBackgroundBlurStyle);
     }
-    if ('buttonBackgroundBlurStyleOptions' in params) {
-      this.updateParam(
-        'buttonBackgroundBlurStyleOptions',
-        params.buttonBackgroundBlurStyleOptions
-      );
+    if ("buttonBackgroundBlurStyleOptions" in params) {
+      this.updateParam("buttonBackgroundBlurStyleOptions", params.buttonBackgroundBlurStyleOptions);
     }
-    if ('buttonBackgroundEffect' in params) {
-      this.updateParam('buttonBackgroundEffect', params.buttonBackgroundEffect);
+    if ("buttonBackgroundEffect" in params) {
+      this.updateParam("buttonBackgroundEffect", params.buttonBackgroundEffect);
     }
-    if ('buttonBorderRadius' in params) {
-      this.updateParam('buttonBorderRadius', params.buttonBorderRadius);
+    if ("buttonBorderRadius" in params) {
+      this.updateParam("buttonBorderRadius", params.buttonBorderRadius);
     }
-    if ('buttonMinHeight' in params) {
-      this.updateParam('buttonMinHeight', params.buttonMinHeight);
+    if ("buttonMinHeight" in params) {
+      this.updateParam("buttonMinHeight", params.buttonMinHeight);
     }
-    if ('buttonPadding' in params) {
-      this.updateParam('buttonPadding', params.buttonPadding);
+    if ("buttonPadding" in params) {
+      this.updateParam("buttonPadding", params.buttonPadding);
     }
-    if ('languageDirection' in params) {
-      this.updateParam('languageDirection', params.languageDirection);
+    if ("languageDirection" in params) {
+      this.updateParam("languageDirection", params.languageDirection);
     }
   }
   rerender() {
@@ -1299,86 +873,112 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-o([Param], CapsuleSegmentButtonV2.prototype, 'items', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'selectedIndex', void 0);
-o([Event], CapsuleSegmentButtonV2.prototype, '$selectedIndex', void 0);
-o([Event], CapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-o(
-  [Param],
-  CapsuleSegmentButtonV2.prototype,
-  'itemSelectedBackgroundColor',
-  void 0
-);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-o(
-  [Param],
-  CapsuleSegmentButtonV2.prototype,
-  'itemSelectedIconFillColor',
-  void 0
-);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
-o(
-  [Param],
-  CapsuleSegmentButtonV2.prototype,
-  'itemSelectedSymbolFontColor',
-  void 0
-);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'itemShadow', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
-o(
-  [Param],
-  CapsuleSegmentButtonV2.prototype,
-  'buttonBackgroundBlurStyle',
-  void 0
-);
-o(
-  [Param],
-  CapsuleSegmentButtonV2.prototype,
-  'buttonBackgroundBlurStyleOptions',
-  void 0
-);
-o([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'buttonPadding', void 0);
-o([Param], CapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
-class f1 extends ViewV2 {
-  constructor(
-    parent,
-    params,
-    __localStorage,
-    elmtId = -1,
-    paramsLambda,
-    extraInfo
-  ) {
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "items", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "selectedIndex", void 0);
+j([
+  Event
+], CapsuleSegmentButtonV2.prototype, "$selectedIndex", void 0);
+j([
+  Event
+], CapsuleSegmentButtonV2.prototype, "onItemClicked", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemMinFontScale", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemMaxFontScale", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSpace", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemFontColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSelectedFontColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemFontSize", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSelectedFontSize", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemFontWeight", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSelectedFontWeight", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemBorderRadius", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSelectedBackgroundColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemIconSize", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemIconFillColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSelectedIconFillColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSymbolFontSize", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSymbolFontColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemSelectedSymbolFontColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemMinHeight", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemPadding", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "itemShadow", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "buttonBackgroundColor", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "buttonBackgroundBlurStyle", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "buttonBackgroundBlurStyleOptions", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "buttonBackgroundEffect", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "buttonBorderRadius", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "buttonMinHeight", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "buttonPadding", void 0);
+j([
+  Param
+], CapsuleSegmentButtonV2.prototype, "languageDirection", void 0);
+class v4 extends ViewV2 {
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
     this.ContentLayer = () => {
-      const parent =
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length
-          ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1]
-          : null;
+      const parent = PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1] : null;
       this.observeComponentCreation2((elmtId, isInitialRender) => {
-        Flex.create({
-          alignItems: ItemAlign.Stretch,
-          space: { main: this.getItemSpace() },
-        });
+        Flex.create({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } });
         Flex.constraintSize({
           minWidth: '100%',
-          minHeight: this.getButtonMinHeight(),
+          minHeight: this.getButtonMinHeight()
         });
         Flex.clip(false);
         Flex.direction(this.languageDirection);
@@ -1422,8 +1022,8 @@ class f1 extends ViewV2 {
           }
           if (this.isMouseWheelScroll) {
             const offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
-            const m1 = offset < 0 ? 1 : -1;
-            this.updateSelectedIndex(this.normalizedSelectedIndex + m1);
+            const e5 = offset < 0 ? 1 : -1;
+            this.updateSelectedIndex(this.normalizedSelectedIndex + e5);
             this.isMouseWheelScroll = false;
             return;
           }
@@ -1438,11 +1038,11 @@ class f1 extends ViewV2 {
           if (!finger) {
             return;
           }
-          let l1 = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
+          let d5 = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
           if (this.isRTL()) {
-            l1 = -l1;
+            d5 = -d5;
           }
-          this.updateSelectedIndex(this.normalizedSelectedIndex + l1);
+          this.updateSelectedIndex(this.normalizedSelectedIndex + d5);
         });
         PanGesture.onActionCancel(() => {
           this.isDragging = false;
@@ -1453,199 +1053,166 @@ class f1 extends ViewV2 {
         Gesture.pop();
       }, Flex);
       this.observeComponentCreation2((elmtId, isInitialRender) => {
-        Repeat(this.getItems(), this)
-          .each((repeatItem) => {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-              Button.createWithChild({ type: ButtonType.Normal });
-              Button.accessibilityGroup(true);
-              Button.accessibilitySelected(this.isSelected(repeatItem));
-              Button.accessibilityText(
-                this.getItemAccessibilityText(repeatItem)
-              );
-              Button.accessibilityDescription(
-                this.getItemAccessibilityDescription(repeatItem)
-              );
-              Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
-              Button.backgroundColor(Color.Transparent);
-              Button.borderRadius(this.getItemBorderRadius());
-              Button.direction(this.languageDirection);
-              Button.enabled(repeatItem.item.enabled);
-              Button.focusScopePriority(
-                this.focusGroupId,
-                this.getFocusPriority(repeatItem)
-              );
-              Button.hoverEffect(HoverEffect.None);
-              Button.layoutWeight(1);
-              Button.padding(0);
-              Button.scale(this.getItemScale(repeatItem.index));
-              Button.stateEffect(false);
-              Button.onAreaChange((k1, area) => {
-                this.itemRects[repeatItem.index] = {
-                  size: {
-                    width: area.width,
-                    height: area.height,
-                  },
-                  position: {
-                    x: area.position.x,
-                    y: area.position.y,
-                  },
-                  globalPosition: {
-                    x: area.globalPosition.x,
-                    y: area.globalPosition.y,
-                  },
-                };
-              });
-              Gesture.create(GesturePriority.Low);
-              TapGesture.create();
-              TapGesture.onAction(() => {
-                this.onItemClicked?.(repeatItem.index);
-                this.updateSelectedIndex(repeatItem.index);
-              });
-              TapGesture.pop();
-              Gesture.pop();
-              Button.onTouch((event) => {
-                if (event.type === TouchType.Down) {
-                  if (this.isSelected(repeatItem)) {
-                    this.updateItemScale(0.95);
-                  }
-                  this.updateTouchPressedItemIndex(repeatItem.index);
-                } else if (
-                  [TouchType.Up, TouchType.Cancel].includes(event.type)
-                ) {
-                  this.updateItemScale(1);
-                  this.updateTouchPressedItemIndex(-1);
-                }
-              });
-              Button.onHover((isHover) => {
-                if (isHover) {
-                  this.updateHoveredItemIndex(repeatItem.index);
-                } else {
-                  this.updateHoveredItemIndex(-1);
-                }
-              });
-              Button.onMouse((event) => {
-                if (event.action === MouseAction.Press) {
-                  this.updateMousePressedItemIndex(repeatItem.index);
-                } else if (
-                  [MouseAction.Release, MouseAction.CANCEL].includes(
-                    event.action
-                  )
-                ) {
-                  this.updateMousePressedItemIndex(-1);
-                }
-              });
-            }, Button);
-            {
-              this.observeComponentCreation2(
-                (elmtId, isInitialRender) => {
-                  if (isInitialRender) {
-                    let componentCall = new h1(
-                      parent ? parent : this,
-                      {
-                        theme: this.theme,
-                        item: repeatItem.item,
-                        selected: this.isSelected(repeatItem),
-                        itemMinFontScale: this.itemMinFontScale,
-                        itemMaxFontScale: this.itemMaxFontScale,
-                        itemFontColor: this.itemFontColor,
-                        itemSelectedFontColor: this.itemSelectedFontColor,
-                        itemFontSize: this.itemFontSize,
-                        itemSelectedFontSize: this.itemSelectedFontSize,
-                        itemFontWeight: this.itemFontWeight,
-                        itemSelectedFontWeight: this.itemSelectedFontWeight,
-                        itemIconSize: this.itemIconSize,
-                        itemIconFillColor: this.itemIconFillColor,
-                        itemSelectedIconFillColor:
-                          this.itemSelectedIconFillColor,
-                        itemSymbolFontSize: this.itemSymbolFontSize,
-                        itemSymbolFontColor: this.itemSymbolFontColor,
-                        itemSelectedSymbolFontColor:
-                          this.itemSelectedSymbolFontColor,
-                        itemMinHeight: this.itemMinHeight,
-                        itemPadding: this.itemPadding,
-                        languageDirection: this.languageDirection,
-                        hasHybrid: this.getItems().hasHybrid,
-                      },
-                      undefined,
-                      elmtId,
-                      () => {},
-                      {
-                        page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                        line: 577,
-                        t1: 13,
-                      }
-                    );
-                    ViewV2.create(componentCall);
-                    let paramsLambda = () => {
-                      return {
-                        theme: this.theme,
-                        item: repeatItem.item,
-                        selected: this.isSelected(repeatItem),
-                        itemMinFontScale: this.itemMinFontScale,
-                        itemMaxFontScale: this.itemMaxFontScale,
-                        itemFontColor: this.itemFontColor,
-                        itemSelectedFontColor: this.itemSelectedFontColor,
-                        itemFontSize: this.itemFontSize,
-                        itemSelectedFontSize: this.itemSelectedFontSize,
-                        itemFontWeight: this.itemFontWeight,
-                        itemSelectedFontWeight: this.itemSelectedFontWeight,
-                        itemIconSize: this.itemIconSize,
-                        itemIconFillColor: this.itemIconFillColor,
-                        itemSelectedIconFillColor:
-                          this.itemSelectedIconFillColor,
-                        itemSymbolFontSize: this.itemSymbolFontSize,
-                        itemSymbolFontColor: this.itemSymbolFontColor,
-                        itemSelectedSymbolFontColor:
-                          this.itemSelectedSymbolFontColor,
-                        itemMinHeight: this.itemMinHeight,
-                        itemPadding: this.itemPadding,
-                        languageDirection: this.languageDirection,
-                        hasHybrid: this.getItems().hasHybrid,
-                      };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                  } else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                      theme: this.theme,
-                      item: repeatItem.item,
-                      selected: this.isSelected(repeatItem),
-                      itemMinFontScale: this.itemMinFontScale,
-                      itemMaxFontScale: this.itemMaxFontScale,
-                      itemFontColor: this.itemFontColor,
-                      itemSelectedFontColor: this.itemSelectedFontColor,
-                      itemFontSize: this.itemFontSize,
-                      itemSelectedFontSize: this.itemSelectedFontSize,
-                      itemFontWeight: this.itemFontWeight,
-                      itemSelectedFontWeight: this.itemSelectedFontWeight,
-                      itemIconSize: this.itemIconSize,
-                      itemIconFillColor: this.itemIconFillColor,
-                      itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                      itemSymbolFontSize: this.itemSymbolFontSize,
-                      itemSymbolFontColor: this.itemSymbolFontColor,
-                      itemSelectedSymbolFontColor:
-                        this.itemSelectedSymbolFontColor,
-                      itemMinHeight: this.itemMinHeight,
-                      itemPadding: this.itemPadding,
-                      languageDirection: this.languageDirection,
-                      hasHybrid: this.getItems().hasHybrid,
-                    });
-                  }
+        Repeat(this.getItems(), this).each((repeatItem) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithChild({ type: ButtonType.Normal });
+            Button.accessibilityGroup(true);
+            Button.accessibilitySelected(this.isSelected(repeatItem));
+            Button.accessibilityText(this.getItemAccessibilityText(repeatItem));
+            Button.accessibilityDescription(this.getItemAccessibilityDescription(repeatItem));
+            Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
+            Button.backgroundColor(Color.Transparent);
+            Button.borderRadius(this.getItemBorderRadius());
+            Button.direction(this.languageDirection);
+            Button.enabled(repeatItem.item.enabled);
+            Button.focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem));
+            Button.hoverEffect(HoverEffect.None);
+            Button.layoutWeight(1);
+            Button.padding(0);
+            Button.scale(this.getItemScale(repeatItem.index));
+            Button.stateEffect(false);
+            Button.onAreaChange((c5, area) => {
+              this.itemRects[repeatItem.index] = {
+                size: {
+                  width: area.width,
+                  height: area.height,
                 },
-                { name: 'SegmentButtonV2ItemContent' }
-              );
-            }
-            Button.pop();
-          })
-          .key(j(this.focusGroupId))
-          .render(isInitialRender);
+                position: {
+                  x: area.position.x,
+                  y: area.position.y,
+                },
+                globalPosition: {
+                  x: area.globalPosition.x,
+                  y: area.globalPosition.y,
+                }
+              };
+            });
+            Gesture.create(GesturePriority.Low);
+            TapGesture.create();
+            TapGesture.onAction(() => {
+              this.onItemClicked?.(repeatItem.index);
+              this.updateSelectedIndex(repeatItem.index);
+            });
+            TapGesture.pop();
+            Gesture.pop();
+            Button.onTouch((event) => {
+              if (event.type === TouchType.Down) {
+                if (this.isSelected(repeatItem)) {
+                  this.updateItemScale(0.95);
+                }
+                this.updateTouchPressedItemIndex(repeatItem.index);
+              }
+              else if ([TouchType.Up, TouchType.Cancel].includes(event.type)) {
+                this.updateItemScale(1);
+                this.updateTouchPressedItemIndex(-1);
+              }
+            });
+            Button.onHover((isHover) => {
+              if (isHover) {
+                this.updateHoveredItemIndex(repeatItem.index);
+              }
+              else {
+                this.updateHoveredItemIndex(-1);
+              }
+            });
+            Button.onMouse((event) => {
+              if (event.action === MouseAction.Press) {
+                this.updateMousePressedItemIndex(repeatItem.index);
+              }
+              else if ([MouseAction.Release, MouseAction.CANCEL].includes(event.action)) {
+                this.updateMousePressedItemIndex(-1);
+              }
+            });
+          }, Button);
+          {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+              if (isInitialRender) {
+                let componentCall = new x4(parent ? parent : this, {
+                  theme: this.theme,
+                  item: repeatItem.item,
+                  selected: this.isSelected(repeatItem),
+                  itemMinFontScale: this.itemMinFontScale,
+                  itemMaxFontScale: this.itemMaxFontScale,
+                  itemFontColor: this.itemFontColor,
+                  itemSelectedFontColor: this.itemSelectedFontColor,
+                  itemFontSize: this.itemFontSize,
+                  itemSelectedFontSize: this.itemSelectedFontSize,
+                  itemFontWeight: this.itemFontWeight,
+                  itemSelectedFontWeight: this.itemSelectedFontWeight,
+                  itemIconSize: this.itemIconSize,
+                  itemIconFillColor: this.itemIconFillColor,
+                  itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+                  itemSymbolFontSize: this.itemSymbolFontSize,
+                  itemSymbolFontColor: this.itemSymbolFontColor,
+                  itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+                  itemMinHeight: this.itemMinHeight,
+                  itemPadding: this.itemPadding,
+                  languageDirection: this.languageDirection,
+                  hasHybrid: this.getItems().hasHybrid,
+                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 577, i4: 13 });
+                ViewV2.create(componentCall);
+                let paramsLambda = () => {
+                  return {
+                    theme: this.theme,
+                    item: repeatItem.item,
+                    selected: this.isSelected(repeatItem),
+                    itemMinFontScale: this.itemMinFontScale,
+                    itemMaxFontScale: this.itemMaxFontScale,
+                    itemFontColor: this.itemFontColor,
+                    itemSelectedFontColor: this.itemSelectedFontColor,
+                    itemFontSize: this.itemFontSize,
+                    itemSelectedFontSize: this.itemSelectedFontSize,
+                    itemFontWeight: this.itemFontWeight,
+                    itemSelectedFontWeight: this.itemSelectedFontWeight,
+                    itemIconSize: this.itemIconSize,
+                    itemIconFillColor: this.itemIconFillColor,
+                    itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+                    itemSymbolFontSize: this.itemSymbolFontSize,
+                    itemSymbolFontColor: this.itemSymbolFontColor,
+                    itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+                    itemMinHeight: this.itemMinHeight,
+                    itemPadding: this.itemPadding,
+                    languageDirection: this.languageDirection,
+                    hasHybrid: this.getItems().hasHybrid
+                  };
+                };
+                componentCall.paramsGenerator_ = paramsLambda;
+              }
+              else {
+                this.updateStateVarsOfChildByElmtId(elmtId, {
+                  theme: this.theme,
+                  item: repeatItem.item,
+                  selected: this.isSelected(repeatItem),
+                  itemMinFontScale: this.itemMinFontScale,
+                  itemMaxFontScale: this.itemMaxFontScale,
+                  itemFontColor: this.itemFontColor,
+                  itemSelectedFontColor: this.itemSelectedFontColor,
+                  itemFontSize: this.itemFontSize,
+                  itemSelectedFontSize: this.itemSelectedFontSize,
+                  itemFontWeight: this.itemFontWeight,
+                  itemSelectedFontWeight: this.itemSelectedFontWeight,
+                  itemIconSize: this.itemIconSize,
+                  itemIconFillColor: this.itemIconFillColor,
+                  itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+                  itemSymbolFontSize: this.itemSymbolFontSize,
+                  itemSymbolFontColor: this.itemSymbolFontColor,
+                  itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+                  itemMinHeight: this.itemMinHeight,
+                  itemPadding: this.itemPadding,
+                  languageDirection: this.languageDirection,
+                  hasHybrid: this.getItems().hasHybrid
+                });
+              }
+            }, { name: "SegmentButtonV2ItemContent" });
+          }
+          Button.pop();
+        })
+          .key(l4(this.focusGroupId)).render(isInitialRender);
       }, Repeat);
       Flex.pop();
     };
     this.BackplateLayer = () => {
-      const parent =
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length
-          ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1]
-          : null;
+      const parent = PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1] : null;
       this.observeComponentCreation2((elmtId, isInitialRender) => {
         If.create();
         if (this.selectedItemRect) {
@@ -1665,201 +1232,67 @@ class f1 extends ViewV2 {
             }, Stack);
             Stack.pop();
           });
-        } else {
-          this.ifElseBranchUpdateFunction(1, () => {});
+        }
+        else {
+          this.ifElseBranchUpdateFunction(1, () => {
+          });
         }
       }, If);
       If.pop();
     };
     this.EffectLayer = () => {
-      const parent =
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length
-          ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1]
-          : null;
+      const parent = PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1] : null;
       this.observeComponentCreation2((elmtId, isInitialRender) => {
-        Repeat(this.getItemRects(), this)
-          .each((repeatItem) => {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-              Stack.create();
-              Stack.backgroundColor(this.getEffectBackgroundColor(repeatItem));
-              Stack.borderRadius(this.getItemBorderRadius());
-              Stack.height(repeatItem.item.size.height);
-              Stack.position({
-                x: repeatItem.item.position.x,
-                y: repeatItem.item.position.y,
-              });
-              Stack.scale(this.getItemScale(repeatItem.index));
-              Stack.width(repeatItem.item.size.width);
-            }, Stack);
-            Stack.pop();
-          })
-          .render(isInitialRender);
+        Repeat(this.getItemRects(), this).each((repeatItem) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Stack.create();
+            Stack.backgroundColor(this.getEffectBackgroundColor(repeatItem));
+            Stack.borderRadius(this.getItemBorderRadius());
+            Stack.height(repeatItem.item.size.height);
+            Stack.position({
+              x: repeatItem.item.position.x,
+              y: repeatItem.item.position.y
+            });
+            Stack.scale(this.getItemScale(repeatItem.index));
+            Stack.width(repeatItem.item.size.width);
+          }, Stack);
+          Stack.pop();
+        }).render(isInitialRender);
       }, Repeat);
     };
-    this.initParam(
-      'items',
-      params && 'items' in params ? params.items : undefined
-    );
-    this.initParam(
-      'selectedIndex',
-      params && 'selectedIndex' in params ? params.selectedIndex : undefined
-    );
-    this.$selectedIndex =
-      '$selectedIndex' in params ? params.$selectedIndex : () => {};
-    this.initParam(
-      'theme',
-      params && 'theme' in params ? params.theme : undefined
-    );
-    this.onItemClicked =
-      'onItemClicked' in params ? params.onItemClicked : () => {};
-    this.initParam(
-      'itemMinFontScale',
-      params && 'itemMinFontScale' in params
-        ? params.itemMinFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemMaxFontScale',
-      params && 'itemMaxFontScale' in params
-        ? params.itemMaxFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemSpace',
-      params && 'itemSpace' in params ? params.itemSpace : undefined
-    );
-    this.initParam(
-      'itemFontColor',
-      params && 'itemFontColor' in params ? params.itemFontColor : undefined
-    );
-    this.initParam(
-      'itemSelectedFontColor',
-      params && 'itemSelectedFontColor' in params
-        ? params.itemSelectedFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemFontSize',
-      params && 'itemFontSize' in params ? params.itemFontSize : undefined
-    );
-    this.initParam(
-      'itemSelectedFontSize',
-      params && 'itemSelectedFontSize' in params
-        ? params.itemSelectedFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemFontWeight',
-      params && 'itemFontWeight' in params ? params.itemFontWeight : undefined
-    );
-    this.initParam(
-      'itemSelectedFontWeight',
-      params && 'itemSelectedFontWeight' in params
-        ? params.itemSelectedFontWeight
-        : undefined
-    );
-    this.initParam(
-      'itemBorderRadius',
-      params && 'itemBorderRadius' in params
-        ? params.itemBorderRadius
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedBackgroundColor',
-      params && 'itemSelectedBackgroundColor' in params
-        ? params.itemSelectedBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'itemIconSize',
-      params && 'itemIconSize' in params ? params.itemIconSize : undefined
-    );
-    this.initParam(
-      'itemIconFillColor',
-      params && 'itemIconFillColor' in params
-        ? params.itemIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedIconFillColor',
-      params && 'itemSelectedIconFillColor' in params
-        ? params.itemSelectedIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontSize',
-      params && 'itemSymbolFontSize' in params
-        ? params.itemSymbolFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontColor',
-      params && 'itemSymbolFontColor' in params
-        ? params.itemSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedSymbolFontColor',
-      params && 'itemSelectedSymbolFontColor' in params
-        ? params.itemSelectedSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemMinHeight',
-      params && 'itemMinHeight' in params ? params.itemMinHeight : undefined
-    );
-    this.initParam(
-      'itemPadding',
-      params && 'itemPadding' in params ? params.itemPadding : undefined
-    );
-    this.initParam(
-      'itemShadow',
-      params && 'itemShadow' in params ? params.itemShadow : undefined
-    );
-    this.initParam(
-      'buttonBackgroundColor',
-      params && 'buttonBackgroundColor' in params
-        ? params.buttonBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundBlurStyle',
-      params && 'buttonBackgroundBlurStyle' in params
-        ? params.buttonBackgroundBlurStyle
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundBlurStyleOptions',
-      params && 'buttonBackgroundBlurStyleOptions' in params
-        ? params.buttonBackgroundBlurStyleOptions
-        : undefined
-    );
-    this.initParam(
-      'buttonBackgroundEffect',
-      params && 'buttonBackgroundEffect' in params
-        ? params.buttonBackgroundEffect
-        : undefined
-    );
-    this.initParam(
-      'buttonBorderRadius',
-      params && 'buttonBorderRadius' in params
-        ? params.buttonBorderRadius
-        : undefined
-    );
-    this.initParam(
-      'buttonMinHeight',
-      params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined
-    );
-    this.initParam(
-      'buttonPadding',
-      params && 'buttonPadding' in params ? params.buttonPadding : undefined
-    );
-    this.initParam(
-      'languageDirection',
-      params && 'languageDirection' in params
-        ? params.languageDirection
-        : undefined
-    );
+    this.initParam("items", (params && "items" in params) ? params.items : undefined);
+    this.initParam("selectedIndex", (params && "selectedIndex" in params) ? params.selectedIndex : undefined);
+    this.$selectedIndex = "$selectedIndex" in params ? params.$selectedIndex : () => { };
+    this.initParam("theme", (params && "theme" in params) ? params.theme : undefined);
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.initParam("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.initParam("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.initParam("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.initParam("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.initParam("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.initParam("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.initParam("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.initParam("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.initParam("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.initParam("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.initParam("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.initParam("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.initParam("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.initParam("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.initParam("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.initParam("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.initParam("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.initParam("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.initParam("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.initParam("itemShadow", (params && "itemShadow" in params) ? params.itemShadow : undefined);
+    this.initParam("buttonBackgroundColor", (params && "buttonBackgroundColor" in params) ? params.buttonBackgroundColor : undefined);
+    this.initParam("buttonBackgroundBlurStyle", (params && "buttonBackgroundBlurStyle" in params) ? params.buttonBackgroundBlurStyle : undefined);
+    this.initParam("buttonBackgroundBlurStyleOptions", (params && "buttonBackgroundBlurStyleOptions" in params) ? params.buttonBackgroundBlurStyleOptions : undefined);
+    this.initParam("buttonBackgroundEffect", (params && "buttonBackgroundEffect" in params) ? params.buttonBackgroundEffect : undefined);
+    this.initParam("buttonBorderRadius", (params && "buttonBorderRadius" in params) ? params.buttonBorderRadius : undefined);
+    this.initParam("buttonMinHeight", (params && "buttonMinHeight" in params) ? params.buttonMinHeight : undefined);
+    this.initParam("buttonPadding", (params && "buttonPadding" in params) ? params.buttonPadding : undefined);
+    this.initParam("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
     this.itemRects = [];
     this.itemScale = 1;
     this.hoveredItemIndex = -1;
@@ -1872,6 +1305,48 @@ class f1 extends ViewV2 {
     this.focusGroupId = util.generateRandomUUID();
     this.finalizeConstruction();
   }
+  m5(params) {
+    this.n5("items", (params && "items" in params) ? params.items : undefined);
+    this.n5("selectedIndex", (params && "selectedIndex" in params) ? params.selectedIndex : undefined);
+    this.$selectedIndex = "$selectedIndex" in params ? params.$selectedIndex : () => { };
+    this.n5("theme", (params && "theme" in params) ? params.theme : undefined);
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.n5("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.n5("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.n5("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.n5("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.n5("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.n5("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.n5("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.n5("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.n5("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.n5("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.n5("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.n5("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.n5("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.n5("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.n5("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.n5("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.n5("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.n5("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.n5("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.n5("itemShadow", (params && "itemShadow" in params) ? params.itemShadow : undefined);
+    this.n5("buttonBackgroundColor", (params && "buttonBackgroundColor" in params) ? params.buttonBackgroundColor : undefined);
+    this.n5("buttonBackgroundBlurStyle", (params && "buttonBackgroundBlurStyle" in params) ? params.buttonBackgroundBlurStyle : undefined);
+    this.n5("buttonBackgroundBlurStyleOptions", (params && "buttonBackgroundBlurStyleOptions" in params) ? params.buttonBackgroundBlurStyleOptions : undefined);
+    this.n5("buttonBackgroundEffect", (params && "buttonBackgroundEffect" in params) ? params.buttonBackgroundEffect : undefined);
+    this.n5("buttonBorderRadius", (params && "buttonBorderRadius" in params) ? params.buttonBorderRadius : undefined);
+    this.n5("buttonMinHeight", (params && "buttonMinHeight" in params) ? params.buttonMinHeight : undefined);
+    this.n5("buttonPadding", (params && "buttonPadding" in params) ? params.buttonPadding : undefined);
+    this.n5("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
+    this.itemRects = [];
+    this.itemScale = 1;
+    this.hoveredItemIndex = -1;
+    this.mousePressedItemIndex = -1;
+    this.touchPressedItemIndex = -1;
+    this.o5("normalizedSelectedIndex");
+    this.o5("selectedItemRect");
+  }
   get normalizedSelectedIndex() {
     const items = this.getItems();
     return normalize(this.selectedIndex, 0, items.length - 1);
@@ -1880,9 +1355,7 @@ class f1 extends ViewV2 {
     return this.itemRects[this.normalizedSelectedIndex];
   }
   getFocusPriority(repeatItem) {
-    return this.normalizedSelectedIndex === repeatItem.index
-      ? FocusPriority.PREVIOUS
-      : FocusPriority.AUTO;
+    return this.normalizedSelectedIndex === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
   }
   isItemEnabled(index) {
     const items = this.getItems();
@@ -1910,17 +1383,14 @@ class f1 extends ViewV2 {
       Stack.clip(false);
       Stack.constraintSize({
         minWidth: '100%',
-        minHeight: this.getButtonMinHeight(),
+        minHeight: this.getButtonMinHeight()
       });
       Stack.direction(this.languageDirection);
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
       Stack.borderRadius(this.getButtonBorderRadius());
-      Stack.backgroundBlurStyle(
-        this.getButtonBackgroundBlurStyle(),
-        this.getButtonBackgroundBlurStyleOptions()
-      );
+      Stack.backgroundBlurStyle(this.getButtonBackgroundBlurStyle(), this.getButtonBackgroundBlurStyleOptions());
       Stack.clip(false);
       Stack.direction(this.languageDirection);
     }, Stack);
@@ -1932,7 +1402,7 @@ class f1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
   getItems() {
-    return this.items ?? e1;
+    return this.items ?? u4;
   }
   getItemBackplateShadow() {
     return this.itemShadow ?? this.theme.itemShadow;
@@ -1952,7 +1422,7 @@ class f1 extends ViewV2 {
   getItemScale(index) {
     const pressed = this.isPressed(index);
     const scale = pressed ? 0.95 : 1;
-    return { x: scale, y: scale };
+    return { x: scale, y: scale, };
   }
   isPressed(index) {
     return this.mousePressedItemIndex === index;
@@ -1989,28 +1459,16 @@ class f1 extends ViewV2 {
   }
   getEffectBackgroundColor(repeatItem) {
     if (repeatItem.index === this.mousePressedItemIndex) {
-      return {
-        id: -1,
-        type: 10001,
-        params: ['sys.color.interactive_click'],
-        bundleName: '__harDefaultBundleName__',
-        moduleName: '__harDefaultModuleName__',
-      };
+      return { "id": -1, "type": 10001, params: ['sys.color.interactive_click'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     }
     if (repeatItem.index === this.hoveredItemIndex) {
-      return {
-        id: -1,
-        type: 10001,
-        params: ['sys.color.interactive_hover'],
-        bundleName: '__harDefaultBundleName__',
-        moduleName: '__harDefaultModuleName__',
-      };
+      return { "id": -1, "type": 10001, params: ['sys.color.interactive_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     }
     return Color.Transparent;
   }
   getItemBorderRadius() {
-    if (this.itemBorderRadius && i1.getInstance().u1(this.itemBorderRadius)) {
-      return i1.getInstance().stringify(this.itemBorderRadius);
+    if (this.itemBorderRadius && y4.getInstance().p5(this.itemBorderRadius)) {
+      return y4.getInstance().stringify(this.itemBorderRadius);
     }
     return this.theme.itemBorderRadius;
   }
@@ -2021,11 +1479,8 @@ class f1 extends ViewV2 {
     return this.theme.itemSelectedBackgroundColor;
   }
   getItemSpace() {
-    if (
-      this.itemSpace &&
-      this.itemSpace.unit !== LengthUnit.PERCENT &&
-      i1.getInstance().u1(this.itemSpace)
-    ) {
+    if (this.itemSpace && this.itemSpace.unit !== LengthUnit.PERCENT
+      && y4.getInstance().p5(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -2042,37 +1497,24 @@ class f1 extends ViewV2 {
     return -1;
   }
   isPointOnRect(globalX, globalY, rect) {
-    return (
-      globalX >= rect.globalPosition.x &&
-      globalX <= rect.globalPosition.x + rect.size.width &&
-      globalY >= rect.globalPosition.y &&
-      globalY <= rect.globalPosition.y + rect.size.height
-    );
+    return globalX >= rect.globalPosition.x && globalX <= rect.globalPosition.x + rect.size.width &&
+      globalY >= rect.globalPosition.y && globalY <= rect.globalPosition.y + rect.size.height;
   }
   updateSelectedIndex(selectedIndex) {
-    if (
-      !this.isItemEnabled(selectedIndex) ||
-      selectedIndex === this.selectedIndex
-    ) {
+    if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex) {
       return;
     }
-    this.getUIContext().animateTo(
-      { curve: curves.springMotion(0.347, 0.99) },
-      () => {
-        this.$selectedIndex?.(selectedIndex);
-      }
-    );
+    this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+      this.$selectedIndex?.(selectedIndex);
+    });
   }
   updateItemScale(scale) {
     if (this.itemScale === scale) {
       return;
     }
-    this.getUIContext().animateTo(
-      { curve: curves.interpolatingSpring(10, 1, 410, 38) },
-      () => {
-        this.itemScale = scale;
-      }
-    );
+    this.getUIContext().animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+      this.itemScale = scale;
+    });
   }
   getItemAccessibilityDescription(repeatItem) {
     return repeatItem.item.accessibilityDescription;
@@ -2084,17 +1526,14 @@ class f1 extends ViewV2 {
     return repeatItem.index === this.normalizedSelectedIndex;
   }
   getButtonPadding() {
-    if (this.buttonPadding && i1.getInstance().u1(this.buttonPadding)) {
-      return i1.getInstance().stringify(this.buttonPadding);
+    if (this.buttonPadding && y4.getInstance().p5(this.buttonPadding)) {
+      return y4.getInstance().stringify(this.buttonPadding);
     }
     return this.theme.buttonPadding;
   }
   getButtonBorderRadius() {
-    if (
-      this.buttonBorderRadius &&
-      i1.getInstance().u1(this.buttonBorderRadius)
-    ) {
-      return i1.getInstance().stringify(this.buttonBorderRadius);
+    if (this.buttonBorderRadius && y4.getInstance().p5(this.buttonBorderRadius)) {
+      return y4.getInstance().stringify(this.buttonBorderRadius);
     }
     return this.theme.buttonBorderRadius;
   }
@@ -2105,123 +1544,108 @@ class f1 extends ViewV2 {
     return this.theme.buttonBackgroundColor;
   }
   getButtonMinHeight() {
-    if (this.buttonMinHeight && i1.getInstance().u1(this.buttonMinHeight)) {
-      return i1.getInstance().stringify(this.buttonMinHeight);
+    if (this.buttonMinHeight && y4.getInstance().p5(this.buttonMinHeight)) {
+      return y4.getInstance().stringify(this.buttonMinHeight);
     }
     const items = this.getItems();
-    return items.hasHybrid ? this.theme.l1 : this.theme.buttonMinHeight;
+    return items.hasHybrid ? this.theme.g5 : this.theme.buttonMinHeight;
   }
   updateStateVars(params) {
     if (params === undefined) {
       return;
     }
-    if ('items' in params) {
-      this.updateParam('items', params.items);
+    if ("items" in params) {
+      this.updateParam("items", params.items);
     }
-    if ('selectedIndex' in params) {
-      this.updateParam('selectedIndex', params.selectedIndex);
+    if ("selectedIndex" in params) {
+      this.updateParam("selectedIndex", params.selectedIndex);
     }
-    if ('theme' in params) {
-      this.updateParam('theme', params.theme);
+    if ("theme" in params) {
+      this.updateParam("theme", params.theme);
     }
-    if ('itemMinFontScale' in params) {
-      this.updateParam('itemMinFontScale', params.itemMinFontScale);
+    if ("itemMinFontScale" in params) {
+      this.updateParam("itemMinFontScale", params.itemMinFontScale);
     }
-    if ('itemMaxFontScale' in params) {
-      this.updateParam('itemMaxFontScale', params.itemMaxFontScale);
+    if ("itemMaxFontScale" in params) {
+      this.updateParam("itemMaxFontScale", params.itemMaxFontScale);
     }
-    if ('itemSpace' in params) {
-      this.updateParam('itemSpace', params.itemSpace);
+    if ("itemSpace" in params) {
+      this.updateParam("itemSpace", params.itemSpace);
     }
-    if ('itemFontColor' in params) {
-      this.updateParam('itemFontColor', params.itemFontColor);
+    if ("itemFontColor" in params) {
+      this.updateParam("itemFontColor", params.itemFontColor);
     }
-    if ('itemSelectedFontColor' in params) {
-      this.updateParam('itemSelectedFontColor', params.itemSelectedFontColor);
+    if ("itemSelectedFontColor" in params) {
+      this.updateParam("itemSelectedFontColor", params.itemSelectedFontColor);
     }
-    if ('itemFontSize' in params) {
-      this.updateParam('itemFontSize', params.itemFontSize);
+    if ("itemFontSize" in params) {
+      this.updateParam("itemFontSize", params.itemFontSize);
     }
-    if ('itemSelectedFontSize' in params) {
-      this.updateParam('itemSelectedFontSize', params.itemSelectedFontSize);
+    if ("itemSelectedFontSize" in params) {
+      this.updateParam("itemSelectedFontSize", params.itemSelectedFontSize);
     }
-    if ('itemFontWeight' in params) {
-      this.updateParam('itemFontWeight', params.itemFontWeight);
+    if ("itemFontWeight" in params) {
+      this.updateParam("itemFontWeight", params.itemFontWeight);
     }
-    if ('itemSelectedFontWeight' in params) {
-      this.updateParam('itemSelectedFontWeight', params.itemSelectedFontWeight);
+    if ("itemSelectedFontWeight" in params) {
+      this.updateParam("itemSelectedFontWeight", params.itemSelectedFontWeight);
     }
-    if ('itemBorderRadius' in params) {
-      this.updateParam('itemBorderRadius', params.itemBorderRadius);
+    if ("itemBorderRadius" in params) {
+      this.updateParam("itemBorderRadius", params.itemBorderRadius);
     }
-    if ('itemSelectedBackgroundColor' in params) {
-      this.updateParam(
-        'itemSelectedBackgroundColor',
-        params.itemSelectedBackgroundColor
-      );
+    if ("itemSelectedBackgroundColor" in params) {
+      this.updateParam("itemSelectedBackgroundColor", params.itemSelectedBackgroundColor);
     }
-    if ('itemIconSize' in params) {
-      this.updateParam('itemIconSize', params.itemIconSize);
+    if ("itemIconSize" in params) {
+      this.updateParam("itemIconSize", params.itemIconSize);
     }
-    if ('itemIconFillColor' in params) {
-      this.updateParam('itemIconFillColor', params.itemIconFillColor);
+    if ("itemIconFillColor" in params) {
+      this.updateParam("itemIconFillColor", params.itemIconFillColor);
     }
-    if ('itemSelectedIconFillColor' in params) {
-      this.updateParam(
-        'itemSelectedIconFillColor',
-        params.itemSelectedIconFillColor
-      );
+    if ("itemSelectedIconFillColor" in params) {
+      this.updateParam("itemSelectedIconFillColor", params.itemSelectedIconFillColor);
     }
-    if ('itemSymbolFontSize' in params) {
-      this.updateParam('itemSymbolFontSize', params.itemSymbolFontSize);
+    if ("itemSymbolFontSize" in params) {
+      this.updateParam("itemSymbolFontSize", params.itemSymbolFontSize);
     }
-    if ('itemSymbolFontColor' in params) {
-      this.updateParam('itemSymbolFontColor', params.itemSymbolFontColor);
+    if ("itemSymbolFontColor" in params) {
+      this.updateParam("itemSymbolFontColor", params.itemSymbolFontColor);
     }
-    if ('itemSelectedSymbolFontColor' in params) {
-      this.updateParam(
-        'itemSelectedSymbolFontColor',
-        params.itemSelectedSymbolFontColor
-      );
+    if ("itemSelectedSymbolFontColor" in params) {
+      this.updateParam("itemSelectedSymbolFontColor", params.itemSelectedSymbolFontColor);
     }
-    if ('itemMinHeight' in params) {
-      this.updateParam('itemMinHeight', params.itemMinHeight);
+    if ("itemMinHeight" in params) {
+      this.updateParam("itemMinHeight", params.itemMinHeight);
     }
-    if ('itemPadding' in params) {
-      this.updateParam('itemPadding', params.itemPadding);
+    if ("itemPadding" in params) {
+      this.updateParam("itemPadding", params.itemPadding);
     }
-    if ('itemShadow' in params) {
-      this.updateParam('itemShadow', params.itemShadow);
+    if ("itemShadow" in params) {
+      this.updateParam("itemShadow", params.itemShadow);
     }
-    if ('buttonBackgroundColor' in params) {
-      this.updateParam('buttonBackgroundColor', params.buttonBackgroundColor);
+    if ("buttonBackgroundColor" in params) {
+      this.updateParam("buttonBackgroundColor", params.buttonBackgroundColor);
     }
-    if ('buttonBackgroundBlurStyle' in params) {
-      this.updateParam(
-        'buttonBackgroundBlurStyle',
-        params.buttonBackgroundBlurStyle
-      );
+    if ("buttonBackgroundBlurStyle" in params) {
+      this.updateParam("buttonBackgroundBlurStyle", params.buttonBackgroundBlurStyle);
     }
-    if ('buttonBackgroundBlurStyleOptions' in params) {
-      this.updateParam(
-        'buttonBackgroundBlurStyleOptions',
-        params.buttonBackgroundBlurStyleOptions
-      );
+    if ("buttonBackgroundBlurStyleOptions" in params) {
+      this.updateParam("buttonBackgroundBlurStyleOptions", params.buttonBackgroundBlurStyleOptions);
     }
-    if ('buttonBackgroundEffect' in params) {
-      this.updateParam('buttonBackgroundEffect', params.buttonBackgroundEffect);
+    if ("buttonBackgroundEffect" in params) {
+      this.updateParam("buttonBackgroundEffect", params.buttonBackgroundEffect);
     }
-    if ('buttonBorderRadius' in params) {
-      this.updateParam('buttonBorderRadius', params.buttonBorderRadius);
+    if ("buttonBorderRadius" in params) {
+      this.updateParam("buttonBorderRadius", params.buttonBorderRadius);
     }
-    if ('buttonMinHeight' in params) {
-      this.updateParam('buttonMinHeight', params.buttonMinHeight);
+    if ("buttonMinHeight" in params) {
+      this.updateParam("buttonMinHeight", params.buttonMinHeight);
     }
-    if ('buttonPadding' in params) {
-      this.updateParam('buttonPadding', params.buttonPadding);
+    if ("buttonPadding" in params) {
+      this.updateParam("buttonPadding", params.buttonPadding);
     }
-    if ('languageDirection' in params) {
-      this.updateParam('languageDirection', params.languageDirection);
+    if ("languageDirection" in params) {
+      this.updateParam("languageDirection", params.languageDirection);
     }
   }
   rerender() {
@@ -2230,506 +1654,369 @@ class f1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-o([Param], f1.prototype, 'items', void 0);
-o([Param], f1.prototype, 'selectedIndex', void 0);
-o([Event], f1.prototype, '$selectedIndex', void 0);
-o([Param], f1.prototype, 'theme', void 0);
-o([Event], f1.prototype, 'onItemClicked', void 0);
-o([Param], f1.prototype, 'itemMinFontScale', void 0);
-o([Param], f1.prototype, 'itemMaxFontScale', void 0);
-o([Param], f1.prototype, 'itemSpace', void 0);
-o([Param], f1.prototype, 'itemFontColor', void 0);
-o([Param], f1.prototype, 'itemSelectedFontColor', void 0);
-o([Param], f1.prototype, 'itemFontSize', void 0);
-o([Param], f1.prototype, 'itemSelectedFontSize', void 0);
-o([Param], f1.prototype, 'itemFontWeight', void 0);
-o([Param], f1.prototype, 'itemSelectedFontWeight', void 0);
-o([Param], f1.prototype, 'itemBorderRadius', void 0);
-o([Param], f1.prototype, 'itemSelectedBackgroundColor', void 0);
-o([Param], f1.prototype, 'itemIconSize', void 0);
-o([Param], f1.prototype, 'itemIconFillColor', void 0);
-o([Param], f1.prototype, 'itemSelectedIconFillColor', void 0);
-o([Param], f1.prototype, 'itemSymbolFontSize', void 0);
-o([Param], f1.prototype, 'itemSymbolFontColor', void 0);
-o([Param], f1.prototype, 'itemSelectedSymbolFontColor', void 0);
-o([Param], f1.prototype, 'itemMinHeight', void 0);
-o([Param], f1.prototype, 'itemPadding', void 0);
-o([Param], f1.prototype, 'itemShadow', void 0);
-o([Param], f1.prototype, 'buttonBackgroundColor', void 0);
-o([Param], f1.prototype, 'buttonBackgroundBlurStyle', void 0);
-o([Param], f1.prototype, 'buttonBackgroundBlurStyleOptions', void 0);
-o([Param], f1.prototype, 'buttonBackgroundEffect', void 0);
-o([Param], f1.prototype, 'buttonBorderRadius', void 0);
-o([Param], f1.prototype, 'buttonMinHeight', void 0);
-o([Param], f1.prototype, 'buttonPadding', void 0);
-o([Param], f1.prototype, 'languageDirection', void 0);
-o([Local], f1.prototype, 'itemRects', void 0);
-o([Local], f1.prototype, 'itemScale', void 0);
-o([Local], f1.prototype, 'hoveredItemIndex', void 0);
-o([Local], f1.prototype, 'mousePressedItemIndex', void 0);
-o([Local], f1.prototype, 'touchPressedItemIndex', void 0);
-o([Computed], f1.prototype, 'normalizedSelectedIndex', null);
-o([Computed], f1.prototype, 'selectedItemRect', null);
-const g1 = {
-  itemBorderRadius: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_multi_corner_radius'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemBackgroundColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.segment_button_v2_multi_capsule_button_background'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedBackgroundColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.comp_background_emphasize'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+j([
+  Param
+], v4.prototype, "items", void 0);
+j([
+  Param
+], v4.prototype, "selectedIndex", void 0);
+j([
+  Event
+], v4.prototype, "$selectedIndex", void 0);
+j([
+  Param
+], v4.prototype, "theme", void 0);
+j([
+  Event
+], v4.prototype, "onItemClicked", void 0);
+j([
+  Param
+], v4.prototype, "itemMinFontScale", void 0);
+j([
+  Param
+], v4.prototype, "itemMaxFontScale", void 0);
+j([
+  Param
+], v4.prototype, "itemSpace", void 0);
+j([
+  Param
+], v4.prototype, "itemFontColor", void 0);
+j([
+  Param
+], v4.prototype, "itemSelectedFontColor", void 0);
+j([
+  Param
+], v4.prototype, "itemFontSize", void 0);
+j([
+  Param
+], v4.prototype, "itemSelectedFontSize", void 0);
+j([
+  Param
+], v4.prototype, "itemFontWeight", void 0);
+j([
+  Param
+], v4.prototype, "itemSelectedFontWeight", void 0);
+j([
+  Param
+], v4.prototype, "itemBorderRadius", void 0);
+j([
+  Param
+], v4.prototype, "itemSelectedBackgroundColor", void 0);
+j([
+  Param
+], v4.prototype, "itemIconSize", void 0);
+j([
+  Param
+], v4.prototype, "itemIconFillColor", void 0);
+j([
+  Param
+], v4.prototype, "itemSelectedIconFillColor", void 0);
+j([
+  Param
+], v4.prototype, "itemSymbolFontSize", void 0);
+j([
+  Param
+], v4.prototype, "itemSymbolFontColor", void 0);
+j([
+  Param
+], v4.prototype, "itemSelectedSymbolFontColor", void 0);
+j([
+  Param
+], v4.prototype, "itemMinHeight", void 0);
+j([
+  Param
+], v4.prototype, "itemPadding", void 0);
+j([
+  Param
+], v4.prototype, "itemShadow", void 0);
+j([
+  Param
+], v4.prototype, "buttonBackgroundColor", void 0);
+j([
+  Param
+], v4.prototype, "buttonBackgroundBlurStyle", void 0);
+j([
+  Param
+], v4.prototype, "buttonBackgroundBlurStyleOptions", void 0);
+j([
+  Param
+], v4.prototype, "buttonBackgroundEffect", void 0);
+j([
+  Param
+], v4.prototype, "buttonBorderRadius", void 0);
+j([
+  Param
+], v4.prototype, "buttonMinHeight", void 0);
+j([
+  Param
+], v4.prototype, "buttonPadding", void 0);
+j([
+  Param
+], v4.prototype, "languageDirection", void 0);
+j([
+  Local
+], v4.prototype, "itemRects", void 0);
+j([
+  Local
+], v4.prototype, "itemScale", void 0);
+j([
+  Local
+], v4.prototype, "hoveredItemIndex", void 0);
+j([
+  Local
+], v4.prototype, "mousePressedItemIndex", void 0);
+j([
+  Local
+], v4.prototype, "touchPressedItemIndex", void 0);
+j([
+  Computed
+], v4.prototype, "normalizedSelectedIndex", null);
+j([
+  Computed
+], v4.prototype, "selectedItemRect", null);
+const w4 = {
+  itemBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_multi_corner_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.segment_button_v2_multi_capsule_button_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.comp_background_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemSpace: LengthMetrics.vp(1),
-  itemFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_on_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_on_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemFontWeight: FontWeight.Medium,
   itemSelectedFontWeight: FontWeight.Medium,
-  itemIconFillColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.icon_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedIconFillColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_on_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSymbolFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_secondary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSelectedSymbolFontColor: {
-    id: -1,
-    type: 10001,
-    params: ['sys.color.font_on_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemFontSize: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.ohos_id_text_size_button2'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
+  itemIconFillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedIconFillColor: { "id": -1, "type": 10001, params: ['sys.color.font_on_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSymbolFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemSelectedSymbolFontColor: { "id": -1, "type": 10001, params: ['sys.color.font_on_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemFontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
   itemIconSize: 24,
   itemSymbolFontSize: 20,
   itemPadding: {
-    top: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level2'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    bottom: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level2'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    start: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level4'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
-    end: LengthMetrics.resource({
-      id: -1,
-      type: 10002,
-      params: ['sys.float.padding_level4'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    }),
+    top: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    bottom: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+    end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
   },
-  itemMinHeight: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_multi_singleline_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  m1: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_v2_multi_doubleline_height'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemMaxFontScale: t,
-  n1: t,
-  o1: u,
-  itemMinFontScale: a1,
-  q1: a1,
-  s1: b1,
+  itemMinHeight: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_multi_singleline_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  h5: { "id": -1, "type": 10002, params: ['sys.float.segment_button_v2_multi_doubleline_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+  itemMaxFontScale: n4,
+  i5: n4,
+  j5: o4,
+  itemMinFontScale: q4,
+  k5: q4,
+  l5: r4,
 };
 export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
-  constructor(
-    parent,
-    params,
-    __localStorage,
-    elmtId = -1,
-    paramsLambda,
-    extraInfo
-  ) {
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
-    this.initParam(
-      'items',
-      params && 'items' in params ? params.items : undefined
-    );
-    this.initParam(
-      'selectedIndexes',
-      params && 'selectedIndexes' in params ? params.selectedIndexes : undefined
-    );
-    this.$selectedIndexes =
-      '$selectedIndexes' in params ? params.$selectedIndexes : () => {};
-    this.onItemClicked =
-      'onItemClicked' in params ? params.onItemClicked : () => {};
-    this.initParam(
-      'itemMinFontScale',
-      params && 'itemMinFontScale' in params
-        ? params.itemMinFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemMaxFontScale',
-      params && 'itemMaxFontScale' in params
-        ? params.itemMaxFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemSpace',
-      params && 'itemSpace' in params ? params.itemSpace : undefined
-    );
-    this.initParam(
-      'itemFontColor',
-      params && 'itemFontColor' in params ? params.itemFontColor : undefined
-    );
-    this.initParam(
-      'itemSelectedFontColor',
-      params && 'itemSelectedFontColor' in params
-        ? params.itemSelectedFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemFontSize',
-      params && 'itemFontSize' in params ? params.itemFontSize : undefined
-    );
-    this.initParam(
-      'itemSelectedFontSize',
-      params && 'itemSelectedFontSize' in params
-        ? params.itemSelectedFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemFontWeight',
-      params && 'itemFontWeight' in params ? params.itemFontWeight : undefined
-    );
-    this.initParam(
-      'itemSelectedFontWeight',
-      params && 'itemSelectedFontWeight' in params
-        ? params.itemSelectedFontWeight
-        : undefined
-    );
-    this.initParam(
-      'itemBorderRadius',
-      params && 'itemBorderRadius' in params
-        ? params.itemBorderRadius
-        : undefined
-    );
-    this.initParam(
-      'itemBackgroundColor',
-      params && 'itemBackgroundColor' in params
-        ? params.itemBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'itemBackgroundEffect',
-      params && 'itemBackgroundEffect' in params
-        ? params.itemBackgroundEffect
-        : undefined
-    );
-    this.initParam(
-      'itemBackgroundBlurStyle',
-      params && 'itemBackgroundBlurStyle' in params
-        ? params.itemBackgroundBlurStyle
-        : undefined
-    );
-    this.initParam(
-      'itemBackgroundBlurStyleOptions',
-      params && 'itemBackgroundBlurStyleOptions' in params
-        ? params.itemBackgroundBlurStyleOptions
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedBackgroundColor',
-      params && 'itemSelectedBackgroundColor' in params
-        ? params.itemSelectedBackgroundColor
-        : undefined
-    );
-    this.initParam(
-      'itemIconSize',
-      params && 'itemIconSize' in params ? params.itemIconSize : undefined
-    );
-    this.initParam(
-      'itemIconFillColor',
-      params && 'itemIconFillColor' in params
-        ? params.itemIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedIconFillColor',
-      params && 'itemSelectedIconFillColor' in params
-        ? params.itemSelectedIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontSize',
-      params && 'itemSymbolFontSize' in params
-        ? params.itemSymbolFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontColor',
-      params && 'itemSymbolFontColor' in params
-        ? params.itemSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedSymbolFontColor',
-      params && 'itemSelectedSymbolFontColor' in params
-        ? params.itemSelectedSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemMinHeight',
-      params && 'itemMinHeight' in params ? params.itemMinHeight : undefined
-    );
-    this.initParam(
-      'itemPadding',
-      params && 'itemPadding' in params ? params.itemPadding : undefined
-    );
-    this.initParam(
-      'languageDirection',
-      params && 'languageDirection' in params
-        ? params.languageDirection
-        : undefined
-    );
-    this.theme = g1;
+    this.initParam("items", (params && "items" in params) ? params.items : undefined);
+    this.initParam("selectedIndexes", (params && "selectedIndexes" in params) ? params.selectedIndexes : undefined);
+    this.$selectedIndexes = "$selectedIndexes" in params ? params.$selectedIndexes : () => { };
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.initParam("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.initParam("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.initParam("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.initParam("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.initParam("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.initParam("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.initParam("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.initParam("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.initParam("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.initParam("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.initParam("itemBackgroundColor", (params && "itemBackgroundColor" in params) ? params.itemBackgroundColor : undefined);
+    this.initParam("itemBackgroundEffect", (params && "itemBackgroundEffect" in params) ? params.itemBackgroundEffect : undefined);
+    this.initParam("itemBackgroundBlurStyle", (params && "itemBackgroundBlurStyle" in params) ? params.itemBackgroundBlurStyle : undefined);
+    this.initParam("itemBackgroundBlurStyleOptions", (params && "itemBackgroundBlurStyleOptions" in params) ? params.itemBackgroundBlurStyleOptions : undefined);
+    this.initParam("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.initParam("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.initParam("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.initParam("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.initParam("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.initParam("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.initParam("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.initParam("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.initParam("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.initParam("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
+    this.theme = w4;
     this.focusGroupId = util.generateRandomUUID();
     this.finalizeConstruction();
+  }
+  m5(params) {
+    this.n5("items", (params && "items" in params) ? params.items : undefined);
+    this.n5("selectedIndexes", (params && "selectedIndexes" in params) ? params.selectedIndexes : undefined);
+    this.$selectedIndexes = "$selectedIndexes" in params ? params.$selectedIndexes : () => { };
+    this.onItemClicked = "onItemClicked" in params ? params.onItemClicked : () => { };
+    this.n5("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.n5("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.n5("itemSpace", (params && "itemSpace" in params) ? params.itemSpace : undefined);
+    this.n5("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.n5("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.n5("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.n5("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.n5("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.n5("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.n5("itemBorderRadius", (params && "itemBorderRadius" in params) ? params.itemBorderRadius : undefined);
+    this.n5("itemBackgroundColor", (params && "itemBackgroundColor" in params) ? params.itemBackgroundColor : undefined);
+    this.n5("itemBackgroundEffect", (params && "itemBackgroundEffect" in params) ? params.itemBackgroundEffect : undefined);
+    this.n5("itemBackgroundBlurStyle", (params && "itemBackgroundBlurStyle" in params) ? params.itemBackgroundBlurStyle : undefined);
+    this.n5("itemBackgroundBlurStyleOptions", (params && "itemBackgroundBlurStyleOptions" in params) ? params.itemBackgroundBlurStyleOptions : undefined);
+    this.n5("itemSelectedBackgroundColor", (params && "itemSelectedBackgroundColor" in params) ? params.itemSelectedBackgroundColor : undefined);
+    this.n5("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.n5("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.n5("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.n5("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.n5("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.n5("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.n5("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.n5("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.n5("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
-      Flex.create({
-        alignItems: ItemAlign.Stretch,
-        space: { main: this.getItemSpace() },
-      });
+      Flex.create({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } });
       Flex.clip(false);
       Flex.direction(this.languageDirection);
       Flex.focusScopeId(this.focusGroupId, true);
     }, Flex);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
-      Repeat(this.getItems(), this)
-        .each((repeatItem) => {
-          this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithChild({ type: ButtonType.Normal });
-            Button.accessibilityGroup(true);
-            Button.accessibilityChecked(this.isSelected(repeatItem));
-            Button.accessibilityText(this.getItemAccessibilityText(repeatItem));
-            Button.accessibilityDescription(
-              this.getItemAccessibilityDescription(repeatItem)
-            );
-            Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
-            Button.backgroundColor(this.getItemBackgroundColor(repeatItem));
-            Button.backgroundEffect(this.itemBackgroundEffect);
-            Button.borderRadius(this.getItemButtonBorderRadius(repeatItem));
-            Button.constraintSize({ minHeight: this.getItemMinHeight() });
-            Button.direction(this.languageDirection);
-            Button.enabled(repeatItem.item.enabled);
-            Button.focusScopePriority(
-              this.focusGroupId,
-              this.getFocusPriority(repeatItem)
-            );
-            Button.layoutWeight(1);
-            Button.padding(0);
-            Button.onClick(() => {
-              this.onItemClicked?.(repeatItem.index);
-              let selection;
-              const items = this.getItems();
-              const selectedIndexes = this.selectedIndexes ?? [];
-              if (this.isSelected(repeatItem)) {
-                selection = selectedIndexes.filter((index) => {
-                  if (index < 0 || index > items.length - 1) {
-                    return false;
-                  }
-                  return index !== repeatItem.index;
-                });
-              } else {
-                selection = selectedIndexes
-                  .filter((index) => index >= 0 && index <= items.length - 1)
-                  .concat(repeatItem.index);
-              }
-              this.$selectedIndexes(selection);
-            });
-          }, Button);
-          this.observeComponentCreation2((elmtId, isInitialRender) => {
-            __Common__.create();
-            __Common__.borderRadius(this.getItemButtonBorderRadius(repeatItem));
-            __Common__.backgroundBlurStyle(
-              this.getItemBackgroundBlurStyle(),
-              this.getItemBackgroundBlurStyleOptions()
-            );
-            __Common__.direction(this.languageDirection);
-          }, __Common__);
-          {
-            this.observeComponentCreation2(
-              (elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                  let componentCall = new h1(
-                    this,
-                    {
-                      theme: this.theme,
-                      item: repeatItem.item,
-                      selected: this.isSelected(repeatItem),
-                      hasHybrid: this.getItems().hasHybrid,
-                      itemMinFontScale: this.itemMinFontScale,
-                      itemMaxFontScale: this.itemMaxFontScale,
-                      itemFontColor: this.itemFontColor,
-                      itemSelectedFontColor: this.itemSelectedFontColor,
-                      itemFontSize: this.itemFontSize,
-                      itemSelectedFontSize: this.itemSelectedFontSize,
-                      itemFontWeight: this.itemFontWeight,
-                      itemSelectedFontWeight: this.itemSelectedFontWeight,
-                      itemIconSize: this.itemIconSize,
-                      itemIconFillColor: this.itemIconFillColor,
-                      itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                      itemSymbolFontSize: this.itemSymbolFontSize,
-                      itemSymbolFontColor: this.itemSymbolFontColor,
-                      itemSelectedSymbolFontColor:
-                        this.itemSelectedSymbolFontColor,
-                      itemMinHeight: this.itemMinHeight,
-                      itemPadding: this.itemPadding,
-                      languageDirection: this.languageDirection,
-                    },
-                    undefined,
-                    elmtId,
-                    () => {},
-                    {
-                      page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                      line: 1108,
-                      t1: 13,
-                    }
-                  );
-                  ViewV2.create(componentCall);
-                  let paramsLambda = () => {
-                    return {
-                      theme: this.theme,
-                      item: repeatItem.item,
-                      selected: this.isSelected(repeatItem),
-                      hasHybrid: this.getItems().hasHybrid,
-                      itemMinFontScale: this.itemMinFontScale,
-                      itemMaxFontScale: this.itemMaxFontScale,
-                      itemFontColor: this.itemFontColor,
-                      itemSelectedFontColor: this.itemSelectedFontColor,
-                      itemFontSize: this.itemFontSize,
-                      itemSelectedFontSize: this.itemSelectedFontSize,
-                      itemFontWeight: this.itemFontWeight,
-                      itemSelectedFontWeight: this.itemSelectedFontWeight,
-                      itemIconSize: this.itemIconSize,
-                      itemIconFillColor: this.itemIconFillColor,
-                      itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                      itemSymbolFontSize: this.itemSymbolFontSize,
-                      itemSymbolFontColor: this.itemSymbolFontColor,
-                      itemSelectedSymbolFontColor:
-                        this.itemSelectedSymbolFontColor,
-                      itemMinHeight: this.itemMinHeight,
-                      itemPadding: this.itemPadding,
-                      languageDirection: this.languageDirection,
-                    };
-                  };
-                  componentCall.paramsGenerator_ = paramsLambda;
-                } else {
-                  this.updateStateVarsOfChildByElmtId(elmtId, {
-                    theme: this.theme,
-                    item: repeatItem.item,
-                    selected: this.isSelected(repeatItem),
-                    hasHybrid: this.getItems().hasHybrid,
-                    itemMinFontScale: this.itemMinFontScale,
-                    itemMaxFontScale: this.itemMaxFontScale,
-                    itemFontColor: this.itemFontColor,
-                    itemSelectedFontColor: this.itemSelectedFontColor,
-                    itemFontSize: this.itemFontSize,
-                    itemSelectedFontSize: this.itemSelectedFontSize,
-                    itemFontWeight: this.itemFontWeight,
-                    itemSelectedFontWeight: this.itemSelectedFontWeight,
-                    itemIconSize: this.itemIconSize,
-                    itemIconFillColor: this.itemIconFillColor,
-                    itemSelectedIconFillColor: this.itemSelectedIconFillColor,
-                    itemSymbolFontSize: this.itemSymbolFontSize,
-                    itemSymbolFontColor: this.itemSymbolFontColor,
-                    itemSelectedSymbolFontColor:
-                      this.itemSelectedSymbolFontColor,
-                    itemMinHeight: this.itemMinHeight,
-                    itemPadding: this.itemPadding,
-                    languageDirection: this.languageDirection,
-                  });
+      Repeat(this.getItems(), this).each((repeatItem) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+          Button.createWithChild({ type: ButtonType.Normal });
+          Button.accessibilityGroup(true);
+          Button.accessibilityChecked(this.isSelected(repeatItem));
+          Button.accessibilityText(this.getItemAccessibilityText(repeatItem));
+          Button.accessibilityDescription(this.getItemAccessibilityDescription(repeatItem));
+          Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
+          Button.backgroundColor(this.getItemBackgroundColor(repeatItem));
+          Button.backgroundEffect(this.itemBackgroundEffect);
+          Button.borderRadius(this.getItemButtonBorderRadius(repeatItem));
+          Button.constraintSize({ minHeight: this.getItemMinHeight() });
+          Button.direction(this.languageDirection);
+          Button.enabled(repeatItem.item.enabled);
+          Button.focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem));
+          Button.layoutWeight(1);
+          Button.padding(0);
+          Button.onClick(() => {
+            this.onItemClicked?.(repeatItem.index);
+            let selection;
+            const items = this.getItems();
+            const selectedIndexes = this.selectedIndexes ?? [];
+            if (this.isSelected(repeatItem)) {
+              selection = selectedIndexes.filter((index) => {
+                if (index < 0 || index > items.length - 1) {
+                  return false;
                 }
-              },
-              { name: 'SegmentButtonV2ItemContent' }
-            );
-          }
-          __Common__.pop();
-          Button.pop();
-        })
-        .key(j(this.focusGroupId))
-        .render(isInitialRender);
+                return index !== repeatItem.index;
+              });
+            }
+            else {
+              selection = selectedIndexes
+                .filter((index) => index >= 0 && index <= items.length - 1)
+                .concat(repeatItem.index);
+            }
+            this.$selectedIndexes(selection);
+          });
+        }, Button);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+          __Common__.create();
+          __Common__.borderRadius(this.getItemButtonBorderRadius(repeatItem));
+          __Common__.backgroundBlurStyle(this.getItemBackgroundBlurStyle(), this.getItemBackgroundBlurStyleOptions());
+          __Common__.direction(this.languageDirection);
+        }, __Common__);
+        {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            if (isInitialRender) {
+              let componentCall = new x4(this, {
+                theme: this.theme,
+                item: repeatItem.item,
+                selected: this.isSelected(repeatItem),
+                hasHybrid: this.getItems().hasHybrid,
+                itemMinFontScale: this.itemMinFontScale,
+                itemMaxFontScale: this.itemMaxFontScale,
+                itemFontColor: this.itemFontColor,
+                itemSelectedFontColor: this.itemSelectedFontColor,
+                itemFontSize: this.itemFontSize,
+                itemSelectedFontSize: this.itemSelectedFontSize,
+                itemFontWeight: this.itemFontWeight,
+                itemSelectedFontWeight: this.itemSelectedFontWeight,
+                itemIconSize: this.itemIconSize,
+                itemIconFillColor: this.itemIconFillColor,
+                itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+                itemSymbolFontSize: this.itemSymbolFontSize,
+                itemSymbolFontColor: this.itemSymbolFontColor,
+                itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+                itemMinHeight: this.itemMinHeight,
+                itemPadding: this.itemPadding,
+                languageDirection: this.languageDirection,
+              }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 1108, i4: 13 });
+              ViewV2.create(componentCall);
+              let paramsLambda = () => {
+                return {
+                  theme: this.theme,
+                  item: repeatItem.item,
+                  selected: this.isSelected(repeatItem),
+                  hasHybrid: this.getItems().hasHybrid,
+                  itemMinFontScale: this.itemMinFontScale,
+                  itemMaxFontScale: this.itemMaxFontScale,
+                  itemFontColor: this.itemFontColor,
+                  itemSelectedFontColor: this.itemSelectedFontColor,
+                  itemFontSize: this.itemFontSize,
+                  itemSelectedFontSize: this.itemSelectedFontSize,
+                  itemFontWeight: this.itemFontWeight,
+                  itemSelectedFontWeight: this.itemSelectedFontWeight,
+                  itemIconSize: this.itemIconSize,
+                  itemIconFillColor: this.itemIconFillColor,
+                  itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+                  itemSymbolFontSize: this.itemSymbolFontSize,
+                  itemSymbolFontColor: this.itemSymbolFontColor,
+                  itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+                  itemMinHeight: this.itemMinHeight,
+                  itemPadding: this.itemPadding,
+                  languageDirection: this.languageDirection
+                };
+              };
+              componentCall.paramsGenerator_ = paramsLambda;
+            }
+            else {
+              this.updateStateVarsOfChildByElmtId(elmtId, {
+                theme: this.theme,
+                item: repeatItem.item,
+                selected: this.isSelected(repeatItem),
+                hasHybrid: this.getItems().hasHybrid,
+                itemMinFontScale: this.itemMinFontScale,
+                itemMaxFontScale: this.itemMaxFontScale,
+                itemFontColor: this.itemFontColor,
+                itemSelectedFontColor: this.itemSelectedFontColor,
+                itemFontSize: this.itemFontSize,
+                itemSelectedFontSize: this.itemSelectedFontSize,
+                itemFontWeight: this.itemFontWeight,
+                itemSelectedFontWeight: this.itemSelectedFontWeight,
+                itemIconSize: this.itemIconSize,
+                itemIconFillColor: this.itemIconFillColor,
+                itemSelectedIconFillColor: this.itemSelectedIconFillColor,
+                itemSymbolFontSize: this.itemSymbolFontSize,
+                itemSymbolFontColor: this.itemSymbolFontColor,
+                itemSelectedSymbolFontColor: this.itemSelectedSymbolFontColor,
+                itemMinHeight: this.itemMinHeight,
+                itemPadding: this.itemPadding,
+                languageDirection: this.languageDirection
+              });
+            }
+          }, { name: "SegmentButtonV2ItemContent" });
+        }
+        __Common__.pop();
+        Button.pop();
+      })
+        .key(l4(this.focusGroupId)).render(isInitialRender);
     }, Repeat);
     Flex.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
   getFocusPriority(repeatItem) {
-    return Math.min(...this.selectedIndexes) === repeatItem.index
-      ? FocusPriority.PREVIOUS
-      : FocusPriority.AUTO;
+    return Math.min(...this.selectedIndexes) === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
   }
   getItems() {
-    return this.items ?? e1;
+    return this.items ?? u4;
   }
   getItemBackgroundBlurStyleOptions() {
     if (this.itemBackgroundEffect) {
@@ -2750,27 +2037,21 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     return repeatItem.item.accessibilityText;
   }
   getItemSpace() {
-    if (
-      this.itemSpace &&
-      this.itemSpace.unit !== LengthUnit.PERCENT &&
-      i1.getInstance().u1(this.itemSpace)
-    ) {
+    if (this.itemSpace && this.itemSpace.unit !== LengthUnit.PERCENT
+      && y4.getInstance().p5(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
   }
   getItemMinHeight() {
-    if (this.itemMinHeight && i1.getInstance().u1(this.itemMinHeight)) {
-      return i1.getInstance().stringify(this.itemMinHeight);
+    if (this.itemMinHeight && y4.getInstance().p5(this.itemMinHeight)) {
+      return y4.getInstance().stringify(this.itemMinHeight);
     }
     return this.theme.itemMinHeight;
   }
   getItemBackgroundColor(repeatItem) {
     if (this.isSelected(repeatItem)) {
-      return (
-        this.itemSelectedBackgroundColor?.color ??
-        this.theme.itemSelectedBackgroundColor
-      );
+      return this.itemSelectedBackgroundColor?.color ?? this.theme.itemSelectedBackgroundColor;
     }
     return this.itemBackgroundColor?.color ?? this.theme.itemBackgroundColor;
   }
@@ -2780,24 +2061,20 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
   }
   getItemButtonBorderRadius(repeatItem) {
     const items = this.getItems();
-    const j1 = LengthMetrics.vp(0);
+    const b5 = LengthMetrics.vp(0);
     const borderRadiuses = {
-      topStart: j1,
-      bottomStart: j1,
-      topEnd: j1,
-      bottomEnd: j1,
+      topStart: b5,
+      bottomStart: b5,
+      topEnd: b5,
+      bottomEnd: b5,
     };
     if (repeatItem.index === 0) {
-      const borderRadius =
-        this.itemBorderRadius ??
-        LengthMetrics.resource(this.theme.itemBorderRadius);
+      const borderRadius = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
       borderRadiuses.topStart = borderRadius;
       borderRadiuses.bottomStart = borderRadius;
     }
     if (repeatItem.index === items.length - 1) {
-      const borderRadius =
-        this.itemBorderRadius ??
-        LengthMetrics.resource(this.theme.itemBorderRadius);
+      const borderRadius = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
       borderRadiuses.topEnd = borderRadius;
       borderRadiuses.bottomEnd = borderRadius;
     }
@@ -2807,98 +2084,83 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     if (params === undefined) {
       return;
     }
-    if ('items' in params) {
-      this.updateParam('items', params.items);
+    if ("items" in params) {
+      this.updateParam("items", params.items);
     }
-    if ('selectedIndexes' in params) {
-      this.updateParam('selectedIndexes', params.selectedIndexes);
+    if ("selectedIndexes" in params) {
+      this.updateParam("selectedIndexes", params.selectedIndexes);
     }
-    if ('itemMinFontScale' in params) {
-      this.updateParam('itemMinFontScale', params.itemMinFontScale);
+    if ("itemMinFontScale" in params) {
+      this.updateParam("itemMinFontScale", params.itemMinFontScale);
     }
-    if ('itemMaxFontScale' in params) {
-      this.updateParam('itemMaxFontScale', params.itemMaxFontScale);
+    if ("itemMaxFontScale" in params) {
+      this.updateParam("itemMaxFontScale", params.itemMaxFontScale);
     }
-    if ('itemSpace' in params) {
-      this.updateParam('itemSpace', params.itemSpace);
+    if ("itemSpace" in params) {
+      this.updateParam("itemSpace", params.itemSpace);
     }
-    if ('itemFontColor' in params) {
-      this.updateParam('itemFontColor', params.itemFontColor);
+    if ("itemFontColor" in params) {
+      this.updateParam("itemFontColor", params.itemFontColor);
     }
-    if ('itemSelectedFontColor' in params) {
-      this.updateParam('itemSelectedFontColor', params.itemSelectedFontColor);
+    if ("itemSelectedFontColor" in params) {
+      this.updateParam("itemSelectedFontColor", params.itemSelectedFontColor);
     }
-    if ('itemFontSize' in params) {
-      this.updateParam('itemFontSize', params.itemFontSize);
+    if ("itemFontSize" in params) {
+      this.updateParam("itemFontSize", params.itemFontSize);
     }
-    if ('itemSelectedFontSize' in params) {
-      this.updateParam('itemSelectedFontSize', params.itemSelectedFontSize);
+    if ("itemSelectedFontSize" in params) {
+      this.updateParam("itemSelectedFontSize", params.itemSelectedFontSize);
     }
-    if ('itemFontWeight' in params) {
-      this.updateParam('itemFontWeight', params.itemFontWeight);
+    if ("itemFontWeight" in params) {
+      this.updateParam("itemFontWeight", params.itemFontWeight);
     }
-    if ('itemSelectedFontWeight' in params) {
-      this.updateParam('itemSelectedFontWeight', params.itemSelectedFontWeight);
+    if ("itemSelectedFontWeight" in params) {
+      this.updateParam("itemSelectedFontWeight", params.itemSelectedFontWeight);
     }
-    if ('itemBorderRadius' in params) {
-      this.updateParam('itemBorderRadius', params.itemBorderRadius);
+    if ("itemBorderRadius" in params) {
+      this.updateParam("itemBorderRadius", params.itemBorderRadius);
     }
-    if ('itemBackgroundColor' in params) {
-      this.updateParam('itemBackgroundColor', params.itemBackgroundColor);
+    if ("itemBackgroundColor" in params) {
+      this.updateParam("itemBackgroundColor", params.itemBackgroundColor);
     }
-    if ('itemBackgroundEffect' in params) {
-      this.updateParam('itemBackgroundEffect', params.itemBackgroundEffect);
+    if ("itemBackgroundEffect" in params) {
+      this.updateParam("itemBackgroundEffect", params.itemBackgroundEffect);
     }
-    if ('itemBackgroundBlurStyle' in params) {
-      this.updateParam(
-        'itemBackgroundBlurStyle',
-        params.itemBackgroundBlurStyle
-      );
+    if ("itemBackgroundBlurStyle" in params) {
+      this.updateParam("itemBackgroundBlurStyle", params.itemBackgroundBlurStyle);
     }
-    if ('itemBackgroundBlurStyleOptions' in params) {
-      this.updateParam(
-        'itemBackgroundBlurStyleOptions',
-        params.itemBackgroundBlurStyleOptions
-      );
+    if ("itemBackgroundBlurStyleOptions" in params) {
+      this.updateParam("itemBackgroundBlurStyleOptions", params.itemBackgroundBlurStyleOptions);
     }
-    if ('itemSelectedBackgroundColor' in params) {
-      this.updateParam(
-        'itemSelectedBackgroundColor',
-        params.itemSelectedBackgroundColor
-      );
+    if ("itemSelectedBackgroundColor" in params) {
+      this.updateParam("itemSelectedBackgroundColor", params.itemSelectedBackgroundColor);
     }
-    if ('itemIconSize' in params) {
-      this.updateParam('itemIconSize', params.itemIconSize);
+    if ("itemIconSize" in params) {
+      this.updateParam("itemIconSize", params.itemIconSize);
     }
-    if ('itemIconFillColor' in params) {
-      this.updateParam('itemIconFillColor', params.itemIconFillColor);
+    if ("itemIconFillColor" in params) {
+      this.updateParam("itemIconFillColor", params.itemIconFillColor);
     }
-    if ('itemSelectedIconFillColor' in params) {
-      this.updateParam(
-        'itemSelectedIconFillColor',
-        params.itemSelectedIconFillColor
-      );
+    if ("itemSelectedIconFillColor" in params) {
+      this.updateParam("itemSelectedIconFillColor", params.itemSelectedIconFillColor);
     }
-    if ('itemSymbolFontSize' in params) {
-      this.updateParam('itemSymbolFontSize', params.itemSymbolFontSize);
+    if ("itemSymbolFontSize" in params) {
+      this.updateParam("itemSymbolFontSize", params.itemSymbolFontSize);
     }
-    if ('itemSymbolFontColor' in params) {
-      this.updateParam('itemSymbolFontColor', params.itemSymbolFontColor);
+    if ("itemSymbolFontColor" in params) {
+      this.updateParam("itemSymbolFontColor", params.itemSymbolFontColor);
     }
-    if ('itemSelectedSymbolFontColor' in params) {
-      this.updateParam(
-        'itemSelectedSymbolFontColor',
-        params.itemSelectedSymbolFontColor
-      );
+    if ("itemSelectedSymbolFontColor" in params) {
+      this.updateParam("itemSelectedSymbolFontColor", params.itemSelectedSymbolFontColor);
     }
-    if ('itemMinHeight' in params) {
-      this.updateParam('itemMinHeight', params.itemMinHeight);
+    if ("itemMinHeight" in params) {
+      this.updateParam("itemMinHeight", params.itemMinHeight);
     }
-    if ('itemPadding' in params) {
-      this.updateParam('itemPadding', params.itemPadding);
+    if ("itemPadding" in params) {
+      this.updateParam("itemPadding", params.itemPadding);
     }
-    if ('languageDirection' in params) {
-      this.updateParam('languageDirection', params.languageDirection);
+    if ("languageDirection" in params) {
+      this.updateParam("languageDirection", params.languageDirection);
     }
   }
   rerender() {
@@ -2907,215 +2169,144 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'items', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'selectedIndexes', void 0);
-o([Event], MultiCapsuleSegmentButtonV2.prototype, '$selectedIndexes', void 0);
-o([Event], MultiCapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemSelectedFontColor',
-  void 0
-);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemSelectedFontSize',
-  void 0
-);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemSelectedFontWeight',
-  void 0
-);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemBackgroundColor',
-  void 0
-);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemBackgroundEffect',
-  void 0
-);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemBackgroundBlurStyle',
-  void 0
-);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemBackgroundBlurStyleOptions',
-  void 0
-);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemSelectedBackgroundColor',
-  void 0
-);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemSelectedIconFillColor',
-  void 0
-);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemSymbolFontColor',
-  void 0
-);
-o(
-  [Param],
-  MultiCapsuleSegmentButtonV2.prototype,
-  'itemSelectedSymbolFontColor',
-  void 0
-);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
-o([Param], MultiCapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
-class h1 extends ViewV2 {
-  constructor(
-    parent,
-    params,
-    __localStorage,
-    elmtId = -1,
-    paramsLambda,
-    extraInfo
-  ) {
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "items", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "selectedIndexes", void 0);
+j([
+  Event
+], MultiCapsuleSegmentButtonV2.prototype, "$selectedIndexes", void 0);
+j([
+  Event
+], MultiCapsuleSegmentButtonV2.prototype, "onItemClicked", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemMinFontScale", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemMaxFontScale", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSpace", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemFontColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSelectedFontColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemFontSize", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSelectedFontSize", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemFontWeight", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSelectedFontWeight", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemBorderRadius", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemBackgroundColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemBackgroundEffect", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemBackgroundBlurStyle", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemBackgroundBlurStyleOptions", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSelectedBackgroundColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemIconSize", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemIconFillColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSelectedIconFillColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSymbolFontSize", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSymbolFontColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemSelectedSymbolFontColor", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemMinHeight", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "itemPadding", void 0);
+j([
+  Param
+], MultiCapsuleSegmentButtonV2.prototype, "languageDirection", void 0);
+class x4 extends ViewV2 {
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
-    this.initParam(
-      'hasHybrid',
-      params && 'hasHybrid' in params ? params.hasHybrid : undefined
-    );
-    this.initParam(
-      'item',
-      params && 'item' in params ? params.item : undefined
-    );
-    this.initParam(
-      'selected',
-      params && 'selected' in params ? params.selected : undefined
-    );
-    this.initParam(
-      'theme',
-      params && 'theme' in params ? params.theme : undefined
-    );
-    this.initParam(
-      'itemMinFontScale',
-      params && 'itemMinFontScale' in params
-        ? params.itemMinFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemMaxFontScale',
-      params && 'itemMaxFontScale' in params
-        ? params.itemMaxFontScale
-        : undefined
-    );
-    this.initParam(
-      'itemFontColor',
-      params && 'itemFontColor' in params ? params.itemFontColor : undefined
-    );
-    this.initParam(
-      'itemSelectedFontColor',
-      params && 'itemSelectedFontColor' in params
-        ? params.itemSelectedFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemFontSize',
-      params && 'itemFontSize' in params ? params.itemFontSize : undefined
-    );
-    this.initParam(
-      'itemSelectedFontSize',
-      params && 'itemSelectedFontSize' in params
-        ? params.itemSelectedFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemFontWeight',
-      params && 'itemFontWeight' in params ? params.itemFontWeight : undefined
-    );
-    this.initParam(
-      'itemSelectedFontWeight',
-      params && 'itemSelectedFontWeight' in params
-        ? params.itemSelectedFontWeight
-        : undefined
-    );
-    this.initParam(
-      'itemIconSize',
-      params && 'itemIconSize' in params ? params.itemIconSize : undefined
-    );
-    this.initParam(
-      'itemIconFillColor',
-      params && 'itemIconFillColor' in params
-        ? params.itemIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedIconFillColor',
-      params && 'itemSelectedIconFillColor' in params
-        ? params.itemSelectedIconFillColor
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontSize',
-      params && 'itemSymbolFontSize' in params
-        ? params.itemSymbolFontSize
-        : undefined
-    );
-    this.initParam(
-      'itemSymbolFontColor',
-      params && 'itemSymbolFontColor' in params
-        ? params.itemSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemSelectedSymbolFontColor',
-      params && 'itemSelectedSymbolFontColor' in params
-        ? params.itemSelectedSymbolFontColor
-        : undefined
-    );
-    this.initParam(
-      'itemMinHeight',
-      params && 'itemMinHeight' in params ? params.itemMinHeight : undefined
-    );
-    this.initParam(
-      'itemPadding',
-      params && 'itemPadding' in params ? params.itemPadding : undefined
-    );
-    this.initParam(
-      'languageDirection',
-      params && 'languageDirection' in params
-        ? params.languageDirection
-        : undefined
-    );
+    this.initParam("hasHybrid", (params && "hasHybrid" in params) ? params.hasHybrid : undefined);
+    this.initParam("item", (params && "item" in params) ? params.item : undefined);
+    this.initParam("selected", (params && "selected" in params) ? params.selected : undefined);
+    this.initParam("theme", (params && "theme" in params) ? params.theme : undefined);
+    this.initParam("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.initParam("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.initParam("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.initParam("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.initParam("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.initParam("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.initParam("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.initParam("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.initParam("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.initParam("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.initParam("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.initParam("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.initParam("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.initParam("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.initParam("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.initParam("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.initParam("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
     this.finalizeConstruction();
+  }
+  m5(params) {
+    this.n5("hasHybrid", (params && "hasHybrid" in params) ? params.hasHybrid : undefined);
+    this.n5("item", (params && "item" in params) ? params.item : undefined);
+    this.n5("selected", (params && "selected" in params) ? params.selected : undefined);
+    this.n5("theme", (params && "theme" in params) ? params.theme : undefined);
+    this.n5("itemMinFontScale", (params && "itemMinFontScale" in params) ? params.itemMinFontScale : undefined);
+    this.n5("itemMaxFontScale", (params && "itemMaxFontScale" in params) ? params.itemMaxFontScale : undefined);
+    this.n5("itemFontColor", (params && "itemFontColor" in params) ? params.itemFontColor : undefined);
+    this.n5("itemSelectedFontColor", (params && "itemSelectedFontColor" in params) ? params.itemSelectedFontColor : undefined);
+    this.n5("itemFontSize", (params && "itemFontSize" in params) ? params.itemFontSize : undefined);
+    this.n5("itemSelectedFontSize", (params && "itemSelectedFontSize" in params) ? params.itemSelectedFontSize : undefined);
+    this.n5("itemFontWeight", (params && "itemFontWeight" in params) ? params.itemFontWeight : undefined);
+    this.n5("itemSelectedFontWeight", (params && "itemSelectedFontWeight" in params) ? params.itemSelectedFontWeight : undefined);
+    this.n5("itemIconSize", (params && "itemIconSize" in params) ? params.itemIconSize : undefined);
+    this.n5("itemIconFillColor", (params && "itemIconFillColor" in params) ? params.itemIconFillColor : undefined);
+    this.n5("itemSelectedIconFillColor", (params && "itemSelectedIconFillColor" in params) ? params.itemSelectedIconFillColor : undefined);
+    this.n5("itemSymbolFontSize", (params && "itemSymbolFontSize" in params) ? params.itemSymbolFontSize : undefined);
+    this.n5("itemSymbolFontColor", (params && "itemSymbolFontColor" in params) ? params.itemSymbolFontColor : undefined);
+    this.n5("itemSelectedSymbolFontColor", (params && "itemSelectedSymbolFontColor" in params) ? params.itemSelectedSymbolFontColor : undefined);
+    this.n5("itemMinHeight", (params && "itemMinHeight" in params) ? params.itemMinHeight : undefined);
+    this.n5("itemPadding", (params && "itemPadding" in params) ? params.itemPadding : undefined);
+    this.n5("languageDirection", (params && "languageDirection" in params) ? params.languageDirection : undefined);
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create({ space: 2 });
-      Column.constraintSize({
-        minHeight: this.getItemMinHeight(),
-        minWidth: '100%',
-      });
+      Column.constraintSize({ minHeight: this.getItemMinHeight(), minWidth: '100%' });
       Column.direction(this.languageDirection);
       Column.justifyContent(FlexAlign.Center);
       Column.padding(this.getItemPadding());
@@ -3132,7 +2323,8 @@ class h1 extends ViewV2 {
             SymbolGlyph.attributeModifier.bind(this)(this.item.symbolModifier);
           }, SymbolGlyph);
         });
-      } else if (this.item.icon) {
+      }
+      else if (this.item.icon) {
         this.ifElseBranchUpdateFunction(1, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.item.icon);
@@ -3144,8 +2336,10 @@ class h1 extends ViewV2 {
             Image.attributeModifier.bind(this)(this.item.iconModifier);
           }, Image);
         });
-      } else {
-        this.ifElseBranchUpdateFunction(2, () => {});
+      }
+      else {
+        this.ifElseBranchUpdateFunction(2, () => {
+        });
       }
     }, If);
     If.pop();
@@ -3167,8 +2361,10 @@ class h1 extends ViewV2 {
           }, Text);
           Text.pop();
         });
-      } else {
-        this.ifElseBranchUpdateFunction(1, () => {});
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
       }
     }, If);
     If.pop();
@@ -3183,43 +2379,35 @@ class h1 extends ViewV2 {
   }
   getItemSymbolFillColor() {
     if (this.selected) {
-      return (
-        this.itemSelectedSymbolFontColor?.color ??
-        this.theme.itemSelectedSymbolFontColor
-      );
+      return this.itemSelectedSymbolFontColor?.color ?? this.theme.itemSelectedSymbolFontColor;
     }
     return this.itemSymbolFontColor?.color ?? this.theme.itemSymbolFontColor;
   }
   getSymbolFontSize() {
-    if (
-      this.itemSymbolFontSize &&
-      i1.getInstance().u1(this.itemSymbolFontSize)
-    ) {
-      return i1.getInstance().stringify(this.itemSymbolFontSize);
+    if (this.itemSymbolFontSize && y4.getInstance().p5(this.itemSymbolFontSize) && this.itemSymbolFontSize.unit !== LengthUnit.PERCENT) {
+      return y4.getInstance().stringify(this.itemSymbolFontSize);
     }
     return this.theme.itemSymbolFontSize;
   }
   getItemMaxFontScale() {
     if (typeof this.itemMaxFontScale === 'number') {
-      return normalize(this.itemMaxFontScale, this.theme.n1, this.theme.o1);
+      return normalize(this.itemMaxFontScale, this.theme.i5, this.theme.j5);
     }
     if (typeof this.itemMaxFontScale === 'object') {
-      const itemMaxFontScale =
-        i(this.getUIContext(), this.itemMaxFontScale) ?? t;
-      return normalize(itemMaxFontScale, this.theme.n1, this.theme.o1);
+      const itemMaxFontScale = j4(this.getUIContext(), this.itemMaxFontScale) ?? n4;
+      return normalize(itemMaxFontScale, this.theme.i5, this.theme.j5);
     }
-    return t;
+    return n4;
   }
   getItemMinFontScale() {
     if (typeof this.itemMinFontScale === 'number') {
-      return normalize(this.itemMinFontScale, this.theme.q1, this.theme.s1);
+      return normalize(this.itemMinFontScale, this.theme.k5, this.theme.l5);
     }
     if (typeof this.itemMinFontScale === 'object') {
-      const itemMinFontScale =
-        i(this.getUIContext(), this.itemMinFontScale) ?? a1;
-      return normalize(itemMinFontScale, this.theme.q1, this.theme.s1);
+      const itemMinFontScale = j4(this.getUIContext(), this.itemMinFontScale) ?? q4;
+      return normalize(itemMinFontScale, this.theme.k5, this.theme.l5);
     }
-    return a1;
+    return q4;
   }
   getItemPadding() {
     const itemPadding = {
@@ -3228,31 +2416,25 @@ class h1 extends ViewV2 {
       start: this.theme.itemPadding.start,
       end: this.theme.itemPadding.end,
     };
-    if (this.itemPadding?.top && i1.getInstance().u1(this.itemPadding.top)) {
+    if (this.itemPadding?.top && y4.getInstance().p5(this.itemPadding.top)) {
       itemPadding.top = this.itemPadding.top;
     }
-    if (
-      this.itemPadding?.bottom &&
-      i1.getInstance().u1(this.itemPadding.bottom)
-    ) {
+    if (this.itemPadding?.bottom && y4.getInstance().p5(this.itemPadding.bottom)) {
       itemPadding.bottom = this.itemPadding.bottom;
     }
-    if (
-      this.itemPadding?.start &&
-      i1.getInstance().u1(this.itemPadding.start)
-    ) {
+    if (this.itemPadding?.start && y4.getInstance().p5(this.itemPadding.start)) {
       itemPadding.start = this.itemPadding.start;
     }
-    if (this.itemPadding?.end && i1.getInstance().u1(this.itemPadding.end)) {
+    if (this.itemPadding?.end && y4.getInstance().p5(this.itemPadding.end)) {
       itemPadding.end = this.itemPadding.end;
     }
     return itemPadding;
   }
   getItemMinHeight() {
-    if (this.itemMinHeight && i1.getInstance().u1(this.itemMinHeight)) {
-      return i1.getInstance().stringify(this.itemMinHeight);
+    if (this.itemMinHeight && y4.getInstance().p5(this.itemMinHeight)) {
+      return y4.getInstance().stringify(this.itemMinHeight);
     }
-    return this.hasHybrid ? this.theme.m1 : this.theme.itemMinHeight;
+    return this.hasHybrid ? this.theme.h5 : this.theme.itemMinHeight;
   }
   getItemFontColor() {
     if (this.selected) {
@@ -3268,34 +2450,25 @@ class h1 extends ViewV2 {
   }
   getItemFontSize() {
     if (this.selected) {
-      if (
-        this.itemSelectedFontSize &&
-        i1.getInstance().u1(this.itemSelectedFontSize)
-      ) {
-        return i1.getInstance().stringify(this.itemSelectedFontSize);
+      if (this.itemSelectedFontSize && y4.getInstance().p5(this.itemSelectedFontSize) && this.itemSelectedFontSize.unit !== LengthUnit.PERCENT) {
+        return y4.getInstance().stringify(this.itemSelectedFontSize);
       }
       return this.theme.itemFontSize;
     }
-    if (this.itemFontSize && i1.getInstance().u1(this.itemFontSize)) {
-      return i1.getInstance().stringify(this.itemFontSize);
+    if (this.itemFontSize && y4.getInstance().p5(this.itemFontSize) && this.itemFontSize.unit !== LengthUnit.PERCENT) {
+      return y4.getInstance().stringify(this.itemFontSize);
     }
     return this.theme.itemFontSize;
   }
   getItemIconHeight() {
-    if (
-      this.itemIconSize?.height &&
-      i1.getInstance().u1(this.itemIconSize.height)
-    ) {
-      return i1.getInstance().stringify(this.itemIconSize.height);
+    if (this.itemIconSize?.height && y4.getInstance().p5(this.itemIconSize.height)) {
+      return y4.getInstance().stringify(this.itemIconSize.height);
     }
     return this.theme.itemIconSize;
   }
   getItemIconWidth() {
-    if (
-      this.itemIconSize?.width &&
-      i1.getInstance().u1(this.itemIconSize.width)
-    ) {
-      return i1.getInstance().stringify(this.itemIconSize.width);
+    if (this.itemIconSize?.width && y4.getInstance().p5(this.itemIconSize.width)) {
+      return y4.getInstance().stringify(this.itemIconSize.width);
     }
     return this.theme.itemIconSize;
   }
@@ -3315,74 +2488,68 @@ class h1 extends ViewV2 {
     if (params === undefined) {
       return;
     }
-    if ('hasHybrid' in params) {
-      this.updateParam('hasHybrid', params.hasHybrid);
+    if ("hasHybrid" in params) {
+      this.updateParam("hasHybrid", params.hasHybrid);
     }
-    if ('item' in params) {
-      this.updateParam('item', params.item);
+    if ("item" in params) {
+      this.updateParam("item", params.item);
     }
-    if ('selected' in params) {
-      this.updateParam('selected', params.selected);
+    if ("selected" in params) {
+      this.updateParam("selected", params.selected);
     }
-    if ('theme' in params) {
-      this.updateParam('theme', params.theme);
+    if ("theme" in params) {
+      this.updateParam("theme", params.theme);
     }
-    if ('itemMinFontScale' in params) {
-      this.updateParam('itemMinFontScale', params.itemMinFontScale);
+    if ("itemMinFontScale" in params) {
+      this.updateParam("itemMinFontScale", params.itemMinFontScale);
     }
-    if ('itemMaxFontScale' in params) {
-      this.updateParam('itemMaxFontScale', params.itemMaxFontScale);
+    if ("itemMaxFontScale" in params) {
+      this.updateParam("itemMaxFontScale", params.itemMaxFontScale);
     }
-    if ('itemFontColor' in params) {
-      this.updateParam('itemFontColor', params.itemFontColor);
+    if ("itemFontColor" in params) {
+      this.updateParam("itemFontColor", params.itemFontColor);
     }
-    if ('itemSelectedFontColor' in params) {
-      this.updateParam('itemSelectedFontColor', params.itemSelectedFontColor);
+    if ("itemSelectedFontColor" in params) {
+      this.updateParam("itemSelectedFontColor", params.itemSelectedFontColor);
     }
-    if ('itemFontSize' in params) {
-      this.updateParam('itemFontSize', params.itemFontSize);
+    if ("itemFontSize" in params) {
+      this.updateParam("itemFontSize", params.itemFontSize);
     }
-    if ('itemSelectedFontSize' in params) {
-      this.updateParam('itemSelectedFontSize', params.itemSelectedFontSize);
+    if ("itemSelectedFontSize" in params) {
+      this.updateParam("itemSelectedFontSize", params.itemSelectedFontSize);
     }
-    if ('itemFontWeight' in params) {
-      this.updateParam('itemFontWeight', params.itemFontWeight);
+    if ("itemFontWeight" in params) {
+      this.updateParam("itemFontWeight", params.itemFontWeight);
     }
-    if ('itemSelectedFontWeight' in params) {
-      this.updateParam('itemSelectedFontWeight', params.itemSelectedFontWeight);
+    if ("itemSelectedFontWeight" in params) {
+      this.updateParam("itemSelectedFontWeight", params.itemSelectedFontWeight);
     }
-    if ('itemIconSize' in params) {
-      this.updateParam('itemIconSize', params.itemIconSize);
+    if ("itemIconSize" in params) {
+      this.updateParam("itemIconSize", params.itemIconSize);
     }
-    if ('itemIconFillColor' in params) {
-      this.updateParam('itemIconFillColor', params.itemIconFillColor);
+    if ("itemIconFillColor" in params) {
+      this.updateParam("itemIconFillColor", params.itemIconFillColor);
     }
-    if ('itemSelectedIconFillColor' in params) {
-      this.updateParam(
-        'itemSelectedIconFillColor',
-        params.itemSelectedIconFillColor
-      );
+    if ("itemSelectedIconFillColor" in params) {
+      this.updateParam("itemSelectedIconFillColor", params.itemSelectedIconFillColor);
     }
-    if ('itemSymbolFontSize' in params) {
-      this.updateParam('itemSymbolFontSize', params.itemSymbolFontSize);
+    if ("itemSymbolFontSize" in params) {
+      this.updateParam("itemSymbolFontSize", params.itemSymbolFontSize);
     }
-    if ('itemSymbolFontColor' in params) {
-      this.updateParam('itemSymbolFontColor', params.itemSymbolFontColor);
+    if ("itemSymbolFontColor" in params) {
+      this.updateParam("itemSymbolFontColor", params.itemSymbolFontColor);
     }
-    if ('itemSelectedSymbolFontColor' in params) {
-      this.updateParam(
-        'itemSelectedSymbolFontColor',
-        params.itemSelectedSymbolFontColor
-      );
+    if ("itemSelectedSymbolFontColor" in params) {
+      this.updateParam("itemSelectedSymbolFontColor", params.itemSelectedSymbolFontColor);
     }
-    if ('itemMinHeight' in params) {
-      this.updateParam('itemMinHeight', params.itemMinHeight);
+    if ("itemMinHeight" in params) {
+      this.updateParam("itemMinHeight", params.itemMinHeight);
     }
-    if ('itemPadding' in params) {
-      this.updateParam('itemPadding', params.itemPadding);
+    if ("itemPadding" in params) {
+      this.updateParam("itemPadding", params.itemPadding);
     }
-    if ('languageDirection' in params) {
-      this.updateParam('languageDirection', params.languageDirection);
+    if ("languageDirection" in params) {
+      this.updateParam("languageDirection", params.languageDirection);
     }
   }
   rerender() {
@@ -3391,94 +2558,141 @@ class h1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-o([Param], h1.prototype, 'hasHybrid', void 0);
-o([Param], h1.prototype, 'item', void 0);
-o([Param], h1.prototype, 'selected', void 0);
-o([Param], h1.prototype, 'theme', void 0);
-o([Param], h1.prototype, 'itemMinFontScale', void 0);
-o([Param], h1.prototype, 'itemMaxFontScale', void 0);
-o([Param], h1.prototype, 'itemFontColor', void 0);
-o([Param], h1.prototype, 'itemSelectedFontColor', void 0);
-o([Param], h1.prototype, 'itemFontSize', void 0);
-o([Param], h1.prototype, 'itemSelectedFontSize', void 0);
-o([Param], h1.prototype, 'itemFontWeight', void 0);
-o([Param], h1.prototype, 'itemSelectedFontWeight', void 0);
-o([Param], h1.prototype, 'itemIconSize', void 0);
-o([Param], h1.prototype, 'itemIconFillColor', void 0);
-o([Param], h1.prototype, 'itemSelectedIconFillColor', void 0);
-o([Param], h1.prototype, 'itemSymbolFontSize', void 0);
-o([Param], h1.prototype, 'itemSymbolFontColor', void 0);
-o([Param], h1.prototype, 'itemSelectedSymbolFontColor', void 0);
-o([Param], h1.prototype, 'itemMinHeight', void 0);
-o([Param], h1.prototype, 'itemPadding', void 0);
-o([Param], h1.prototype, 'languageDirection', void 0);
-class i1 {
-  constructor() {}
+j([
+  Param
+], x4.prototype, "hasHybrid", void 0);
+j([
+  Param
+], x4.prototype, "item", void 0);
+j([
+  Param
+], x4.prototype, "selected", void 0);
+j([
+  Param
+], x4.prototype, "theme", void 0);
+j([
+  Param
+], x4.prototype, "itemMinFontScale", void 0);
+j([
+  Param
+], x4.prototype, "itemMaxFontScale", void 0);
+j([
+  Param
+], x4.prototype, "itemFontColor", void 0);
+j([
+  Param
+], x4.prototype, "itemSelectedFontColor", void 0);
+j([
+  Param
+], x4.prototype, "itemFontSize", void 0);
+j([
+  Param
+], x4.prototype, "itemSelectedFontSize", void 0);
+j([
+  Param
+], x4.prototype, "itemFontWeight", void 0);
+j([
+  Param
+], x4.prototype, "itemSelectedFontWeight", void 0);
+j([
+  Param
+], x4.prototype, "itemIconSize", void 0);
+j([
+  Param
+], x4.prototype, "itemIconFillColor", void 0);
+j([
+  Param
+], x4.prototype, "itemSelectedIconFillColor", void 0);
+j([
+  Param
+], x4.prototype, "itemSymbolFontSize", void 0);
+j([
+  Param
+], x4.prototype, "itemSymbolFontColor", void 0);
+j([
+  Param
+], x4.prototype, "itemSelectedSymbolFontColor", void 0);
+j([
+  Param
+], x4.prototype, "itemMinHeight", void 0);
+j([
+  Param
+], x4.prototype, "itemPadding", void 0);
+j([
+  Param
+], x4.prototype, "languageDirection", void 0);
+class y4 {
+  constructor() {
+  }
   static getInstance() {
-    if (!i1.instance) {
-      i1.instance = new i1();
+    if (!y4.instance) {
+      y4.instance = new y4();
     }
-    return i1.instance;
+    return y4.instance;
   }
-  stringify(metrics) {
-    switch (metrics.unit) {
+  stringify(a5) {
+    switch (a5.unit) {
       case LengthUnit.PX:
-        return `${metrics.value}px`;
+        return `${a5.value}px`;
       case LengthUnit.VP:
-        return `${metrics.value}vp`;
+        return `${a5.value}vp`;
       case LengthUnit.FP:
-        return `${metrics.value}fp`;
+        return `${a5.value}fp`;
       case LengthUnit.PERCENT:
-        return `${metrics.value}%`;
+        return `${a5.value}%`;
       case LengthUnit.LPX:
-        return `${metrics.value}lpx`;
+        return `${a5.value}lpx`;
     }
   }
-  u1(metrics) {
-    return metrics.value >= 0;
+  p5(z4) {
+    return z4.value >= 0;
   }
 }
-function i(context, resource) {
+function j4(context, resource) {
   const resourceManager = context.getHostContext()?.resourceManager;
   if (!resourceManager) {
     return undefined;
   }
   try {
     return resourceManager.getNumber(resource);
-  } catch (err) {
+  }
+  catch (err) {
     return undefined;
   }
 }
 function normalize(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
-function j(groupId) {
+function l4(groupId) {
   return (item, index) => {
     let key = groupId;
     if (item.text) {
       if (typeof item.text === 'string') {
         key += item.text;
-      } else {
-        key += m(item.text);
+      }
+      else {
+        key += m4(item.text);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
         key += item.icon;
-      } else {
-        key += m(item.icon);
+      }
+      else {
+        key += m4(item.icon);
       }
     }
     if (item.symbol) {
-      key += m(item.symbol);
+      key += m4(item.symbol);
     }
     return key;
   };
 }
-function m(resource) {
+function m4(resource) {
   if (resource.id !== -1) {
     return `${resource.id}`;
-  } else {
+  }
+  else {
     return JSON.stringify(resource);
   }
 }

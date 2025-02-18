@@ -41,6 +41,8 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -87,6 +89,8 @@
 #include "base/log/log.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/thread/background_task_executor.h"
+#include "base/thread/task_dependency_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
@@ -134,6 +138,8 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
+static bool g_isDynamicVsync = false;
+static bool g_isDragging = false;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -413,8 +419,7 @@ public:
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f, "
-             "instanceId_ %{public}d",
-            keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
+             "instanceId_ %{public}d", keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
         CHECK_NULL_VOID(info->type_ == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
@@ -427,7 +432,7 @@ public:
             ContainerScope scope(instanceId_);
             auto manager = pipeline->GetSafeAreaManager();
             CHECK_NULL_VOID(manager);
-            manager->SetRawKeyboardHeight(keyboardRect.Height());
+            manager->SetKeyboardInfo(keyboardRect.Height());
             auto uiExtMgr = pipeline->GetUIExtensionManager();
             if (uiExtMgr) {
                 SetUIExtensionImeShow(keyboardRect);
@@ -671,19 +676,24 @@ public:
     ~FoldScreenListener() = default;
     void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
     {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "fold status is changed, foldStatus: %{public}d", foldStatus);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [container, foldStatus] {
+            [instanceId = instanceId_, container, foldStatus] {
                 auto context = container->GetPipelineContext();
                 CHECK_NULL_VOID(context);
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
+                if (SystemProperties::IsSuperFoldDisplayDevice()) {
+                    SubwindowManager::GetInstance()->HideMenuNG(false);
+                    SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
+                }
             },
-            TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
     }
 
 private:
@@ -698,6 +708,7 @@ public:
     ~FoldDisplayModeListener() = default;
     void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
     {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "display mode is changed, displayMode: %{public}d", displayMode);
         if (!isDialog_) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -711,7 +722,7 @@ public:
                     auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                     context->OnFoldDisplayModeChanged(aceDisplayMode);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged");
             return;
         }
         auto container = Platform::DialogContainer::GetContainer(instanceId_);
@@ -726,7 +737,7 @@ public:
                 auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                 context->OnFoldDisplayModeChanged(aceDisplayMode);
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged");
     }
 
 private:
@@ -753,7 +764,7 @@ public:
                 SubwindowManager::GetInstance()->ClearMenuNG(instanceId, targetId, true, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
-            TaskExecutor::TaskType::UI, "ArkUITouchOutsideSubwindowClear", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUITouchOutsideSubwindowClear");
     }
 
 private:
@@ -971,6 +982,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     auto errorCode = InitializeInner(window, name, storage, true);
     AddWatchSystemParameter();
     RegisterLinkJumpCallback();
+    UpdateWindowBlur();
     return errorCode;
 }
 
@@ -1534,6 +1546,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
 void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
+    if (isFormRender_ && !fontScaleFollowSystem_) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "use form default size");
+        return;
+    }
     CHECK_NULL_VOID(config);
     auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
     auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
@@ -1675,6 +1691,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         ImageFileCache::GetInstance().SetCacheFileInfo();
         ImageFileCache::GetInstance().ClearAllCacheFiles();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+
+        auto task = [] {
+            bool dynamicVsync = false;
+            std::unordered_map<std::string, std::string> payload;
+            std::unordered_map<std::string, std::string> reply;
+            payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
+            payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
+            dynamicVsync = g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+        };
+        BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
@@ -1689,6 +1717,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
     });
 
+    bool reusedNodeSkipMeasure = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "reusedNodeSkipMeasure" && metaDataItem.value == "true";
+    });
+    if (reusedNodeSkipMeasure) {
+        EventReport::ReportReusedNodeSkipMeasureApp();
+    }
+    AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
@@ -2155,7 +2190,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
 
-    InitializeSafeArea(container);
+    std::string safeAreaTaskKey = "SafeArea";
+    TaskDependencyManager::GetInstance()->PostTaskToBg([container, this] {
+            OHOS::Ace::SetSkipBacktrace(true);
+            this->InitializeSafeArea(container);
+            OHOS::Ace::SetSkipBacktrace(false);
+        },
+        safeAreaTaskKey);
+
     InitializeDisplayAvailableRect(container);
     InitDragSummaryMap(container);
 
@@ -2171,17 +2213,33 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // setLogFunc of current app
     AddAlarmLogFunc();
     InitUISessionManagerCallbacks(pipeline);
-    UiSessionManager::GetInstance().SaveBaseInfo(std::string("bundleName:")
+    UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
                                                      .append(moduleName)
                                                      .append(",abilityName:")
                                                      .append(abilityName));
     UpdateFontScale(context->GetConfiguration());
-    auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
-    if (thpExtraManager->Init()) {
-        pipeline->SetTHPExtraManager(thpExtraManager);
-    }
+    std::string unimportantTaskKey = "UnimportantTask";
+    TaskDependencyManager::GetInstance()->PostTaskToBg([pipelineWeak = WeakPtr(pipeline)] {
+            auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+            if (thpExtraManager->Init()) {
+                auto pipeline = pipelineWeak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [pipelineWeak = WeakPtr(pipeline), thpExtraManager] () {
+                        auto pipeline = pipelineWeak.Upgrade();
+                        CHECK_NULL_VOID(pipeline);
+                        pipeline->SetTHPExtraManager(thpExtraManager);
+                    },
+                    TaskExecutor::TaskType::UI,
+                    "thpExtraManagerInitFinish");
+            }
+        },
+        unimportantTaskKey);
+    TaskDependencyManager::GetInstance()->Wait(safeAreaTaskKey);
     return errorCode;
 }
 
@@ -2233,9 +2291,17 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
             TAG_LOGI(AceLogTag::ACE_WINDOW,
-                "InitializeDisplayAvailableRect : %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
-                availableArea.posY_, availableArea.width_, availableArea.height_);
+                "Initialize displayId: %{public}u, availableRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+                (uint32_t)displayId, availableArea.posX_, availableArea.posY_, availableArea.width_,
+                availableArea.height_);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WINDOW, "Display failed to get availableArea, displayId: %{public}u",
+                (uint32_t)displayId);
         }
+    }
+
+    if (!defaultDisplay) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "DisplayManager failed to get display by id: %{public}u", (uint32_t)displayId);
     }
 }
 
@@ -2327,6 +2393,18 @@ void UIContentImpl::UnFocus()
     CHECK_NULL_VOID(pipelineContext);
 }
 
+void UIContentImpl::ActiveWindow()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]:window active", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    Platform::AceContainer::ActiveWindow(instanceId_);
+}
+
+void UIContentImpl::UnActiveWindow()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]:window unactive", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    Platform::AceContainer::UnActiveWindow(instanceId_);
+}
+
 void UIContentImpl::Destroy()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window destroy", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
@@ -2341,6 +2419,7 @@ void UIContentImpl::Destroy()
     }
     ContainerScope::RemoveAndCheck(instanceId_);
     UnregisterDisplayManagerCallback();
+    SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()
@@ -2713,6 +2792,12 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
+void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    UpdateConfiguration(config);
+}
+
 void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     CHECK_NULL_VOID(config);
@@ -2762,6 +2847,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
     lastReason_ = reason;
+
+    if (!g_isDragging && !g_isDynamicVsync && (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START)) {
+        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(true);
+        ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(true)");
+        g_isDragging = true;
+    }
+
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
@@ -2841,6 +2934,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         if (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
             reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
             bool isDragging = reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START;
+            if (!g_isDynamicVsync && !isDragging) {
+                OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(false);
+                ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(false)");
+                g_isDragging = false;
+            }
             taskExecutor->PostTask(
                 [weak = AceType::WeakClaim(AceType::RawPtr(context)), isDragging]() {
                     auto pipelineContext = weak.Upgrade();
@@ -4185,12 +4283,12 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
     }
 }
 
-bool UIContentImpl::GetContainerModalTitleVisible()
+bool UIContentImpl::GetContainerModalTitleVisible(bool isImmersive)
 {
     ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return NG::ContainerModalViewEnhance::GetContainerModalTitleVisible(pipeline);
+    return NG::ContainerModalViewEnhance::GetContainerModalTitleVisible(pipeline, isImmersive);
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
@@ -4615,12 +4713,12 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
                 CHECK_NULL_VOID(pipeline);
                 ContainerScope scope(pipeline->GetInstanceId());
                 pipeline->GetInspectorTree();
-                UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+                UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
             },
             TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-    UiSessionManager::GetInstance().SaveInspectorTreeFunction(callback);
+    UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
     auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         CHECK_NULL_VOID(pipeline);
@@ -4635,6 +4733,41 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-    UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
+    UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
+    auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline)]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetAllPixelMap();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
+    };
+    UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
+}
+
+bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, false);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, code, data, subSystemId]() {
+            auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+            CHECK_NULL_VOID(context);
+            auto uiExtManager = context->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtManager);
+            uiExtManager->UpdateWMSUIExtProperty(static_cast<Ace::NG::UIContentBusinessCode>(code),
+                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
+        }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
+    return true;
 }
 } // namespace OHOS::Ace

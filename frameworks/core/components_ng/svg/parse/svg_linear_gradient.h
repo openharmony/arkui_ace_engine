@@ -29,6 +29,7 @@ public:
     static RefPtr<SvgNode> Create();
     void SetAttr(const std::string& name, const std::string& value) override;
     SvgLinearGradientInfo GetLinearGradientInfo(const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    SvgLengthScaleUnit GradientUnits();
 private:
     SvgLinearGradientAttribute linearGradientAttr_;
 };

@@ -54,6 +54,26 @@ public:
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
 
+    void SetDirection(SwipeDirection direction)
+    {
+        direction_ = direction;
+    }
+
+    void SetSpeed(double speed)
+    {
+        speed_ = speed;
+    }
+
+    SwipeDirection GetDirection() const
+    {
+        return direction_;
+    }
+
+    double GetSpeed() const
+    {
+        return speed_;
+    }
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

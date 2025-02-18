@@ -1082,7 +1082,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleTouchUp001, TestSize.Level1)
     richEditorPattern->editingLongPress_ = true;
     richEditorPattern->isEditing_ = false;
     richEditorPattern->HandleTouchUp();
-    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
+    EXPECT_EQ(richEditorPattern->editingLongPress_, false);
     richEditorPattern->editingLongPress_ = true;
     richEditorPattern->isEditing_ = true;
     richEditorPattern->HandleTouchUp();
@@ -1321,7 +1321,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0);
+    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
 
     EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
 }

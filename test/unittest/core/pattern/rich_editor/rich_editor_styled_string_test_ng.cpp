@@ -74,6 +74,8 @@ void RichEditorStyledStringTestNg::SetUp()
     richEditorPattern->SetSpanStringMode(true);
     richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
     richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->CreateNodePaintMethod();
     richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
@@ -1127,7 +1129,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertStyledStringByPaste001, TestSize.Le
     /**
      * @tc.steps: step2. add span and select text
      */
-    AddSpan("test");
+    richEditorPattern->InsertValue(u"test");
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
     richEditorPattern->textSelector_.Update(3, 4);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
@@ -1221,8 +1223,9 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level1)
  */
 HWTEST_F(RichEditorStyledStringTestNg, ToStyledString001, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);

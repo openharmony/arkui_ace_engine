@@ -568,7 +568,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
             return;
         }
         RSBitmap bitmap;
-        RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+        RSBitmapFormat format = GetBitmapFormat();
         bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
         bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
         image->BuildFromBitmap(bitmap);
@@ -588,7 +588,7 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
         return;
     }
     RSBitmap bitmap;
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmapFormat format = GetBitmapFormat();
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
     bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
     RSBrush brush;
@@ -1564,7 +1564,7 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1594,7 +1594,7 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1625,7 +1625,7 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1670,7 +1670,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1699,7 +1699,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1726,7 +1726,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     matrix[18] = percentNum;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1750,7 +1750,7 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1775,7 +1775,7 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
     matrix[18] = 1;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);

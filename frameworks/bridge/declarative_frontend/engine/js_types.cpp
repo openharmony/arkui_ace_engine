@@ -17,10 +17,8 @@
 
 namespace OHOS::Ace::Framework {
 
-static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Checkbox", "CheckboxGroup",
-    "Rating", "Radio", "Toggle", "Hyperlink" };
-static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Checkbox", "CheckboxGroup", "Rating",
-    "Radio", "Toggle", "Hyperlink" };
+static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
+static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
 
 #ifdef USE_ARK_ENGINE
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
@@ -30,6 +28,17 @@ Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
         info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetStopPropagation(true);
+    }
+    return JSValueRef::Undefined(info->GetVM());
+}
+
+Local<JSValueRef> JsPropagation(panda::JsiRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (eventInfo) {
+        eventInfo->SetStopPropagation(false);
     }
     return JSValueRef::Undefined(info->GetVM());
 }

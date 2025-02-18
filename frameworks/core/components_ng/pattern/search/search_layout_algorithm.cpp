@@ -444,11 +444,12 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    UpdateClipBounds(layoutWrapper, searchHeight_);
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    UpdateClipBounds(layoutWrapper, searchHeight);
     // update search height
-    constraint->selfIdealSize.SetHeight(searchHeight_);
+    constraint->selfIdealSize.SetHeight(searchHeight);
     auto searchWidth = CalcSearchWidth(constraint.value(), layoutWrapper);
-    SizeF idealSize(searchWidth, searchHeight_);
+    SizeF idealSize(searchWidth, searchHeight);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         geometryNode->SetFrameSize(SizeF());
         return;
@@ -670,6 +671,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .searchFrameHeight = searchFrameHeight,
         .isRTL = isRTL
     };
+
     LayoutSearchIcon(params);
     LayoutSearchButton(params);
     LayoutDivider(params);

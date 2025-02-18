@@ -82,6 +82,7 @@ public:
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+        ResetOriginCaretPosition();
     }
 
     ~TextPattern() override;
@@ -166,7 +167,7 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpTextStyleInfo();
     void DumpTextStyleInfo2();
     void DumpTextStyleInfo3();
@@ -329,7 +330,8 @@ public:
 
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
-    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(
+        int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type);
     virtual void HandleSurfacePositionChanged(int32_t posX, int32_t posY) {};
     bool HasSurfaceChangedCallback()
     {
@@ -456,9 +458,9 @@ public:
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
-    virtual std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const
+    virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const
     {
-        std::list<ParagraphManager::ParagraphInfo> res;
+        std::vector<ParagraphManager::ParagraphInfo> res;
         CHECK_NULL_RETURN(pManager_, res);
         return pManager_->GetParagraphs();
     }
@@ -779,6 +781,10 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
+    bool GetOriginCaretPosition(OffsetF& offset) const;
+    void ResetOriginCaretPosition();
+    bool RecordOriginCaretPosition(const OffsetF& offset);
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -1063,6 +1069,9 @@ private:
     bool isAutoScrollByMouse_ = false;
     bool shiftFlag_ = false;
     std::string textDetectTypes_ = "";
+    // Used to record original caret position for "shift + up/down"
+    // Less than 0 is invalid, initialized as invalid in constructor
+    OffsetF originCaretPosition_;
 };
 } // namespace OHOS::Ace::NG
 

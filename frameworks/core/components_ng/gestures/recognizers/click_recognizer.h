@@ -76,6 +76,11 @@ public:
         return count_;
     }
 
+    double GetDistanceThreshold() const
+    {
+        return distanceThreshold_;
+    }
+
     GestureEventFunc GetTapActionFunc()
     {
         auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -132,6 +137,7 @@ private:
     void TriggerClickAccepted(const TouchEvent& event);
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
     void RecordClickEventIfNeed(const GestureEvent& info) const;
+    void AboutToAddToPendingRecognizers(const TouchEvent& event);
 
     int32_t count_ = 1;
     double distanceThreshold_ = std::numeric_limits<double>::infinity();

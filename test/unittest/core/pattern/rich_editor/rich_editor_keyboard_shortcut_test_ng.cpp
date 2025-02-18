@@ -615,30 +615,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTripleClickEvent001, TestSize.L
 }
 
 /**
- * @tc.name: TestRichEditorShowCaretNoTwinkling001
- * @tc.desc: test ShowCaretNoTwinkling
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, TestRichEditorShowCaretNoTwinkling001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(44, 50);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    richEditorPattern->ShowCaretNoTwinkling(richOffset);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-}
-
-/**
  * @tc.name: PreferredParagraph001
  * @tc.desc: test PreferredParagraph
  * @tc.type: FUNC
@@ -1287,7 +1263,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
      */
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
@@ -1295,7 +1270,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
      */
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->isMoveCaretAnywhere_ = false;
     richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
@@ -1329,10 +1303,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchUp001, TestSize.Level1)
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->moveCaretState_.isTouchCaret = true;
     richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
     richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
+    EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
 
 /**

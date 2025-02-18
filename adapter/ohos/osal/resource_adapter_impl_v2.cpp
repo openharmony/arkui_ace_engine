@@ -247,7 +247,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
     CHECK_NULL_VOID(taskExecutor);
 
     // post an asynchronous task to preload themes in PRELOAD_LIST
-    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
+    auto task = [manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
         weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
         CHECK_NULL_VOID(themeStyle);

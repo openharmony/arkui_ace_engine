@@ -1402,7 +1402,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     canvas.AttachPen(pen);
     if (isRightToLeft_->Get()) {
         canvas.Scale(-1, 1);
-        canvas.Translate(-radius * INT32_TWO, 0);
+        canvas.Translate(-(radius + ringProgressLeftPadding_.ConvertToPx()) * INT32_TWO, 0);
     }
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },

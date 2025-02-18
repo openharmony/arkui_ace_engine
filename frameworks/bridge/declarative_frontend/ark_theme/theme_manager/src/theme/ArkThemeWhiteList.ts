@@ -23,7 +23,6 @@ class ArkThemeWhiteList {
         'AlphabetIndexer',
         'Badge',
         'Button',
-        'Counter',
         'DataPanel',
         'LoadingProgress',
         'Menu',
@@ -33,11 +32,8 @@ class ArkThemeWhiteList {
         'QRCode',
         'Radio',
         'Scroll',
-        'Select',
-        'Slider',
         'Swiper',
         'Text',
-        'TextClock',
         'Toggle',
     ];
 

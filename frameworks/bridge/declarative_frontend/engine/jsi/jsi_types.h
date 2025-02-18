@@ -268,7 +268,7 @@ public:
 
     JsiRef<JsiValue> operator[](size_t index) const;
     JsiRef<JsiObject> This() const;
-    int Length() const;
+    uint32_t Length() const;
 
     template<typename T>
     void SetReturnValue(T* instance) const;

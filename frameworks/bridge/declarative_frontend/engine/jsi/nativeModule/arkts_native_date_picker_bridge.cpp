@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 
+#include "core/components/picker/picker_base_component.h"
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -30,6 +31,7 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
+constexpr int PARAM_ARR_LENGTH_1 = 1;
 ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -323,6 +325,130 @@ ArkUINativeModuleValue DatePickerBridge::ResetDigitalCrownSensitivity(ArkUIRunti
     auto modifier = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
     modifier->getDatePickerModifier()->resetDatePickerDigitalCrownSensitivity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+double GetMSByDateToDouble(const std::string& date)
+{
+    auto json = JsonUtil::ParseJsonString(date);
+    if (!json || json->IsNull()) {
+        return 0.0f;
+    }
+
+    std::tm dateTime {};
+    auto year = json->GetValue("year");
+    if (year && year->IsNumber()) {
+        dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+    }
+    auto month = json->GetValue("month");
+    if (month && month->IsNumber()) {
+        dateTime.tm_mon = month->GetInt();
+    }
+    auto day = json->GetValue("day");
+    if (day && day->IsNumber()) {
+        dateTime.tm_mday = day->GetInt();
+    }
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto local = std::localtime(&now);
+    CHECK_NULL_RETURN(local, 0.0f);
+    dateTime.tm_hour = local->tm_hour;
+    dateTime.tm_min = local->tm_min;
+    dateTime.tm_sec = local->tm_sec;
+    return Date::GetMilliSecondsByDateTime(dateTime);
+}
+panda::Local<panda::ObjectRef> CreateOnChange(EcmaVM* vm, const BaseEventInfo* info)
+{
+    const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+    Local<JSValueRef> jsonValue =
+        panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, eventInfo->GetSelectedStr().c_str()));
+    if (jsonValue->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto datePickerResultObj = jsonValue->ToObject(vm);
+    return datePickerResultObj;
+}
+ArkUINativeModuleValue DatePickerBridge::SetDatePickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                             const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto dateObj = CreateOnChange(vm, info);
+        panda::Local<panda::JSValueRef> params[] = { dateObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerOnChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue DatePickerBridge::ResetDatePickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerOnChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue DatePickerBridge::SetDatePickerOnDateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerOnDateChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                             const BaseEventInfo* info) {
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::DateRef> dateObj =
+            panda::DateRef::New(vm, GetMSByDateToDouble(eventInfo->GetSelectedStr()));
+        panda::Local<panda::JSValueRef> params[] = { dateObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerOnDateChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue DatePickerBridge::ResetDatePickerOnDateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerOnDateChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

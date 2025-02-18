@@ -292,4 +292,14 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
 {
     return true;
 }
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
+}
 } // namespace OHOS::Ace::Platform

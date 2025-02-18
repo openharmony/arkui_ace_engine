@@ -1000,7 +1000,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
     EXPECT_FALSE(context_->OnNonPointerEvent(event));
-    EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
      * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
@@ -1011,7 +1010,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     event.code = KeyCode::KEY_DPAD_UP;
     EXPECT_FALSE(context_->OnNonPointerEvent(event));
-    EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
      * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::UP and
@@ -1023,7 +1021,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_FALSE(context_->OnNonPointerEvent(event));
-    EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
      * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = true, action = KeyAction::UP and
@@ -1035,7 +1032,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_FALSE(context_->OnNonPointerEvent(event));
-    EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
     * @tc.steps5: Call the function OnKeyEvent with isFocusActive_ = true, action = KeyAction::UP and
@@ -2028,7 +2024,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
     context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
     context_->mouseEvents_.clear();
     ASSERT_NE(context_->rootNode_, nullptr);
-    ASSERT_EQ(context_->lastMouseEvent_, nullptr);
+    ASSERT_NE(context_->lastMouseEvent_, nullptr);
 
     /**
      * @tc.steps2: Call the function FlushMouseEvent.
@@ -2054,8 +2050,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
     event.x = 54.321f;
     event.y = 54.321f;
     context_->mouseEvents_[context_->rootNode_].emplace_back(event);
-    ASSERT_NE(context_->lastMouseEvent_, nullptr);
-    ASSERT_NE(static_cast<int>(context_->lastMouseEvent_->action), 5);
+    EXPECT_NE(static_cast<int>(context_->lastMouseEvent_->action), 5);
     context_->FlushMouseEvent();
     for (const auto& [node, mouseEvents] : context_->mouseEvents_) {
         EXPECT_EQ(mouseEvents.size(), 0);

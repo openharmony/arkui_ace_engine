@@ -1483,7 +1483,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback048, TestSize
     callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
     callbackInfo.period = minInterval;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
-    FRAME_NODE2->ProcessThrottledVisibleCallback();
+    FRAME_NODE2->ProcessThrottledVisibleCallback(false);
     EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
 }
 

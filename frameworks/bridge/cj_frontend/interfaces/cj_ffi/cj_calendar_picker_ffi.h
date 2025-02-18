@@ -21,27 +21,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_datepicker_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
-template<typename T>
-struct NativeOptional {
-    bool hasValue;
-    T value;
-};
-
 extern "C" {
-struct NativePickerDialogButtonStyle {
-    NativeOptional<int32_t> type;
-    NativeOptional<int32_t> style;
-    NativeOptional<int32_t> role;
-    NativeOptional<NativeLength> fontSize;
-    NativeOptional<uint32_t> fontColor;
-    NativeOptional<char*> fontWeight;
-    NativeOptional<int32_t> fontStyle;
-    NativeOptional<char*> fontFamily;
-    NativeOptional<uint32_t> backgroundColor;
-    NativeOptional<NativeBorderRadiuses> borderRadius;
-    NativeOptional<bool> primary;
-};
-
 struct NativeCalendarDialogOptions {
     NativeLength hintRadius;
     FfiTime selected;

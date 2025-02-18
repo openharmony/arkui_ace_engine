@@ -64,7 +64,9 @@ public:
         foregroundImageCanvas_->SetPaintConfig(foregroundConfig);
         secondaryImageCanvas_->SetPaintConfig(secondaryConfig);
         backgroundImageCanvas_->SetPaintConfig(backgroundConfig);
-        backgroundImageFocusCanvas_->SetPaintConfig(backgroundFocusConfig);
+        if (backgroundImageFocusCanvas_ != nullptr) {
+            backgroundImageFocusCanvas_->SetPaintConfig(backgroundFocusConfig);
+        }
     }
 
     void UpdateImageSourceInfo(

@@ -1077,7 +1077,6 @@ ArkThemeWhiteList.whiteList = [
     'AlphabetIndexer',
     'Badge',
     'Button',
-    'Counter',
     'DataPanel',
     'LoadingProgress',
     'Menu',
@@ -1087,10 +1086,7 @@ ArkThemeWhiteList.whiteList = [
     'QRCode',
     'Radio',
     'Scroll',
-    'Select',
-    'Slider',
     'Swiper',
     'Text',
-    'TextClock',
     'Toggle',
 ];

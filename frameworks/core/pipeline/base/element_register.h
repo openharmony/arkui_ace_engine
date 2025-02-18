@@ -134,7 +134,7 @@ public:
         return lastestElementId_;
     }
 
-    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key);
+    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key, bool willGetAll = false);
 
     void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node);
 

@@ -369,7 +369,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level1)
      */
     renderContext->RequestNextFrame();
     EXPECT_EQ(renderContext->GetBorderColor()->leftColor.value(), Color::BLACK);
-    EXPECT_NE(renderContext->GetUnsafeHost(), nullptr);
+    EXPECT_NE(renderContext->GetHost(), nullptr);
     EXPECT_FALSE(renderContext->HasSharedTransition());
 }
 

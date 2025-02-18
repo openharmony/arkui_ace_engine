@@ -165,7 +165,7 @@ export struct TipsDialogV2 {
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   // themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = 160;
   private imageIndex: number = 0;
   private textIndex: number = 1;
@@ -182,10 +182,6 @@ export struct TipsDialogV2 {
         this.contentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -436,7 +432,7 @@ export struct SelectDialogV2 {
   @Local dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
   // the controller of content list
   private contentScroller: Scroller = new Scroller();
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   @Computed
@@ -601,10 +597,6 @@ export struct SelectDialogV2 {
       },
       buttons: this.buttons,
       contentAreaPadding: this.contentPadding,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -696,7 +688,7 @@ export struct ConfirmDialogV2 {
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
   private marginOffset: number = 0 - PADDING_LEVEL_8;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   private textIndex: number = 0;
   private checkboxIndex: number = 1;
@@ -814,10 +806,6 @@ export struct ConfirmDialogV2 {
       },
       minContentHeight: this.minContentHeight!!,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -837,7 +825,7 @@ export struct AlertDialogV2 {
   // the controller of content area
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   @Computed
@@ -863,10 +851,6 @@ export struct AlertDialogV2 {
         this.AlertDialogContentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -918,7 +902,7 @@ export struct CustomContentDialogV2 {
   @BuilderParam contentBuilder: CustomBuilder;
   @Param contentAreaPadding?: LocalizedPadding = undefined;
   @Param buttons?: AdvancedDialogV2Button[] = undefined;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
@@ -932,10 +916,6 @@ export struct CustomContentDialogV2 {
       },
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -1040,8 +1020,7 @@ struct CustomDialogContentComponent {
   @Local titleHeight: number = 0;
   @Local buttonHeight: number = 0;
   @Local contentMaxHeight: Length = '100%';
-  @Param fontSizeScale: number = -1;
-  @Param onFontSizeScaleChange?: (val: number) => void = undefined;
+  @Consumer() fontSizeScale: number = -1;
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
@@ -1098,7 +1077,7 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.onFontSizeScaleChange?.(this.updateFontScale());
+    this.fontSizeScale = this.updateFontScale();
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     let height: number = 0;
@@ -1125,7 +1104,7 @@ struct CustomDialogContentComponent {
     let uiContext: UIContext = this.getUIContext();
     this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
     this.appMaxFontScale = uiContext.getMaxFontScale();
-    this.onFontSizeScaleChange?.(this.updateFontScale());
+    this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }
 
@@ -1664,7 +1643,7 @@ export struct LoadingDialogV2 {
   @Param content?: ResourceStr = '';
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Local loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
@@ -1672,10 +1651,6 @@ export struct LoadingDialogV2 {
       CustomDialogContentComponent({
         contentBuilder: () => {
           this.contentBuilder();
-        },
-        fontSizeScale: this.fontSizeScale,
-        onFontSizeScaleChange: (fontSizeScale: number) => {
-          this.fontSizeScale = fontSizeScale;
         },
         minContentHeight: this.minContentHeight!!,
       }).constraintSize({ maxHeight: '100%' });

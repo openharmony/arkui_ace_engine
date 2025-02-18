@@ -21,15 +21,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-struct DragInfo {
-    bool isDragForbidden = false;
-    bool isDraggable = false;
-    bool isCustomerSet = false;
-    bool textIsSelected = false;
-    DragInfo(bool isDragForbidden, bool isDraggable, bool isCustomerSet, bool textIsSelected)
-        : isDragForbidden(isDragForbidden), isDraggable(isDraggable),
-          isCustomerSet(isCustomerSet), textIsSelected(textIsSelected) {}
-};
 struct DragStatusTestCase {
     DragInfo dragInfo;
     InputEventType inputEventType;

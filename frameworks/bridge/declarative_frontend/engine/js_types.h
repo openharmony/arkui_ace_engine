@@ -55,6 +55,7 @@ Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsClickPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsTouchPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info);
+Local<JSValueRef> JsPropagation(panda::JsiRuntimeCallInfo *info);
 
 #endif
 

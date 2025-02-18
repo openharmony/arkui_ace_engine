@@ -735,7 +735,7 @@ void MenuPattern::HideStackMenu() const
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
-                TaskExecutor::TaskType::UI, "HideStackMenu", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "HideStackMenu");
     });
     auto menuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
     if (menuPattern) {
@@ -1617,6 +1617,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(theme, false);
     auto renderContext = dirty->GetHostNode()->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->UpdateClipShape(nullptr);
+    renderContext->ResetClipShape();
 
     auto menuProp = DynamicCast<MenuLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);

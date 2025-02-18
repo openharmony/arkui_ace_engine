@@ -160,6 +160,13 @@ public:
     static bool GetIndicatorInteractive(FrameNode* frameNode);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static int32_t GetPageFlipMode(FrameNode* frameNode);
+    static int GetSwipeByGroup(FrameNode* frameNode);
+    static SwiperDisplayMode GetDisplayMode(FrameNode* frameNode);
+    static float GetMinSize(FrameNode* frameNode);
+    static void ResetArrowStyle(FrameNode* frameNode);
+    static void ResetIndicatorStyle(FrameNode* frameNode);
+    static SwiperArrowParameters GetArrowStyle(FrameNode* frameNode);
+    static std::shared_ptr<SwiperDigitalParameters> GetDigitIndicator(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

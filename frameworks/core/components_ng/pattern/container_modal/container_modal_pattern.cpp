@@ -73,7 +73,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     PaddingProperty padding;
     if (isShow && customTitleSettedShow_) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
+            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
     }
     layoutProperty->UpdatePadding(padding);
     BorderWidthProperty borderWidth;
@@ -300,12 +300,12 @@ void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButto
     eventHub->RemovePanEvent(panEvent_);
 }
 
-void ContainerModalPattern::OnWindowFocused()
+void ContainerModalPattern::OnWindowActivated()
 {
     WindowFocus(true);
 }
 
-void ContainerModalPattern::OnWindowUnfocused()
+void ContainerModalPattern::OnWindowDeactivated()
 {
     WindowFocus(false);
 }
@@ -589,7 +589,18 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     TrimFloatingWindowLayout();
 }
 
-bool ContainerModalPattern::GetContainerModalTitleVisible() { return customTitleSettedShow_; }
+bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
+{
+    if (isImmersive) {
+        auto floatingTitleRow = GetFloatingTitleRow();
+        CHECK_NULL_RETURN(floatingTitleRow, false);
+        auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
+        CHECK_NULL_RETURN(floatingLayoutProperty, false);
+        return floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE;
+    } else {
+        return isTitleShow_ && customTitleSettedShow_;
+    }
+}
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
@@ -813,6 +824,22 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
     titleRowProperty->UpdatePadding(padding);
 }
 
+void ContainerModalPattern::InitAllTitleRowLayoutProperty()
+{
+    auto containerModal = GetHost();
+    CHECK_NULL_VOID(containerModal);
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    InitTitleRowLayoutProperty(customTitleRow);
+    customTitleRow->MarkModifyDone();
+    customTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    InitTitleRowLayoutProperty(floatingTitleRow);
+    floatingTitleRow->MarkModifyDone();
+    floatingTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+}
+
 CalcLength ContainerModalPattern::GetControlButtonRowWidth()
 {
     auto row = GetControlButtonRow();
@@ -918,7 +945,7 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
     auto customTitleRowProp = customtitleRow->GetLayoutProperty();
     if (customTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
+            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
     }
     hostProp->UpdatePadding(padding);
 }

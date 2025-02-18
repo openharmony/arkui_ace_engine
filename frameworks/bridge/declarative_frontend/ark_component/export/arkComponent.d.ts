@@ -996,9 +996,10 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
     selectedTextStyle(value: PickerTextStyle): this;
     onAccept(callback: (value: string, index: number) => void): this;
     onCancel(callback: () => void): this;
-    onChange(callback: (value: string | string[], index: number | number[]) => void): this;
+    onChange(callback: Optional<OnTextPickerChangeCallback>): this;
     selectedIndex(value: number | number[]): this;
     digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this;
+    onScrollStop(callback: (value: string | string[], index: number | number[]) => void): this;
 }
 declare class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1044,7 +1045,7 @@ declare class ArkCheckboxComponent extends ArkComponent implements CheckboxAttri
     padding(value: Padding | Length): this;
     size(value: SizeOptions): this;
     responseRegion(value: Array<Rectangle> | Rectangle): this;
-    onChange(callback: (value: boolean) => void): this;
+    onChange(callback: OnCheckboxChangeCallback): this;
 }
 declare class ArkNavDestinationComponent extends ArkComponent implements NavDestinationAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1075,7 +1076,7 @@ declare class ArkCheckboxGroupComponent extends ArkComponent implements Checkbox
     selectedColor(value: ResourceColor): this;
     unselectedColor(value: ResourceColor): this;
     mark(value: MarkStyle): this;
-    onChange(callback: (event: CheckboxGroupResult) => void): CheckboxGroupAttribute;
+    onChange(callback: OnCheckboxGroupChangeCallback): CheckboxGroupAttribute;
     size(value: SizeOptions): this;
     width(value: Length): this;
     height(value: Length): this;
@@ -1163,7 +1164,7 @@ declare class ArkCalendarPickerComponent extends ArkComponent implements Calenda
     constructor(nativePtr: KNode, classType?: ModifierType);
     edgeAlign(alignType: CalendarAlign, offset?: Offset | undefined): this;
     textStyle(value: PickerTextStyle): this;
-    onChange(callback: (value: Date) => void): this;
+    onChange(callback: Callback<Date>): this;
     padding(value: Padding | Length): this;
     border(value: BorderOptions): this;
 }
@@ -1182,7 +1183,7 @@ declare class ArkDatePickerComponent extends ArkComponent implements DatePickerA
     textStyle(value: PickerTextStyle): DatePickerAttribute;
     selectedTextStyle(value: PickerTextStyle): DatePickerAttribute;
     onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute;
-    onDateChange(callback: (value: Date) => void): DatePickerAttribute;
+    onDateChange(callback: Callback<Date>): this;
     backgroundColor(value: ResourceColor): this;
     digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): DatePickerAttribute;
 }
@@ -1235,7 +1236,7 @@ declare class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribu
 declare class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     width(value: Length): this;
-    fontSize(value: any): this;
+    fontSize(value: Length): this;
     font(value: Font): this;
     fontColor(value: ResourceColor): this;
     radius(value: any): this;
@@ -2036,6 +2037,8 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
+    minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
+    maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

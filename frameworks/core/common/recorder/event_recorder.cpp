@@ -344,7 +344,8 @@ void EventRecorder::FillWebJsCode(std::optional<WebJsItem>& scriptItems) const
     }
 }
 
-void EventRecorder::SaveJavascriptItems(const std::map<std::string, std::vector<std::string>>& scriptItems)
+void EventRecorder::SaveJavascriptItems(const std::map<std::string, std::vector<std::string>>& scriptItems,
+    const std::vector<std::string>& orderScriptItems)
 {
     if (scriptItems.empty()) {
         return;
@@ -353,19 +354,30 @@ void EventRecorder::SaveJavascriptItems(const std::map<std::string, std::vector<
         return;
     }
     cacheScriptItems_ = std::make_optional<std::map<std::string, std::vector<std::string>>>(scriptItems);
+    if (!orderScriptItems.empty()) {
+        cacheOrderScriptItems_ = std::make_optional<std::vector<std::string>>(orderScriptItems);
+    }
 }
 
-void EventRecorder::HandleJavascriptItems(std::optional<std::map<std::string, std::vector<std::string>>>& scriptItems)
+void EventRecorder::HandleJavascriptItems(
+    std::optional<WebJsItem>& scriptItems, std::optional<std::vector<std::string>>& orderScriptItems)
 {
     if (scriptItems.has_value()) {
         cacheScriptItems_ = std::nullopt;
+        cacheOrderScriptItems_ = std::nullopt;
         return;
     }
+    FillWebJsCode(cacheScriptItems_);
     if (!cacheScriptItems_.has_value()) {
+        cacheOrderScriptItems_ = std::nullopt;
         return;
     }
     scriptItems.swap(cacheScriptItems_);
     cacheScriptItems_ = std::nullopt;
+    if (cacheOrderScriptItems_.has_value()) {
+        orderScriptItems.swap(cacheOrderScriptItems_);
+        cacheOrderScriptItems_ = std::nullopt;
+    }
 }
 
 bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::string& identifier)

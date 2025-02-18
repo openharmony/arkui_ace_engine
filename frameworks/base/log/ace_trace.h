@@ -45,6 +45,8 @@
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetMeasureDebugTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_SAFE_AREA_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSafeAreaDebugTraceEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_VSYNC_MODE_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetVsyncModeTraceEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else

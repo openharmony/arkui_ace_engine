@@ -474,6 +474,10 @@ public:
 
     void OnWindowUnfocused() override;
 
+    void OnWindowActivated() override;
+
+    void OnWindowDeactivated() override;
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -496,7 +500,7 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    RectF GetTransformRectRelativeToWindow() const;
+    RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
@@ -1124,6 +1128,14 @@ public:
         return changeInfoFlag_;
     }
 
+    void SetDeleteRsNode(bool isDelete) {
+        isDeleteRsNode = isDelete;
+    }
+ 
+    bool GetIsDelete() {
+        return isDeleteRsNode;
+    }
+
     void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
 
     void ClearChangeInfoFlag()
@@ -1348,7 +1360,7 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
-    void ProcessThrottledVisibleCallback();
+    void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
@@ -1502,6 +1514,7 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
+    bool isDeleteRsNode = false;
 
     RefPtr<FrameNode> overlayNode_;
 

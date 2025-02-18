@@ -121,7 +121,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement() override;
+    void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
@@ -247,6 +247,9 @@ public:
 
     void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
+    
+    void HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr);
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -294,6 +297,8 @@ public:
     void OnHide() override;
 
     void WindowFocus(bool isFocus) override;
+
+    void WindowActivate(bool isActive) override;
 
     void ContainerModalUnFocus() override;
 
@@ -409,7 +414,7 @@ public:
     void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
         bool keyboardHeightChanged);
     float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
-        float height, SizeF& rootSize);
+        float height, SizeF& rootSize, bool isInline = false);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -424,8 +429,6 @@ public:
     virtual SafeAreaInsets GetSafeArea() const;
 
     virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
-
-    virtual SafeAreaInsets GetScbSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -477,6 +480,10 @@ public:
     void AddWindowFocusChangedCallback(int32_t nodeId);
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
+
+    void AddWindowActivateChangedCallback(int32_t nodeId);
+
+    void RemoveWindowActivateChangedCallback(int32_t nodeId);
 
     void AddWindowSizeChangeCallback(int32_t nodeId);
 
@@ -1101,12 +1108,41 @@ public:
     void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
     void FlushPendingDeleteCustomNode();
 
+    void HandleSpecialContainerNode();
+
+    void AddPositionZNode(int32_t nodeId)
+    {
+        positionZNodes_.insert(nodeId);
+    }
+
+    void DeletePositionZNode(int32_t nodeId)
+    {
+        auto it = positionZNodes_.find(nodeId);
+        if (it != positionZNodes_.end()) {
+            positionZNodes_.erase(it);
+        }
+    }
+
+    std::set<int32_t> GetPositionZNodes()
+    {
+        return positionZNodes_;
+    }
+
+    void ClearPositionZNodes()
+    {
+        positionZNodes_.clear();
+    }
     bool IsWindowSizeDragging() const
     {
         return isWindowSizeDragging_;
     }
 
     void SetIsWindowSizeDragging(bool isDragging);
+    void GetAllPixelMap();
+    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
+    {
+        uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1152,6 +1188,8 @@ private:
     void FlushWindowStateChangedCallback(bool isShow);
 
     void FlushWindowFocusChangedCallback(bool isFocus);
+
+    void FlushWindowActivateChangedCallback(bool isActivate);
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
@@ -1213,7 +1251,8 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+                nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
                 return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
@@ -1248,6 +1287,8 @@ private:
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
     std::set<int32_t> onWindowFocusChangedCallbacks_;
+    // window on activate or on unactivate
+    std::set<int32_t> onWindowActivateChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
     // window size drag end
@@ -1341,6 +1382,8 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
     std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
+
+    std::set<int32_t> positionZNodes_;
 
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;

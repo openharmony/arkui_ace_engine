@@ -74,7 +74,8 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
 {
     RefPtr<NG::PipelineContext> pipeline = nullptr;
     if (menuParam.isShowInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            Container::CurrentId(), SubwindowType::TYPE_MENU);
         CHECK_NULL_RETURN(subwindow, false);
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -96,7 +97,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->UpdateChainedTransition(menuParam.transition);
     }
-    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow && !wrapperPattern->GetIsOpenMenu()) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
         overlayManager->HideMenu(menuNode, targetId, false);
     }
@@ -146,7 +147,7 @@ void ViewAbstractModelNG::BindMenu(
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
             params.clear();
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
             CHECK_NULL_VOID(subwindow);
             auto childContainerId = subwindow->GetChildContainerId();
             auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -181,7 +182,8 @@ void CreateCustomMenuWithPreview(
 
 void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
 {
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -199,7 +201,9 @@ void BindContextMenuSingle(
     CHECK_NULL_VOID(targetNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
     auto targetId = targetNode->GetId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "target %{public}d menu isShow %{public}d", targetId, menuParam.isShow);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -244,7 +248,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "bind context menu with type %{public}hhd", menuParam.contextMenuRegisterType);
     BindContextMenu(targetNode, type, buildFunc, menuParam, previewBuildFunc);
 }
 
@@ -253,7 +256,8 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
 {
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -279,14 +283,13 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
         auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
             OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
-                auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                     TAG_LOGI(AceLogTag::ACE_MENU, "Post rightClick task for menu");
                     info.SetStopPropagation(true);
                     taskExecutor->PostTask(
-                        [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
+                        [builder = builderF, weakTarget, menuParam, info]() mutable {
                             auto targetNode = weakTarget.Upgrade();
                             CHECK_NULL_VOID(targetNode);
                             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() +
@@ -311,11 +314,10 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
             auto event =
                 [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
                 TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
-                auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                    [builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
                         TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
@@ -352,7 +354,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
 
     // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
         CHECK_NULL_VOID(subwindow);
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -738,6 +740,19 @@ void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
     }
 }
 
+void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserScrollTriggerable();
+    } else {
+        accessibilityProperty->SetUserScrollTriggerable(triggerable);
+    }
+}
+
 void ViewAbstractModelNG::SetAccessibilityRole(const std::string& role, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -881,6 +896,18 @@ void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool che
     } else {
         accessibilityProperty->SetUserCheckedType(checked);
         accessibilityProperty->SetUserCheckable(true);
+    }
+}
+
+void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserScrollTriggerable();
+    } else {
+        accessibilityProperty->SetUserScrollTriggerable(triggerable);
     }
 }
 

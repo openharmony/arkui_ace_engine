@@ -344,6 +344,7 @@ void ArcListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
     info.SetMainVelocity(0.0);
     info.SetMainDelta(0.0);
     pattern_->scrollableEvent_->GetScrollable()->HandleTouchUp();
+    pattern_->scrollableEvent_->GetScrollable()->lastMainDelta_ = 0.0;
     pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
     pattern_->scrollableEvent_->GetScrollable()->isDragging_ = false;
     FlushLayoutTask(frameNode_);

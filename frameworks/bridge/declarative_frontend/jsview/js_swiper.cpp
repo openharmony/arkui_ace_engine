@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
@@ -30,7 +31,6 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
-#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -77,6 +77,7 @@ SwiperModel* SwiperModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
+WeakPtr<JSIndicatorController> JSSwiper::jSIndicatorController_;
 namespace {
 
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
@@ -781,10 +782,17 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
     if (!jsIndicatorController) {
         return;
     }
-
+    jSIndicatorController_ = jsIndicatorController;
     SwiperModel::GetInstance()->SetBindIndicator(true);
     WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     jsIndicatorController->SetSwiperNode(targetNode);
+}
+
+void JSSwiper::ResetSwiperNode()
+{
+    if (jSIndicatorController_.Upgrade()) {
+        jSIndicatorController_.Upgrade()->ResetSwiperNode();
+    }
 }
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
@@ -801,6 +809,7 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
+        ResetSwiperNode();
 
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {
@@ -1261,9 +1270,48 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
     }
 }
 
+void JSSwiperController::SwipeTo(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        LOGE("Param is not valid");
+        return;
+    }
+    if (controller_) {
+        controller_->SwipeTo(args[0]->ToNumber<int32_t>());
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "swipeTo: Swiper controller not bind.");
+    }
+}
+
+void JSSwiperController::ShowNext(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (controller_) {
+        controller_->ShowNext();
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "showNext: Swiper controller not bind.");
+    }
+}
+
+void JSSwiperController::ShowPrevious(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (controller_) {
+        controller_->ShowPrevious();
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "showPrevious: Swiper controller not bind.");
+    }
+}
+
 void JSSwiperController::ChangeIndex(const JSCallbackInfo& args)
 {
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "changeIndex: Swiper controller not bind.");
         return;
     }
     if (args.Length() < 1 || !args[0]->IsNumber()) {
@@ -1289,6 +1337,8 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "finishAnimation: Swiper controller not bind.");
         return;
     }
 
@@ -1315,6 +1365,8 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Swiper controller not bind.");
         return;
     }
 
@@ -1347,6 +1399,8 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
 void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
 {
     if (!controller_) {
+        EventReport::ReportScrollableErrorEvent(
+            "Swiper", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Swiper controller not bind.");
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
         return;
     }

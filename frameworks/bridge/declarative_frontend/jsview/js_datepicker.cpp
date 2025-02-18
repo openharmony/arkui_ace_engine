@@ -278,6 +278,28 @@ void ParseDatePickerHoverMode(PickerDialogInfo& pickerDialog, const JSRef<JSObje
         }
     }
 }
+
+void ParseDatePickerBlurStyleOption(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto blurStyleValue = paramObject->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!pickerDialog.blurStyleOption.has_value()) {
+            pickerDialog.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, pickerDialog.blurStyleOption.value());
+    }
+}
+
+void ParseDatePickerEffectOption(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto effectOptionValue = paramObject->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!pickerDialog.effectOption.has_value()) {
+            pickerDialog.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, pickerDialog.effectOption.value());
+    }
+}
 } // namespace
 
 void JSDatePicker::JSBind(BindingTarget globalObj)
@@ -1166,6 +1188,8 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     }
 
     ParseDatePickerHoverMode(pickerDialog, paramObject);
+    ParseDatePickerBlurStyleOption(pickerDialog, paramObject);
+    ParseDatePickerEffectOption(pickerDialog, paramObject);
 }
 
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
@@ -1905,6 +1929,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     }
 
     ParseDatePickerHoverMode(pickerDialog, paramObject);
+    ParseDatePickerBlurStyleOption(pickerDialog, paramObject);
+    ParseDatePickerEffectOption(pickerDialog, paramObject);
 
     auto buttonInfos = ParseButtonStyles(paramObject);
 

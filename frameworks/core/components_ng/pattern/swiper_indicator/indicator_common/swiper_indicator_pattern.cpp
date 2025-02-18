@@ -82,14 +82,19 @@ void SwiperIndicatorPattern::InitIndicatorEvent()
     CHECK_NULL_VOID(host);
     RegisterIndicatorChangeEvent();
 
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
         InitClickEvent(gestureHub);
         InitHoverMouseEvent();
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
         InitFocusEvent();
+    } else {
+        if (clickEvent_) {
+            gestureHub->RemoveClickEvent(clickEvent_);
+            clickEvent_ = nullptr;
+        }
     }
 
     auto swiperPattern = GetSwiperPattern();
@@ -98,8 +103,6 @@ void SwiperIndicatorPattern::InitIndicatorEvent()
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
         InitAccessibilityFocusEvent();
@@ -475,7 +478,7 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
         auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(swiperLayoutProperty);
         if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
-            swiperPattern->ArrowHover(isHover_);
+            swiperPattern->ArrowHover(isHover_, HOVER_INDICATOR);
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

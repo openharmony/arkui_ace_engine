@@ -687,6 +687,9 @@ void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* 
     font.fontWeight = static_cast<FontWeight>(fontInfo->fontWeight);
     std::vector<std::string> families;
     if (fontInfo->fontFamilies && fontInfo->familyLength > 0) {
+        if (fontInfo->familyLength > DEFAULT_MAX_FONT_FAMILY_LENGTH) {
+            return;
+        }
         families.resize(fontInfo->familyLength);
         for (uint32_t i = 0; i < fontInfo->familyLength; i++) {
             families.at(i) = std::string(*(fontInfo->fontFamilies + i));

@@ -53,6 +53,8 @@ constexpr int32_t COUNT_1 = 1;
 constexpr int32_t COUNT_3 = 3;
 } // namespace
 
+using CacheItem = RepeatVirtualScrollCaches::CacheItem;
+
 class RepeatNodeCacheSyntaxTest : public testing::Test {
 public:
 
