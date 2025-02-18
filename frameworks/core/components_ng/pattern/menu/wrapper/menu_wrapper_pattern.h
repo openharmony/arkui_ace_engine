@@ -469,10 +469,6 @@ public:
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
     void StopPreviewMenuAnimation();
-    void GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
-        RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext);
-    void AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext, RefPtr<RenderContext> previewScaleContext,
-        RefPtr<RenderContext> menuContext, RefPtr<RenderContext> previewDisappearContext);
 
     void SetAnimationPreviewScale(float scale)
     {
