@@ -771,13 +771,14 @@ export class SubHeaderV2 extends ViewV2 {
             Row.justifyContent(FlexAlign.End);
         }, Row);
         this.observeComponentCreation2((u11, v11) => {
-            Image.create({ "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_arrow_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Image.fillColor(this.subHeaderV2Theme.iconArrowColor);
-            Image.width(ARROW_ICON_WIDTH);
-            Image.height(OPERATE_ITEM_LENGTH);
-            Image.draggable(false);
-            Image.matchTextDirection(true);
-        }, Image);
+            SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.chevron_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
+            SymbolGlyph.fontColor([this.subHeaderV2Theme.iconArrowColor]);
+            SymbolGlyph.draggable(false);
+            SymbolGlyph.focusable(true);
+            SymbolGlyph.width(ARROW_ICON_WIDTH);
+            SymbolGlyph.height(OPERATE_ITEM_LENGTH);
+        }, SymbolGlyph);
         Row.pop();
     }
     TextArrowStyle(n9 = null) {
@@ -932,19 +933,11 @@ export class SubHeaderV2 extends ViewV2 {
                         });
                     }, Button);
                     this.observeComponentCreation2((v9, w9) => {
-                        SymbolGlyph.create({
-                            "id": -1,
-                            "type": 40000,
-                            params: ['sys.symbol.chevron_right'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
-                        });
-                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH);
+                        SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.chevron_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
                         SymbolGlyph.fontColor([this.subHeaderV2Theme.iconArrowColor]);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.focusable(true);
-                        SymbolGlyph.minFontScale(DEFAULT_FONT_SCALE);
-                        SymbolGlyph.maxFontScale(DEFAULT_FONT_SCALE);
                         SymbolGlyph.width(ARROW_ICON_WIDTH);
                         SymbolGlyph.height(OPERATE_ITEM_LENGTH);
                     }, SymbolGlyph);
