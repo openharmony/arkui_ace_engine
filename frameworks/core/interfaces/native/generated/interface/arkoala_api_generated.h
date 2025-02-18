@@ -1305,6 +1305,12 @@ typedef struct Opt_DrawingRenderingContext Opt_DrawingRenderingContext;
 typedef struct CanvasRenderingContext2DPeer CanvasRenderingContext2DPeer;
 typedef struct CanvasRenderingContext2DPeer* Ark_CanvasRenderingContext2D;
 typedef struct Opt_CanvasRenderingContext2D Opt_CanvasRenderingContext2D;
+typedef struct OffscreenCanvasRenderingContext2DPeer OffscreenCanvasRenderingContext2DPeer;
+typedef struct OffscreenCanvasRenderingContext2DPeer* Ark_OffscreenCanvasRenderingContext2D;
+typedef struct Opt_OffscreenCanvasRenderingContext2D Opt_OffscreenCanvasRenderingContext2D;
+typedef struct RenderingContextSettingsPeer RenderingContextSettingsPeer;
+typedef struct RenderingContextSettingsPeer* Ark_RenderingContextSettings;
+typedef struct Opt_RenderingContextSettings Opt_RenderingContextSettings;
 typedef struct ImageBitmapPeer ImageBitmapPeer;
 typedef struct ImageBitmapPeer* Ark_ImageBitmap;
 typedef struct Opt_ImageBitmap Opt_ImageBitmap;
@@ -2575,14 +2581,14 @@ typedef struct Ark_CheckboxOptions Ark_CheckboxOptions;
 typedef struct Opt_CheckboxOptions Opt_CheckboxOptions;
 typedef struct Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext;
 typedef struct Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext;
+typedef struct OffscreenCanvasPeer OffscreenCanvasPeer;
+typedef struct OffscreenCanvasPeer* Ark_OffscreenCanvas;
+typedef struct Opt_OffscreenCanvas Opt_OffscreenCanvas;
 typedef struct Ark_Union_ImageBitmap_PixelMap Ark_Union_ImageBitmap_PixelMap;
 typedef struct Opt_Union_ImageBitmap_PixelMap Opt_Union_ImageBitmap_PixelMap;
 typedef struct CanvasRendererPeer CanvasRendererPeer;
 typedef struct CanvasRendererPeer* Ark_CanvasRenderer;
 typedef struct Opt_CanvasRenderer Opt_CanvasRenderer;
-typedef struct RenderingContextSettingsPeer RenderingContextSettingsPeer;
-typedef struct RenderingContextSettingsPeer* Ark_RenderingContextSettings;
-typedef struct Opt_RenderingContextSettings Opt_RenderingContextSettings;
 typedef struct Ark_LengthMetricsUnit Ark_LengthMetricsUnit;
 typedef struct Opt_LengthMetricsUnit Opt_LengthMetricsUnit;
 typedef struct CanvasPathPeer CanvasPathPeer;
@@ -10070,6 +10076,14 @@ typedef struct Opt_CanvasRenderingContext2D {
     Ark_Tag tag;
     Ark_CanvasRenderingContext2D value;
 } Opt_CanvasRenderingContext2D;
+typedef struct Opt_OffscreenCanvasRenderingContext2D {
+    Ark_Tag tag;
+    Ark_OffscreenCanvasRenderingContext2D value;
+} Opt_OffscreenCanvasRenderingContext2D;
+typedef struct Opt_RenderingContextSettings {
+    Ark_Tag tag;
+    Ark_RenderingContextSettings value;
+} Opt_RenderingContextSettings;
 typedef struct Opt_ImageBitmap {
     Ark_Tag tag;
     Ark_ImageBitmap value;
@@ -15397,6 +15411,10 @@ typedef struct Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext {
     Ark_Tag tag;
     Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext value;
 } Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext;
+typedef struct Opt_OffscreenCanvas {
+    Ark_Tag tag;
+    Ark_OffscreenCanvas value;
+} Opt_OffscreenCanvas;
 typedef struct Ark_Union_ImageBitmap_PixelMap {
     Ark_Int32 selector;
     union {
@@ -15412,10 +15430,6 @@ typedef struct Opt_CanvasRenderer {
     Ark_Tag tag;
     Ark_CanvasRenderer value;
 } Opt_CanvasRenderer;
-typedef struct Opt_RenderingContextSettings {
-    Ark_Tag tag;
-    Ark_RenderingContextSettings value;
-} Opt_RenderingContextSettings;
 typedef struct Ark_LengthMetricsUnit {
     Ark_String _LengthMetricsUnitStub;
 } Ark_LengthMetricsUnit;
@@ -19834,6 +19848,34 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     Ark_Int32 (*getWidth)(Ark_CanvasRenderingContext2D peer);
 } GENERATED_ArkUICanvasRenderingContext2DAccessor;
 
+typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
+    void (*destroyPeer)(Ark_OffscreenCanvasRenderingContext2D peer);
+    Ark_OffscreenCanvasRenderingContext2D (*ctor)(const Ark_Number* width,
+                                                  const Ark_Number* height,
+                                                  const Opt_RenderingContextSettings* settings);
+    Ark_NativePointer (*getFinalizer)();
+    void (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
+                      const Opt_String* type,
+                      const Opt_CustomObject* quality);
+    Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
+} GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor;
+
+typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
+    void (*destroyPeer)(Ark_OffscreenCanvas peer);
+    Ark_OffscreenCanvas (*ctor)(const Ark_Number* width,
+                                const Ark_Number* height);
+    Ark_NativePointer (*getFinalizer)();
+    Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
+    Ark_OffscreenCanvasRenderingContext2D (*getContext2d)(Ark_OffscreenCanvas peer,
+                                                          const Opt_RenderingContextSettings* options);
+    Ark_Int32 (*getHeight)(Ark_OffscreenCanvas peer);
+    void (*setHeight)(Ark_OffscreenCanvas peer,
+                      const Ark_Number* height);
+    Ark_Int32 (*getWidth)(Ark_OffscreenCanvas peer);
+    void (*setWidth)(Ark_OffscreenCanvas peer,
+                     const Ark_Number* width);
+} GENERATED_ArkUIOffscreenCanvasAccessor;
+
 typedef struct GENERATED_ArkUIDrawingRenderingContextAccessor {
     void (*destroyPeer)(Ark_DrawingRenderingContext peer);
     Ark_DrawingRenderingContext (*ctor)(const Opt_LengthMetricsUnit* unit);
@@ -22650,6 +22692,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIRenderingContextSettingsAccessor* (*getRenderingContextSettingsAccessor)();
     const GENERATED_ArkUICanvasRendererAccessor* (*getCanvasRendererAccessor)();
     const GENERATED_ArkUICanvasRenderingContext2DAccessor* (*getCanvasRenderingContext2DAccessor)();
+    const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* (*getOffscreenCanvasRenderingContext2DAccessor)();
+    const GENERATED_ArkUIOffscreenCanvasAccessor* (*getOffscreenCanvasAccessor)();
     const GENERATED_ArkUIDrawingRenderingContextAccessor* (*getDrawingRenderingContextAccessor)();
     const GENERATED_ArkUIICurveAccessor* (*getICurveAccessor)();
     const GENERATED_ArkUIDrawModifierAccessor* (*getDrawModifierAccessor)();
