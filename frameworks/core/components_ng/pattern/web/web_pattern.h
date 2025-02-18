@@ -824,7 +824,7 @@ private:
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
-    void OnOptimizeParserBudgetEnabledUpdate(bool value);
+    void OnOptimizeParserBudgetEnabledUpdate(bool enable);
     int GetWebId();
 
     void InitEvent();
