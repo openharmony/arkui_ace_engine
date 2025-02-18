@@ -285,10 +285,20 @@ HWTEST_F(ClickEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
     ASSERT_NE(eventInfo, nullptr);
     Callback_Void callback = accessor_->getPreventDefault(peer_);
     auto callbackHelper = CallbackHelper(callback);
-    eventInfo->SetPreventDefault(false);
-    EXPECT_FALSE(eventInfo->IsPreventDefault());
-    callbackHelper.Invoke();
-    EXPECT_TRUE(eventInfo->IsPreventDefault());
+
+    auto checkWithName = [&](const std::string& patternName, bool expected) {
+        eventInfo->SetPatternName(patternName);
+        eventInfo->SetPreventDefault(false);
+        EXPECT_FALSE(eventInfo->IsPreventDefault());
+        callbackHelper.Invoke();
+        EXPECT_EQ(eventInfo->IsPreventDefault(), expected);
+    };
+
+    checkWithName("Checkbox", true);
+    checkWithName("RichEditor", true);
+    checkWithName("Grid", false);
+    checkWithName("Hyperlink", true);
+
     CallbackKeeper::ReleaseReverseCallback<Callback_Void>(callback);
 }
 }

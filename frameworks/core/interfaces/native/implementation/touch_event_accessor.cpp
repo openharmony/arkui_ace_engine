@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
+#include <unordered_set>
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+
+namespace {
+const std::unordered_set<std::string> g_touchPreventDefPattern = { "Checkbox", "CheckboxGroup", "Rating",
+    "Radio", "Toggle", "Hyperlink" };
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TouchEventAccessor {
@@ -71,6 +78,11 @@ Callback_Void GetPreventDefaultImpl(TouchEventPeer* peer)
     auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
         TouchEventInfo* info = peer->GetEventInfo();
         CHECK_NULL_VOID(info);
+        auto patternName = info->GetPatternName();
+        if (g_touchPreventDefPattern.find(patternName.c_str()) == g_touchPreventDefPattern.end()) {
+            LOGE("ARKOALA Component does not support prevent function.");
+            return;
+        }
         info->SetPreventDefault(true);
     });
     return callback;

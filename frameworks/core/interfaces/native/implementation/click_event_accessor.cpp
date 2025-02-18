@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
+#include <unordered_set>
+
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
+
+namespace {
+const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Checkbox", "CheckboxGroup",
+    "Rating", "Radio", "Toggle", "Hyperlink" };
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
@@ -206,6 +213,11 @@ Callback_Void GetPreventDefaultImpl(ClickEventPeer* peer)
     auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
         GestureEvent* info = peer->GetEventInfo();
         CHECK_NULL_VOID(info);
+        auto patternName = info->GetPatternName();
+        if (g_clickPreventDefPattern.find(patternName.c_str()) == g_clickPreventDefPattern.end()) {
+            LOGE("ARKOALA Component does not support prevent function.");
+            return;
+        }
         info->SetPreventDefault(true);
     });
     return callback;
