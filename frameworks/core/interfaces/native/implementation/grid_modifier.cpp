@@ -89,7 +89,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // GridModifier
 namespace GridInterfaceModifier {
-void SetGridOptionsImpl(Ark_NativePointer node, const Opt_Scroller* scroller,
+void SetGridOptionsImpl(Ark_NativePointer node,
+                        const Opt_Scroller* scroller,
                         const Opt_GridLayoutOptions* layoutOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
