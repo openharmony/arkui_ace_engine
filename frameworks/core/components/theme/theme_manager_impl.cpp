@@ -86,6 +86,9 @@
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
+#include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -180,7 +183,11 @@ const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPt
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
         { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> },
         { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> },
-        { SelectTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SelectThemeWrapper::WrapperBuilder> }
+        { SelectTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SelectThemeWrapper::WrapperBuilder> },
+        { NavigationBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::NavigationBarThemeWrapper::WrapperBuilder> },
+        { AgingAdapationDialogTheme::TypeId(),
+            &ThemeWrapperBuildFunc<NG::AgingAdapationDialogThemeWrapper::WrapperBuilder> },
+        { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;

@@ -58,6 +58,19 @@ public:
     static RefPtr<FrameNode> CreateDialogNode();
 };
 
+namespace {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DialogTheme::TypeId()) {
+        return NavigationPatternTestThreeNg::dialogTheme_;
+    } else if (type == NavigationBarTheme::TypeId()) {
+        return NavigationPatternTestThreeNg::navigationBarTheme_;
+    } else {
+        return nullptr;
+    }
+}
+} // namespace
+
 RefPtr<DialogTheme> NavigationPatternTestThreeNg::dialogTheme_ = nullptr;
 RefPtr<NavigationBarTheme> NavigationPatternTestThreeNg::navigationBarTheme_ = nullptr;
 
@@ -70,14 +83,10 @@ void NavigationPatternTestThreeNg::SetUpTestSuite()
     navigationBarTheme_ = AceType::MakeRefPtr<NavigationBarTheme>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DialogTheme::TypeId()) {
-            return dialogTheme_;
-        } else if (type == NavigationBarTheme::TypeId()) {
-            return navigationBarTheme_;
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

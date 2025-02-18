@@ -73,6 +73,7 @@ void NavigationBranchTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 /**
@@ -1742,11 +1743,12 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest049, TestSize.Level1)
     newBar1.iconSymbol = onApply;
     toolBarItems.push_back(newBar1);
     int32_t index = -1;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index), nullptr);
+    int32_t themeScopeId = 0;
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index, themeScopeId), nullptr);
     int32_t index_ = 3;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index_), nullptr);
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index_, themeScopeId), nullptr);
     int32_t indexs = 0;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs), nullptr);
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs, themeScopeId), nullptr);
 }
 
 /**
@@ -1785,7 +1787,8 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest050, TestSize.Level1)
     newBar1.icon = "icon";
     toolBarItems.push_back(newBar1);
     int32_t indexs = 0;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs), nullptr);
+    int32_t themeScopeId = 0;
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs, themeScopeId), nullptr);
 }
 
 /**
