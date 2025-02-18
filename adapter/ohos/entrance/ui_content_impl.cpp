@@ -4613,9 +4613,14 @@ void UIContentImpl::UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTrans
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
+        [id = instanceId_, aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
             transform.posY, transform.scaleX, transform.scaleY)]() {
             aceContainer->SetSingleHandTransform(singleHandTransform);
+            auto context = NG::PipelineContext::GetContextByContainerId(id);
+            CHECK_NULL_VOID(context);
+            auto uiExtManager = context->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtManager);
+            uiExtManager->TransferAccessibilityRectInfo();
         }, TaskExecutor::TaskType::UI, "ArkUISetSingleHandTransform");
 }
 
