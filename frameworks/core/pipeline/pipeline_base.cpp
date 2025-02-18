@@ -241,8 +241,7 @@ void PipelineBase::SetRootSize(double density, float width, float height)
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
 }
 
@@ -1026,8 +1025,7 @@ bool PipelineBase::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline");
     }
 }
 
