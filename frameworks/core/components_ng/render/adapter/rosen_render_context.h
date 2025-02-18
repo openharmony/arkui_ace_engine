@@ -442,6 +442,8 @@ public:
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
+    void AddRsNodeForCapture();
+    void SetDrawNodeChangeCallback() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

@@ -811,7 +811,6 @@ void PipelineContext::HandleSpecialContainerNode()
     for (auto positionZNodeId : positionZSet) {
         auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(positionZNodeId));
         if (!frameNode) {
-            DeletePositionZNode(positionZNodeId);
             continue;
         }
         auto parentNode = frameNode->GetParentFrameNode();
@@ -833,6 +832,7 @@ void PipelineContext::HandleSpecialContainerNode()
             overlayNode->GetRenderContext()->SetDrawNode();
         }
     }
+    ClearPositionZNodes();
 }
 
 void PipelineContext::FlushMessages()
@@ -1252,6 +1252,10 @@ void PipelineContext::SetupRootElement()
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
+    auto rootContext = rootNode_->GetRenderContext();
+    if (rootContext) {
+        rootContext->SetDrawNodeChangeCallback();
+    }
 }
 
 void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
