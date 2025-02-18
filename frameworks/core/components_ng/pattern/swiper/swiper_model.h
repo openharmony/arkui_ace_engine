@@ -84,6 +84,12 @@ struct SwiperMarginOptions {
     bool ignoreBlank;
 };
 
+struct SwiperContentWillScrollResult {
+    int32_t currentIndex;
+    int32_t comingIndex;
+    float offset;
+};
+
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
 using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
@@ -91,6 +97,7 @@ using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 using ContentDidScrollEvent =
     std::function<void(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)>;
+using ContentWillScrollEvent = std::function<bool(const SwiperContentWillScrollResult& result)>;
 
 class ACE_FORCE_EXPORT SwiperModel {
 public:
@@ -146,6 +153,7 @@ public:
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
+    virtual void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;
