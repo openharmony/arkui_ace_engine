@@ -237,6 +237,8 @@ public:
         userSetOpacity_ = opacity;
     }
 
+    RefPtr<UINode> GetNavigationNode() override;
+
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
