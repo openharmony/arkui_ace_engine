@@ -88,7 +88,7 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
 
 void DatePickerColumnPattern::OnModifyDone()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
@@ -547,7 +547,7 @@ void DatePickerColumnPattern::UpdatePickerTextProperties(uint32_t index, uint32_
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -643,7 +643,7 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 
 void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -1093,7 +1093,7 @@ int32_t DatePickerColumnPattern::CalcScrollIndex(
 
 float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -1161,7 +1161,7 @@ float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScroll
 
 float DatePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, DatePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -1214,7 +1214,7 @@ float DatePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, Date
 
 void DatePickerColumnPattern::SetOptionShiftDistance()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);

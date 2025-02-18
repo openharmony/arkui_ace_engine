@@ -169,7 +169,7 @@ void ArcScrollBar::ScheduleShrinkDelayTask()
 {
     if (GetDisplayMode() != DisplayMode::AUTO) {
         shrinkDelayTask_.Cancel();
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);

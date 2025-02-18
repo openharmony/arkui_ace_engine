@@ -44,7 +44,7 @@ public:
         auto ratingPattern = DynamicCast<RatingPattern>(pattern_.Upgrade());
         CHECK_NULL_VOID(ratingPattern);
         CHECK_NULL_VOID(ratingModifier_);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
         CHECK_NULL_VOID(ratingTheme);

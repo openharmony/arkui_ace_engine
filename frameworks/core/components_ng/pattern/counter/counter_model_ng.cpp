@@ -43,7 +43,7 @@ RefPtr<FrameNode> CounterModelNG::CreateFrameNode(int32_t nodeId)
         V2::COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     auto counterPattern = counterNode->GetPattern<CounterPattern>();
     CHECK_NULL_RETURN(counterPattern, counterNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, counterNode);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
     CHECK_NULL_RETURN(counterTheme, counterNode);
@@ -132,7 +132,7 @@ void CounterModelNG::SetEnableDec(bool enableDec)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableDec);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);
@@ -154,7 +154,7 @@ void CounterModelNG::SetEnableInc(bool enableInc)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableInc);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);
@@ -264,7 +264,7 @@ void CounterModelNG::SetEnableDec(FrameNode* frameNode, bool enableDec)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableDec);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);
@@ -284,7 +284,7 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableInc);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);

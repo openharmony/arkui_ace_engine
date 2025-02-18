@@ -50,7 +50,7 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, selfContentSize);
     geometryNode->SetContentSize(selfContentSize);
     // sub button measure
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
     CHECK_NULL_VOID(counterTheme);

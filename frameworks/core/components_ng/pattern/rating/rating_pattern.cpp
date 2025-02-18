@@ -571,7 +571,7 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace)
 {
     CHECK_NULL_RETURN(ratingModifier_, 0.0);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, 0.0);
@@ -935,7 +935,7 @@ void RatingPattern::OnModifyDone()
     HandleEnabled();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);

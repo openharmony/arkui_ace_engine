@@ -37,7 +37,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
@@ -88,7 +88,7 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& ratingSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(ratingLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);

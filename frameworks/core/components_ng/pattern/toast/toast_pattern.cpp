@@ -354,7 +354,7 @@ void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
 void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
 {
     CHECK_NULL_VOID(text);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
     auto parent = gridColumnInfo->GetParent();
@@ -400,7 +400,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto textContext = host->GetRenderContext();
     CHECK_NULL_VOID(textContext);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);

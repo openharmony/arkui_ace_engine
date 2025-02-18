@@ -654,7 +654,7 @@ void WebModelNG::SetOnRequestFocus(FrameNode* frameNode, std::function<void(cons
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
 #ifdef ARKUI_CAPI_UNITTEST
         func(info.get());
@@ -683,7 +683,7 @@ void WebModelNG::SetOnConsoleLog(FrameNode* frameNode, std::function<bool(const 
 {
     CHECK_NULL_VOID(frameNode);
     auto onConsole = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(context, false);
         bool result = false;
 #ifdef ARKUI_CAPI_UNITTEST
@@ -963,7 +963,7 @@ void WebModelNG::SetOnInterceptKeyEventCallback(
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         bool result = false;
         CHECK_NULL_RETURN(context, result);
         context->PostSyncEvent(

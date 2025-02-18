@@ -154,7 +154,7 @@ void ArcScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
 
 void ArcScrollBarOverlayModifier::DrawArc(DrawingContext& context)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto strokeWidth = strokeWidth_->Get();
     auto& canvas = context.canvas;
@@ -178,7 +178,7 @@ void ArcScrollBarOverlayModifier::DrawArc(DrawingContext& context)
 void ArcScrollBarOverlayModifier::DrawBackgroundArc(DrawingContext& context)
 {
     CHECK_NULL_VOID(backgroundBarColor_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto& canvas = context.canvas;
     auto strokeWidth = backgroundStrokeWidth_->Get();

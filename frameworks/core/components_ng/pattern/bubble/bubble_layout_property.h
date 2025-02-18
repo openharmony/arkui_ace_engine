@@ -100,7 +100,7 @@ public:
         bubbleLayoutProperty->Put("arrowHeight", GetArrowHeight().value_or(Dimension(8.0_vp)).ToString().c_str());
         bubbleLayoutProperty->Put("showInSubWindow", GetShowInSubWindow().value_or(false));
 
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;
         auto defaultTargetSpace = theme ? theme->GetTargetSpace() : Dimension(8._vp);
         bubbleLayoutProperty->Put("targetSpace", GetTargetSpace().value_or(defaultTargetSpace).ToString().c_str());

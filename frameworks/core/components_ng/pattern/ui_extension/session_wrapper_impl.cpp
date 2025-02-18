@@ -445,7 +445,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
 void SessionWrapperImpl::UpdateSessionConfig()
 {
     auto extConfig = session_->GetSystemConfig();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto hostConfig = pipeline->GetKeyboardAnimationConfig();
     extConfig.animationIn_ = {
@@ -628,7 +628,7 @@ void SessionWrapperImpl::NotifyForeground()
     CHECK_NULL_VOID(session_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
     int32_t windowSceneId = GetWindowSceneId();
@@ -845,7 +845,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     CHECK_NULL_VOID(session_);
     auto instanceId = GetInstanceIdFromHost();
     ContainerScope scope(instanceId);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     displayAreaWindow_ = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(displayAreaWindow_.Left(), displayAreaWindow_.Top());
@@ -913,7 +913,7 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
     CHECK_NULL_RETURN(taskExecutor_, false);
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto curWindow = pipeline->GetCurrentWindowRect();
     int64_t curTime = GetCurrentTimestamp();
@@ -957,7 +957,7 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
     int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto curWindow = pipeline->GetCurrentWindowRect();
     if (keyboardHeight > 0) {

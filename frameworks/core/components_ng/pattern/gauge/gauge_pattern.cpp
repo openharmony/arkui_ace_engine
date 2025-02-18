@@ -178,7 +178,7 @@ void GaugePattern::InitLimitValueText(int32_t valueTextId, bool isMin)
     std::ostringstream out;
     out << std::setiosflags(std::ios::fixed) << std::setprecision(0) << limitValue;
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
 

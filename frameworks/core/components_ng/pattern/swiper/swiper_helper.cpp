@@ -79,7 +79,7 @@ void SwiperHelper::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicator
     CHECK_NULL_VOID(indicatorNode);
     auto indicatorProps = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(indicatorProps);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     const auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     const auto digitalParams = swiper.GetSwiperDigitalParameters();
@@ -407,7 +407,7 @@ std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDig
     CHECK_NULL_RETURN(params, "");
     auto jsonValue = JsonUtil::Create(true);
     CHECK_NULL_RETURN(jsonValue, "");
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, "");
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(theme, "");

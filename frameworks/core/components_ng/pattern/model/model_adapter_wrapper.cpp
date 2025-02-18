@@ -48,7 +48,7 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, const ModelViewContext& c
     });
 
 #if MULTI_ECS_UPDATE_AT_ONCE
-    RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
+    RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline) {
         Render3D::GraphicsManager::GetInstance().AttachContext(pipeline);

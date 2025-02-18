@@ -59,7 +59,7 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto radioTheme = pipeline->GetTheme<RadioTheme>();
         json->PutExtAttr("checked", GetRadioCheck().value_or(false) ? "true" : "false", filter);
