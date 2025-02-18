@@ -3139,7 +3139,6 @@ void RichEditorPattern::HandleBlurEvent()
         lastSelectionRange_.reset();
     }
     HandleOnEditChanged(false);
-    isMoveCaretAnywhere_ = false;
 }
 
 void RichEditorPattern::HandleFocusEvent()
@@ -6913,7 +6912,6 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     ResetTouchSelectState();
-    isMoveCaretAnywhere_ = false;
     CHECK_NULL_VOID(HasFocus() && sourceTool == SourceTool::FINGER);
     auto touchDownOffset = info.GetLocalLocation();
     moveCaretState_.touchDownOffset = touchDownOffset;
@@ -6930,7 +6928,6 @@ void RichEditorPattern::HandleTouchUp()
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
-    isMoveCaretAnywhere_ = false;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -11211,31 +11208,6 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
     TripleClickSection(info, start, end, pos);
 }
 
-void RichEditorPattern::ShowCaretNoTwinkling(const Offset& textOffset)
-{
-    auto position = paragraphs_.GetIndex(textOffset);
-    SetCaretPosition(position);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show caret no twinkling at position=%{public}d", position);
-    StopTwinkling();
-    caretVisible_ = true;
-    isMoveCaretAnywhere_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-
-    CHECK_NULL_VOID(overlayMod_);
-    auto [lastClickOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
-    auto localOffset = OffsetF(textOffset.GetX(), lastClickOffset.GetY());
-    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
-
-    // select + long press, so cancel selection.
-    if (textSelector_.IsValid()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select + long press, so cancel selection");
-        CloseSelectOverlay();
-        ResetSelection();
-    }
-}
-
 void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
 {
     // While previewing + long press and move, then shall select content.
@@ -11261,29 +11233,6 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     HandleSelectionChange(start, end);
     TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
-{
-    // While editing + long press and move, then shall move caret:caret show anywhere on the fonts.
-    CHECK_NULL_VOID(isMoveCaretAnywhere_);
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
-    auto position = paragraphs_.GetIndex(textOffset);
-    AdjustCursorPosition(position);
-    SetCaretPosition(position);
-    auto [caretOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
-    CHECK_NULL_VOID(overlayMod_);
-    auto localOffset = OffsetF(offset.GetX(), caretOffset.GetY());
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    // make sure the caret is display in the range of frame.
-    localOffset.SetX(std::clamp(localOffset.GetX(), 0.0f, frameSize.Width()));
-    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
-    MoveCaretToContentRect(localOffset, caretHeight);
 }
 
 void RichEditorPattern::HideMenu()
