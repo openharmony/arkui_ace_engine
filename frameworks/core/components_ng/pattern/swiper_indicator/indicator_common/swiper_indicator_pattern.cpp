@@ -737,6 +737,7 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 {
     dragStartPoint_ =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    UpadateStartAngle();
 }
 
 void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
@@ -796,7 +797,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         touchOffset = startAngle - endAngle;
         touchOffset = GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
@@ -849,7 +850,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         touchOffset = startAngle - endAngle;
         touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
@@ -971,7 +972,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         turnPageRateOffset = startAngle - endAngle;
         if (LessNotEqual(std::abs(turnPageRateOffset), GetIndicatorDragAngleThreshold(false))) {
             return;
@@ -1005,6 +1006,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - step);
         }
         dragStartPoint_ = dragPoint;
+        UpadateStartAngle();
     }
 }
 
