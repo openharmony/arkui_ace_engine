@@ -38,6 +38,7 @@ void DestroyPeerImpl(TransitionEffectPeer* peer)
 Ark_NativePointer CtorImpl(const Ark_String* type,
                            const Ark_TransitionEffects* effect)
 {
+    CHECK_NULL_RETURN(type && effect, nullptr);
     auto valueText = Converter::Convert<std::string>(*type);
     TransitionEffectPeer* peer = new TransitionEffectPeer();
     auto emptyDimension = Dimension();
@@ -46,7 +47,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
         auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
         TranslateOptions translate(x.value_or(emptyDimension), y.value_or(emptyDimension), z.value_or(emptyDimension));
-        peer->handler = new ChainedTranslateEffect(translate);
+        peer->handler = AceType::MakeRefPtr<ChainedTranslateEffect>(translate);
     } else if (valueText == ROTATE_TOKEN) {
         auto x = Converter::Convert<float>(effect->rotate.x.value);
         auto y = Converter::Convert<float>(effect->rotate.y.value);
@@ -54,13 +55,13 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto centerX = Converter::OptConvert<CalcDimension>(effect->rotate.centerX.value);
         auto centerY = Converter::OptConvert<CalcDimension>(effect->rotate.centerY.value);
         auto centerZ = Converter::OptConvert<CalcDimension>(effect->rotate.centerZ.value);
-        auto perspective = Converter::Convert<float>(effect->rotate.centerZ.value);
+        auto perspective = Converter::Convert<float>(effect->rotate.perspective.value);
         auto angle = Converter::OptConvert<float>(effect->rotate.angle);
         RotateOptions rotate(x, y, z, angle.value_or(0),
             centerX.value_or(emptyDimension),
             centerY.value_or(emptyDimension),
             centerZ.value_or(emptyDimension), perspective);
-        peer->handler = new ChainedRotateEffect(rotate);
+        peer->handler = AceType::MakeRefPtr<ChainedRotateEffect>(rotate);
     } else if (valueText == SCALE_TOKEN) {
         auto x = Converter::Convert<float>(effect->scale.x.value);
         auto y = Converter::Convert<float>(effect->scale.y.value);
@@ -68,22 +69,21 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto centerX = Converter::OptConvert<CalcDimension>(effect->scale.centerX.value);
         auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
         ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
-        peer->handler = new ChainedScaleEffect(scale);
+        peer->handler = AceType::MakeRefPtr<ChainedScaleEffect>(scale);
     } else if (valueText == OPACITY_TOKEN) {
         auto opacity = Converter::Convert<float>(effect->opacity);
-        peer->handler = new ChainedOpacityEffect(opacity);
+        peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
     } else if (valueText == MOVE_TOKEN) {
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
-        peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
+        peer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(move.value_or(TransitionEdge::TOP));
     } else if (valueText == ASYMMETRIC_TOKEN) {
-        CHECK_NULL_RETURN(effect, nullptr);
-        CHECK_NULL_RETURN(effect->asymmetric.appear.ptr, nullptr);
+        CHECK_NULL_RETURN(effect && effect->asymmetric.appear.ptr, nullptr);
         auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
         CHECK_NULL_RETURN(app, nullptr);
         CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
         auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
         CHECK_NULL_RETURN(disapp, nullptr);
-        peer->handler = new ChainedAsymmetricEffect(app->handler, disapp->handler);
+        peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(app->handler, disapp->handler);
     }
     return peer;
 }
@@ -154,15 +154,24 @@ Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    LOGE("TransitionEffectAccessor::AnimationImpl Return value must be TransitionEffect here.");
-    return nullptr;
+    CHECK_NULL_RETURN(value, nullptr);
+    AnimationOption option = Converter::Convert<AnimationOption>(*value);
+    auto refOpt = std::make_shared<AnimationOption>(option);
+    peer->handler->SetAnimationOption(refOpt);
+    return peer;
 }
 Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
                               const Ark_TransitionEffect* transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
-    return nullptr;
+    CHECK_NULL_RETURN(transitionEffect, peer);
+    auto lastEffect = peer;
+    while (lastEffect->handler->GetNext() != nullptr) {
+        lastEffect->handler = lastEffect->handler->GetNext();
+    }
+    const auto nextPeer = reinterpret_cast<TransitionEffectPeer*>(transitionEffect->ptr);
+    lastEffect->handler->SetNext(nextPeer->handler);
+    return peer;
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
