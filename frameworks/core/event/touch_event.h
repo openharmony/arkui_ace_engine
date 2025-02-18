@@ -330,6 +330,7 @@ struct TouchEvent final : public UIInputEvent {
         event.inputXDeltaSlope = inputXDeltaSlope;
         event.inputYDeltaSlope = inputYDeltaSlope;
         event.isPassThroughMode = isPassThroughMode;
+        event.operatingHand = operatingHand;
         return event;
     }
 
@@ -450,8 +451,8 @@ struct TouchEvent final : public UIInputEvent {
             .downTime = time,
             .size = size,
             .force = force,
-            .isPressed = (type == TouchType::DOWN) },
-            .operatingHand = operatingHand;
+            .isPressed = (type == TouchType::DOWN),
+            .operatingHand = operatingHand };
         TouchEvent event;
         event.SetId(id)
             .SetX(x)
