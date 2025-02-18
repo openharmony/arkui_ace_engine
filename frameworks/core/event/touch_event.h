@@ -72,6 +72,7 @@ struct TouchPoint final {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
+    int32_t operatingHand = 0;
 };
 
 /**
@@ -99,6 +100,7 @@ struct TouchEvent final : public UIInputEvent {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
+    int32_t operatingHand = 0;
     bool isInterpolated = false;
     bool isMouseTouchTest = false;
     bool isFalsified = false;
@@ -287,6 +289,12 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetOperatingHand(int32_t operatingHand)
+    {
+        this->operatingHand = operatingHand;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -442,7 +450,8 @@ struct TouchEvent final : public UIInputEvent {
             .downTime = time,
             .size = size,
             .force = force,
-            .isPressed = (type == TouchType::DOWN) };
+            .isPressed = (type == TouchType::DOWN) },
+            .operatingHand = operatingHand;
         TouchEvent event;
         event.SetId(id)
             .SetX(x)
@@ -459,7 +468,8 @@ struct TouchEvent final : public UIInputEvent {
             .SetIsInterpolated(isInterpolated)
             .SetPointerEvent(pointerEvent)
             .SetOriginalId(originalId)
-            .SetIsPassThroughMode(isPassThroughMode);
+            .SetIsPassThroughMode(isPassThroughMode)
+            .SetOperatingHand(operatingHand);
         event.pointers.emplace_back(std::move(point));
         return event;
     }

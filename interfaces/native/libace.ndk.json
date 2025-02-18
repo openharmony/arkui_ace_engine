@@ -472,6 +472,14 @@
         "name": "OH_ArkUI_PointerEvent_GetTiltY"
     },
     {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_PointerEvent_GetInteractionHand"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_PointerEvent_GetInteractionHandByIndex"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetTouchAreaWidth"
     },

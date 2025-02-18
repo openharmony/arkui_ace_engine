@@ -225,8 +225,11 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
+        points[i].operatingHand = fingureIterator == fingureEnd ? 0 : fingureIterator->operatingHand_;
         i++;
-        fingureIterator++;
+        if (fingureIterator != fingureEnd) {
+            fingureIterator++;
+        }
     }
 }
 

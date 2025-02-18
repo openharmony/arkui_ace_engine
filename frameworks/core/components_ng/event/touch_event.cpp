@@ -134,11 +134,13 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
     }
     eventInfo.SetSourceTool(lastPoint.sourceTool);
     eventInfo.SetPressedKeyCodes(lastPoint.pressedKeyCodes_);
+    eventInfo.SetOperatingHand(lastPoint.operatingHand);
     if (isFlushTouchEventsEnd_) {
         // trigger callback of the last touch event during one vsync period
         eventInfo.SetTouchEventsEnd(true);
         isFlushTouchEventsEnd_ = false;
     }
+    eventInfo.SetTargetDisplayId(lastPoint.targetDisplayId);
     return eventInfo;
 }
 
@@ -161,6 +163,7 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
         changedInfo.SetTiltY(lastPoint.tiltY.value());
     }
     changedInfo.SetSourceTool(lastPoint.sourceTool);
+    changedInfo.SetOperatingHand(lastPoint.operatingHand);
     return changedInfo;
 }
 
@@ -188,6 +191,7 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
         info.SetTiltY(pointItem.tiltY.value());
     }
     info.SetSourceTool(pointItem.sourceTool);
+    info.SetOperatingHand(pointItem.operatingHand);
     return info;
 }
 
