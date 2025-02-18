@@ -966,8 +966,12 @@ void WebModelNG::SetOnInterceptKeyEventCallback(
         auto context = PipelineBase::GetCurrentContext();
         bool result = false;
         CHECK_NULL_RETURN(context, result);
+#ifdef ARKUI_CAPI_UNITTEST
+        result = func(keyEventInfo);
+#else
         context->PostSyncEvent(
             [func, &keyEventInfo, &result]() { result = func(keyEventInfo); }, "ArkUIWebInterceptKeyEventCallback");
+#endif // ARKUI_CAPI_UNITTEST
         return result;
     };
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
