@@ -16,6 +16,7 @@
 #include "core/event/axis_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/common/ace_application_info.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
@@ -245,6 +246,8 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.time = timeStamp_;
     axisEvent.localX = static_cast<float>(localLocation_.GetX());
     axisEvent.localY = static_cast<float>(localLocation_.GetY());
+    axisEvent.sourceType = deviceType_;
+    axisEvent.sourceTool = sourceTool_;
     const auto& targetLocalOffset = GetTarget().area.GetOffset();
     const auto& targetOrigin = GetTarget().origin;
     // width height x y globalx globaly
@@ -258,6 +261,9 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.deviceId = GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = CalculateModifierKeyState(GetPressedKeyCodes());
+    // check for api version
+    axisEvent.axisSupportSourceTypeAndSourceTool =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN);
     return axisEvent;
 }
 
