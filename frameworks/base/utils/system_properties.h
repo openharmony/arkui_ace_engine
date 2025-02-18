@@ -67,6 +67,20 @@ enum class ScreenShape : int32_t {
     SCREEN_SHAPE_UNDEFINED,
 };
 
+union DebugFlags {
+    DebugFlags(int64_t flag = 0) : flag_(flag) {}
+    int64_t flag_;
+    struct {
+        bool containerMultiThread_ : 1;
+        bool getHostOnDetach_ : 1;
+        bool claimDeathObj_ : 1;
+        bool aceObjTypeCvt_ : 1;
+        bool jsObjTypeCvt_ : 1;
+        bool objDestroyInUse_ : 1;
+        bool useInvalidIter_ : 1;
+    } bits_;
+};
+
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -392,6 +406,41 @@ public:
 
     static bool GetDebugEnabled();
 
+    static bool DetectContainerMultiThread()
+    {
+        return debugEnabled_ && debugFlags_.bits_.containerMultiThread_;
+    }
+
+    static bool DetectGetHostOnDetach()
+    {
+        return debugEnabled_ && debugFlags_.bits_.getHostOnDetach_;
+    }
+
+    static bool DetectClaimDeathObj()
+    {
+        return debugEnabled_ && debugFlags_.bits_.claimDeathObj_;
+    }
+
+    static bool DetectAceObjTypeConvertion()
+    {
+        return debugEnabled_ && debugFlags_.bits_.aceObjTypeCvt_;
+    }
+
+    static bool DetectJsObjTypeConvertion()
+    {
+        return debugEnabled_ && debugFlags_.bits_.jsObjTypeCvt_;
+    }
+
+    static bool DetectObjDestroyInUse()
+    {
+        return debugEnabled_ && debugFlags_.bits_.objDestroyInUse_;
+    }
+
+    static bool DetectUseInvalidIterator()
+    {
+        return debugEnabled_ && debugFlags_.bits_.useInvalidIter_;
+    }
+
     static bool GetMeasureDebugTraceEnabled()
     {
         return measureDebugTraceEnable_;
@@ -703,6 +752,7 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static DebugFlags debugFlags_;
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
