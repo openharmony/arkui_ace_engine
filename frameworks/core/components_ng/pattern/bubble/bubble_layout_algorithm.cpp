@@ -529,7 +529,7 @@ void BubbleLayoutAlgorithm::UpdateHostWindowRect()
         CHECK_NULL_VOID(container);
     }
     if (container->IsUIExtensionWindow()) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_POPUP);
         CHECK_NULL_VOID(subwindow);
         hostWindowRect_ = subwindow->GetUIExtensionHostWindowRect();
     }
@@ -559,7 +559,7 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
                 auto frameNode = frameNodeWK.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, frameNode->GetId(), containerId);
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, frameNode->GetId(), containerId);
             },
             TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas");
     }

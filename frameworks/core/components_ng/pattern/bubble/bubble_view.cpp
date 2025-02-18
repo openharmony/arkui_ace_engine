@@ -989,7 +989,7 @@ PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNod
     auto context = customNode->GetContextWithCheck();
     CHECK_NULL_RETURN(context, popupInfoError);
     auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
     if (subwindow) {
         auto overlayManager = subwindow->GetOverlayManager();
         if (overlayManager) {
@@ -1016,7 +1016,7 @@ PopupInfo BubbleView::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode,
     auto context = customNode->GetContextWithCheck();
     CHECK_NULL_RETURN(context, popupInfoError);
     auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
     if (subwindow) {
         auto overlayManager = subwindow->GetOverlayManager();
         if (overlayManager) {
@@ -1041,7 +1041,7 @@ RefPtr<OverlayManager> BubbleView::GetPopupOverlayManager(const RefPtr<UINode>& 
     auto context = customNode->GetContextWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
     auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
     if (subwindow) {
         auto overlayManager = subwindow->GetOverlayManager();
         if (overlayManager) {

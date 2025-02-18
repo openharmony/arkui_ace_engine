@@ -1783,7 +1783,7 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
             rects.emplace_back(rect);
         }
         auto subWindowMgr = SubwindowManager::GetInstance();
-        subWindowMgr->SetHotAreas(rects, popupId, popupPattern->GetContainerId());
+        subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, popupPattern->GetContainerId());
     }
 }
 
@@ -1874,7 +1874,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         }
         if (isShowInSubWindow) {
             auto subwindow = SubwindowManager::GetInstance();
-            subwindow->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
+            subwindow->DeleteHotAreas(Container::CurrentId(), popupNode->GetId(), SubwindowType::TYPE_POPUP);
             subwindow->HideSubWindowNG();
         }
         popupPattern->CallDoubleBindCallback("false");
@@ -2038,7 +2038,7 @@ void OverlayManager::ErasePopup(int32_t targetId)
             AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         if (isShowInSubWindow) {
             auto subwindowMgr = SubwindowManager::GetInstance();
-            subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
+            subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId(), SubwindowType::TYPE_POPUP);
         }
         RemoveChildWithService(rootNode, popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2168,7 +2168,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     pipeline->AddAfterLayoutTask([idsNeedClean, containerId = Container::CurrentId()] {
         auto subwindowMgr = SubwindowManager::GetInstance();
         for (auto child : idsNeedClean) {
-            subwindowMgr->DeleteHotAreas(containerId, child);
+            subwindowMgr->DeleteHotAreas(containerId, child, SubwindowType::TYPE_MENU);
         }
     });
     hasDragPixelMap_ ? RemoveMenuWrapperNode(rootNode) : rootNode->Clean();
@@ -2425,7 +2425,7 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
         rootNode->RemoveChild(node);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         auto subwindowMgr = SubwindowManager::GetInstance();
-        subwindowMgr->DeleteHotAreas(Container::CurrentId(), node->GetId());
+        subwindowMgr->DeleteHotAreas(Container::CurrentId(), node->GetId(), SubwindowType::TYPE_MENU);
         menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
         break;
     }
@@ -2472,7 +2472,7 @@ void OverlayManager::CleanPopupInSubWindow()
             bubblePattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
             rootNode->RemoveChild(removeNode);
             auto subwindowMgr = SubwindowManager::GetInstance();
-            subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId());
+            subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId(), SubwindowType::TYPE_POPUP);
             ErasePopupInfo(target);
         }
     }
@@ -3076,7 +3076,7 @@ void OverlayManager::PopModalDialog(int32_t maskId)
             break;
         }
     }
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindowByType(subWindowId_, SubwindowType::TYPE_DIALOG);
     CHECK_NULL_VOID(subWindow);
     auto subOverlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(subOverlayManager);
@@ -3212,7 +3212,7 @@ void OverlayManager::DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode)
 
         auto pipeline = dialogNode->GetContextRefPtr();
         currentId = pipeline ? pipeline->GetInstanceId() : currentId;
-        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, dialogNode->GetId());
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, dialogNode->GetId(), SubwindowType::TYPE_DIALOG);
         SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
 }
@@ -3991,7 +3991,8 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
             popupMap_.erase(targetId);
             rootNode->RemoveChild(overlay);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(container->GetInstanceId());
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                container->GetInstanceId(), SubwindowType::TYPE_POPUP);
             CHECK_NULL_RETURN(subwindow, false);
             subwindow->DeleteHotAreas(overlay->GetId());
             if (rootNode->GetChildren().empty()) {

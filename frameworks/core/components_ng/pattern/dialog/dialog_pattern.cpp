@@ -291,7 +291,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     if (dialogProperties_.isShowInSubWindow) {
         auto pipeline = host->GetContextRefPtr();
         auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
-        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId());
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId(), SubwindowType::TYPE_DIALOG);
         SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
     overlayManager->CloseDialog(host);
@@ -1803,7 +1803,7 @@ void DialogPattern::InitHostWindowRect()
 
     if (container->IsUIExtensionWindow()) {
         isUIExtensionSubWindow_ = true;
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subwindow);
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());

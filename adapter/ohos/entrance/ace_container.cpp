@@ -514,20 +514,29 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
     return aceContainer;
 }
 
+bool MarkRemoveOverlayInSubwindow(const RefPtr<Subwindow> subwindow, int32_t instanceId)
+{
+    if (subwindow && subwindow->GetShown()) {
+        auto subContainerId = SubwindowManager::GetInstance()->GetSubContainerId(instanceId);
+        if (subContainerId < 0) {
+            return false;
+        }
+        ContainerScope scope(subContainerId);
+        auto overlayManager = subwindow->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, false);
+        return overlayManager->RemoveOverlayInSubwindow();
+    }
+    return false;
+}
+
 bool AceContainer::RemoveOverlayBySubwindowManager(int32_t instanceId)
 {
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        if (subwindow->GetShown()) {
-            auto subContainerId = SubwindowManager::GetInstance()->GetSubContainerId(instanceId);
-            if (subContainerId < 0) {
-                return false;
-            }
-            ContainerScope scope(subContainerId);
-            auto overlayManager = subwindow->GetOverlayManager();
-            CHECK_NULL_RETURN(overlayManager, false);
-            return overlayManager->RemoveOverlayInSubwindow();
+    auto sortSubwindow = SubwindowManager::GetInstance()->GetSortSubwindow(instanceId);
+    for (const auto& subwindow : sortSubwindow) {
+        if (!MarkRemoveOverlayInSubwindow(subwindow, instanceId)) {
+            continue;
         }
+        return true;
     }
     return false;
 }
@@ -1126,13 +1135,8 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE_COMMERCIAL("ViewChangeCallback(%d, %d)", width, height);
-        auto callback = [context, width, height, type, rsTransaction, id]() {
+        auto callback = [context, width, height, type, rsTransaction]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
-            if (type == WindowSizeChangeReason::ROTATION) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
-                CHECK_NULL_VOID(subwindow);
-                subwindow->ResizeWindow();
-            }
         };
         auto container = Container::Current();
         CHECK_NULL_VOID(container);

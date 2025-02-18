@@ -1016,12 +1016,12 @@ void RenderBubble::OnPaintFinish()
         if (bubbleComponent_->GetPopupParam()->HasAction()) {
             std::vector<Rect> rects;
             rects.emplace_back(GetRectBasedWindowTopLeft());
-            SubwindowManager::GetInstance()->SetHotAreas(rects);
+            SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_POPUP);
             return;
         }
         std::vector<Rect> rects;
         rects.emplace_back(Rect(childOffset_, childSize_));
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_POPUP);
     }
 }
 
