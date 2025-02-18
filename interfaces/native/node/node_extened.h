@@ -117,6 +117,29 @@ struct ArkUI_SwiperIndicator {
     ArkUI_OptionalInt maxDisplayCount;
 };
 
+struct ArkUI_SwiperDigitIndicator {
+    ArkUI_SwiperIndicatorType type;
+    ArkUI_OptionalFloat dimLeft;
+    ArkUI_OptionalFloat dimTop;
+    ArkUI_OptionalFloat dimRight;
+    ArkUI_OptionalFloat dimBottom;
+    ArkUI_OptionalUint fontColor;
+    ArkUI_OptionalUint selectedFontColor;
+    ArkUI_OptionalFloat fontSize;
+    ArkUI_OptionalFloat selectedFontSize;
+    ArkUI_OptionalUint fontWeight;
+    ArkUI_OptionalUint selectedFontWeight;
+};
+
+struct ArkUI_SwiperArrowStyle {
+    ArkUI_OptionalInt showBackground;
+    ArkUI_OptionalInt showSidebarMiddle;
+    ArkUI_OptionalFloat backgroundSize;
+    ArkUI_OptionalUint backgroundColor;
+    ArkUI_OptionalFloat arrowSize;
+    ArkUI_OptionalUint arrowColor;
+};
+
 struct ArkUI_DrawableDescriptor {
     OH_PixelmapNativeHandle pixelMap;
     OH_PixelmapNativeHandle* pixelMapArray;

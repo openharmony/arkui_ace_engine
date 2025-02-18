@@ -1321,7 +1321,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0);
+    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
 
     EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
 }

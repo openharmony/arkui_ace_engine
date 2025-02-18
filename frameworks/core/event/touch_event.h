@@ -53,6 +53,8 @@ struct TouchPoint final {
     int32_t operatingHand = 0;
     int32_t width;
     int32_t height;
+
+    void CovertId();
 };
 
 /**

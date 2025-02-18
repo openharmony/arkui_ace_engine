@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/core/components/text/text_theme.h"
 #undef private
 #undef protected
 
@@ -44,6 +45,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr int32_t HOURS_WEST = -8;
+constexpr int32_t PROPERTY_CHANGE_FLAG_1 = 17;
+constexpr int32_t PROPERTY_CHANGE_FLAG_2 = 25;
 inline const std::string CLOCK_FORMAT = "aa h:m:s";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
@@ -54,6 +57,7 @@ const std::string EMPTY_TEXT = "";
 const std::string TEXTCLOCK_CONTENT = "08:00:00";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
+const Color TEXT_COLOR_VALUE_1 = Color::FromRGB(255, 255, 100);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 } // namespace
@@ -1178,5 +1182,87 @@ HWTEST_F(TextClockTestNG, BuildContentModifierNode, TestSize.Level1)
      * @tc.expected: step3. check whether the properties is correct.
      */
     pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextClockTest015
+ * @tc.desc: Test ResetTextColor and ResetFontColor of TextClock.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test ResetTextColor and ResetFontColor.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+
+    model.SetTextColor(TEXT_COLOR_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE_1);
+    model.ResetTextColor();
+    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), false);
+
+    model.SetFontColor(frameNode, TEXT_COLOR_VALUE);
+    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    model.ResetFontColor(frameNode);
+    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), false);
+    model.SetFontColor(frameNode, TEXT_COLOR_VALUE);
+    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    model.ResetFontColor(nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), true);
+}
+
+/**
+ * @tc.name: TextClockTest016
+ * @tc.desc: Test OnThemeScopeUpdate of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+    auto textProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test OnThemeScopeUpdate.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+
+    EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_MEASURE);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_CHANGE_FLAG_1);
+
+    const double fontSize = 20.1;
+    model.InitFontDefault(
+        TextStyle(FONT_FAMILY_VALUE, fontSize, FONT_WEIGHT_VALUE, ITALIC_FONT_STYLE_VALUE, TEXT_COLOR_VALUE));
+
+    EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_CHANGE_FLAG_2);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_CHANGE_FLAG_2);
 }
 } // namespace OHOS::Ace::NG

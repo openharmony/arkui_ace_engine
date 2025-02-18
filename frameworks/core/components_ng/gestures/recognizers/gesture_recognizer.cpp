@@ -600,4 +600,15 @@ void NGGestureRecognizer::UpdateCallbackState(const std::unique_ptr<GestureEvent
         callbackState_ = CallbackState::CANCEL;
     }
 }
+
+void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event)
+{
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        if ((refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED) &&
+            AceType::InstanceOf<ClickRecognizer>(this)) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

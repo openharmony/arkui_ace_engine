@@ -330,7 +330,8 @@ public:
 
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
-    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(
+        int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type);
     virtual void HandleSurfacePositionChanged(int32_t posX, int32_t posY) {};
     bool HasSurfaceChangedCallback()
     {
@@ -457,9 +458,9 @@ public:
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
-    virtual std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const
+    virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const
     {
-        std::list<ParagraphManager::ParagraphInfo> res;
+        std::vector<ParagraphManager::ParagraphInfo> res;
         CHECK_NULL_RETURN(pManager_, res);
         return pManager_->GetParagraphs();
     }

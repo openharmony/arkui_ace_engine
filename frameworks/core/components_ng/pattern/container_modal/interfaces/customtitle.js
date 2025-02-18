@@ -209,7 +209,6 @@ const f2 = 'arkui_button_size_change';
 const g2 = 'arkui_button_spacing_change';
 const h2 = 'arkui_color_mode_locked';
 const i2 = 'arkui_button_right_offset_change';
-const p5 = 'arkui_custom_title_row_update';
 const j2 = {
     bundleName: '',
     moduleName: '',
@@ -944,9 +943,6 @@ class c3 extends ViewPU {
         }
     }
     aboutToAppear() {
-    }
-    onDidBuild() {
-        ContainerModal.callNative(p5);
     }
     MenuBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {

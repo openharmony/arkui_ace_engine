@@ -603,7 +603,7 @@ void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissContentCover));
             dismissObj->SetProperty<int32_t>("reason", info);
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1115,8 +1115,7 @@ PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info
         JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
         dismissObj->SetPropertyObject("dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissPopup));
         dismissObj->SetProperty<int32_t>("reason", reason);
-        JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
-
+        JSRef<JSVal> newJSVal = dismissObj;
         func->ExecuteJS(1, &newJSVal);
     };
     return onWillDismiss;
@@ -1707,7 +1706,7 @@ void JSViewAbstract::ParseSpringBackCallback(const JSRef<JSObject>& paramObj,
             JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
             dismissObj->SetPropertyObject(
                 "springBack", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsSheetSpringBack));
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1736,7 +1735,7 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissSheet));
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1750,7 +1749,7 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissSheet));
             dismissObj->SetProperty<int32_t>("reason", info);
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1979,7 +1978,7 @@ void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissDialog));
             dismissObj->SetProperty<int32_t>("reason", info);
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_IMAGE_DEFINES_H
+#define FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_IMAGE_DEFINES_H
 
-#include "../../base/file_uri_helper.h"
-#include "file_uri.h"
+namespace OHOS::Ace {
+enum class ImageType {
+    BASE,
+    ANIMATION,
+    UNDEFINED,
+};
+} // namespace OHOS::Ace
 
-namespace OHOS::Ace::Napi {
-std::string FileUriHelper::GetRealPath(std::string fileUriStr)
-{
-    AppFileService::ModuleFileUri::FileUri fileUri(fileUriStr);
-    return fileUri.GetRealPath();
-}
-} // namespace OHOS::Ace::Napi
+#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_IMAGE_DEFINES_H

@@ -1442,7 +1442,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyleOption(
     styleOption.isValidColor = true;
 
     // Set scale
-    styleOption.scale = std::clamp(styleOption.scale, 0.0, 1.0);
+    styleOption.scale = std::clamp(options.scale, 0.0f, 1.0f);
 
     BlurOption blurOption;
     int vectorSize = 2;

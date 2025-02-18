@@ -41,6 +41,8 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -87,6 +89,8 @@
 #include "base/log/log.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/thread/background_task_executor.h"
+#include "base/thread/task_dependency_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
@@ -134,6 +138,8 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
+static bool g_isDynamicVsync = false;
+static bool g_isDragging = false;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -670,7 +676,7 @@ public:
     ~FoldScreenListener() = default;
     void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
     {
-        LOGI("fold status is changed, foldStatus: %{public}d", foldStatus);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "fold status is changed, foldStatus: %{public}d", foldStatus);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
@@ -702,7 +708,7 @@ public:
     ~FoldDisplayModeListener() = default;
     void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
     {
-        LOGI("display mode is changed, displayMode: %{public}d", displayMode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "display mode is changed, displayMode: %{public}d", displayMode);
         if (!isDialog_) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -1685,6 +1691,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         ImageFileCache::GetInstance().SetCacheFileInfo();
         ImageFileCache::GetInstance().ClearAllCacheFiles();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+
+        auto task = [] {
+            bool dynamicVsync = false;
+            std::unordered_map<std::string, std::string> payload;
+            std::unordered_map<std::string, std::string> reply;
+            payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
+            payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
+            dynamicVsync = g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+        };
+        BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
@@ -1699,6 +1717,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
     });
 
+    bool reusedNodeSkipMeasure = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "reusedNodeSkipMeasure" && metaDataItem.value == "true";
+    });
+    if (reusedNodeSkipMeasure) {
+        EventReport::ReportReusedNodeSkipMeasureApp();
+    }
+    AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
@@ -2165,7 +2190,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
 
-    InitializeSafeArea(container);
+    std::string safeAreaTaskKey = "SafeArea";
+    TaskDependencyManager::GetInstance()->PostTaskToBg([container, this] {
+            OHOS::Ace::SetSkipBacktrace(true);
+            this->InitializeSafeArea(container);
+            OHOS::Ace::SetSkipBacktrace(false);
+        },
+        safeAreaTaskKey);
+
     InitializeDisplayAvailableRect(container);
     InitDragSummaryMap(container);
 
@@ -2188,10 +2220,26 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(",abilityName:")
                                                      .append(abilityName));
     UpdateFontScale(context->GetConfiguration());
-    auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
-    if (thpExtraManager->Init()) {
-        pipeline->SetTHPExtraManager(thpExtraManager);
-    }
+    std::string unimportantTaskKey = "UnimportantTask";
+    TaskDependencyManager::GetInstance()->PostTaskToBg([pipelineWeak = WeakPtr(pipeline)] {
+            auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+            if (thpExtraManager->Init()) {
+                auto pipeline = pipelineWeak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [pipelineWeak = WeakPtr(pipeline), thpExtraManager] () {
+                        auto pipeline = pipelineWeak.Upgrade();
+                        CHECK_NULL_VOID(pipeline);
+                        pipeline->SetTHPExtraManager(thpExtraManager);
+                    },
+                    TaskExecutor::TaskType::UI,
+                    "thpExtraManagerInitFinish");
+            }
+        },
+        unimportantTaskKey);
+    TaskDependencyManager::GetInstance()->Wait(safeAreaTaskKey);
     return errorCode;
 }
 
@@ -2371,6 +2419,7 @@ void UIContentImpl::Destroy()
     }
     ContainerScope::RemoveAndCheck(instanceId_);
     UnregisterDisplayManagerCallback();
+    SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()
@@ -2743,6 +2792,12 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
+void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    UpdateConfiguration(config);
+}
+
 void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     CHECK_NULL_VOID(config);
@@ -2792,6 +2847,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
     lastReason_ = reason;
+
+    if (!g_isDragging && !g_isDynamicVsync && (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START)) {
+        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(true);
+        ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(true)");
+        g_isDragging = true;
+    }
+
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
@@ -2871,6 +2934,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         if (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
             reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
             bool isDragging = reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START;
+            if (!g_isDynamicVsync && !isDragging) {
+                OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(false);
+                ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(false)");
+                g_isDragging = false;
+            }
             taskExecutor->PostTask(
                 [weak = AceType::WeakClaim(AceType::RawPtr(context)), isDragging]() {
                     auto pipelineContext = weak.Upgrade();

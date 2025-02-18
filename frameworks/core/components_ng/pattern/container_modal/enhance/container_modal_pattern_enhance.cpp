@@ -324,7 +324,6 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_VISIBILITY, hideMaximize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MINIMIZE_VISIBILITY, hideMinimize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_CLOSE_VISIBILITY, hideClose);
-    InitAllTitleRowLayoutProperty();
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -678,6 +677,11 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
     auto floatingTitleRow = GetFloatingTitleRow();
     auto customTitleRow = GetCustomTitleRow();
     auto gestureRow = GetGestureRow();
+    if (enableContainerModalGesture_) {
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    }
     EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
     EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
     EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");

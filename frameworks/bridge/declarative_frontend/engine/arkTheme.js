@@ -1079,7 +1079,6 @@ ArkThemeWhiteList.whiteList = [
     'Button',
     'Checkbox',
     'CheckboxGroup',
-    'Counter',
     'DataPanel',
     'LoadingProgress',
     'Menu',
@@ -1089,7 +1088,6 @@ ArkThemeWhiteList.whiteList = [
     'QRCode',
     'Radio',
     'Scroll',
-    'Select',
     'Swiper',
     'Text',
 ];

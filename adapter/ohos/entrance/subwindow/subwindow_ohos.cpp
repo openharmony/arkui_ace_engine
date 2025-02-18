@@ -143,7 +143,11 @@ void SubwindowOhos::SetToastWindowOption(RefPtr<Platform::AceContainer>& parentC
 {
     if (toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TOAST);
+        if (GetIsSelectOverlaySubWindow()) {
+            windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TEXT_MENU);
+        } else {
+            windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TOAST);
+        }
     }
     windowOption->SetWindowType(toastWindowType);
     if (parentContainer->IsUIExtensionWindow()) {
@@ -206,6 +210,7 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
         auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
         if (!display) {
             TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "failed to GetVisibleAreaDisplayInfoById");
+            return size;
         }
         size = Size(display->GetWidth(), display->GetHeight());
     }
@@ -238,9 +243,10 @@ void SubwindowOhos::InitContainer()
         } else if (GetAboveApps()) {
             auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
             isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-            auto mainWindowId = GetMainWindowId();
+            auto isSelectOverlay = GetIsSelectOverlaySubWindow();
+            auto mainWindowId = isSelectOverlay ? parentWindowId : GetMainWindowId();
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
-            windowTag = "TOAST_TOPMOST_";
+            windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
@@ -2045,9 +2051,15 @@ bool SubwindowOhos::CheckHostWindowStatus() const
 
 bool SubwindowOhos::Close()
 {
+    if (isClosing_) {
+        return true;
+    }
+
     CHECK_NULL_RETURN(window_, false);
     window_->UnregisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
+    isClosing_ = true;
     OHOS::Rosen::WMError ret = window_->Close();
+    isClosing_ = false;
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to close the dialog subwindow.");
         return false;

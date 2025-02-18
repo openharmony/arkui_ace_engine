@@ -122,7 +122,7 @@ void AddCustomWindowMaskComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     const auto object = JSRef<JSObject>::Make(obj);
     const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }

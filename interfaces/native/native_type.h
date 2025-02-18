@@ -173,6 +173,20 @@ typedef struct ArkUI_BarrierOption ArkUI_BarrierOption;
 typedef struct ArkUI_SwiperIndicator ArkUI_SwiperIndicator;
 
 /**
+ * @brief Defines the digital indicator style for the swiper.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_SwiperDigitIndicator ArkUI_SwiperDigitIndicator;
+
+/**
+ * @brief Defines the arrow style for the swiper.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_SwiperArrowStyle ArkUI_SwiperArrowStyle;
+
+/**
  * @brief Defines formatted string data objects supported by the text component.
  *
  * @since 12
@@ -217,7 +231,7 @@ typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 /**
  * @brief Set the linear progress indicator style.
  *
- * @since 16
+ * @since 15
  */
 typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
 
@@ -878,7 +892,7 @@ typedef enum {
 /**
  * @brief Enumerates the page flipping modes using the mouse wheel for the <b>Swiper</b> component.
  *
- * @since 14
+ * @since 15
  */
 typedef enum {
     /** When the mouse wheel is scrolled continuously, multiple pages are flipped, which is determined by the number of
@@ -2278,7 +2292,7 @@ typedef enum {
 /**
  * @brief Define an enum for the areas of the <b>ListItemGroup</b> component.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /** Outside the area of the <b>ListItemGroup</b> component. */
@@ -3372,6 +3386,341 @@ int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indic
 int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indicator);
 
 /**
+ * @brief Creates a digital indicator.
+ *
+ * @return Returns the pointer to the new indicator.
+ * @since 16
+ */
+ArkUI_SwiperDigitIndicator *OH_ArkUI_SwiperDigitIndicator_Create();
+
+/**
+ * @brief Sets the distance between the digital indicator and the start of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param value Indicates the distance between the digital indicator and the start of the swiper.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetStartPosition(ArkUI_SwiperDigitIndicator* indicator, float value);
+
+/**
+ * @brief Gets the distance between the digital indicator and the start of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return Returns the distance between the digital indicator and the start of the swiper.
+ * @since 16
+ */
+float OH_ArkUI_SwiperDigitIndicator_GetStartPosition(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the distance between the digital indicator and the top of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param value Indicates the distance between the digital indicator and the top of the swiper.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetTopPosition(ArkUI_SwiperDigitIndicator* indicator, float value);
+
+/**
+ * @brief Gets the distance between the digital indicator and the top of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return Returns the distance between the digital indicator and the top of the swiper.
+ * @since 16
+ */
+float OH_ArkUI_SwiperDigitIndicator_GetTopPosition(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the distance between the digital indicator and the end of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param value Indicates the distance between the digital indicator and the end of the swiper.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetEndPosition(ArkUI_SwiperDigitIndicator* indicator, float value);
+
+/**
+ * @brief Gets the distance between the digital indicator and the end of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return Returns the distance between the digital indicator and the end of the swiper.
+ * @since 16
+ */
+float OH_ArkUI_SwiperDigitIndicator_GetEndPosition(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the distance between the digital indicator and the bottom of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param value Returns the distance between the digital indicator and the bottom of the swiper.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetBottomPosition(ArkUI_SwiperDigitIndicator* indicator, float value);
+
+/**
+ * @brief Gets the distance between the digital indicator and the bottom of the swiper.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return Returns the distance between the digital indicator and the bottom of the swiper.
+ * @since 16
+ */
+float OH_ArkUI_SwiperDigitIndicator_GetBottomPosition(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the font color of total count in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param color font color, in 0xARGB format. Default value: 0xFF182431.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetFontColor(ArkUI_SwiperDigitIndicator* indicator, uint32_t color);
+
+/**
+ * @brief Gets the font color of total count in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return font color, in 0xARGB format.
+ * @since 16
+ */
+uint32_t OH_ArkUI_SwiperDigitIndicator_GetFontColor(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the font color of selected index in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param selectedColor font color, in 0xARGB format. Default value: 0xFF182431.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontColor(ArkUI_SwiperDigitIndicator* indicator, uint32_t selectedColor);
+
+/**
+ * @brief Gets the font color of selected index in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return font color, in 0xARGB format.
+ * @since 16
+ */
+uint32_t OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the font size of total count in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param size font size, in fp.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetFontSize(ArkUI_SwiperDigitIndicator* indicator, float size);
+
+/**
+ * @brief Gets the font size of total count in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return font size, in fp.
+ * @since 16
+ */
+float OH_ArkUI_SwiperDigitIndicator_GetFontSize(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the font size of selected index in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param size font size, in fp.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize(ArkUI_SwiperDigitIndicator* indicator, float size);
+
+/**
+ * @brief Gets the font size of selected index in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return font size, in fp.
+ * @since 16
+ */
+float OH_ArkUI_SwiperDigitIndicator_GetSelectedFontSize(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the font weight of total count in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param fontWeight font weight {@link ArkUI_FontWeight}. The default value is <b>ARKUI_FONT_WEIGHT_NORMAL</b>.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetFontWeight(ArkUI_SwiperDigitIndicator *indicator, ArkUI_FontWeight fontWeight);
+
+/**
+ * @brief Gets the font weight of total count in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return font weight {@link ArkUI_FontWeight}.
+ * @since 16
+ */
+ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetFontWeight(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Sets the font weight of selected index in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param selectedFontWeight font weight {@link ArkUI_FontWeight}. The default value is <b>ARKUI_FONT_WEIGHT_NORMAL</b>.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontWeight(
+    ArkUI_SwiperDigitIndicator *indicator, ArkUI_FontWeight selectedFontWeight);
+
+/**
+ * @brief Gets the font weight of selected index in the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return font weight {@link ArkUI_FontWeight}.
+ * @since 16
+ */
+ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetSelectedFontWeight(ArkUI_SwiperDigitIndicator* indicator);
+
+/**
+ * @brief Destroys the digital indicator.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @since 16
+ */
+void OH_ArkUI_SwiperDigitIndicator_Destroy(ArkUI_SwiperDigitIndicator *indicator);
+
+/**
+ * @brief Creates a arrow style for swiper.
+ *
+ * @return Returns the pointer to the new arrow style.
+ * @since 16
+ */
+ArkUI_SwiperArrowStyle *OH_ArkUI_SwiperArrowStyle_Create();
+
+/**
+ * @brief Sets whether to show the background for the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @param showBackground whether to show the background for the arrow.
+ *        The value <b>1</b> means to show the background, and <b>0</b> means the opposite.
+ *        The default value is <b>0</b>.
+ * @since 16
+ */
+void OH_ArkUI_SwiperArrowStyle_SetShowBackground(ArkUI_SwiperArrowStyle *arrowStyle, int32_t showBackground);
+
+/**
+ * @brief Gets whether to show the background for the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @return whether to show the background for the arrow.
+ *         The value <b>1</b> means to show the background, and <b>0</b> means the opposite.
+ * @since 16
+ */
+int32_t OH_ArkUI_SwiperArrowStyle_GetShowBackground(ArkUI_SwiperArrowStyle* arrowStyle);
+
+/**
+ * @brief Sets the display position of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @param showSidebarMiddle the display position of the arrow.
+ *        The value <b>1</b> means to display on boths sides of the swiper,
+ *        and <b>0</b> means display on boths sides of the swiper indicator.
+ *        The default value is <b>0</b>.
+ * @since 16
+ */
+void OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle(ArkUI_SwiperArrowStyle* arrowStyle, int32_t showSidebarMiddle);
+
+/**
+ * @brief Gets the display position of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @return the display position of the arrow. The value <b>1</b> means to display on boths sides of the swiper,
+ *         and <b>0</b> means display on boths sides of the swiper indicator.
+ * @since 16
+ */
+int32_t OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle(ArkUI_SwiperArrowStyle* arrowStyle);
+
+/**
+ * @brief Sets the background size of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @param backgroundSize the background size of the arrow. The unit is vp.
+ *        The default value is <b>24</b> when the arrow displays on both sides of the swiper indicator.
+ *        The default value is <b>32</b> when the arrow displays on both sides of the swiper.
+ * @since 16
+ */
+void OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(ArkUI_SwiperArrowStyle* arrowStyle, float backgroundSize);
+
+/**
+ * @brief Gets the background size of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @return Returns the background size of the arrow. The unit is vp.
+ * @since 16
+ */
+float OH_ArkUI_SwiperArrowStyle_GetBackgroundSize(ArkUI_SwiperArrowStyle *arrowStyle);
+
+/**
+ * @brief Destroys the arrow style.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @since 16
+ */
+void OH_ArkUI_SwiperArrowStyle_Destroy(ArkUI_SwiperArrowStyle *arrowStyle);
+
+/**
+ * @brief Sets the background color of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @param backgroundColor the background color of the arrow, in 0xARGB format.
+ *        The default value is <b>0x00000000</b> when the arrow displays on both sides of the swiper indicator.
+ *        The default value is <b>0x19182431</b> when the arrow displays on both sides of the swiper.
+ * @since 16
+ */
+void OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(ArkUI_SwiperArrowStyle *arrowStyle, uint32_t backgroundColor);
+
+/**
+ * @brief Gets the background color of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @return Returns the background color of the arrow, in 0xARGB format.
+ * @since 16
+ */
+uint32_t OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(ArkUI_SwiperArrowStyle* arrowStyle);
+
+/**
+ * @brief Sets the size of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @param arrowSize the size of the arrow. The unit is vp.
+ *        The default value is <b>18</b> when the arrow displays on both sides of the swiper indicator.
+ *        The default value is <b>24</b> when the arrow displays on both sides of the swiper.
+ *        The arrow size is fixed to 3/4 of the background size when the background is shown.
+ * @since 16
+ */
+void OH_ArkUI_SwiperArrowStyle_SetArrowSize(ArkUI_SwiperArrowStyle* arrowStyle, float arrowSize);
+
+/**
+ * @brief Gets the size of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @return the size of the arrow. The unit is vp.
+ * @since 16
+ */
+float OH_ArkUI_SwiperArrowStyle_GetArrowSize(ArkUI_SwiperArrowStyle* arrowStyle);
+
+/**
+ * @brief Sets the color of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @param arrowColor the color of the arrow, in 0xARGB format. The default value is <b>0x00182431</b>.
+ * @since 16
+ */
+void OH_ArkUI_SwiperArrowStyle_SetArrowColor(ArkUI_SwiperArrowStyle* arrowStyle, uint32_t arrowColor);
+
+/**
+ * @brief Gets the color of the arrow.
+ *
+ * @param arrowStyle The pointer to the arrow style.
+ * @return Returns the color of the arrow, in 0xARGB format.
+ * @since 16
+ */
+uint32_t OH_ArkUI_SwiperArrowStyle_GetArrowColor(ArkUI_SwiperArrowStyle* arrowStyle);
+
+/**
  * @brief Create a configuration item for the ListitemSwipeActionItem interface settings.
  *
  * @return List Item SwipeActionItem configuration item instance.
@@ -4189,7 +4538,7 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle);
  *
  * @return Returns a <b>ProgressLinearStyleOption</b> instance.
  * <br> If the result returns nullptr, there may be out of memory.
- * @since 16
+ * @since 15
  */
 ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create(void);
 
@@ -4197,7 +4546,7 @@ ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create(void)
  * @brief Destroy linear progress indicator style information.
  *
  * @param option Linear progress indicator style information.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_Destroy(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4206,7 +4555,7 @@ void OH_ArkUI_ProgressLinearStyleOption_Destroy(ArkUI_ProgressLinearStyleOption*
  *
  * @param option Linear progress indicator style information.
  * @param enabled Whether to enable the scan effect. Default value: false.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
 
@@ -4216,7 +4565,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(ArkUI_ProgressLinea
  * @param option Linear progress indicator style information.
  * @param enabled Whether to enable the smooth effect. When this effect is enabled, the progress change to
  * the set value takes place gradually. Otherwise, it takes place immediately. Default value: true.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
 
@@ -4226,7 +4575,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(ArkUI_ProgressLin
  * @param option Linear progress indicator style information.
  * @param strokeWidth Stroke width of the progress indicator. It cannot be set in percentage.
  * Default value: 4.0vp.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(ArkUI_ProgressLinearStyleOption* option, float strokeWidth);
 
@@ -4236,7 +4585,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(ArkUI_ProgressLinearStyle
  * @param option Linear progress indicator style information.
  * @param strokeRadius Rounded corner radius of the progress indicator. Value range: [0, strokeWidth/2].
  * Default value: strokeWidth/2.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(ArkUI_ProgressLinearStyleOption* option, float strokeRadius);
 
@@ -4245,7 +4594,7 @@ void OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(ArkUI_ProgressLinearStyl
  *
  * @param option Linear progress indicator style information.
  * @return Whether to enable the scan effect.
- * @since 16
+ * @since 15
  */
 bool OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4254,7 +4603,7 @@ bool OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(ArkUI_ProgressLinea
  *
  * @param option Linear progress indicator style information.
  * @return Whether to enable the smooth effect.
- * @since 16
+ * @since 15
  */
 bool OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4263,7 +4612,7 @@ bool OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(ArkUI_ProgressLin
  *
  * @param option Linear progress indicator style information.
  * @return Stroke width of the progress indicator.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyleOption* option);
 
@@ -4272,7 +4621,7 @@ float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyl
  *
  * @param option Linear progress indicator style information.
  * @return Rounded corner radius of the progress indicator.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearStyleOption* option);
 

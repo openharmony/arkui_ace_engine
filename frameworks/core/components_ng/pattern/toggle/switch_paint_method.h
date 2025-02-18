@@ -23,6 +23,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -46,7 +47,11 @@ public:
             bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                            : direction_ == TextDirection::RTL;
             auto pointOffset = isSelect_ ^ isRtl ? size.Width() - size.Height() : 0.0f;
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto renderContext = paintWrapper->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, nullptr);
+            auto host = renderContext->GetHost();
+            CHECK_NULL_RETURN(host, nullptr);
+            auto pipeline = host->GetContext();
             CHECK_NULL_RETURN(pipeline, nullptr);
             auto themeScopeId = GetThemeScopeId(paintWrapper);
             auto switchTheme = pipeline->GetTheme<SwitchTheme>(themeScopeId);
@@ -101,7 +106,11 @@ public:
     {
         auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto host = renderContext->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto switchTheme = pipeline->GetTheme<SwitchTheme>(GetThemeScopeId(paintWrapper));
         CHECK_NULL_VOID(switchTheme);

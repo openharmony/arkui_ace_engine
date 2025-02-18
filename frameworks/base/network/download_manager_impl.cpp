@@ -262,7 +262,7 @@ public:
                 RemoveDownloadTask(url, nodeId, false);
             });
         task->OnFail(
-            [this, downloadCondition, url, nodeId](const NetStackRequest& request, const NetStackResponse& response,
+            [downloadCondition, url](const NetStackRequest& request, const NetStackResponse& response,
                 const NetStackError& error) { OnFail(downloadCondition, request, response, error); });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
@@ -286,7 +286,7 @@ public:
                 true, instanceId);
             RemoveDownloadTaskWithPreload(url, nodeId, false);
         };
-        innerCallback->OnCancel = [this, cancelCallback = downloadCallback.cancelCallback, instanceId, url, nodeId]() {
+        innerCallback->OnCancel = [this, cancelCallback = downloadCallback.cancelCallback, url, nodeId]() {
             LOGI("Async Http task of url [%{private}s] cancelled", url.c_str());
             RemoveDownloadTaskWithPreload(url, nodeId, false);
         };

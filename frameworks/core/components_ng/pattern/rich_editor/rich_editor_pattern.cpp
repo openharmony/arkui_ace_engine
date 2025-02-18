@@ -165,12 +165,12 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     if (value->GetLength() != styledString_->GetLength() && value->GetLength() > maxLength_.value_or(INT_MAX)) {
         auto subLength = CalculateTruncationLength(value->GetU16string(), maxLength_.value_or(INT_MAX));
         if (subLength == 0) {
-            IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
+            IF_TRUE(IsPreviewTextInputting() && !previewTextRecord_.previewTextExiting, NotifyExitTextPreview(true));
             return;
         }
         subValue = value->GetSubSpanString(0, subLength);
     }
-    IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
+    IF_TRUE(IsPreviewTextInputting() && !previewTextRecord_.previewTextExiting, NotifyExitTextPreview(true));
     CloseSelectOverlay();
     ResetSelection();
     styledString_->RemoveCustomSpan();
@@ -181,7 +181,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     styledString_->AddCustomSpan();
-    styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
+    styledString_->SetFramNode(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ForceTriggerAvoidOnCaretChange();
 }
@@ -246,7 +246,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         pattern->SetSyncLoad(options.imageAttribute.value().syncLoad);
     }
     auto index = host->GetChildren().size();
-    imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+    imageNodes.push_back(imageNode);
     imageNode->MountToParent(host, index);
     HandleImageDrag(imageNode);
     SetImageLayoutProperty(imageNode, options);
@@ -893,7 +893,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     int32_t spanIndex = TextSpanSplit(insertIndex);
     IF_TRUE(spanIndex == -1, spanIndex = static_cast<int32_t>(host->GetChildren().size()));
 
-    imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+    imageNodes.push_back(imageNode);
     imageNode->MountToParent(host, spanIndex);
     auto renderContext = imageNode->GetRenderContext();
     IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
@@ -908,7 +908,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto userMouseOption = options.userMouseOption;
     if (userMouseOption.onHover) {
         spanItem->onHover_ = std::move(userMouseOption.onHover);
-        hoverableNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+        hoverableNodes.push_back(imageNode);
     }
     placeholderCount_++;
     if (updateCaret) {
@@ -1074,7 +1074,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
     }
-    builderNodes.push_back(WeakClaim(placeholderSpanNode.GetRawPtr()));
+    builderNodes.push_back(placeholderSpanNode);
     placeholderSpanNode->MountToParent(host, spanIndex);
     auto renderContext = placeholderSpanNode->GetRenderContext();
     IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
@@ -2112,6 +2112,7 @@ void RichEditorPattern::UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const
     auto imageSpanItem = DynamicCast<ImageSpanItem>(node->GetSpanItem());
     CHECK_NULL_VOID(imageSpanItem);
     imageSpanItem->options.imageAttribute = imageStyle;
+    imageSpanItem->MarkDirty();
 }
 
 bool RichEditorPattern::SymbolSpanUpdateStyle(
@@ -3107,7 +3108,7 @@ void RichEditorPattern::HandleBlurEvent()
 {
     auto reason = GetBlurReason();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d, blur reason=%{public}d", frameId_, reason);
-    ClearOnFocusTextField(GetUnsafeHostPtr());
+    ClearOnFocusTextField(GetHost().GetRawPtr());
     IF_PRESENT(multipleClickRecognizer_, Stop());
     CHECK_NULL_VOID(showSelect_ || !IsSelected());
     isLongPress_ = false;
@@ -4774,6 +4775,7 @@ void RichEditorPattern::OnColorConfigurationUpdate()
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
         spanNode->UpdateColorByResourceId();
     }
+    paragraphCache_.Clear();
     IF_PRESENT(typingTextStyle_, UpdateColorByResourceId());
     IF_PRESENT(typingStyle_, UpdateColorByResourceId());
     IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
@@ -5069,7 +5071,10 @@ void RichEditorPattern::FinishTextPreview()
 void RichEditorPattern::FinishTextPreviewInner(bool deletePreviewText)
 {
     CHECK_NULL_VOID(previewTextRecord_.previewTextHasStarted);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "FinishTextPreviewInner");
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "FinishTextPreviewInner, deleteText=%{public}d, previewContent is empty=%{public}d", deletePreviewText,
+        previewTextRecord_.previewContent.empty());
+    previewTextRecord_.previewTextExiting = true;
     IF_TRUE(deletePreviewText && !previewTextRecord_.previewContent.empty(),
         DeleteByRange(nullptr, previewTextRecord_.startOffset, previewTextRecord_.endOffset));
     previewTextRecord_.Reset();
@@ -5146,6 +5151,11 @@ float RichEditorPattern::GetPreviewTextUnderlineWidth() const
 bool RichEditorPattern::IsIMEOperation(OperationType operationType)
 {
     return operationType == OperationType::IME;
+}
+
+void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
+{
+    InsertValue(UtfUtils::Str8ToStr16(insertValue), isIME);
 }
 
 void RichEditorPattern::InsertValue(const std::u16string& insertValue, bool isIME)
@@ -8124,10 +8134,11 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
     return copyOption_ != CopyOptions::None && BetweenSelection(globalOffset);
 }
 
-void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
+void RichEditorPattern::HandleSurfaceChanged(
+    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type)
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
-        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
         UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
@@ -11179,7 +11190,7 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
     int32_t start = 0;
     int32_t end = 0;
     auto& paragraphInfoList = paragraphs_.GetParagraphs();
-    if (pos == paragraphInfoList.back().end) {
+    if (!paragraphInfoList.empty() && pos == paragraphInfoList.back().end) {
         start = paragraphInfoList.back().start;
         end = paragraphInfoList.back().end;
     } else {
@@ -11191,7 +11202,7 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
             }
         }
     }
-    if (paragraphInfoList.back().end != end) {
+    if (!paragraphInfoList.empty() && paragraphInfoList.back().end != end) {
         --end;
     }
     end = std::min(GetTextContentLength(), end);

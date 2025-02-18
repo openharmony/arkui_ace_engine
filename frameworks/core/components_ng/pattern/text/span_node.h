@@ -72,6 +72,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
+        spanItem_->MarkDirty();                                              \
         RequestTextFlushDirty();                                             \
     }                                                                        \
     void Reset##name()                                                       \
@@ -123,6 +124,7 @@ public:                                                                         
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
+        spanItem_->MarkDirty();                                                  \
         RequestTextFlushDirty();                                                 \
     }                                                                            \
     void Reset##name()                                                           \
@@ -216,6 +218,7 @@ public:
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1; // relative offset from span, [selectedStart, selectedEnd)
     int32_t selectedEnd = -1;
+    bool needReLayout = false;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
     void UpdateSymbolSpanParagraph(
         const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder,
@@ -333,6 +336,15 @@ public:
     
     virtual void SpanDumpInfo();
     void SpanDumpInfoAdvance();
+    void MarkDirty()
+    {
+        needReLayout = true;
+    }
+    void UpdateContent(const std::u16string& newContent)
+    {
+        content = newContent;
+        MarkDirty();
+    }
 
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
@@ -415,6 +427,7 @@ public:
             return;
         }
         spanItem_->unicode = unicode;
+        spanItem_->MarkDirty();
         RequestTextFlushDirty(true);
     }
 
@@ -424,6 +437,7 @@ public:
             return;
         }
         spanItem_->content = content;
+        spanItem_->MarkDirty();
         RequestTextFlushDirty(true);
     }
 
@@ -631,6 +645,18 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void MarkModifyDone() override
+    {
+        FrameNode::MarkModifyDone();
+        placeholderSpanItem_->MarkDirty();
+    }
+
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
+    {
+        FrameNode::MarkDirtyNode(extraFlag);
+        placeholderSpanItem_->MarkDirty();
     }
 
     void DumpInfo() override

@@ -362,6 +362,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         if (fingersNumberSatisfied) {
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+            AboutToAddToPendingRecognizers(event);
         } else {
             extraInfo_ += "finger number not satisfied.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -641,5 +642,17 @@ OnAccessibilityEventFunc ClickRecognizer::GetOnAccessibilityEventFunc()
         node->OnAccessibilityEvent(eventType);
     };
     return callback;
+}
+
+void ClickRecognizer::AboutToAddToPendingRecognizers(const TouchEvent& event)
+{
+    if (event.sourceType == SourceType::MOUSE &&
+        (refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED)) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        eventManager->AddToMousePendingRecognizers(AceType::WeakClaim(this));
+    }
 }
 } // namespace OHOS::Ace::NG

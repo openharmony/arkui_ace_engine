@@ -236,6 +236,7 @@ private:
     int32_t popupTargetId_ = -1;
     bool haveDialog_ = false;
     bool isShowed_ = false;
+    bool isClosing_ = false;
     bool needAvoidKeyboard_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;

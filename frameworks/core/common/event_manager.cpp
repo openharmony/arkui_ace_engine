@@ -72,6 +72,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    CheckMousePendingRecognizersState(touchPoint);
     CleanRefereeBeforeTouchTest(touchPoint, needAppend);
     ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
@@ -2144,6 +2145,26 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
     } else {
         return false;
     }
+}
+
+void EventManager::AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer)
+{
+    mousePendingRecognizers_.emplace_back(recognizer);
+}
+
+void EventManager::CheckMousePendingRecognizersState(const TouchEvent& event)
+{
+    if (!mousePendingRecognizers_.empty() && event.sourceType == SourceType::MOUSE) {
+        for (const auto& item : mousePendingRecognizers_) {
+            auto recognizer = item.Upgrade();
+            if (!recognizer || (recognizer->GetRefereeState() != NG::RefereeState::PENDING &&
+                             recognizer->GetRefereeState() != NG::RefereeState::PENDING_BLOCKED)) {
+                continue;
+            }
+            recognizer->CheckPendingRecognizerIsInAttachedNode(event);
+        }
+    }
+    mousePendingRecognizers_.clear();
 }
 
 } // namespace OHOS::Ace

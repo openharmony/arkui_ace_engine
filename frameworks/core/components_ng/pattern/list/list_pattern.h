@@ -111,6 +111,11 @@ public:
         return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
     }
 
+    int32_t GetEndIndexInItemPosition() const
+    {
+        return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
+    }
+
     bool IsScrollable() const override
     {
         return isScrollable_;
@@ -388,6 +393,11 @@ public:
         isNeedDividerAnimation_ = isNeedDividerAnimation;
     }
 
+    bool IsStackFromEnd() const
+    {
+        return isStackFromEnd_;
+    }
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -446,6 +456,7 @@ protected:
 
     int32_t itemStartIndex_ = 0;
     float scrollSnapVelocity_ = 0.0f;
+    bool isStackFromEnd_ = true;
 private:
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
@@ -454,6 +465,7 @@ private:
     void ChangeAxis(RefPtr<UINode> node);
     bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
+    bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,15 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_DRAWABLE_DESCRIPTOR_BASE_FILE_URI_HELPER_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_DRAWABLE_DESCRIPTOR_BASE_FILE_URI_HELPER_H
-#include <string>
 
-namespace OHOS::Ace::Napi {
-class FileUriHelper {
+#ifndef TEST_UNITTEST_INTERFACES_ACE_KIT_MOCK_MOCK_ACE_KIT_PROPERTY_H
+#define TEST_UNITTEST_INTERFACES_ACE_KIT_MOCK_MOCK_ACE_KIT_PROPERTY_H
+
+#include "ui/properties/property.h"
+
+namespace OHOS::Ace::Kit {
+class MockAceKitProperty : public Property {
+    DECLARE_ACE_TYPE(MockAceKitProperty, Ace::Kit::Property);
+
 public:
-    static std::string GetRealPath(std::string fileUriStr);
+    MockAceKitProperty() = default;
+    ~MockAceKitProperty() override = default;
 };
-} // namespace OHOS::Ace::Napi
+} // namespace OHOS::Ace::Kit
 
-#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_DRAWABLE_DESCRIPTOR_BASE_FILE_URI_HELPER_H
+#endif

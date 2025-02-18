@@ -2612,27 +2612,27 @@
         "name": "OH_ArkUI_UnregisterDrawCallbackOnNodeHandle"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_Create"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_Destroy"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius"
     },
     {
@@ -2640,19 +2640,19 @@
         "name": "OH_ArkUI_PointerEvent_GetChangedPointerId"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius"
     },
     {
@@ -2902,5 +2902,149 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_NodeUtils_GetPositionToParent"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetStartPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetStartPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetTopPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetTopPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetEndPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetEndPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetBottomPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetBottomPosition"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetFontColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetFontColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetSelectedFontColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetFontSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetFontSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetSelectedFontSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetFontWeight"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetFontWeight"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_SetSelectedFontWeight"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_GetSelectedFontWeight"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperDigitIndicator_Destroy"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_SetShowBackground"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_GetShowBackground"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_SetBackgroundSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_GetBackgroundSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_SetBackgroundColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_GetBackgroundColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_SetArrowSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_GetArrowSize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_SetArrowColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_GetArrowColor"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SwiperArrowStyle_Destroy"
     }
 ]

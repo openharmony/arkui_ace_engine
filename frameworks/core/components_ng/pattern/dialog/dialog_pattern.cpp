@@ -618,6 +618,9 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
+    auto focusHub = titleRow->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, titleRow);
+    focusHub->SetFocusable(false);
     return titleRow;
 }
 
