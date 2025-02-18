@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 129
+#define ARKUI_FULL_API_VERSION 130
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 129
+#define ARKUI_NODE_API_VERSION 130
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -873,6 +873,7 @@ enum ArkUIEventSubKind {
     ON_SWIPER_ANIMATION_END,
     ON_SWIPER_GESTURE_SWIPE,
     ON_SWIPER_DID_CONTENT_SCROLL,
+    ON_SWIPER_CONTENT_WILL_SCROLL,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
@@ -2611,6 +2612,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
     void (*setSwiperOnContentDidScroll)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnContentDidScroll)(ArkUINodeHandle node);
+    void (*setSwiperOnContentWillScroll)(ArkUINodeHandle node, bool* callback);
+    void (*resetSwiperOnContentWillScroll)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIndicatorInteractive)(ArkUINodeHandle node);
     void (*setSwiperPageFlipMode)(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode);
     void (*resetSwiperPageFlipMode)(ArkUINodeHandle node);

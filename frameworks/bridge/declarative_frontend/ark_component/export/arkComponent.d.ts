@@ -1846,6 +1846,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     onGestureSwipe(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this;
     nestedScroll(value: SwiperNestedScrollMode): this;
     pageFlipMode(value: PageFlipMode): this;
+    onContentWillScroll(handler: ContentWillScrollCallback): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

@@ -1252,4 +1252,204 @@ HWTEST_F(SwiperEventTestNg, UpdateSwiperPanEvent001, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
 }
+
+/**
+ * @tc.name: OnContentWillScroll001
+ * @tc.desc: Test Swiper onContentWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnContentWillScroll001, TestSize.Level1)
+{
+    auto onContentWillScroll = [](const SwiperContentWillScrollResult& result) {
+        if (result.currentIndex == 0 && result.comingIndex == 1) {
+            return false;
+        }
+        return true;
+    };
+
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetOnContentWillScroll(std::move(onContentWillScroll));
+        model.SetIndex(0);
+    });
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.begin()->first, 0);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
+
+    info.SetMainDelta(20.0f);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
+}
+
+/**
+ * @tc.name: OnContentWillScroll002
+ * @tc.desc: Test Swiper onContentWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnContentWillScroll002, TestSize.Level1)
+{
+    auto onContentWillScroll = [](const SwiperContentWillScrollResult& result) {
+        if (result.currentIndex == 0 && result.comingIndex == 1) {
+            return false;
+        }
+        return true;
+    };
+
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetOnContentWillScroll(std::move(onContentWillScroll));
+        model.SetIndex(0);
+    });
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
+
+    info.SetMainDelta(-20.0f);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
+
+    info.SetMainDelta(20.0f);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 40.0f);
+
+    info.SetMainVelocity(0.0f);
+    info.SetMainDelta(300.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 340.0f);
+}
+
+/**
+ * @tc.name: OnContentWillScroll003
+ * @tc.desc: Test Swiper onContentWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnContentWillScroll003, TestSize.Level1)
+{
+    auto onContentWillScroll = [](const SwiperContentWillScrollResult& result) {
+        if (result.currentIndex == 0 && result.comingIndex == 2) {
+            return false;
+        }
+        return true;
+    };
+
+    CreateWithItem(
+        [=](SwiperModelNG model) {
+            model.SetOnContentWillScroll(std::move(onContentWillScroll));
+            model.SetIndex(0);
+            model.SetDisplayCount(2);
+            model.SetSwipeByGroup(true);
+        },
+        5);
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.begin()->first, 0);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
+
+    info.SetMainDelta(20.0f);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
+
+    pattern_->ChangeIndex(4, false);
+    FlushLayoutTask(frameNode_);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(100.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[4].startPos, 100.0f);
+}
+
+/**
+ * @tc.name: OnContentWillScroll004
+ * @tc.desc: Test Swiper onContentWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnContentWillScroll004, TestSize.Level1)
+{
+    auto onContentWillScroll = [](const SwiperContentWillScrollResult& result) {
+        if (result.currentIndex == 0 && result.comingIndex == 3) {
+            return false;
+        }
+        return true;
+    };
+
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetOnContentWillScroll(std::move(onContentWillScroll));
+        model.SetIndex(0);
+    });
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.begin()->first, 0);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
+
+    info.SetMainDelta(20.0f);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, -20.0f);
+}
+
+/**
+ * @tc.name: OnContentWillScroll005
+ * @tc.desc: Test Swiper onContentWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnContentWillScroll005, TestSize.Level1)
+{
+    auto onContentWillScroll = [](const SwiperContentWillScrollResult& result) {
+        if (result.currentIndex == 0 && result.comingIndex == 2) {
+            return false;
+        }
+        return true;
+    };
+
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetOnContentWillScroll(std::move(onContentWillScroll));
+        model.SetIndex(0);
+        model.SetDisplayCount(2);
+        model.SetSwipeByGroup(true);
+        model.SetPreviousMargin(Dimension(50.0_px), false);
+        model.SetNextMargin(Dimension(50.0_px), false);
+        model.SetItemSpace(Dimension(40.0_px));
+    }, 10);
+
+    pattern_->ShowNext(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 170.0f);
+
+    pattern_->ShowPrevious(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[-2].endPos, -210.0f);
+}
 } // namespace OHOS::Ace::NG
