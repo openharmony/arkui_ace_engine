@@ -1141,6 +1141,11 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
         return;
     }
 
+    if (LessOrEqual(curScale, 0.0) || LessOrEqual(preScale_, 0.0)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleScaleGestureChange invalid scale");
+        return;
+    }
+
     TAG_LOGD(AceLogTag::ACE_WEB,
         "HandleScaleGestureChange curScale:%{public}f, preScale: %{public}f, "
         "zoomStatus: %{public}d, pageScale: %{public}f, startPinchScale: %{public}f, startPageScale: %{public}f",
@@ -1152,14 +1157,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 
     zoomErrorCount_ = 0;
 
-    double scale = 0.0;
-    if (!ZoomOutAndIn(curScale, scale)) {
-        return;
-    }
-
-    TAG_LOGD(AceLogTag::ACE_WEB, "HandleScaleGestureChange ZoomOutAndIn return scale:%{public}f", scale);
-
-    double newScale = GetNewScale(scale);
+    double newScale = curScale / preScale_;
     double newOriginScale = GetNewOriginScale(event.GetScale());
 
     double centerX = event.GetPinchCenter().GetX();
@@ -1168,21 +1166,15 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     CHECK_NULL_VOID(frameNode);
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChangeV2 curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
+        "HandleScaleGestureChangeV2 curScale:%{public}f newScale: %{public}f"
         " centerX: %{public}f centerY: %{public}f",
-        curScale, scale, newScale, centerX, centerY);
+        curScale, newScale, centerX, centerY);
 
     // Plan two
     delegate_->ScaleGestureChangeV2(
         PINCH_UPDATE_TYPE, newScale, newOriginScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
-    if (LessNotEqual(scale, DEFAULT_PINCH_SCALE)) {
-        pageScale_ = DEFAULT_PINCH_SCALE;
-        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange pageScale < DEFAULT_PINCH_SCALE");
-    } else {
-        pageScale_ = scale;
-    }
 }
 
 double WebPattern::getZoomOffset(double& scale) const
