@@ -97,6 +97,7 @@ constexpr int32_t JUMP_NEAR_VALUE = 3;
 constexpr float MASS = 1.0f;
 constexpr float STIFFNESS = 328.0f;
 constexpr float DAMPING = 34.0f;
+constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -2499,14 +2500,15 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
         auto mainDelta = pattern->IsHorizontalAndRightToLeft() ? -info.GetMainDelta() : info.GetMainDelta();
         pattern->HandleDragEnd(velocity, mainDelta);
         pattern->InitIndexCanChangeMap();
-        if (std::abs(velocity) <= NEW_MIN_TURN_PAGE_VELOCITY) {
+        if (LessOrEqual(std::abs(velocity), NEW_MIN_TURN_PAGE_VELOCITY) &&
+            std::abs(velocity) > MIN_DUMP_VELOCITY_THRESHOLD) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto eventHub = host->GetEventHub<EventHub>();
             CHECK_NULL_VOID(eventHub);
             auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gestureEventHub);
-            gestureEventHub->DumpVelocityInfoFroPanEvent(info.GetPointerEventId());
+            gestureEventHub->DumpVelocityInfoFroPanEvent(info.GetPointerId());
         }
     };
 }
