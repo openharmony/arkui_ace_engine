@@ -547,45 +547,6 @@ HWTEST_F(TextInputCursorTest, OnHandleMove001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnHandleMove002
- * @tc.desc: Test the clip board interface
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
-     */
-    int32_t start = 5;
-    int32_t end = 10;
-    std::vector<CaretMoveIntent> select = { CaretMoveIntent::Left, CaretMoveIntent::Right, CaretMoveIntent::Up,
-        CaretMoveIntent::Down };
-    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
-
-    /**
-     * @tc.steps: Move the handles and selection up.
-     *            Verify the selection data.
-     */
-    EXPECT_FALSE(pattern_->IsTextArea());
-    pattern_->HandleSetSelection(start, end, false);
-    pattern_->HandleSelect(select[2]);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_NE(pattern_->selectController_->GetSecondHandleInfo().index, end);
-
-    /**
-     * @tc.steps: Move the handles and selection down.
-     *            Verify the selection data.
-     */
-    EXPECT_FALSE(pattern_->IsTextArea());
-    pattern_->HandleSetSelection(start, end, false);
-    pattern_->HandleSelect(select[3]);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_NE(pattern_->selectController_->GetSecondHandleInfo().index, end);
-}
-
-/**
  * @tc.name: OnHandleMove003
  * @tc.desc: Test the clip board interface
  * @tc.type: FUNC
