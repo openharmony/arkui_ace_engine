@@ -40,7 +40,7 @@ struct AppInfo {
     const char* emitEventMethodSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
-const AppInfo koalaAppInfo = {
+const AppInfo KOALA_APP_INFO = {
     "@koalaui/arkts-arkui/Application/Application",
     "createApplication",
     "Lstd/core/String;Lstd/core/String;Z:L@koalaui/arkts-arkui/Application/Application;",
@@ -62,14 +62,14 @@ void TryEmitError(EtsEnv& env)
 
 void RunArkoalaEventLoop(EtsEnv& env, ets_object app)
 {
-    ets_class appClass = env.FindClass(koalaAppInfo.className);
+    ets_class appClass = env.FindClass(KOALA_APP_INFO.className);
     if (!appClass) {
-        LOGE("Cannot load main class %s\n", koalaAppInfo.className);
+        LOGE("Cannot load main class %s\n", KOALA_APP_INFO.className);
         return;
     }
-    ets_method enter = env.Getp_method(appClass, koalaAppInfo.enterMethodName, nullptr /*appInfo->enterMethodSig */);
+    ets_method enter = env.Getp_method(appClass, KOALA_APP_INFO.enterMethodName, nullptr /*appInfo->enterMethodSig */);
     if (!enter) {
-        LOGE("Cannot find enter method %s", koalaAppInfo.enterMethodName);
+        LOGE("Cannot find enter method %s", KOALA_APP_INFO.enterMethodName);
         TryEmitError(env);
         return;
     }
@@ -83,14 +83,14 @@ void RunArkoalaEventLoop(EtsEnv& env, ets_object app)
 
 UIContentErrorCode KoalaFrontend::RunPage(const std::string& url, const std::string& params)
 {
-    ets_class appClass = env_->FindClass(koalaAppInfo.className);
+    ets_class appClass = env_->FindClass(KOALA_APP_INFO.className);
     if (!appClass) {
-        LOGE("Cannot load main class %s\n", koalaAppInfo.className);
+        LOGE("Cannot load main class %s\n", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
     }
-    ets_method create = env_->GetStaticp_method(appClass, koalaAppInfo.createMethodName, koalaAppInfo.createMethodSig);
+    ets_method create = env_->GetStaticp_method(appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig);
     if (!create) {
-        LOGE("Cannot find create method %s\n", koalaAppInfo.createMethodName);
+        LOGE("Cannot find create method %s\n", KOALA_APP_INFO.createMethodName);
         TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
@@ -103,7 +103,7 @@ UIContentErrorCode KoalaFrontend::RunPage(const std::string& url, const std::str
         TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
-    auto* start = env_->Getp_method(appClass, koalaAppInfo.startMethodName, koalaAppInfo.startMethodSig);
+    auto* start = env_->Getp_method(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig);
     // TODO: pass app entry point!
     env_->CallLongMethod((ets_object)(app), start);
 
