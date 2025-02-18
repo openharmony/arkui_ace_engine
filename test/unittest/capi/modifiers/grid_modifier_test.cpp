@@ -297,7 +297,7 @@ HWTEST_F(GridModifierTest, setGridOptionsGetSizeByIndex, TestSize.Level1)
 {
     static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     struct CheckEvent {
         int32_t resourceId;
@@ -345,7 +345,7 @@ HWTEST_F(GridModifierTest, setGridOptionsGetRectByIndex, TestSize.Level1)
 {
     static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     struct CheckEvent {
         int32_t resourceId;
