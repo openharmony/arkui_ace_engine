@@ -164,6 +164,7 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void FocusMoveSearch(const int64_t elementId, const int32_t direction, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+    void UpdateElementInfoInnerWindowId(Accessibility::AccessibilityElementInfo& info, const int64_t& elementId);
     bool IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>& node, NG::WindowSceneInfo& windowSceneInfo);
     void ExecuteAction(const int64_t accessibilityId, const ActionParam& param, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);

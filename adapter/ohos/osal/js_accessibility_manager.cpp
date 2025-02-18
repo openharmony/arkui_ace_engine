@@ -1062,6 +1062,7 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, c
     }
     elementInfo.SetAccessibilityId(elementIdUnwrap);
     elementInfo.SetWindowId(param.windowId);
+    jsAccessibilityManager->UpdateElementInfoInnerWindowId(elementInfo, elementId);
 }
 
 void FillEventInfo(const RefPtr<NG::FrameNode>& node,
@@ -1560,6 +1561,7 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     }
     nodeInfo.SetWindowId(commonProperty.windowId);
+    nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
@@ -1607,6 +1609,7 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     }
     nodeInfo.SetWindowId(commonProperty.windowId);
+    nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
@@ -1766,6 +1769,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetVisible(node->IsVisible());
     SetRectInScreen(node, nodeInfo, commonProperty, scaleX_, scaleY_);
     nodeInfo.SetWindowId(commonProperty.windowId);
+    nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     // is abnormal that pageId equals to 0, use commonProperty.pageId to fix pageId
     if (node->GetPageId()) {
         nodeInfo.SetPageId(node->GetPageId());
@@ -6210,6 +6214,17 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
     UpdateWindowInfo(windowInfo, ngPipeline);
 
     return windowInfo;
+}
+
+void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
+    Accessibility::AccessibilityElementInfo& info, const int64_t& elementId)
+{
+    auto node = FindNodeFromPipeline(context_, elementId);
+    if (node) {
+        NG::WindowSceneInfo windowSceneInfo;
+        IsUpdateWindowSceneInfo(node, windowSceneInfo);
+        info.SetInnerWindowId(windowSceneInfo.innerWindowId);
+    }
 }
 
 void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
