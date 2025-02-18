@@ -328,7 +328,6 @@ public:
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
-        ProcessColumnRect(height_);
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -525,14 +524,20 @@ public:
         return sheetOffsetY_;
     }
 
+    bool IsShowInSubWindowTwoInOne();
+    bool IsShowInSubWindow();
+    SheetType ComputeSheetTypeInSubWindow();
+    void SheetTransitionAction(float offset, bool isStart, bool isTransitionIn);
+    float ComputeTransitionOffset(float sheetHeight);
+    void InitSheetTransitionAction(float offset);
+    int32_t GetSubWindowId();
+
     OffsetF GetSheetArrowOffset() const
     {
         return arrowOffset_;
     }
 
     float GetFitContentHeight();
-
-    void ProcessColumnRect(float height = 0.0f);
 
     bool WillSpringBack() const
     {

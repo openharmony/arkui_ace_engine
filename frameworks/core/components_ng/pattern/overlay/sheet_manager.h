@@ -69,6 +69,11 @@ public:
 
     void DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType);
 
+    void CloseSheetInSubWindow(const SheetKey& sheetKey);
+    static void SetMaskInteractive(const RefPtr<FrameNode>& maskNode, bool isInteractive);
+    void RegisterDestroyCallback(const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle,
+        const int32_t containerId);
+
 private:
     struct SheetContentKey {
         SheetContentKey() {}

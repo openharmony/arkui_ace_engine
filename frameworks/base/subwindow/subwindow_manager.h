@@ -169,7 +169,7 @@ public:
 
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
-    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    void OnWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
     const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
@@ -181,6 +181,20 @@ public:
 
     void SetRect(const NG::RectF& rect, int32_t instanceId);
     void FlushSubWindowUITasks(int32_t instanceId);
+
+    void OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    void OnHostWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason);
+    void HideSheetSubWindow(int32_t containerId);
+    void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode);
 
     int32_t ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode);
     void HideSelectOverlay(const int32_t instanceId);

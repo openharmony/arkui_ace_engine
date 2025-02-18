@@ -1107,6 +1107,37 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
         rosenRect.posX_, rosenRect.posY_, rosenRect.width_, rosenRect.height_);
 }
 
+void SubwindowOhos::ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ResizeWindow();
+    ShowWindow();
+    CHECK_NULL_VOID(window_);
+    window_->SetFullScreen(true);
+    window_->SetTouchable(true);
+    ContainerScope scope(childContainerId_);
+    overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc),
+        std::move(buildtitleNodeFunc), sheetStyle, std::move(onAppear), std::move(onDisappear),
+        std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), targetNode);
+}
+
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
