@@ -43,4 +43,25 @@ const Shadow ShadowConfig::FloatingShadowSDark =
     Shadow(150.0f, Offset(0.0, 30.0), Color(0x3c000000), ShadowStyle::OuterFloatingSM);
 const Shadow ShadowConfig::FloatingShadowMDark =
     Shadow(200.0f, Offset(0.0, 30.0), Color(0x38000000), ShadowStyle::OuterFloatingMD);
+
+const Shadow& ShadowConfig::GetShadowConfig(int shadowLevel)
+{
+    switch (static_cast<ShadowStyle>(shadowLevel)) {
+        case ShadowStyle::OuterDefaultXS:
+            return DefaultShadowXS;
+        case ShadowStyle::OuterDefaultSM:
+            return DefaultShadowS;
+        case ShadowStyle::OuterDefaultMD:
+            return DefaultShadowM;
+        case ShadowStyle::OuterDefaultLG:
+            return DefaultShadowL;
+        case ShadowStyle::OuterFloatingSM:
+            return FloatingShadowS;
+        case ShadowStyle::OuterFloatingMD:
+            return FloatingShadowM;
+        default: {
+            return NoneShadow;
+        }
+    }
+}
 } // namespace OHOS::Ace

@@ -44,6 +44,7 @@ enum SheetType {
     SHEET_POPUP,
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
+    SHEET_BOTTOM_OFFSET
 };
 
 struct SheetKey {
@@ -132,6 +133,7 @@ struct SheetStyle {
     std::optional<int32_t> instanceId; // uiContext instanceId
     std::optional<bool> enableHoverMode;
     std::optional<HoverModeAreaType> hoverModeArea;
+    std::optional<NG::BorderRadiusProperty> radius;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -147,7 +149,7 @@ struct SheetStyle {
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
                 sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode &&
                 enableHoverMode == sheetStyle.enableHoverMode &&
-                hoverModeArea == sheetStyle.hoverModeArea);
+                hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -183,6 +185,7 @@ struct SheetStyle {
         width = sheetStyle.width.has_value() ? sheetStyle.width : width;
         enableHoverMode = sheetStyle.enableHoverMode.has_value() ? sheetStyle.enableHoverMode : enableHoverMode;
         hoverModeArea = sheetStyle.hoverModeArea.has_value() ? sheetStyle.hoverModeArea : hoverModeArea;
+        radius = sheetStyle.radius.has_value() ? sheetStyle.radius : radius;
     }
 };
 } // namespace OHOS::Ace::NG

@@ -4615,6 +4615,9 @@ void OverlayManager::UpdateSheetRender(
     }
     if (sheetStyle.shadow.has_value()) {
         sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+    } else if (sheetTheme->IsOuterBorderEnable()) {
+        Shadow shadow = ShadowConfig::GetShadowConfig(sheetTheme->GetSheetShadowConfig());
+        sheetRenderContext->UpdateBackShadow(shadow);
     } else if (!isPartialUpdate) {
         sheetRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
     }
@@ -5062,6 +5065,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
                 break;
             }
         case SheetType::SHEET_BOTTOM:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (!sheetStyle.detents.empty()) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
