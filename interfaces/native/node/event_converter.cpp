@@ -38,6 +38,7 @@ constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_FINGER = 1;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_PEN = 2;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_MOUSE = 7;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD = 9;
+constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_JOYSTICK = 10;
 constexpr int32_t ORIGIN_MOUSE_ACTION_PRESS = 1;
 constexpr int32_t ORIGIN_MOUSE_ACTION_RELEASE = 2;
 constexpr int32_t ORIGIN_MOUSE_ACTION_MOVE = 3;
@@ -347,6 +348,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_IMAGE_ANIMATOR_ON_REPEAT;
         case NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH:
             return ON_IMAGE_ANIMATOR_ON_FINISH;
+        case NODE_ON_FOCUS_AXIS:
+            return ON_FOCUS_AXIS;
         case NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT:
             return ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT;
         case NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT:
@@ -565,6 +568,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_IMAGE_ANIMATOR_EVENT_ON_CANCEL;
         case ON_IMAGE_ANIMATOR_ON_FINISH:
             return NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH;
+        case ON_FOCUS_AXIS:
+            return NODE_ON_FOCUS_AXIS;
         case ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT:
             return NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT;
         case ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT:
@@ -651,6 +656,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
+        case FOCUS_AXIS_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->focusAxisEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
         default:
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "failed to convert origin event data");
             break;
@@ -701,6 +712,8 @@ int32_t ConvertToCInputEventToolType(int32_t originSourceToolType)
             return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_MOUSE);
         case ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD:
             return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_TOUCHPAD);
+        case ORIGIN_INPUT_EVENT_TOOL_TYPE_JOYSTICK:
+            return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_JOYSTICK);
         default:
             break;
     }

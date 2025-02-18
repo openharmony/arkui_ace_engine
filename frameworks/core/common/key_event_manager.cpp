@@ -112,7 +112,7 @@ uint8_t KeyEventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>&
     return keyValue;
 }
 
-bool KeyEventManager::IsSystemKeyboardShortcut([[maybe_unused]] const std::string& value, [[maybe_unused]] uint8_t keys)
+bool KeyEventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t keys)
 {
     if (value.size() != 1) {
         return false;
@@ -132,8 +132,8 @@ bool KeyEventManager::IsSystemKeyboardShortcut([[maybe_unused]] const std::strin
 
 bool KeyEventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys)
 {
-    if (IsSystemKeyboardShortcut(event)) {
-        return false;
+    if (IsSystemKeyboardShortcut(value, keys)) {
+        return true;
     }
     for (auto& weakNode : keyboardShortcutNode_) {
         auto frameNode = weakNode.Upgrade();
@@ -546,6 +546,20 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         }
     }
     return false;
+}
+
+bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
+{
+    auto container = Container::GetContainer(GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto focusNodeHub = rootNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    focusNodeHub->HandleEvent(event);
+    return true;
 }
 
 bool KeyEventManager::TriggerKeyEventDispatch(const KeyEvent& event)

@@ -266,6 +266,28 @@ struct ArkUIDragEvent {
     ArkUI_Int32 dataTypesMaxStrLength;
 };
 
+struct ArkUIFocusAxisEvent {
+    ArkUI_Float64 absXValue;
+    ArkUI_Float64 absYValue;
+    ArkUI_Float64 absZValue;
+    ArkUI_Float64 absRzValue;
+    ArkUI_Float64 absHat0XValue;
+    ArkUI_Float64 absHat0YValue;
+    ArkUI_Float64 absBrakeValue;
+    ArkUI_Float64 absGasValue;
+    ArkUI_Float64 tiltX;
+    ArkUI_Float64 tiltY;
+    ArkUI_Float64 pressure;
+    ArkUI_Int32 toolType;
+    ArkUI_Int64 timeStamp;
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 sourceType;
+    ArkUI_Int64 deviceId;
+    ArkUI_Int32* pressedKeyCodes;
+    ArkUI_Int32 keyCodesLength;
+    bool stopPropagation;
+};
+
 struct ArkUIStringAndFloat {
     ArkUI_Float32 value;
     ArkUI_CharPtr valueStr;
@@ -788,6 +810,7 @@ enum ArkUIEventCategory {
     MIXED_EVENT = 11,
     DRAG_EVENT = 12,
     KEY_INPUT_EVENT = 13, // KEY_EVENT is already defined as a macro in wincon.h
+    FOCUS_AXIS_EVENT = 14,
     TEXT_INPUT_CHANGE = 15,
 };
 
@@ -819,6 +842,7 @@ enum ArkUIEventSubKind {
     ON_DRAG_END,
     ON_PRE_DRAG,
     ON_KEY_PREIME,
+    ON_FOCUS_AXIS,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -1152,6 +1176,7 @@ struct ArkUINodeEvent {
         ArkUIMixedEvent mixedEvent;
         ArkUIDragEvent dragEvent;
         ArkUIKeyEvent keyEvent;
+        ArkUIFocusAxisEvent focusAxisEvent;
         ArkUIAPIEventTextInputMixed textChangeEvent;
     };
 };

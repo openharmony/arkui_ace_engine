@@ -384,7 +384,7 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
     }
 }
 
-void GetNonPointerAxisEventAction(int32_t action, NG::NonPointerAxisEvent& event)
+void GetNonPointerAxisEventAction(int32_t action, NG::FocusAxisEvent& event)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
@@ -475,7 +475,9 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.timeStamp = time;
     event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
     event.deviceId = keyEvent->GetDeviceId();
-    event.sourceType = SourceType::KEYBOARD;
+    int32_t orgDevice = keyEvent->GetSourceType();
+    event.sourceType =
+        orgDevice == MMI::PointerEvent::SOURCE_TYPE_JOYSTICK ? SourceType::JOYSTICK : SourceType::KEYBOARD;
 #ifdef SECURITY_COMPONENT_ENABLE
     event.enhanceData = keyEvent->GetEnhanceData();
 #endif
@@ -486,7 +488,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
 }
 
-void ConvertNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::NonPointerAxisEvent& event)
+void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::FocusAxisEvent& event)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
@@ -509,7 +511,7 @@ void ConvertNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointe
     GetNonPointerAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
-    event.sourceTool = GetSourceTool(item.GetToolType());
+    event.sourceTool = SourceTool::JOYSTICK;
     event.pointerEvent = pointerEvent;
     event.originalId = item.GetOriginPointerId();
     event.deviceId = pointerEvent->GetDeviceId();

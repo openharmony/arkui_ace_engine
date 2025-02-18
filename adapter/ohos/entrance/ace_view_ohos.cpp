@@ -33,7 +33,7 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/non_pointer_axis_event.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
@@ -145,7 +145,7 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     }
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_JOYSTICK) {
-        view->ProcessNonPointerAxisEvent(pointerEvent);
+        view->ProcessFocusAxisEvent(pointerEvent);
         return;
     }
 
@@ -441,15 +441,20 @@ bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     event.isPreIme = isPreIme;
-    return nonPointerEventCallback_(event);
+    return nonPointerEventCallback_(event, nullptr);
 }
 
-bool AceViewOhos::ProcessNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(nonPointerEventCallback_, false);
-    NG::NonPointerAxisEvent event;
-    ConvertNonPointerAxisEvent(pointerEvent, event);
-    return nonPointerEventCallback_(event);
+    NG::FocusAxisEvent event;
+    ConvertFocusAxisEvent(pointerEvent, event);
+    auto markProcess = [event, enabled = pointerEvent->IsMarkEnabled()]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
+            enabled);
+    };
+    return nonPointerEventCallback_(event, std::move(markProcess));
 }
 
 const void* AceViewOhos::GetNativeWindowById(uint64_t textureId)

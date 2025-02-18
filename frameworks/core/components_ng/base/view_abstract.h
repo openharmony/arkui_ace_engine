@@ -311,6 +311,7 @@ public:
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest);
+    static void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback);
     static void SetDraggable(bool draggable);
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
     static void SetOnDragStart(
@@ -408,6 +409,8 @@ public:
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
+    static void DisableOnFocusAxisEvent();
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode);
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnDragStart(FrameNode* frameNode);
     static void DisableOnDragEnter(FrameNode* frameNode);
@@ -662,6 +665,7 @@ public:
     static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
     static void SetLayoutEvent(FrameNode* frameNode, std::function<void()>&& onLayout);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
+    static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);

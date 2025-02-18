@@ -2119,6 +2119,21 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
   }
 }
 
+declare type FocusAxisEventCallback = (event: FocusAxisEvent) => void;
+class OnFocusAxisEventModifier extends ModifierWithKey<FocusAxisEventCallback> {
+  constructor(value: FocusAxisEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onFocusAxisEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyEvent(node);
+    } else {
+      getUINativeModule().common.setOnKeyEvent(node, this.value);
+    }
+  }
+}
+
 class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   constructor(value: MotionPathOptions) {
     super(value);
@@ -3862,6 +3877,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onKeyPreIme(event: Callback<KeyEvent, boolean>): this {
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
+    return this;
+  }
+
+  onFocusAxisEvent(event: (event?: FocusAxisEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
     return this;
   }
 
