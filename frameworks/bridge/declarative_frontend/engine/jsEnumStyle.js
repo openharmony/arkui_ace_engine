@@ -624,6 +624,18 @@ var FlexWrap;
   FlexWrap[FlexWrap["WrapReverse"] = 2] = "WrapReverse";
 })(FlexWrap || (FlexWrap = {}));
 
+class LayoutPolicy {
+  id_ = '';
+
+  constructor(id) {
+    this.id_ = id;
+  }
+
+  static get matchParent() {
+    return new LayoutPolicy('matchParent');
+  }
+}
+
 var BlurStyle;
 (function (BlurStyle) {
   BlurStyle[BlurStyle["SmallLight"] = 100] = "SmallLight";

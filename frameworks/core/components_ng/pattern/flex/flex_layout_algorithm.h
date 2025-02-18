@@ -69,7 +69,7 @@ public:
 
 private:
     void InitFlexProperties(LayoutWrapper* layoutWrapper);
-    void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, const SizeF& realSize);
+    void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper);
     void UpdateAllocatedSize(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossAxisSize);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
@@ -82,6 +82,7 @@ private:
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
+    void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& realSize);
     void MeasureAndCleanMagicNodes(LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties);
     bool HandleBlankFirstTimeMeasure(const MagicLayoutNode& child, FlexItemProperties& flexItemProperties);
     void UpdateFlexProperties(FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper);
@@ -97,6 +98,17 @@ private:
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     bool CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr);
     void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
+
+    void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
+    void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
+    void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
+    void AddElementIntoMagicNodes(int32_t childDisplayPriority, MagicLayoutNode node, float childLayoutWeight);
+    bool AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child);
+    std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FirstMeasureInWeightMode();
+    void SecondMeasureInWeightMode(std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator firstLoopIter);
+    void FinalMeasureInWeightMode();
+    void MeasureInPriorityMode(FlexItemProperties& flexItemProperties);
+    void SecondMeasureInGrowOrShrink();
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;
@@ -114,6 +126,7 @@ private:
     std::map<int32_t, float> magicNodeWeights_;
     std::list<MagicLayoutNode> secondaryMeasureList_;
     std::list<RefPtr<LayoutWrapper>> outOfLayoutChildren_;
+    std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
 
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;
