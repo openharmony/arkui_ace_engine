@@ -2737,11 +2737,12 @@ NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
     return {};
 }
 
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     CHECK_NULL_RETURN(uiWindow_, {});
     Rosen::AvoidArea avoidArea;
-    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    Rosen::Rect rect;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea, rect, apiVersion);
     if (ret == Rosen::WMError::WM_OK) {
         return avoidArea;
     }
