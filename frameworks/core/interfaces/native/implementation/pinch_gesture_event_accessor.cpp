@@ -38,7 +38,8 @@ Ark_Int32 GetScaleImpl(PinchGestureEventPeer* peer)
     CHECK_NULL_RETURN(peer, errValue);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
-
+    LOGW("ARKOALA PinchGestureEventAccessor::GetScaleImpl returns Ark_Int32, "
+        "but should return Ark_Number.");
     double value = event->GetScale();
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
@@ -59,7 +60,8 @@ Ark_Int32 GetPinchCenterXImpl(PinchGestureEventPeer* peer)
     CHECK_NULL_RETURN(peer, errValue);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
-
+    LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterXImpl returns Ark_Int32, "
+        "but should return Ark_Number.");
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetX());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
@@ -83,7 +85,8 @@ Ark_Int32 GetPinchCenterYImpl(PinchGestureEventPeer* peer)
     CHECK_NULL_RETURN(peer, errValue);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
-
+    LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterYImpl returns Ark_Int32, "
+        "but should return Ark_Number.");
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetY());
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
