@@ -102,16 +102,15 @@ void SetGridOptionsImpl(Ark_NativePointer node, const Opt_Scroller* scroller,
         if (regularSizeOpt) {
             options.regularSize = regularSizeOpt.value();
         }
-        std::optional<std::set<int32_t>> irregularIndexes =
-            Converter::OptConvert<std::set<int32_t>>(layoutOptionsOpt.value());
-        if (irregularIndexes) {
-            options.irregularIndexes = irregularIndexes.value();
+        std::optional<std::set<int32_t>> irrIndex = Converter::OptConvert<std::set<int32_t>>(layoutOptionsOpt.value());
+        if (irrIndex) {
+            options.irregularIndexes = irrIndex.value();
         }
         auto onGetIrregularSizeByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number>
                                     (layoutOptionsOpt.value().onGetIrregularSizeByIndex);
         if (onGetIrregularSizeByIndex) {
             auto modelCallback = [callback = CallbackHelper(*onGetIrregularSizeByIndex)]
-            (int32_t value) -> GridItemSize {
+                                            (int32_t value) -> GridItemSize {
                 Ark_Number param = Converter::ArkValue<Ark_Number>(value);
                 auto resultOpt = callback.InvokeWithOptConvertResult
                                     <GridItemSize, Ark_Tuple_Number_Number, Callback_Tuple_Number_Number_Void>(param);
@@ -122,13 +121,11 @@ void SetGridOptionsImpl(Ark_NativePointer node, const Opt_Scroller* scroller,
         auto onGetRectByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number_Number_Number>
                                     (layoutOptionsOpt.value().onGetRectByIndex);
         if (onGetRectByIndex) {
-            auto modelCallback = [callback = CallbackHelper(*onGetRectByIndex)]
-            (int32_t value) -> GridItemRect {
+            auto modelCallback = [callback = CallbackHelper(*onGetRectByIndex)](int32_t value) -> GridItemRect {
                 Ark_Number param = Converter::ArkValue<Ark_Number>(value);
-                auto resultOpt = callback.InvokeWithOptConvertResult
-                                    <GridItemRect, Ark_Tuple_Number_Number_Number_Number,
+                auto resOpt = callback.InvokeWithOptConvertResult<GridItemRect, Ark_Tuple_Number_Number_Number_Number,
                                      Callback_Tuple_Number_Number_Number_Number_Void>(param);
-                return resultOpt.value_or(GridItemRect());
+                return resOpt.value_or(GridItemRect());
             };
             options.getRectByIndex = modelCallback;
         }
