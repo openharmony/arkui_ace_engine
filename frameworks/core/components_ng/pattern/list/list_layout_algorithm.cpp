@@ -212,10 +212,10 @@ void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper,
         layoutWrapper->SetActiveChildRange(-1, -1);
         return;
     }
-    auto start = !isStackFromEnd_ ? itemPosition_.begin()->first : totalItemCount_ - itemPosition_.rbegin()->first - 1;
+    auto start = !isStackFromEnd_ ? itemStartIndex_ + itemPosition_.begin()->first :
+                                    itemStartIndex_ + totalItemCount_ - itemPosition_.rbegin()->first - 1;
     auto end = !isStackFromEnd_ ? itemStartIndex_ + itemPosition_.rbegin()->first :
                                   itemStartIndex_ + totalItemCount_ - itemPosition_.begin()->first - 1;
-    cacheEnd += itemStartIndex_;
     layoutWrapper->SetActiveChildRange(start, end, cacheStart, cacheEnd, show);
 }
 
