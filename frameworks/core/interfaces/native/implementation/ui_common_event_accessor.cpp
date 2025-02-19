@@ -15,9 +15,12 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/native/implementation/ui_common_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 namespace UICommonEventAccessor {
 void DestroyPeerImpl(UICommonEventPeer* peer)
 {
@@ -42,10 +45,28 @@ void SetOnTouchImpl(UICommonEventPeer* peer,
 void SetOnAppearImpl(UICommonEventPeer* peer,
                      const Opt_Callback_Void* callback_)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto arkOnAppear = Converter::OptConvert<Callback_Void>(*callback_);
+    if (arkOnAppear) {
+        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() {
+            arkCallback.Invoke();
+        };
+        peer->SetOnAppear(std::move(onAppear));
+    }
 }
 void SetOnDisappearImpl(UICommonEventPeer* peer,
                         const Opt_Callback_Void* callback_)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto arkOnDisAppear = Converter::OptConvert<Callback_Void>(*callback_);
+    if (arkOnDisAppear) {
+        auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() {
+            arkCallback.Invoke();
+        };
+        peer->SetOnDisAppear(std::move(onDisAppear));
+    }
 }
 void SetOnKeyEventImpl(UICommonEventPeer* peer,
                        const Opt_Callback_KeyEvent_Void* callback_)
@@ -54,10 +75,28 @@ void SetOnKeyEventImpl(UICommonEventPeer* peer,
 void SetOnFocusImpl(UICommonEventPeer* peer,
                     const Opt_Callback_Void* callback_)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto arkOnFocus = Converter::OptConvert<Callback_Void>(*callback_);
+    if (arkOnFocus) {
+        auto onFocus = [arkCallback = CallbackHelper(arkOnFocus.value())]() {
+            arkCallback.Invoke();
+        };
+        peer->SetOnFocus(std::move(onFocus));
+    }
 }
 void SetOnBlurImpl(UICommonEventPeer* peer,
                    const Opt_Callback_Void* callback_)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto arkOnBlur = Converter::OptConvert<Callback_Void>(*callback_);
+    if (arkOnBlur) {
+        auto onBlur = [arkCallback = CallbackHelper(arkOnBlur.value())]() {
+            arkCallback.Invoke();
+        };
+        peer->SetOnBlur(std::move(onBlur));
+    }
 }
 void SetOnHoverImpl(UICommonEventPeer* peer,
                     const Opt_HoverCallback* callback_)
