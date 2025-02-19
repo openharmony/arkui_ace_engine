@@ -1511,8 +1511,8 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             StartWindowMaximizeAnimation(width, height, rsTransaction);
             break;
         }
-        case WindowSizeChangeReason::MAX_TO_SPLIT:
-        case WindowSizeChangeReason::SPLIT_TO_MAX: {
+        case WindowSizeChangeReason::MAXIMIZE_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_MAXIMIZE: {
             StartSplitWindowAnimation(width, height, type, rsTransaction);
             break;
         }

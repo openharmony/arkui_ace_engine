@@ -43,8 +43,8 @@ enum class WindowSizeChangeReason : uint32_t {
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
     AVOID_AREA_CHANGE,
-    MAX_TO_SPLIT,
-    SPLIT_TO_MAX,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
     END,
 };
 } // namespace OHOS::Ace
