@@ -269,7 +269,7 @@ private:
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
 };
 
-class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListener {
+class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {
 public:
     explicit MenuWindowSceneListener(WeakPtr<SubwindowOhos> sub) : sub_(sub) {}
     ~MenuWindowSceneListener() = default;
