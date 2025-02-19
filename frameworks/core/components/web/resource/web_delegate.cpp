@@ -2775,11 +2775,26 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
     if (fabs(visibleRatio_) > FLT_EPSILON && visibleRatio_ > 0.0) {
         CHECK_NULL_VOID(nweb_);
         nweb_->OnUnoccluded();
-        if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
-            visibleRatio_ < lowerFrameRateVisibleRatio_) {
-            nweb_->SetEnableLowerFrameRate(true);
+        if (isHalfFrame) {
+            if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < lowerFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(true);
+                nweb_->SetEnableHalfFrameRate(false);
+            } else if (fabs(visibleRatio_ - halfFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < halfFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(false);
+                nweb_->SetEnableHalfFrameRate(true);
+            } else {
+                nweb_->SetEnableLowerFrameRate(false);
+                nweb_->SetEnableHalfFrameRate(false);
+            }
         } else {
-            nweb_->SetEnableLowerFrameRate(false);
+            if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < lowerFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(true);
+            } else {
+                nweb_->SetEnableLowerFrameRate(false);
+            }
         }
     } else {
         auto context = context_.Upgrade();
@@ -2799,7 +2814,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
     }
 }
 
-void WebDelegate::ratioStrToFloat(const std::string& str)
+void WebDelegate::ratioStrToFloat(const std::string& str, float& ratio)
 {
     // LowerFrameRateConfig format x.xx, len is 4, [0.00, 1.00]
     if (str.size() != VISIBLERATIO_LENGTH) {
@@ -2825,7 +2840,7 @@ void WebDelegate::ratioStrToFloat(const std::string& str)
     int i = f * VISIBLERATIO_FLOAT_TO_INT;
     if (i >= 0 && i <= VISIBLERATIO_FLOAT_TO_INT) {
         TAG_LOGI(AceLogTag::ACE_WEB, "visibleRatio check success.");
-        lowerFrameRateVisibleRatio_ = f;
+        ratio = f;
     }
 }
 
@@ -2841,13 +2856,32 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     std::string visibleAreaRatio =
         OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatio");
-    ratioStrToFloat(visibleAreaRatio);
+    std::string visibleAreaRatioV2 =
+        OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatioV2");
+    ratioStrToFloat(visibleAreaRatio, lowerFrameRateVisibleRatio_);
+    ratioStrToFloat(visibleAreaRatioV2, halfFrameRateVisibleRatio_);
+    if (lowerFrameRateVisibleRatio_ < halfFrameRateVisibleRatio_) {
+        isHalfFrame = true;
+    } else {
+        isHalfFrame = false;
+    }
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
-    if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
-        partitionPoints = { 0 };
+    if (isHalfFrame) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to half frame rate:%{public}f", halfFrameRateVisibleRatio_);
+        if ((int)(halfFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partitionPoints = { 0 };
+        } else if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partitionPoints = { 0, halfFrameRateVisibleRatio_ };
+        } else {
+            partitionPoints = { 0, lowerFrameRateVisibleRatio_, halfFrameRateVisibleRatio_ };
+        }
     } else {
-        partitionPoints = { 0, lowerFrameRateVisibleRatio_ };
+        if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partitionPoints = { 0 };
+        } else {
+            partitionPoints = { 0, lowerFrameRateVisibleRatio_ };
+        }
     }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
