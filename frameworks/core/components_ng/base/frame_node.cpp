@@ -5979,12 +5979,17 @@ void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
 
 void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 {
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddFrameNodeChangeListener(WeakClaim(this));
     if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
-        auto context = GetContext();
-        CHECK_NULL_VOID(context);
         if (!context->AddChangedFrameNode(WeakClaim(this))) {
             return;
         }
+    }
+    if (changeFlag == FRAME_NODE_CHANGE_GEOMETRY_CHANGE || changeFlag == FRAME_NODE_CHANGE_TRANSITION_START ||
+        changeFlag == FRAME_NODE_CHANGE_TRANSFORM_CHANGE) {
+        context->SetIsTransFlag(true);
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
 }

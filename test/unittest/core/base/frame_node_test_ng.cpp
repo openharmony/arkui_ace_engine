@@ -2451,4 +2451,27 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg090, TestSize.Level1)
     EXPECT_TRUE(json->Contains(label));
 }
 
+/**
+ * @tc.name: FrameNodeTestNg091
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg091, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(1 << 5);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 1 << 5);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg092
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg092, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(0);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 0);
+}
 } // namespace OHOS::Ace::NG
