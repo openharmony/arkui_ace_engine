@@ -59,6 +59,7 @@ struct PopupInfo {
     SizeF targetSize;
     OffsetF targetOffset;
     bool focusable = false;
+    bool isAvoidKeyboard = false;
 };
 
 struct GatherNodeChildInfo {

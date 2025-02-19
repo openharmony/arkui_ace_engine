@@ -103,6 +103,8 @@ public:
 
     static float GetCurrentRootHeight();
 
+    void MarkDirtyOverlay();
+
     void SetupRootElement() override;
 
     void SetupSubRootElement();

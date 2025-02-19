@@ -1942,6 +1942,7 @@ void ViewAbstract::BindPopup(
     popupInfo.popupId = popupId;
     popupInfo.popupNode = popupNode;
     popupInfo.isBlockEvent = param->IsBlockEvent();
+    popupInfo.isAvoidKeyboard = param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT;
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
