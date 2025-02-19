@@ -3065,12 +3065,15 @@ void SheetPresentationPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
-    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE) {
-        TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet will not avoid keyboard.");
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    bool isCurrentFocus = host->GetFocusHub()->IsCurrentFocus();
+    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus) {
+        TAG_LOGD(AceLogTag::ACE_SHEET,
+            "Sheet will not avoid keyboard.keyboardAvoidMode:%{public}d, isCurrentFocus:%{public}d.",
+            keyboardAvoidMode_, isCurrentFocus);
+        return;
+    }
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
@@ -3094,7 +3097,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     CHECK_NULL_VOID(host->GetFocusHub());
     // When bindSheet lift height exceed the max height, hightUp = the remaining height that needs to scroll,
     // otherwise, hightUp = the height to be lifted up
-    auto heightUp = host->GetFocusHub()->IsCurrentFocus() ? GetSheetHeightChange() : 0.0f;
+    auto heightUp = isCurrentFocus ? GetSheetHeightChange() : 0.0f;
     sheetHeightUp_ = heightUp;
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet needs to deal with %{public}f height.", heightUp);
     auto offset = pageHeight_ - height_ - heightUp;
