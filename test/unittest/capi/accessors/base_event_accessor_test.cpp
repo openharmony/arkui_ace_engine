@@ -160,8 +160,26 @@ HWTEST_F(BaseEventAccessorTest, SetTimeStampTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, DISABLED_GetSourceTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
 {
+    const std::vector<Ark_SourceType> TEST_PLAN = {
+        Ark_SourceType::ARK_SOURCE_TYPE_MOUSE,
+        Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN,
+        Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN
+    };
+
+    for (auto expected : TEST_PLAN) {
+        accessor_->setSource(peer_, expected);
+        auto source = accessor_->getSource(peer_);
+        EXPECT_EQ(source, expected);
+    }
+
+    auto invalidValue = static_cast<Ark_SourceType>(10000);
+    accessor_->setSource(peer_, invalidValue);
+    auto source = accessor_->getSource(peer_);
+    EXPECT_EQ(source, Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN);
+    source = accessor_->getSource(nullptr);
+    EXPECT_EQ(source, static_cast<Ark_SourceType>(-1));
 }
 
 /**
@@ -275,8 +293,29 @@ HWTEST_F(BaseEventAccessorTest, SetTiltYTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, DISABLED_GetSourceToolTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, GetSourceToolTest, TestSize.Level1)
 {
+    const std::vector<Ark_SourceTool> TEST_PLAN = {
+        Ark_SourceTool::ARK_SOURCE_TOOL_UNKNOWN,
+        Ark_SourceTool::ARK_SOURCE_TOOL_FINGER,
+        Ark_SourceTool::ARK_SOURCE_TOOL_PEN,
+        Ark_SourceTool::ARK_SOURCE_TOOL_MOUSE,
+        Ark_SourceTool::ARK_SOURCE_TOOL_TOUCHPAD,
+        Ark_SourceTool::ARK_SOURCE_TOOL_JOYSTICK
+    };
+
+    for (auto expected : TEST_PLAN) {
+        accessor_->setSourceTool(peer_, expected);
+        auto sourceTool = accessor_->getSourceTool(peer_);
+        EXPECT_EQ(sourceTool, expected);
+    }
+
+    auto invalidValue = static_cast<Ark_SourceTool>(10000);
+    accessor_->setSourceTool(peer_, invalidValue);
+    auto sourceTool = accessor_->getSourceTool(peer_);
+    EXPECT_EQ(sourceTool, Ark_SourceTool::ARK_SOURCE_TOOL_JOYSTICK);
+    sourceTool = accessor_->getSourceTool(nullptr);
+    EXPECT_EQ(sourceTool, static_cast<Ark_SourceTool>(-1));
 }
 
 /**
@@ -286,15 +325,25 @@ HWTEST_F(BaseEventAccessorTest, DISABLED_GetSourceToolTest, TestSize.Level1)
  */
 HWTEST_F(BaseEventAccessorTest, SetSourceToolTest, TestSize.Level1)
 {
-    const std::vector<SourceType> TEST_PLAN = {
-        SourceType::MOUSE,
-        SourceType::TOUCH
+    const std::vector<std::pair<SourceTool, SourceTool>> TEST_PLAN = {
+        { SourceTool::UNKNOWN, SourceTool::UNKNOWN },
+        { SourceTool::FINGER, SourceTool::FINGER },
+        { SourceTool::PEN, SourceTool::PEN },
+        { SourceTool::RUBBER, SourceTool::PEN },
+        { SourceTool::BRUSH, SourceTool::PEN },
+        { SourceTool::PENCIL, SourceTool::PEN },
+        { SourceTool::AIRBRUSH, SourceTool::PEN },
+        { SourceTool::MOUSE, SourceTool::MOUSE },
+        { SourceTool::LENS, SourceTool::MOUSE },
+        { SourceTool::TOUCHPAD, SourceTool::TOUCHPAD },
+        { SourceTool::JOYSTICK, SourceTool::JOYSTICK },
+        { static_cast<SourceTool>(10000), SourceTool::JOYSTICK },
     };
 
-    for (auto expected : TEST_PLAN) {
-        Ark_SourceType value = Converter::ArkValue<Ark_SourceType>(expected);
-        accessor_->setSource(peer_, value);
-        auto source = baseEvent_->GetSourceDevice();
+    for (auto& [input, expected] : TEST_PLAN) {
+        Ark_SourceTool value = Converter::ArkValue<Ark_SourceTool>(input);
+        accessor_->setSourceTool(peer_, value);
+        auto source = baseEvent_->GetSourceTool();
         EXPECT_EQ(source, expected);
     }
 }
