@@ -241,6 +241,12 @@ public:
         bool enableInspector, const NG::SnapshotParam& param)
     {}
 
+    virtual std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(
+        RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options)
+    {
+        return {};
+    }
+
     virtual std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
         const NG::SnapshotOptions& options)
     {
