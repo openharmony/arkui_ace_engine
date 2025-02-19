@@ -332,6 +332,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
