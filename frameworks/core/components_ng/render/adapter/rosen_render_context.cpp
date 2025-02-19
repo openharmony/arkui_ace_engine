@@ -3606,6 +3606,8 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(
             DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
+        rsNode_->AddModifier(accessibilityFocusStateModifier_);
+        accessibilityFocusStateModifier_->AttachAnimationRectProperty();
         RequestNextFrame();
         return;
     }
@@ -3613,6 +3615,7 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         InitFocusStateModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
         rsNode_->AddModifier(focusStateModifier_);
+        focusStateModifier_->AttachAnimationRectProperty();
     } else {
         InitFocusAnimationModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusAnimationModifier_->GetOverlayRect());
