@@ -4917,6 +4917,7 @@ struct ArkUISymbolGlyphModifier {
     void (*resetMinFontScale)(ArkUINodeHandle node);
     void (*setMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
     void (*resetMaxFontScale)(ArkUINodeHandle node);
+    void (*setCustomSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
 };
 
 struct ArkUISymbolSpanModifier {
@@ -4932,6 +4933,7 @@ struct ArkUISymbolSpanModifier {
     void (*setSymbolSpanEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
     void (*resetSymbolSpanEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
+    void (*setCustomSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
 };
 
 struct ArkUIComponent3DModifier {

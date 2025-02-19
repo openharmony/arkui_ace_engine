@@ -54,6 +54,9 @@
 namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
+constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
 RichEditorModel* RichEditorModel::GetInstance()
 {
     if (!instance_) {
@@ -1494,6 +1497,20 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     return imageStyle;
 }
 
+void JSRichEditorController::ParseJsCustomSymbolStyle(const JSRef<JSVal>& jsValue, TextStyle& style, uint32_t& symbolId)
+{
+    std::vector<std::string> fontFamilies;
+    if (symbolId > SYSTEM_SYMBOL_BOUNDARY) {
+        JSContainerBase::ParseJsSymbolCustomFamilyNames(fontFamilies, jsValue);
+        style.SetSymbolType(SymbolType::CUSTOM);
+        style.SetFontFamilies(fontFamilies);
+    } else {
+        style.SetSymbolType(SymbolType::SYSTEM);
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        style.SetFontFamilies(fontFamilies);
+    }
+}
+
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
@@ -1871,6 +1888,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
             auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
+            ParseJsCustomSymbolStyle(args[0], style, symbolId);
             options.style = style;
         }
     }

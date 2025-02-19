@@ -27,6 +27,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
@@ -349,7 +351,25 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
     symbolTextStyle.SetEffectStrategy(
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
-    symbolTextStyle.SetFontFamilies({ "HM Symbol" });
+    auto symbolType = textStyle.GetSymbolType();
+    symbolTextStyle.SetSymbolType(symbolType);
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = textStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        if (fontFamilies.empty()) {
+            return false;
+        }
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    }
     paragraph->PushStyle(symbolTextStyle);
     if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
