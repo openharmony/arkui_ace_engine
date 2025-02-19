@@ -195,6 +195,7 @@ enum class InputReason {
 struct PreviewTextInfo {
     std::u16string text;
     PreviewRange range;
+    bool isIme;
 };
 
 struct InsertCommandInfo {
@@ -1669,6 +1670,10 @@ public:
     void AddInsertCommand(const std::u16string& insertValue, InputReason reason);
     void AddInputCommand(const InputCommandInfo& inputCommandInfo);
     void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
+    void SetIsFilterChanged(bool isFilterChanged)
+    {
+        isFilterChanged_ = isFilterChanged;
+    }
     float GetFontSizePx();
 protected:
     virtual void InitDragEvent();
@@ -1725,6 +1730,7 @@ private:
     bool OnWillChangePreDelete(const std::u16string& oldContent, uint32_t start, uint32_t end);
     bool OnWillChangePreInsert(const std::u16string& insertValue, const std::u16string& oldContent,
         uint32_t start, uint32_t end);
+    void RecoverTextValueAndCaret(const std::u16string& oldValue, TextRange caretIndex);
     void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
@@ -2192,6 +2198,7 @@ private:
     TextRange callbackRangeAfter_;
     std::u16string callbackOldContent_;
     PreviewText callbackOldPreviewText_;
+    bool isFilterChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 
