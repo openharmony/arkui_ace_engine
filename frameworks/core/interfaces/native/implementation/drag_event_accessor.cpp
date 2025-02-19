@@ -38,7 +38,7 @@ namespace OHOS::Ace::NG::Converter {
         }
     }
 
-    void AssignArkValue(std::optional<DragRet>& dst, const Ark_DragResult& src)
+    void AssignArkValue(Ark_DragResult& dst, const DragRet& src)
     {
         switch (src) {
             case DragRet::DRAG_SUCCESS: dst = ARK_DRAG_RESULT_DRAG_SUCCESSFUL; break;
@@ -57,7 +57,7 @@ namespace OHOS::Ace::NG::Converter {
         dst.x = ArkValue<Opt_Length>(src.Left());
         dst.y = ArkValue<Opt_Length>(src.Top());
         dst.width = ArkValue<Opt_Length>(src.Width());
-        dst.height = Convert(src.Height());
+        dst.height = ArkValue<Opt_Length>(src.Height());
     }
 } // namespace Converter
 
@@ -159,10 +159,9 @@ void SetResultImpl(Ark_DragEvent peer,
 }
 Ark_DragResult GetResultImpl(Ark_DragEvent peer)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->dragInfo);
-    auto result = OptConvert<DragRet>(dragResult);
-    return ArkValue<Ark_DragResult(peer->dragInfo->GetResult());
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->dragInfo, {});
+    return ArkValue<Ark_DragResult>(peer->dragInfo->GetResult());
 }
 Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
 {

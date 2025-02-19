@@ -27,6 +27,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "frameworks/base/geometry/offset.h"
+#include "frameworks/base/geometry/rect.h"
 #include "frameworks/core/gestures/velocity.h"
 
 namespace OHOS::Ace::NG {
@@ -68,6 +69,15 @@ namespace {
         { "ARK_DRAG_RESULT_DROP_ENABLED", ARK_DRAG_RESULT_DROP_ENABLED, DragRet::ENABLE_DROP },
         { "ARK_DRAG_RESULT_DROP_DISABLED", ARK_DRAG_RESULT_DROP_DISABLED, DragRet::DISABLE_DROP },
         { "ARK_DRAG_RESULT_INVALID", static_cast<Ark_DragResult>(-1), DragRet::DISABLE_DROP },
+    };
+
+    const std::vector<std::tuple<std::string, DragRet, Ark_DragResult>> testFixtureEnumArkDragResultValues {
+        {  "ARK_DRAG_RESULT_DRAG_SUCCESSFUL", DragRet::DRAG_SUCCESS, ARK_DRAG_RESULT_DRAG_SUCCESSFUL },
+        {  "ARK_DRAG_RESULT_DRAG_FAILED", DragRet::DRAG_FAIL, ARK_DRAG_RESULT_DRAG_FAILED },
+        {  "ARK_DRAG_RESULT_DRAG_CANCELED", DragRet::DRAG_CANCEL, ARK_DRAG_RESULT_DRAG_CANCELED },
+        {  "ARK_DRAG_RESULT_DROP_ENABLED", DragRet::ENABLE_DROP, ARK_DRAG_RESULT_DROP_ENABLED },
+        {  "ARK_DRAG_RESULT_DROP_DISABLED", DragRet::DISABLE_DROP, ARK_DRAG_RESULT_DROP_DISABLED },
+        {  "ARK_DRAG_RESULT_INVALID", static_cast<DragRet>(-1), static_cast<Ark_DragResult>(-1) },
     };
 } // namespace
 
@@ -166,9 +176,9 @@ HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
 {
-    for (auto& [input, expected, value] : testFixtureEnumDragResultValues) {
+    for (auto& [input, value, expected] : testFixtureEnumArkDragResultValues) {
         dragEvent_->SetResult(value);
-        EXPECT_EQ(accessor_->getResult(peer_, value), expected) <<
+        EXPECT_EQ(accessor_->getResult(peer_), expected) <<
             "Input value is: " << input << ", method: SetResult";
     }
 }
@@ -181,21 +191,13 @@ HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
 HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureLengthAnyValidValues) {
-        Rect rect(value, value, value, value);
+        Rect rect(value.ConvertToPx(), value.ConvertToPx(), value.ConvertToPx(), value.ConvertToPx());
         dragEvent_->SetPreviewRect(rect);
-        auto arkRect = accessor_->getPreviewRect(value);
-        dst.x = ArkValue<Opt_Length>(src.Left());
-        dst.y = ArkValue<Opt_Length>(src.Top());
-        dst.width = ArkValue<Opt_Length>(src.Width());
-        dst.height = Convert(src.Height());
-        EXPECT_EQ(arkRect.x, expected) <<
-            "Input value is: " << input << ", method: GetPreviewRect";
-        EXPECT_EQ(arkRect.y, expected) <<
-            "Input value is: " << input << ", method: GetPreviewRect";
-        EXPECT_EQ(arkRect.width, expected) <<
-            "Input value is: " << input << ", method: GetPreviewRect";
-        EXPECT_EQ(arkRect.height, expected) <<
-            "Input value is: " << input << ", method: GetPreviewRect";
+        auto arkRect = accessor_->getPreviewRect(peer_);
+        CompareOptLength(arkRect.x, ArkValue<Opt_Length>(expected));
+        CompareOptLength(arkRect.y, ArkValue<Opt_Length>(expected));
+        CompareOptLength(arkRect.width, ArkValue<Opt_Length>(expected));
+        CompareOptLength(arkRect.height, ArkValue<Opt_Length>(expected));
     }
 }
 
