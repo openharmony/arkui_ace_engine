@@ -37,7 +37,7 @@ public:
      * @brief Called before the adapter performs a jump
      *
      */
-    virtual void MarkJump() {}
+    virtual void MarkJump() = 0;
 
     virtual void FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) = 0;
 

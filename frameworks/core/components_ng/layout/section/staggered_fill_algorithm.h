@@ -50,6 +50,8 @@ public:
 
     int32_t GetMarkIndex() override;
 
+    void MarkJump() override;
+
 private:
     bool CanFillMoreAtEnd(float viewportBound, Axis axis);
 

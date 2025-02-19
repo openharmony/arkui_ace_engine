@@ -21,13 +21,15 @@
 #include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool notify)
+void ScrollWindowAdapter::UpdateMarkItem(int32_t index)
 {
-    if (index == -1) {
-        index = fillAlgorithm_->GetMarkIndex();
+    if (index == LAST_ITEM) {
+        index = totalCount_ - 1;
     }
     if (markIndex_ == index) {
         return;
@@ -155,9 +157,10 @@ void ScrollWindowAdapter::Prepare()
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
     if (jumpPending_) {
         jumpPending_ = false;
-        auto scroll = container_->GetPattern<ScrollablePattern>();
-        if (scroll) {
+        if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
             scroll->ScrollToIndex(markIndex_, false, ScrollAlign::START, std::nullopt);
+        } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
+            swiper->ChangeIndex(markIndex_, false);
         }
     }
 }

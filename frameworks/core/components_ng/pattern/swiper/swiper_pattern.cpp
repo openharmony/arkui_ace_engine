@@ -154,6 +154,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
     if (jumpIndex_) {
         algo->SetJumpIndex(jumpIndex_.value());
+        UpdateLayoutRange(GetAxis(), *jumpIndex_, false);
     } else if (targetIndex_) {
         algo->SetTargetIndex(targetIndex_.value());
     }
@@ -4203,7 +4204,7 @@ int32_t SwiperPattern::TotalCount() const
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, 1);
     auto displayCount = props->GetDisplayCount().value_or(1);
-    auto totalCount = RealTotalCount();
+    auto totalCount = ArkoalaLazyEnabled() ? GetTotalChildCount() : RealTotalCount();
     if (IsSwipeByGroup() && displayCount != 0) {
         totalCount =
             static_cast<int32_t>(std::ceil(static_cast<float>(totalCount) / static_cast<float>(displayCount))) *

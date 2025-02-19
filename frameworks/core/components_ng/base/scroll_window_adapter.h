@@ -41,9 +41,8 @@ public:
 
     /**
      * @param index of the latest pivot item.
-     * @param notify true if need to notify frontend of pivot change.
      */
-    void UpdateMarkItem(int32_t index, bool notify);
+    void UpdateMarkItem(int32_t index);
 
     void UpdateViewport(const SizeF& size, Axis axis);
 
