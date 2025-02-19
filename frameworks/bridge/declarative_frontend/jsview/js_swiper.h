@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -70,6 +71,11 @@ protected:
     static void SetPageFlipMode(const JSCallbackInfo& info);
     static void SetOnContentWillScroll(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static void SetIndicatorController(const JSCallbackInfo& info);
+    static void ResetSwiperNode();
+
+    private:
+        static WeakPtr<JSIndicatorController> jSIndicatorController_;
 };
 
 class JSSwiperController final : public Referenced {

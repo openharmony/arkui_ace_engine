@@ -150,6 +150,11 @@ public:
     {
         isHorizontalAndRightToLeft_ = axis_ == Axis::HORIZONTAL && textDirection == TextDirection::RTL;
     }
+
+    void SetFirstIndex(int32_t index)
+    {
+        firstIndex_ = index;
+    }
 protected:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -192,6 +197,7 @@ protected:
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t currentIndexActual_ = 0;
+    int32_t firstIndex_ = 0;
     int32_t nextValidIndex_ = 0;
     int32_t itemCount_ = 0;
     int32_t displayCount_ = 1;

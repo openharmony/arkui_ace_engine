@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
@@ -724,8 +725,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
 
     std::string type = valueArg->ToString(vm)->ToString(vm);
     std::string indicatorStr = "";
@@ -735,8 +739,20 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
         indicatorStr = type + "|" + indicator;
     } else if (type == "ArkDotIndicator") {
         indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm);
-    } else {
+    } else if (type == "ArkDigitIndicator") {
         indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm);
+    } else if (type == "IndicatorComponentController") {
+        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+        Framework::JSIndicatorController* jsController =
+            Framework::JSRef<Framework::JSObject>::Cast(info[INDICATOR_VALUE_INDEX])
+                ->Unwrap<Framework::JSIndicatorController>();
+        if (jsController) {
+            WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(frameNode);
+            jsController->SetSwiperNode(targetNode);
+        }
+        indicatorStr = "IndicatorComponentController|";
+    } else {
+        indicatorStr = "boolean|1";
     }
     GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndicator(nativeNode, indicatorStr.c_str());
     return panda::JSValueRef::Undefined(vm);

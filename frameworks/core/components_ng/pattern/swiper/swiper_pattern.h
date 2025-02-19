@@ -291,7 +291,7 @@ public:
 
     bool HasIndicatorNode() const
     {
-        return indicatorId_.has_value();
+        return indicatorId_.has_value() || GetIndicatorNode() != nullptr;
     }
 
     bool HasLeftButtonNode() const
@@ -620,6 +620,28 @@ public:
     {
         return isTouchDownOnOverlong_;
     }
+    bool IsBindIndicator() const
+    {
+        return isBindIndicator_;
+    }
+
+    void SetBindIndicator(bool bind)
+    {
+        isBindIndicator_ = bind;
+    }
+
+    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode);
+
+    RefPtr<FrameNode> GetIndicatorNode() const
+    {
+        auto refUINode = indicatorNode_.Upgrade();
+        CHECK_NULL_RETURN(refUINode, nullptr);
+        auto frameNode = DynamicCast<FrameNode>(refUINode);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode;
+    }
+
+    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
 
     void SetPageFlipMode(int32_t pageFlipMode);
 
@@ -970,6 +992,12 @@ private:
 
     void CheckSpecialItemCount() const;
     bool IsCachedShow() const;
+    void MarkDirtyBindIndicatorNode() const;
+    RefPtr<FrameNode> GetCommonIndicatorNode();
+    bool IsIndicator(const std::string& tag) const
+    {
+        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
+    }
     bool ContentWillScroll(int32_t currentIndex, int32_t comingIndex, float offset);
     bool CheckContentWillScroll(float checkValue, float mainDelta);
     float CalcWillScrollOffset(int32_t comingIndex);
@@ -1153,6 +1181,8 @@ private:
     std::set<int32_t> cachedItems_;
     LayoutConstraintF layoutConstraint_;
     bool requestLongPredict_ = false;
+    WeakPtr<NG::UINode> indicatorNode_;
+    bool isBindIndicator_ = false;
 
     PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
     bool isFirstAxisAction_ = true;

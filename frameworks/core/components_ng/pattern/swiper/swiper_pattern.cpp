@@ -115,6 +115,9 @@ const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
     AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 
+constexpr float MASS = 1.0f;
+constexpr float STIFFNESS = 328.0f;
+constexpr float DAMPING = 34.0f;
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -291,7 +294,7 @@ void SwiperPattern::InitCapture()
 
     if (!hasCachedCapture_ && hasCachedCapture) {
         // Screenshot nodes need to be added at the forefront of all special nodes to display at the bottom
-        uint32_t number = static_cast<uint32_t>(HasIndicatorNode()) + static_cast<uint32_t>(HasLeftButtonNode()) +
+        uint32_t number = static_cast<uint32_t>(indicatorId_.has_value()) + static_cast<uint32_t>(HasLeftButtonNode()) +
                           static_cast<uint32_t>(HasRightButtonNode()) + 1;
         auto leftCaptureNode = FrameNode::GetOrCreateFrameNode(
             V2::SWIPER_LEFT_CAPTURE_ETS_TAG, GetLeftCaptureId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -369,6 +372,13 @@ bool SwiperPattern::NeedForceMeasure() const
            (isSwipeByGroup_.has_value() && isSwipeByGroup_.value() != IsSwipeByGroup());
 }
 
+void SwiperPattern::MarkDirtyBindIndicatorNode() const
+{
+    auto indicatorNode = GetIndicatorNode();
+    CHECK_NULL_VOID(indicatorNode);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void SwiperPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -385,7 +395,11 @@ void SwiperPattern::OnModifyDone()
             0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     }
 
-    InitIndicator();
+    if (!isBindIndicator_) {
+        InitIndicator();
+    } else if (NeedForceMeasure()) {
+        MarkDirtyBindIndicatorNode();
+    }
     InitArrow();
     InitCapture();
     CheckSpecialItemCount();
@@ -427,6 +441,16 @@ void SwiperPattern::OnModifyDone()
     if (IsSwipeByGroup()) {
         needAdjustIndex_ = true;
     }
+    
+    if (isBindIndicator_) {
+        auto refUINode = indicatorNode_.Upgrade();
+        CHECK_NULL_VOID(refUINode);
+        auto frameNode = DynamicCast<NG::FrameNode>(refUINode);
+        CHECK_NULL_VOID(frameNode);
+        auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+        CHECK_NULL_VOID(indicatorPattern);
+        indicatorPattern->InitIndicatorEvent();
+    }
 }
 
 void SwiperPattern::OnAfterModifyDone()
@@ -466,8 +490,8 @@ void SwiperPattern::UpdateIndicatorOnChildChange()
         StopIndicatorAnimation();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
-        if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+        auto indicatorNode = GetCommonIndicatorNode();
+        if (indicatorNode && IsIndicator(indicatorNode->GetTag())) {
             indicatorNode->MarkModifyDone();
             indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -1252,6 +1276,7 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex) cons
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireChangeEvent(preIndex, currentIndex);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
+    swiperEventHub->FireIndicatorIndexChangeEvent(currentIndex);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
 
     if (jumpIndex_) {
@@ -2562,15 +2587,13 @@ void SwiperPattern::UpdateNextValidIndex()
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset, std::optional<int32_t> nextIndex)
 {
     additionalOffset = IsHorizontalAndRightToLeft() ? -additionalOffset : additionalOffset;
-    if (!indicatorId_.has_value()) {
+    if (!HasIndicatorNode()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto child = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+    auto child = GetCommonIndicatorNode();
     CHECK_NULL_VOID(child);
 
-    if (child->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+    if (!IsIndicator(child->GetTag())) {
         return;
     }
 
@@ -2661,7 +2684,7 @@ bool SwiperPattern::InsideIndicatorRegion(const TouchLocationInfo& locationInfo)
     CHECK_NULL_RETURN(host, false);
     auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
     CHECK_NULL_RETURN(indicatorNode, false);
-    if (indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+    if (!indicatorNode || !IsIndicator(indicatorNode->GetTag())) {
         return false;
     }
 
@@ -3373,7 +3396,7 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
     }
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
-    return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 328, 34);
+    return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, MASS, STIFFNESS, DAMPING);
 }
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex)
@@ -3383,7 +3406,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
         return;
     }
     const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
-    if (!indicatorId_.has_value() && !turnPageRateCallback) {
+    if (!HasIndicatorNode() && !turnPageRateCallback) {
         return;
     }
     CheckMarkDirtyNodeForRenderIndicator(translate, nextIndex);
@@ -3433,7 +3456,7 @@ void SwiperPattern::PlayTranslateAnimation(
         return;
     }
 
-    if (indicatorId_.has_value()) {
+    if (HasIndicatorNode()) {
         CheckMarkDirtyNodeForRenderIndicator(endPos - startPos, nextIndex);
     }
 
@@ -4085,7 +4108,7 @@ int32_t SwiperPattern::RealTotalCount() const
     CHECK_NULL_RETURN(host, 0);
     // last child is swiper indicator
     int num = 0;
-    if (IsShowIndicator() && HasIndicatorNode()) {
+    if (!isBindIndicator_ && IsShowIndicator() && HasIndicatorNode()) {
         num += 1;
     }
     if (HasLeftButtonNode()) {
@@ -4614,9 +4637,9 @@ void SwiperPattern::OnTranslateFinish(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (HasIndicatorNode()) {
-        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+        auto indicatorNode = GetCommonIndicatorNode();
         CHECK_NULL_VOID(indicatorNode);
-        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+        if (IsIndicator(indicatorNode->GetTag())) {
             indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             MarkDirtyNodeSelf();
         }
@@ -6069,11 +6092,8 @@ int32_t SwiperPattern::GetMaxDisplayCount() const
 
 void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
-    if (!indicatorNode || indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+    auto indicatorNode = GetCommonIndicatorNode();
+    if (!indicatorNode || !IsIndicator(indicatorNode->GetTag())) {
         return;
     }
 
@@ -6089,12 +6109,8 @@ void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)
     if (GetMaxDisplayCount() <= 0) {
         return;
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
-    if (!indicatorNode || indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+    auto indicatorNode = GetCommonIndicatorNode();
+    if (!indicatorNode || !IsIndicator(indicatorNode->GetTag())) {
         return;
     }
 
@@ -6201,6 +6217,32 @@ void SwiperPattern::CheckSpecialItemCount() const
     CHECK_NULL_VOID(swiperNode);
     swiperNode->SetSpecialItemCount(indicatorId_.has_value() + leftButtonId_.has_value() + rightButtonId_.has_value() +
                                     leftCaptureId_.has_value() + rightCaptureId_.has_value());
+}
+
+RefPtr<FrameNode> SwiperPattern::GetCommonIndicatorNode()
+{
+    if (isBindIndicator_) {
+        return GetIndicatorNode();
+    } else {
+        CHECK_NULL_RETURN(indicatorId_.has_value(), nullptr);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+    }
+}
+
+void SwiperPattern::SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
+{
+    if (isBindIndicator_) {
+        indicatorNode_ = indicatorNode;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+        auto frameIndicatorNode = GetIndicatorNode();
+        CHECK_NULL_VOID(frameIndicatorNode);
+        frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void SwiperPattern::SetPageFlipMode(int32_t pageFlipMode)
