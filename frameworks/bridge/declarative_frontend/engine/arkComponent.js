@@ -17335,7 +17335,7 @@ class ArkScrollableBarModeOptions {
 }
 class ArkTabsCachedMaxCount {
   isEqual(another) {
-    return (this.value.count == another.count && this.value.mode == another.mode);
+    return (this.value.count === another.count && this.value.mode === another.mode);
   }
 }
 class ArkAlignRules {
@@ -31579,7 +31579,7 @@ class CachedMaxCountModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.value.count == this.stageValue.count && this.value.mode == this.stageValue.mode);
+    return !(this.value.count === this.stageValue.count && this.value.mode === this.stageValue.mode);
   }
 }
 CachedMaxCountModifier.identity = Symbol('cachedMaxCount');

@@ -709,7 +709,7 @@ class ArkTabsCachedMaxCount {
   mode: TabsCacheMode;
 
   isEqual(another: ArkTabsCachedMaxCount): boolean {
-    return (this.count == another.count && this.mode == another.mode);
+    return (this.count === another.count && this.mode === another.mode);
   }
 }
 
