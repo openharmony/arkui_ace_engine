@@ -50,23 +50,21 @@ Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
                                       const Ark_Number* index,
                                       const Ark_Number* indexInGroup)
 {
-    LOGE("ListScrollerAccessor::GetItemRectInGroupImpl is not implemented.");
-    // wait for Ark_NativePointer change to another type which is acceptable to "Rect" data
-    CHECK_NULL_RETURN(peer, {}); // need to fix a return value
-    CHECK_NULL_RETURN(index, {}); // need to fix a return value
-    CHECK_NULL_RETURN(indexInGroup, {}); // need to fix a return value
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(index, {});
+    CHECK_NULL_RETURN(indexInGroup, {});
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::GetItemRectInGroupImpl. Controller isn't bound to a component.");
-        return {}; // need to fix a return value
+        return {};
     }
 
     int32_t convIndex = Converter::Convert<int32_t>(*index);
     int32_t convIndexInGroup = Converter::Convert<int32_t>(*indexInGroup);
     // get a result of GetItemRectInGroup to return it
-    scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
-    return {}; // need to fix a return value
+    auto rect = scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
+    return Converter::ArkValue<Ark_RectResult>(rect);
 }
 void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
                              Ark_ListScroller peer,
