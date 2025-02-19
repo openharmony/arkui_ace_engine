@@ -1439,7 +1439,7 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: OnDidScroll_SetNullCallback
- * @tc.desc: Test OnScrollEdgeImpl
+ * @tc.desc: Test OnDidScrollImpl
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollModifierTest, OnDidScroll_SetNullCallback, testing::ext::TestSize.Level1)
