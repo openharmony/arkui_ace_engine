@@ -15,6 +15,7 @@
 
 #include "core/components/video/video_element.h"
 
+#include <cstdio>
 #include <iomanip>
 #include <regex>
 #include <sstream>
@@ -379,17 +380,18 @@ void VideoElement::MediaPlay(const std::string& filePath)
             return;
         }
         auto hapPath = Container::Current()->GetHapPath();
-        auto hapFd = open(hapPath.c_str(), O_RDONLY);
-        if (hapFd < 0) {
+        std::FILE* hapFp = std::fopen(hapPath.c_str(), "r");
+        if (hapFp == nullptr) {
             LOGE("Open hap file failed");
             return;
         }
+        auto hapFd = fileno(hapFp);
         if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
             LOGE("Player SetSource failed");
-            close(hapFd);
+            std::fclose(hapFp);
             return;
         }
-        close(hapFd);
+        std::fclose(hapFp);
     }
 }
 
@@ -404,17 +406,18 @@ void VideoElement::RawFilePlay(const std::string& filePath)
         return;
     }
     auto hapPath = Container::Current()->GetHapPath();
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(hapPath.c_str(), "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return;
     }
+    auto hapFd = fileno(hapFp);
     if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return;
     }
-    close(hapFd);
+    std::fclose(hapFp);
 }
 
 void VideoElement::RelativePathPlay(const std::string& filePath)
@@ -428,17 +431,18 @@ void VideoElement::RelativePathPlay(const std::string& filePath)
         return;
     }
     auto hapPath = Container::Current()->GetHapPath();
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(hapPath.c_str(), "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return;
     }
+    auto hapFd = fileno(hapFp);
     if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return;
     }
-    close(hapFd);
+    std::fclose(hapFp);
 }
 
 bool VideoElement::GetResourceId(const std::string& path, uint32_t& resId)
@@ -470,7 +474,12 @@ void VideoElement::SetMediaSource(std::string& filePath, int32_t& fd)
         fd = dataProvider->GetDataProviderFile(filePath, "r");
     } else if (StringUtils::StartWith(filePath, "file://")) {
         filePath = FileUriHelper::GetRealPath(filePath);
-        fd = open(filePath.c_str(), O_RDONLY);
+        std::FILE* fp = std::fopen(filePath.c_str(), "r");
+        if (fp != nullptr) {
+            fd = fileno(fp);
+        } else {
+            LOGE("Open file %{public}s failed", filePath.c_str());
+        }
     } else if (StringUtils::StartWith(filePath, "resource:///")) {
         // file path: resources/base/media/xxx.xx --> resource:///xxx.xx
         MediaPlay(filePath);
