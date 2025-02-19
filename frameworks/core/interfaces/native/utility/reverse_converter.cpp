@@ -353,4 +353,18 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src)
     dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
     dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
 }
+
+void AssignArkValue(Ark_OffsetResult& dst, const Offset& src)
+{
+    dst.xOffset = ArkValue<Ark_Number>(src.GetX());
+    dst.yOffset = ArkValue<Ark_Number>(src.GetY());
+}
+
+void AssignArkValue(Ark_RectResult& dst, const RectF& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.GetX());
+    dst.y = ArkValue<Ark_Number>(src.GetY());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
 } // namespace OHOS::Ace::NG::Converter

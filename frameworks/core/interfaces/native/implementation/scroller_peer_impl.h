@@ -34,12 +34,12 @@ public:
     void TriggerFling(const Ark_Number* velocity);
     void TriggerScrollPage0(bool next);
     void TriggerScrollPage1(bool next);
-    Ark_NativePointer TriggerCurrentOffset();
+    Ark_OffsetResult TriggerCurrentOffset();
     void TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
     void TriggerScrollBy(const Ark_Length* dx, const Ark_Length* dy);
     Ark_Boolean TriggerIsAtEnd();
-    Ark_NativePointer TriggerGetItemRect(const Ark_Number* index);
+    Ark_RectResult TriggerGetItemRect(const Ark_Number* index);
     Ark_Int32 TriggerGetItemIndex(const Ark_Number* x, const Ark_Number* y);
 
     const WeakPtr<ScrollControllerBase>& GetController() const

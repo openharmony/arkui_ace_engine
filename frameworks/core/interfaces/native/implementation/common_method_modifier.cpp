@@ -1595,13 +1595,6 @@ RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
     return nullptr;
 }
 
-void AssignArkValue(Ark_RectResult& dst, const RectF& src)
-{
-    dst.x = ArkValue<Ark_Number>(src.GetX());
-    dst.y = ArkValue<Ark_Number>(src.GetY());
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
-}
 void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src)
 {
     dst.windowX = ArkValue<Ark_Number>(src.windowPoint.GetX());
