@@ -2244,4 +2244,29 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest075, TestSize.Level1)
     targetDropNode = dragDropManager->FindTargetDropNode(frameNode, point);
     EXPECT_EQ(targetDropNode, frameNode);
 }
+
+/**
+* @tc.name: DragDropManagerTest076
+* @tc.desc: Test GetScaleInfo with scale
+* @tc.type: FUNC
+* @tc.author:
+*/
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest076, TestSize.Level1)
+{
+    constexpr float WIDTH_UNKOWN = 00.0f;
+    constexpr float HEIGHT_UNKOWN = 00.0f;
+    auto scaleUnkown = DragDropManager::GetScaleInfo(WIDTH_UNKOWN, HEIGHT_UNKOWN, true);
+    ASSERT_NE(scaleUnkown, nullptr);
+    EXPECT_FALSE(scaleUnkown->isNeedScale);
+    constexpr float WIDTH_SMALL = 1.0f;
+    constexpr float HEIGHT_SMALL = 1.0f;
+    auto scaleSmall = DragDropManager::GetScaleInfo(WIDTH_SMALL, HEIGHT_SMALL, true);
+    ASSERT_NE(scaleSmall, nullptr);
+    EXPECT_EQ(scaleSmall->scale, 1);
+    constexpr float WIDTH_LARGE = 2000.0f;
+    constexpr float HEIGHT_LARGE = 2000.0f;
+    auto scaleLarge = DragDropManager::GetScaleInfo(WIDTH_LARGE, HEIGHT_LARGE, false);
+    ASSERT_NE(scaleLarge, nullptr);
+    EXPECT_NE(scaleLarge->scale, 1);
+}
 } // namespace OHOS::Ace::NG

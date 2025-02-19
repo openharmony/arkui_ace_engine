@@ -63,6 +63,7 @@ typedef enum {
 } FocusMove;
 
 typedef int ArkUI_Bool;
+typedef std::int16_t ArkUI_Int16;
 typedef int ArkUI_Int32;
 typedef unsigned int ArkUI_Uint32;
 typedef long long ArkUI_Int64;
@@ -1492,7 +1493,6 @@ struct ArkUIOptionalCommonCharPtr {
     ArkUI_Int32 isSet;
     ArkUI_CommonCharPtr value;
 };
-
 struct ArkUISwiperIndicator {
     ArkUISwiperIndicatorType type;
     ArkUI_Int32 dimUnit;
@@ -1508,6 +1508,30 @@ struct ArkUISwiperIndicator {
     ArkUIOptionalUint colorValue;
     ArkUIOptionalUint selectedColorValue;
     ArkUIOptionalInt maxDisplayCount;
+};
+
+struct ArkUISwiperDigitIndicator {
+    ArkUISwiperIndicatorType type;
+    ArkUI_Int32 dimUnit;
+    ArkUIOptionalFloat dimLeft;
+    ArkUIOptionalFloat dimTop;
+    ArkUIOptionalFloat dimRight;
+    ArkUIOptionalFloat dimBottom;
+    ArkUIOptionalUint fontColor;
+    ArkUIOptionalUint selectedFontColor;
+    ArkUIOptionalFloat fontSize;
+    ArkUIOptionalFloat selectedFontSize;
+    ArkUIOptionalUint fontWeight;
+    ArkUIOptionalUint selectedFontWeight;
+};
+
+struct ArkUISwiperArrowStyle {
+    ArkUIOptionalInt showBackground;
+    ArkUIOptionalInt showSidebarMiddle;
+    ArkUIOptionalFloat backgroundSize;
+    ArkUIOptionalUint backgroundColor;
+    ArkUIOptionalFloat arrowSize;
+    ArkUIOptionalUint arrowColor;
 };
 
 struct ArkUI_StyledString;
@@ -1531,6 +1555,7 @@ struct ArkUIKeyframeAnimateOption {
     void* userData;
     ArkUIKeyframeState* keyframes;
     ArkUI_Int32 keyframeSize;
+    ArkUIExpectedFrameRateRange* expectedFrameRateRange;
 };
 
 struct ArkUIKeyframe {
@@ -2051,7 +2076,6 @@ struct ArkUICommonModifier {
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
         ArkUIDragInteractionOptions dragInteractionOptions);
     void (*resetDragPreviewOptions)(ArkUINodeHandle node);
-    void (*setDisableDataPrefetch)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*setMouseResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetMouseResponseRegion)(ArkUINodeHandle node);
@@ -2069,6 +2093,8 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityDefaultFocus)(ArkUINodeHandle node);
     void (*setAccessibilityUseSamePage)(ArkUINodeHandle node, ArkUI_Bool isFullSilent);
     void (*resetAccessibilityUseSamePage)(ArkUINodeHandle node);
+    void (*setAccessibilityScrollTriggerable)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAccessibilityScrollTriggerable)(ArkUINodeHandle node);
     void (*setHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);
@@ -2297,6 +2323,7 @@ struct ArkUICommonModifier {
     void (*setNodeBackdropBlur)(
         ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     ArkUIBackdropBlur (*getNodeBackdropBlur)(ArkUINodeHandle node);
+    void (*setDisableDataPrefetch)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*setOnVisibleAreaApproximateChange)(
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval);
 };
@@ -2797,6 +2824,9 @@ struct ArkUIListModifier {
     void (*setListMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool enabled);
     void (*resetListMaintainVisibleContentPosition)(ArkUINodeHandle node);
     ArkUI_Bool (*getListMaintainVisibleContentPosition)(ArkUINodeHandle node);
+    void (*setListStackFromEnd)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*resetListStackFromEnd)(ArkUINodeHandle node);
+    ArkUI_Bool (*getListStackFromEnd)(ArkUINodeHandle node);
     void (*setListFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetListFadingEdge)(ArkUINodeHandle node);
@@ -2958,6 +2988,15 @@ struct ArkUISwiperModifier {
     void (*resetSwiperOnContentWillScroll)(ArkUINodeHandle node);
     void (*setSwiperOnSelected)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnSelected)(ArkUINodeHandle node);
+    void (*setSwiperMinSize)(ArkUINodeHandle node, ArkUI_Float32 minSizeValue, ArkUI_Int32 minSizeUnit);
+    void (*resetSwiperMinSize)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSwiperMinSize)(ArkUINodeHandle node);
+    void (*setSwiperDigitIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperDigitIndicator* swiperIndicator);
+    void (*getSwiperDigitIndicator)(ArkUINodeHandle node, ArkUISwiperDigitIndicator* swiperIndicator);
+    ArkUISwiperIndicatorType (*getIndicatorType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperSwipeByGroup)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getSwiperDisplayMode)(ArkUINodeHandle node);
+    ArkUISwiperArrowStyle (*getSwiperArrowStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -3365,6 +3404,8 @@ struct ArkUITabsModifier {
     void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
     void (*setTabsOnSelected)(ArkUINodeHandle node, void* callback);
     void (*resetTabsOnSelected)(ArkUINodeHandle node);
+    void (*setCachedMaxCount)(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode);
+    void (*resetCachedMaxCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {
@@ -4117,7 +4158,7 @@ struct ArkUICheckboxModifier {
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
     void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
     void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
-    
+
     ArkUI_CharPtr (*getCheckboxName)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getCheckboxGroup)(ArkUINodeHandle node);
 };
@@ -4870,6 +4911,12 @@ struct ArkUISymbolGlyphModifier {
     void (*resetEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
     void (*resetSymbolGlyphInitialize)(ArkUINodeHandle node);
+    void (*updateSymbolEffect)(ArkUINodeHandle node, ArkUI_Uint32 symbolEffectType, ArkUI_Bool isActive,
+        ArkUI_Int16 isTxtActiveSource);
+    void (*setMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 minFontScale);
+    void (*resetMinFontScale)(ArkUINodeHandle node);
+    void (*setMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
+    void (*resetMaxFontScale)(ArkUINodeHandle node);
 };
 
 struct ArkUISymbolSpanModifier {

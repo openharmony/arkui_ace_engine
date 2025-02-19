@@ -32,6 +32,7 @@ public:
 
     static constexpr int32_t LEAST_SQUARE_PARAM_NUM = 3;
     static constexpr int32_t POINT_NUMBER = 5;
+    static constexpr float TOUCH_STILL_THRESHOLD = 0.5;
 
     void Reset()
     {
@@ -43,7 +44,7 @@ public:
         yAxis_.Reset();
     }
 
-    void UpdateTouchPoint(const TouchEvent& event, bool end = false);
+    void UpdateTouchPoint(const TouchEvent& event, bool end = false, float range = TOUCH_STILL_THRESHOLD);
 
     void UpdateTrackerPoint(double x, double y, const TimeStamp& time, bool end = false);
 

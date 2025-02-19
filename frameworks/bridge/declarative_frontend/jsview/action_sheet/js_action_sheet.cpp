@@ -479,6 +479,8 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseDialogCallback(obj, onWillDismissFunc);
     ActionSheetModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 
+    JSViewAbstract::ParseAppearDialogCallback(args, properties);
+
     // Parse sheets
     auto sheetsVal = obj->GetProperty("sheets");
     if (sheetsVal->IsArray()) {

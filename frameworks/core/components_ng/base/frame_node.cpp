@@ -51,6 +51,7 @@
 #endif
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -167,9 +168,10 @@ public:
         }
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(UiNode);
         auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(UiNode);
+        auto repeatVirtualScroll2Node = AceType::DynamicCast<RepeatVirtualScroll2Node>(UiNode);
         if (lazyForEachNode) {
             lazyForEachNode->BuildAllChildren();
-        } else if (repeatVirtualScrollNode) {
+        } else if (repeatVirtualScrollNode || repeatVirtualScroll2Node) {
             TAG_LOGE(AceLogTag::ACE_REPEAT, "repeatVirtualScroll not support in non scoll container!");
         } else {
             auto customNode = AceType::DynamicCast<CustomNode>(UiNode);
@@ -1279,8 +1281,9 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
         PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
     }
+    bool forceMeasure = !GetPattern()->ReusedNodeSkipMeasure();
     // node may have been measured before AttachToMainTree
-    if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
+    if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess() && forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
     UINode::OnAttachToMainTree(recursive);
@@ -2348,6 +2351,13 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
+    if (isDeleteRsNode) {
+        auto parentFrameNode = GetParentFrameNode();
+        if (parentFrameNode) {
+            parentFrameNode->MarkNeedSyncRenderTree();
+            parentFrameNode->RebuildRenderContextTree();
+        }
+    }
     needSyncRenderTree_ = false;
 }
 
@@ -3551,13 +3561,16 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
-RectF FrameNode::GetTransformRectRelativeToWindow() const
+RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, RectF());
     RectF rect = context->GetPaintRectWithTransform();
     auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
+        if (checkBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
         rect = ApplyFrameNodeTranformToRect(rect, parent);
         parent = parent->GetAncestorNodeOfFrame(true);
     }

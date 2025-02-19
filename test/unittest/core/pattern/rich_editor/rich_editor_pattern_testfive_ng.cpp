@@ -1317,7 +1317,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleSurfaceChanged001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->magnifierController_.Reset();
-    richEditorPattern->HandleSurfaceChanged(1, 1, 2, 2);
+    richEditorPattern->HandleSurfaceChanged(1, 1, 2, 2, WindowSizeChangeReason::DRAG);
     EXPECT_FALSE(richEditorPattern->originIsMenuShow_);
 }
 

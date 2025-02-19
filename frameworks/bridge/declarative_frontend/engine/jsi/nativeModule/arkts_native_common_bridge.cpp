@@ -1291,9 +1291,9 @@ void ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef> blurOptionsArg, B
 
 void ParseDynamicBrightnessOption(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
     ArkUI_Float32& rate, ArkUI_Float32& lightUpDegree, ArkUI_Float32& cubicCoeff, ArkUI_Float32& quadCoeff,
-    ArkUI_Float32& saturation, std::vector<float>& posRGB, std::vector<float>& negRGB, ArkUI_Float32& fraction) 
-{   
-    Local<JSValueRef> rateArg = runtimeCallInfo->GetCallArgRef(1);         
+    ArkUI_Float32& saturation, std::vector<float>& posRGB, std::vector<float>& negRGB, ArkUI_Float32& fraction)
+{
+    Local<JSValueRef> rateArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> lightUpDegreeArg = runtimeCallInfo->GetCallArgRef(2);
     Local<JSValueRef> cubicCoeffArg = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> quadCoeffArg = runtimeCallInfo->GetCallArgRef(4);
@@ -5337,7 +5337,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBrightnessInternal(ArkUIRuntim
     std::vector<float> posRGB(3, 0.0);
     std::vector<float> negRGB(3, 0.0);
     ArkUI_Float32 fraction = 1.0f;
-    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree, 
+    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree,
         cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction);
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundBrightnessInternal(
         nativeNode, rate, lightUpDegree, cubicCoeff, quadCoeff, saturation,
@@ -5369,7 +5369,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundBrightness(ArkUIRuntimeCallInf
     std::vector<float> posRGB(3, 0.0);
     std::vector<float> negRGB(3, 0.0);
     ArkUI_Float32 fraction = 1.0f;
-    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree, 
+    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree,
         cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction);
     GetArkUINodeModifiers()->getCommonModifier()->setForegroundBrightness(
         nativeNode, rate, lightUpDegree, cubicCoeff, quadCoeff, saturation,
@@ -5777,7 +5777,7 @@ ArkUINativeModuleValue CommonBridge::SetMaskShape(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     };
     ViewAbstract::SetMask(frameNode, maskShape->GetBasicShape());
-    
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -6124,6 +6124,32 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityUseSamePage(ArkUIRuntimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityUseSamePage(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAccessibilityScrollTriggerable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool boolValue = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityScrollTriggerable(nativeNode, boolValue);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityScrollTriggerable(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityScrollTriggerable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityScrollTriggerable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

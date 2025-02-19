@@ -5845,4 +5845,500 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest004, TestSize.Level1)
     EXPECT_FALSE(focusHub->ProcessOnCrownEventInternal(crownEvent));
 #endif
 }
+
+/**
+ * @tc.name: TimePickerColumnLayoutAlgorithmNeedAdaptForAging
+ * @tc.desc: Test TimePickerColumnLayoutAlgorithm NeedAdaptForAging.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnLayoutAlgorithmNeedAdaptForAging, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
+     */
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.selfIdealSize.SetWidth(20);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_TRUE(minuteColumn);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_TRUE(minuteColumnPattern);
+    auto columnBlend = AceType::DynamicCast<FrameNode>(minuteColumn->GetParent());
+    ASSERT_TRUE(columnBlend);
+    auto blendLayoutProperty = columnBlend->GetLayoutProperty();
+    blendLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    blendLayoutProperty->UpdateContentConstraint();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(minuteColumn, minuteColumn->GetGeometryNode(), pickerProperty);
+
+    /**
+     * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
+     *                  and Layout function.
+     */
+    TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
+    timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    double fontScale = 1.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    bool result = timePickerColumnLayoutAlgorithm.NeedAdaptForAging();
+    EXPECT_EQ(false, result);
+
+    fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    result = timePickerColumnLayoutAlgorithm.NeedAdaptForAging();
+    EXPECT_EQ(true, result);
+}
+
+/**
+ * @tc.name: TimePickerColumnLayoutAlgorithmAdjustFontSizeScale
+ * @tc.desc: Test TimePickerColumnLayoutAlgorithm AdjustFontSizeScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnLayoutAlgorithmAdjustFontSizeScale, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
+     */
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.selfIdealSize.SetWidth(20);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_TRUE(minuteColumn);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_TRUE(minuteColumnPattern);
+    auto columnBlend = AceType::DynamicCast<FrameNode>(minuteColumn->GetParent());
+    ASSERT_TRUE(columnBlend);
+    auto blendLayoutProperty = columnBlend->GetLayoutProperty();
+    blendLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    blendLayoutProperty->UpdateContentConstraint();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(minuteColumn, minuteColumn->GetGeometryNode(), pickerProperty);
+
+    /**
+     * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
+     *                  and Layout function.
+     */
+    TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
+    timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    double fontScale = 1.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = timePickerColumnLayoutAlgorithm.AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TimePickerColumnLayoutAlgorithmReCalcItemHeightScale
+ * @tc.desc: Test TimePickerColumnLayoutAlgorithm ReCalcItemHeightScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnLayoutAlgorithmReCalcItemHeightScale, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
+     */
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.selfIdealSize.SetWidth(20);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_TRUE(minuteColumn);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_TRUE(minuteColumnPattern);
+    auto columnBlend = AceType::DynamicCast<FrameNode>(minuteColumn->GetParent());
+    ASSERT_TRUE(columnBlend);
+    auto blendLayoutProperty = columnBlend->GetLayoutProperty();
+    blendLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    blendLayoutProperty->UpdateContentConstraint();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(minuteColumn, minuteColumn->GetGeometryNode(), pickerProperty);
+
+    /**
+     * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
+     *                  and Layout function.
+     */
+    TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
+    timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    bool isDividerSpacing = false;
+    Dimension userSetHeight;
+    float result = timePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
+    EXPECT_NE(result, TEXT_HEIGHT_NUMBER);
+
+    isDividerSpacing = true;
+    userSetHeight = 50.0_vp;
+    result = timePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
+    EXPECT_NE(result, TEXT_HEIGHT_NUMBER);
+}
+
+/**
+ * @tc.name: TimePickerColumnLayoutAlgorithmGetPickerMaxHeight
+ * @tc.desc: Test TimePickerColumnLayoutAlgorithm GetPickerMaxHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnLayoutAlgorithmGetPickerMaxHeight, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
+     */
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.selfIdealSize.SetWidth(20);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_TRUE(minuteColumn);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_TRUE(minuteColumnPattern);
+    auto columnBlend = AceType::DynamicCast<FrameNode>(minuteColumn->GetParent());
+    ASSERT_TRUE(columnBlend);
+    auto blendLayoutProperty = columnBlend->GetLayoutProperty();
+    blendLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    blendLayoutProperty->UpdateContentConstraint();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(minuteColumn, minuteColumn->GetGeometryNode(), pickerProperty);
+
+    /**
+     * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
+     *                  and Layout function.
+     */
+    TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
+    timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+
+    /**
+     * @tc.steps: step2. call MountSecondNode.
+     * @tc.expected: set HasAmPmNode is true and language_ is not "ug".
+     */
+    std::optional<int32_t> temp;
+    temp.emplace(100);
+    timePickerRowPattern->secondId_ = temp;
+    RefPtr<FrameNode> stackSecondNode = FrameNode::CreateFrameNode(TIME_AMPM, HOUR_PICKED, timePickerRowPattern);
+    float result = timePickerColumnLayoutAlgorithm.GetPickerMaxHeight(layoutConstraint, stackSecondNode);
+    ASSERT_NE(TEXT_WEIGHT_NUMBER, result);
+}
+
+/**
+ * @tc.name: TimePickerModelNGHasUserDefinedDisappearFontFamily01
+ * @tc.desc: Test TimePickerModelNG HasUserDefinedDisappearFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGHasUserDefinedDisappearFontFamily01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TimePickerModelNG::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ASSERT_TRUE(timePickerRowPattern->GetHasUserDefinedDisappearFontFamily());
+    TimePickerModelNG::GetInstance()->HasUserDefinedDisappearFontFamily(false);
+    ASSERT_FALSE(timePickerRowPattern->GetHasUserDefinedDisappearFontFamily());
+}
+
+/**
+ * @tc.name: TimePickerModelNGHasUserDefinedDisappearFontFamily02
+ * @tc.desc: Test TimePickerModelNG HasUserDefinedDisappearFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGHasUserDefinedDisappearFontFamily02, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TimePickerModelNG::GetInstance()->HasUserDefinedDisappearFontFamily(false);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ASSERT_FALSE(timePickerRowPattern->GetHasUserDefinedNormalFontFamily());
+    TimePickerModelNG::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+    ASSERT_FALSE(timePickerRowPattern->GetHasUserDefinedNormalFontFamily());
+}
+
+/**
+ * @tc.name: TimePickerModelNGHasUserDefinedNormalFontFamily01
+ * @tc.desc: Test TimePickerModelNG HasUserDefinedNormalFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGHasUserDefinedNormalFontFamily01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TimePickerModelNG::GetInstance()->HasUserDefinedNormalFontFamily(false);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ASSERT_FALSE(timePickerRowPattern->GetHasUserDefinedNormalFontFamily());
+    TimePickerModelNG::GetInstance()->HasUserDefinedNormalFontFamily(true);
+    ASSERT_TRUE(timePickerRowPattern->GetHasUserDefinedNormalFontFamily());
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetHour2401
+ * @tc.desc: Test TimePickerModelNG SetHour24 true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetHour2401, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ASSERT_TRUE(timePickerRowPattern->GetHour24());
+    TimePickerModelNG::GetInstance()->SetHour24(false);
+    timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ASSERT_FALSE(timePickerRowPattern->GetHour24());
+}
+
+/**
+ * @tc.name: TimePickerModelNGgetNormalTextStyle01
+ * @tc.desc: Test TimePickerModelNG getNormalTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGgetNormalTextStyle01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pickerTheme = MockThemeDefault::GetPickerTheme();
+    ASSERT_NE(pickerTheme, nullptr);
+    auto style = pickerTheme->GetOptionStyle(false, false);
+    auto pickerTextStyle = TimePickerModelNG::getNormalTextStyle(frameNode);
+    EXPECT_EQ(pickerTextStyle.fontStyle.value_or(Ace::FontStyle::NORMAL), style.GetFontStyle());
+}
+
+/**
+ * @tc.name: TimePickerModelNGgetSelectedTextStyle01
+ * @tc.desc: Test TimePickerModelNG getSelectedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGgetSelectedTextStyle01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pickerTheme = MockThemeDefault::GetPickerTheme();
+    ASSERT_NE(pickerTheme, nullptr);
+    auto style = pickerTheme->GetOptionStyle(false, false);
+    auto pickerTextStyle = TimePickerModelNG::getSelectedTextStyle(frameNode);
+    EXPECT_EQ(pickerTextStyle.fontStyle.value_or(Ace::FontStyle::NORMAL), style.GetFontStyle());
+}
+
+/**
+ * @tc.name: TimePickerModelNGgetTimepickerSelected01
+ * @tc.desc: Test TimePickerModelNG getTimepickerSelected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGgetTimepickerSelected01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pickerTheme = MockThemeDefault::GetPickerTheme();
+    ASSERT_NE(pickerTheme, nullptr);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto actualPickerTime = TimePickerModelNG::getTimepickerSelected(frameNode);
+    EXPECT_EQ(timePickerRowPattern->GetCurrentTime().GetHour(), actualPickerTime.GetHour());
+}
+
+/**
+ * @tc.name: TimePickerModelNGgetTimepickerBackgroundColor01
+ * @tc.desc: Test TimePickerModelNG getTimepickerBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGgetTimepickerBackgroundColor01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pickerTheme = MockThemeDefault::GetPickerTheme();
+    ASSERT_NE(pickerTheme, nullptr);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto result = TimePickerModelNG::getTimepickerBackgroundColor(frameNode);
+    EXPECT_NE(result, MINUTE_59);
+}
+
+/**
+ * @tc.name: TimePickerModelNGgetTimepickerUseMilitaryTime01
+ * @tc.desc: Test TimePickerModelNG getTimepickerUseMilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGgetTimepickerUseMilitaryTime01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pickerTheme = MockThemeDefault::GetPickerTheme();
+    ASSERT_NE(pickerTheme, nullptr);
+    ASSERT_FALSE(TimePickerModelNG::getTimepickerUseMilitaryTime(frameNode));
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetWheelModeEnabled
+ * @tc.desc: Test TimePickerModelNG SetWheelModeEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetWheelModeEnabled, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, false);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    EXPECT_EQ(timePickerRowPattern->GetWheelModeEnabled(), false);
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, true);
+    EXPECT_EQ(timePickerRowPattern->GetWheelModeEnabled(), true);
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetDefaultAttributes
+ * @tc.desc: Test TimePickerModelNG SetDefaultAttributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, SetDefaultAttributes01, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerTheme = MockThemeDefault::GetPickerTheme();
+    RefPtr<FrameNode> frameNode;
+    TimePickerModelNG::SetDefaultAttributes(frameNode, pickerTheme);
+    ASSERT_NE(pickerTheme, nullptr);
+    frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ASSERT_FALSE(pickerProperty->HasSelectedColor());
+}
+
+/**
+ * @tc.name: TimePickerModelNGHasUserDefinedSelectedFontFamily
+ * @tc.desc: Test TimePickerModelNG HasUserDefinedSelectedFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGHasUserDefinedSelectedFontFamily, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    ZeroPrefixType showType = ZeroPrefixType::SHOW;
+    ZeroPrefixType hideType = ZeroPrefixType::HIDE;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED_PREFIXZERO);
+    TimePickerModelNG::GetInstance()->SetDateTimeOptions(hideType, showType, hideType);
+    TimePickerModelNG::GetInstance()->HasUserDefinedSelectedFontFamily(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ASSERT_TRUE(timePickerRowPattern->GetHasUserDefinedSelectedFontFamily());
+    TimePickerModelNG::GetInstance()->HasUserDefinedSelectedFontFamily(false);
+    ASSERT_FALSE(timePickerRowPattern->GetHasUserDefinedSelectedFontFamily());
+}
+
+/**
+ * @tc.name: TimePickerDialogCreateNextPrevButtonNode
+ * @tc.desc: Test TimePickerDialog CreateNextPrevButtonNode parameter null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogCreateNextPrevButtonNode, TestSize.Level1)
+{
+    std::function<void()> timePickerSwitchEvent = []() {};
+    RefPtr<FrameNode> timeNode = nullptr;
+    std::vector<ButtonInfo> buttonInfos;
+    RefPtr<FrameNode> result = TimePickerDialogView::CreateNextPrevButtonNode(
+        timePickerSwitchEvent, timeNode, buttonInfos);
+    ASSERT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerDialogCreateNextPrevButtonNode02
+ * @tc.desc: Test TimePickerDialog CreateNextPrevButtonNode parameter non-null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogCreateNextPrevButtonNode02, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pickerTheme = MockThemeDefault::GetPickerTheme();
+    ASSERT_NE(pickerTheme, nullptr);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    std::function<void()> timePickerSwitchEvent = []() {};
+    std::optional<int32_t> temp;
+    temp.emplace(100);
+    timePickerRowPattern->secondId_ = temp;
+    RefPtr<FrameNode> stackSecondNode = FrameNode::CreateFrameNode(TIME_AMPM, HOUR_PICKED, timePickerRowPattern);
+    std::vector<ButtonInfo> buttonInfos;
+    ASSERT_NE(stackSecondNode, nullptr);
+    RefPtr<FrameNode> result = TimePickerDialogView::CreateNextPrevButtonNode(
+        timePickerSwitchEvent, stackSecondNode, buttonInfos);
+    ASSERT_NE(result, nullptr);
+}
+
 } // namespace OHOS::Ace::NG

@@ -259,7 +259,9 @@ void IndicatorPattern::OnModifyDone()
         }
         currentIndexInSingleMode_ = initialIndex;
     }
-
+    if (currentIndexInSingleMode_ > RealTotalCount() - 1) {
+        currentIndexInSingleMode_ = 0;
+    }
     auto indicatorNode = GetHost();
     CHECK_NULL_VOID(indicatorNode);
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -331,7 +333,7 @@ bool IndicatorPattern::GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& f
 
 void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
 {
-    if (!IsLoop()) {
+    if (!IsLoop() || IsHover() || IsPressed()) {
         if (index >= RealTotalCount()) {
             SetCurrentIndexInSingleMode(RealTotalCount() - 1);
             return;

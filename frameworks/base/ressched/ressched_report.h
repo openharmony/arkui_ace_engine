@@ -38,7 +38,11 @@ constexpr double JUDGE_DISTANCE = 3.125;
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
     const std::unordered_map<std::string, std::string>& payload);
 
+using ReportSyncEventFunc = int32_t (*)(const uint32_t resType, const int64_t value,
+    const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply);
+
 ReportDataFunc ACE_EXPORT LoadReportDataFunc();
+ReportSyncEventFunc ACE_EXPORT LoadReportSyncEventFunc();
 
 class ACE_EXPORT ResSchedReport final {
 public:
@@ -46,6 +50,11 @@ public:
     void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
+    void ResScheSyncEventReport(const uint32_t resType, const int64_t value,
+        const std::unordered_map<std::string, std::string>& payload,
+        std::unordered_map<std::string, std::string>& reply);
+    bool AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
+        std::unordered_map<std::string, std::string>& reply);
     void OnTouchEvent(const TouchEvent& touchEvent);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
@@ -80,6 +89,7 @@ private:
     double GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent);
 
     ReportDataFunc reportDataFunc_ = nullptr;
+    ReportSyncEventFunc reportSyncEventFunc_ = nullptr;
     bool loadPageOn_ = false;
     bool loadPageRequestFrameOn_ = false;
     TouchEvent curTouchEvent_;

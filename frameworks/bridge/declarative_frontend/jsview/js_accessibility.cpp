@@ -246,6 +246,22 @@ void JSViewAbstract::JsAccessibilityChecked(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetAccessibilityChecked(checked, resetValue);
 }
 
+void JSViewAbstract::JsAccessibilityScrollTriggerable(const JSCallbackInfo& info)
+{
+    bool scrollTriggerable = false;
+    bool resetValue = false;
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined()) {
+        resetValue = true;
+    } else if (arg->IsBoolean()) {
+        scrollTriggerable = arg->ToBoolean();
+    } else {
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetAccessibilityScrollTriggerable(scrollTriggerable, resetValue);
+}
+
 void JSViewAbstract::JsAccessibilityRole(const JSCallbackInfo& info)
 {
     bool resetValue = false;

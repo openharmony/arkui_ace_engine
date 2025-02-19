@@ -252,6 +252,8 @@ public:
 
     static std::string GetLanguage();
 
+    static bool GetContainerDeleteFlag();
+
     static std::string GetRegion();
 
     static std::string GetNewPipePkg();
@@ -641,6 +643,11 @@ public:
 
     static bool IsNeedResampleTouchPoints();
 
+    static bool GetAsyncInitializeEnabled()
+    {
+        return asyncInitializeEnabled_.load();
+    }
+
     static bool IsNeedSymbol();
 
     static bool GetTaskPriorityAdjustmentEnable()
@@ -696,6 +703,7 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
@@ -718,6 +726,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
+    static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;

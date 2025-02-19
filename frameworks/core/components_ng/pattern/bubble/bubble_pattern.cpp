@@ -459,7 +459,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -573,7 +573,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -717,7 +717,8 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
             CHECK_NULL_VOID(layoutProp);
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipelineNg->GetInstanceId());
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                    pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
                 CHECK_NULL_VOID(subwindow);
                 subwindow->HidePopupNG(targetNodeId_);
             }
@@ -739,7 +740,8 @@ void BubblePattern::OnWindowHide()
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     if (showInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipelineNg->GetInstanceId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
         CHECK_NULL_VOID(subwindow);
         subwindow->HidePopupNG(targetNodeId_);
     }

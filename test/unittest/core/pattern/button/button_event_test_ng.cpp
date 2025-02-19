@@ -555,7 +555,7 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest006, TestSize.Level1)
     buttonPattern->InitTouchEvent();
     auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    std::function<void(UIState)> touchListener = buttonPattern->GetTouchListener();
+    std::function<void(UIState)>& touchListener = buttonPattern->GetTouchListener();
     ASSERT_NE(touchListener, nullptr);
     /**
      * @tc.steps: step3. change button params.
@@ -571,6 +571,7 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest006, TestSize.Level1)
      */
     UIState pressedState = UI_STATE_PRESSED;
     eventHub->AddSupportedUIStateWithCallback(pressedState, touchListener, true);
+    buttonPattern->HandlePressedStyle();
     EXPECT_EQ(buttonPattern->backgroundColor_, Color::BLUE);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
     /**
@@ -579,6 +580,7 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest006, TestSize.Level1)
      */
     UIState normalState = UI_STATE_NORMAL;
     eventHub->AddSupportedUIStateWithCallback(normalState, touchListener, true);
+    buttonPattern->HandleNormalStyle();
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLUE);
 }
 

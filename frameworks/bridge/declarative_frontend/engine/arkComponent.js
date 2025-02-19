@@ -3019,6 +3019,19 @@ class AccessibilityUseSamePageModifier extends ModifierWithKey {
   }
 }
 AccessibilityUseSamePageModifier.identity = Symbol('accessibilityUseSamePage');
+class AccessibilityScrollTriggerableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityScrollTriggerable(node);
+    } else {
+      getUINativeModule().common.setAccessibilityScrollTriggerable(node, this.value);
+    }
+  }
+}
+AccessibilityScrollTriggerableModifier.identity = Symbol('accessibilityScrollTriggerable');
 class HoverEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4603,6 +4616,15 @@ class ArkComponent {
   }
   accessibilityUseSamePage(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityUseSamePageModifier.identity, AccessibilityUseSamePageModifier, value);
+    return this;
+  }
+  accessibilityScrollTriggerable(value) {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
     return this;
   }
   obscured(reasons) {
@@ -17311,6 +17333,11 @@ class ArkScrollableBarModeOptions {
     return (this.value === another.value);
   }
 }
+class ArkTabsCachedMaxCount {
+  isEqual(another) {
+    return (this.value.count == another.count && this.value.mode == another.mode);
+  }
+}
 class ArkAlignRules {
   constructor() {
     this.left = undefined;
@@ -29061,6 +29088,19 @@ class ListMaintainVisibleContentPositionModifier extends ModifierWithKey {
   }
 }
 ListMaintainVisibleContentPositionModifier.identity = Symbol('listMaintainVisibleContentPosition');
+class ListStackFromEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListStackFromEnd(node);
+    } else {
+      getUINativeModule().list.setListStackFromEnd(node, this.value);
+    }
+  }
+}
+ListStackFromEndModifier.identity = Symbol('listStackFromEnd');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -29528,6 +29568,10 @@ class ArkListComponent extends ArkScrollable {
   maintainVisibleContentPosition(value) {
     modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
       ListMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
+  stackFromEnd(value) {
+    modifierWithKey(this._modifiersWithKeys, ListStackFromEndModifier.identity, ListStackFromEndModifier, value);
     return this;
   }
   clip(value) {
@@ -30482,7 +30526,7 @@ class SwiperAutoPlayModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().swiper.resetSwiperAutoPlay(node);
-    } else { 
+    } else {
       getUINativeModule().swiper.setSwiperAutoPlay(node, this.value.autoPlay, this.value.needStopWhenTouched);
     }
   }
@@ -31085,6 +31129,13 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TabHeightModifier.identity, TabHeightModifier, value);
     return this;
   }
+  cachedMaxCount(count, mode) {
+    let arkTabsCachedMaxCount = new ArkTabsCachedMaxCount();
+    arkTabsCachedMaxCount.count = count;
+    arkTabsCachedMaxCount.mode = mode;
+    modifierWithKey(this._modifiersWithKeys, CachedMaxCountModifier.identity, CachedMaxCountModifier, arkTabsCachedMaxCount);
+    return this;
+  }
 }
 class BarGridAlignModifier extends ModifierWithKey {
   constructor(value) {
@@ -31516,6 +31567,22 @@ class TabHeightModifier extends ModifierWithKey {
     }
 }
 TabHeightModifier.identity = Symbol('tabHeight');
+class CachedMaxCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetCachedMaxCount(node);
+    } else {
+      getUINativeModule().tabs.setCachedMaxCount(node, this.value.count, this.value.mode);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.value.count == this.stageValue.count && this.value.mode == this.stageValue.mode);
+  }
+}
+CachedMaxCountModifier.identity = Symbol('cachedMaxCount');
 // @ts-ignore
 if (globalThis.Tabs !== undefined) {
   globalThis.Tabs.attributeModifier = function (modifier) {
@@ -33291,6 +33358,40 @@ class SymbolEffectModifier extends ModifierWithKey {
 }
 SymbolEffectModifier.identity = Symbol('symbolEffect');
 
+class SymbolMinFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetMinFontScale(node);
+    } else {
+      getUINativeModule().symbolGlyph.setMinFontScale(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SymbolMinFontScaleModifier.identity = Symbol('symbolGlyphMinFontScale');
+
+class SymbolMaxFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().symbolGlyph.setMaxFontScale(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SymbolMaxFontScaleModifier.identity = Symbol('symbolGlyphMaxFontScale');
+
 /// <reference path='./import.ts' />
 class ArkSymbolGlyphComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -33330,6 +33431,14 @@ class ArkSymbolGlyphComponent extends ArkComponent {
     symbolEffect.symbolEffect = effect;
     symbolEffect.action = action;
     modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
+    return this;
+  }
+  minFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, SymbolMinFontScaleModifier.identity, SymbolMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, SymbolMaxFontScaleModifier.identity, SymbolMaxFontScaleModifier, value);
     return this;
   }
 }

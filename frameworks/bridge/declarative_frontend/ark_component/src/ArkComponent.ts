@@ -460,7 +460,7 @@ class PositionModifier extends ModifierWithKey<Position | Edges | LocalizedEdges
       }
     }
   }
-  
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
       !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
@@ -2802,15 +2802,15 @@ class BackgroundBrightnessInternalModifier extends ModifierWithKey<BrightnessOpt
     if (reset) {
       getUINativeModule().common.resetBackgroundBrightnessInternal(node);
     } else {
-      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
         this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
-  }                       
+  }
 
   checkObjectDiff(): boolean {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
       && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
       && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2824,7 +2824,7 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
     if (reset) {
       getUINativeModule().common.resetForegroundBrightness(node);
     } else {
-      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
         this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
   }
@@ -2832,7 +2832,7 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
   checkObjectDiff(): boolean {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
       && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
       && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -3197,6 +3197,20 @@ class AccessibilityUseSamePageModifier extends ModifierWithKey<AccessibilitySame
       getUINativeModule().common.resetAccessibilityUseSamePage(node);
     } else {
       getUINativeModule().common.setAccessibilityUseSamePage(node, this.value);
+    }
+  }
+}
+
+class AccessibilityScrollTriggerableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityScrollTriggerable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityScrollTriggerable(node);
+    } else {
+      getUINativeModule().common.setAccessibilityScrollTriggerable(node, this.value);
     }
   }
 }
@@ -4688,7 +4702,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
     return this;
   }
-  
+
   key(value: string): this {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
@@ -4837,12 +4851,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
     return this;
   }
-  
+
   accessibilityRole(value: AccessibilityRoleType): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityRoleModifier.identity, AccessibilityRoleModifier, value);
     return this;
   }
-  
+
   onAccessibilityFocus(value: AccessibilityFocusCallback): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
     return this;
@@ -4868,6 +4882,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityUseSamePage(value: AccessibilitySamePageMode): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityUseSamePageModifier.identity, AccessibilityUseSamePageModifier, value);
+    return this;
+  }
+
+  accessibilityScrollTriggerable(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
     return this;
   }
 
@@ -4979,7 +5002,7 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   // the first param is used to indicate frameNode
-  // the second param is used to indicate the callback 
+  // the second param is used to indicate the callback
   // the third param is used to indicate the instanceid
   // other options will be indicated after them
   setOnClick(callback: (event: ClickEvent) => void): void {

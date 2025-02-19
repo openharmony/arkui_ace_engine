@@ -117,7 +117,7 @@ Constants.DEFAULT_TRANSPARENCY = 0.4;
 Constants.EMPHASIZED_NORMAL_BTN_COLOR = {
     id: -1,
     type: 10001,
-    params: ['sys.color.comp_background_tertiary'],
+    params: ['sys.color.comp_background_emphasize'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
 };

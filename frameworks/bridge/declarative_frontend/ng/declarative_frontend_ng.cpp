@@ -57,8 +57,7 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
         jsEngine->Initialize(delegate);
     };
     if (needPostJsTask) {
-        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngine",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngine");
     } else {
         initJSEngineTask();
     }
@@ -375,8 +374,7 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(const std::string& url, const 
                 CHECK_NULL_VOID(frontend->jsEngine_);
                 frontend->jsEngine_->LoadFaAppSource();
             },
-            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource");
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarativeNg.
     if (delegate_) {

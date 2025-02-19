@@ -35,6 +35,7 @@ import { SwiperBootcamp } from './SwiperBootcamp';
 import { RefreshBootcamp } from './RefreshBootcamp';
 import { ListItemBootcamp } from './ListItemBootcamp';
 import { GridRowBootcamp } from './GridRowBootcamp';
+import { ColumnSplitBootcamp } from './ColumnSplitBootcamp';
 import { GridItemBootcamp } from './GridItemBootcamp';
 import { RowSplitBootcamp } from './RowSplitBootcamp';
 import { FoldSplitContainerBootcamp } from './FoldSplitContainerBootcamp';
@@ -59,12 +60,13 @@ export const containersRoute: RouteGroup = {
     { name: 'row', label: '横向布局/Row' },
     { name: 'scroll', label: '滚动容器/Scroll' },
     { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
+    { name:'columnSplit', label:'纵向分割容器/ColumnSplit' },
     { name: 'flowItem', label: '瀑布流选项/FlowItem' },
-  { name: 'gridRow', label: '栅格容器/GridRow' },
-  { name: 'swiper', label: '轮播容器/Swiper' },
-  { name: 'refresh', label: '刷新容器/Refresh' },
-  { name: 'gridItem', label: '网格选项/GridItem' },
-  { name: 'folder-stack', label: '折叠布局/FolderStack' },
+    { name: 'gridRow', label: '栅格容器/GridRow' },
+    { name: 'swiper', label: '轮播容器/Swiper' },
+    { name: 'refresh', label: '刷新容器/Refresh' },
+    { name: 'gridItem', label: '网格选项/GridItem' },
+    { name: 'folder-stack', label: '折叠布局/FolderStack' },
     { name: 'rowSplit', label: '横向分割容器/RowSplit' },
     { name: 'fold-split-container', label: '折叠屏分栏组件/FoldSplitContainer' },
   ]
@@ -116,6 +118,8 @@ export function ContainersDestination(name: string, route: Route) {
     GridItemBootcamp({ title: route.label })
   } else if (name === 'containers/folder-stack') {
     FolderStackBootcamp({ title: route.label })
+  }else if(name === 'containers/columnSplit') {
+    ColumnSplitBootcamp({title: route.label})
   } else if (name === 'containers/rowSplit') {
     RowSplitBootcamp({ title: route.label })
   } else if (name === 'containers/fold-split-container') {

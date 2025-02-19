@@ -331,6 +331,15 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
+    
+    void ResetIndicatorParameters()
+    {
+        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+            swiperParameters_ = nullptr;
+        } else {
+            swiperDigitalParameters_ = nullptr;
+        }
+    }
 
     virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
 
@@ -1209,6 +1218,10 @@ private:
 
     void CheckAndReportEvent();
 
+    void UpdateItemsLatestSwitched();
+    void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
+    void PostIdleTaskToCleanTabContent();
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1387,6 +1400,9 @@ private:
 
     SwiperHoverFlag hoverFlag_ = HOVER_NONE;
     GestureStatus gestureStatus_ = GestureStatus::INIT;
+
+    std::list<int32_t> itemsLatestSwitched_;
+    std::set<int32_t> itemsNeedClean_;
 };
 } // namespace OHOS::Ace::NG
 

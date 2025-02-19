@@ -99,7 +99,7 @@ std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
     { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "The ComponentContent already exists. " },
     { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "The ComponentContent cannot be found. " },
     { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The targetId does not exist. " },
-    { ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE, "The node of targetId is not in the component tree. " }
+    { ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE, "The node of targetId is not in the component tree. " }
 };
 
 void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
@@ -361,6 +361,17 @@ AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionCon
     }
     auto delay = obj->GetPropertyValue<int32_t>("delay", 0);
     auto iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
+    JSRef<JSVal> rateRangeObjectArgs = obj->GetProperty("expectedFrameRateRange");
+    if (rateRangeObjectArgs->IsObject()) {
+        JSRef<JSObject> rateRangeObj = JSRef<JSObject>::Cast(rateRangeObjectArgs);
+        int32_t fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
+        int32_t fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
+        int32_t fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[keyframe] SetExpectedFrameRateRange"
+            "{%{public}d, %{public}d, %{public}d}", fRRmin, fRRmax, fRRExpected);
+        RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+        option.SetFrameRateRange(frameRateRange);
+    }
     option.SetDelay(delay);
     option.SetIteration(iterations);
     return option;

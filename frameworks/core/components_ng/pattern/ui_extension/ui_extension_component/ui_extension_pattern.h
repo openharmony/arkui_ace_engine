@@ -245,7 +245,7 @@ public:
     void NotifyHostWindowMode(Rosen::WindowMode mode);
     void NotifyHostWindowMode();
 
-    void TransferAccessibilityRectInfo();
+    void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 

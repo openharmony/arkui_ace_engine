@@ -454,7 +454,7 @@ public:
         forceUpdateEmbeddedMenu_ = forceUpdate;
     }
 
-    bool GetForceUpdateEmbeddedMenu()
+    bool GetForceUpdateEmbeddedMenu() const
     {
         return forceUpdateEmbeddedMenu_;
     }
@@ -551,6 +551,16 @@ public:
 
     bool IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const;
 
+    void SetIsOpenMenu(bool isOpenMenu)
+    {
+        isOpenMenu_ = isOpenMenu;
+    }
+
+    bool GetIsOpenMenu() const
+    {
+        return isOpenMenu_;
+    }
+
     void SetHoverMode(bool enableFold)
     {
         enableFold_ = enableFold;
@@ -641,6 +651,7 @@ private:
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
     int32_t fingerId_ = -1;
+    bool isOpenMenu_ = false;
     std::optional<bool> enableFold_;
     // Identify whether the menuWrapper is used by selectOverlay in the subwindow.
     bool isSelectOverlaySubWindowWrapper_ = false;

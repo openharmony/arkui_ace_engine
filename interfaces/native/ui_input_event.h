@@ -548,7 +548,7 @@ float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, 
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* event, uint32_t* pointerIndex);
 
@@ -1125,14 +1125,18 @@ int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
     const ArkUI_UIInputEvent* event, int32_t fingerId, int32_t pointerIndex);
 
 /**
- * @brief Post pointer event to a specific node.
+ * @brief Post a cloned event to a specific node.
  *
- * @param node Indicates the target node.
+ * @param node Target node.
  * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
  * @return Returns the result code.
  *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_POST_CLONED_POINTER_EVENT_FAILED} if post the cloned pointer event failed.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ *          Returns {@link ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL }
+ *          if the component status abnormal.
+ *          Returns {@link ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT }
+ *          if no component hit to respond to the event.
  * @since 16
  */
 int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);

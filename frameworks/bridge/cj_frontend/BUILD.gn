@@ -182,6 +182,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_textinput_ffi.cpp",
       "interfaces/cj_ffi/cj_textpicker_ffi.cpp",
       "interfaces/cj_ffi/cj_texttimer_ffi.cpp",
+      "interfaces/cj_ffi/cj_timepicker_ffi.cpp",
       "interfaces/cj_ffi/cj_toggle_ffi.cpp",
       "interfaces/cj_ffi/cj_transitioneffect.cpp",
       "interfaces/cj_ffi/cj_transitioneffect_ffi.cpp",

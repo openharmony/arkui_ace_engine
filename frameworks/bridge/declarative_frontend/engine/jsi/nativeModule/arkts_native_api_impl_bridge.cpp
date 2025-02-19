@@ -231,7 +231,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
             Framework::JsConverter::ConvertNapiValueToJsVal(navDestinationResult->param)->GetLocalHandle(),
             panda::StringRef::NewFromUtf8(vm, navDestinationResult->navDestinationId.c_str()),
             panda::NumberRef::New(vm, static_cast<int32_t>(navDestinationResult->mode)),
-            panda::StringRef::NewFromUtf8(vm, navDestinationResult->uniqueId.c_str()) };
+            panda::NumberRef::New(vm, navDestinationResult->uniqueId) };
         const char* navDestinationKeys[] = { "navigationId", "name", "state", "index", "param", "navDestinationId",
             "mode", "uniqueId" };
         auto navDestinationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(navDestinationKeys),
@@ -900,6 +900,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityUseSamePage));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityUseSamePage"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityUseSamePage));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityScrollTriggerable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityScrollTriggerable));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityScrollTriggerable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityScrollTriggerable));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHoverEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetHoverEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHoverEffect"),
@@ -2825,6 +2829,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetSymbolGlyphInitialize));
     symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSymbolGlyphInitialize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetSymbolGlyphInitialize));
+    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetMinFontScale));
+    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetMinFontScale));
+    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetMaxFontScale));
+    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetMaxFontScale));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolGlyph"), symbolGlyph);
 
     auto symbolSpan = panda::ObjectRef::New(vm);
@@ -4538,6 +4550,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnSelected));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnSelected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnSelected));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCachedMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetCachedMaxCount));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCachedMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetCachedMaxCount));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 
@@ -5506,6 +5522,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListMaintainVisibleContentPosition));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListMaintainVisibleContentPosition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListMaintainVisibleContentPosition));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListStackFromEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListStackFromEnd));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListStackFromEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListStackFromEnd));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListNestedScroll));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListNestedScroll"),

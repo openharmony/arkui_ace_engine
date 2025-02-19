@@ -110,9 +110,11 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, nullptr);
     CHECK_NULL_RETURN(navBarNode, nullptr);
+    auto frameNode = navBarNode->GetParent();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto theme = NavigationGetTheme(frameNode->GetThemeScopeId());
+    CHECK_NULL_RETURN(theme, nullptr);
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
     auto navBarMaxNum = navBarPattern->GetMaxMenuNum();
     auto mostMenuItemCount =
@@ -122,7 +124,6 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     navBarPattern->SetMaxMenuNum(mostMenuItemCount);
     bool needMoreButton = menuItems.size() > mostMenuItemCount;
 
-    auto frameNode = navBarNode->GetParent();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_RETURN(navigationGroupNode, nullptr);
     auto hub = navigationGroupNode->GetEventHub<EventHub>();
@@ -145,7 +146,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
                 V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
-            NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled);
+            NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled, theme);
             auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
             CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
             barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -178,7 +179,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
         CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        NavigationTitleUtil::BuildMoreIemNode(barItemNode, isButtonEnabled);
+        NavigationTitleUtil::BuildMoreIemNode(barItemNode, isButtonEnabled, theme);
         auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
         MenuParam menuParam;
         menuParam.isShowInSubWindow = false;

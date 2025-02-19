@@ -1650,7 +1650,7 @@ HWTEST_F(ViewAbstractTestNg, OpenPopup, TestSize.Level1)
     param->SetTargetId(std::to_string(targetId));
     EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_TARGET_INFO_NOT_EXIST);
     param->SetTargetId(std::to_string(targetNode->GetId()));
-    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE);
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE);
     param->SetIsShow(true);
     param->SetUseCustomComponent(true);
     ViewStackProcessor::GetInstance()->Push(targetNode);
@@ -1782,7 +1782,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenu, TestSize.Level1)
     targetId = 10000;
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_TARGET_INFO_NOT_EXIST);
     targetId = targetNode->GetId();
-    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE);
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE);
     ViewStackProcessor::GetInstance()->Push(targetNode);
     targetNode->onMainTree_ = true;
     targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));

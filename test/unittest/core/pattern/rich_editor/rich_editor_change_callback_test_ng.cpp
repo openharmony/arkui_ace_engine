@@ -1762,7 +1762,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleSurfaceChanged001, TestSize.Level
     ASSERT_NE(richEditorPattern, nullptr);
     std::vector<std::vector<int>> cases = { { 1, 1, 2, 2 }, { 1, 2, 2, 2 }, { 1, 1, 1, 2 }, { 1, 2, 1, 2 } };
     for (uint32_t i = 0; i < cases.size(); ++i) {
-        richEditorPattern->HandleSurfaceChanged(cases[i][0], cases[i][1], cases[i][2], cases[i][3]);
+        richEditorPattern->HandleSurfaceChanged(
+            cases[i][0], cases[i][1], cases[i][2], cases[i][3], WindowSizeChangeReason::DRAG);
         EXPECT_NE(richEditorPattern, nullptr);
     }
 }

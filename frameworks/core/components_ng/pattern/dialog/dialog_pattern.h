@@ -337,6 +337,7 @@ private:
     void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
+    bool NeedUpdateHostWindowRect();
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);

@@ -568,7 +568,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
             return;
         }
         RSBitmap bitmap;
-        RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+        RSBitmapFormat format = GetBitmapFormat();
         bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
         bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
         image->BuildFromBitmap(bitmap);
@@ -588,7 +588,7 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
         return;
     }
     RSBitmap bitmap;
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmapFormat format = GetBitmapFormat();
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
     bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
     RSBrush brush;

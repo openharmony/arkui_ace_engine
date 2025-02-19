@@ -503,6 +503,8 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseDialogCallback(obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 
+        JSViewAbstract::ParseAppearDialogCallback(args, properties);
+
         // Parse showInSubWindowValue.
         auto showInSubWindowValue = obj->GetProperty("showInSubWindow");
         if (showInSubWindowValue->IsBoolean()) {

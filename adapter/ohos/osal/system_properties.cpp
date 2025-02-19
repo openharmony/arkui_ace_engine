@@ -248,6 +248,11 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+bool IsContainerDeleteFlag()
+{
+    return (system::GetParameter("persist.container.delete", "false") == "true");
+}
+
 bool IsLayoutDetectEnabled()
 {
     return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
@@ -421,6 +426,12 @@ int32_t ReadDragDropFrameworkStatus()
     return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
 }
 
+bool IsAsyncInitializeEnabled()
+{
+    return system::GetBoolParameter("persist.ace.async.initialize", true);
+}
+
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(IsAsyncInitializeEnabled()); 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -471,6 +482,7 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
 ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
@@ -611,7 +623,6 @@ void SystemProperties::InitDeviceInfo(
 {
     // SetDeviceOrientation should be earlier than deviceWidth/deviceHeight init.
     SetDeviceOrientation(orientation);
-
     isRound_ = isRound;
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
@@ -650,6 +661,7 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
+    asyncInitializeEnabled_.store(IsAsyncInitializeEnabled());
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
@@ -659,7 +671,6 @@ void SystemProperties::InitDeviceInfo(
     } else {
         screenShape_ = ScreenShape::NOT_ROUND;
     }
-
     InitDeviceTypeBySystemProperty();
 }
 
@@ -685,6 +696,11 @@ ACE_WEAK_SYM float SystemProperties::GetFontScale()
 {
     // Default value of font size scale is 1.0.
     return fontScale_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return containerDeleteFlag_;
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
@@ -906,6 +922,11 @@ void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, 
     }
     if (focusCanBeActive != focusCanBeActive_) {
         SetFocusCanBeActive(focusCanBeActive);
+        if (!focusCanBeActive) {
+            auto container = reinterpret_cast<Platform::AceContainer*>(context);
+            CHECK_NULL_VOID(container);
+            container->SetIsFocusActive(focusCanBeActive);
+        }
         LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
     }
     return;

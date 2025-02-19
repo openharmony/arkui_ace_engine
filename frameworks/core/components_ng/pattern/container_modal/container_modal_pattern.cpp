@@ -828,13 +828,16 @@ void ContainerModalPattern::InitAllTitleRowLayoutProperty()
 {
     auto containerModal = GetHost();
     CHECK_NULL_VOID(containerModal);
-    InitTitleRowLayoutProperty(GetCustomTitleRow());
-    InitTitleRowLayoutProperty(GetFloatingTitleRow());
-    containerModal->MarkModifyDone();
-    containerModal->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    auto pipeline = containerModal->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushUITasks();
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    InitTitleRowLayoutProperty(customTitleRow);
+    customTitleRow->MarkModifyDone();
+    customTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    InitTitleRowLayoutProperty(floatingTitleRow);
+    floatingTitleRow->MarkModifyDone();
+    floatingTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 CalcLength ContainerModalPattern::GetControlButtonRowWidth()

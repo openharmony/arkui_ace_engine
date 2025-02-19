@@ -45,6 +45,8 @@ public:
     static void SetSymbolGlyphInitialize(FrameNode* framwNode, const std::uint32_t& symbolId);
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
+    static void UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t symbolEffectType, const bool isActive,
+        const std::int16_t isTxtActiveSource);
 };
 } // namespace OHOS::Ace::NG
 

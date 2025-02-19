@@ -1830,7 +1830,7 @@ void ViewAbstract::CheckIfParentNeedMarkDirty(FrameNode* frameNode)
         parentNode->GetTag() == V2::FLEX_ETS_TAG) {
         auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        if (!renderContext->HasPositionEdges() || !renderContext->HasPosition()) {
+        if (!renderContext->HasPositionEdges() && !renderContext->HasPosition()) {
             parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     }
@@ -1974,7 +1974,7 @@ void ViewAbstract::BindPopup(
         showInSubWindow = false;
     } else {
         // subwindow model needs to use subContainer to get popupInfo
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
         }
@@ -2028,7 +2028,8 @@ void ViewAbstract::BindPopup(
         } else {
             // erase popup in subwindow when target node destroy
             auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                    containerId, SubwindowType::TYPE_POPUP);
                 CHECK_NULL_VOID(subwindow);
                 auto overlayManager = subwindow->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -2090,7 +2091,7 @@ RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& 
     CHECK_NULL_RETURN(context, nullptr);
     if (GetTargetNodeIsInSubwindow(node)) {
         auto instanceId = context->GetInstanceId();
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_MENU);
         if (subwindow) {
             auto overlayManager = subwindow->GetOverlayManager();
             return overlayManager;
@@ -2135,7 +2136,7 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
     }
     if (!targetNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
-        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
     auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
     if (popupInfo.popupNode) {
@@ -2334,7 +2335,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     }
     if (!targetNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
-        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
     auto overlayManager = GetCurOverlayManager(customNode);
     CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);
@@ -2365,6 +2366,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     auto theme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
     auto expandDisplay = theme->GetExpandDisplay();
+    menuWrapperPattern->SetIsOpenMenu(true);
     if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuParam.positionOffset);
         return ERROR_CODE_NO_ERROR;

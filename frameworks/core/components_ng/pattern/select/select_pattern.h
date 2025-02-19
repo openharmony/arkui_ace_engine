@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
 #include "core/components_ng/pattern/select/select_model.h"
+#include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
@@ -206,6 +207,12 @@ public:
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
     Dimension GetSelectLeftRightMargin() const;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<SelectPaintProperty>();
+    }
+    void ResetFontColor();
 
 private:
     void OnAttachToFrameNode() override;
@@ -307,6 +314,7 @@ private:
     std::optional<Color> selectedBgColor_;
     OptionFont optionFont_;
     std::optional<Color> optionBgColor_;
+    std::optional<Color> fontColor_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
