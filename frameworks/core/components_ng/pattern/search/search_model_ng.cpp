@@ -1162,6 +1162,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
+    cancelButtonLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     cancelButtonEvent->SetEnabled(false);
