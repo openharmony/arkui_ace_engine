@@ -785,6 +785,16 @@ public:
     void ResetOriginCaretPosition();
     bool RecordOriginCaretPosition(const OffsetF& offset);
 
+    bool GetIsLoopAnimation()
+    {
+        return isLoopAnimation_;
+    }
+
+    void SetIsLoopAnimation(bool isLoopAnimation)
+    {
+        isLoopAnimation_ = isLoopAnimation;
+    }
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -1020,6 +1030,9 @@ private:
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
     void UpdateMarqueeStartPolicy();
+    void ProcessVisibleAreaCallback();
+    void PauseSymbolAnimation();
+    void ResumeSymbolAnimation();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1072,6 +1085,7 @@ private:
     // Used to record original caret position for "shift + up/down"
     // Less than 0 is invalid, initialized as invalid in constructor
     OffsetF originCaretPosition_;
+    bool isLoopAnimation_ = false;
 };
 } // namespace OHOS::Ace::NG
 

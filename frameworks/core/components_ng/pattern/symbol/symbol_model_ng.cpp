@@ -88,6 +88,15 @@ void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOpti
     auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    bool isLoopAnimation = false;
+    if (symbolEffectOptions.GetEffectType() == SymbolEffectType::PULSE ||
+        (symbolEffectOptions.GetEffectType() == SymbolEffectType::HIERARCHICAL &&
+            symbolEffectOptions.GetFillStyle() == FillStyle::ITERATIVE)) {
+        isLoopAnimation = symbolEffectOptions.GetIsTxtActive();
+    }
+    pattern->SetIsLoopAnimation(isLoopAnimation);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
 }
 
