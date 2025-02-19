@@ -691,7 +691,6 @@ public:
     bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position, bool moveContent = true);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
-    void HandleSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
     OffsetF GetDragUpperLeftCoordinates() override;
