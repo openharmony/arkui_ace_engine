@@ -49,7 +49,7 @@ Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
     const auto errValue = static_cast<Ark_TouchType>(-1);
     CHECK_NULL_RETURN(peer, errValue);
     TouchEventInfo* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(info, errValue);
     auto changedTouches = info->GetChangedTouches();
     if (changedTouches.empty()) {
         LOGE("ARKOALA TouchEventAccessor::GetTypeImpl empty list of changed touches.");
