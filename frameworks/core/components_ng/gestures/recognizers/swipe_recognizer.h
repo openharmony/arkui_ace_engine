@@ -30,8 +30,8 @@ class SwipeRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(SwipeRecognizer, MultiFingersRecognizer);
 
 public:
-    SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed)
-        : MultiFingersRecognizer(fingers), direction_(direction), speed_(speed)
+    SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed, bool isLimitFingerCount = false)
+        : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), speed_(speed)
     {}
     ~SwipeRecognizer() override = default;
 

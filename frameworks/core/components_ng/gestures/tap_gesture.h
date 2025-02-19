@@ -42,8 +42,9 @@ public:
             gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
         }
     }
-    TapGesture(int32_t count, int32_t fingers, double distanceThreshold = std::numeric_limits<double>::infinity())
-        : Gesture(fingers), count_(count), distanceThreshold_(distanceThreshold)
+    TapGesture(int32_t count, int32_t fingers, double distanceThreshold = std::numeric_limits<double>::infinity(),
+        bool isLimitFingerCount = false) : Gesture(fingers, isLimitFingerCount), count_(count),
+        distanceThreshold_(distanceThreshold)
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::TAP_GESTURE);
