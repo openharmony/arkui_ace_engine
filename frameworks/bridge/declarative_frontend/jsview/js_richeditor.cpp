@@ -45,6 +45,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -1516,6 +1517,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
+    COLOR_MODE_LOCK(GetColorMode());
     std::vector<Color> symbolColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
         updateSpanStyle.updateSymbolColor = symbolColor;
@@ -1802,14 +1804,15 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     }
     TextSpanOptions options;
     std::u16string spanValue;
-    if (!args[0]->IsEmpty() && args[0]->IsString() && args[0]->ToString() != ""
-        && JSContainerBase::ParseJsString(args[0], spanValue)) {
-        options.value = spanValue;
-    } else {
+    if (auto tempArg = args[0]; tempArg->IsEmpty() || !tempArg->IsString() || tempArg->ToString() == "" ||
+        !JSContainerBase::ParseJsString(tempArg, spanValue)) {
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "args error");
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
     }
+    options.value = spanValue;
+
+    auto controller = controllerWeak_.Upgrade();
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
@@ -1825,7 +1828,12 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+            if (!controller) {
+                TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "add text span, rich editor controller error");
+                args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(0)));
+                return;
+            }
+            auto theme = controller->GetTheme();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
@@ -1833,17 +1841,14 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             options.useThemeDecorationColor = updateSpanStyle_.useThemeDecorationColor;
         }
         auto paraStyleObj = JSObjectCast(spanObject->GetProperty("paragraphStyle"));
-        if (!paraStyleObj->IsUndefined()) {
-            struct UpdateParagraphStyle style;
-            if (ParseParagraphStyle(paraStyleObj, style)) {
-                options.paraStyle = style;
-            }
+        struct UpdateParagraphStyle style;
+        if (ParseParagraphStyle(paraStyleObj, style)) {
+            options.paraStyle = style;
         }
         UserGestureOptions gestureOption;
         ParseUserGesture(args, gestureOption, "TextSpan");
         options.userGestureOption = std::move(gestureOption);
     }
-    auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     int32_t spanIndex = 0;
     if (richEditorController) {
@@ -1870,7 +1875,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
     }
-
+    auto controller = controllerWeak_.Upgrade();
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
@@ -1885,7 +1890,12 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+            if (!controller) {
+                TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "add symbol span, rich editor controller error");
+                args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(0)));
+                return;
+            }
+            auto theme = controller->GetTheme();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
             ParseJsCustomSymbolStyle(args[0], style, symbolId);
@@ -1893,7 +1903,6 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
         }
     }
 
-    auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     int32_t spanIndex = 0;
     if (richEditorController) {
@@ -2047,6 +2056,7 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
             placeholderSpan.offset = placeholderOffset;
         }
     }
+    COLOR_MODE_LOCK(GetColorMode());
     JSRef<JSVal> colorMetrics = placeholderOptionObject->GetProperty("dragBackgroundColor");
     if (Color dragBackgroundColor; !colorMetrics->IsNull() &&
         JSContainerBase::ParseColorMetricsToColor(colorMetrics, dragBackgroundColor)) {
@@ -2175,6 +2185,9 @@ void JSRichEditorController::ParseTextAlignParagraphStyle(const JSRef<JSObject>&
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    if (styleObject->IsUndefined()) {
+        return false;
+    }
     ParseTextAlignParagraphStyle(styleObject, style);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ParseLineBreakStrategyParagraphStyle(styleObject, style);
@@ -2237,7 +2250,12 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
         return;
     }
-    auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+    auto controller = controllerWeak_.Upgrade();
+    if (!controller) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "update span style, rich editor controller error");
+        return;
+    }
+    auto theme = controller->GetTheme();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
     auto richEditorTextStyle = JSObjectCast(jsObject->GetProperty("textStyle"));
@@ -2255,7 +2273,6 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         ParseJsSymbolSpanStyle(richEditorSymbolSpanStyle, symbolTextStyle, updateSpanStyle_);
     }
 
-    auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     CHECK_NULL_VOID(richEditorController);
     richEditorController->SetUpdateSpanStyle(updateSpanStyle_);
@@ -2291,10 +2308,6 @@ void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
         return;
     }
     auto styleObj = JSObjectCast(object->GetProperty("style"));
-
-    if (styleObj->IsUndefined()) {
-        return;
-    }
 
     struct UpdateParagraphStyle style;
     if (!ParseParagraphStyle(styleObj, style)) {
@@ -2382,7 +2395,7 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
         return;
     }
-    auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+    auto theme = controller->GetTheme();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     bool isUndefined = false;
     if (info[0]->IsObject()) {
@@ -2418,6 +2431,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
+    COLOR_MODE_LOCK(GetColorMode());
     Color textColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
         style.SetTextColor(textColor);
@@ -2568,6 +2582,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
         updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
         style.SetTextDecorationColor(style.GetTextColor());
+        updateSpanStyle.useThemeDecorationColor = false;
     }
 }
 

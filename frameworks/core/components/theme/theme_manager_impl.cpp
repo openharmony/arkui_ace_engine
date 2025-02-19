@@ -83,6 +83,7 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
 #include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
@@ -182,6 +183,7 @@ const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPt
         { ToggleTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ToggleThemeWrapper::WrapperBuilder> },
         { CounterTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CounterThemeWrapper::WrapperBuilder> },
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
+        { NG::RichEditorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::RichEditorThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
         { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },

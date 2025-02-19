@@ -347,6 +347,16 @@ public:
         MarkDirty();
     }
 
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextColor = color;
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextDecorationColor = color;
+    }
+
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
     void EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const;
@@ -463,6 +473,16 @@ public:
         if (spanItem_->backgroundStyle) {
             spanItem_->backgroundStyle->UpdateColorByResourceId();
         }
+    }
+
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextColorWithoutCheck(color);
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextDecorationColorWithoutCheck(color);
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);

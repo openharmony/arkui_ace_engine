@@ -118,6 +118,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestOnDragMove001, TestSize.L
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
 
     auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
