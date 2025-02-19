@@ -1228,7 +1228,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropProxy_->OnDragStart(info, extraInfoLimited, GetFrameNode());
     if (!dragDropManager->IsDraggingPressed(info.GetPointerId())) {
         dragDropManager->OnDragEnd(
-            PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
+            DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
     }
 }
 
@@ -1277,7 +1277,8 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
         dragDropProxy_->OnDragMove(info);
     }
     if (IsNeedSwitchToSubWindow()) {
-        PointerEvent pointerEvent = PointerEvent(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        DragPointerEvent pointerEvent =
+            DragPointerEvent(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
         dragDropManager->DoDragMoveAnimate(pointerEvent);
     }
 }

@@ -218,9 +218,9 @@ public:
     // Used to determine whether the touched frameNode is the target
     bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false, const std::string& target = "") override;
 #endif
-    // Called by container when key event received.
+    // Called by container when event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override;
+    bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
@@ -663,7 +663,7 @@ public:
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
     void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
     const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;

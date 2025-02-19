@@ -1825,6 +1825,19 @@ class OnKeyPreImeModifier extends ModifierWithKey {
   }
 }
 OnKeyPreImeModifier.identity = Symbol('onKeyPreIme');
+class OnFocusAxisEventModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnFocusAxisEvent(node);
+    } else {
+      getUINativeModule().common.setOnFocusAxisEvent(node, this.value);
+    }
+  }
+}
+OnFocusAxisEventModifier.identity = Symbol('onFocusAxisEvent');
 class OnFocusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3714,6 +3727,10 @@ class ArkComponent {
   }
   onKeyPreIme(event) {
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
+    return this;
+  }
+  onFocusAxisEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
     return this;
   }
   focusable(value) {

@@ -53,6 +53,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
@@ -67,6 +68,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -8934,6 +8936,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
     JSClass<JSViewAbstract>::StaticMethod("monopolizeEvents", &JSInteractableView::JsMonopolizeEvents);
+    JSClass<JSViewAbstract>::StaticMethod("onFocusAxisEvent", &JSViewAbstract::JsOnFocusAxisEvent);
 
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
@@ -10287,6 +10290,37 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
+}
+
+void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (arg->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnFocusAxisEvent();
+        return;
+    }
+    if (!arg->IsFunction()) {
+        return;
+    }
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(arg);
+    if (jsOnFocusAxisEventFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnFocusAxisFuncLocalHandle = jsOnFocusAxisEventFunc->GetLocalHandle();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onFocusAxisEvent = [vm, execCtx = args.GetExecutionContext(),
+                       func = panda::CopyableGlobal(vm, jsOnFocusAxisFuncLocalHandle),
+                       node = frameNode](NG::FocusAxisEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onFocusAxis");
+        PipelineContext::SetCallBackNode(node);
+        auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    ViewAbstractModel::GetInstance()->SetOnFocusAxisEvent(std::move(onFocusAxisEvent));
 }
 
 bool JSViewAbstract::CheckColor(
