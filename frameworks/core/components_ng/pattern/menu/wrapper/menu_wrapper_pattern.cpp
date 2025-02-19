@@ -244,10 +244,10 @@ void MenuWrapperPattern::HideSubMenu()
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetShowedSubMenu(nullptr);
     auto subMenu = host->GetChildren().back();
     auto focusMenu = MenuFocusViewShow();
     CHECK_NULL_VOID(focusMenu);
+    menuPattern->SetShowedSubMenu(nullptr);
     auto innerMenu = GetMenuChild(focusMenu);
     if (!innerMenu) {
         UpdateMenuAnimation(host);
