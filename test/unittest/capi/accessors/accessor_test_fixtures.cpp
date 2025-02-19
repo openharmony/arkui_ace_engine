@@ -19,7 +19,6 @@
 
 namespace OHOS::Ace::NG::AccessorTestFixtures {
 using namespace Converter;
-
 // Fixture 'Boolean' for type 'Ark_Boolean'
 const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues = {
     { "true", ArkValue<Ark_Boolean>(true), true },
@@ -115,16 +114,16 @@ const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVeloci
 
 const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
     testFixtureEnumDragBehaviorValues = {
-    { "ARK_DRAG_BEHAVIOR_COPY", ARK_DRAG_BEHAVIOR_COPY, OHOS::Ace::DragBehavior::COPY },
     { "ARK_DRAG_BEHAVIOR_MOVE", ARK_DRAG_BEHAVIOR_MOVE, OHOS::Ace::DragBehavior::MOVE },
-    { "-1", static_cast<Ark_DragBehavior>(-1), OHOS::Ace::DragBehavior::MOVE },
+    { "ARK_DRAG_BEHAVIOR_COPY", ARK_DRAG_BEHAVIOR_COPY, OHOS::Ace::DragBehavior::COPY },
+    { "-1", static_cast<Ark_DragBehavior>(OHOS::Ace::DragBehavior::UNKNOWN), OHOS::Ace::DragBehavior::COPY },
 };
 
 const std::vector<std::tuple<std::string, OHOS::Ace::DragBehavior, Ark_DragBehavior>>
     testFixtureEnumArkDragBehaviorValues = {
     { "ARK_DRAG_BEHAVIOR_COPY", OHOS::Ace::DragBehavior::COPY, ARK_DRAG_BEHAVIOR_COPY },
     { "ARK_DRAG_BEHAVIOR_MOVE", OHOS::Ace::DragBehavior::MOVE, ARK_DRAG_BEHAVIOR_MOVE },
-    { "-1", OHOS::Ace::DragBehavior::UNKNOWN, static_cast<Ark_DragBehavior>(-1) },
+    { "-1", OHOS::Ace::DragBehavior::UNKNOWN, static_cast<Ark_DragBehavior>(OHOS::Ace::DragBehavior::UNKNOWN) },
 };
 
 const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues = {

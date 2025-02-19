@@ -23,7 +23,6 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "frameworks/core/gestures/drag_event.h"
 
-
 namespace OHOS::Ace::NG::AccessorTestFixtures {
 
 enum ResAccessorID {

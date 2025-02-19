@@ -159,8 +159,9 @@ void SetResultImpl(Ark_DragEvent peer,
 }
 Ark_DragResult GetResultImpl(Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->dragInfo, {});
+    auto defaultReturn = ArkValue<Ark_DragResult>(DragRet::DRAG_DEFAULT); // DRAG_DEFAULT = -1
+    CHECK_NULL_RETURN(peer, defaultReturn);
+    CHECK_NULL_RETURN(peer->dragInfo, defaultReturn);
     return ArkValue<Ark_DragResult>(peer->dragInfo->GetResult());
 }
 Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
@@ -216,9 +217,10 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_DragEvent peer,
 }
 Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    auto defaultReturn = ArkValue<Ark_DragBehavior>(DragBehavior::MOVE);
+    CHECK_NULL_RETURN(peer, defaultReturn);
     auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, {});
+    CHECK_NULL_RETURN(info, defaultReturn);
     auto dragBehavior = info->GetDragBehavior();
     return Converter::ArkValue<Ark_DragBehavior>(dragBehavior);
 }
@@ -229,8 +231,8 @@ void SetDragBehaviorImpl(Ark_DragEvent peer,
     auto info = peer->dragInfo;
     CHECK_NULL_VOID(info);
     auto behavior = Converter::OptConvert<DragBehavior>(dragBehavior);
-    if (behavior.has_value()) {
-        info->SetDragBehavior(behavior.value());
+    if (behavior) {
+        info->SetDragBehavior(*behavior);
     }
 }
 Ark_Boolean GetUseCustomDropAnimationImpl(Ark_DragEvent peer)

@@ -68,7 +68,7 @@ namespace {
         { "ARK_DRAG_RESULT_DRAG_CANCELED", ARK_DRAG_RESULT_DRAG_CANCELED, DragRet::DRAG_CANCEL },
         { "ARK_DRAG_RESULT_DROP_ENABLED", ARK_DRAG_RESULT_DROP_ENABLED, DragRet::ENABLE_DROP },
         { "ARK_DRAG_RESULT_DROP_DISABLED", ARK_DRAG_RESULT_DROP_DISABLED, DragRet::DISABLE_DROP },
-        { "ARK_DRAG_RESULT_INVALID", static_cast<Ark_DragResult>(-1), DragRet::DISABLE_DROP },
+        { "ARK_DRAG_RESULT_INVALID", static_cast<Ark_DragResult>(DragRet::DRAG_DEFAULT), DragRet::DISABLE_DROP },
     };
 
     const std::vector<std::tuple<std::string, DragRet, Ark_DragResult>> testFixtureEnumArkDragResultValues {
@@ -77,7 +77,7 @@ namespace {
         {  "ARK_DRAG_RESULT_DRAG_CANCELED", DragRet::DRAG_CANCEL, ARK_DRAG_RESULT_DRAG_CANCELED },
         {  "ARK_DRAG_RESULT_DROP_ENABLED", DragRet::ENABLE_DROP, ARK_DRAG_RESULT_DROP_ENABLED },
         {  "ARK_DRAG_RESULT_DROP_DISABLED", DragRet::DISABLE_DROP, ARK_DRAG_RESULT_DROP_DISABLED },
-        {  "ARK_DRAG_RESULT_INVALID", static_cast<DragRet>(-1), static_cast<Ark_DragResult>(-1) },
+        {  "ARK_DRAG_RESULT_INVALID", DragRet::DRAG_DEFAULT, static_cast<Ark_DragResult>(DragRet::DRAG_DEFAULT) },
     };
 } // namespace
 
