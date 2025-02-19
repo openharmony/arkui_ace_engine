@@ -3614,8 +3614,7 @@ void TextPattern::PauseSymbolAnimation()
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    CHECK_NULL_VOID(symbolEffectOptions);
-    if (!symbolEffectOptions.GetIsTxtActive()) {
+    if (!symbolEffectOptions || !symbolEffectOptions.GetIsTxtActive()) {
         return;
     }
     symbolEffectOptions.SetIsTxtActive(false);
