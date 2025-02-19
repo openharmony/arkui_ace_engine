@@ -68,7 +68,7 @@ HWTEST_F(TouchEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
     Callback_Void callback = accessor_->getPreventDefault(peer_);
     auto callbackHelper = CallbackHelper(callback);
 
-    auto checkWithName = [&](const std::string& patternName, bool expected) {
+    auto checkWithName = [eventInfo, &callbackHelper](const std::string& patternName, bool expected) {
         eventInfo->SetPatternName(patternName);
         eventInfo->SetPreventDefault(false);
         EXPECT_FALSE(eventInfo->IsPreventDefault());
