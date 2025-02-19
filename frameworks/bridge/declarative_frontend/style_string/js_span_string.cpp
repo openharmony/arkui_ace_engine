@@ -1204,7 +1204,7 @@ void JSMutableSpanString::ReplaceSpanString(const JSCallbackInfo& info)
     auto thisObj = info.This();
     auto newIndex = spanStringStoreIndex_.fetch_add(1);
     std::string key = "STYLED_STRING_SPANSTRING_STORE_" + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), info[0]);
+    thisObj->SetPropertyObject(key.c_str(), info[2]);
     controller->ReplaceSpanString(start, length, spanStringController);
 }
 
@@ -1234,7 +1234,7 @@ void JSMutableSpanString::InsertSpanString(const JSCallbackInfo& info)
     auto thisObj = info.This();
     auto newIndex = spanStringStoreIndex_.fetch_add(1);
     std::string key = "STYLED_STRING_SPANSTRING_STORE_" + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), info[0]);
+    thisObj->SetPropertyObject(key.c_str(), info[1]);
     controller->InsertSpanString(start, spanStringController);
 }
 
