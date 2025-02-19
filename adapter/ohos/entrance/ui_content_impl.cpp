@@ -719,8 +719,6 @@ private:
     int32_t targetId_ = -1;
 };
 
-typedef int (*LoadVirtualMachineFunc)(int, const char*, const char*, void*);
-typedef void* (*GetVMAddrFunc)();
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
     CHECK_NULL_VOID(context);
@@ -730,39 +728,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
     StoreConfiguration(context->GetConfiguration());
-
-    if (bundleName_ == "com.example.trivial.application") {
-        // TODO: use passed-in runtime
-        void* handle = dlopen("/system/lib/libvmloader.so", RTLD_LAZY);
-        if (!handle) {
-            LOGW("Koala Cannot open library: %s", dlerror());
-            return;
-        }
-
-        // Clear any existing error
-        dlerror();
-
-        // Get the function pointer for LoadVirtualMachine
-        LoadVirtualMachineFunc LoadVirtualMachine = (LoadVirtualMachineFunc)dlsym(handle, "LoadVirtualMachine");
-        auto* GetVMAddr = (GetVMAddrFunc)(dlsym(handle, "GetVMAddr"));
-        const char* dlsym_error = dlerror();
-        if (dlsym_error) {
-            LOGW("Koala Cannot load symbol 'LoadVirtualMachine': %s", dlsym_error);
-            dlclose(handle);
-            handle = nullptr;
-            return;
-        }
-
-        const char* classPath = "/data/storage/el1/bundle/libs/arm";
-        const char* nativePath = "/data/storage/el1/bundle/libs/arm";
-        // Call the function
-        int vmRes = LoadVirtualMachine(2, classPath, nativePath, nullptr);
-        if (vmRes != 0) {
-            LOGW("Koala load vm failed %d", vmRes);
-            return;
-        }
-        runtime_ = GetVMAddr();
-    }
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
