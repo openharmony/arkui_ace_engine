@@ -20,9 +20,11 @@
 namespace OHOS::Ace::NG {
 const Point IN_ACTIVE_BAR_POINT = Point(238.f, 80.f);
 const Offset IN_ACTIVE_BAR_OFFSET = Offset(238.f, 80.f);
+#ifdef ARKUI_CIRCLE_FEATURE
 const float VERTICAL_RATIO = HEIGHT / CONTENT_MAIN_SIZE;
 const float ARC_LIST_ITER_SCALE = 0.92f;
 const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
+#endif
 
 namespace {} // namespace
 class ArcScrollBarTestNg : public ScrollTestNg {
@@ -97,7 +99,7 @@ void ArcScrollBarTestNg::DragScrollBarAction(Offset startOffset, float dragDelta
     gesture.SetMainVelocity(velocity);
     DragScrollBarEnd(gesture);
 }
-
+#ifdef ARKUI_CIRCLE_FEATURE
 /**
  * @tc.name: ArcScrollBarTestNg001
  * @tc.desc: Test handleDrag
@@ -576,4 +578,5 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg014, TestSize.Level1)
     EXPECT_EQ(arcmodifer.hoverAnimatingType_, HoverAnimationType::SHRINK);
 }
 
+#endif
 } // namespace OHOS::Ace::NG
