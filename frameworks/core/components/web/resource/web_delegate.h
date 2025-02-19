@@ -1364,6 +1364,8 @@ private:
     float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
     float lowerFrameRateVisibleRatio_ = 0.1;
+    float halfFrameRateVisibleRatio_ = 0.3;
+    bool isHalfFrame_ = false;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     std::optional<ScriptItems> onHeadReadyScriptItems_;
