@@ -16,9 +16,8 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/base_event_peer.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/frame_node.h"
 
-struct UICommonEventPeer : public OHOS::Ace::NG::ViewAbstractModelNG {
-    ~UICommonEventPeer() override = default;
+struct UICommonEventPeer {
+    OHOS::Ace::NG::FrameNode* node;
 };

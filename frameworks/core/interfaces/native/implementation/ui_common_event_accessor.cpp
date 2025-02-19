@@ -47,12 +47,13 @@ void SetOnAppearImpl(UICommonEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
+    CHECK_NULL_VOID(peer->node);
     auto arkOnAppear = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnAppear) {
         auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() {
             arkCallback.Invoke();
         };
-        peer->SetOnAppear(std::move(onAppear));
+        ViewAbstract::SetOnAppear(std::move(onAppear));
     }
 }
 void SetOnDisappearImpl(UICommonEventPeer* peer,
@@ -60,12 +61,13 @@ void SetOnDisappearImpl(UICommonEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
+    CHECK_NULL_VOID(peer->node);
     auto arkOnDisAppear = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnDisAppear) {
         auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() {
             arkCallback.Invoke();
         };
-        peer->SetOnDisAppear(std::move(onDisAppear));
+        ViewAbstract::SetOnDisappear(peer->node, std::move(onDisAppear));
     }
 }
 void SetOnKeyEventImpl(UICommonEventPeer* peer,
@@ -77,12 +79,13 @@ void SetOnFocusImpl(UICommonEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
+    CHECK_NULL_VOID(peer->node);
     auto arkOnFocus = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnFocus) {
         auto onFocus = [arkCallback = CallbackHelper(arkOnFocus.value())]() {
             arkCallback.Invoke();
         };
-        peer->SetOnFocus(std::move(onFocus));
+        ViewAbstract::SetOnFocus(std::move(onFocus));
     }
 }
 void SetOnBlurImpl(UICommonEventPeer* peer,
@@ -90,12 +93,13 @@ void SetOnBlurImpl(UICommonEventPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
+    CHECK_NULL_VOID(peer->node);
     auto arkOnBlur = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnBlur) {
         auto onBlur = [arkCallback = CallbackHelper(arkOnBlur.value())]() {
             arkCallback.Invoke();
         };
-        peer->SetOnBlur(std::move(onBlur));
+        ViewAbstract::SetOnBlur(std::move(onBlur));
     }
 }
 void SetOnHoverImpl(UICommonEventPeer* peer,
