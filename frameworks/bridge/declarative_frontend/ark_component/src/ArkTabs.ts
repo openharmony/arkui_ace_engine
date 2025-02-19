@@ -608,7 +608,7 @@ class CachedMaxCountModifier extends ModifierWithKey<ArkTabsCachedMaxCount> {
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.count == this.stageValue.count && this.value.mode == this.stageValue.mode);
+    return !(this.value.count === this.stageValue.count && this.value.mode === this.stageValue.mode);
   }
 }
 
