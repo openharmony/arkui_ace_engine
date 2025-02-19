@@ -19,6 +19,7 @@
 #include "base/utils/device_config.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -112,7 +113,7 @@ private:
 
 class JSRichEditorBaseController : public Referenced {
 public:
-    void SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
+    virtual void SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
     {
         controllerWeak_ = controller;
     }
@@ -263,16 +264,29 @@ public:
         }
     }
 
+    void SetController(const RefPtr<RichEditorBaseControllerBase>& controller) override;
+
     void GetSelection(const JSCallbackInfo& args);
     void SetStyledString(const JSCallbackInfo& args);
     void GetStyledString(const JSCallbackInfo& args);
     void OnContentChanged(const JSCallbackInfo& args);
+
+    void SetStyledStringCache(RefPtr<SpanString> styledString)
+    {
+        styledStringCache_ = styledString;
+    }
+
+    RefPtr<SpanString> GetStyledStringCache() const
+    {
+        return styledStringCache_;
+    }
 
 private:
     void SetOnWillChange(const JSCallbackInfo& args);
     void SetOnDidChange(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJsOnWillChange(const NG::StyledStringChangeValue& changeValue);
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorStyledStringController);
+    RefPtr<SpanString> styledStringCache_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

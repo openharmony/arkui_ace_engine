@@ -2821,6 +2821,17 @@ void JSRichEditorBaseController::ParseJsSelectionOptions(
     }
 }
 
+void JSRichEditorStyledStringController::SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
+{
+    JSRichEditorBaseController::SetController(controller);
+    auto styledStringCache = GetStyledStringCache();
+    CHECK_NULL_VOID(styledStringCache);
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    styledStringController->SetStyledString(styledStringCache);
+    SetStyledStringCache(nullptr);
+}
+
 void JSRichEditorStyledStringController::GetSelection(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2842,6 +2853,9 @@ void JSRichEditorStyledStringController::SetStyledString(const JSCallbackInfo& a
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     auto controller = controllerWeak_.Upgrade();
+    if (!controller) {
+        SetStyledStringCache(spanStringController->GetSubSpanString(0, spanStringController->GetLength()));
+    }
     auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
     CHECK_NULL_VOID(styledStringController);
     styledStringController->SetStyledString(spanStringController);
