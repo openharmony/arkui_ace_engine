@@ -26,8 +26,6 @@ import { KeyCode } from '@kit.InputKit';
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
-// 字体字重缩放等数值
-const DEFAULT_FONT_SCALE: number = 1;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
 const DOUBLE_LINE_NUM: number = 2;
