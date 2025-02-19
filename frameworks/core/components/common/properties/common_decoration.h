@@ -71,7 +71,7 @@ struct EffectOption {
     double brightness { 1.0f };
     Color color { Color::TRANSPARENT };
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
-    BlurOption blurOption;
+    BlurOption blurOption = { std::vector<float>() };
     BlurType blurType = BlurType::WITHIN_WINDOW;
     BlurStyleActivePolicy policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
     Color inactiveColor { Color::TRANSPARENT };

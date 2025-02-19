@@ -1238,7 +1238,7 @@ HWTEST_F(TextFieldModifyTest, OnHandleMoveDone001, TestSize.Level1)
 
     pattern_->SetIsSingleHandle(true);
     pattern_->selectOverlay_->OnHandleMoveDone(handleRect, false);
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
 }
 
 /**

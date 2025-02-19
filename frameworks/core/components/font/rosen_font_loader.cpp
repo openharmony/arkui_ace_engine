@@ -19,6 +19,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/font/rosen_font_collection.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -315,11 +316,24 @@ void RosenFontLoader::NotifyCallbacks()
         }
     }
     callbacks_.clear();
+    std::stringstream ssNodes;
+    ssNodes << "[";
     for (const auto& [node, callback] : callbacksNG_) {
+        auto uiNode = node.Upgrade();
+        if (uiNode) {
+            ssNodes << std::to_string(uiNode->GetId());
+            ssNodes << ", ";
+        }
         if (callback) {
             callback();
         }
     }
+    ssNodes << "]";
+    ACE_SCOPED_TRACE("Load Success! NotifyCallbacks [familyName:%s][size:%d][nodes:%s]", familyName_.c_str(),
+        static_cast<uint32_t>(callbacksNG_.size()), ssNodes.str().c_str());
+    TAG_LOGI(AceLogTag::ACE_FONT,
+        "Load Success! NotifyCallbacks [familyName:%{public}s][size:%{public}d][nodes:%{public}s]", familyName_.c_str(),
+        static_cast<uint32_t>(callbacksNG_.size()), ssNodes.str().c_str());
     callbacksNG_.clear();
     if (variationChanged_) {
         variationChanged_();

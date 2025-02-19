@@ -377,9 +377,19 @@ class ObserveV2 {
   }
 
 
-  // mark view model object 'target' property 'attrName' as changed
-  // notify affected watchIds and elmtIds
-  public fireChange(target: object, attrName: string): void {
+
+
+  /**
+  * mark view model object 'target' property 'attrName' as changed
+  * notify affected watchIds and elmtIds
+  *
+  * @param propName ObservedV2 or ViewV2 target
+  * @param attrName attrName
+  * @param ignoreOnProfile The data reported to the profiler needs to be the changed state data. 
+  * If the fireChange is invoked before the data changed, it needs to be ignored on the profiler.
+  * The default value is false.
+  */
+  public fireChange(target: object, attrName: string, ignoreOnProfiler: boolean = false): void {
     // enable to get more fine grained traces
     // including 2 (!) .end calls.
 
@@ -439,7 +449,7 @@ class ObserveV2 {
     } // for
 
     // report the stateVar changed when recording the profiler
-    if (stateMgmtDFX.enableProfiler) {
+    if (stateMgmtDFX.enableProfiler && !ignoreOnProfiler) {
       stateMgmtDFX.reportStateInfoToProfilerV2(target, attrName, changedIdSet);
     }
   }

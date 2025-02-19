@@ -24,6 +24,30 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     return CreateDialogNode(nodeId, param, customNode);
 }
 
+void SetDialogTransitionEffects(RefPtr<FrameNode> dialog,
+                                RefPtr<FrameNode> frameNode,
+                                const DialogProperties& param,
+                                RefPtr<DialogPattern> pattern)
+{
+    auto dialogContext = dialog->GetRenderContext();
+    if (param.transitionEffect != nullptr) {
+        dialogContext->UpdateChainedTransition(param.transitionEffect);
+    }
+    if (param.maskTransitionEffect != nullptr) {
+        dialogContext->UpdateChainedTransition(param.maskTransitionEffect);
+    }
+    if (param.dialogTransitionEffect != nullptr) {
+        frameNode->GetRenderContext()->UpdateChainedTransition(param.dialogTransitionEffect);
+    }
+    if (param.transitionEffect == nullptr &&
+        param.dialogTransitionEffect == nullptr &&
+        param.maskTransitionEffect == nullptr) {
+        // set open and close animation
+        pattern->SetOpenAnimation(param.openAnimation);
+        pattern->SetCloseAnimation(param.closeAnimation);
+    }
+}
+
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
@@ -96,13 +120,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     pattern->SetOnWillDismiss(param.onWillDismiss);
     pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
 
-    if (param.transitionEffect != nullptr) {
-        dialogContext->UpdateChainedTransition(param.transitionEffect);
-    } else {
-        // set open and close animation
-        pattern->SetOpenAnimation(param.openAnimation);
-        pattern->SetCloseAnimation(param.closeAnimation);
-    }
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(customNode);
+    SetDialogTransitionEffects(dialog, frameNode, param, pattern);
 
     dialog->MarkModifyDone();
     return dialog;

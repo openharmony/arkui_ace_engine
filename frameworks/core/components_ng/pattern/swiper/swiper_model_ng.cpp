@@ -1086,4 +1086,68 @@ void SwiperModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const
         event(&eventInfo);
     });
 }
+
+SwiperArrowParameters SwiperModelNG::GetArrowStyle(FrameNode* frameNode)
+{
+    SwiperArrowParameters swiperArrowParameters;
+    CHECK_NULL_RETURN(frameNode, swiperArrowParameters);
+    auto castSwiperLayoutProperty = frameNode->GetLayoutPropertyPtr<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(castSwiperLayoutProperty, swiperArrowParameters);
+    swiperArrowParameters.isShowBackground = castSwiperLayoutProperty->GetIsShowBackground();
+    swiperArrowParameters.isSidebarMiddle = castSwiperLayoutProperty->GetIsSidebarMiddle();
+    swiperArrowParameters.backgroundSize = castSwiperLayoutProperty->GetBackgroundSize();
+    swiperArrowParameters.backgroundColor = castSwiperLayoutProperty->GetBackgroundColor();
+    swiperArrowParameters.arrowSize = castSwiperLayoutProperty->GetArrowSize();
+    swiperArrowParameters.arrowColor = castSwiperLayoutProperty->GetArrowColor();
+    return swiperArrowParameters;
+}
+
+void SwiperModelNG::ResetArrowStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBackground, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsSidebarMiddle, frameNode);
+}
+
+void SwiperModelNG::ResetIndicatorStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetIndicatorParameters();
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+int SwiperModelNG::GetSwipeByGroup(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, SwipeByGroup, value, frameNode, value);
+    return value;
+}
+
+SwiperDisplayMode SwiperModelNG::GetDisplayMode(FrameNode* frameNode)
+{
+    SwiperDisplayMode displayMode = SwiperDisplayMode::STRETCH;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwiperLayoutProperty, DisplayMode, displayMode, frameNode, displayMode);
+    return displayMode;
+}
+
+float SwiperModelNG::GetMinSize(FrameNode* frameNode)
+{
+    Dimension value(0, DimensionUnit::VP);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, MinSize, value, frameNode, value);
+    return value.Value();
+}
+
+std::shared_ptr<SwiperDigitalParameters> SwiperModelNG::GetDigitIndicator(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSwiperDigitalParameters();
+}
 } // namespace OHOS::Ace::NG

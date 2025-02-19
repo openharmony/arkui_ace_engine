@@ -904,7 +904,7 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleBlurEvent001, TestSize.Level1)
     richEditorPattern->isCustomKeyboardAttached_ = true;
     focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
     richEditorPattern->HandleBlurEvent();
-    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
 }
 
 /**

@@ -1415,9 +1415,13 @@ float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
     auto pixelMap = frameNode->GetDragPixelMap();
     CHECK_NULL_RETURN(pixelMap, scale);
     auto width = pixelMap->GetWidth();
-    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
-    if (frameNode->GetDragPreviewOption().isScaleEnabled && width != 0 && width > maxWidth) {
-        scale = maxWidth / width;
+    auto height = pixelMap->GetHeight();
+    auto gestureEvent = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEvent, scale);
+    if (frameNode->GetDragPreviewOption().isScaleEnabled && width > 0 && height > 0) {
+        auto scaleData = DragDropManager::GetScaleInfo(width, height, gestureEvent->GetTextDraggable());
+        CHECK_NULL_RETURN(scaleData, scale);
+        scale = scaleData->scale;
     }
     return scale;
 }

@@ -104,6 +104,7 @@ public:
     MOCK_METHOD0(DestroyWindow, void());
     MOCK_METHOD0(ResizeDialogSubwindow, void());
     MOCK_METHOD0(GetDisplayId, uint64_t());
+    MOCK_METHOD1(IsSameDisplayWithParentWindow, bool(bool useInitializedId));
     MOCK_METHOD1(ShowSelectOverlay, bool(const RefPtr<NG::FrameNode>& overlayNode));
 };
 } // namespace OHOS::Ace

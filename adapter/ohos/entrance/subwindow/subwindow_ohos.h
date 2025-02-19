@@ -169,6 +169,7 @@ public:
 
     void ResizeDialogSubwindow() override;
     uint64_t GetDisplayId() override;
+    bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
@@ -224,6 +225,7 @@ private:
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
     int32_t childContainerId_ = -1;
+    uint64_t defaultDisplayId_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
@@ -236,6 +238,7 @@ private:
     int32_t popupTargetId_ = -1;
     bool haveDialog_ = false;
     bool isShowed_ = false;
+    bool isClosing_ = false;
     bool needAvoidKeyboard_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;

@@ -73,6 +73,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true)),
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       isRightToLeft_(AceType::MakeRefPtr<PropertyBool>(false)),
+      progressUpdate_(AceType::MakeRefPtr<PropertyBool>(false)),
       capsuleBorderRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0f))
 {
     AttachProperty(strokeWidth_);
@@ -99,6 +100,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
     AttachProperty(isItalic_);
     AttachProperty(smoothEffect_);
     AttachProperty(isRightToLeft_);
+    AttachProperty(progressUpdate_);
     AttachProperty(capsuleBorderRadius_);
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -153,6 +155,11 @@ void ProgressModifier::SetProgressType(ProgressType type)
 {
     CHECK_NULL_VOID(progressType_);
     progressType_->Set(static_cast<int32_t>(type));
+}
+
+void ProgressModifier::UpdateProgress()
+{
+    progressUpdate_->Set(!progressUpdate_->Get());
 }
 
 void ProgressModifier::ProcessSweepingAnimation(ProgressType type, float value)
@@ -1402,7 +1409,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     canvas.AttachPen(pen);
     if (isRightToLeft_->Get()) {
         canvas.Scale(-1, 1);
-        canvas.Translate(-radius * INT32_TWO, 0);
+        canvas.Translate(-(radius + ringProgressLeftPadding_.ConvertToPx()) * INT32_TWO, 0);
     }
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },

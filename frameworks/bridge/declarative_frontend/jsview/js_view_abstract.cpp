@@ -2345,7 +2345,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 #endif
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
     }
-    if (info.Length() == 2) {
+    if (info.Length() == 2) { // 2 is background image info length
         auto jsImageRepeat = info[1];
         if (jsImageRepeat->IsNumber()) {
             repeatIndex = jsImageRepeat->ToNumber<int32_t>();
@@ -6985,6 +6985,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityFocus", &JSViewAbstract::JsOnAccessibilityFocus);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDefaultFocus", &JSViewAbstract::JsAccessibilityDefaultFocus);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityUseSamePage", &JSViewAbstract::JsAccessibilityUseSamePage);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityScrollTriggerable",
+                                          &JSViewAbstract::JsAccessibilityScrollTriggerable);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);

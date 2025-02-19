@@ -61,7 +61,7 @@ uint32_t AceContainer::GetWindowType() const
     return DEFAULT_WINDOW_TYPE;
 }
 
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }

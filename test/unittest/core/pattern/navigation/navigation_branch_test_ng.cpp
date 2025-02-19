@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,7 @@ void NavigationBranchTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 /**
@@ -83,7 +84,6 @@ void NavigationBranchTestNg::MockPipelineContextGetTheme()
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -102,6 +102,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest001, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -128,6 +129,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest002, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -168,6 +170,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest003, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest004, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -210,6 +213,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest004, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest005, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -233,6 +237,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest005, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationTestNg001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -253,6 +258,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationTestNg001, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationTestNg002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -278,6 +284,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationTestNg002, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationTestNg003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -310,6 +317,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationTestNg003, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationModelTest001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -338,6 +346,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationModelTest001, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationModelTest002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -361,6 +370,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationModelTest002, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest006, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -396,6 +406,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest006, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest007, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -425,6 +436,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest007, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest008, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -465,6 +477,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest008, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest009, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -505,6 +518,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest009, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest010, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -540,6 +554,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest010, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest011, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -569,6 +584,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest011, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest012, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -609,6 +625,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest012, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest013, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -649,6 +666,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest013, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest014, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -676,6 +694,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest014, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest015, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -703,6 +722,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest015, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest016, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -733,6 +753,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest016, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest017, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -765,6 +786,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest017, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest018, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -799,6 +821,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest018, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest019, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -828,6 +851,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest019, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest020, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -857,6 +881,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest020, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest021, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -885,6 +910,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest021, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest022, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -913,6 +939,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest022, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest023, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -940,6 +967,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest023, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest024, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -972,6 +1000,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest024, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest025, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1000,6 +1029,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest025, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest026, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1032,6 +1062,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest026, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest027, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1060,6 +1091,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest027, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest028, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1092,6 +1124,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest028, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest029, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1126,6 +1159,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest029, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest030, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1151,6 +1185,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest030, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest031, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1177,6 +1212,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest031, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest032, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1203,6 +1239,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest032, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest033, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1233,6 +1270,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest033, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest034, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1261,6 +1299,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest034, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest035, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1295,6 +1334,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest035, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest036, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1328,6 +1368,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest036, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest037, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1354,6 +1395,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest037, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest038, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1386,6 +1428,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest038, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest039, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1408,43 +1451,13 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest039, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavigationPatternTest040
- * @tc.desc: Test UpdateIsFullPageNavigation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationBranchTestNg, NavigationPatternTest040, TestSize.Level1)
-{
-    NavigationModelNG navigationModel;
-    navigationModel.Create();
-    navigationModel.SetTitle("navigationModel", false);
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<FrameNode> frameNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode_, nullptr);
-    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
-        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
-    ASSERT_NE(navigationLayoutProperty, nullptr);
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    ASSERT_NE(hostNode, nullptr);
-
-    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(pattern, nullptr);
-    // set navigationStack_ is not nullptr
-    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
-    ASSERT_NE(pattern->navigationStack_, nullptr);
-    pattern->pageNode_ = WeakPtr<FrameNode>(frameNode_);
-    frameNode_->geometryNode_ = nullptr;
-    pattern->isFullPageNavigation_ = true;
-    pattern->UpdateIsFullPageNavigation(frameNode);
-}
-
-/**
  * @tc.name: NavigationPatternTest041
  * @tc.desc: Test UpdateSystemBarStyleOnTopNavPathChange function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest041, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1475,6 +1488,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest041, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest042, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1513,6 +1527,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest042, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest043, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1539,6 +1554,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest043, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest044, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1568,6 +1584,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest044, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest045, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1601,6 +1618,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest045, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest046, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1640,6 +1658,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest046, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest047, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1673,6 +1692,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest047, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest048, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1709,6 +1729,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest048, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest049, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1742,11 +1763,12 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest049, TestSize.Level1)
     newBar1.iconSymbol = onApply;
     toolBarItems.push_back(newBar1);
     int32_t index = -1;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index), nullptr);
+    int32_t themeScopeId = 0;
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index, themeScopeId), nullptr);
     int32_t index_ = 3;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index_), nullptr);
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, index_, themeScopeId), nullptr);
     int32_t indexs = 0;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs), nullptr);
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs, themeScopeId), nullptr);
 }
 
 /**
@@ -1756,6 +1778,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest049, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationPatternTest050, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1785,7 +1808,8 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest050, TestSize.Level1)
     newBar1.icon = "icon";
     toolBarItems.push_back(newBar1);
     int32_t indexs = 0;
-    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs), nullptr);
+    int32_t themeScopeId = 0;
+    EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs, themeScopeId), nullptr);
 }
 
 /**
@@ -1795,6 +1819,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest050, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -1814,6 +1839,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg001, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -1833,6 +1859,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg002, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -1854,6 +1881,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg003, TestSize.Level1)
  */
 HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg004, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation.
      */

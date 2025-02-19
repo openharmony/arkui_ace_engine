@@ -214,15 +214,15 @@ HWTEST_F(MenuItemPatternOptionTestNg, PerformActionTest002, TestSize.Level1)
     event.code = KeyCode::KEY_ENTER;
     EXPECT_TRUE(optionPattern_->OnKeyEvent(event));
 
-    UIState pressedState = UI_STATE_PRESSED;
+    UIState normalState = UI_STATE_NORMAL;
     for (int turn = 0; turn < 2; turn++) {
         optionPattern_->SetIsHover(isHover[turn]);
-        optionPattern_->OnPress(pressedState);
+        optionPattern_->OnPress(normalState);
         EXPECT_EQ(optionPattern_->GetBgBlendColor(), hoverColor[turn]);
     }
 
-    UIState normalState = UI_STATE_NORMAL;
-    optionPattern_->OnPress(normalState);
+    UIState pressedState = UI_STATE_PRESSED;
+    optionPattern_->OnPress(pressedState);
     EXPECT_EQ(optionPattern_->GetBgBlendColor(), optionPattern_->selectTheme_->GetClickedColor());
 }
 

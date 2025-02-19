@@ -15,6 +15,7 @@
 
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { StepperBootcamp } from './StepperBootcamp';
+import { NavigationBootcamp } from './NavigationBootcamp';
 import { SwiperBootcamp } from './SwiperBootcamp';
 import { TabContentBootcamp } from './TabContentBootcamp'
 import { TabsBootcamp } from './TabsBootcamp'
@@ -28,6 +29,7 @@ export const navigatesRoute: RouteGroup = {
     { name: 'tabs', label: '页签容器/Tabs' },
     { name: 'toolbar', label: '工具栏/ToolBar' },
     { name: 'stepper', label: '步骤导航/Stepper' }
+    { name: 'navigation', label: '导航/Navigation' },
   ]
 };
 
@@ -39,6 +41,8 @@ export function NavigatesDestination(name: string, route: Route) {
     TabContentBootcamp({ title: route.label })
   } else if (name === 'navigates/tabs') {
     TabsBootcamp({ title: route.label })
+   }else if (name === 'navigates/navigation') {
+    NavigationBootcamp({ title: route.label })
   } else if (name === 'navigates/toolbar') {
     ToolBarBootcamp({ title: route.label })
   } else if (name === 'navigates/stepper') {

@@ -113,6 +113,18 @@ public:
 private:
     int32_t GetFrameNodeId() const;
     void InitAllCallback();
+    void InitForegroundCallback();
+    void InitBackgroundCallback();
+    void InitDestructionCallback();
+    void InitTransferAbilityResultFunc();
+    void InitTransferExtensionDataFunc();
+    void InitNotifyRemoteReadyFunc();
+    void InitNotifySyncOnFunc();
+    void InitNotifyAsyncOnFunc();
+    void InitNotifyBindModalFunc();
+    void InitNotifyGetAvoidAreaByTypeFunc();
+    void InitNotifyExtensionEventFunc();
+    void InitGetStatusBarHeightFunc();
     void UpdateSessionConfig();
     RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
@@ -122,6 +134,7 @@ private:
     bool RegisterDataConsumer();
     void PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data);
     void PostBusinessDataConsumeSyncReply(uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;

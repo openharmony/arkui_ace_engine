@@ -291,7 +291,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     if (dialogProperties_.isShowInSubWindow) {
         auto pipeline = host->GetContextRefPtr();
         auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
-        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId());
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId(), SubwindowType::TYPE_DIALOG);
         SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
     overlayManager->CloseDialog(host);
@@ -618,6 +618,9 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
+    auto focusHub = titleRow->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, titleRow);
+    focusHub->SetFocusable(false);
     return titleRow;
 }
 
@@ -1768,11 +1771,44 @@ void DialogPattern::DumpObjectProperty()
         DumpLog::GetInstance().AddDesc("MaskRect: " + dialogProperties_.maskRect.value().ToString());
     }
 }
+
+bool DialogPattern::NeedUpdateHostWindowRect()
+{
+    CHECK_NULL_RETURN(isUIExtensionSubWindow_, false);
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto currentId = pipeline->GetInstanceId();
+    if (currentId < MIN_SUBCONTAINER_ID) {
+        return false;
+    }
+
+    auto container = AceEngine::Get().GetContainer(currentId);
+    CHECK_NULL_RETURN(container, false);
+    if (container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        CHECK_NULL_RETURN(subwindow, false);
+        return subwindow->IsSameDisplayWithParentWindow();
+    }
+
+    return false;
+}
+
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (isFoldStatusChanged_ || type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
-        TAG_LOGI(AceLogTag::ACE_DIALOG, "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d",
-            type, isFoldStatusChanged_);
+    auto forceUpdate = NeedUpdateHostWindowRect();
+    auto isWindowChanged = type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE;
+
+    TAG_LOGI(AceLogTag::ACE_DIALOG,
+        "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d forceUpdate: %{public}d", type,
+        isFoldStatusChanged_, forceUpdate);
+
+    if (isFoldStatusChanged_ || isWindowChanged || forceUpdate) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         InitHostWindowRect();
@@ -1800,7 +1836,7 @@ void DialogPattern::InitHostWindowRect()
 
     if (container->IsUIExtensionWindow()) {
         isUIExtensionSubWindow_ = true;
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subwindow);
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());

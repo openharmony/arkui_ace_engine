@@ -35,6 +35,9 @@ private:
     static void OnMenuClick(const JSCallbackInfo& info);
     static void OnCloseClick(const JSCallbackInfo& info);
     static void OnDidBuild(const JSCallbackInfo& info);
+    static void OnCreateServicePanel(const JSCallbackInfo& info);
+    static std::string GetStringValueFromJSObject(const JSRef<JSObject>& object, const char* prop);
+    static void GetParamsFromJSArray(const JSRef<JSArray>& jsArray, std::map<std::string, std::string>& params);
 };
 } // namespace OHOS::Ace::Framework
 

@@ -35,7 +35,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b1111;
+constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
+constexpr int32_t RATING_IMAGE_SUCCESS_FOCUS_CODE = 0b1111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
 constexpr int32_t HALF_DIVIDE = 2;
 
@@ -55,6 +56,7 @@ void RatingPattern::OnAttachToFrameNode()
     themeRatingScore_ = ratingTheme->GetRatingScore();
     themeBorderWidth_ = ratingTheme->GetFocusBorderWidth();
     pipelineContext_ = host->GetContextRefPtr();
+    isNeedFocusStyle_ = !NearZero(ratingTheme->GetFocusSpace().Value());
 }
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
@@ -160,14 +162,14 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
         backgroundConfig_.dstRect_ = backgroundImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
-    if (imageFlag == 0b1000) {
+    if (imageFlag == 0b1000 && backgroundImageFocusLoadingCtx_ != nullptr) {
         backgroundImageFocusCanvas_ = backgroundImageFocusLoadingCtx_->MoveCanvasImage();
         backgroundFocusConfig_.srcRect_ = backgroundImageFocusLoadingCtx_->GetSrcRect();
         backgroundFocusConfig_.dstRect_ = backgroundImageFocusLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
-    if (imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
+    if (IsRatingImageReady(imageSuccessStateCode_)) {
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -177,7 +179,7 @@ void RatingPattern::OnImageDataReady(int32_t imageFlag)
     imageReadyStateCode_ |= static_cast<uint32_t>(imageFlag);
 
     // 3 images are ready, invoke to update layout to calculate single star size.
-    if (imageReadyStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
+    if (IsRatingImageReady(imageReadyStateCode_)) {
         MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 }
@@ -224,22 +226,22 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(foregroundImageCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(secondaryImageCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(backgroundImageCanvas_, defaultPaintMethod);
-    CHECK_NULL_RETURN(backgroundImageFocusCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(foregroundImageLoadingCtx_, defaultPaintMethod);
     CHECK_NULL_RETURN(secondaryImageLoadingCtx_, defaultPaintMethod);
     CHECK_NULL_RETURN(backgroundImageLoadingCtx_, defaultPaintMethod);
-    CHECK_NULL_RETURN(backgroundImageFocusLoadingCtx_, defaultPaintMethod);
     UpdatePaintConfig();
     PrepareAnimation(foregroundImageCanvas_);
     PrepareAnimation(secondaryImageCanvas_);
     PrepareAnimation(backgroundImageCanvas_);
-    PrepareAnimation(backgroundImageFocusCanvas_);
+    if (backgroundImageFocusCanvas_ != nullptr) {
+        PrepareAnimation(backgroundImageFocusCanvas_);
+    }
     // when frameNode mark dirty to update rendering, only when 3 images are all loaded successfully and
     // JudgeImageSourceInfo is true, pattern will update ratingModifier's CanvasImage.
     if (ratingModifier_->JudgeImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
             secondaryImageLoadingCtx_->GetSourceInfo(), backgroundImageLoadingCtx_->GetSourceInfo(),
             foregroundConfig_) &&
-        imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
+        IsRatingImageReady(imageSuccessStateCode_)) {
         ratingModifier_->UpdateImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
             secondaryImageLoadingCtx_->GetSourceInfo(), backgroundImageLoadingCtx_->GetSourceInfo());
         ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
@@ -262,6 +264,11 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     auto paintMethod = MakeRefPtr<RatingPaintMethod>(WeakClaim(this), ratingModifier_, starNum, state_, reverse);
     paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
     return paintMethod;
+}
+
+bool RatingPattern::IsRatingImageReady(uint32_t imageStateCode)
+{
+    return imageStateCode == (IsNeedFocusStyle() ? RATING_IMAGE_SUCCESS_FOCUS_CODE : RATING_IMAGE_SUCCESS_CODE);
 }
 
 bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -956,7 +963,9 @@ void RatingPattern::OnModifyDone()
     LoadForeground(layoutProperty, ratingTheme, iconTheme);
     LoadSecondary(layoutProperty, ratingTheme, iconTheme);
     LoadBackground(layoutProperty, ratingTheme, iconTheme);
-    LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
+    if (IsNeedFocusStyle()) {
+        LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
+    }
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();

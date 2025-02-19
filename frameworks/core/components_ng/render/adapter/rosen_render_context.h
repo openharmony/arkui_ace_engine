@@ -437,6 +437,11 @@ public:
 
     OffsetF GetRectOffsetWithPositionEdges(
         const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference) override;
+    void SetDrawNode() override;
+    bool AddNodeToRsTree() override;
+    static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
+    RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
+    void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

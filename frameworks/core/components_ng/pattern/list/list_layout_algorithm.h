@@ -429,6 +429,15 @@ public:
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
 
+    bool GetStackFromEnd() const
+    {
+        return isStackFromEnd_;
+    }
+
+    void ReverseItemPosition(ListLayoutAlgorithm::PositionMap& itemPosition, int32_t totalItemCount, float mainSize);
+
+    void ProcessStackFromEnd();
+
     int32_t GetLaneIdx4Divider() const
     {
         return laneIdx4Divider_;
@@ -538,9 +547,15 @@ protected:
     void GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup);
     int32_t GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const;
 
-    inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
+    RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true) const
     {
-        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
+        index = !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, addToRenderTree);
+    }
+    RefPtr<LayoutWrapper> GetChildByIndex(LayoutWrapper* layoutWrapper, uint32_t index, bool isCache = false) const
+    {
+        index =  !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+        return layoutWrapper->GetChildByIndex(index, isCache);
     }
     virtual float GetLayoutFixOffset()
     {
@@ -635,6 +650,7 @@ private:
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 
     float chainInterval_ = 0.0f;
+    bool isStackFromEnd_ = false;
 };
 } // namespace OHOS::Ace::NG
 

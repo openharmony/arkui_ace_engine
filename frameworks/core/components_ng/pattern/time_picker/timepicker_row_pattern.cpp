@@ -342,11 +342,7 @@ void TimePickerRowPattern::OnModifyDone()
     isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
-
     ClearFocus();
-    isHapticChanged_ = false;
-    isForceUpdate_ = false;
-    isDateTimeOptionUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();

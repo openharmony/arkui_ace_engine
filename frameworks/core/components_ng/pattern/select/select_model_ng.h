@@ -87,6 +87,9 @@ public:
     static void ResetBuilderFunc(FrameNode* frameNode);
     static void SetChangeValue(FrameNode* frameNode, int index, const std::string& value);
     ControlSize GetControlSize() override;
+    void BackgroundColor(const Color& color) override;
+    void ResetBackgroundColor() override;
+    void ResetFontColor() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
