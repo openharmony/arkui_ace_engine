@@ -270,6 +270,110 @@ void JsComponentSnapshot::ParseOptions(int32_t idx, NG::SnapshotOptions& options
         napi_get_value_bool(env_, waitUntilRenderFinishedNapi, &waitUntilRenderFinished);
         options.waitUntilRenderFinished = waitUntilRenderFinished;
     }
+
+    result = false;
+    napi_has_named_property(env_, argv_[idx], "region", &result);
+    if (!result) {
+        options.regionMode = NG::SnapshotRegionMode::NO_REGION;
+        return;
+    }
+    napi_value regionObject = nullptr;
+    napi_get_named_property(env_, argv_[idx], "region", &regionObject);
+    if (!regionObject) {
+        options.regionMode = NG::SnapshotRegionMode::NO_REGION;
+        return;
+    }
+
+    options.regionMode = NG::SnapshotRegionMode::COMMON;
+    if (ParseLocalizedRegion(&regionObject, options)) {
+        options.regionMode = NG::SnapshotRegionMode::LOCALIZED;
+    } else {
+        ParseRegion(&regionObject, options);
+    }
+}
+
+bool JsComponentSnapshot::ParseRegion(napi_value* regionObject, NG::SnapshotOptions& options)
+{
+    bool getReigonResult = false;
+    options.snapshotRegion = NG::LocalizedSnapshotRegion {};
+    napi_has_named_property(env_, *regionObject, "left", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"left\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value leftPxNapi;
+    napi_get_named_property(env_, *regionObject, "left", &leftPxNapi);
+    napi_get_value_double(env_, leftPxNapi, &options.snapshotRegion.start);
+
+    napi_has_named_property(env_, *regionObject, "right", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"right\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value rightPxNapi;
+    napi_get_named_property(env_, *regionObject, "right", &rightPxNapi);
+    napi_get_value_double(env_, rightPxNapi, &options.snapshotRegion.end);
+
+    napi_has_named_property(env_, *regionObject, "top", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"top\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value topPxNapi;
+    napi_get_named_property(env_, *regionObject, "top", &topPxNapi);
+    napi_get_value_double(env_, topPxNapi, &options.snapshotRegion.top);
+
+    napi_has_named_property(env_, *regionObject, "bottom", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"bottom\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value bottomPxNapi;
+    napi_get_named_property(env_, *regionObject, "bottom", &bottomPxNapi);
+    napi_get_value_double(env_, bottomPxNapi, &options.snapshotRegion.bottom);
+    return true;
+}
+
+bool JsComponentSnapshot::ParseLocalizedRegion(napi_value* regionObject, NG::SnapshotOptions& options)
+{
+    options.snapshotRegion = NG::LocalizedSnapshotRegion {};
+    bool getReigonResult = false;
+    napi_has_named_property(env_, *regionObject, "start", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"start\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value startPxNapi;
+    napi_get_named_property(env_, *regionObject, "start", &startPxNapi);
+    napi_get_value_double(env_, startPxNapi, &options.snapshotRegion.start);
+
+    napi_has_named_property(env_, *regionObject, "end", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"end\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value endPxNapi;
+    napi_get_named_property(env_, *regionObject, "end", &endPxNapi);
+    napi_get_value_double(env_, endPxNapi, &options.snapshotRegion.end);
+
+    napi_has_named_property(env_, *regionObject, "top", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"top\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value topPxNapi;
+    napi_get_named_property(env_, *regionObject, "top", &topPxNapi);
+    napi_get_value_double(env_, topPxNapi, &options.snapshotRegion.top);
+
+    napi_has_named_property(env_, *regionObject, "bottom", &getReigonResult);
+    if (!getReigonResult) {
+        LOGE("The \"bottom\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    napi_value bottomPxNapi;
+    napi_get_named_property(env_, *regionObject, "bottom", &bottomPxNapi);
+    napi_get_value_double(env_, bottomPxNapi, &options.snapshotRegion.bottom);
+    return true;
 }
 
 static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)

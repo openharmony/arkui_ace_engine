@@ -204,7 +204,7 @@ public:
                     pipeline->UpdateSystemSafeArea(safeArea);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
-                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
                 }
                 // for ui extension component
@@ -555,6 +555,9 @@ bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 }
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
+
+void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) {}
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,

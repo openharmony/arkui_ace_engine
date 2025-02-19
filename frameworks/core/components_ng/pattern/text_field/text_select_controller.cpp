@@ -110,7 +110,11 @@ void TextSelectController::FitCaretMetricsToTouchPoint(CaretMetricsF& caretMetri
 
 void TextSelectController::FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics)
 {
-    if (GreatNotEqual(caretMetrics.height, contentRect_.Height())) {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    if (GreatNotEqual(caretMetrics.height, contentRect_.Height()) && !textField->IsTextArea()) {
         caretMetrics.offset.SetY(caretMetrics.offset.GetY() + caretMetrics.height - contentRect_.Height());
         caretMetrics.height = contentRect_.Height();
     }
@@ -304,9 +308,8 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
     CHECK_NULL_RETURN(pattern, err);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, err);
-    bool smartSelect = false;
     if (!textField->IsUsingMouse()) {
-        smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+        AdjustWordSelection(pos, start, end, localOffset);
     }
 
     GetSubParagraphByOffset(pos, start, end);

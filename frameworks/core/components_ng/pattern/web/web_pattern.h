@@ -773,6 +773,8 @@ public:
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
+    std::string GetCurrentLanguage() override;
+
 private:
     friend class WebContextSelectOverlay;
 
@@ -888,6 +890,7 @@ private:
     void SetFakeDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
+    void HandleTouchEvent(const TouchEventInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
     void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);
@@ -1211,6 +1214,7 @@ private:
     int32_t zoomErrorCount_ = 0;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
     bool overlayCreating_ = false;
+    bool awaitingOnTextSelected_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
@@ -1252,6 +1256,7 @@ private:
     int64_t lastHeight_ = 0L;
     int64_t lastWidth_ = 0L;
     bool dragWindowFlag_ = false;
+    bool isSetMouseDragMonitorState = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
 

@@ -456,6 +456,8 @@ struct CJUICommonModifier {
     ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
     void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut);
     void (*resetFocusScopeId)(ArkUINodeHandle node);
+    void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
+    void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
     void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);
@@ -1025,6 +1027,15 @@ struct CJUISwiperModifier {
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
     void (*setSwiperOnSelected)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnSelected)(ArkUINodeHandle node);
+    void (*setSwiperMinSize)(ArkUINodeHandle node, ArkUI_Float32 minSizeValue, ArkUI_Int32 minSizeUnit);
+    void (*resetSwiperMinSize)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSwiperMinSize)(ArkUINodeHandle node);
+    void (*setSwiperDigitIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperDigitIndicator* swiperIndicator);
+    void (*getSwiperDigitIndicator)(ArkUINodeHandle node, ArkUISwiperDigitIndicator* swiperIndicator);
+    ArkUISwiperIndicatorType (*getIndicatorType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperSwipeByGroup)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getSwiperDisplayMode)(ArkUINodeHandle node);
+    ArkUISwiperArrowStyle (*getSwiperArrowStyle)(ArkUINodeHandle node);
 };
 
 struct CJUISwiperControllerModifier {
@@ -1322,6 +1333,8 @@ struct CJUITabsModifier {
     void (*resetAnimateMode)(ArkUINodeHandle node);
     void (*setBarBackgroundEffect)(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* effectOption);
     void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
+    void (*setTabsOnSelected)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnSelected)(ArkUINodeHandle node);
 };
 
 struct CJUIStepperItemModifier {
@@ -2132,6 +2145,8 @@ struct CJUINavigationModifier {
     void (*resetNavBarWidth)(ArkUINodeHandle node);
     void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setEnableToolBarAdaptation)(ArkUINodeHandle node, ArkUI_Bool enbale);
+    void (*resetEnableToolBarAdaptation)(ArkUINodeHandle node);
 };
 
 struct CJUINavRouterModifier {
@@ -2327,6 +2342,10 @@ struct CJUICalendarPickerModifier {
     void (*resetStartDate)(ArkUINodeHandle node);
     void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
     void (*resetEndDate)(ArkUINodeHandle node);
+    void (*setCalendarPickerMarkToday)(ArkUINodeHandle node, ArkUI_Bool isMarkToday);
+    void (*resetCalendarPickerMarkToday)(ArkUINodeHandle node);
+    void (*setCalendarPickerDisabledDateRange)(ArkUINodeHandle node, ArkUI_CharPtr disabledDateRangeStr);
+    void (*resetCalendarPickerDisabledDateRange)(ArkUINodeHandle node);
     void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
         ArkUI_Int32 alignType);
     void (*resetEdgeAlign)(ArkUINodeHandle node);
@@ -2340,6 +2359,8 @@ struct CJUICalendarPickerModifier {
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getStartDate)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getEndDate)(ArkUINodeHandle node);
+    ArkUI_Bool (*getCalendarPickerMarkToday)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getCalendarPickerDisabledDateRange)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
     void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
@@ -2556,6 +2577,10 @@ struct CJUISymbolGlyphModifier {
     void (*resetEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 copyOption);
     void (*resetSymbolGlyphInitialize)(ArkUINodeHandle node);
+    void (*setMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 minFontScale);
+    void (*resetMinFontScale)(ArkUINodeHandle node);
+    void (*setMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
+    void (*resetMaxFontScale)(ArkUINodeHandle node);
 };
 
 struct CJUISymbolSpanModifier {
@@ -3067,7 +3092,7 @@ struct CJUIFrameNodeModifier {
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
-    ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool isExpanded);
+    ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode);
     ArkUINodeHandle (*getFirst)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getNextSibling)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getPreviousSibling)(ArkUINodeHandle node, ArkUI_Bool isExpanded);

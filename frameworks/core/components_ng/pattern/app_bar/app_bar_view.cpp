@@ -37,8 +37,8 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_WIDTH = 96;
-constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 12;
-constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 4;
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 8;
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 12;
 
 RefPtr<AppBarTheme> GetAppBarTheme()
 {
@@ -99,6 +99,7 @@ void AppBarView::BindJSContainer()
     CHECK_NULL_VOID(pattern);
     pattern->AppInfoCallBack();
     pattern->AppScreenCallBack();
+    pattern->AppBgColorCallBack();
 }
 
 void AppBarView::AddContentToJSContainer()
@@ -115,6 +116,7 @@ void AppBarView::AddContentToJSContainer()
     stageNodeWrapper->MarkDirtyNode();
 
     auto focusHub = contentStage_->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     focusHub->AnyChildFocusHub([](const RefPtr<FocusHub>& child) {
         auto node = child->GetFrameNode();
         auto focusView = node ? node->GetPattern<FocusView>() : nullptr;
@@ -328,6 +330,41 @@ void AppBarView::DestroyServicePanel()
     ContainerScope scope(pipeline->GetInstanceId());
     overlayManager->CloseModalUIExtension(sessionId_);
     LOGI("ServicePanel release session:%{public}d", sessionId_);
+}
+
+void AppBarView::CreateServicePanel(
+    const std::string& appGalleryBundleName, const std::string& abilityName, std::map<std::string, std::string>& params)
+{
+#ifndef PREVIEW
+    if (OHOS::Ace::SystemProperties::GetAtomicServiceBundleName().empty() &&
+        OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
+        LOGE("UIExtension BundleName is empty.");
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    ModalUIExtensionCallbacks callbacks;
+    callbacks.onRelease = [wp = WeakClaim(this)](int32_t releaseCode) {
+        auto bar = wp.Upgrade();
+        bar->DestroyServicePanel();
+    };
+    callbacks.onError = [wp = WeakClaim(this)](int32_t code, const std::string& name, const std::string& message) {
+        auto bar = wp.Upgrade();
+        bar->DestroyServicePanel();
+    };
+    auto wantWrap = WantWrap::CreateWantWrap(appGalleryBundleName, abilityName);
+    wantWrap->SetWantParam(params);
+    LOGI("ServicePanel request bundle: %{public}s, ability: %{public}s. "
+         "UIExtension bundle: %{public}s, ability: %{public}s, module: %{public}s",
+        appGalleryBundleName.c_str(), abilityName.c_str(), params["bundleName"].c_str(), params["abilityName"].c_str(),
+        params["module"].c_str());
+    ModalUIExtensionConfig config;
+    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, callbacks, config);
+#endif
 }
 
 void AppBarView::CreateServicePanel(bool firstTry)

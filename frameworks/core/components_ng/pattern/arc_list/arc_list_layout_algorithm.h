@@ -40,8 +40,6 @@ public:
 
     using CenterPos2ScaleMap = std::map<float, float, AscendingOrder>;
 
-    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
-
     float GetStartHeaderPos() const
     {
         return startHeaderPos_;
@@ -71,6 +69,7 @@ protected:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup) override;
     float GetLayoutFixOffset() override;
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper) override;
+    void FixPredictSnapPos() override;
 
 private:
     void MeasureList(LayoutWrapper* layoutWrapper) override;

@@ -22,6 +22,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 using VectorFloat64Ptr = void*;
+using VectorFloat64Handle = void*;
 using VectorInt32Ptr = void*;
 
 extern "C" {
@@ -50,7 +51,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkShapeSetStrokeMiterLimit(double miterLimit);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetStrokeOpacity(double strokeOpacity);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetStrokeWidth(double strokeWidth, int32_t widthUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetAntiAlias(bool antiAlias);
-CJ_EXPORT void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Ptr vecValue, uint32_t column, uint32_t row);
+CJ_EXPORT void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Handle vecValue, uint32_t column, uint32_t row);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit);

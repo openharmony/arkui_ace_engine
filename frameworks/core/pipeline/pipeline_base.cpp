@@ -86,6 +86,14 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
+std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
+{
+    if (!perfMonitor_) {
+        perfMonitor_ = std::make_shared<ArkUIPerfMonitor>();
+    }
+    return perfMonitor_;
+}
+
 PipelineBase::~PipelineBase()
 {
     std::lock_guard lock(destructMutex_);
@@ -233,8 +241,7 @@ void PipelineBase::SetRootSize(double density, float width, float height)
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
 }
 
@@ -769,6 +776,19 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
     }
 }
 
+bool PipelineBase::MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, static_cast<SubwindowType>(type));
+    if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow() &&
+        !subwindow->NeedAvoidKeyboard()) {
+        // subwindow is shown, main window no need to handle the keyboard event
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
+        CheckAndUpdateKeyboardInset(keyboardHeight);
+        return true;
+    }
+    return false;
+}
+
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, bool supportAvoidance,
     bool forceChange)
@@ -777,11 +797,17 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     double keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
 #ifdef OHOS_STANDARD_SYSTEM
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
-            // subwindow is shown, main window no need to handle the keyboard event
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
-            CheckAndUpdateKeyboardInset(keyboardHeight);
+        int32_t instanceId = currentContainer->GetInstanceId();
+        if (MarkUpdateSubwindowKeyboardInsert(
+            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_DIALOG))) {
+            return;
+        }
+        if (MarkUpdateSubwindowKeyboardInsert(
+            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_POPUP))) {
+            return;
+        }
+        if (MarkUpdateSubwindowKeyboardInsert(
+            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_MENU))) {
             return;
         }
 #endif
@@ -798,11 +824,17 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     auto currentContainer = Container::Current();
     float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
-            // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
-            CheckAndUpdateKeyboardInset(keyboardHeight);
+        int32_t instanceId = currentContainer->GetInstanceId();
+        if (MarkUpdateSubwindowKeyboardInsert(
+            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_DIALOG))) {
+            return;
+        }
+        if (MarkUpdateSubwindowKeyboardInsert(
+            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_POPUP))) {
+            return;
+        }
+        if (MarkUpdateSubwindowKeyboardInsert(
+            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_MENU))) {
             return;
         }
     }
@@ -993,8 +1025,7 @@ bool PipelineBase::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline");
     }
 }
 

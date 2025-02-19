@@ -259,6 +259,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleLayoutProperty);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
+    useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
@@ -267,7 +268,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");
         return;
     }
-    useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     // bubble size fit screen.
     layoutWrapper->GetGeometryNode()->SetFrameSize(layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
@@ -320,7 +320,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto targetSize = geometryNode->GetFrameSize();
-        auto targetOffset = targetNode->GetPaintRectOffset(false, true);
+        auto targetOffset = targetNode->GetPaintRectOffset();
         auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
         float maxWidth = constrainWidth - targetSecurity_ * DOUBLE;
@@ -524,12 +524,12 @@ void BubbleLayoutAlgorithm::UpdateHostWindowRect()
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
-        container = AceEngine::Get().GetContainer(currentId);
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(parentContainerId);
         CHECK_NULL_VOID(container);
     }
     if (container->IsUIExtensionWindow()) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_POPUP);
         CHECK_NULL_VOID(subwindow);
         hostWindowRect_ = subwindow->GetUIExtensionHostWindowRect();
     }
@@ -559,9 +559,9 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
                 auto frameNode = frameNodeWK.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, frameNode->GetId(), containerId);
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, frameNode->GetId(), containerId);
             },
-            TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas");
     }
 }
 
@@ -661,7 +661,9 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     maxColumns_ = popupTheme->GetMaxColumns();
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
     InitWrapperRect(layoutWrapper);
-    UpdateScrollHeight(layoutWrapper, showInSubWindow);
+    if (!useCustom_) {
+        UpdateScrollHeight(layoutWrapper, showInSubWindow);
+    }
 }
 
 void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
@@ -757,7 +759,7 @@ void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
     }
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    auto targetOffset = targetNode->GetPaintRectOffset(false, true);
+    auto targetOffset = targetNode->GetPaintRectOffset();
     float getY = 0;
     getY = targetOffset.GetY();
     auto bubbleNode = layoutWrapper->GetHostNode();
@@ -997,7 +999,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
         position = GetAdjustPosition(currentPlacementStates, step, childSize, topPosition, bottomPosition, ArrowOffset);
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
             showArrow_ = false;
-            if (avoidKeyboard_) {
+            if (avoidKeyboard_ && !isHalfFoldHover_) {
                 placement_ = originPlacement;
                 position = AdjustPositionNew(originPosition, childSize.Width(), childSize.Height());
             } else {
@@ -1172,15 +1174,42 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         default:
             break;
     }
-    if ((xMax < xMin && !isGreatWrapperWidth_) || yMax < yMin) {
-        return OffsetF(0.0f, 0.0f);
-    } else if (xMax < xMin && isGreatWrapperWidth_) {
+    if ((LessNotEqual(xMax, xMin) && !isGreatWrapperWidth_) || LessNotEqual(yMax, yMin)) {
+        if (!CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax)) {
+            return OffsetF(0.0f, 0.0f);
+        }
+    } else if (LessNotEqual(xMax, xMin) && isGreatWrapperWidth_) {
         auto y = std::clamp(position.GetY(), yMin, yMax);
         return OffsetF(0.0f, y + yTargetOffset);
     }
     auto result = GetBubblePosition(position, xMin, xMax, yMin, yMax);
     CheckArrowPosition(result, width, height);
     return result;
+}
+
+bool BubbleLayoutAlgorithm::CheckIfNeedRemoveArrow(float& xMin, float& xMax, float& yMin, float& yMax)
+{
+    if (!showArrow_ || !avoidKeyboard_) {
+        return false;
+    }
+    bool isHorizontal = false;
+    if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
+        isHorizontal = true;
+    }
+    if ((isHorizontal && LessNotEqual(yMax, yMin)) || (!isHorizontal && LessNotEqual(xMax, xMin))) {
+        return false;
+    }
+    if (isHorizontal && GreatOrEqual(xMax + BUBBLE_ARROW_HEIGHT.ConvertToPx(), xMin)) {
+        xMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        showArrow_ = false;
+        return true;
+    }
+    if (!isHorizontal && GreatOrEqual(yMax + BUBBLE_ARROW_HEIGHT.ConvertToPx(), yMin)) {
+        yMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        showArrow_ = false;
+        return true;
+    }
+    return false;
 }
 
 OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float xMin,
@@ -1481,7 +1510,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         targetSize_ = geometryNode->GetFrameSize();
-        targetOffset_ = targetNode->GetPaintRectOffset(false, true);
+        targetOffset_ = targetNode->GetPaintRectOffset();
     }
     auto pipelineContext = GetMainPipelineContext(layoutWrapper);
     CHECK_NULL_VOID(pipelineContext);

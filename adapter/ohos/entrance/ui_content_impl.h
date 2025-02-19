@@ -28,6 +28,7 @@
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
+#include "wm/data_handler_interface.h"
 #include "wm/window.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
@@ -75,6 +76,8 @@ public:
     void Background() override;
     void Focus() override;
     void UnFocus() override;
+    void ActiveWindow() override;
+    void UnActiveWindow() override;
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
@@ -97,6 +100,8 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
@@ -295,6 +300,7 @@ public:
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
+    bool GetContainerModalTitleVisible(bool isImmersive) override;
     void SetContainerModalTitleHeight(int32_t height) override;
     void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
@@ -341,6 +347,8 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
 
     void SetFormRenderingMode(int8_t renderMode) override;
+
+    void SetFormEnableBlurBackground(bool enableBlurBackground) override;
 
     void SetContentNodeGrayScale(float grayscale) override;
 
@@ -390,6 +398,10 @@ public:
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
+    void SetTopWindowBoundaryByID(const std::string& stringId) override;
+    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
+    bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

@@ -33,6 +33,11 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         nodeInfo_->codeRow = pos.first;
         nodeInfo_->codeCol = pos.second;
     }
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        depth_ = 1;
+        hostPageId_ = INT32_MAX;
+    }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -240,6 +245,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     if (iter == children_.end()) {
         return children_.end();
     }
+
+    // the node set isInDestroying state when destroying in pop animation
+    // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
+    if (IsDestroyingState()) {
+        return children_.end();
+    }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
     // disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved until the
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
@@ -358,6 +369,19 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
+    if (parent->GetPageId() != 0 && parent->GetPageId() != INT32_MAX) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
+}
+
+void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChildAfter(AceType::Claim(this), siblingNode);
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }
@@ -380,6 +404,9 @@ void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationC
 
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
+    if (IsDestroyingState()) {
+        return false;
+    }
     // The recursive flag will used by RenderContext, if recursive flag is false,
     // it may trigger transition
     DetachFromMainTree(!allowTransition);
@@ -393,7 +420,11 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    SetDepth(1);
+    depth_ = -1;
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        SetDepth(1);
+        SetHostPageIdByParent(INT32_MAX);
+    }
     UpdateThemeScopeId(0);
 }
 
@@ -486,6 +517,9 @@ void UINode::DoAddChild(
         child->UpdateThemeScopeId(themeScopeId);
     }
     child->SetDepth(GetDepth() + 1);
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        child->SetHostPageIdByParent(hostPageId_);
+    }
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
     }
@@ -494,6 +528,7 @@ void UINode::DoAddChild(
         child->AttachToMainTree(!addDefaultTransition, context_);
     }
     MarkNeedSyncRenderTree(true);
+    ProcessIsInDestroyingForReuseableNode(child);
 }
 
 void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -710,6 +745,9 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
 void UINode::DetachFromMainTree(bool recursive)
 {
     if (!onMainTree_) {
+        return;
+    }
+    if (IsDestroyingState()) {
         return;
     }
     onMainTree_ = false;
@@ -1662,6 +1700,47 @@ bool UINode::GetIsRootBuilderNode() const
 }
 
 // Collects  all the child elements of "children" in a recursive manner
+// Fills the "removedElmtId" list and the "reservedElmtId" list with the collected child elements
+void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
+    std::list<int32_t>& reservedElmtId, bool isEntry)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Container::Current();
+    auto greatOrEqualApi13 =
+        container && container->GetApiTargetVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    for (auto const& child : children) {
+        bool needByTransition = child->IsDisappearing();
+        if (greatOrEqualApi13) {
+            needByTransition = isEntry && child->IsDisappearing() && child->GetInspectorIdValue("") != "";
+        }
+
+        if (!needByTransition && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
+            removedElmtId.emplace_back(child->GetId());
+            if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+                CollectCleanedChildren(child->GetChildren(), removedElmtId, reservedElmtId, false);
+            }
+        } else if (needByTransition && greatOrEqualApi13) {
+            child->CollectReservedChildren(reservedElmtId);
+        }
+    }
+    if (isEntry) {
+        children_.clear();
+    }
+}
+
+void UINode::CollectReservedChildren(std::list<int32_t>& reservedElmtId)
+{
+    reservedElmtId.emplace_back(GetId());
+    if (GetTag() == V2::JS_VIEW_ETS_TAG) {
+        SetJSViewActive(false);
+    } else {
+        for (auto const& child : GetChildren()) {
+            child->CollectReservedChildren(reservedElmtId);
+        }
+    }
+}
+
+// Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
@@ -1684,6 +1763,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
 void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
 {
     removedElmtId.emplace_back(child->GetId());
+    child->OnCollectRemoved();
     // Fetch all the child elementIDs recursively
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
@@ -1883,5 +1963,47 @@ void UINode::SetAllowReusableV2Descendant(bool allow)
 bool UINode::IsAllowReusableV2Descendant() const
 {
     return allowReusableV2Descendant_;
+}
+
+void UINode::SetDestroying(bool isDestroying, bool cleanStatus)
+{
+    if (isInDestroying_ == isDestroying) {
+        return;
+    }
+
+    isInDestroying_ = isDestroying;
+    for (const auto& child : GetChildren()) {
+        if (child->IsReusableNode()) {
+            child->SetDestroying(isDestroying, false);
+        } else {
+            child->SetDestroying(isDestroying, cleanStatus);
+        }
+    }
+    // add customnode to pipiline when state change, destroy them next vsync
+    OnDestroyingStateChange(isDestroying, cleanStatus);
+}
+
+bool UINode::HasSkipNode()
+{
+    for (const auto& child : children_) {
+        if (child->GetTag() == V2::WEB_ETS_TAG) {
+            return true;
+        }
+
+        if (child->HasSkipNode()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !child || !child->IsReusableNode()) {
+        return;
+    }
+    if (!IsInDestroying() && child->IsInDestroying()) {
+        child->SetDestroying(false, false);
+    }
 }
 } // namespace OHOS::Ace::NG

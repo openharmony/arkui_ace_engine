@@ -441,12 +441,16 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 bool WaterFlowLayoutAlgorithm::PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
     const int32_t lastItem = layoutInfo_->GetLastItem();
+    int32_t startFrom = lastItem;
+    if (lastItem == -1) {
+        startFrom = 0;
+    }
     if (itemIdx <= lastItem) {
         return host->GetOrCreateChildByIndex(itemIdx, false, true);
     }
     const auto sub = layoutInfo_->targetIndex_;
     layoutInfo_->targetIndex_ = itemIdx;
-    const bool res = MeasureToTarget(host, lastItem, deadline);
+    const bool res = MeasureToTarget(host, startFrom, deadline);
     layoutInfo_->targetIndex_ = sub;
     return res;
 }

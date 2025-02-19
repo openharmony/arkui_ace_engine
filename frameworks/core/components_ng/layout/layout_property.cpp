@@ -980,7 +980,7 @@ void LayoutProperty::UpdateLayoutWeight(float value)
     }
 }
 
-void LayoutProperty::UpdateChainWeight(const LayoutWeightPair& value)
+void LayoutProperty::UpdateChainWeight(const ChainWeightPair& value)
 {
     if (flexItemProperty_->UpdateChainWeight(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;

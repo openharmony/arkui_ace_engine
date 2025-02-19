@@ -21,6 +21,7 @@
 #include "base/log/jank_frame_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -36,15 +37,39 @@ constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 
 namespace OHOS::Ace::NG {
 
+static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
+{
+    if (!SystemProperties::GetContainerDeleteFlag()) {
+        return;
+    }
+
+    CHECK_NULL_VOID(rsNode);
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(rsNode->GetFrameNodeId());
+
+    CHECK_NULL_VOID(uiNode);
+    if (isPositionZ) {
+        auto pipeline = uiNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddPositionZNode(rsNode->GetFrameNodeId());
+        return;
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (frameNode && frameNode->GetRenderContext()) {
+        frameNode->GetRenderContext()->AddNodeToRsTree();
+    }
+}
+
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
+    Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
-            ArkUIPerfMonitor::GetInstance().StartPerf();
+            ArkUIPerfMonitor::GetPerfMonitor(id)->StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
             }
@@ -56,7 +81,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
-            ArkUIPerfMonitor::GetInstance().FinishPerf();
+            ArkUIPerfMonitor::GetPerfMonitor(id)->FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
@@ -71,8 +96,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             onVsync();
             return;
         }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     if (window->GetSurfaceNode()) {

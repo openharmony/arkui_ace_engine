@@ -42,6 +42,7 @@ public:
     virtual void ClearBorder() = 0;
     virtual void ClearBorderWidth() = 0;
     virtual void ClearPadding() = 0;
+    virtual void SetMarkToday(bool isMarkToday) = 0;
 
 private:
     static std::unique_ptr<CalendarPickerModel> instance_;

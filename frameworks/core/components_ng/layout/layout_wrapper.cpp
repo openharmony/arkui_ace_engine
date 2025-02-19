@@ -99,28 +99,33 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     bool isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(host);
     // apply keyboard avoidance on Page or Overlay
     if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
-        GetHostTag() == V2::OVERLAY_ETS_TAG) {
+        GetHostTag() == V2::OVERLAY_ETS_TAG || GetHostTag() == V2::ORDER_OVERLAY_ETS_TAG) {
         CHECK_NULL_RETURN(IsActive(), false);
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
         auto pageCurrentOffset = GetPageCurrentOffset();
         auto pageHasOffset = LessNotEqual(pageCurrentOffset, 0.0f);
-        if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+        auto keyboardOffset = manager->GetKeyboardOffset();
+        auto lastChild = host->GetLastChild();
+        if (GetHostTag() == V2::PAGE_ETS_TAG && lastChild && lastChild->GetTag() == V2::DIALOG_ETS_TAG) {
+            keyboardOffset = 0.0f;
+        }
+        if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
             renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
             return false;
         }
         auto geometryNode = GetGeometryNode();
         auto x = geometryNode->GetFrameOffset().GetX();
         if (manager->IsAtomicService()) {
-            auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
+            auto usingRect = RectF(OffsetF(x, keyboardOffset), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
             geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
             renderContext->SyncPartialRsProperties();
             return true;
         }
         auto usingRect =
-            RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
+            RectF(OffsetF(x, safeArea.top_.Length() + keyboardOffset), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
         geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
         renderContext->SyncPartialRsProperties();
@@ -170,6 +175,16 @@ OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, boo
             auto renderPosition = FrameNode::ContextPositionConvertToPX(
                 parentRenderContext, parentLayoutConstraint.value().percentReference);
             offset += OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second));
+        } else if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() &&
+            parentRenderContext->GetPositionProperty()->HasPositionEdges()) {
+            auto parentLayoutProp = parent->GetLayoutProperty();
+            CHECK_NULL_RETURN(parentLayoutProp, offset);
+            auto parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
+            CHECK_EQUAL_RETURN(parentLayoutConstraint.has_value(), false, offset);
+            auto positionEdges = parentRenderContext->GetPositionEdgesValue(EdgesParam {});
+            auto renderPosition = parentRenderContext->GetRectOffsetWithPositionEdges(positionEdges,
+                parentLayoutConstraint->percentReference.Width(), parentLayoutConstraint->percentReference.Height());
+            offset += renderPosition;
         } else {
             offset += parent->GetFrameRectWithSafeArea().GetOffset();
         }
@@ -204,6 +219,18 @@ RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
         auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
         rect =
             RectF(OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second)), size);
+        return rect;
+    } else if (checkPosition && renderContext && renderContext->GetPositionProperty() &&
+        renderContext->GetPositionProperty()->HasPositionEdges()) {
+        auto layoutProp = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProp, rect);
+        auto layoutConstraint = layoutProp->GetLayoutConstraint();
+        CHECK_EQUAL_RETURN(layoutConstraint.has_value(), false, rect);
+        auto positionEdges = renderContext->GetPositionEdgesValue(EdgesParam {});
+        auto renderPosition = renderContext->GetRectOffsetWithPositionEdges(positionEdges,
+            layoutConstraint->percentReference.Width(), layoutConstraint->percentReference.Height());
+        auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
+        rect = RectF(renderPosition, size);
         return rect;
     }
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();

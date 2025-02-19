@@ -32,7 +32,7 @@ struct TimePickerDialogEvent {
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
 };
-class TimePickerModel {
+class ACE_FORCE_EXPORT TimePickerModel {
 public:
     static TimePickerModel* GetInstance();
     virtual ~TimePickerModel() = default;
@@ -59,6 +59,7 @@ public:
     virtual void HasUserDefinedOpacity() = 0;
     virtual void SetEnableCascade(bool isEnableCascade) = 0;
 
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
     static std::once_flag onceFlag_;

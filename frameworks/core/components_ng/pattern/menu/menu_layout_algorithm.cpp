@@ -826,6 +826,45 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
     childConstraint.maxSize.SetWidth(maxWidth);
 }
 
+void MenuLayoutAlgorithm::UpdateSelectFocus(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsSelectMenu()) {
+        return;
+    }
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childHost = child->GetHostNode();
+        CHECK_NULL_VOID(childHost);
+        // when use contentModifier the origin scroll node should be hide.
+        auto needHide = pattern->UseContentModifier() && childHost->GetId() != pattern->GetBuilderId();
+        auto layoutProperty = childHost->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(needHide ? VisibleType::GONE : VisibleType::VISIBLE);
+        auto focusHub = childHost->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetShow(!needHide);
+        // when use contentModifier the default focus should change to the first custom node.
+        if (childHost->GetChildren().empty()) {
+            return;
+        }
+        auto columnChild = childHost->GetChildAtIndex(0);
+        CHECK_NULL_VOID(columnChild);
+        if (columnChild->GetChildren().empty()) {
+            return;
+        }
+        auto optionChild = columnChild->GetChildAtIndex(0);
+        CHECK_NULL_VOID(optionChild);
+        auto optionNode = AceType::DynamicCast<FrameNode>(optionChild);
+        CHECK_NULL_VOID(optionNode);
+        auto optionFocusHub = optionNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(optionFocusHub);
+        optionFocusHub->SetIsDefaultFocus(!needHide);
+    }
+}
+
 void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     LayoutConstraintF& childConstraint, PaddingPropertyF padding, SizeF& idealSize,
     RefPtr<FrameNode> parentItem)
@@ -2173,6 +2212,16 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
     }
     UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
+    if (textAlign == TextAlign::CENTER) {
+        for (const auto& optionWrapper : optionsLayoutWrapper) {
+            optionWrapper->Measure(optionConstraint);
+        }
+    }
     constraint.minSize.SetWidth(maxChildrenWidth + optionPadding_ * 2.0f);
 }
 
@@ -2340,7 +2389,8 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
 {
     CHECK_NULL_VOID(layoutWrapper && menuPattern);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    if (!SkipUpdateTargetNodeSize(targetNode, menuPattern)) {
+    bool holdTargetOffset = SkipUpdateTargetNodeSize(targetNode, menuPattern);
+    if (!holdTargetOffset) {
         CHECK_NULL_VOID(targetNode);
         dumpInfo_.targetNode = targetNode->GetTag();
         auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -2362,7 +2412,10 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     if (canExpandCurrentWindow_ && targetTag_ != V2::SELECT_ETS_TAG) {
-        ModifyTargetOffset();
+        if (!holdTargetOffset) {
+            ModifyTargetOffset();
+            menuPattern->SetTargetOffset(targetOffset_);
+        }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
         return;
@@ -2890,7 +2943,8 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow)
         isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
         if (isUIExtensionSubWindow_) {
             canExpandCurrentWindow_ = true;
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                containerId, SubwindowType::TYPE_MENU);
             CHECK_NULL_VOID(subwindow);
             auto rect = subwindow->GetUIExtensionHostWindowRect();
             UIExtensionHostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -2910,7 +2964,7 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    auto availableRect = pipelineContext->GetDisplayAvailableRect();
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(menuPattern->GetHost());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayAvailableRect : %{public}s", availableRect.ToString().c_str());
     if (canExpandCurrentWindow_ && isExpandDisplay_) {
         menuWindowRect = Rect(availableRect.Left(), availableRect.Top(), availableRect.Width(), availableRect.Height());
@@ -2955,8 +3009,10 @@ bool MenuLayoutAlgorithm::HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(innerMenuPattern, false);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, false);
-    return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED &&
-           menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0;
+    auto isEmbeddedMenu =
+        layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED;
+    return isEmbeddedMenu && menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0 &&
+           !menuWrapperPattern->GetForceUpdateEmbeddedMenu();
 }
 
 std::string MenuLayoutAlgorithm::MoveTo(double x, double y)

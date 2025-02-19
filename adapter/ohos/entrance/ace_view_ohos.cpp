@@ -359,6 +359,11 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             dragEventCallback_(event, action, node);
             break;
         }
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL: {
+            action = DragEventAction::DRAG_EVENT_PULL_CANCEL;
+            dragEventCallback_(event, action, node);
+            break;
+        }
         default:
             break;
     }

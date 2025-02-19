@@ -51,6 +51,7 @@ bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
 bool SystemProperties::accessTraceEnable_ = false;
+bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -100,6 +101,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
@@ -339,6 +341,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
 std::string SystemProperties::GetDebugInspectorId()
 {
     return UNDEFINED_PARAM;
@@ -372,5 +379,15 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return false;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    return false;
 }
 } // namespace OHOS::Ace

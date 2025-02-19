@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,9 +95,7 @@ public:
         IDLE,
     };
 
-    static void SetVelocityScale(double sVelocityScale);
     static double GetVelocityScale();
-    static void SetFriction(double sFriction);
 
     void Initialize(const RefPtr<FrameNode>& host);
 
@@ -198,7 +196,7 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
-    void ProcessAxisUpdateEvent(float mainDelta);
+    void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
     void ProcessAxisEndEvent();
     void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
     void ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus);
@@ -374,6 +372,8 @@ public:
     {
         getSnapTypeCallback_ = getSnapTypeCallback;
     }
+
+    std::optional<float> GetPredictSnapOffset() const;
 
     void SetHandleScrollCallback(NestableScrollCallback&& func)
     {
@@ -644,13 +644,12 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
+    bool isCrownDragging_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode
     std::string nodeTag_ = "Scrollable";
     double slipFactor_ = 0.0;
-    static std::optional<double> sFriction_;
-    static std::optional<double> sVelocityScale_;
     bool continuousDragStatus_ = false;
     CancelableCallback<void()> task_;
     int32_t dragCount_ = 0;
@@ -694,6 +693,7 @@ private:
     float lastPosition_ = 0.0f;
     float initVelocity_ = 0.0f;
     float frictionVelocity_ = 0.0f;
+    double lastMainDelta_ = 0.0;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation

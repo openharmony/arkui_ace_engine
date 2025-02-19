@@ -70,6 +70,7 @@ void NavigationLayoutTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 /*
@@ -1445,7 +1446,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit001, TestSize.Level1)
     preNode->eventHub_ = nullptr;
     bool isNavBar = false;
 
-    EXPECT_EQ(preNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(preNode->GetEventHubOnly<EventHub>(), nullptr);
     EXPECT_FALSE(isNavBar);
     // Make sure navDestination is true
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);

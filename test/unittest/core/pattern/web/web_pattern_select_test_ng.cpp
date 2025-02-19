@@ -1196,7 +1196,6 @@ HWTEST_F(WebPatternSelectTestNg, OnSelectPopupMenu_002, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParamMock> params = nullptr;
-    EXPECT_EQ(params, nullptr);
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallbackMock> callback =
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
     EXPECT_NE(callback, nullptr);
@@ -1226,7 +1225,6 @@ HWTEST_F(WebPatternSelectTestNg, OnSelectPopupMenu_003, TestSize.Level1)
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
     EXPECT_NE(params, nullptr);
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallbackMock> callback = nullptr;
-    EXPECT_EQ(callback, nullptr);
     webPattern->OnSelectPopupMenu(params, callback);
 #endif
 }

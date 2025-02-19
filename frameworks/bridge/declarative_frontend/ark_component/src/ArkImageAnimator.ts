@@ -254,7 +254,7 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
       ImageAnimatorIterationsModeModifier, value);
     return this;
   }
-  autoMonitorInvisibleAreaMode(value: boolean): ImageAnimatorAttribute {
+  monitorInvisibleAreaMode(value: boolean): ImageAnimatorAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorAutoMonitorInvisibleAreaModeModifier.identity,
       ImageAnimatorAutoMonitorInvisibleAreaModeModifier, value);
     return this;

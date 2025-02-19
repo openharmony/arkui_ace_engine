@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -139,7 +140,7 @@ void SelectPattern::OnModifyDone()
     }
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<SelectTheme>();
+    auto theme = context->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
@@ -314,10 +315,10 @@ void SelectPattern::RegisterOnHover()
 void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        if (info.GetTouches().empty()) {
-            return;
-        }
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::function<void(UIState)> callback = [weak = WeakClaim(this)](const UIState& state) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -326,16 +327,15 @@ void SelectPattern::RegisterOnPress()
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
-        auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select touch type %{public}zu", touchType);
-        if (touchType == TouchType::DOWN) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select touch type %{public}zu", (size_t)state);
+        if (state == UI_STATE_PRESSED) {
             pattern->SetBgBlendColor(theme->GetClickedColor());
             pattern->PlayBgColorAnimation(false);
         }
-        if (touchType == TouchType::UP) {
+        if (state == UI_STATE_NORMAL) {
             if (pattern->IsHover()) {
                 pattern->SetBgBlendColor(theme->GetHoverColor());
             } else {
@@ -344,9 +344,7 @@ void SelectPattern::RegisterOnPress()
             pattern->PlayBgColorAnimation(false);
         }
     };
-    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    gestureHub->AddTouchEvent(touchEvent);
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, callback, true);
 }
 
 void SelectPattern::CreateSelectedCallback()
@@ -453,7 +451,7 @@ void SelectPattern::SetFocusStyle()
     CHECK_NULL_VOID(selectRenderContext);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(selectTheme);
     auto&& graphics = selectRenderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
@@ -501,7 +499,7 @@ void SelectPattern::ClearFocusStyle()
     CHECK_NULL_VOID(selectRenderContext);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(selectTheme);
 
     if (shadowModify_) {
@@ -601,7 +599,7 @@ void SelectPattern::SetDisabledStyle()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
 
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
@@ -807,6 +805,7 @@ void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
 
 void SelectPattern::SetFontColor(const Color& color)
 {
+    fontColor_ = color;
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
@@ -974,7 +973,7 @@ void SelectPattern::ResetOptionProps()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(selectTheme && textTheme);
 
@@ -1463,7 +1462,7 @@ void SelectPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(selectTheme);
 
     auto pattern = host->GetPattern<SelectPattern>();
@@ -1488,6 +1487,33 @@ void SelectPattern::OnColorConfigurationUpdate()
     }
     SetOptionBgColor(selectTheme->GetBackgroundColor());
     host->SetNeedCallChildrenUpdate(false);
+}
+
+bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(themeScopeId);
+    CHECK_NULL_RETURN(selectTheme, false);
+
+    if (!fontColor_.has_value()) {
+        ResetFontColor();
+        text_->MarkDirtyNode();
+        result = true;
+    }
+
+    auto selectRenderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(selectRenderContext, false);
+    auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_RETURN(selectPaintProperty, false);
+    if (!selectPaintProperty->HasBackgroundColor()) {
+        selectRenderContext->UpdateBackgroundColor(selectTheme->GetButtonBackgroundColor());
+        result = true;
+    }
+    return result;
 }
 
 void SelectPattern::OnLanguageConfigurationUpdate()
@@ -1524,7 +1550,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             }
             
         },
-        TaskExecutor::TaskType::UI, "ArkUISelectLanguageConfigUpdate", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUISelectLanguageConfigUpdate");
 }
 
 Dimension SelectPattern::GetFontSize()
@@ -1732,5 +1758,26 @@ void SelectPattern::SetDivider(const SelectDivider& divider)
         CHECK_NULL_VOID(props);
         props->UpdateDivider(divider);
     }
+}
+
+void SelectPattern::ResetFontColor()
+{
+    if (fontColor_.has_value()) {
+        fontColor_.reset();
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(selectTheme);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateTextColor(selectTheme->GetFontColor());
+    auto context = text_->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateForegroundColor(selectTheme->GetFontColor());
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
 }
 } // namespace OHOS::Ace::NG

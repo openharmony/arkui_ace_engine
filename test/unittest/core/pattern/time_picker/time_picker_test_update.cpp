@@ -69,9 +69,30 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const int HALF_VALUE = 2;
 const int SHOW_COUNT = 7;
 const Dimension FONT_VALUE_VP = 4.0_vp;
 const Dimension FONT_VALUE_NOMARL = Dimension(10);
+const double CURRENT_YOFFSET1 = -200.f;
+const double CURRENT_YOFFSET2 = 200.f;
+const double DEFAULT_YOFFSET1 = 1.f;
+const double NEXT_DISTANCE = 7.f;
+const double PREVIOUS_DISTANCE = 5.f;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class TimePickerPatternTestUpdate : public testing::Test {
 public:
@@ -119,18 +140,11 @@ void TimePickerPatternTestUpdate::TearDownTestSuite()
 void TimePickerPatternTestUpdate::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            if (type == IconTheme::TypeId()) {
-                return AceType::MakeRefPtr<IconTheme>();
-            } else if (type == DialogTheme::TypeId()) {
-                return AceType::MakeRefPtr<DialogTheme>();
-            } else if (type == PickerTheme::TypeId()) {
-                return MockThemeDefault::GetPickerTheme();
-            } else {
-                return nullptr;
-            }
-        });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -2021,5 +2035,102 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest010, TestSize.Level1)
     PickerTime value23 { 23, 40, 42 };
     hour = timePickerRowPattern->ParseHourOf24(value23.GetHour());
     EXPECT_EQ(hour, 11);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern001
+ * @tc.desc: Test UpdateColumnChildPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerColumnPattern001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.step: step1. create TimePicker's column pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto amPmColumn = allChildNode["amPm"].Upgrade();
+    ASSERT_NE(amPmColumn, nullptr);
+    auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(amPmColumnPattern, nullptr);
+    amPmColumnPattern->SetCurrentIndex(0);
+    EXPECT_TRUE(amPmColumnPattern->NotLoopOptions());
+
+    auto host = amPmColumnPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto options = amPmColumnPattern->GetOptions();
+    auto totalOptionCount = options[host];
+    EXPECT_EQ(totalOptionCount, HALF_VALUE);
+
+    /**
+     * @tc.step: step2. call UpdateColumnChildPosition, selected index is 0, not allow to slide down.
+     * @tc.expected: yLast_ is CURRNET_YOFFSET2, offsetCurSet_ is DEFAULT_YOFFSET1, GetCurrentIndex is 0.
+     */
+    amPmColumnPattern->yOffset_ = 0.f;
+    amPmColumnPattern->offsetCurSet_ = DEFAULT_YOFFSET1;
+    amPmColumnPattern->yLast_ = DEFAULT_YOFFSET1;
+    amPmColumnPattern->UpdateColumnChildPosition(CURRENT_YOFFSET2);
+
+    EXPECT_EQ(amPmColumnPattern->yLast_, CURRENT_YOFFSET2);
+    EXPECT_EQ(amPmColumnPattern->offsetCurSet_, DEFAULT_YOFFSET1);
+    EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), 0);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern002
+ * @tc.desc: Test UpdateColumnChildPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerColumnPattern002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.step: step1. create TimePicker's column pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto amPmColumn = allChildNode["amPm"].Upgrade();
+    ASSERT_NE(amPmColumn, nullptr);
+    auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(amPmColumnPattern, nullptr);
+    amPmColumnPattern->SetCurrentIndex(0);
+    EXPECT_TRUE(amPmColumnPattern->NotLoopOptions());
+
+    auto host = amPmColumnPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto options = amPmColumnPattern->GetOptions();
+    auto totalOptionCount = options[host];
+    EXPECT_EQ(totalOptionCount, HALF_VALUE);
+
+    /**
+     * @tc.step: step2. call UpdateColumnChildPosition, selected index is from 0 to 1 after sliding up.
+     * @tc.expected: yOffset_ is 0.f, offsetCurSet_ is 0.f, GetCurrentIndex is 1.
+     */
+    auto midIndex = amPmColumnPattern->GetShowCount() / HALF_VALUE;
+    amPmColumnPattern->optionProperties_[midIndex].prevDistance = PREVIOUS_DISTANCE;
+    amPmColumnPattern->optionProperties_[midIndex].nextDistance = NEXT_DISTANCE;
+
+    amPmColumnPattern->yLast_ = DEFAULT_YOFFSET1;
+    amPmColumnPattern->yOffset_ = CURRENT_YOFFSET1;
+    amPmColumnPattern->UpdateColumnChildPosition(CURRENT_YOFFSET1);
+
+    EXPECT_EQ(amPmColumnPattern->yOffset_, 0.f);
+    EXPECT_EQ(amPmColumnPattern->offsetCurSet_, 0.f);
+    EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), 1);
 }
 } // namespace OHOS::Ace::NG

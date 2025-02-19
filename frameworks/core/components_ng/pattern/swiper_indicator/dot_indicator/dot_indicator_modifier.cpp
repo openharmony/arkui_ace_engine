@@ -818,6 +818,26 @@ RefPtr<InterpolatingSpring> DotIndicatorModifier::GetTailCurve()
     return LONG_POINT_DEFAULT_CURVE;
 }
 
+AnimationOption DotIndicatorModifier::CreateTailOption(
+    const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState, bool isNormal)
+{
+    AnimationOption optionTail;
+    optionTail.SetDuration(animationDuration_);
+
+    if (userSetSwiperCurve_) {
+        optionTail.SetCurve(headCurve_);
+        return optionTail;
+    }
+
+    auto interpolatingSpring = GetTailCurve();
+    if (isNormal) {
+        interpolatingSpring->UpdateMinimumAmplitudeRatio(
+            CalculateMinimumAmplitudeRatio(longPointCenterX, gestureState));
+    }
+    optionTail.SetCurve(interpolatingSpring);
+    return optionTail;
+}
+
 void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
     GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
     const LinearVector<float>& vectorBlackPointCenterX, bool isNormal)
@@ -836,14 +856,7 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     optionHead.SetCurve(curve);
     optionHead.SetDuration(animationDuration_);
 
-    AnimationOption optionTail;
-    auto interpolatingSpring = GetTailCurve();
-    if (isNormal) {
-        interpolatingSpring->UpdateMinimumAmplitudeRatio(
-            CalculateMinimumAmplitudeRatio(longPointCenterX, gestureState));
-    }
-    optionTail.SetCurve(interpolatingSpring);
-    optionTail.SetDuration(animationDuration_);
+    AnimationOption optionTail = CreateTailOption(longPointCenterX, gestureState, isNormal);
     AnimationOption optionLeft = optionTail;
     AnimationOption optionRight = optionHead;
 

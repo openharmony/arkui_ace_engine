@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H
 
+#include <atomic>
 #include <cstdarg>
 #include <cstdint>
 #include <cstring>
@@ -218,7 +219,8 @@ enum AceLogTag : uint8_t {
     ACE_BADGE = 92,                // C0395C
     ACE_QRCODE = 93,               // C0395D
     ACE_PROGRESS = 94,             // C0395E
-    ACE_DYNAMIC_COMPONENT = 95,    // C0395E
+    ACE_DYNAMIC_COMPONENT = 95,    // C0395F
+    ACE_DRAWABLE_DESCRIPTOR = 96,  // C03960
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
@@ -302,6 +304,10 @@ private:
 
     static LogLevel level_;
 };
+
+static std::atomic<bool> skipBacktrace = false;
+
+void SetSkipBacktrace(bool inputFlag);
 
 bool LogBacktrace(size_t maxFrameNums = 256);
 } // namespace OHOS::Ace

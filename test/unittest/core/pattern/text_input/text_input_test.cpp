@@ -1901,7 +1901,7 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
      * @tc.steps: step4. escape when select all value
      */
     pattern_->HandleOnSelectAll(true);
-    EXPECT_TRUE(pattern_->HandleOnEscape());
+    EXPECT_FALSE(pattern_->HandleOnEscape());
 }
 
 /**

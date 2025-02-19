@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -465,9 +466,10 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    auto containerId = Container::CurrentId();
-    auto foldablewindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(containerId));
-    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return false; });
+
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetFoldStatus(FoldStatus::FOLDED);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
     MockPipelineContext::GetCurrent()->rootHeight_ = 6.0f;
     MockPipelineContext::GetCurrent()->rootWidth_ = 5.0f;
     EXPECT_FALSE(sheetPattern->IsFoldExpand());
@@ -476,7 +478,9 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     sheetPattern->GetSheetTypeWithAuto(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM);
 
-    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
+
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->sheetBottom_ = "bottom";
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
@@ -518,9 +522,10 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    auto containerId = Container::CurrentId();
-    auto foldablewindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(containerId));
-    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
+
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->sheetBottom_ = "undefined";
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
@@ -556,14 +561,7 @@ HWTEST_F(SheetPresentationTestNg, IsFoldExpand001, TestSize.Level1)
     SheetPresentationTestNg::SetUpTestCase();
 
     /**
-     * @tc.steps: step1. set API15.
-     */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN));
-
-    /**
-     * @tc.steps: step2. set container FoldStatus FOLDED.
+     * @tc.steps: step1. set container FoldStatus FOLDED.
      */
     RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
     displayInfo->SetFoldStatus(FoldStatus::FOLDED);
@@ -577,7 +575,7 @@ HWTEST_F(SheetPresentationTestNg, IsFoldExpand001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. excute IsFoldExpand func.
+     * @tc.steps: step2. excute IsFoldExpand func.
      * @tc.expected: false
      */
     EXPECT_FALSE(sheetPattern->IsFoldExpand());
@@ -1226,6 +1224,61 @@ HWTEST_F(SheetPresentationTestNg, GetTopAreaInWindow001, TestSize.Level1)
     SystemProperties::SetDeviceOrientation(deviceOrientation);
     safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeAreaInsets.top_.Length(), sheetPattern->GetBottomSafeArea());
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetBottomSafeArea001
+ * @tc.desc: Branch: if (cutoutSafeArea.top_.IsValid())
+ *           Condition: cutoutSafeArea.top_.IsValid() == true && GetStatusBarHeight() == 300
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, GetBottomSafeArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step1. mock pipeline and window, set cutoutSafeArea.top_.IsValid() is true.
+     * @tc.expected: GetBottomSafeArea is 300.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    SafeAreaInsets::Inset insetleft;
+    SafeAreaInsets::Inset insetTop;
+    insetTop.start = 0;
+    insetTop.end = 1;
+    SafeAreaInsets::Inset insetRight;
+    SafeAreaInsets::Inset insetBottom;
+    pipelineContext->safeAreaManager_->cutoutSafeArea_ =
+        SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+    auto window = std::make_shared<MockWindow>();
+    EXPECT_CALL(*window, GetStatusBarHeight()).WillRepeatedly([]() -> uint32_t { return 300; });
+    pipelineContext->window_ = window;
+    EXPECT_EQ(sheetPattern->GetBottomSafeArea(), 300);
+
+    /**
+     * @tc.steps: step1. set cutoutSafeArea.top_.IsValid() is false.
+     * @tc.expected: GetBottomSafeArea is safeAreaInsets.top_.Length().
+     */
+    insetTop.end = 0;
+    pipelineContext->safeAreaManager_->cutoutSafeArea_ =
+        SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(sheetPattern->GetBottomSafeArea(), safeAreaInsets.top_.Length());
+
+    pipelineContext->window_.reset();
     SheetPresentationTestNg::TearDownTestCase();
 }
 

@@ -165,6 +165,8 @@ export struct SliderBootcamp {
   @State slideRangeFrom: number = 0;
   @State enableSlideRangeTo: boolean = false;
   @State slideRangeTo: number = 0;
+  @State enableHapticFeedback: boolean = false;
+  @State hapticFeedback: boolean = true;
 
   /*通用属性和事件*/
   @State enableCompWidth: boolean = false;
@@ -1129,6 +1131,7 @@ export struct SliderBootcamp {
           this.sliderOptionsValue = value
           console.info('value:' + value + 'mode:' + mode.toString())
         })
+        .enableHapticFeedback(useEnabled(this.enableHapticFeedback, this.hapticFeedback))
         /*通用属性和通用事件*/
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
@@ -2221,6 +2224,16 @@ export struct SliderBootcamp {
           value: $enableSlideRangeTo,
           min: 0,
           max: 100
+        })
+        
+        RadioBlock({
+          title: 'hapticFeedback',
+          isEnabled: this.enableHapticFeedback,
+          value: this.hapticFeedback,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
         })
         /*通用属性和通用事件*/
         CompSizeBlocks({

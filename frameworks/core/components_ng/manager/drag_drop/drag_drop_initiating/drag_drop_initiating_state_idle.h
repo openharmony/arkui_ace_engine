@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t DEALY_TASK_DURATION = 350;
 constexpr int32_t SNAPSHOT_DELAY_TIME = 150;
 constexpr int32_t PRE_DRAG_DELAY_TIME = 50;
 } // namespace
@@ -47,10 +48,12 @@ public:
 private:
     void RegisterDragListener();
     void UnRegisterDragListener();
+    void AsyncDragEnd();
     void ResetStateForHitTest(const RefPtr<FrameNode>& frameNode);
     void StartCreateSnapshotTask(int32_t fingerId);
     void StartPreDragDetectingStartTask();
     void StartGatherTask();
+    void StartPreDragStatusCallback(const TouchEvent& touchEvent);
 };
 } // namespace OHOS::Ace::NG
 

@@ -403,6 +403,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      }
 
     public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
+        if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+            const prebuildFunc: PrebuildFunc = () => {
+              this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
+            };
+            PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+            ViewStackProcessor.PushPrebuildCompCmd();
+            return;
+        }
         if (this.isDeleting_) {
             stateMgmtConsole.error(`@ComponentV2 ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
             return;
@@ -496,6 +504,16 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * FIXME will still use in the future?
      */
     public uiNodeNeedUpdateV2(elmtId: number): void {
+        if (this.isPrebuilding_) {
+            const propertyChangedFunc: PrebuildFunc = () => {
+                this.uiNodeNeedUpdateV2(elmtId);
+            };
+            if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+                PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+            }
+            PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+            return;
+        }
         if (this.isFirstRender()) {
             return;
         }
@@ -548,6 +566,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             if (this.dirtDescendantElementIds_.size) {
                 stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
             }
+
+            for (const dirtRetakenElementId of this.dirtRetakenElementIds_) {
+                this.dirtDescendantElementIds_.add(dirtRetakenElementId);
+            }
+            this.dirtRetakenElementIds_.clear();
         } while (this.dirtDescendantElementIds_.size);
         stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE`);
         stateMgmtProfiler.end();
@@ -569,7 +592,18 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         // do not process an Element that has been marked to be deleted
         const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
-        const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+        if (!entry) {
+            stateMgmtProfiler.end();
+            return;
+        }
+        let updateFunc: UpdateFunc;
+        // if the element is pending, its updateFunc will not be executed during this function call, instead mark its UpdateFuncRecord as changed
+        // when the pending element is retaken and its UpdateFuncRecord is marked changed, then it will be inserted into dirtRetakenElementIds_
+        if (entry.isPending()) {
+            entry.setIsChanged(true);
+        } else {
+            updateFunc = entry.getUpdateFunc();
+        }
 
         if (typeof updateFunc !== 'function') {
             stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);

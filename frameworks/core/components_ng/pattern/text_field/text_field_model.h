@@ -239,7 +239,7 @@ public:
                 auto nextChar = value.substr(i, 1);
                 auto mapTuple = escapeMap.find(nextChar);
                 if (mapTuple == escapeMap.end()) {
-                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\%{public}s failed", nextChar.c_str());
+                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\%{private}s failed", nextChar.c_str());
                     return false;
                 }
                 ch = mapTuple->second;
@@ -302,7 +302,6 @@ public:
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) = 0;
     virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
@@ -365,7 +364,6 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
-
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};
     virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) = 0;

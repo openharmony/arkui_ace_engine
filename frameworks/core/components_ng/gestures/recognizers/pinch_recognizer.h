@@ -36,6 +36,18 @@ public:
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
 
+    void SetDistance(double distance)
+    {
+        distance_ = distance;
+    }
+
+    double GetDistance() const
+    {
+        return distance_;
+    }
+
+    void CheckCallbackState() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

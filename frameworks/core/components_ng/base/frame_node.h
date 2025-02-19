@@ -243,6 +243,7 @@ public:
     void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
         CreateEventHubInner();
+        CHECK_NULL_VOID(eventHub_);
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
@@ -253,6 +254,7 @@ public:
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         CreateEventHubInner();
+        CHECK_NULL_VOID(eventHub_);
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -337,6 +339,7 @@ public:
     RefPtr<T> GetEventHub()
     {
         CreateEventHubInner();
+        CHECK_NULL_RETURN(eventHub_, nullptr);
         return DynamicCast<T>(eventHub_);
     }
 
@@ -349,6 +352,7 @@ public:
     RefPtr<GestureEventHub> GetOrCreateGestureEventHub()
     {
         CreateEventHubInner();
+        CHECK_NULL_RETURN(eventHub_, nullptr);
         return eventHub_->GetOrCreateGestureEventHub();
     }
 
@@ -470,6 +474,10 @@ public:
 
     void OnWindowUnfocused() override;
 
+    void OnWindowActivated() override;
+
+    void OnWindowDeactivated() override;
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -492,7 +500,7 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    RectF GetTransformRectRelativeToWindow() const;
+    RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
@@ -827,6 +835,7 @@ public:
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
 
     FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false, bool isExpand = true);
+    FrameNode* GetFrameNodeChildByIndexWithoutBuild(uint32_t index);
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -1119,6 +1128,14 @@ public:
         return changeInfoFlag_;
     }
 
+    void SetDeleteRsNode(bool isDelete) {
+        isDeleteRsNode = isDelete;
+    }
+ 
+    bool GetIsDelete() {
+        return isDeleteRsNode;
+    }
+
     void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
 
     void ClearChangeInfoFlag()
@@ -1204,6 +1221,7 @@ public:
     void OnPropertyChangeMeasure() const;
 
     void SetKitNode(const RefPtr<Kit::FrameNode>& node);
+    const RefPtr<Kit::FrameNode>& GetKitNode() const;
 
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
@@ -1240,15 +1258,30 @@ public:
     {
         return lastHostParentOffsetToWindow_;
     }
+    void ResetRenderDirtyMarked(bool isRenderDirtyMarked)
+    {
+        isRenderDirtyMarked_ = isRenderDirtyMarked;
+    }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
     void FireFrameNodeDestructorCallback();
+
+    bool CheckTopWindowBoundary() const
+    {
+        return topWindowBoundary_;
+    }
+
+    void SetTopWindowBoundary(bool topWindowBoundary)
+    {
+        topWindowBoundary_ = topWindowBoundary;
+    }
 
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void OnCollectRemoved() override;
 
 private:
     void MarkDirtyNode(
@@ -1327,7 +1360,7 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
-    void ProcessThrottledVisibleCallback();
+    void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
@@ -1481,13 +1514,13 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
+    bool isDeleteRsNode = false;
 
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
-        false, true, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_;
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
@@ -1516,6 +1549,8 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+
+    bool topWindowBoundary_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

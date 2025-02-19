@@ -37,14 +37,25 @@ enum class ToastWindowType {
     TOAST_WINDOW_COUNT
 };
 
+enum class SubwindowType {
+    TYPE_SYSTEM_TOP_MOST_TOAST = 0,
+    TYPE_TOP_MOST_TOAST,
+    TYPE_MENU,
+    TYPE_POPUP,
+    TYPE_DIALOG,
+    TYPE_SELECT_MENU,
+    SUB_WINDOW_TYPE_COUNT,
+};
+
 class ACE_EXPORT Subwindow : public AceType {
     DECLARE_ACE_TYPE(Subwindow, AceType)
 
 public:
     static RefPtr<Subwindow> CreateSubwindow(int32_t instanceId);
 
-    virtual bool InitContainer() = 0;
+    virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
+    virtual void ResizeWindowForMenu() = 0;
     virtual NG::RectF GetRect() = 0;
     virtual void SetRect(const NG::RectF& rect) = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
@@ -95,10 +106,16 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual Rect GetFoldExpandAvailableRect() const = 0;
     virtual NG::RectF GetWindowRect() const
     {
         return NG::RectF();
     }
+    virtual bool NeedAvoidKeyboard()
+    {
+        return false;
+    }
+    virtual bool CheckHostWindowStatus() const = 0;
     virtual bool IsFreeMultiWindow() const = 0;
     virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
     virtual int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) = 0;
@@ -165,6 +182,26 @@ public:
         return isSystemTopMost_;
     }
 
+    void SetIsRosenWindowCreate(bool isRosenWindowCreate)
+    {
+        isRosenWindowCreate_ = isRosenWindowCreate;
+    }
+
+    bool GetIsRosenWindowCreate() const
+    {
+        return isRosenWindowCreate_;
+    }
+
+    void SetIsSelectOverlaySubWindow(bool isSelectOverlaySubWindow)
+    {
+        isSelectOverlaySubWindow_ = isSelectOverlaySubWindow;
+    }
+
+    bool GetIsSelectOverlaySubWindow() const
+    {
+        return isSelectOverlaySubWindow_;
+    }
+
     virtual void ClearToast() = 0;
     virtual void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback) = 0;
@@ -189,12 +226,15 @@ public:
     virtual void DestroyWindow() = 0;
     virtual void ResizeDialogSubwindow() = 0;
     virtual uint64_t GetDisplayId() = 0;
+    virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
 
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    bool isRosenWindowCreate_ = false;
+    bool isSelectOverlaySubWindow_ = false;
     ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
     // toast main window ID
     uint32_t mainWindowId_ = 0;

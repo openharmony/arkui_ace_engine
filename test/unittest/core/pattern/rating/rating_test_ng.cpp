@@ -364,6 +364,8 @@ HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest008, TestSize.Lev
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ratingPattern->isNeedFocusStyle_ = true;
+    ratingPattern->OnModifyDone();
     ASSERT_NE(ratingPattern, nullptr);
 
     /**
@@ -641,18 +643,15 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
-    ratingPattern->LoadFocusBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     ASSERT_NE(ratingPattern->foregroundImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->secondaryImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->backgroundImageLoadingCtx_, nullptr);
-    ASSERT_NE(ratingPattern->backgroundImageFocusLoadingCtx_, nullptr);
     EXPECT_TRUE(ratingPattern->secondaryConfig_.isSvg_);
     EXPECT_FALSE(ratingPattern->backgroundConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->foregroundConfig_.isSvg_);
     ratingPattern->foregroundImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
-    ratingPattern->backgroundImageFocusLoadingCtx_->SuccessCallback(nullptr);
     /**
      * @tc.steps: step4. 3 ImageLoadContexts callback successfuly, and imageSuccessStateCode_ ==
      * RATING_IMAGE_SUCCESS_CODE.
@@ -677,16 +676,14 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
-    ratingPattern->LoadFocusBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     EXPECT_FALSE(ratingPattern->secondaryConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->backgroundConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->foregroundConfig_.isSvg_);
-    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 15);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 7);
     ratingPattern->foregroundImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
-    ratingPattern->backgroundImageFocusLoadingCtx_->SuccessCallback(nullptr);
-    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 0b1111);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, RATING_IMAGE_SUCCESS_CODE);
     auto paintMethod3 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod3, nullptr);
     EXPECT_EQ(ratingPattern->ratingModifier_->foreground_.GetSrc(), RATING_SVG_URL);
@@ -724,7 +721,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
      */
     frameNode->geometryNode_->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
     frameNode->geometryNode_->SetContentSize(CONTAINER_SIZE);
-    ratingPattern->imageSuccessStateCode_ = 0b1111;
+    ratingPattern->imageSuccessStateCode_ = RATING_IMAGE_SUCCESS_CODE;
     auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod2, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
@@ -1817,104 +1814,6 @@ HWTEST_F(RatingTestNg, RatingPatternTest071, TestSize.Level1)
 }
 
 /**
- * @tc.name: PreventDefault001
- * @tc.desc: test InitTouchEvent and InitClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RatingTestNg, PreventDefault001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create RatingModelNG.
-     */
-    RatingModelNG rating;
-    rating.Create();
-    rating.SetIndicator(RATING_INDICATOR);
-    rating.SetStepSize(RATING_STEP_SIZE_1);
-    rating.SetStars(DEFAULT_STAR_NUM);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<RatingPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-
-    /**
-     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent(gestureHub);
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
-    touchInfo.SetPreventDefault(true);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    ASSERT_NE(pattern->touchEvent_, nullptr);
-    pattern->touchEvent_->callback_(touchInfo);
-    EXPECT_TRUE(pattern->isTouchPreventDefault_);
-    /**
-     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent(gestureHub);
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(true);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    ASSERT_NE(pattern->clickEvent_, nullptr);
-    pattern->clickEvent_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-}
-
-/**
- * @tc.name: PreventDefault002
- * @tc.desc: test RatingPattern::InitTouchEvent and RatingPattern::InitClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RatingTestNg, PreventDefault002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create RatingModelNG.
-     */
-    RatingModelNG rating;
-    rating.Create();
-    rating.SetIndicator(RATING_INDICATOR);
-    rating.SetStepSize(RATING_STEP_SIZE_1);
-    rating.SetStars(DEFAULT_STAR_NUM);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<RatingPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-
-    /**
-     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent(gestureHub);
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::UP);
-    touchInfo.SetPreventDefault(false);
-    touchInfo.SetSourceDevice(SourceType::MOUSE);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    ASSERT_NE(pattern->touchEvent_, nullptr);
-    pattern->touchEvent_->callback_(touchInfo);
-    EXPECT_EQ(touchInfo.IsPreventDefault(), pattern->isTouchPreventDefault_);
-    /**
-     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent(gestureHub);
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(false);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    ASSERT_NE(pattern->clickEvent_, nullptr);
-    pattern->clickEvent_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-}
-
-/**
  * @tc.name: RatingPatternTest072
  * @tc.desc: test RatingPattern::HandleClick
  * @tc.type: FUNC
@@ -2107,6 +2006,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest016, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2182,6 +2082,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest017, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2237,6 +2138,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest018, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2292,6 +2194,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2324,5 +2227,24 @@ HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::HOVER);
     ratingPattern->HandleHoverEvent(false);
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::NONE);
+}
+
+/**
+ * @tc.name: RatingOnChangeEventTest002
+ * @tc.desc: Test Rating onChange event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingOnChangeEventTest002, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    std::string unknownRatingScore;
+    auto onChange = [&unknownRatingScore](const std::string& ratingScore) { unknownRatingScore = ratingScore; };
+    rating.SetOnChange(frameNode, onChange);
+    EXPECT_NE(eventHub->changeEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

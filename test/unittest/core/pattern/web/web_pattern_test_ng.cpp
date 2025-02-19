@@ -286,6 +286,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->isEnhanceSurface_ = true;
     webPattern->delegate_ = nullptr;
     webPattern->OnModifyDone();
+    webPattern->GetCurrentLanguage();
 #endif
 }
 

@@ -636,7 +636,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign005, TestSize.Level1)
      */
     DragAction(frameNode_, Offset(), 100, 800);
     EXPECT_TRUE(TickPosition(-250.0f));
-    EXPECT_TRUE(TickPosition(-175.0f));
+    EXPECT_TRUE(TickPosition(0.0f));
 }
 
 /**
@@ -1244,5 +1244,34 @@ HWTEST_F(ListEventTestNg, CenterSnapAnimation001, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 0);
+}
+
+/**
+ * @tc.name: HandleBoxSelectDragStart
+ * @tc.desc: Handle drag start for box select
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleBoxSelectDragStart, TestSize.Level1)
+{
+    const int32_t itemNumber = 20;
+    const float contentStartOffset = 0;
+    const float contentEndOffset = 100;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    CreateListItems(itemNumber);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetRawGlobalLocation(Offset(20, 50));
+    info.SetOffsetX(5);
+    info.SetOffsetY(10);
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->canMultiSelect_);
+    EXPECT_FALSE(pattern_->IsItemSelected(20, 50));
+    pattern_->HandleDragEnd();
+
+    GetChildPattern<ListItemPattern>(frameNode_, 0)->SetSelected(true);
+    EXPECT_TRUE(pattern_->IsItemSelected(20, 50));
 }
 } // namespace OHOS::Ace::NG

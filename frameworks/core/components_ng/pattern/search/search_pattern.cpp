@@ -19,9 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -813,9 +811,7 @@ void SearchPattern::OnClickButtonAndImage()
     if (!event.IsKeepEditable()) {
         textFieldPattern->StopEditing();
     }
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Search.onSubmit");
-#endif
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -836,7 +832,6 @@ void SearchPattern::OnClickCancelButton()
     textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateValue(u"");
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -1716,6 +1711,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("enablePreviewText", textFieldPattern->GetSupportPreviewText(), filter);
     textFieldPattern->ToJsonValueSelectOverlay(json, filter);
     json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
+    json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const

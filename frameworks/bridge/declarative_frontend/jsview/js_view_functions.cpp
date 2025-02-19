@@ -186,6 +186,44 @@ void ViewFunctions::ExecuteSetActive(bool active, bool isReuse)
     }
 }
 
+void ViewFunctions::ExecutePrebuildComponent()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsPrebuildComponent_.Lock();
+    if (!func->IsEmpty()) {
+        func->Call(jsObject_.Lock());
+    } else {
+        LOGE("the prebuild component func is null");
+    }
+}
+
+void ViewFunctions::ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsSetPrebuildPhase_.Lock();
+    if (!func->IsEmpty()) {
+        auto jsPrebuildPhase = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(prebuildPhase)));
+        func->Call(jsObject_.Lock(), 1, &jsPrebuildPhase);
+    } else {
+        LOGE("the set prebuild phase func is null");
+    }
+}
+
+bool ViewFunctions::ExecuteIsEnablePrebuildInMultiFrame()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
+    auto func = jsIsEnablePrebuildInMultiFrame_.Lock();
+    if (!func->IsEmpty()) {
+        auto result = func->Call(jsObject_.Lock());
+        if (result->IsBoolean()) {
+            return result->ToBoolean();
+        }
+    } else {
+        LOGE("the is enable prebuild in multi frame func is null");
+    }
+    return false;
+}
+
 void ViewFunctions::ExecuteOnDumpInfo(const std::vector<std::string>& params)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
@@ -305,6 +343,21 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsOnDumpInspector = jsObject->GetProperty("onDumpInspector");
         if (jsOnDumpInspector->IsFunction()) {
             jsOnDumpInspector_ = JSRef<JSFunc>::Cast(jsOnDumpInspector);
+        }
+
+        JSRef<JSVal> jsPrebuildComponent = jsObject->GetProperty("prebuildComponent");
+        if (jsPrebuildComponent->IsFunction()) {
+            jsPrebuildComponent_ = JSRef<JSFunc>::Cast(jsPrebuildComponent);
+        }
+
+        JSRef<JSVal> jsIsEnablePrebuildInMultiFrame = jsObject->GetProperty("isEnablePrebuildInMultiFrame");
+        if (jsIsEnablePrebuildInMultiFrame->IsFunction()) {
+            jsIsEnablePrebuildInMultiFrame_ = JSRef<JSFunc>::Cast(jsIsEnablePrebuildInMultiFrame);
+        }
+
+        JSRef<JSVal> jsSetPrebuildPhase = jsObject->GetProperty("setPrebuildPhase");
+        if (jsSetPrebuildPhase->IsFunction()) {
+            jsSetPrebuildPhase_ = JSRef<JSFunc>::Cast(jsSetPrebuildPhase);
         }
     }
 
@@ -655,7 +708,7 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             view->Destroy(parentCustomView);
         }
@@ -680,7 +733,7 @@ void ViewFunctions::Destroy()
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             LOGE("NOTE NOTE NOTE render returned a JSView object that's dangling!");
         }
@@ -692,7 +745,11 @@ void ViewFunctions::Destroy()
 // Partial update method
 void ViewFunctions::ExecuteRerender()
 {
-    COMPONENT_UPDATE_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    COMPONENT_UPDATE_DURATION(id);
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRerenderFunc_.IsEmpty()) {
         LOGE("no rerender function in View!");

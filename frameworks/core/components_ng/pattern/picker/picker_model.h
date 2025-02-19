@@ -44,6 +44,8 @@ struct PickerDialogInfo {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
     std::optional<HoverModeAreaType> hoverModeArea;
 };
@@ -80,12 +82,13 @@ public:
     virtual void HasUserDefinedOpacity() = 0;
     virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) {};
 
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
     static std::once_flag onceFlag_;
 };
 
-class DatePickerDialogModel {
+class ACE_FORCE_EXPORT DatePickerDialogModel {
 public:
     static DatePickerDialogModel* GetInstance();
     virtual ~DatePickerDialogModel() = default;

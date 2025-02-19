@@ -39,6 +39,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -94,11 +95,11 @@ std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
     { ERROR_CODE_INTERNAL_ERROR, "Internal error." },
     { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
         "2. Incorrect parameter types; 3. Parameter verification failed." },
-    { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
-    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
-    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
-    { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The target does not exist. " },
-    { ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE, "The target node is not in the component tree. " }
+    { ERROR_CODE_DIALOG_CONTENT_ERROR, "The ComponentContent is incorrect. " },
+    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "The ComponentContent already exists. " },
+    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "The ComponentContent cannot be found. " },
+    { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The targetId does not exist. " },
+    { ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE, "The node of targetId is not in the component tree. " }
 };
 
 void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
@@ -360,6 +361,17 @@ AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionCon
     }
     auto delay = obj->GetPropertyValue<int32_t>("delay", 0);
     auto iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
+    JSRef<JSVal> rateRangeObjectArgs = obj->GetProperty("expectedFrameRateRange");
+    if (rateRangeObjectArgs->IsObject()) {
+        JSRef<JSObject> rateRangeObj = JSRef<JSObject>::Cast(rateRangeObjectArgs);
+        int32_t fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
+        int32_t fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
+        int32_t fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[keyframe] SetExpectedFrameRateRange"
+            "{%{public}d, %{public}d, %{public}d}", fRRmin, fRRmax, fRRExpected);
+        RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+        option.SetFrameRateRange(frameRateRange);
+    }
     option.SetDelay(delay);
     option.SetIteration(iterations);
     return option;
@@ -709,6 +721,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
+    auto iterations = option.GetIteration();
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     std::optional<int32_t> count;
@@ -718,8 +732,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count]() mutable {
-            RecordAnimationFinished(count.value_or(1));
+                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count,
+                            iterations]() mutable {
+            RecordAnimationFinished(iterations);
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -733,13 +748,12 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
-        onFinishEvent = [traceStreamPtr, count]() {
-            RecordAnimationFinished(count.value_or(1));
+        onFinishEvent = [traceStreamPtr, iterations]() {
+            RecordAnimationFinished(iterations);
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     }
 
-    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
@@ -910,7 +924,6 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
             return;
         }
     }
-    sheetStyle.instanceId = Container::CurrentId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "paramCnt: %{public}d, contentId: %{public}d, targetId: %{public}d",
         paramCnt, sheetContentNode->GetId(), targetId);
     auto ret = ViewContextModel::GetInstance()->OpenBindSheet(sheetContentNode,
@@ -1050,9 +1063,10 @@ void JSViewContext::JSOpenPopup(const JSCallbackInfo& info)
         JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
     }
     auto ret = JSViewAbstract::OpenPopup(popupParam, popupContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1077,9 +1091,10 @@ bool UpdateParsePopupParam(const JSCallbackInfo& info, RefPtr<PopupParam>& popup
             popupParam->SetTargetId(param->GetTargetId());
         }
     } else {
-        if (result != ERROR_CODE_INTERNAL_ERROR) {
-            ReturnPromise(info, result);
+        if (result == ERROR_CODE_INTERNAL_ERROR) {
+            result = ERROR_CODE_NO_ERROR;
         }
+        ReturnPromise(info, result);
         return false;
     }
     auto isShowInSubWindow = param->IsShowInSubWindow();
@@ -1121,9 +1136,10 @@ void JSViewContext::JSUpdatePopup(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::UpdatePopup(popupParam, popupContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1140,6 +1156,129 @@ void JSViewContext::JSClosePopup(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::ClosePopup(popupContentNode);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(info, ret);
+    return;
+}
+
+int32_t GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)
+{
+    if (!node) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto context = node->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, ERROR_CODE_INTERNAL_ERROR);
+    auto overlayManager = context->GetOverlayManager();
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuNode = overlayManager->GetMenuNodeWithExistContent(node);
+    if (!menuNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "GetMenuParam failed because cannot find menuNode.");
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    auto wrapperPattern = AceType::DynamicCast<NG::MenuWrapperPattern>(menuNode->GetPattern());
+    CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto menuProperties = wrapperPattern->GetMenuParam();
+    menuParam = menuProperties;
+    return ERROR_CODE_NO_ERROR;
+}
+
+void JSViewContext::JSOpenMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    int32_t targetId = INVALID_ID;
+    if (info[INDEX_ONE]->IsObject()) {
+        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        auto result = ParseTargetInfo(menuObj, targetId);
+        if (result != ERROR_CODE_NO_ERROR) {
+            ReturnPromise(info, result);
+            return;
+        }
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    NG::MenuParam menuParam;
+    JSRef<JSObject> menuObj;
+    if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
+        menuObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
+    }
+    JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+    auto ret = JSViewAbstract::OpenMenu(menuParam, menuContentNode, targetId);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSUpdateMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    bool isPartialUpdate = false;
+    if (paramCnt == LENGTH_THREE) {
+        if (!info[INDEX_TWO]->IsBoolean()) {
+            ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+            return;
+        }
+        isPartialUpdate = info[INDEX_TWO]->ToBoolean();
+    }
+    NG::MenuParam menuParam;
+    if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
+        if (isPartialUpdate) {
+            auto result = GetMenuParam(menuParam, menuContentNode);
+            if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+                ReturnPromise(info, result);
+                return;
+            }
+        }
+        auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto ret = JSViewAbstract::UpdateMenu(menuParam, menuContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSCloseMenu(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_ONE) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto menuContentNode = ParseContentNode(info);
+    if (menuContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto ret = JSViewAbstract::CloseMenu(menuContentNode);
     if (ret != ERROR_CODE_INTERNAL_ERROR) {
         ReturnPromise(info, ret);
     }
@@ -1199,6 +1338,9 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("openPopup", JSOpenPopup);
     JSClass<JSViewContext>::StaticMethod("updatePopup", JSUpdatePopup);
     JSClass<JSViewContext>::StaticMethod("closePopup", JSClosePopup);
+    JSClass<JSViewContext>::StaticMethod("openMenu", JSOpenMenu);
+    JSClass<JSViewContext>::StaticMethod("updateMenu", JSUpdateMenu);
+    JSClass<JSViewContext>::StaticMethod("closeMenu", JSCloseMenu);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
     JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);

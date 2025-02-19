@@ -201,9 +201,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     renderContext->SetClipToBounds(true);
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     // only floating window show border
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
-    renderContext->UpdateBorderRadius(borderRadius);
     BorderColorProperty borderColor;
     borderColor.SetColor((isFloatingWindow && isShow) ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
     renderContext->UpdateBorderColor(borderColor);
@@ -265,24 +262,6 @@ RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
     const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
 {
     return controlButtonsNode->GetChildAtIndex(originIndex);
-}
-
-void ContainerModalPatternEnhance::OnWindowFocused()
-{
-    ContainerModalPattern::OnWindowFocused();
-    isHoveredMenu_ = false;
-}
-
-void ContainerModalPatternEnhance::OnWindowUnfocused()
-{
-    if (SubwindowManager::GetInstance()->GetCurrentWindow() &&
-        SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
-        isFocus_ = false;
-        isHoveredMenu_ = true;
-        return;
-    }
-    ContainerModalPattern::OnWindowUnfocused();
-    isHoveredMenu_ = false;
 }
 
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
@@ -485,13 +464,13 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
     CHECK_NULL_VOID(tapGesture);
     WeakPtr<FrameNode> weakNode = frameNode_;
     tapGesture->SetOnActionId([weakNode](GestureEvent& info) mutable {
-        TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click.");
         auto containerNode = weakNode.Upgrade();
         CHECK_NULL_VOID(containerNode);
         auto windowManager = GetNotMovingWindowManager(containerNode);
         CHECK_NULL_VOID(windowManager);
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click. maximizeMode =  %{public}d", maximizeMode);
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -501,7 +480,7 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_MAXIMIZE);
             windowManager->WindowMaximize(true);
         }
-        containerNode->OnWindowFocused();
+        containerNode->OnWindowActivated();
     });
     eventHub->AddGesture(tapGesture);
 }
@@ -516,14 +495,13 @@ void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& conta
 
 void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
     auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     ResetHoverTimer();
     if (!windowManager) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd");
     auto mode = windowManager->GetWindowMode();
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd, mode = %{public}d", mode);
     auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
         mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -533,7 +511,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowFocused();
+    GetHost()->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
@@ -570,8 +548,8 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
     CHECK_NULL_RETURN(menuList, nullptr);
     auto subWindowManger = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subWindowManger, nullptr);
-    if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
-            !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
+    auto menuSubwindow = subWindowManger->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    if ((!menuSubwindow || !menuSubwindow->GetShown())) {
         ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
         MenuParam menuParam {};
         menuParam.type = MenuType::CONTEXT_MENU;
@@ -699,6 +677,11 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
     auto floatingTitleRow = GetFloatingTitleRow();
     auto customTitleRow = GetCustomTitleRow();
     auto gestureRow = GetGestureRow();
+    if (enableContainerModalGesture_) {
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    }
     EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
     EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
     EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
@@ -781,7 +764,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick()
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowFocused();
+    GetHost()->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick()
@@ -843,6 +826,9 @@ void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name
     auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
     controlButtonsNode->FireCustomCallback(name, value);
+    auto customTitleNode = GetCustomTitleNode();
+    CHECK_NULL_VOID(customTitleNode);
+    customTitleNode->FireCustomCallback(name, value);
 }
 
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
@@ -850,7 +836,20 @@ CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
     auto buttonRow = GetButtonRowByInspectorId();
     CHECK_NULL_RETURN(buttonRow, CalcLength(Dimension(0, DimensionUnit::VP)));
     auto width = buttonRow->GetGeometryNode()->GetFrameRect().Width();
-    return CalcLength(Dimension(width, DimensionUnit::VP));
+    if (NearZero(width)) {
+        // If the width is 0, initialize the width according to UX specifications.
+        int32_t buttonNum = 0;
+        const auto& children = buttonRow->GetChildren();
+        for (const auto& child : children) {
+            auto childButton = AceType::DynamicCast<FrameNode>(child);
+            if (childButton && childButton->IsVisible()) {
+                buttonNum++;
+            }
+        }
+        return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
+                          CONTROL_BUTTON_ROW_LEFT_PADDING + CONTROL_BUTTON_ROW_RIGHT_PADDING);
+    }
+    return CalcLength(Dimension(width, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
 }
 
 bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)

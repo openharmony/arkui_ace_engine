@@ -44,6 +44,7 @@ enum class FoldScreenType: int32_t {
     BIG_FOLDER = 1,
     SMALL_FOLDER = 2,
     OUTER_FOLDER = 3,
+    SUPER_FOLDER = 5,
 };
 
 constexpr int32_t MCC_UNDEFINED = 0;
@@ -251,6 +252,8 @@ public:
 
     static std::string GetLanguage();
 
+    static bool GetContainerDeleteFlag();
+
     static std::string GetRegion();
 
     static std::string GetNewPipePkg();
@@ -338,6 +341,11 @@ public:
     static bool GetAccessTraceEnabled()
     {
         return accessTraceEnable_;
+    }
+
+    static bool GetVsyncModeTraceEnabled()
+    {
+        return vsyncModeTraceEnable_;
     }
 
     static bool GetTraceInputEventEnabled()
@@ -621,6 +629,8 @@ public:
 
     static bool IsSmallFoldProduct();
 
+    static bool IsBigFoldProduct();
+
     static std::string GetWebDebugRenderMode();
 
     static std::string GetDebugInspectorId();
@@ -633,6 +643,11 @@ public:
 
     static bool IsNeedResampleTouchPoints();
 
+    static bool GetAsyncInitializeEnabled()
+    {
+        return asyncInitializeEnabled_.load();
+    }
+
     static bool IsNeedSymbol();
 
     static bool GetTaskPriorityAdjustmentEnable()
@@ -641,6 +656,8 @@ public:
     }
 
     static int32_t GetDragDropFrameworkStatus();
+
+    static bool IsSuperFoldDisplayDevice();
 
 private:
     static bool opincEnabled_;
@@ -657,6 +674,7 @@ private:
     static bool textTraceEnable_;
     static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
+    static bool vsyncModeTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
     static bool isRound_;
@@ -685,6 +703,7 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
@@ -707,6 +726,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
+    static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;

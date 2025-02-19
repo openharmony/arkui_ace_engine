@@ -1082,7 +1082,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleTouchUp001, TestSize.Level1)
     richEditorPattern->editingLongPress_ = true;
     richEditorPattern->isEditing_ = false;
     richEditorPattern->HandleTouchUp();
-    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
+    EXPECT_EQ(richEditorPattern->editingLongPress_, false);
     richEditorPattern->editingLongPress_ = true;
     richEditorPattern->isEditing_ = true;
     richEditorPattern->HandleTouchUp();
@@ -1321,7 +1321,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0);
+    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
 
     EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
 }
@@ -1493,7 +1493,7 @@ HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength001, TestSize.Lev
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 4;
     int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
-    EXPECT_EQ(length, 5);
+    EXPECT_EQ(length, 4);
 }
 
 /**
@@ -1510,7 +1510,7 @@ HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength002, TestSize.Lev
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 1;
     int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
-    EXPECT_EQ(length, 3);
+    EXPECT_EQ(length, 2);
 }
 
 /**

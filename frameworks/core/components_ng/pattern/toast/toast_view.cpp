@@ -173,7 +173,7 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     }
     toastContext->UpdateBackShadow(shadow);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
+        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(toastTheme->GetDefaultBGColor()));
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             toastInfo.backgroundBlurStyle.value_or(toastTheme->GetToastBackgroundBlurStyle()));

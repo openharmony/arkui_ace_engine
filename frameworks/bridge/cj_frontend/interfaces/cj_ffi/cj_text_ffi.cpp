@@ -58,6 +58,11 @@ const std::vector<TextDecorationStyle> TEXT_DECORATIONS_STYLE = { TextDecoration
 
 namespace OHOS::Ace::Framework {
 
+NativeLayoutManager::NativeLayoutManager() : FFIData()
+{
+    LOGI("Native LayoutManager constructed: %{public}" PRId64, GetID());
+}
+
 NGNativeTextController::NGNativeTextController() : FFIData()
 {
     LOGI("Native TextController constructed: %{public}" PRId64, GetID());
@@ -67,6 +72,19 @@ void NGNativeTextController::CloseSelectionMenu()
 {
     if (controller_) {
         controller_->CloseSelectionMenu();
+    }
+}
+
+void NGNativeTextController::GetLayoutManager(int64_t layoutId)
+{
+    auto layout = FFIData::GetData<NativeLayoutManager>(layoutId);
+    if (layout == nullptr) {
+        LOGE("FFIText invalid layoutId");
+        return;
+    }
+    if (controller_) {
+        auto nativeLayout = controller_->GetLayoutInfoInterface();
+        layout->SetLayoutManager(nativeLayout.Upgrade());
     }
 }
 } // namespace OHOS::Ace::Framework
@@ -545,6 +563,49 @@ void FfiOHOSAceFrameworkTextControllerCloseSelectionMenu(int64_t selfID)
         self->CloseSelectionMenu();
     } else {
         LOGE("FfiText: invalid textControllerId");
+    }
+}
+
+void FfiOHOSAceFrameworkTextControllerGetLayoutManager(int64_t selfID, int64_t layoutID)
+{
+    auto controller = FFIData::GetData<NGNativeTextController>(selfID);
+    if (controller != nullptr) {
+        controller->GetLayoutManager(layoutID);
+    } else {
+        LOGE("FfiText: invalid textControllerId");
+    }
+}
+
+int64_t FfiOHOSAceFrameworkLayoutManager()
+{
+    auto layout = FFIData::Create<NativeLayoutManager>();
+    if (layout == nullptr) {
+        return FFI_ERROR_CODE;
+    }
+    return layout->GetID();
+}
+
+int32_t FfiOHOSAceFrameworkLayoutManagerGetLineCount(int64_t selfID)
+{
+    auto self = FFIData::GetData<NativeLayoutManager>(selfID);
+    if (self != nullptr) {
+        return self->GetLineCount();
+    } else {
+        LOGE("FfiText: invalid textControllerId");
+        return -1;
+    }
+}
+
+void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(
+    int64_t selfID, int32_t x, int32_t y, CPositionWithAffinity* retPtr)
+{
+    auto self = FFIData::GetData<NativeLayoutManager>(selfID);
+    if (self != nullptr) {
+        CPositionWithAffinity positionWithAffinity = self->GetGlyphPositionAtCoordinate(x, y);
+        retPtr->position_ = positionWithAffinity.position_;
+        retPtr->affinity_ = positionWithAffinity.affinity_;
+    } else {
+        LOGE("FfiText: invalid LayoutManagerId");
     }
 }
 }

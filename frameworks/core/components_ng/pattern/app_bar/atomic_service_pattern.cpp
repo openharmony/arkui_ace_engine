@@ -57,6 +57,11 @@ void AtomicServicePattern::ContentSafeAreaCallBack()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->KeyboardSafeAreaEnabled()) {
+        safeArea.bottom_ = safeArea.bottom_.Combine(manager->GetKeyboardInset());
+    }
     auto left = Dimension(safeArea.left_.Length(), DimensionUnit::PX).ConvertToVp();
     auto right = Dimension(safeArea.right_.Length(), DimensionUnit::PX).ConvertToVp();
     auto top = Dimension(safeArea.top_.Length(), DimensionUnit::PX).ConvertToVp();
@@ -84,10 +89,28 @@ void AtomicServicePattern::ColorConfigurationCallBack()
 
 void AtomicServicePattern::AppInfoCallBack()
 {
+    auto atom = GetHost();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
     auto customAppBar = GetJSAppBarContainer();
     CHECK_NULL_VOID(customAppBar);
-    auto result =
-        AceApplicationInfo::GetInstance().GetProcessName() + "|" + AceApplicationInfo::GetInstance().GetAbilityName();
+    auto id = windowManager->GetAppIconId();
+    auto pixelMap = themeConstants->GetPixelMap(id);
+    if (pixelMap) {
+        const RefPtr<PixelMap> icon = PixelMap::CreatePixelMap(&pixelMap);
+        customAppBar->FireAppIconCallback(icon);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "App bar Cannot get pixelmap, try media path.");
+    }
+    auto result = AceApplicationInfo::GetInstance().GetProcessName() + "|" +
+                  themeConstants->GetString(windowManager->GetAppLabelId());
     customAppBar->FireCustomCallback(ARKUI_APP_BAR_BAR_INFO, result);
 }
 
@@ -98,6 +121,17 @@ void AtomicServicePattern::AppScreenCallBack()
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     customAppBar->FireCustomCallback(ARKUI_APP_BAR_SCREEN, container->UIExtensionIsHalfScreen());
+}
+
+void AtomicServicePattern::AppBgColorCallBack()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto customAppBar = GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+    customAppBar->FireCustomCallback(ARKUI_APP_BG_COLOR, pipeline->GetAppBgColor().ColorToString());
 }
 
 void AtomicServicePattern::UpdateLayoutMargin()
@@ -145,9 +179,7 @@ void AtomicServicePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
+    AppBgColorCallBack();
 }
 
 void AtomicServicePattern::OnLanguageConfigurationUpdate()
@@ -157,11 +189,7 @@ void AtomicServicePattern::OnLanguageConfigurationUpdate()
 
 void AtomicServicePattern::OnColorConfigurationUpdate()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
+    AppBgColorCallBack();
     ColorConfigurationCallBack();
 }
 RefPtr<CustomAppBarNode> AtomicServicePattern::GetJSAppBarContainer()

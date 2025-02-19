@@ -36,6 +36,8 @@ struct TextPickerDialog {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
     std::optional<HoverModeAreaType> hoverModeArea;
 };
@@ -61,6 +63,7 @@ public:
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
     virtual void SetGradientHeight(const Dimension& value) {};
     virtual void SetCanLoop(const bool value) = 0;
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
     virtual void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;

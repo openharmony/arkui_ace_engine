@@ -297,7 +297,13 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-    UpdateMenuBorderAndBackgroundBlur();
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        UpdateMenuBorderAndBackgroundBlur();
+    }
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -414,7 +420,13 @@ void InnerMenuPattern::OnModifyDone()
     auto uiNode = AceType::DynamicCast<UINode>(host);
     UpdateMenuItemChildren(uiNode);
     SetAccessibilityAction();
-    InitDefaultBorder(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        InitDefaultBorder(host);
+    }
 }
 
 // close menu on touch up
@@ -723,7 +735,7 @@ void MenuPattern::HideStackMenu() const
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
-                TaskExecutor::TaskType::UI, "HideStackMenu", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "HideStackMenu");
     });
     auto menuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
     if (menuPattern) {
@@ -1605,6 +1617,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(theme, false);
     auto renderContext = dirty->GetHostNode()->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->UpdateClipShape(nullptr);
+    renderContext->ResetClipShape();
 
     auto menuProp = DynamicCast<MenuLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);

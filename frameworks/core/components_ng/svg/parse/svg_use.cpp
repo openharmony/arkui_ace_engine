@@ -93,6 +93,18 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
     refSvgNode->Draw(canvas, layout, color);
 }
 
+void SvgUse::ApplyOpacity(RSCanvas& canvas)
+{
+    if (!attributes_.hasOpacity) {
+        LOGD("SvgUse::ApplyOpacity has no opacity");
+        return;
+    }
+    RSBrush brush;
+    brush.SetAlphaF(attributes_.opacity);
+    RSSaveLayerOps slo(nullptr, &brush);
+    canvas.SaveLayer(slo);
+}
+
 void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 {
     auto svgContext = svgContext_.Upgrade();
@@ -108,7 +120,8 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
         canvas.Translate(useX, useY);
     }
     AttributeScope scope(refSvgNode);
-    refSvgNode->InheritUseAttr(attributes_);
+    refSvgNode->InheritAttr(attributes_);
+    ApplyOpacity(canvas);
     refSvgNode->Draw(canvas, lengthRule);
 }
 

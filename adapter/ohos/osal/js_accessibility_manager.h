@@ -57,8 +57,8 @@ struct CommonProperty {
     int32_t windowId = 0;
     int32_t windowLeft = 0;
     int32_t windowTop = 0;
-    int32_t pageId = 0;
-    std::string pagePath;
+    std::vector<std::string> pagePaths;
+    std::vector<RefPtr<NG::FrameNode>> pageNodes;
     bool isReduceMode = false;
 };
 
@@ -99,7 +99,21 @@ enum class DumpMode {
     TREE,
     NODE,
     HANDLE_EVENT,
-    HOVER_TEST
+    HOVER_TEST,
+    EVENT_TEST
+};
+
+struct DumpInfoArgument {
+    bool useWindowId = false;
+    DumpMode mode = DumpMode::TREE;
+    bool isDumpSimplify = false;
+    bool verbose = false;
+    int64_t rootId = -1;
+    int32_t pointX = 0;
+    int32_t pointY = 0;
+    int64_t nodeId = -1;
+    int32_t action = 0;
+    int32_t eventId = -1;
 };
 
 class JsAccessibilityManager : public AccessibilityNodeManager,
@@ -165,20 +179,17 @@ public:
     int RegisterInteractionOperation(int windowId);
     void DeregisterInteractionOperation();
 
-    bool HandleAccessibilityEvent(
-        std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo);
-    bool HandleAccessibilityEventForUEA(
-        std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo);
-    bool HandleAccessibilityEventForHost(
-        std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo, const int32_t pageId);
+    bool IsSendAccessibilityEvent(const AccessibilityEvent& accessibilityEvent);
+    bool IsSendAccessibilityEventForUEA(
+        const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
+    bool IsSendAccessibilityEventForHost(AccessibilityEvent accessibilityEvent, const int32_t pageId,
+        const std::string componentType);
+    void GetComponentTypeAndPageIdByNodeId(const int64_t nodeId, const RefPtr<PipelineBase>& context,
+        std::string& componentType, int32_t& pageId);
+
     void SendCacheAccessibilityEvent(int32_t instanceId);
     void SendCacheAccessibilityEventForHost(const int32_t pageId);
     void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) override;
-    bool SendEvent(std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo);
 
     std::list<WeakPtr<NG::FrameNode>>& GetDefaultFocusList()
     {
@@ -308,11 +319,14 @@ public:
         const std::vector<std::string>& params,
         int64_t& actionAccessibilityId,
         ActionType& actionOp);
+    bool DumpProcessEventParameters(
+        AccessibilityEvent& event, const std::vector<std::string>& params);
+    bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument);
 
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;
-    void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) override;
+    void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
 
     AccessibilityWorkMode GetAccessibilityWorkMode() override;
 
@@ -322,6 +336,11 @@ public:
     void RegisterGetParentRectHandler();
 
     bool IsScreenReaderEnabled() override;
+
+    void SetFocusMoveResultWithNode(
+        const WeakPtr<NG::FrameNode>& hostNode,
+        AccessibilityElementOperatorCallback& callback,
+        const int32_t requestId);
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -531,6 +550,8 @@ private:
     void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
+    void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
+
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 
@@ -619,7 +640,17 @@ private:
     void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
+
     void RegisterDynamicRenderGetParentRectHandler();
+
+    void GetCurrentWindowPages(
+        const RefPtr<NG::PipelineContext>& ngPipeline,
+        std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        std::vector<std::string>& pagePaths);
+    const std::string GetPagePathInPageNodes(
+        int32_t pageId,
+        const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        const std::vector<std::string> pagePaths);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
@@ -645,13 +676,10 @@ private:
     bool isUseJson_ = false;
 
     std::string pageMode_;
-    std::vector<Accessibility::AccessibilityEventInfo> cacheEventVec_;
-    mutable std::mutex cacheEventVecMutex_;
+    std::vector<AccessibilityEvent> cacheEventVec_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
-    mutable std::mutex defaultFocusListMutex_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
-    mutable std::mutex extensionComponentStatusVecMutex_;
-    std::unordered_map<int32_t, std::optional<Accessibility::AccessibilityEventInfo>> pageIdEventMap_;
+    std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;
     AccessibilityParentRectInfo uecRectInfo_;
 };
 

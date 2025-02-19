@@ -1894,6 +1894,29 @@ Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
     auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
     return ArkTSUtils::GetModifierKeyState(info, pressedKeyCodes);
 }
+
+Local<JSValueRef> ArkTSUtils::JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    return panda::NumberRef::New(info->GetVM(), eventInfo->GetHorizontalAxis());
+}
+
+Local<JSValueRef> ArkTSUtils::JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    return panda::NumberRef::New(info->GetVM(), eventInfo->GetVerticalAxis());
+}
+
 bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     if (!jsValue->IsObject(vm)) {

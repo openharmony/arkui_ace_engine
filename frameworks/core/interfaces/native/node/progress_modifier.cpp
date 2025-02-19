@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
+constexpr double DEFAULT_PROGRESS_TOTAL = 100;
 constexpr int32_t MIN_COLOR_STOPS_VALUE_INDEX = 0;
 constexpr int32_t MIN_COLOR_STOPS_HAS_DIMENSION_INDEX = 1;
 constexpr int32_t MIN_COLOR_STOPS_DIMENSION_INDEX = 2;
@@ -37,6 +38,7 @@ const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 constexpr float STROKEWIDTH_DEFAULT_VALUE = 4.0f;
+constexpr ArkUI_Uint32 MAX_FONT_FAMILY_LENGTH = Infinity<ArkUI_Uint32>();
 
 /**
  * @param colors color value
@@ -79,6 +81,7 @@ void ResetProgressValue(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
+    ProgressModelNG::SetTotal(frameNode, DEFAULT_PROGRESS_TOTAL);
 }
 
 
@@ -233,7 +236,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     const char** fontFamilies = value->fontInfo.fontFamilies;
     uint32_t familyLength = value->fontInfo.familyLength;
     std::vector<std::string> families;
-    if (fontFamilies && familyLength > 0) {
+    if (fontFamilies && familyLength > 0 && familyLength <= MAX_FONT_FAMILY_LENGTH) {
         families.resize(familyLength);
         for (uint32_t i = 0; i < familyLength; i++) {
             families.at(i) = std::string(*(fontFamilies + i));

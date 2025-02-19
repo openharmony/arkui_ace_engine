@@ -350,4 +350,37 @@ ArkUINativeModuleValue MenuBridge::ResetSubMenuExpandingMode(ArkUIRuntimeCallInf
     GetArkUINodeModifiers()->getMenuModifier()->resetSubMenuExpandingMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue MenuBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != ARG_INDEX_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_0);
+    Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    CalcDimension fontSize;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.IsNegative() ||
+        fontSize.Unit() == DimensionUnit::PERCENT) {
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontSize(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuFontSize(
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MenuBridge::ResetFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontSize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

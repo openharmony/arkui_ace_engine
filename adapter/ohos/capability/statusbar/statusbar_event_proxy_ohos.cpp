@@ -72,8 +72,7 @@ void NotifyCard(const RefPtr<StatusBarClickListener>& listener)
                 ContainerScope scope(id);
                 listener->OnStatusBarClick();
             },
-            TaskExecutor::TaskType::UI, "ArkUINotifyCardStatusBarClick",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, "ArkUINotifyCardStatusBarClick");
     }
 }
 } // namespace

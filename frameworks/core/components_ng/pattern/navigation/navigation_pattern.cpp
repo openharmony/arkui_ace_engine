@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -49,6 +50,7 @@ constexpr Dimension DRAG_BAR_RADIUS = 6.0_vp;
 constexpr Dimension DRAG_BAR_BLUR_RADIUS = 20.0_vp;
 constexpr Dimension DRAG_BAR_ITEM_RADIUS = 1.0_vp;
 constexpr int32_t SECOND_ZINDEX_VALUE = 2;
+constexpr int32_t INVALID_ANIMATION_ID = -1;
 namespace {
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -80,7 +82,7 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
     NavDestinationMode mode = context->GetMode();
     int32_t uniqueId = context->GetUniqueId();
     info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param,
-        navDestinationId, mode, std::to_string(uniqueId));
+        navDestinationId, mode, uniqueId);
 }
 
 void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -99,11 +101,11 @@ void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestin
         newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
 }
 
-void TriggerNavDestinationTransition(const RefPtr<NavDestinationGroupNode>& navDestination,
+int32_t TriggerNavDestinationTransition(const RefPtr<NavDestinationGroupNode>& navDestination,
     NavigationOperation operation, bool isEnter)
 {
-    CHECK_NULL_VOID(navDestination);
-    navDestination->DoTransition(operation, isEnter);
+    CHECK_NULL_RETURN(navDestination, INVALID_ANIMATION_ID);
+    return navDestination->DoTransition(operation, isEnter);
 }
 } // namespace
 
@@ -354,6 +356,8 @@ void NavigationPattern::OnModifyDone()
     // AddRecoverableNavigation function will check inside whether current navigation can be recovered
     pipeline->GetNavigationManager()->AddRecoverableNavigation(hostNode->GetCurId(), hostNode);
     RestoreJsStackIfNeeded();
+    UpdateToobarFocusColor();
+    UpdateDividerBackgroundColor();
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -1216,7 +1220,10 @@ void NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& 
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    if (newTopNavDestination && preTopNavDestination) {
+    bool preUseCustomTransition = TriggerNavDestinationTransition(
+        preTopNavDestination, NavigationOperation::REPLACE, false) != INVALID_ANIMATION_ID;
+    TriggerNavDestinationTransition(newTopNavDestination, NavigationOperation::REPLACE, true);
+    if (newTopNavDestination && preTopNavDestination && !preUseCustomTransition) {
         navigationNode->DealNavigationExit(preTopNavDestination, false, false);
     } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         navigationNode->DealNavigationExit(navBarNode, true, false);
@@ -2277,17 +2284,71 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
 
 void NavigationPattern::OnColorConfigurationUpdate()
 {
-    auto dividerNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    UpdateDividerBackgroundColor();
 
     auto dragBarNode = GetDragBarNode();
     CHECK_NULL_VOID(dragBarNode);
     auto dragPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
     CHECK_NULL_VOID(dragPattern);
     dragPattern->UpdateDefaultColor();
+}
+
+void NavigationPattern::UpdateDividerBackgroundColor()
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    dividerNode->MarkDirtyNode();
+}
+
+void NavigationPattern::UpdateToobarFocusColor()
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto containerNode = AceType::DynamicCast<FrameNode>(toolBarNode->GetToolbarContainerNode());
+    CHECK_NULL_VOID(containerNode);
+    auto toolBarItemNodes = containerNode->GetChildren();
+    auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    for (auto& toolBarItemNode : toolBarItemNodes) {
+        auto buttonNode = AceType::DynamicCast<FrameNode>(toolBarItemNode);
+        CHECK_NULL_VOID(buttonNode);
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        auto focusHub = buttonNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetPaintColor(theme->GetToolBarItemFocusColor());
+    }
+}
+
+bool NavigationPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_RETURN(navBarNode, false);
+
+    auto dividerNode = AceType::DynamicCast<FrameNode>(navBarNode->GetToolBarDividerNode());
+    CHECK_NULL_RETURN(dividerNode, false);
+
+    auto theme = NavigationGetTheme(themeScopeId);
+    CHECK_NULL_RETURN(theme, false);
+
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_RETURN(dividerRenderProperty, false);
+    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
+
+    navigationGroupNode->MarkModifyDone();
+    return false;
 }
 
 void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
@@ -2965,6 +3026,11 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
     }
     if (preTopNavDestination) {
         preTopNavDestination->SetIsOnAnimation(true);
+        if (!isPopPage) {
+            auto renderContext = preTopNavDestination->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, false);
+            renderContext->RemoveClipWithRRect();
+        }
     }
     if (newTopNavDestination) {
         newTopNavDestination->SetIsOnAnimation(true);

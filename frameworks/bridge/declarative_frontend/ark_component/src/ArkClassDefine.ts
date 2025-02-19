@@ -1331,6 +1331,20 @@ class ArkSymbolEffect {
   }
 }
 
+class ArkBindMenu{
+  content: Array<MenuElement> | CustomBuilder | undefined;
+  options: MenuOptions | undefined;
+
+  constructor() {
+    this.content = undefined;
+    this.options = undefined;
+  }
+
+  isEqual(another: ArkBindMenu): boolean {
+    return (this.content === another.content && this.options === another.options);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1431,6 +1445,7 @@ class ArkDragPreviewOptions {
   defaultAnimationBeforeLifting: boolean | undefined;
   enableEdgeAutoScroll: boolean | undefined;
   enableHapticFeedback: boolean | undefined;
+  isLiftingDisabled: boolean | undefined;
 
   constructor() {
     this.mode = undefined;
@@ -1439,6 +1454,7 @@ class ArkDragPreviewOptions {
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
     this.enableHapticFeedback = undefined;
+    this.isLiftingDisabled = undefined;
   }
 
   isEqual(another: ArkDragPreviewOptions): boolean {
@@ -1448,19 +1464,31 @@ class ArkDragPreviewOptions {
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
       this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&
-      this.enableHapticFeedback === another.enableHapticFeedback
+      this.enableHapticFeedback === another.enableHapticFeedback &&
+      this.isLiftingDisabled === another.isLiftingDisabled
     );
   }
 }
 
 class ArkDragPreview {
   inspetorId: string;
+  onlyForLifting: boolean | undefined;
+  pixelMap: PixelMap | undefined;
+  extraInfo: string;
   constructor() {
     this.inspetorId = undefined;
+    this.onlyForLifting = undefined;
+    this.pixelMap = undefined;
+    this.extraInfo = undefined;
   }
 
   isEqual(another: ArkDragPreview): boolean {
-    return this.inspetorId === another.inspetorId;
+    return (
+      this.inspetorId === another.inspetorId &&
+      this.onlyForLifting === another.onlyForLifting && 
+      this.pixelMap === another.pixelMap &&
+      this.extraInfo === another.extraInfo
+    );
   }
 }
 

@@ -68,15 +68,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-
-    /**
-     * @tc.steps2: set host_and call UpdateInspectorId.
-     * @tc.expect: focusNode is not null .
-     */
     eventHub->host_ = frameNode_1;
     frameNode_1->UpdateInspectorId("123");
-    auto focusNode = focusHub->GetChildFocusNodeById("123");
-    ASSERT_NE(focusNode, nullptr);
 
     /**
      * @tc.steps3: change host_,focusType_,enabled_,
@@ -99,28 +92,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
     EXPECT_FALSE(rt);
 
     /**
-     * @tc.steps4: change isSubPipeline_ and call RequestFocus with 123
-     * @tc.expect: RequestFocus 123 success.
-     */
-    context_->isSubPipeline_ = true;
-    rt = context_->RequestFocus("123");
-    EXPECT_TRUE(rt);
-
-    /**
      * @tc.steps4: change isSubPipeline_ and call RequestFocus with empty string
      * @tc.expect: RequestFocus empty string return false.
      */
     context_->isSubPipeline_ = false;
     rt = context_->RequestFocus("");
     EXPECT_FALSE(rt);
-
-    /**
-     * @tc.steps4: change isSubPipeline_ and call RequestFocus with 123
-     * @tc.expect: RequestFocus 123 success.
-     */
-    context_->isSubPipeline_ = false;
-    rt = context_->RequestFocus("123");
-    EXPECT_TRUE(rt);
 }
 
 /**
@@ -2022,6 +1999,38 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
         auto idToTouchPoint = context_->eventManager_->GetIdToTouchPoint();
         EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
     }
+}
+
+HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->eventManager_, nullptr);
+
+    TouchEvent event;
+    RefPtr<HoverEventTarget> penHoverMoveEventTarget_ = AceType::MakeRefPtr<HoverEventTarget>("Button", 25);
+    penHoverMoveEventTarget_->onPenHoverMoveEventCallback_ = nullptr;
+    bool ret = penHoverMoveEventTarget_->HandlePenHoverMoveEvent(event);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->eventManager_, nullptr);
+
+    TouchEvent event;
+    RefPtr<HoverEventTarget> penHoverMoveEventTarget_ = AceType::MakeRefPtr<HoverEventTarget>("Button", 25);
+    penHoverMoveEventTarget_->onPenHoverMoveEventCallback_ = [](HoverInfo& penHoverMoveInfo) {};
+    bool ret = penHoverMoveEventTarget_->HandlePenHoverMoveEvent(event);
+    EXPECT_EQ(ret, true);
 }
 } // namespace NG
 } // namespace OHOS::Ace

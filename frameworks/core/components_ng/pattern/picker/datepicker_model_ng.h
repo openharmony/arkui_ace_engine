@@ -52,8 +52,10 @@ public:
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
     static void SetMode(FrameNode* frameNode, const DatePickerMode& value);
     static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
+    static void SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetChangeEvent(DateChangeEvent&& onChange) override;
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(
@@ -75,6 +77,7 @@ public:
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
@@ -86,7 +89,7 @@ private:
     std::string dateTimeOrder = "";
 };
 
-class ACE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
+class ACE_FORCE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
 public:
     void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,

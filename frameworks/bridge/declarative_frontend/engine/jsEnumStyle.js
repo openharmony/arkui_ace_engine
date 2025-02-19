@@ -1826,19 +1826,6 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
 
-let LevelMode;
-(function (LevelMode) {
-    LevelMode[LevelMode.OVERLAY = 0] = 'OVERLAY';
-    LevelMode[LevelMode.EMBEDDED = 1] = 'EMBEDDED';
-})(LevelMode || (LevelMode = {}));
-
-let ImmersiveMode;
-(function (ImmersiveMode) {
-    ImmersiveMode[ImmersiveMode.DEFAULT = 0] = 'DEFAULT';
-    ImmersiveMode[ImmersiveMode.PAGE = 1] = 'PAGE';
-    ImmersiveMode[ImmersiveMode.FULL = 2] = 'FULL';
-})(ImmersiveMode || (ImmersiveMode = {}));
-
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
@@ -2592,7 +2579,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-    this.nativeStack.onPopCallback(typeof result === 'boolean' ? undefined : result);
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return pathInfo;
   }
@@ -2621,7 +2608,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-    this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return index;
   }
@@ -2647,7 +2634,7 @@ class NavPathStack {
       this.animated = animated;
     }
     if (needFireOnResult) {
-      this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+      this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     }
     this.nativeStack?.onStateChanged();
   }
@@ -3836,3 +3823,9 @@ let TextMenuShowMode;
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
   TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
 })(TextMenuShowMode || (TextMenuShowMode = {}));
+
+let KeyProcessingMode;
+(function (KeyProcessingMode) {
+  KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
+  KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
+})(KeyProcessingMode || (KeyProcessingMode = {}));

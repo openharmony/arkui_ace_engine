@@ -309,6 +309,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew010, TestSize.Level1)
     layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->isDisappearing_ = false;
+    frameNode->onMainTree_ = true;
     rosenRenderContext->DetachNodeAnimatableProperty(property);
     rosenRenderContext->OnTransitionOutFinish();
     EXPECT_TRUE(outFlag);

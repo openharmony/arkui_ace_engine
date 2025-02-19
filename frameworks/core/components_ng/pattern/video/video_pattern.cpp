@@ -618,6 +618,18 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
 void VideoPattern::OnError(const std::string& errorId)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_VOID(video);
+    auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
+    CHECK_NULL_VOID(column);
+    auto renderContext = column->GetRenderContext();
+    renderContext->AddChild(renderContextForMediaPlayer_, 0);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
+
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
     auto json = JsonUtil::Create(true);
     json->Put("error", "");
@@ -2275,4 +2287,20 @@ void VideoPattern::OnWindowHide()
 #endif
 }
 
+void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("currentProgressRate", progressRate_, filter);
+    json->PutExtAttr("surfaceBackgroundColor",
+        renderContextForMediaPlayer_
+            ? renderContextForMediaPlayer_->GetBackgroundColorValue(Color::BLACK).ColorToString().c_str()
+            : "",
+        filter);
+    json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
+}
 } // namespace OHOS::Ace::NG

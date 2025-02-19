@@ -81,11 +81,11 @@ public:
     void SetGestureEventHub(const RefPtr<GestureEventHub>& gestureEventHub);
     const RefPtr<InputEventHub>& GetOrCreateInputEventHub();
     const RefPtr<InputEventHub>& GetInputEventHub() const;
-    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false,
+    RefPtr<FocusHub> GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false,
         FocusStyleType focusStyleType = FocusStyleType::NONE,
         const std::unique_ptr<FocusPaintParam>& paintParamsPtr = nullptr);
-    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
-    const RefPtr<FocusHub>& GetFocusHub() const;
+    RefPtr<FocusHub> GetOrCreateFocusHub(const FocusPattern& focusPattern);
+    RefPtr<FocusHub> GetFocusHub() const;
     void AttachHost(const WeakPtr<FrameNode>& host);
     void OnAttachContext(PipelineContext* context);
     void OnDetachContext(PipelineContext* context);
@@ -195,6 +195,8 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
+    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner);
+    void RemoveSupportedUIState(UIState state, bool isInner);
     bool IsCurrentStateOn(UIState state);
     void SetKeyboardShortcut(
         const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction);

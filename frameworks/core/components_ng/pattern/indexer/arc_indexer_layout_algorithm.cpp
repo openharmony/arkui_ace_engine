@@ -112,7 +112,7 @@ void ArcIndexerLayoutAlgorithm::MeasurePopup(LayoutWrapper* layoutWrapper, uint3
 {
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount - 1);
     CHECK_NULL_VOID(childWrapper);
-    auto childLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
+    auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(childLayoutProperty);
     auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
     layoutConstraint->Reset();
@@ -141,7 +141,7 @@ void ArcIndexerLayoutAlgorithm::MeasureArc(LayoutWrapper* layoutWrapper)
     }
 
     stepAngle_ = DOUBLE * atan2f(itemRadius_, arcRadius_) * HALF_CIRCLE_ANGLE / M_PI;
-    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (autoCollapse && fullCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
         fullCount_ += 1;
     }

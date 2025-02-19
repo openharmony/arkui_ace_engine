@@ -828,6 +828,7 @@ protected:
     Color placeholderColor_;
     Color bgColor_;
     Color focusBgColor_;
+    Color inlineBgColor_;
     Color cursorColor_;
     Color symbolColor_;
     Color textColorDisable_;
@@ -873,7 +874,6 @@ private:
     TextStyle overCountTextStyle_;
     Color inlineTextColor_;
     Radius inlineRadiusSize_;
-    Color inlineBgColor_;
     Color inlineBorderColor_;
     Color defaultCounterColor_;
     Color overCounterColor_;

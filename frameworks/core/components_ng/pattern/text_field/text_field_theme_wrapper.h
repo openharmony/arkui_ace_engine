@@ -58,6 +58,7 @@ public:
             placeholderColor_ = colors->FontSecondary();
             bgColor_ = colors->CompBackgroundTertiary();
             focusBgColor_ = colors->CompBackgroundTertiary();
+            inlineBgColor_ = colors->BackgroundPrimary();
             cursorColor_ =  colors->Brand();
             symbolColor_ = colors->IconPrimary();
             textColorDisable_ = colors->IconTertiary();
