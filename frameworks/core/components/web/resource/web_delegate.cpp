@@ -2775,7 +2775,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
     if (fabs(visibleRatio_) > FLT_EPSILON && visibleRatio_ > 0.0) {
         CHECK_NULL_VOID(nweb_);
         nweb_->OnUnoccluded();
-        if (isHalfFrame) {
+        if (isHalfFrame_) {
             if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
                 visibleRatio_ < lowerFrameRateVisibleRatio_) {
                 nweb_->SetEnableLowerFrameRate(true);
@@ -2861,13 +2861,13 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     ratioStrToFloat(visibleAreaRatio, lowerFrameRateVisibleRatio_);
     ratioStrToFloat(visibleAreaRatioV2, halfFrameRateVisibleRatio_);
     if (lowerFrameRateVisibleRatio_ < halfFrameRateVisibleRatio_) {
-        isHalfFrame = true;
+        isHalfFrame_ = true;
     } else {
-        isHalfFrame = false;
+        isHalfFrame_ = false;
     }
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
-    if (isHalfFrame) {
+    if (isHalfFrame_) {
         TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to half frame rate:%{public}f", halfFrameRateVisibleRatio_);
         if ((int)(halfFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
             partitionPoints = { 0 };
