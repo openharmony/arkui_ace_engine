@@ -768,10 +768,26 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
-void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule)
+void UINode::SetUserFreeze(bool isUserFreeze)
+{
+    userFreeze_ = isUserFreeze;
+}
+
+bool UINode::IsUserFreeze()
+{
+    return userFreeze_.has_value() && userFreeze_.value();
+}
+
+void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule, bool isUserFreeze)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
+    if (isUserFreeze) {
+        SetUserFreeze(isUserFreeze);
+    } else if (IsUserFreeze()) {
+        return;
+    }
+
     auto isNeedUpdateFreezeVaule = context->IsOpenInvisibleFreeze() || isForceUpdateFreezeVaule;
     if (isNeedUpdateFreezeVaule && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
