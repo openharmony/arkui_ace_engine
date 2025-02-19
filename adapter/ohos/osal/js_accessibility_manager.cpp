@@ -3620,12 +3620,12 @@ RefPtr<NG::PipelineContext> JsAccessibilityManager::GetPipelineByWindowId(uint32
 
 // DFX related
 namespace {
-template <typename Iterator>
-bool CheckAndGetEventTestArgument(Iterator start, const std::vector<std::string>& params, DumpInfoArgument& argument)
+bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start,
+    const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
     auto arg = start;
     argument.mode = DumpMode::EVENT_TEST;
-    static constexpr int32_t NUM_EVENT_DIMENSION = 2;
+    constexpr int32_t NUM_EVENT_DIMENSION = 2;
     if (std::distance(arg, params.end()) <= NUM_EVENT_DIMENSION) {
         DumpLog::GetInstance().Print(std::string("Error: --event-test is used to send event with node ") +
             "need elementId and eventId, e.g. '--event-test ${elementId} ${eventId}'!");
@@ -3694,7 +3694,10 @@ void JsAccessibilityManager::DumpHoverTestNG(uint32_t windowId, int64_t rootId, 
 bool JsAccessibilityManager::DumpProcessEventParameters(
     AccessibilityEvent& event, const std::vector<std::string>& params)
 {
-    static constexpr int32_t NUM_PARAMETERS_DIMENSION = 1;
+    constexpr int32_t NUM_PARAMETERS_DIMENSION = 1;
+    if (params.size() < 1) {
+        return false;
+    }
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
         if (*arg == "--stackNodeId") {
             if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
@@ -3764,6 +3767,9 @@ bool JsAccessibilityManager::CheckDumpInfoParams(const std::vector<std::string> 
 
 bool JsAccessibilityManager::GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
+    if (params.size() < 1) {
+        return false;
+    }
     argument.isDumpSimplify = params[0].compare("-simplify") == 0;
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
         if (*arg == "-w") {
