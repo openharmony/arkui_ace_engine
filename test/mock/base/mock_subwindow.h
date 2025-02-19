@@ -106,6 +106,8 @@ public:
     MOCK_METHOD0(GetDisplayId, uint64_t());
     MOCK_METHOD1(IsSameDisplayWithParentWindow, bool(bool useInitializedId));
     MOCK_METHOD1(ShowSelectOverlay, bool(const RefPtr<NG::FrameNode>& overlayNode));
+    MOCK_METHOD0(GetAttachState, MenuWindowState());
+    MOCK_METHOD0(GetDetachState, MenuWindowState());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H
