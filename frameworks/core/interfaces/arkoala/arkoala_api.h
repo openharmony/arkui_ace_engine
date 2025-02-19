@@ -3404,6 +3404,8 @@ struct ArkUITabsModifier {
     void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
     void (*setTabsOnSelected)(ArkUINodeHandle node, void* callback);
     void (*resetTabsOnSelected)(ArkUINodeHandle node);
+    void (*setCachedMaxCount)(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode);
+    void (*resetCachedMaxCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {

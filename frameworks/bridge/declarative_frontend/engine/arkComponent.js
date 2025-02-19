@@ -17333,6 +17333,11 @@ class ArkScrollableBarModeOptions {
     return (this.value === another.value);
   }
 }
+class ArkTabsCachedMaxCount {
+  isEqual(another) {
+    return (this.value.count == another.count && this.value.mode == another.mode);
+  }
+}
 class ArkAlignRules {
   constructor() {
     this.left = undefined;
@@ -31124,6 +31129,13 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TabHeightModifier.identity, TabHeightModifier, value);
     return this;
   }
+  cachedMaxCount(count, mode) {
+    let arkTabsCachedMaxCount = new ArkTabsCachedMaxCount();
+    arkTabsCachedMaxCount.count = count;
+    arkTabsCachedMaxCount.mode = mode;
+    modifierWithKey(this._modifiersWithKeys, CachedMaxCountModifier.identity, CachedMaxCountModifier, arkTabsCachedMaxCount);
+    return this;
+  }
 }
 class BarGridAlignModifier extends ModifierWithKey {
   constructor(value) {
@@ -31555,6 +31567,22 @@ class TabHeightModifier extends ModifierWithKey {
     }
 }
 TabHeightModifier.identity = Symbol('tabHeight');
+class CachedMaxCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetCachedMaxCount(node);
+    } else {
+      getUINativeModule().tabs.setCachedMaxCount(node, this.value.count, this.value.mode);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.value.count == this.stageValue.count && this.value.mode == this.stageValue.mode);
+  }
+}
+CachedMaxCountModifier.identity = Symbol('cachedMaxCount');
 // @ts-ignore
 if (globalThis.Tabs !== undefined) {
   globalThis.Tabs.attributeModifier = function (modifier) {
