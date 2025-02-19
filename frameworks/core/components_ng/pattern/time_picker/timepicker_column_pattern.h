@@ -467,6 +467,7 @@ private:
     bool hoverd_ = false;
     bool wheelModeEnabled_ = true;
     double scrollDelta_ = 0.0;
+    double enterDelta_ = 0.0;
     bool animationCreated_ = false;
     OffsetF offset_;
     SizeF size_;
