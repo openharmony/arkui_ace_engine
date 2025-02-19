@@ -46,7 +46,7 @@ namespace OHOS::Ace::NG::Converter {
             case DragRet::DRAG_CANCEL: dst = ARK_DRAG_RESULT_DRAG_CANCELED; break;\
             case DragRet::ENABLE_DROP: dst = ARK_DRAG_RESULT_DROP_ENABLED; break;
             case DragRet::DISABLE_DROP: dst = ARK_DRAG_RESULT_DROP_DISABLED; break;
-            default: 
+            default:
                 dst = static_cast<Ark_DragResult>(-1);
                 LOGE("Unexpected enum value in Ark_DragResult: %{public}d", src);
         }
