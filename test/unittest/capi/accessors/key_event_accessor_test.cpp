@@ -14,6 +14,7 @@
  */
 #include "accessor_test_base.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
@@ -634,5 +635,23 @@ HWTEST_F(KeyEventAccessorTest, setUnicodeInvalidTest, TestSize.Level1)
         accessor_->setUnicode(peer, unicode);
         EXPECT_EQ(eventInfo_->GetUnicode(), currentCode);
     }
+}
+
+/**
+ * @tc.name: GetStopPropagationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
+{
+    KeyEventInfo* eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    Callback_Void callback = accessor_->getStopPropagation(peer_);
+    auto callbackHelper = CallbackHelper(callback);
+    eventInfo->SetStopPropagation(false);
+    EXPECT_FALSE(eventInfo->IsStopPropagation());
+    callbackHelper.Invoke();
+    EXPECT_TRUE(eventInfo->IsStopPropagation());
+    CallbackKeeper::ReleaseReverseCallback<Callback_Void>(callback);
 }
 } // namespace OHOS::Ace::NG

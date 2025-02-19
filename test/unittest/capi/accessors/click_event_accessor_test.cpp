@@ -17,6 +17,7 @@
 
 #include "accessor_test_base.h"
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
@@ -265,5 +266,33 @@ HWTEST_F(ClickEventAccessorTest, getYTestValidValues, TestSize.Level1)
         auto result = Converter::Convert<double>(accessor_->getY(peer_));
         EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
+}
+
+/**
+ * @tc.name: GetPreventDefaultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
+{
+    GestureEvent* eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    Callback_Void callback = accessor_->getPreventDefault(peer_);
+    auto callbackHelper = CallbackHelper(callback);
+
+    auto checkWithName = [eventInfo, &callbackHelper](const std::string& patternName, bool expected) {
+        eventInfo->SetPatternName(patternName);
+        eventInfo->SetPreventDefault(false);
+        EXPECT_FALSE(eventInfo->IsPreventDefault());
+        callbackHelper.Invoke();
+        EXPECT_EQ(eventInfo->IsPreventDefault(), expected);
+    };
+
+    checkWithName("Checkbox", true);
+    checkWithName("RichEditor", true);
+    checkWithName("Grid", false);
+    checkWithName("Hyperlink", true);
+
+    CallbackKeeper::ReleaseReverseCallback<Callback_Void>(callback);
 }
 }
