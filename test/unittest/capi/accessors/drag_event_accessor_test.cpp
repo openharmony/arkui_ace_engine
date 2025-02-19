@@ -275,7 +275,7 @@ HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDisplayXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetScreenX(value);
         auto x = accessor_->getDisplayX(peer_);
         EXPECT_EQ(x, static_cast<int32_t>(Convert<int>(expected))) <<
@@ -290,7 +290,7 @@ HWTEST_F(DragEventAccessorTest, GetDisplayXTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDisplayYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetScreenY(value);
         auto y = accessor_->getDisplayY(peer_);
         EXPECT_EQ(y, static_cast<int32_t>(Convert<int>(expected))) <<
@@ -305,7 +305,7 @@ HWTEST_F(DragEventAccessorTest, GetDisplayYTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetVelocityXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         auto offset = Offset(value, 0.0);
         auto velocity = Velocity(offset);
         dragEvent_->SetVelocity(velocity);
@@ -325,7 +325,7 @@ HWTEST_F(DragEventAccessorTest, GetVelocityXTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetVelocityYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         auto offset = Offset(0.0, value);
         auto velocity = Velocity(offset);
         dragEvent_->SetVelocity(velocity);
@@ -345,7 +345,7 @@ HWTEST_F(DragEventAccessorTest, GetVelocityYTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetVelocityTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureVelocityValues) {
+    for (auto& [input, value, expected] : testFixtureVelocityValues) {
         auto offset = Offset(value, value);
         auto velocity = Velocity(offset);
         dragEvent_->SetVelocity(velocity);
@@ -362,13 +362,25 @@ HWTEST_F(DragEventAccessorTest, GetVelocityTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, SetDragBehaviorTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureEnumDragBehaviorValues) {
-        EXPECT_EQ(OHOS::Ace::DragBehavior::UNKNOWN, dragEvent_->GetDragBehavior());
-        dragEvent_->GetDragBehavior();
+    EXPECT_EQ(OHOS::Ace::DragBehavior::UNKNOWN, dragEvent_->GetDragBehavior());
+    for (auto& [input, value, expected] : testFixtureEnumDragBehaviorValues) {
         accessor_->setDragBehavior(peer_, value);
         EXPECT_EQ(expected, dragEvent_->GetDragBehavior()) <<
             "Input value is: " << input << ", method: setDragBehavior";
-        dragEvent_->SetDragBehavior(OHOS::Ace::DragBehavior::UNKNOWN);
+    }
+}
+
+/**
+ * @tc.name: SetDragBehaviorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureEnumArkDragBehaviorValues) {
+        dragEvent_->SetDragBehavior(value);
+        EXPECT_EQ(expected, accessor_->getDragBehavior(peer_)) <<
+            "Input value is: " << input << ", method: getDragBehavior";
     }
 }
 
