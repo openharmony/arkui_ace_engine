@@ -1134,6 +1134,16 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     PostIdleTask(GetHost());
     HandleTabsCachedMaxCount(startIndex_, endIndex_);
 
+    int32_t startIndex = startIndex_;
+    int32_t endIndex = endIndex_;
+    if (startIndex != prevStartIndex_ || endIndex != prevEndIndex_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, startIndex, endIndex);
+    }
+    prevStartIndex_ = startIndex_;
+    prevEndIndex_ = endIndex_;
+
     if (!itemPosition_.empty()) {
         const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
         auto firstItem = GetFirstItemInfoInVisibleArea();

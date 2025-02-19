@@ -404,6 +404,12 @@ bool ListPattern::UpdateStartListItemIndex()
                            (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
         startArea = startGroupInfo.area;
         startItemIndexInGroup = startGroupInfo.indexInGroup;
+        if (startFlagChanged) {
+            VisibleContentInfo endGroupInfo = startPattern->GetEndListItemIndex();
+            int32_t endItemIndexInGroup = endGroupInfo.indexInGroup;
+            startWrapper->GetHostNode()->OnAccessibilityEvent(
+                AccessibilityEventType::SCROLLING_EVENT, startItemIndexInGroup, endItemIndexInGroup);
+        }
     }
     startInfo_ = { startIndex_, startArea, startItemIndexInGroup };
     return startFlagChanged;
@@ -425,6 +431,12 @@ bool ListPattern::UpdateEndListItemIndex()
                          (endInfo_.indexInGroup != endGroupInfo.indexInGroup);
         endArea = endGroupInfo.area;
         endItemIndexInGroup = endGroupInfo.indexInGroup;
+        if (endFlagChanged) {
+            VisibleContentInfo startGroupInfo = endPattern->GetStartListItemIndex();
+            int32_t startItemIndexInGroup = startGroupInfo.indexInGroup;
+            endWrapper->GetHostNode()->OnAccessibilityEvent(
+                AccessibilityEventType::SCROLLING_EVENT, startItemIndexInGroup, endItemIndexInGroup);
+        }
     }
     endInfo_ = { endIndex_, endArea, endItemIndexInGroup };
     return endFlagChanged;
@@ -463,6 +475,9 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     }
     auto onScrollIndex = listEventHub->GetOnScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    if (startIndexChanged_ || endIndexChanged_) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, startIndex_, endIndex_);
+    }
     OnScrollVisibleContentChange(listEventHub, indexChanged);
     auto onReachStart = listEventHub->GetOnReachStart();
     FireOnReachStart(onReachStart);
@@ -2959,10 +2974,10 @@ void ListPattern::ResetChildrenSize()
 void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged)
 {
     CHECK_NULL_VOID(listEventHub);
+    bool startChanged = UpdateStartListItemIndex();
+    bool endChanged = UpdateEndListItemIndex();
     auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
     if (onScrollVisibleContentChange) {
-        bool startChanged = UpdateStartListItemIndex();
-        bool endChanged = UpdateEndListItemIndex();
         if (indexChanged || startChanged || endChanged) {
             onScrollVisibleContentChange(startInfo_, endInfo_);
         }

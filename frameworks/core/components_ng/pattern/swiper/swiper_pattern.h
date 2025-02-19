@@ -1257,6 +1257,8 @@ private:
     int32_t endIndex_ = 0;
     int32_t oldIndex_ = 0;
     int32_t nextIndex_ = 0;
+    int32_t prevStartIndex_ = 0;
+    int32_t prevEndIndex_ = 0;
 
     PanDirection panDirection_;
 

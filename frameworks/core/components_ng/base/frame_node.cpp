@@ -3829,6 +3829,21 @@ void FrameNode::OnAccessibilityEventForVirtualNode(AccessibilityEventType eventT
 }
 
 void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetAccessibilityId();
+        event.startIndex = startIndex;
+        event.endIndex = endIndex;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
+    }
+}
+
+void FrameNode::OnAccessibilityEvent(
     AccessibilityEventType eventType, std::string beforeText, std::string latestContent)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {

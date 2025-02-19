@@ -2578,6 +2578,8 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+    eventInfo.SetBeginIndex(accessibilityEvent.startIndex);
+    eventInfo.SetEndIndex(accessibilityEvent.endIndex);
 }
 } // namespace
 
