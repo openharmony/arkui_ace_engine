@@ -451,6 +451,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent1Test, TestSize.Level1)
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
         auto info = peer->GetEventInfo();
+        ASSERT_NE(info, nullptr);
         checkEvent = {
             .resourceId = resourceId,
             .code = info->GetKeyCode()
