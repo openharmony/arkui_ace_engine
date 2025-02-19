@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PROGRESS_DEFAULT_VALUE = 0.0f;
+constexpr float PROGRESS_MAX_VALUE = 100.f;
 }
 bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
@@ -501,7 +502,7 @@ void ProgressPattern::DumpInfo()
     CHECK_NULL_VOID(paintProperty);
     
     auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
-    auto maxValue = paintProperty->GetMaxValue().value();
+    auto maxValue = paintProperty->GetMaxValue().value_or(PROGRESS_MAX_VALUE);
     auto jsonValue = JsonUtil::Create(true);
     auto color = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
@@ -739,7 +740,7 @@ void ProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(paintProperty);
 
     auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
-    auto maxValue = paintProperty->GetMaxValue().value();
+    auto maxValue = paintProperty->GetMaxValue().value_or(PROGRESS_MAX_VALUE);
     auto jsonValue = JsonUtil::Create(true);
     auto color = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());

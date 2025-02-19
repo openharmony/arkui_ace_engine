@@ -146,7 +146,7 @@ void ProgressModelNG::SetBorderColor(const Color& value)
     CHECK_NULL_VOID(frameNode);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    auto progressType = progressPaintProperty->GetProgressTypeValue();
+    auto progressType = progressPaintProperty->GetProgressTypeValue(ProgressType::LINEAR);
     if (progressType == ProgressType::CAPSULE) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value);
     }
