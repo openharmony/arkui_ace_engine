@@ -108,6 +108,11 @@ void AceViewOhos::TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t
     view->NotifyTransformHintChanged(transform);
 }
 
+bool IsAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return pointerEvent->GetAxes() != 0;
+}
+
 void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
     const std::function<void()>& callback, bool isInjected)
@@ -142,7 +147,8 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
         if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
             (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
-            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END)) {
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
+            (pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL && IsAxisEvent(pointerEvent))) {
             view->ProcessAxisEvent(pointerEvent, node, isInjected);
         } else {
             view->ProcessDragEvent(pointerEvent, node);
