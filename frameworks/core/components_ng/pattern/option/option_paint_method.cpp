@@ -38,6 +38,10 @@ void PaintCustomDivider(SizeF optionSize, float horInterval, float iconHorInterv
     CHECK_NULL_VOID(paintWrapper);
     auto props = AceType::DynamicCast<OptionPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(props);
+    if (!props->HasDivider()) {
+        LOGE("Default divider is not set to the OptionPaintProperty");
+        return;
+    }
     auto dividerWidth = static_cast<float>(props->GetDividerValue().strokeWidth.ConvertToPx());
     auto startMargin = static_cast<float>(props->GetDividerValue().startMargin.ConvertToPx());
     auto endMargin = static_cast<float>(props->GetDividerValue().endMargin.ConvertToPx());

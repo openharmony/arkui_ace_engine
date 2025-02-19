@@ -83,7 +83,9 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(symbolProperty, nullptr);
     symbolProperty->UpdateFontSize(dialogTheme->GetIdealSize());
-    symbolProperty->UpdateSymbolSourceInfo(srcLayoutProperty->GetSymbolSourceInfoValue());
+    if (srcLayoutProperty->HasSymbolSourceInfo()) {
+        symbolProperty->UpdateSymbolSourceInfo(srcLayoutProperty->GetSymbolSourceInfoValue());
+    }
     auto symbolColorList = srcLayoutProperty->GetSymbolColorListValue({});
     symbolColorList.empty() ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
                             : symbolProperty->UpdateSymbolColorList(symbolColorList);
