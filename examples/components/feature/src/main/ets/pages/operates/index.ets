@@ -27,6 +27,7 @@ import { promptActionCustomDialogBootcamp } from './promptActionCustomDialogBoot
 import { ActionMenuBootcamp } from './ActionMenuBootcamp';
 import { DialogBootcamp } from './DialogBootcamp';
 import { ActionDialogBootcamp } from './ActionDialogBootcamp';
+import { AlertDialogBootcamp } from './AlertDialogBootcamp';
 import { CustomDialogBootcamp } from './CustomDialogBootcamp';
 import { AlertDialogBootcamp } from './AlertDialogBootcamp';
 
