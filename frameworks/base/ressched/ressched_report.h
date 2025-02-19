@@ -35,6 +35,12 @@ constexpr int32_t LOAD_PAGE_NO_REQUEST_FRAME_EVENT = 2;
 constexpr double JUDGE_DISTANCE = 3.125;
 }
 
+struct ResEventInfo {
+    TimeStamp timeStamp;
+    Offset offset;
+    SourceTool sourceTool = SourceTool::UNKNOWN;
+};
+
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
     const std::unordered_map<std::string, std::string>& payload);
 
@@ -77,8 +83,8 @@ private:
     void HandleTouchPullDown(const TouchEvent& touchEvent);
     void HandleTouchPullUp(const TouchEvent& touchEvent);
     void HandleTouchPullMove(const TouchEvent& touchEvent);
-    double GetUpVelocity(const TouchEvent& lastMoveInfo,
-        const TouchEvent& upEventInfo);
+    double GetUpVelocity(const ResEventInfo& lastMoveInfo,
+        const ResEventInfo& upEventInfo);
     void RecordTouchEvent(const TouchEvent& touchEvent, bool enforce = false);
 
     void HandleAxisBegin(const AxisEvent& axisEvent);
@@ -86,16 +92,16 @@ private:
     void HandleAxisEnd(const AxisEvent& axisEvent);
 
     void RecordAxisEvent(const AxisEvent& axisEvent, bool enforce = false);
-    double GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent);
+    double GetAxisUpVelocity(const ResEventInfo& lastAxisEvent, const ResEventInfo& curAxisEvent);
 
     ReportDataFunc reportDataFunc_ = nullptr;
     ReportSyncEventFunc reportSyncEventFunc_ = nullptr;
     bool loadPageOn_ = false;
     bool loadPageRequestFrameOn_ = false;
-    TouchEvent curTouchEvent_;
-    TouchEvent lastTouchEvent_;
-    AxisEvent curAxisEvent_;
-    AxisEvent lastAxisEvent_;
+    ResEventInfo curTouchEvent_;
+    ResEventInfo lastTouchEvent_;
+    ResEventInfo curAxisEvent_;
+    ResEventInfo lastAxisEvent_;
     Offset averageDistance_;
     bool isInSlide_ = false;
     bool isInTouch_ = false;
