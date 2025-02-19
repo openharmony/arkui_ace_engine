@@ -1439,4 +1439,22 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
     
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
 }
+
+void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("markToday", currentSettingData_.markToday ? "true" : "false", filter);
+    std::string disabledDateRangeStr = "";
+    for (const auto& range : currentSettingData_.disabledDateRange) {
+        disabledDateRangeStr += range.first.ToString(false) + "," + range.second.ToString(false) + ",";
+    }
+    if (!disabledDateRangeStr.empty() && disabledDateRangeStr.back() == ',') {
+        disabledDateRangeStr.pop_back();
+    }
+    json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
+}
 } // namespace OHOS::Ace::NG
