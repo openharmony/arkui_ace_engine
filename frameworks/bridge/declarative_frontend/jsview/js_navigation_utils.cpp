@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation_utils.h"
 
+#include "frameworks/base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
@@ -263,4 +264,55 @@ void JSNavigationUtils::ParseBarItems(const WeakPtr<NG::FrameNode>& targetNode,
     }
 }
 
+std::optional<NG::NavDestinationTransition> JSNavigationUtils::ParseNavDestinationTransition(
+    const JSRef<JSObject>& jsTransition, const JsiExecutionContext& execCtx)
+{
+    if (jsTransition->IsEmpty() || jsTransition->IsUndefined()) {
+        return std::nullopt;
+    }
+    NG::NavDestinationTransition navDestinationTransition;
+    JSRef<JSVal> event = jsTransition->GetProperty("event");
+    if (!event->IsFunction()) {
+        // property `event` of navDestinationTransition is required option, so return nullopt if it's invalid.
+        return std::nullopt;
+    } else {
+        auto eventFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(event));
+        auto transitionEvent = [execCtx, event = std::move(eventFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("navDestination custom transition event");
+            event->ExecuteJS();
+        };
+        navDestinationTransition.event = std::move(transitionEvent);
+    }
+    JSRef<JSVal> jsOnTransitionEnd = jsTransition->GetProperty("onTransitionEnd");
+    if (jsOnTransitionEnd->IsFunction()) {
+        auto transitionEndFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsOnTransitionEnd));
+        auto onTransitionEnd = [execCtx, transitionEnd = std::move(transitionEndFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("navDestination custom transition finish");
+            transitionEnd->ExecuteJS();
+        };
+        navDestinationTransition.onTransitionEnd = std::move(onTransitionEnd);
+    }
+    JSRef<JSVal> duration = jsTransition->GetProperty("duration");
+    // default duration: 1000.
+    navDestinationTransition.duration = duration->IsNumber() ? duration->ToNumber<int32_t>() : 1000;
+    JSRef<JSVal> delay = jsTransition->GetProperty("delay");
+    // default delay: 0.
+    navDestinationTransition.delay = delay->IsNumber() ? delay->ToNumber<int32_t>() : 0;
+    JSRef<JSVal> curveArgs = jsTransition->GetProperty("curve");
+    if (curveArgs->IsString()) {
+        navDestinationTransition.curve = CreateCurve(curveArgs->ToString(), false);
+    } else if (curveArgs->IsObject()) {
+        JSRef<JSVal> curveString = JSRef<JSObject>::Cast(curveArgs)->GetProperty("__curveString");
+        if (curveString->IsString()) {
+            navDestinationTransition.curve = CreateCurve(curveString->ToString(), false);
+        }
+    } else {
+        // default curve: easeInOut
+        navDestinationTransition.curve = Curves::EASE_IN_OUT;
+    }
+    return navDestinationTransition;
+}
 } // namespace OHOS::Ace::Framework
