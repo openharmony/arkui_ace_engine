@@ -173,9 +173,8 @@ void OnDidScrollImpl(Ark_NativePointer node,
     auto call = [arkCallback = CallbackHelper(*value)](
         Dimension offset, ScrollState stateIn) {
             auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
-            auto x = Converter::ArkValue<Ark_Number>(offset);
-            auto y = Converter::ArkValue<Ark_Number>(offset);
-            arkCallback.Invoke(x, y, state);
+            auto offsetVal = Converter::ArkValue<Ark_Number>(offset);
+            arkCallback.Invoke(offsetVal, offsetVal, state);
     };
     ScrollableModelNG::SetOnDidScroll(frameNode, std::move(call));
 }
