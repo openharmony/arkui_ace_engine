@@ -1120,6 +1120,7 @@ void MovingPhotoPattern::PausePlayback()
 
 void MovingPhotoPattern::RefreshMovingPhoto()
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto start.");
     if (uri_ == "") {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
         return;
@@ -1142,6 +1143,9 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
     UpdateImageNode();
+    if (fd_ > 0) {
+        close(fd_);
+    }
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
