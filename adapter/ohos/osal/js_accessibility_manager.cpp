@@ -7115,12 +7115,17 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
             getParentRectHandler_(windowInfo.top, windowInfo.left);
             return windowInfo;
         } else if (getParentRectHandlerNew_) {
+            if (IsReentrantLimit()) {
+                return windowInfo;
+            }
+            SetReentrantLimit(true);
             AccessibilityParentRectInfo rectInfo;
             getParentRectHandlerNew_(rectInfo);
             windowInfo.top = rectInfo.top;
             windowInfo.left = rectInfo.left;
             windowInfo.scaleX = rectInfo.scaleX;
             windowInfo.scaleY = rectInfo.scaleY;
+            SetReentrantLimit(false);
             return windowInfo;
         }
     }
