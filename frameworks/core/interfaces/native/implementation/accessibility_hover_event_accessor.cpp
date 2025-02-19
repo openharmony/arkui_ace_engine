@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -33,7 +34,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_AccessibilityHoverType GetTypeImpl(Ark_AccessibilityHoverEvent peer)
 {
-    return {};
+    const auto errValue = static_cast<Ark_AccessibilityHoverType>(-1);
+    CHECK_NULL_RETURN(peer, errValue);
+    AccessibilityHoverInfo* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Ark_AccessibilityHoverType>(info->GetActionType());
 }
 void SetTypeImpl(Ark_AccessibilityHoverEvent peer,
                  Ark_AccessibilityHoverType type)

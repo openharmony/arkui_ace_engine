@@ -18,6 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 
 namespace {
@@ -45,7 +46,16 @@ Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
 }
 Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 {
-    return {};
+    const auto errValue = static_cast<Ark_TouchType>(-1);
+    CHECK_NULL_RETURN(peer, errValue);
+    TouchEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(peer, errValue);
+    auto changedTouches = info->GetChangedTouches();
+    if (changedTouches.empty()) {
+        LOGE("ARKOALA TouchEventAccessor::GetTypeImpl empty list of changed touches.");
+        return errValue;
+    }
+    return Converter::ArkValue<Ark_TouchType>(changedTouches.front().GetTouchType());
 }
 void SetTypeImpl(Ark_TouchEvent peer,
                  Ark_TouchType type)
