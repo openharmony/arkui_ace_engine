@@ -289,7 +289,8 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(child);
     measureChildSizeBefore_ = child->GetGeometryNode()->GetFrameSize();
     if (isHalfFoldHover_) {
-        SizeF size = SizeF(childLayoutConstraint.maxSize.Width(), static_cast<float>(wrapperRect_.Height()));
+        SizeF size = SizeF(childLayoutConstraint.maxSize.Width(),
+            static_cast<float>(std::floor(wrapperRect_.Height())));
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
     }
     // childSize_ and childOffset_ is used in Layout.
