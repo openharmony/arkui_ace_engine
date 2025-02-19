@@ -27,6 +27,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "frameworks/base/geometry/offset.h"
+#include "frameworks/base/geometry/rect.h"
 #include "frameworks/core/gestures/velocity.h"
 
 namespace OHOS::Ace::NG {
@@ -67,7 +68,16 @@ namespace {
         { "ARK_DRAG_RESULT_DRAG_CANCELED", ARK_DRAG_RESULT_DRAG_CANCELED, DragRet::DRAG_CANCEL },
         { "ARK_DRAG_RESULT_DROP_ENABLED", ARK_DRAG_RESULT_DROP_ENABLED, DragRet::ENABLE_DROP },
         { "ARK_DRAG_RESULT_DROP_DISABLED", ARK_DRAG_RESULT_DROP_DISABLED, DragRet::DISABLE_DROP },
-        { "ARK_DRAG_RESULT_INVALID", static_cast<Ark_DragResult>(-1), DragRet::DISABLE_DROP },
+        { "ARK_DRAG_RESULT_INVALID", static_cast<Ark_DragResult>(DragRet::DRAG_DEFAULT), DragRet::DISABLE_DROP },
+    };
+
+    const std::vector<std::tuple<std::string, DragRet, Ark_DragResult>> testFixtureEnumArkDragResultValues {
+        {  "ARK_DRAG_RESULT_DRAG_SUCCESSFUL", DragRet::DRAG_SUCCESS, ARK_DRAG_RESULT_DRAG_SUCCESSFUL },
+        {  "ARK_DRAG_RESULT_DRAG_FAILED", DragRet::DRAG_FAIL, ARK_DRAG_RESULT_DRAG_FAILED },
+        {  "ARK_DRAG_RESULT_DRAG_CANCELED", DragRet::DRAG_CANCEL, ARK_DRAG_RESULT_DRAG_CANCELED },
+        {  "ARK_DRAG_RESULT_DROP_ENABLED", DragRet::ENABLE_DROP, ARK_DRAG_RESULT_DROP_ENABLED },
+        {  "ARK_DRAG_RESULT_DROP_DISABLED", DragRet::DISABLE_DROP, ARK_DRAG_RESULT_DROP_DISABLED },
+        {  "ARK_DRAG_RESULT_INVALID", DragRet::DRAG_DEFAULT, static_cast<Ark_DragResult>(DragRet::DRAG_DEFAULT) },
     };
 } // namespace
 
@@ -160,6 +170,38 @@ HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureEnumArkDragResultValues) {
+        dragEvent_->SetResult(value);
+        EXPECT_EQ(accessor_->getResult(peer_), expected) <<
+            "Input value is: " << input << ", method: SetResult";
+    }
+}
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureLengthAnyValidValues) {
+        Rect rect(value.ConvertToPx(), value.ConvertToPx(), value.ConvertToPx(), value.ConvertToPx());
+        dragEvent_->SetPreviewRect(rect);
+        auto arkRect = accessor_->getPreviewRect(peer_);
+        CompareOptLength(arkRect.x, ArkValue<Opt_Length>(expected));
+        CompareOptLength(arkRect.y, ArkValue<Opt_Length>(expected));
+        CompareOptLength(arkRect.width, ArkValue<Opt_Length>(expected));
+        CompareOptLength(arkRect.height, ArkValue<Opt_Length>(expected));
+    }
+}
+
+/**
  * @tc.name: SetDataTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -233,7 +275,7 @@ HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDisplayXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetScreenX(value);
         auto x = accessor_->getDisplayX(peer_);
         EXPECT_EQ(x, static_cast<int32_t>(Convert<int>(expected))) <<
@@ -248,7 +290,7 @@ HWTEST_F(DragEventAccessorTest, GetDisplayXTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDisplayYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetScreenY(value);
         auto y = accessor_->getDisplayY(peer_);
         EXPECT_EQ(y, static_cast<int32_t>(Convert<int>(expected))) <<
@@ -263,7 +305,7 @@ HWTEST_F(DragEventAccessorTest, GetDisplayYTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetVelocityXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         auto offset = Offset(value, 0.0);
         auto velocity = Velocity(offset);
         dragEvent_->SetVelocity(velocity);
@@ -283,7 +325,7 @@ HWTEST_F(DragEventAccessorTest, GetVelocityXTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetVelocityYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         auto offset = Offset(0.0, value);
         auto velocity = Velocity(offset);
         dragEvent_->SetVelocity(velocity);
@@ -303,7 +345,7 @@ HWTEST_F(DragEventAccessorTest, GetVelocityYTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetVelocityTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureVelocityValues) {
+    for (auto& [input, value, expected] : testFixtureVelocityValues) {
         auto offset = Offset(value, value);
         auto velocity = Velocity(offset);
         dragEvent_->SetVelocity(velocity);
@@ -320,13 +362,25 @@ HWTEST_F(DragEventAccessorTest, GetVelocityTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, SetDragBehaviorTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureEnumDragBehaviorValues) {
-        EXPECT_EQ(OHOS::Ace::DragBehavior::UNKNOWN, dragEvent_->GetDragBehavior());
-        dragEvent_->GetDragBehavior();
+    EXPECT_EQ(OHOS::Ace::DragBehavior::UNKNOWN, dragEvent_->GetDragBehavior());
+    for (auto& [input, value, expected] : testFixtureEnumDragBehaviorValues) {
         accessor_->setDragBehavior(peer_, value);
         EXPECT_EQ(expected, dragEvent_->GetDragBehavior()) <<
             "Input value is: " << input << ", method: setDragBehavior";
-        dragEvent_->SetDragBehavior(OHOS::Ace::DragBehavior::UNKNOWN);
+    }
+}
+
+/**
+ * @tc.name: SetDragBehaviorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureEnumArkDragBehaviorValues) {
+        dragEvent_->SetDragBehavior(value);
+        EXPECT_EQ(expected, accessor_->getDragBehavior(peer_)) <<
+            "Input value is: " << input << ", method: getDragBehavior";
     }
 }
 

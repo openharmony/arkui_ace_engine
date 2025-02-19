@@ -114,8 +114,16 @@ const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVeloci
 
 const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
     testFixtureEnumDragBehaviorValues = {
-    { "ARK_DRAG_BEHAVIOR_COPY", ARK_DRAG_BEHAVIOR_COPY, OHOS::Ace::DragBehavior::COPY },
     { "ARK_DRAG_BEHAVIOR_MOVE", ARK_DRAG_BEHAVIOR_MOVE, OHOS::Ace::DragBehavior::MOVE },
+    { "ARK_DRAG_BEHAVIOR_COPY", ARK_DRAG_BEHAVIOR_COPY, OHOS::Ace::DragBehavior::COPY },
+    { "-1", static_cast<Ark_DragBehavior>(OHOS::Ace::DragBehavior::UNKNOWN), OHOS::Ace::DragBehavior::COPY },
+};
+
+const std::vector<std::tuple<std::string, OHOS::Ace::DragBehavior, Ark_DragBehavior>>
+    testFixtureEnumArkDragBehaviorValues = {
+    { "ARK_DRAG_BEHAVIOR_COPY", OHOS::Ace::DragBehavior::COPY, ARK_DRAG_BEHAVIOR_COPY },
+    { "ARK_DRAG_BEHAVIOR_MOVE", OHOS::Ace::DragBehavior::MOVE, ARK_DRAG_BEHAVIOR_MOVE },
+    { "-1", OHOS::Ace::DragBehavior::UNKNOWN, static_cast<Ark_DragBehavior>(OHOS::Ace::DragBehavior::UNKNOWN) },
 };
 
 const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues = {
@@ -168,5 +176,23 @@ const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceI
     { DIMENSIONS_RES_NON_PCT_11_ID, DIMENSIONS_RES_NON_PCT_11_STR, -123._px },
     { DIMENSIONS_RES_NON_PCT_12_ID, DIMENSIONS_RES_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_PCT_13_ID, DIMENSIONS_RES_NON_PCT_13_STR, -0.2_pct },
+};
+
+const std::vector<std::tuple<std::string, Dimension, Ark_Length>> testFixtureLengthAnyValidValues = {
+    { "123.0_vp", 123.0_vp, Converter::ArkValue<Ark_Length>(123.0_vp) },
+    { "0.0_vp", 0.0_vp, Converter::ArkValue<Ark_Length>(0.0_vp) },
+    { "1.23_vp", 1.23_vp, Converter::ArkValue<Ark_Length>(1.23_vp) },
+    { "123.0_fp", 123.0_fp, Converter::ArkValue<Ark_Length>(123.0_fp) },
+    { "0.0_fp", 0.0_fp, Converter::ArkValue<Ark_Length>(0.0_fp) },
+    { "1.23_fp", 1.23_fp, Converter::ArkValue<Ark_Length>(1.23_fp) },
+    { "123.0_px", 123.0_px, Converter::ArkValue<Ark_Length>(123.0_px) },
+    { "0.0_px", 0.0_px, Converter::ArkValue<Ark_Length>(0.0_px) },
+    { "1.23_px", 1.23_px, Converter::ArkValue<Ark_Length>(1.23_px) },
+    { "-2.3_vp", -2.3_vp, Converter::ArkValue<Ark_Length>(-2.3_vp) },
+    { "-4.5_fp", -4.5_fp, Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { "-5.6_px", -5.6_px, Converter::ArkValue<Ark_Length>(-5.6_px) },
+    { "0.5_pct", 0.5_pct, Converter::ArkValue<Ark_Length>(0.5_pct) },
+    { "0.0_pct", 0.0_pct, Converter::ArkValue<Ark_Length>(0.0_pct) },
+    { "-0.8_pct", -0.8_pct, Converter::ArkValue<Ark_Length>(-0.8_pct) },
 };
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
