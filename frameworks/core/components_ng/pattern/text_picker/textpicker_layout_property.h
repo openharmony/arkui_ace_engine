@@ -125,7 +125,7 @@ public:
 
         SetFonts(json, filter);
 
-        auto canLoop = GetCanLoopValue();
+        auto canLoop = GetCanLoopValue(true);
         json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
     }
 
