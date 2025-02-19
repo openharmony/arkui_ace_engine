@@ -42,10 +42,9 @@ Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
 }
 Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
 {
-    // fix a return value
     CHECK_NULL_RETURN(peer && peer->controller_, {});
-    peer->controller_->GetTextContentRect();
-    return {};
+    auto rect = peer->controller_->GetTextContentRect();
+    return Converter::ArkValue<Ark_RectResult>(rect);
 }
 Ark_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {

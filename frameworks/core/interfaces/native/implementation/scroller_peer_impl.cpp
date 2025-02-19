@@ -216,18 +216,16 @@ void ScrollerPeerImpl::TriggerScrollPage1(bool next)
     TriggerScrollPage0(next);
 }
 
-Ark_NativePointer ScrollerPeerImpl::TriggerCurrentOffset()
+Ark_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset()
 {
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerCurrentOffset Controller not bound to component.");
-        return 0;
+        return {};
     }
     ContainerScope scope(instanceId_);
-    scrollController->GetCurrentOffset(); // the result of GetCurrentOffset need to be returned
-    LOGE("ARKOALA ScrollerPeerImpl::TriggerCurrentOffset is not implemented.");
-    // wait for Ark_NativePointer change to another type which is acceptable to "offset" data
-    return 0; // temp stub
+    auto offset = scrollController->GetCurrentOffset(); // the result of GetCurrentOffset need to be returned
+    return Converter::ArkValue<Ark_OffsetResult>(offset);
 }
 
 void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smoothValue,
@@ -315,20 +313,18 @@ Ark_Boolean ScrollerPeerImpl::TriggerIsAtEnd()
     return Converter::ArkValue<Ark_Boolean>(scrollController->IsAtEnd());
 }
 
-Ark_NativePointer ScrollerPeerImpl::TriggerGetItemRect(const Ark_Number* indexValue)
+Ark_RectResult ScrollerPeerImpl::TriggerGetItemRect(const Ark_Number* indexValue)
 {
-    CHECK_NULL_RETURN(indexValue, 0);
+    CHECK_NULL_RETURN(indexValue, {});
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerGetItemRect Controller not bound to component.");
-        return 0;
+        return {};
     }
     int32_t index = Converter::Convert<int32_t>(*indexValue);
     ContainerScope scope(instanceId_);
-    scrollController->GetItemRect(index); // the result of GetItemRect need to be returned
-    LOGE("ARKOALA ScrollerPeerImpl::TriggerGetItemRect is not implemented.");
-    // wait for Ark_NativePointer change to another type which is acceptable to "rect" data
-    return 0; // temp stub
+    auto rect = scrollController->GetItemRect(index); // the result of GetItemRect need to be returned
+    return Converter::ArkValue<Ark_RectResult>(rect);
 }
 
 Ark_Int32 ScrollerPeerImpl::TriggerGetItemIndex(const Ark_Number* x, const Ark_Number* y)

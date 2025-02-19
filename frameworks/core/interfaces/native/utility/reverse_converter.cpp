@@ -301,4 +301,26 @@ void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvCo
 {
     dst.supportAvoidance = Converter::ArkValue<Opt_Boolean>(src.supportAvoidance);
 }
+
+void AssignArkValue(Ark_OffsetResult& dst, const Offset& src)
+{
+    dst.xOffset = ArkValue<Ark_Number>(src.GetX());
+    dst.yOffset = ArkValue<Ark_Number>(src.GetY());
+}
+
+void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.Left());
+    dst.y = ArkValue<Ark_Number>(src.Top());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
+
+void AssignArkValue(Ark_RectResult& dst, const RectF& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.GetX());
+    dst.y = ArkValue<Ark_Number>(src.GetY());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
 } // namespace OHOS::Ace::NG::Converter
