@@ -350,7 +350,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(parameter);
+        auto peer = parameter;
         ASSERT_NE(peer, nullptr);
         auto info = peer->GetEventInfo();
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
@@ -399,7 +399,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEventTest, TestSize.Level1)
     static const int32_t expectedResId = 123;
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(event);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
         auto info = peer->GetEventInfo();
