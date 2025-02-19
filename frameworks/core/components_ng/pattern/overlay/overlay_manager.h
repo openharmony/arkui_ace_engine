@@ -831,6 +831,7 @@ private:
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
 
     void SetDragNodeNeedClean();
+    void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
