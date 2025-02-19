@@ -88,6 +88,12 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
 
+#define LOGF_ABORT(fmt, ...)      \
+    do {                          \
+        LOGF(fmt, ##__VA_ARGS__); \
+        abort();                  \
+    } while (0)
+
 #define APP_LOGD(fmt, ...) PRINT_APP_LOG(DEBUG, fmt, ##__VA_ARGS__)
 #define APP_LOGI(fmt, ...) PRINT_APP_LOG(INFO, fmt, ##__VA_ARGS__)
 #define APP_LOGW(fmt, ...) PRINT_APP_LOG(WARN, fmt, ##__VA_ARGS__)

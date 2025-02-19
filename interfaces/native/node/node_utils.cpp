@@ -218,8 +218,7 @@ void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* nam
         return;
     }
     if (name == nullptr || value == nullptr) {
-        LOGF("AddCustomProperty input params name or value is nullptr");
-        abort();
+        LOGF_ABORT("AddCustomProperty input params name or value is nullptr");
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->addCustomProperty(node->uiNodeHandle, name, value);
@@ -231,8 +230,7 @@ void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* 
         return;
     }
     if (name == nullptr) {
-        LOGF("RemoveCustomProperty input params name is nullptr");
-        abort();
+        LOGF_ABORT("RemoveCustomProperty input params name is nullptr");
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->removeCustomProperty(node->uiNodeHandle, name);
@@ -328,8 +326,7 @@ int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindow
 const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info)
 {
     if (!info) {
-        LOGF("HostWindowInfo is nullptr");
-        abort();
+        LOGF_ABORT("HostWindowInfo is nullptr");
     }
     return info->name;
 }
@@ -353,8 +350,7 @@ void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle)
 const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle)
 {
     if (!handle) {
-        LOGF("CustomProperty is nullptr");
-        abort();
+        LOGF_ABORT("CustomProperty is nullptr");
     }
     return handle->value;
 }
@@ -370,8 +366,7 @@ void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle)
 ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildrenInfo* handle, int32_t index)
 {
     if (!handle) {
-        LOGF("ActiveChildrenInfo is nullptr");
-        abort();
+        LOGF_ABORT("ActiveChildrenInfo is nullptr");
     }
     if (index < handle->nodeCount && index >= 0) {
         return handle->nodeList[index];
@@ -382,8 +377,7 @@ ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildren
 int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
 {
     if (!handle) {
-        LOGF("ActiveChildrenInfo is nullptr");
-        abort();
+        LOGF_ABORT("ActiveChildrenInfo is nullptr");
     }
     return handle->nodeCount;
 }
