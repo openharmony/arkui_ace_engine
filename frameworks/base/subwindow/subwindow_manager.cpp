@@ -33,6 +33,9 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
     std::lock_guard<std::mutex> lock(instanceMutex_);
     if (!instance_) {
         instance_ = std::make_shared<SubwindowManager>();
+        if (instance_) {
+            instance_->isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
+        }
     }
     return instance_;
 }
@@ -1327,15 +1330,16 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
         windowType = SubwindowType::TYPE_DIALOG;
     }
     searchKey.windowType = windowType;
+    searchKey.foldStatus = FoldStatus::UNKNOWN;
     auto container = Container::GetContainer(instanceId);
     if (container) {
         displayId = container->GetCurrentDisplayId();
+        searchKey.foldStatus =
+            isSuperFoldDisplayDevice_ && (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID)
+                ? container->GetCurrentFoldStatus()
+                : FoldStatus::UNKNOWN;
     }
 
-    auto foldstatus = container ? container->GetCurrentFoldStatus() : FoldStatus::UNKNOWN;
-    auto isSuperFoldDisplay = SystemProperties::IsSuperFoldDisplayDevice() &&
-                              (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID);
-    searchKey.foldStatus = isSuperFoldDisplay ? foldstatus : FoldStatus::UNKNOWN;
     searchKey.displayId = displayId;
     return searchKey;
 }
