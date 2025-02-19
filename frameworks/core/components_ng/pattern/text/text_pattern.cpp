@@ -3608,7 +3608,7 @@ void TextPattern::PauseSymbolAnimation()
     if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
         return;
     }
-    if (!isLoopAnimation) {
+    if (!isLoopAnimation_) {
         return;
     }
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -3630,7 +3630,7 @@ void TextPattern::ResumeSymbolAnimation()
     if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
         return;
     }
-    if (!isLoopAnimation) {
+    if (!isLoopAnimation_) {
         return;
     }
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
