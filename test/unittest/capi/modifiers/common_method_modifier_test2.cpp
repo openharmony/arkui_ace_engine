@@ -19,6 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -103,6 +104,7 @@ bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionR
 
 namespace GeneratedModifier {
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
 }
 
 namespace Converter {
@@ -324,6 +326,103 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
     EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
+}
+
+/*
+ * @tc.name: setOnKeyPreImeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnKeyPreIme, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    struct CheckEvent {
+        int32_t resourceId = -1;
+        KeyCode code = KeyCode::KEY_UNKNOWN;
+    };
+    static const int32_t expectedResId = 123;
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
+        auto peer = parameter;
+        ASSERT_NE(peer, nullptr);
+        auto info = peer->GetEventInfo();
+        auto accessor = GeneratedModifier::GetKeyEventAccessor();
+        checkEvent = {
+            .resourceId = resourceId,
+            .code = info->GetKeyCode()
+        };
+        accessor->destroyPeer(peer);
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, expectedResId);
+    modifier_->setOnKeyPreIme(node_, &arkCallback);
+
+    auto callOnKeyPreIme = focusHub->GetOnKeyPreIme();
+    ASSERT_NE(callOnKeyPreIme, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_FN;
+    auto eventInfo = KeyEventInfo(keyEvent);
+    EXPECT_FALSE(checkEvent.has_value());
+    auto result = callOnKeyPreIme(eventInfo);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(checkEvent->code, keyEvent.code);
+}
+
+
+/*
+ * @tc.name: setOnKeyEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnKeyEventTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    struct CheckEvent {
+        int32_t resourceId = -1;
+        KeyCode code = KeyCode::KEY_UNKNOWN;
+    };
+    static const int32_t expectedResId = 123;
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
+        auto peer = event;
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetKeyEventAccessor();
+        auto info = peer->GetEventInfo();
+        checkEvent = {
+            .resourceId = resourceId,
+            .code = info->GetKeyCode()
+        };
+        accessor->destroyPeer(peer);
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(checkCallback, expectedResId);
+    modifier_->setOnKeyEvent(node_, &arkCallback);
+
+    auto callOnKeyEvent = focusHub->GetOnKeyCallback();
+    ASSERT_NE(callOnKeyEvent, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_FN;
+    auto eventInfo = KeyEventInfo(keyEvent);
+    EXPECT_FALSE(checkEvent.has_value());
+    callOnKeyEvent(eventInfo);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+    EXPECT_EQ(checkEvent->code, keyEvent.code);
 }
 
 /*
