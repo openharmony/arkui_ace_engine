@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor();
 namespace GestureRecognizerAccessor {
-void DestroyPeerImpl(GestureRecognizerPeer* peer)
+void DestroyPeerImpl(Ark_GestureRecognizer peer)
 {
     if (peer) {
         delete peer;
@@ -40,45 +40,42 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetTagImpl(GestureRecognizerPeer* peer)
+void GetTagImpl(Ark_GestureRecognizer peer)
 {
     LOGE("ARKOALA GestureRecognizerAccessor.GetTagImpl -> Incorrect return value!");
 }
-Ark_NativePointer GetTypeImpl(GestureRecognizerPeer* peer)
+Ark_GestureControl_GestureType GetTypeImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), nullptr);
+    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
     Ark_NativePointer ret = nullptr;
     auto typeName = peer->GetRecognizer()->GetRecognizerType();
-    ret = reinterpret_cast<Ark_NativePointer>(&typeName);
     LOGE("ARKOALA GestureRecognizerAccessor.GetTypeImpl not implemented -> incorrect return value!");
-    return ret;
+    return {};
 }
-Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
+Ark_Boolean IsBuiltInImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
     auto gestureInfo = peer->GetRecognizer()->GetGestureInfo();
     return Converter::ArkValue<Ark_Boolean>(gestureInfo->IsSystemGesture());
 }
-void SetEnabledImpl(GestureRecognizerPeer* peer,
+void SetEnabledImpl(Ark_GestureRecognizer peer,
                     Ark_Boolean isEnabled)
 {
     CHECK_NULL_VOID(peer && peer->GetRecognizer());
     peer->GetRecognizer()->SetEnabled(Converter::Convert<bool>(isEnabled));
 }
-Ark_Boolean IsEnabledImpl(GestureRecognizerPeer* peer)
+Ark_Boolean IsEnabledImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
     return Converter::ArkValue<Ark_Boolean>(peer->GetRecognizer()->IsEnabled());
 }
-Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
+Ark_GestureRecognizerState GetStateImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), nullptr);
-    Ark_NativePointer ret = nullptr;
+    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
     auto state = peer->GetRecognizer()->GetGestureState();
-    ret = reinterpret_cast<Ark_NativePointer>(&state);
-    return ret;
+    return {};
 }
-Ark_EventTargetInfo GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
+Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto attachNode = peer->GetRecognizer() ? peer->GetRecognizer()->GetAttachedNode().Upgrade() : nullptr;
@@ -102,7 +99,7 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
     }
     return result;
 }
-Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
+Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
     return Converter::ArkValue<Ark_Boolean>(peer->GetRecognizer()->IsInResponseLinkRecognizers());

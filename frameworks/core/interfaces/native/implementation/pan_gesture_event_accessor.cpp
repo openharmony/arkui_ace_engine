@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureEventAccessor {
-void DestroyPeerImpl(PanGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_PanGestureEvent peer)
 {
     delete peer;
 }
@@ -31,43 +31,43 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetOffsetXImpl(PanGestureEventPeer* peer)
+Ark_Int32 GetOffsetXImpl(Ark_PanGestureEvent peer)
 {
     return {};
 }
-void SetOffsetXImpl(PanGestureEventPeer* peer,
+void SetOffsetXImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetX)
 {
 }
-Ark_Int32 GetOffsetYImpl(PanGestureEventPeer* peer)
+Ark_Int32 GetOffsetYImpl(Ark_PanGestureEvent peer)
 {
     return {};
 }
-void SetOffsetYImpl(PanGestureEventPeer* peer,
+void SetOffsetYImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetY)
 {
 }
-Ark_Int32 GetVelocityXImpl(PanGestureEventPeer* peer)
+Ark_Int32 GetVelocityXImpl(Ark_PanGestureEvent peer)
 {
     return {};
 }
-void SetVelocityXImpl(PanGestureEventPeer* peer,
+void SetVelocityXImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityX)
 {
 }
-Ark_Int32 GetVelocityYImpl(PanGestureEventPeer* peer)
+Ark_Int32 GetVelocityYImpl(Ark_PanGestureEvent peer)
 {
     return {};
 }
-void SetVelocityYImpl(PanGestureEventPeer* peer,
+void SetVelocityYImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityY)
 {
 }
-Ark_Int32 GetVelocityImpl(PanGestureEventPeer* peer)
+Ark_Int32 GetVelocityImpl(Ark_PanGestureEvent peer)
 {
     return {};
 }
-void SetVelocityImpl(PanGestureEventPeer* peer,
+void SetVelocityImpl(Ark_PanGestureEvent peer,
                      const Ark_Number* velocity)
 {
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAttachmentAccessor {
-void DestroyPeerImpl(ImageAttachmentPeer* peer)
+void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
 }
 Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
@@ -30,11 +30,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetVerticalAlignImpl(ImageAttachmentPeer* peer)
+Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
-Ark_NativePointer GetObjectFitImpl(ImageAttachmentPeer* peer)
+Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
     return {};
 }

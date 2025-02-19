@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubmitEventAccessor {
-void DestroyPeerImpl(SubmitEventPeer* peer)
+void DestroyPeerImpl(Ark_SubmitEvent peer)
 {
     delete peer;
 }
@@ -31,20 +31,20 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void KeepEditableStateImpl(SubmitEventPeer* peer)
+void KeepEditableStateImpl(Ark_SubmitEvent peer)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->GetEventInfo());
     peer->GetEventInfo()->SetKeepEditable(true);
 }
-void GetTextImpl(SubmitEventPeer* peer)
+void GetTextImpl(Ark_SubmitEvent peer)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->GetEventInfo());
     auto text = peer->GetEventInfo()->GetText();
     LOGE("Arkoala method SubmitEventAccessor.GetTextImpl has incorrect return type");
 }
-void SetTextImpl(SubmitEventPeer* peer,
+void SetTextImpl(Ark_SubmitEvent peer,
                  const Ark_String* text)
 {
     CHECK_NULL_VOID(peer);

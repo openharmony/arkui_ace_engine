@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PermissionRequestAccessor {
-void DestroyPeerImpl(PermissionRequestPeer* peer)
+void DestroyPeerImpl(Ark_PermissionRequest peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
@@ -34,26 +34,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DenyImpl(PermissionRequestPeer* peer)
+void DenyImpl(Ark_PermissionRequest peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Deny();
 }
-void GetOriginImpl(PermissionRequestPeer* peer)
+void GetOriginImpl(Ark_PermissionRequest peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->GetOrigin();
     // origin value need to be returned
     LOGE("PermissionRequestAccessor::GetOriginImpl - return value need to be supported");
 }
-void GetAccessibleResourceImpl(PermissionRequestPeer* peer)
+Array_String GetAccessibleResourceImpl(Ark_PermissionRequest peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetResources();
     // accessible resource value need to be returned
     LOGE("PermissionRequestAccessor::GetAccessibleResourceImpl - return value need to be supported");
+    return {};
 }
-void GrantImpl(PermissionRequestPeer* peer,
+void GrantImpl(Ark_PermissionRequest peer,
                const Array_String* resources)
 {
     CHECK_NULL_VOID(peer && peer->handler);

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
-void DestroyPeerImpl(EventTargetInfoPeer* peer)
+void DestroyPeerImpl(Ark_EventTargetInfo peer)
 {
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
@@ -37,7 +37,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetIdImpl(EventTargetInfoPeer* peer)
+void GetIdImpl(Ark_EventTargetInfo peer)
 {
     CHECK_NULL_VOID(peer); // Use CHECK_NULL_VOID_RETURN with an empty string if it is possible.
     const auto result = Converter::ArkValue<Ark_String>(peer->id); // Return result if it is possible.

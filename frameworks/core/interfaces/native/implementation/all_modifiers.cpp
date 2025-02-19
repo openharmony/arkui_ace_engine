@@ -235,6 +235,8 @@ const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor();
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor();
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor();
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor();
+const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor();
+const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor();
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
@@ -508,6 +510,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetRenderingContextSettingsAccessor,
         GetCanvasRendererAccessor,
         GetCanvasRenderingContext2DAccessor,
+        GetOffscreenCanvasRenderingContext2DAccessor,
+        GetOffscreenCanvasAccessor,
         GetDrawingRenderingContextAccessor,
         GetICurveAccessor,
         GetDrawModifierAccessor,

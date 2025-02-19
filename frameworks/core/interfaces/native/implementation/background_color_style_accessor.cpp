@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BackgroundColorStyleAccessor {
-void DestroyPeerImpl(BackgroundColorStylePeer* peer)
+void DestroyPeerImpl(Ark_BackgroundColorStyle peer)
 {
 }
 Ark_BackgroundColorStyle CtorImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)

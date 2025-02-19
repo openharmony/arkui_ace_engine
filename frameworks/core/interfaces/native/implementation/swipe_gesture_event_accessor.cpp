@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeGestureEventAccessor {
-void DestroyPeerImpl(SwipeGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_SwipeGestureEvent peer)
 {
     delete peer;
 }
@@ -32,7 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetAngleImpl(SwipeGestureEventPeer* peer)
+Ark_Int32 GetAngleImpl(Ark_SwipeGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, errValue);
@@ -42,7 +42,7 @@ Ark_Int32 GetAngleImpl(SwipeGestureEventPeer* peer)
     LOGE("Arkoala method SwipeGestureEventAccessor.GetAngleImpl return int32_t value");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(angle));
 }
-void SetAngleImpl(SwipeGestureEventPeer* peer,
+void SetAngleImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* angle)
 {
     CHECK_NULL_VOID(peer);
@@ -51,7 +51,7 @@ void SetAngleImpl(SwipeGestureEventPeer* peer,
     CHECK_NULL_VOID(info);
     info->SetAngle(Converter::Convert<float>(*angle));
 }
-Ark_Int32 GetSpeedImpl(SwipeGestureEventPeer* peer)
+Ark_Int32 GetSpeedImpl(Ark_SwipeGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, errValue);
@@ -62,7 +62,7 @@ Ark_Int32 GetSpeedImpl(SwipeGestureEventPeer* peer)
     LOGE("Arkoala method SwipeGestureEventAccessor.GetSpeedImpl return int32_t value");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
-void SetSpeedImpl(SwipeGestureEventPeer* peer,
+void SetSpeedImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* speed)
 {
     CHECK_NULL_VOID(peer);

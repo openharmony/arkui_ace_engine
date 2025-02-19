@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceErrorAccessor {
-void DestroyPeerImpl(WebResourceErrorPeer* peer)
+void DestroyPeerImpl(Ark_WebResourceError peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
@@ -34,14 +34,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetErrorInfoImpl(WebResourceErrorPeer* peer)
+void GetErrorInfoImpl(Ark_WebResourceError peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->GetInfo();
     // info need to be returned
     LOGE("WebResourceErrorAccessor::GetErrorInfoImpl - return value need to be supported");
 }
-Ark_Int32 GetErrorCodeImpl(WebResourceErrorPeer* peer)
+Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     return static_cast<Ark_Int32>(peer->handler->GetCode());

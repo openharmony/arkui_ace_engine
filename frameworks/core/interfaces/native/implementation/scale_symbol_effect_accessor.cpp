@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScaleSymbolEffectAccessor {
-void DestroyPeerImpl(ScaleSymbolEffectPeer* peer)
+void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 {
 }
 Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
@@ -31,19 +31,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetScopeImpl(ScaleSymbolEffectPeer* peer)
+Ark_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
 {
     return {};
 }
-void SetScopeImpl(ScaleSymbolEffectPeer* peer,
+void SetScopeImpl(Ark_ScaleSymbolEffect peer,
                   Ark_EffectScope scope)
 {
 }
-Ark_NativePointer GetDirectionImpl(ScaleSymbolEffectPeer* peer)
+Ark_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
 {
     return {};
 }
-void SetDirectionImpl(ScaleSymbolEffectPeer* peer,
+void SetDirectionImpl(Ark_ScaleSymbolEffect peer,
                       Ark_EffectDirection direction)
 {
 }

@@ -30,7 +30,7 @@ struct TimePickerDialogPeer {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
-void DestroyPeerImpl(TimePickerDialogPeer* peer)
+void DestroyPeerImpl(Ark_TimePickerDialog peer)
 {
     if (peer) {
         delete peer;

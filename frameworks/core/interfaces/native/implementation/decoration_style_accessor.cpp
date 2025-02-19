@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DecorationStyleAccessor {
-void DestroyPeerImpl(DecorationStylePeer* peer)
+void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
 }
 Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
@@ -30,11 +30,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetTypeImpl(DecorationStylePeer* peer)
+Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
 {
     return {};
 }
-Ark_NativePointer GetStyleImpl(DecorationStylePeer* peer)
+Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
     return {};
 }

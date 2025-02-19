@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BounceSymbolEffectAccessor {
-void DestroyPeerImpl(BounceSymbolEffectPeer* peer)
+void DestroyPeerImpl(Ark_BounceSymbolEffect peer)
 {
 }
 Ark_BounceSymbolEffect CtorImpl(const Opt_EffectScope* scope,
@@ -31,19 +31,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetScopeImpl(BounceSymbolEffectPeer* peer)
+Ark_EffectScope GetScopeImpl(Ark_BounceSymbolEffect peer)
 {
     return {};
 }
-void SetScopeImpl(BounceSymbolEffectPeer* peer,
+void SetScopeImpl(Ark_BounceSymbolEffect peer,
                   Ark_EffectScope scope)
 {
 }
-Ark_NativePointer GetDirectionImpl(BounceSymbolEffectPeer* peer)
+Ark_EffectDirection GetDirectionImpl(Ark_BounceSymbolEffect peer)
 {
     return {};
 }
-void SetDirectionImpl(BounceSymbolEffectPeer* peer,
+void SetDirectionImpl(Ark_BounceSymbolEffect peer,
                       Ark_EffectDirection direction)
 {
 }

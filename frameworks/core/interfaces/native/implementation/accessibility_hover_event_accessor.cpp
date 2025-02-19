@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AccessibilityHoverEventAccessor {
-void DestroyPeerImpl(AccessibilityHoverEventPeer* peer)
+void DestroyPeerImpl(Ark_AccessibilityHoverEvent peer)
 {
     delete peer;
 }
@@ -31,59 +31,59 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetTypeImpl(AccessibilityHoverEventPeer* peer)
+Ark_AccessibilityHoverType GetTypeImpl(Ark_AccessibilityHoverEvent peer)
 {
     return {};
 }
-void SetTypeImpl(AccessibilityHoverEventPeer* peer,
+void SetTypeImpl(Ark_AccessibilityHoverEvent peer,
                  Ark_AccessibilityHoverType type)
 {
 }
-Ark_Int32 GetXImpl(AccessibilityHoverEventPeer* peer)
+Ark_Int32 GetXImpl(Ark_AccessibilityHoverEvent peer)
 {
     return {};
 }
-void SetXImpl(AccessibilityHoverEventPeer* peer,
+void SetXImpl(Ark_AccessibilityHoverEvent peer,
               const Ark_Number* x)
 {
 }
-Ark_Int32 GetYImpl(AccessibilityHoverEventPeer* peer)
+Ark_Int32 GetYImpl(Ark_AccessibilityHoverEvent peer)
 {
     return {};
 }
-void SetYImpl(AccessibilityHoverEventPeer* peer,
+void SetYImpl(Ark_AccessibilityHoverEvent peer,
               const Ark_Number* y)
 {
 }
-Ark_Int32 GetDisplayXImpl(AccessibilityHoverEventPeer* peer)
+Ark_Int32 GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
 {
     return {};
 }
-void SetDisplayXImpl(AccessibilityHoverEventPeer* peer,
+void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
                      const Ark_Number* displayX)
 {
 }
-Ark_Int32 GetDisplayYImpl(AccessibilityHoverEventPeer* peer)
+Ark_Int32 GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
 {
     return {};
 }
-void SetDisplayYImpl(AccessibilityHoverEventPeer* peer,
+void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
                      const Ark_Number* displayY)
 {
 }
-Ark_Int32 GetWindowXImpl(AccessibilityHoverEventPeer* peer)
+Ark_Int32 GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
 {
     return {};
 }
-void SetWindowXImpl(AccessibilityHoverEventPeer* peer,
+void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
                     const Ark_Number* windowX)
 {
 }
-Ark_Int32 GetWindowYImpl(AccessibilityHoverEventPeer* peer)
+Ark_Int32 GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
 {
     return {};
 }
-void SetWindowYImpl(AccessibilityHoverEventPeer* peer,
+void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
                     const Ark_Number* windowY)
 {
 }

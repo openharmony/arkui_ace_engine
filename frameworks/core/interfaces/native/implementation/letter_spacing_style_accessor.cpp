@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LetterSpacingStyleAccessor {
-void DestroyPeerImpl(LetterSpacingStylePeer* peer)
+void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
 }
 Ark_LetterSpacingStyle CtorImpl(Ark_LengthMetrics value)
@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetLetterSpacingImpl(LetterSpacingStylePeer* peer)
+Ark_Int32 GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
 {
     return {};
 }

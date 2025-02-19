@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureStyleAccessor {
-void DestroyPeerImpl(GestureStylePeer* peer)
+void DestroyPeerImpl(Ark_GestureStyle peer)
 {
 }
 Ark_GestureStyle CtorImpl(const Opt_GestureStyleInterface* value)

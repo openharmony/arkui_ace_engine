@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageDataAccessor {
-void DestroyPeerImpl(ImageDataPeer* peer)
+void DestroyPeerImpl(Ark_ImageData peer)
 {
 }
 Ark_ImageData CtorImpl(const Ark_Number* width,
@@ -32,11 +32,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetHeightImpl(ImageDataPeer* peer)
+Ark_Int32 GetHeightImpl(Ark_ImageData peer)
 {
     return {};
 }
-Ark_Int32 GetWidthImpl(ImageDataPeer* peer)
+Ark_Int32 GetWidthImpl(Ark_ImageData peer)
 {
     return {};
 }

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaselineOffsetStyleAccessor {
-void DestroyPeerImpl(BaselineOffsetStylePeer* peer)
+void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
 }
 Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetBaselineOffsetImpl(BaselineOffsetStylePeer* peer)
+Ark_Int32 GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
 {
     return {};
 }

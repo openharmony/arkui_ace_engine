@@ -41,7 +41,7 @@ SnapshotOptions Convert(const Ark_SnapshotOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
-void DestroyPeerImpl(GlobalScope_ohos_arkui_componentSnapshotPeer* peer)
+void DestroyPeerImpl(Ark_GlobalScope_ohos_arkui_componentSnapshot peer)
 {
     CHECK_NULL_VOID(peer);
     delete peer;

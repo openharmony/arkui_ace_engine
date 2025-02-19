@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationContextAccessor {
-void DestroyPeerImpl(NavDestinationContextPeer* peer)
+void DestroyPeerImpl(Ark_NavDestinationContext peer)
 {
     delete peer;
 }
@@ -33,19 +33,20 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
+Opt_RouteMapConfig GetConfigInRouteMapImpl(Ark_NavDestinationContext peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, nullptr);
+    auto invalid = Converter::ArkValue<Opt_RouteMapConfig>();
+    CHECK_NULL_RETURN(peer && peer->handler, invalid);
     auto container = Container::Current();
     auto navigationRoute = container->GetNavigationRoute();
     if (!navigationRoute) {
-        return nullptr;
+        return invalid;
     }
     auto navPathInfo = peer->handler->GetNavPathInfo();
-    CHECK_NULL_RETURN(navPathInfo, nullptr);
+    CHECK_NULL_RETURN(navPathInfo, invalid);
     NG::RouteItem routeInfo;
     if (!navigationRoute->GetRouteItem(navPathInfo->GetName(), routeInfo)) {
-        return nullptr;
+        return invalid;
     }
 
     // a temp struct
@@ -63,19 +64,19 @@ Ark_NativePointer GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
         config->data.insert(std::pair(iter->first, iter->second));
     }
 
-    return {}; // fix a return value
+    return invalid; // fix a return value
 }
-void SetPathInfoImpl(NavDestinationContextPeer* peer,
+void SetPathInfoImpl(Ark_NavDestinationContext peer,
                      Ark_NavPathInfo pathInfo)
 {
     LOGE("NavDestinationContext doesn't support set path info");
 }
-void SetPathStackImpl(NavDestinationContextPeer* peer,
+void SetPathStackImpl(Ark_NavDestinationContext peer,
                       Ark_NavPathStack pathStack)
 {
     LOGE("NavDestinationContext doesn't support set nav path stack");
 }
-void GetNavDestinationIdImpl(NavDestinationContextPeer* peer)
+void GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 {
     LOGE("NavDestinationContext doesn't support a return value"); // temp
     CHECK_NULL_VOID(peer && peer->handler); // fix a return value
@@ -83,7 +84,7 @@ void GetNavDestinationIdImpl(NavDestinationContextPeer* peer)
     // fix a return value
     Converter::ArkValue<Ark_String>(id);
 }
-void SetNavDestinationIdImpl(NavDestinationContextPeer* peer,
+void SetNavDestinationIdImpl(Ark_NavDestinationContext peer,
                              const Ark_String* navDestinationId)
 {
     LOGE("NavDestinationContext doesn't support set nav destination id");

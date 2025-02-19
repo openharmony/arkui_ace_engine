@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressGestureEventAccessor {
-void DestroyPeerImpl(LongPressGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_LongPressGestureEvent peer)
 {
     delete peer;
 }
@@ -31,11 +31,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetRepeatImpl(LongPressGestureEventPeer* peer)
+Ark_Boolean GetRepeatImpl(Ark_LongPressGestureEvent peer)
 {
     return {};
 }
-void SetRepeatImpl(LongPressGestureEventPeer* peer,
+void SetRepeatImpl(Ark_LongPressGestureEvent peer,
                    Ark_Boolean repeat)
 {
 }

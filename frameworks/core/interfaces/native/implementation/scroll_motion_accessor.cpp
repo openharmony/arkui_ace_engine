@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollMotionAccessor {
-void DestroyPeerImpl(ScrollMotionPeer* peer)
+void DestroyPeerImpl(Ark_ScrollMotion peer)
 {
 }
 Ark_ScrollMotion CtorImpl(const Ark_Number* position,

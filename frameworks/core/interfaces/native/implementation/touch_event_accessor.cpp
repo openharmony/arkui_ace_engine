@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TouchEventAccessor {
-void DestroyPeerImpl(TouchEventPeer* peer)
+void DestroyPeerImpl(Ark_TouchEvent peer)
 {
     delete peer;
 }
@@ -31,38 +31,39 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetHistoricalPointsImpl(TouchEventPeer* peer)
-{
-}
-Ark_NativePointer GetTypeImpl(TouchEventPeer* peer)
+Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
 {
     return {};
 }
-void SetTypeImpl(TouchEventPeer* peer,
+Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetTypeImpl(Ark_TouchEvent peer,
                  Ark_TouchType type)
 {
 }
-void SetTouchesImpl(TouchEventPeer* peer,
+void SetTouchesImpl(Ark_TouchEvent peer,
                     const Array_TouchObject* touches)
 {
 }
-void SetChangedTouchesImpl(TouchEventPeer* peer,
+void SetChangedTouchesImpl(Ark_TouchEvent peer,
                            const Array_TouchObject* changedTouches)
 {
 }
-Callback_Void GetStopPropagationImpl(TouchEventPeer* peer)
+Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
 {
     return {};
 }
-void SetStopPropagationImpl(TouchEventPeer* peer,
+void SetStopPropagationImpl(Ark_TouchEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }
-Callback_Void GetPreventDefaultImpl(TouchEventPeer* peer)
+Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
 {
     return {};
 }
-void SetPreventDefaultImpl(TouchEventPeer* peer,
+void SetPreventDefaultImpl(Ark_TouchEvent peer,
                            const Callback_Void* preventDefault)
 {
 }

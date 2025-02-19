@@ -120,7 +120,7 @@ ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlertDialogAccessor {
-void DestroyPeerImpl(AlertDialogPeer* peer)
+void DestroyPeerImpl(Ark_AlertDialog peer)
 {
     if (peer) {
         delete peer;

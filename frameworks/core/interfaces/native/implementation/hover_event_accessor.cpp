@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
-void DestroyPeerImpl(HoverEventPeer* peer)
+void DestroyPeerImpl(Ark_HoverEvent peer)
 {
     delete peer;
 }
@@ -31,11 +31,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Callback_Void GetStopPropagationImpl(HoverEventPeer* peer)
+Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
 {
     return {};
 }
-void SetStopPropagationImpl(HoverEventPeer* peer,
+void SetStopPropagationImpl(Ark_HoverEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }

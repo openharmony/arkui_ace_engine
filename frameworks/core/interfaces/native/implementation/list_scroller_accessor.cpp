@@ -29,7 +29,7 @@ void AssignCast(std::optional<Callback_Void>& dst, const Ark_CloseSwipeActionOpt
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListScrollerAccessor {
-void DestroyPeerImpl(ListScrollerPeer* peer)
+void DestroyPeerImpl(Ark_ListScroller peer)
 {
     if (peer) {
         peer->DecRefCount();
@@ -45,15 +45,15 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetItemRectInGroupImpl(ListScrollerPeer* peer,
-                                         const Ark_Number* index,
-                                         const Ark_Number* indexInGroup)
+Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
+                                      const Ark_Number* index,
+                                      const Ark_Number* indexInGroup)
 {
     LOGE("ListScrollerAccessor::GetItemRectInGroupImpl is not implemented.");
     // wait for Ark_NativePointer change to another type which is acceptable to "Rect" data
-    CHECK_NULL_RETURN(peer, nullptr); // need to fix a return value
-    CHECK_NULL_RETURN(index, nullptr); // need to fix a return value
-    CHECK_NULL_RETURN(indexInGroup, nullptr); // need to fix a return value
+    CHECK_NULL_RETURN(peer, {}); // need to fix a return value
+    CHECK_NULL_RETURN(index, {}); // need to fix a return value
+    CHECK_NULL_RETURN(indexInGroup, {}); // need to fix a return value
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
@@ -67,7 +67,7 @@ Ark_NativePointer GetItemRectInGroupImpl(ListScrollerPeer* peer,
     scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
     return {}; // need to fix a return value
 }
-void ScrollToItemInGroupImpl(ListScrollerPeer* peer,
+void ScrollToItemInGroupImpl(Ark_ListScroller peer,
                              const Ark_Number* index,
                              const Ark_Number* indexInGroup,
                              const Opt_Boolean* smooth,
@@ -90,7 +90,7 @@ void ScrollToItemInGroupImpl(ListScrollerPeer* peer,
     scrollController->JumpToItemInGroup(indexValue, indexInGroupValue,
         smoothValue.value_or(false), alignValue.value_or(ScrollAlign::NONE));
 }
-void CloseAllSwipeActionsImpl(ListScrollerPeer* peer,
+void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
                               const Opt_CloseSwipeActionOptions* options)
 {
     CHECK_NULL_VOID(peer);
@@ -106,15 +106,15 @@ void CloseAllSwipeActionsImpl(ListScrollerPeer* peer,
         scrollController->CloseAllSwipeActions(std::move(func));
     }
 }
-Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
-                                                const Ark_Number* x,
-                                                const Ark_Number* y)
+Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
+                                                         const Ark_Number* x,
+                                                         const Ark_Number* y)
 {
     LOGE("ListScrollerAccessor::GetVisibleListContentInfoImpl is not implemented.");
     // wait for Ark_NativePointer change to another type which is acceptable to "ListItemGroupIndex" data
-    CHECK_NULL_RETURN(peer, nullptr); // need to fix a return value
-    CHECK_NULL_RETURN(x, nullptr); // need to fix a return value
-    CHECK_NULL_RETURN(y, nullptr); // need to fix a return value
+    CHECK_NULL_RETURN(peer, {}); // need to fix a return value
+    CHECK_NULL_RETURN(x, {}); // need to fix a return value
+    CHECK_NULL_RETURN(y, {}); // need to fix a return value
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
