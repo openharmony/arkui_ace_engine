@@ -16,6 +16,7 @@
 #include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
@@ -121,8 +122,8 @@ Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->handler, {});
-    LOGE("PanGestureOptionsAccessor::GetDirectionImpl - return value need to be supported");
-    return {};
+    auto panDirection = peer->handler->GetDirection();
+    return Converter::ArkValue<Ark_PanDirection>(panDirection);
 }
 Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
 {
