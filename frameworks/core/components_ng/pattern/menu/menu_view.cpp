@@ -85,7 +85,7 @@ LayoutConstraintF CreatePreviewLayoutConstraint(const RefPtr<LayoutProperty>& la
     LayoutConstraintF constraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
 
     auto currentId = Container::CurrentId();
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subWindow, constraint);
     auto subwindowSize = subWindow->GetRect().GetSize();
     if (!subwindowSize.IsPositive()) {
@@ -1305,7 +1305,7 @@ void MenuView::UpdateMenuPaintProperty(
 }
 
 RefPtr<FrameNode> MenuView::Create(
-    const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag)
+    const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag, bool autoWrapFlag)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1318,7 +1318,7 @@ RefPtr<FrameNode> MenuView::Create(
     CHECK_NULL_RETURN(menuProperty, nullptr);
     menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = CreateSelectOption(params[i], i);
+        auto optionNode = CreateSelectOption(params[i], i, autoWrapFlag);
         auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_RETURN(optionPattern, nullptr);
         optionPattern->SetIsSelectOption(true);
@@ -1719,7 +1719,7 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     return iconNode;
 }
 
-RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent)
+RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent, bool autoWrapFlag)
 {
     // create child text node
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1734,8 +1734,13 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
 
-    textProperty->UpdateMaxLines(1);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    TAG_LOGI(AceLogTag::ACE_MENU, "MenuView::CreateText autoWrapFlag: %{public}d", autoWrapFlag);
+    if (!autoWrapFlag) {
+        textProperty->UpdateMaxLines(1);
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    } else {
+        textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
+    }
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(theme->GetMenuFontColor());
@@ -1787,7 +1792,7 @@ RefPtr<FrameNode> MenuView::CreateIcon(const std::string& icon, const RefPtr<Fra
     return iconNode;
 }
 
-RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t index)
+RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t index, bool autoWrapFlag)
 {
     auto option = Create(index);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1806,7 +1811,7 @@ RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t
     }
     pattern->SetIconNode(iconNode);
 
-    auto text = CreateText(param.text, row);
+    auto text = CreateText(param.text, row, autoWrapFlag);
     pattern->SetTextNode(text);
     return option;
 }

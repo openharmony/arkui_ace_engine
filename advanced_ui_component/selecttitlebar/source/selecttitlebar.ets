@@ -649,7 +649,7 @@ struct ImageMenuItem {
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false
-          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          if (this.fontSize >= this.minFontSize) {
             this.dialogController?.close()
           }
         }
@@ -747,7 +747,7 @@ struct ImageMenuItem {
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false
-          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          if (this.fontSize >= this.minFontSize) {
             this.dialogController?.close()
           }
         }

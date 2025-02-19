@@ -625,6 +625,11 @@ public:
     virtual bool IsAccessibilityHoverPriority() const;
     void SetAccessibilityHoverPriority(bool hoverPriority);
 
+    void SetUserScrollTriggerable(const bool& triggerable);
+    bool HasUserScrollTriggerable();
+    bool IsUserScrollTriggerable();
+    void ResetUserScrollTriggerable();
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -711,6 +716,7 @@ protected:
     std::optional<bool> isSelected_;
     std::optional<int32_t> checkedType_;
     std::optional<bool> isUserCheckable_;
+    std::optional<bool> isUserScrollTriggerable_ = true;
 
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;

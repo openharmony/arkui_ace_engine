@@ -86,17 +86,19 @@ RefPtr<AceType> NativeView::CreateUI()
             }
             self->pendingUpdateTasks_.clear();
         },
-        .removeFunc = [weakThis]() {
-            auto self = weakThis.promote();
-            CHECK_NULL_VOID(self);
-            self->Destroy();
-        },
-        .reloadFunc = [weakThis](bool deep) {
-            auto self = weakThis.promote();
-            CHECK_NULL_VOID(self);
-            ContainerScope scope(self->instanceId_);
-            self->cjView_->Reload(deep);
-        },
+        .removeFunc =
+            [weakThis]() {
+                auto self = weakThis.promote();
+                CHECK_NULL_VOID(self);
+                self->Destroy();
+            },
+        .reloadFunc =
+            [weakThis](bool deep) {
+                auto self = weakThis.promote();
+                CHECK_NULL_VOID(self);
+                ContainerScope scope(self->instanceId_);
+                self->cjView_->Reload(deep);
+            },
         .completeReloadFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
             auto view = weakThis.promote();
             CHECK_NULL_RETURN(view, nullptr);
@@ -147,9 +149,7 @@ RefPtr<AceType> NativeView::CreateUI()
         },
     };
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(partialUpdateCallbacks));
-
     node_ = node;
-
     return node;
 }
 
@@ -413,12 +413,13 @@ void RemoteView::OnDisappear()
 
 void RemoteView::OnDidBuild()
 {
-    VoidCallback(CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewOnDidBuild, "OnDidBuild");
+    VoidCallback(
+        CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewOnDidBuild, "OnDidBuild");
 }
 
 void RemoteView::AboutToReuse(const std::string& value)
 {
-    auto aboutToReuseFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewAboutToReuse;
+    auto aboutToReuseFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewAboutToReuse;
     if (!aboutToReuseFunc) {
         LOGE("CJFunc: RemoteView::AboutToReuse is empty.");
         return;
@@ -429,12 +430,12 @@ void RemoteView::AboutToReuse(const std::string& value)
 void RemoteView::AboutToRecycle()
 {
     VoidCallback(
-        CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewAboutToRecycle, "AboutToRecycle");
+        CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewAboutToRecycle, "AboutToRecycle");
 }
 
 void RemoteView::RecycleSelf(const std::string& value)
 {
-    auto recycleSelfFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewRecycleSelf;
+    auto recycleSelfFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewRecycleSelf;
     if (!recycleSelfFunc) {
         LOGE("CJFunc: RemoteView::RecycleSelf is empty.");
         return;

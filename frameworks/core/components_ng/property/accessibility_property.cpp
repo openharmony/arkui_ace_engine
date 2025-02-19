@@ -809,6 +809,26 @@ void AccessibilityProperty::ResetUserCheckable()
     isUserCheckable_.reset();
 }
 
+void AccessibilityProperty::SetUserScrollTriggerable(const bool& triggerable)
+{
+    isUserScrollTriggerable_ = triggerable;
+}
+
+bool AccessibilityProperty::HasUserScrollTriggerable()
+{
+    return isUserScrollTriggerable_.has_value();
+}
+
+bool AccessibilityProperty::IsUserScrollTriggerable()
+{
+    return isUserScrollTriggerable_.value_or(true);
+}
+
+void AccessibilityProperty::ResetUserScrollTriggerable()
+{
+    isUserScrollTriggerable_ = true;
+}
+
 void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)
 {
     minValue_ = minValue;

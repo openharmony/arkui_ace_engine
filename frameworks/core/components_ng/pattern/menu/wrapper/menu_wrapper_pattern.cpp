@@ -250,10 +250,10 @@ void MenuWrapperPattern::HideSubMenu()
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetShowedSubMenu(nullptr);
     auto subMenu = host->GetChildren().back();
     auto focusMenu = MenuFocusViewShow();
     CHECK_NULL_VOID(focusMenu);
+    menuPattern->SetShowedSubMenu(nullptr);
     auto innerMenu = GetMenuChild(focusMenu);
     if (!innerMenu) {
         UpdateMenuAnimation(host);
@@ -688,7 +688,7 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     if (GetIsSelectOverlaySubWindowWrapper()) {
         subwindowManager->SetSelectOverlayHotAreas(rects, host->GetId(), GetContainerId());
     } else {
-        subwindowManager->SetHotAreas(rects, host->GetId(), GetContainerId());
+        subwindowManager->SetHotAreas(rects, SubwindowType::TYPE_MENU, host->GetId(), GetContainerId());
     }
 }
 

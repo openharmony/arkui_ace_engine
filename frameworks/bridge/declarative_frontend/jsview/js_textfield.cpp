@@ -536,9 +536,20 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
 
-void JSTextField::SetFontWeight(const std::string& value)
+void JSTextField::SetFontWeight(const JSCallbackInfo& info)
 {
-    TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> args = info[0];
+    std::string fontWeight;
+    if (args->IsNumber()) {
+        fontWeight = args->ToString();
+    } else {
+        ParseJsString(args, fontWeight);
+    }
+    FontWeight formatFontWeight = ConvertStrToFontWeight(fontWeight);
+    TextFieldModel::GetInstance()->SetFontWeight(formatFontWeight);
 }
 
 void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
@@ -1502,7 +1513,7 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
 bool JSTextField::ParseJsCustomKeyboardBuilder(
     const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
 {
-    if (info.Length() <= index || !info[index]->IsObject()) {
+    if (info.Length() <= static_cast<uint32_t>(index) || !info[index]->IsObject()) {
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[index]);

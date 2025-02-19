@@ -249,8 +249,9 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
             bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (customFont) {
-                isCustomFont = true;
+            if (!customFont) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "FontRegister failed, no such familyName:%{public}s id:%{public}d",
+                    familyName.c_str(), frameNode->GetId());
             }
         }
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
@@ -527,7 +528,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
             }
         }
-        auto&& paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
+        auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);
         auto paraStart = spanTextLength;
         paragraphIndex++;
@@ -593,10 +594,12 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
         currentParagraphPlaceholderCount_ = 0;
         shadowOffset_ += GetShadowOffset(group);
-        HandleEmptyParagraph(paragraph, group);
-        paragraph->Build();
-        ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
-        UpdateSymbolSpanEffect(frameNode, paragraph, group);
+        if (!useParagraphCache_) {
+            HandleEmptyParagraph(paragraph, group);
+            paragraph->Build();
+            ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
+            UpdateSymbolSpanEffect(frameNode, paragraph, group);
+        }
         if (paraStyle.maxLines != UINT32_MAX) {
             paragraph->Layout(static_cast<float>(maxWidth));
         }

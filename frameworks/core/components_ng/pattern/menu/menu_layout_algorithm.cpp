@@ -2389,7 +2389,8 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
 {
     CHECK_NULL_VOID(layoutWrapper && menuPattern);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    if (!SkipUpdateTargetNodeSize(targetNode, menuPattern)) {
+    bool holdTargetOffset = SkipUpdateTargetNodeSize(targetNode, menuPattern);
+    if (!holdTargetOffset) {
         CHECK_NULL_VOID(targetNode);
         dumpInfo_.targetNode = targetNode->GetTag();
         auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -2411,7 +2412,10 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     if (canExpandCurrentWindow_ && targetTag_ != V2::SELECT_ETS_TAG) {
-        ModifyTargetOffset();
+        if (!holdTargetOffset) {
+            ModifyTargetOffset();
+            menuPattern->SetTargetOffset(targetOffset_);
+        }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
         return;
@@ -2939,7 +2943,8 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow)
         isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
         if (isUIExtensionSubWindow_) {
             canExpandCurrentWindow_ = true;
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                containerId, SubwindowType::TYPE_MENU);
             CHECK_NULL_VOID(subwindow);
             auto rect = subwindow->GetUIExtensionHostWindowRect();
             UIExtensionHostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -2956,17 +2961,7 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, menuWindowRect);
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
-    CHECK_NULL_RETURN(menuPattern, menuWindowRect);
-    auto menuWrapper = menuPattern->GetMenuWrapper();
-    CHECK_NULL_RETURN(menuWrapper, menuWindowRect);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(menuWrapperPattern, menuWindowRect);
-    auto isMenuHide = menuWrapperPattern->IsHide();
-    if (isMenuHide) {
-        TAG_LOGI(AceLogTag::ACE_MENU, "Notify Menu Rect %{public}s, menu is hide, skip", rect.ToString().c_str());
-    } else {
-        displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    }
+    displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     auto availableRect = OverlayManager::GetDisplayAvailableRect(menuPattern->GetHost());

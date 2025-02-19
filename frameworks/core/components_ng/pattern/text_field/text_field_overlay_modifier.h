@@ -134,7 +134,6 @@ private:
     RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RectF textRect_;
-
     RefPtr<AnimatablePropertyOffsetF> floatingCursorOffset_;
     RefPtr<PropertyBool> floatingCursorVisible_;
     RefPtr<PropertyBool> showOriginCursor_;

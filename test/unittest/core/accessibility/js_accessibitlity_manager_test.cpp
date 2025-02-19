@@ -387,7 +387,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager008, TestSize.Level1)
     } else {
         EXPECT_EQ(ret, false);
     }
-    
+
     /**
      * @tc.steps: step3. test TransferAccessibilityAsyncEvent with register true
      */
@@ -432,7 +432,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager009, TestSize.Level1)
     auto context = NG::PipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
     jsAccessibilityManager->Register(true);
-    
+
     /**
      * @tc.steps: step2. test GetPipelineByWindowId
      */
@@ -586,7 +586,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager013, TestSize.Level1)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityLevel("yes");
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    
+
     /**
      * @tc.steps: step2. test SendEventToAccessibilityWithNode
      */
@@ -621,7 +621,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager014, TestSize.Level1)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityLevel("yes");
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    
+
     /**
      * @tc.steps: step2. test RegisterSubWindowInteractionOperation
      */
@@ -656,7 +656,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager015, TestSize.Level1)
     jsAccessibilityManager->parentTreeId_ = parentTreeId;
     jsAccessibilityManager->parentElementId_ = parentElementId;
     EXPECT_TRUE(jsAccessibilityManager->NeedRegisterChildTree(parentWindowId, parentTreeId, parentElementId));
-    
+
     jsAccessibilityManager->Register(true);
     EXPECT_FALSE(jsAccessibilityManager->NeedRegisterChildTree(parentWindowId, parentTreeId, parentElementId));
 
@@ -864,7 +864,7 @@ HWTEST_F(JsAccessibilityManagerTest, GenerateWindowInfo001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<Pattern>(), false);
     windowInfo = jsAccessibilityManager->GenerateWindowInfo(frameNode, nullptr);
-    
+
     auto pipelineContext = MockContainer::Current()->GetPipelineContext();
     ASSERT_NE(pipelineContext, nullptr);
     jsAccessibilityManager->context_ = pipelineContext;
@@ -1071,5 +1071,114 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager022, TestSize.Level1)
     EXPECT_CALL(mockJsManger, SendEventToAccessibilityWithNode(_, _, _))
         .Times(1);
     mockJsManger.OnDumpInfoNG(params, 1, false);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager023
+ * @tc.desc: UpdateAccessibilityElementInfo ScrollTriggerable
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     * @tc.desc: Create a FrameNode object and initialize the JsAccessibilityManager object.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    CHECK_NULL_VOID(frameNode);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Accessibility::AccessibilityElementInfo nodeInfo;
+
+    // Update information in nodeInfo and verify that its default scrollable is true
+    jsAccessibilityManager->UpdateAccessibilityElementInfo(frameNode, nodeInfo);
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    EXPECT_EQ(nodeInfo.GetAccessibilityScrollable(), true);
+
+    /**
+    * @tc.steps: step2. Initialize accessibilityProperty and set ScrollTriggerable to false.
+    * @tc.expected: The updated nodeInfo's ScrollTriggerable property should be false.
+    */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserScrollTriggerable(false);
+    jsAccessibilityManager->UpdateAccessibilityElementInfo(frameNode, nodeInfo);
+    EXPECT_EQ(nodeInfo.GetAccessibilityScrollable(), false);
+
+    /**
+    * @tc.steps: step3. Reset the ScrollTriggerable property of accessibilityProperty.
+    * @tc.expected: The updated nodeInfo's ScrollTriggerable property should be true.
+    */
+    accessibilityProperty->ResetUserScrollTriggerable();
+    jsAccessibilityManager->UpdateAccessibilityElementInfo(frameNode, nodeInfo);
+    EXPECT_EQ(nodeInfo.GetAccessibilityScrollable(), true);
+}
+
+class MockRenderContextTest : public RenderContext {
+public:
+    RectF GetPaintRectWithoutTransform() override
+    {
+        return *retf;
+    }
+    std::shared_ptr<RectF> retf;
+};
+
+/**
+ * @tc.name: FrameNodeAccessibilityVisible02
+ * @tc.desc: Test the function accessibilityVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent frameNode and set up its rect.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    CHECK_NULL_VOID(frameNode);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    auto pipeline = frameNode->GetContext();
+
+    auto parentRender = AceType::MakeRefPtr<MockRenderContextTest>();
+    CHECK_NULL_VOID(parentRender);
+    auto parentRec = std::make_shared<RectF>(10.0, 10.0, 10.0, 5.0);
+    parentRender->retf = parentRec;
+    frameNode->renderContext_ = parentRender;
+
+    /**
+     * @tc.steps: step2. create child frameNode and set up its rect.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+    "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    childNode->isActive_ = true;
+    auto childRender = AceType::MakeRefPtr<MockRenderContextTest>();
+    CHECK_NULL_VOID(childRender);
+    auto childRec = std::make_shared<RectF>(10.0, 10.0, 10.0, 10.0);
+    childRender->retf = childRec;
+    childNode->renderContext_ = childRender;
+
+    /**
+     * @tc.steps: step3. add parent and child node to the pipeline context.
+     */
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->GetRootElement()->AddChild(frameNode);
+    frameNode->AddChild(childNode);
+
+    /**
+     * @tc.steps: step4. verify the child node's accessibilityVisible is true.
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    RefPtr<NG::PipelineContext> ngPipeline;
+    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    std::list<AccessibilityElementInfo> extensionElementInfos;
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
+        childNode->GetAccessibilityId(), 1, extensionElementInfos, ngPipeline, 1);
+    for (auto& extensionElementInfo : extensionElementInfos) {
+        if (childNode->GetAccessibilityId() == extensionElementInfo.GetAccessibilityId()) {
+            EXPECT_TRUE(extensionElementInfo.GetAccessibilityVisible());
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

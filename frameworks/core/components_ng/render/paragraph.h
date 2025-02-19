@@ -219,6 +219,8 @@ class Paragraph : public virtual AceType {
 
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
+    static RefPtr<Paragraph> CreateRichEditorParagraph(
+        const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
 
     static RefPtr<Paragraph> Create(void* paragraph);
     // whether the paragraph has been build

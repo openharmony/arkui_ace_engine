@@ -27,6 +27,7 @@ constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
+constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
@@ -178,6 +179,26 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     if (reportDataFunc_ != nullptr) {
         reportDataFunc_(resType, value, payload);
     }
+}
+
+void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_t value,
+    const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    if (reportSyncEventFunc_ == nullptr) {
+        reportSyncEventFunc_ = LoadReportSyncEventFunc();
+    }
+    if (!reportSyncEventFunc_) {
+        return;
+    }
+    reportSyncEventFunc_(resType, value, payload, reply);
+}
+
+bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 0, payload, reply);
+    return reply["result"] == "\"true\"" ? true : false;
 }
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)

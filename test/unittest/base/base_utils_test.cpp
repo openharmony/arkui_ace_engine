@@ -1185,53 +1185,6 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest070, TestSize.Level1)
 }
 
 /**
- * @tc.name: BaseUtilsTest071
- * @tc.desc: test utf_helper.cpp: Convert u16string and u32string
- * @tc.type: FUNC
- */
-HWTEST_F(BaseUtilsTest, BaseUtilsTest071, TestSize.Level1)
-{
-    ASSERT_EQ(UtfUtils::Str16ToStr32(TEST_INPUT_U16_STRING), TEST_INPUT_U32_STRING);
-    ASSERT_EQ(UtfUtils::Str32ToStr16(TEST_INPUT_U32_STRING), TEST_INPUT_U16_STRING);
-    ASSERT_EQ(UtfUtils::Str16ToStr32(TEST_INPUT_U16_EMOJI), TEST_INPUT_U32_EMOJI);
-    ASSERT_EQ(UtfUtils::Str32ToStr16(TEST_INPUT_U32_EMOJI), TEST_INPUT_U16_EMOJI);
-    ASSERT_EQ(UtfUtils::Str16ToStr32(u""), U"");
-    ASSERT_EQ(UtfUtils::Str32ToStr16(U""), u"");
-    ASSERT_EQ(UtfUtils::Str16ToStr32(UtfUtils::DEFAULT_U16STR), UtfUtils::DEFAULT_U32STR);
-    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::DEFAULT_U32STR), UtfUtils::DEFAULT_U16STR);
-}
-
-/**
- * @tc.name: BaseUtilsTest072
- * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
- * @tc.type: FUNC
- */
-HWTEST_F(BaseUtilsTest, BaseUtilsTest072, TestSize.Level1)
-{
-    std::u16string emojiStr = u"😁";
-    std::u16string subEmojiStr = emojiStr.substr(0, 1);
-    std::u32string excpectSubEmojiStr = U"哈";
-    excpectSubEmojiStr[0] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
-    ASSERT_EQ(UtfUtils::Str16ToStr32(subEmojiStr), excpectSubEmojiStr);
-    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::Str16ToStr32(subEmojiStr)), subEmojiStr);
-}
-
-/**
- * @tc.name: BaseUtilsTest073
- * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
- * @tc.type: FUNC
- */
-HWTEST_F(BaseUtilsTest, BaseUtilsTest073, TestSize.Level1)
-{
-    std::u16string emojiStr = u"哈哈😁";
-    std::u16string subEmojiStr = emojiStr.substr(0, 3);
-    std::u32string excpectSubEmojiStr = U"哈哈哈";
-    excpectSubEmojiStr[2] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
-    ASSERT_EQ(UtfUtils::Str16ToStr32(subEmojiStr), excpectSubEmojiStr);
-    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::Str16ToStr32(subEmojiStr)), subEmojiStr);
-}
-
-/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC

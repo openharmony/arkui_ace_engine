@@ -2037,6 +2037,8 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
+    minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
+    maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

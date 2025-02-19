@@ -714,6 +714,6 @@ Rect DialogContainer::GetDisplayAvailableRect() const
         return Rect();
     }
 
-    return DisplayInfoUtils::GetInstance().GetDisplayAvailableRect(uiWindow_->GetDisplayId());
+    return displayManager_->GetDisplayAvailableRect(uiWindow_->GetDisplayId());
 }
 } // namespace OHOS::Ace::Platform

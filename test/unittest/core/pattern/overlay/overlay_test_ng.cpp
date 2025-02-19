@@ -1886,9 +1886,9 @@ HWTEST_F(OverlayTestNg, AddFrameNodeWithOrder001, TestSize.Level1)
      */
     int32_t childrenSize = rootNode->GetChildren().size();
     overlayManager->AddFrameNodeWithOrder(frameNode, std::nullopt);
-    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
 }
 
 /**

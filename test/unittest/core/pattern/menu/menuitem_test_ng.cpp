@@ -725,4 +725,22 @@ HWTEST_F(MenuItemTestNg, MenuItemSetSelectIconSymbolNg002, TestSize.Level1)
     MneuItemModelInstance.SetSelectIconSrc(frameNode, "selectIcon.png");
     EXPECT_EQ(itemProperty->GetSelectIconSrc().value_or(""), "selectIcon.png");
 }
+
+/**
+ * @tc.name: MenuItemEventTest001
+ * @tc.desc: Test Menuitem onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemEventTest001, TestSize.Level1)
+{
+    MenuItemModelNG menuitem;
+    MenuItemProperties itemOption;
+    menuitem.Create(itemOption);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    menuitem.SetOnChange(frameNode, [](bool onChange) {});
+    EXPECT_NE(eventHub->onChange_, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -871,8 +871,7 @@ void PluginFrontendDelegate::TriggerPageUpdate(int32_t pageId, bool directExecut
         TaskExecutor::TaskType::UI, "ArkUIPluginAddPageUpdateTask");
 }
 
-void PluginFrontendDelegate::PostJsTask(
-    std::function<void()>&& task, const std::string& name, PriorityType priorityType)
+void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }

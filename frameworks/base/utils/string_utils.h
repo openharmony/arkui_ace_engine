@@ -208,13 +208,13 @@ inline std::string RestoreBackslash(const std::string& src)
     return res;
 }
 
-inline int32_t StringToInt(const std::string& value)
+inline int32_t StringToInt(const std::string& value, int64_t defaultErr = 0)
 {
     errno = 0;
     char* pEnd = nullptr;
     int64_t result = std::strtol(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || (result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
-        return 0;
+        return defaultErr;
     } else {
         return result;
     }

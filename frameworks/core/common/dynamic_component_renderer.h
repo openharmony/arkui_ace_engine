@@ -91,6 +91,9 @@ public:
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
     virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) {}
 
+    virtual void NotifyForeground() {};
+    virtual void NotifyBackground() {};
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRenderer);
 };

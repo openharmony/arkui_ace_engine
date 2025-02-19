@@ -181,6 +181,7 @@ public:
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
         paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
+        singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         paintMethod->SetFirstIndex(lastIndex_);
         ResetOptinalMouseClickIndex();
     }

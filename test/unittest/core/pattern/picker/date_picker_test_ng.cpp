@@ -2185,4 +2185,22 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest022, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }
 #endif
+
+/**
+ * @tc.name: DatePickerEventTest001
+ * @tc.desc: Test DatePicker onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerEventTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    datePickerModelNG.SetOnChange(frameNode, [](const BaseEventInfo* info) {});
+    EXPECT_NE(eventHub->changeEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG

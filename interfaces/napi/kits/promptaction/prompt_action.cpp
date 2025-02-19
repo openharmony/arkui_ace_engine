@@ -31,7 +31,7 @@ namespace {
 const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
 const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 const int32_t CUSTOM_DIALOG_PARAM_NUM = 2;
-const int32_t BG_BLUR_STYLE_MAX_INDEX = 12;
+const int32_t BG_BLUR_STYLE_MAX_INDEX = 13;
 const int32_t PROMPTACTION_VALID_PRIMARY_BUTTON_NUM = 1;
 const int32_t OPEN_CUSTOM_DIALOG_WITH_CONTROLLER_PARAM_TOTAL = 3;
 const int32_t OPEN_CUSTOM_DIALOG_WITH_CONTROLLER_PARAM_MAND_COUNT = 2;
@@ -664,6 +664,8 @@ struct PromptAsyncContext {
     napi_value onWillAppear = nullptr;
     napi_value onWillDisappear = nullptr;
     napi_value transitionApi = nullptr;
+    napi_value dialogTransitionApi = nullptr;
+    napi_value maskTransitionApi = nullptr;
     napi_ref callbackSuccess = nullptr;
     napi_ref callbackCancel = nullptr;
     napi_ref callbackComplete = nullptr;
@@ -1392,6 +1394,8 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "autoCancel", &asyncContext->autoCancel);
     napi_get_named_property(env, argv[index], "maskColor", &asyncContext->maskColorApi);
     napi_get_named_property(env, argv[index], "transition", &asyncContext->transitionApi);
+    napi_get_named_property(env, argv[index], "dialogTransition", &asyncContext->dialogTransitionApi);
+    napi_get_named_property(env, argv[index], "maskTransition", &asyncContext->maskTransitionApi);
     napi_get_named_property(env, argv[index], "onWillDismiss", &asyncContext->onWillDismiss);
     napi_get_named_property(env, argv[index], "onDidAppear", &asyncContext->onDidAppear);
     napi_get_named_property(env, argv[index], "onDidDisappear", &asyncContext->onDidDisappear);
@@ -2047,6 +2051,8 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
     onWillDismiss = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]
         (const int32_t& info, const int32_t& instanceId) {
         if (onWillDismissRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillDismissFunc = nullptr;
             napi_value value = nullptr;
             napi_value funcValue = nullptr;
@@ -2062,6 +2068,7 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
             napi_set_named_property(env, paramObj, "reason", value);
             napi_get_reference_value(env, onWillDismissRef, &onWillDismissFunc);
             napi_call_function(env, nullptr, onWillDismissFunc, 1, &paramObj, nullptr);
+            napi_close_handle_scope(env, scope);
         }
     };
 }
@@ -2070,34 +2077,46 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
 {
     auto onDidAppear = [env = asyncContext->env, onDidAppearRef = asyncContext->onDidAppearRef]() {
         if (onDidAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onDidAppearFunc = nullptr;
             napi_get_reference_value(env, onDidAppearRef, &onDidAppearFunc);
             napi_call_function(env, nullptr, onDidAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidAppearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onDidDisappear = [env = asyncContext->env, onDidDisappearRef = asyncContext->onDidDisappearRef]() {
         if (onDidDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onDidDisappearFunc = nullptr;
             napi_get_reference_value(env, onDidDisappearRef, &onDidDisappearFunc);
             napi_call_function(env, nullptr, onDidDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidDisappearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillAppear = [env = asyncContext->env, onWillAppearRef = asyncContext->onWillAppearRef]() {
         if (onWillAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillAppearFunc = nullptr;
             napi_get_reference_value(env, onWillAppearRef, &onWillAppearFunc);
             napi_call_function(env, nullptr, onWillAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillAppearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillDisappear = [env = asyncContext->env, onWillDisappearRef = asyncContext->onWillDisappearRef]() {
         if (onWillDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillDisappearFunc = nullptr;
             napi_get_reference_value(env, onWillDisappearRef, &onWillDisappearFunc);
             napi_call_function(env, nullptr, onWillDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillDisappearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     PromptDialogAttr promptDialogAttr = {
@@ -2140,6 +2159,36 @@ RefPtr<NG::ChainedTransitionEffect> GetTransitionProps(
         }
     }
     return transitionEffect;
+}
+
+RefPtr<NG::ChainedTransitionEffect> GetDialogTransitionProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (delegate) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, asyncContext->dialogTransitionApi, &valueType);
+        if (valueType == napi_object) {
+            dialogTransitionEffect = delegate->GetTransitionEffect(asyncContext->dialogTransitionApi);
+        }
+    }
+    return dialogTransitionEffect;
+}
+
+RefPtr<NG::ChainedTransitionEffect> GetMaskTransitionProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (delegate) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, asyncContext->maskTransitionApi, &valueType);
+        if (valueType == napi_object) {
+            maskTransitionEffect = delegate->GetTransitionEffect(asyncContext->maskTransitionApi);
+        }
+    }
+    return maskTransitionEffect;
 }
 
 std::function<void()> GetCustomBuilder(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -2194,6 +2243,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     auto* nodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(asyncContext->nativePtr);
     auto maskColorProps = GetColorProps(env, asyncContext->maskColorApi);
     auto transitionEffectProps = GetTransitionProps(env, asyncContext);
+    auto dialogTransitionEffectProps = GetDialogTransitionProps(env, asyncContext);
+    auto maskTransitionEffectProps = GetMaskTransitionProps(env, asyncContext);
     PromptDialogAttr lifeCycleAttr = GetDialogLifeCycleCallback(env, asyncContext);
     int32_t mode = GetDialogKeyboardAvoidMode(env, asyncContext->keyboardAvoidModeApi);
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
@@ -2224,6 +2275,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .contentNode = AceType::WeakClaim(nodePtr),
         .maskColor = maskColorProps,
         .transitionEffect = transitionEffectProps,
+        .dialogTransitionEffect = dialogTransitionEffectProps,
+        .maskTransitionEffect = maskTransitionEffectProps,
         .onDidAppear = lifeCycleAttr.onDidAppear,
         .onDidDisappear = lifeCycleAttr.onDidDisappear,
         .onWillAppear = lifeCycleAttr.onWillAppear,
@@ -2493,6 +2546,8 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
         napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
     }
     napi_get_named_property(env, arg, "transition", &asyncContext->transitionApi);
+    napi_get_named_property(env, arg, "dialogTransition", &asyncContext->dialogTransitionApi);
+    napi_get_named_property(env, arg, "maskTransition", &asyncContext->maskTransitionApi);
     napi_get_named_property(env, arg, "maskColor", &asyncContext->maskColorApi);
     napi_get_named_property(env, arg, "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
     napi_get_named_property(env, arg, "keyboardAvoidDistance", &asyncContext->keyboardAvoidDistanceApi);

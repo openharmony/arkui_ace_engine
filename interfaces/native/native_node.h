@@ -2320,7 +2320,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: font weight {@link ArkUI_FontWeight}.\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_IMMUTABLE_FONT_WEIGHT = 1030,
 
@@ -3118,7 +3118,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].i32: keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
     *
-    * @since 16
+    * @since 15
     */
     NODE_TEXT_INPUT_KEYBOARD_APPEARANCE = 7035,
 
@@ -3474,7 +3474,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].i32：keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
     *
-    * @since 16
+    * @since 15
     */
     NODE_TEXT_AREA_KEYBOARD_APPEARANCE = 8026,
 
@@ -3592,7 +3592,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .object: Use the {@link ArkUI_ProgressLinearStyleOption} object to get the style. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_PROGRESS_LINEAR_STYLE,
 
@@ -4979,7 +4979,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: offset from the start of the content, in vp. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_CONTENT_START_OFFSET,
 
@@ -4992,7 +4992,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: offset from the end of the content, in vp. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_CONTENT_END_OFFSET,
 
@@ -5038,7 +5038,7 @@ typedef enum {
      * 
      * @since 16
      */
-    NODE_SCROLL_BACK_TO_TOP,
+    NODE_SCROLL_BACK_TO_TOP = 1002021,
     
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
@@ -5100,12 +5100,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: number of cached items in the list adapter. \n
      * .value[1]?.i32: whether to show cached items. The value <b>0</b> means to hide cached items, and <b>0</b> means
-     * to show cached items. The default value is <b>0</b>. This parameter is supported since API version 16. \n
+     * to show cached items. The default value is <b>0</b>. This parameter is supported since API version 15. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: number of cached items in the list adapter. \n
      * .value[1].i32: whether to show cached items. The value <b>0</b> means to hide cached items, and <b>0</b> means
-     * to show cached items. This parameter is supported since API version 16. \n
+     * to show cached items. This parameter is supported since API version 15. \n
      *
      */
     NODE_LIST_CACHED_COUNT,
@@ -5123,7 +5123,7 @@ typedef enum {
      * .value[2]?.i32：Specify the alignment of the sliding element with the current container,The parameter type is
      * {@link ArkUI_ScrollAlignment}, default value is ARKUI_SCROLL_ALIGNMENT_START. \n
      * .value[3]?.f32: extra offset, in vp. The default value is <b>0</b>.
-     * This parameter is supported since API version 16. \n
+     * This parameter is supported since API version 15. \n
      *
      */
     NODE_LIST_SCROLL_TO_INDEX,
@@ -5194,7 +5194,7 @@ typedef enum {
      * .value[3]?.i32: how the item to scroll to is aligned with the container. The parameter type is
      * {@link ArkUI_ScrollAlignment}. The default value is <b>ARKUI_SCROLL_ALIGNMENT_START</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_SCROLL_TO_INDEX_IN_GROUP = 1003010,
 
@@ -5215,7 +5215,7 @@ typedef enum {
      * .value[2].f32: maximum column width, in vp. \n
      * .value[3].f32: lane spacing, in vp. \n \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_LANES = 1003011,
 
@@ -5229,7 +5229,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      *.value[0].i32: alignment mode for the list snap position. The parameter type is {@link ArkUI_ScrollSnapAlign}.\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_SCROLL_SNAP_ALIGN = 1003012,
 
@@ -5247,9 +5247,26 @@ typedef enum {
      * display area of the <b>List</b> component. The value <b>0</b> means not to maintain the visible content's
      * position, and <b>1</b> means the opposite. The default value is <b>0</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION = 1003013,
+
+    /**
+     * @brief Sets the layout of the List component from the end.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>List</b> is layout from the end.
+     * The value <b>0</b> means not to layout from the end,
+     * and <b>1</b> means the opposite. The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>List</b> is layout from the end.
+     * The value <b>0</b> means not to layout from the end, and <b>1</b> means the opposite.
+     * The default value is <b>0</b>. \n
+     *
+     * @since 16
+     */
+    NODE_LIST_STACK_FROM_END = 1003014,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -5389,16 +5406,22 @@ typedef enum {
     NODE_SWIPER_INDEX,
 
     /**
-     * @brief Defines the number of elements to display per page.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: index value of the child component. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: index value of the child component. \n
-     *
-     */
+    * @brief Defines the number of elements to display per page.
+    * This attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: number of elements to display per page. \n
+    * .value[1]?.i32: whether to turn pages by group. The value <b>0</b> means to turn pages by child element,
+    * and <b>1</b> means to turn pages by group. This parameter is supported since API version 16. \n
+    * .string?: this parameter can only be set to 'auto'. When 'auto' is set, the value[] parameters are ignored.
+    * This parameter is supported since API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: number of elements to display per page. \n
+    * .value[1].i32: whether to turn pages by group. This parameter is supported since API version 16. \n
+    * .string: 'auto' or empty string.
+    *
+    */
     NODE_SWIPER_DISPLAY_COUNT,
 
     /**
@@ -5417,20 +5440,24 @@ typedef enum {
     NODE_SWIPER_DISABLE_SWIPE,
 
     /**
-     * @brief Defines whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
-     * The parameter type is {@link ArkUI_SwiperArrow}.\n
-     * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
-     * The parameter type is {@link ArkUI_SwiperArrow}.\n
-     * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
-     *
-     */
+    * @brief Defines whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
+    * This attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
+    * The parameter type is {@link ArkUI_SwiperArrow}.\n
+    * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
+    * .?object: arrow style. The parameter type is {@link ArkUI_SwiperArrowStyle}. \n
+    * This parameter is supported since API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: whether to show the arrow when the mouse pointer hovers over the navigation point indicator.
+    * The parameter type is {@link ArkUI_SwiperArrow}.\n
+    * The default value is <b>ARKUI_SWIPER_ARROW_HIDE</b>. \n
+    * .object: arrow style. The parameter type is {@link ArkUI_SwiperArrowStyle}. \n
+    * This parameter is supported since API version 16. \n
+    *
+    */
     NODE_SWIPER_SHOW_DISPLAY_ARROW,
 
     /**
@@ -5469,6 +5496,14 @@ typedef enum {
     * \n
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: number of cached items in the swiper adapter. \n
+    * .value[1]?.i32: whether the cached items will be displayed. \n
+    * The value <b>0</b> indicates that cached items will not be displayed, \n
+    * and <b>1</b> indicates that cached nodes will be displayed. The default value is <b>0</b>. \n
+    * This parameter is supported from API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: number of cached items in the swiper adapter. \n
+    * .value[1].i32: whether the cached items will be displayed. This parameter is supported from API version 16. \n
     */
     NODE_SWIPER_CACHED_COUNT,
 
@@ -5503,17 +5538,24 @@ typedef enum {
     NODE_SWIPER_NEXT_MARGIN,
 
     /**
-     * @brief Sets the navigation point indicator of the dot style for the swiper.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: navigation point indicator type. The parameter type is {@link ArkUI_SwiperIndicatorType}. \n
-     * .object: navigation point indicator. The parameter type is {@link ArkUI_SwiperIndicator}. \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: navigation point indicator type. The parameter type is {@link ArkUI_SwiperIndicatorType}. \n
-     * .object: navigation point indicator. The parameter type is {@link ArkUI_SwiperIndicator}. \n
-     *
-     */
+    * @brief Defines the navigation indicator type of the swiper.
+    * The attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+    * .object: The parameter type is {@link ArkUI_SwiperIndicator} when the indicator type \n
+    * is <b>ARKUI_SWIPER_INDICATOR_TYPE_DOT</b>. The parameter type is {@link ArkUI_SwiperDigitIndicator}
+    * when the indicator type is <b>ARKUI_SWIPER_INDICATOR_TYPE_DIGIT</b>. \n
+    * {@link ArkUI_SwiperDigitIndicator} is supported since API version 16. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+    * .object: The parameter type is {@link ArkUI_SwiperIndicator} when the indicator type \n
+    * is <b>ARKUI_SWIPER_INDICATOR_TYPE_DOT</b>. The parameter type is {@link ArkUI_SwiperDigitIndicator}
+    * when the indicator type is <b>ARKUI_SWIPER_INDICATOR_TYPE_DIGIT</b>. \n
+    * {@link ArkUI_SwiperDigitIndicator} is supported since API version 16. \n
+    *
+    */
     NODE_SWIPER_INDICATOR,
 
     /**
@@ -5561,9 +5603,26 @@ typedef enum {
      * Format of the return value {@link ArkUI_PageFlipMode}:\n
      * .value[0].i32: page flipping mode using the mouse wheel. \n
      *
-     * @since 14
+     * @since 15
      */
     NODE_SWIPER_PAGE_FLIP_MODE,
+    
+    /**
+     * @brief Defines the minimum main axis size of child element for swiper to works out the display count.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: minimum main axis size of the child element, Unit: vp. \n
+     * .value[1]?.i32: whether to turn pages by group. The value <b>0</b> means to turn pages by child element,
+     * and <b>1</b> means to turn pages by group. The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: minimum main axis size of the child element, Unit: vp. \n
+     * .value[1].i32: whether to turn pages by group. \n
+     *
+     * @since 16
+     */
+    NODE_SWIPER_AUTO_FILL,
 
     /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
@@ -5642,7 +5701,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .object: {@link ArkUI_NodeAdapter} object. \n
     *
-    * @since 16
+    * @since 15
     */
     NODE_LIST_ITEM_GROUP_NODE_ADAPTER = 1005004,
 
@@ -7409,7 +7468,7 @@ typedef enum {
      * list item group.
      * If the end of the list display area is not on a list item, the value is <b>-1</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE,
     
@@ -9019,7 +9078,7 @@ int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if the snapshot taking failed will null pixelmap returned.
  *         Returns {@link ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT} if the snapshot taking is timeout.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions,
     OH_PixelmapNative** pixelmap);

@@ -66,13 +66,24 @@ void SvgLinearGradient::SetAttr(const std::string& name, const std::string& valu
 SvgLinearGradientInfo SvgLinearGradient::GetLinearGradientInfo(
     const SvgCoordinateSystemContext& svgCoordinateSystemContext)
 {
-    auto gradientRule = svgCoordinateSystemContext.BuildScaleRule(linearGradientAttr_.gradientUnits);
+    Rect defaultRect(0, 0, 1, 1);
+    SvgLengthScaleRule gradientRule =
+        linearGradientAttr_.gradientUnits == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX ?
+        SvgLengthScaleRule(defaultRect, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) :
+        svgCoordinateSystemContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
     auto measuredX1 = GetMeasuredPosition(linearGradientAttr_.x1, gradientRule, SvgLengthType::HORIZONTAL);
     auto measuredY1 = GetMeasuredPosition(linearGradientAttr_.y1, gradientRule, SvgLengthType::VERTICAL);
     auto measuredX2 = GetMeasuredPosition(linearGradientAttr_.x2, gradientRule, SvgLengthType::HORIZONTAL);
     auto measuredY2 = GetMeasuredPosition(linearGradientAttr_.y2, gradientRule, SvgLengthType::VERTICAL);
-    return { .x1 = measuredX1, .x2 = measuredX2, .y1 = measuredY1, .y2 = measuredY2,
+    return {
+        .x1 = measuredX1, .x2 = measuredX2, .y1 = measuredY1, .y2 = measuredY2,
         .spreadMethod = static_cast<int32_t>(linearGradientAttr_.spreadMethod),
-        .gradientTransform = linearGradientAttr_.gradientTransform, .colors = GetStopColors() };
+        .gradientTransform = linearGradientAttr_.gradientTransform, .colors = GetStopColors()
+    };
+}
+
+SvgLengthScaleUnit SvgLinearGradient::GradientUnits()
+{
+    return linearGradientAttr_.gradientUnits;
 }
 } // namespace OHOS::Ace::NG

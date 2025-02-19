@@ -241,7 +241,7 @@ class SetMapProxyHandler {
         if (typeof key === 'symbol') {
             if (key === Symbol.iterator) {
                 const conditionalTarget = this.getTarget(target);
-                ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
+                ObserveV2.getObserve().addRef(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                 ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
                 return (...args): any => target[key](...args);
             }
@@ -283,9 +283,10 @@ class SetMapProxyHandler {
         if (key === 'delete') {
             return (prop): boolean => {
                 if (target.has(prop)) {
+                    const res: boolean = target.delete(prop)
                     ObserveV2.getObserve().fireChange(conditionalTarget, prop);
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
-                    return target.delete(prop);
+                    return res;
                 } else {
                     return false;
                 }
@@ -295,11 +296,11 @@ class SetMapProxyHandler {
             return (): void => {
                 if (target.size > 0) {
                     target.forEach((_, prop) => {
-                        ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString());
+                        ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), true);
                     });
-                    ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
-                    ObserveV2.getObserve().addRef(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                     target.clear();
+                    ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                 }
             };
         }
@@ -314,12 +315,13 @@ class SetMapProxyHandler {
         if (target instanceof Set || (this.isMakeObserved_ && SendableType.isSet(target))) {
             if (key === 'add') {
                 return (val): any => {
-                    ObserveV2.getObserve().fireChange(conditionalTarget, val.toString());
-                    ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
-                    if (!target.has(val)) {
-                        ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
-                        target.add(val);
+                    if (target.has(val)) {
+                        return receiver;
                     }
+                    target.add(val);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, val);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
                     return receiver;
                 };
             }
@@ -353,12 +355,13 @@ class SetMapProxyHandler {
             if (key === 'set') {
                 return (prop, val): any => {
                     if (!target.has(prop)) {
+                        target.set(prop, val);
                         ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
                     } else if (target.get(prop) !== val) {
+                        target.set(prop, val);
                         ObserveV2.getObserve().fireChange(conditionalTarget, prop);
                     }
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
-                    target.set(prop, val);
                     return receiver;
                 };
             }
