@@ -399,7 +399,7 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
     }
     auto counterWidth = contentWidth;
     auto maxParagraphWidth = paragraph_->GetMaxWidth();
-    if (IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
+    if (autoWidth_ || IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
         counterWidth = maxParagraphWidth;
     }
     CounterNodeMeasure(counterWidth, layoutWrapper);
