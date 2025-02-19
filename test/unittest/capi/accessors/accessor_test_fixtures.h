@@ -114,14 +114,21 @@ inline constexpr auto DIMENSIONS_RES_NON_PCT_11_STR = "DIMENSIONS_RES_NON_PCT_11
 inline constexpr auto DIMENSIONS_RES_NON_PCT_12_STR = "DIMENSIONS_RES_NON_PCT_12_STR";
 inline constexpr auto DIMENSIONS_RES_NON_PCT_13_STR = "DIMENSIONS_RES_NON_PCT_13_STR";
 
+using DimensionTestType = std::tuple<std::string, Ark_Number, std::string>;
+
 // Fixture 'Boolean' for type 'Ark_Boolean'
 extern const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues;
+extern const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
+    testFixtureEnumDragBehaviorValues;
+extern const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues;
 extern const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues;
 extern const std::vector<std::tuple<std::string, Ark_Number, int32_t>> testFixtureNumberInt32Values;
 extern const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberDoubleRoundValues;
 extern const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberDoubleValues;
 extern const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberValues;
 extern const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumber_2x_Values;
+// Fixture 'LengthAny' for type 'Ark_Length'
+extern const std::vector<std::tuple<std::string, Dimension, Ark_Length>> testFixtureLengthAnyValidValues;
 extern const std::vector<std::tuple<std::string, double, Ark_Int32>> testFixtureDoubleArkInt32Values;
 extern const std::vector<std::tuple<std::string, double, Ark_Int32>> testFixtureDoubleArkInt32_half_Values;
 extern const std::vector<std::tuple<std::string, float, float>> testFixtureFloatFloat_half_Values;
@@ -130,11 +137,9 @@ extern const std::vector<std::tuple<std::string, float, float, float>>
     testFixtureVelocityFloat_half_Values;
 extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureNumberFloatAnythingValidValues;
 extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVelocityValues;
-extern const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
-testFixtureEnumDragBehaviorValues;
-using DimensionTestType = std::tuple<std::string, Ark_Number, std::string>;
-extern const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues;
 extern const std::vector<float> testFixtureFloatValues;
+extern const std::vector<std::tuple<std::string, OHOS::Ace::DragBehavior, Ark_DragBehavior>>
+    testFixtureEnumArkDragBehaviorValues;
 extern const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable;
 
 extern const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, VerticalAlign>>
