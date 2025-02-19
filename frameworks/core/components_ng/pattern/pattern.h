@@ -250,7 +250,7 @@ public:
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
                     childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
+                } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
                     childRenderContext->UpdateForegroundColorFlag(false);
@@ -266,7 +266,7 @@ public:
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
                     childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
+                } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
                     childRenderContext->UpdateForegroundColorFlag(false);

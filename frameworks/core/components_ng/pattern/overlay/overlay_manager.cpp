@@ -739,7 +739,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
         // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
         auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto currentStyle = layoutProperty->GetSheetStyleValue();
+        auto currentStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (currentStyle.instanceId.has_value()) {
             auto pattern = ContainerNode->GetPattern<SheetPresentationPattern>();
             auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
@@ -4682,7 +4682,7 @@ SheetStyle OverlayManager::UpdateSheetStyle(
 {
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetStyle);
-    auto currentStyle = layoutProperty->GetSheetStyleValue();
+    auto currentStyle = layoutProperty->GetSheetStyleValue(sheetStyle);
     if (isPartialUpdate) {
         currentStyle.PartialUpdate(sheetStyle);
     } else {

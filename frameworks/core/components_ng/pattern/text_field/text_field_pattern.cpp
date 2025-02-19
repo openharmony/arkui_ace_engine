@@ -8088,7 +8088,7 @@ PaddingProperty TextFieldPattern::GetPaddingByUserValue()
     CHECK_NULL_RETURN(theme, padding);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, padding);
-    padding = paintProperty->GetPaddingByUserValue();
+    padding = paintProperty->GetPaddingByUserValue(padding);
     auto themePadding = IsUnderlineMode() ? theme->GetUnderlinePadding() : theme->GetPadding();
     if (!padding.top.has_value()) {
         padding.top = CalcLength(CalcLength(themePadding.Top()).GetDimension());
