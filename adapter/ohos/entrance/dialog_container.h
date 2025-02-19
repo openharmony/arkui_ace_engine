@@ -31,130 +31,12 @@
 #include "core/components_ng/render/adapter/rosen_window.h"
 
 namespace OHOS::Ace::Platform {
-class DialogContainer : public Container, public JsMessageDispatcher {
-    DECLARE_ACE_TYPE(DialogContainer, Container, JsMessageDispatcher);
+class DialogContainer : public AceContainer {
+    DECLARE_ACE_TYPE(DialogContainer, AceContainer);
 
 public:
     explicit DialogContainer(int32_t instanceId, FrontendType type = FrontendType::DECLARATIVE_JS);
     ~DialogContainer() override = default;
-
-    void Initialize() override {};
-    void Destroy() override;
-    void DestroyView() override;
-
-    int32_t GetInstanceId() const override
-    {
-        if (aceView_) {
-            return aceView_->GetInstanceId();
-        }
-        return -1;
-    }
-
-    RefPtr<Frontend> GetFrontend() const override
-    {
-        return frontend_;
-    }
-
-    ResourceConfiguration GetResourceConfiguration() const override
-    {
-        return resourceInfo_.GetResourceConfiguration();
-    }
-
-    void SetResourceConfiguration(const ResourceConfiguration& config)
-    {
-        resourceInfo_.SetResourceConfiguration(config);
-    }
-
-    RefPtr<PlatformResRegister> GetPlatformResRegister() const override
-    {
-        return resRegister_;
-    }
-
-    RefPtr<PipelineBase> GetPipelineContext() const override
-    {
-        return pipelineContext_;
-    }
-
-    int32_t GetViewPosX() const override
-    {
-        return aceView_ ? aceView_->GetPosX() : 0;
-    }
-
-    int32_t GetViewPosY() const override
-    {
-        return aceView_ ? aceView_->GetPosY() : 0;
-    }
-
-    void SetWindowId(uint32_t windowId) override
-    {
-        windowId_ = windowId;
-    }
-
-    uint32_t GetWindowId() const override
-    {
-        return windowId_;
-    }
-
-    int32_t GetViewWidth() const override
-    {
-        return aceView_ ? aceView_->GetWidth() : 0;
-    }
-
-    int32_t GetViewHeight() const override
-    {
-        return aceView_ ? aceView_->GetHeight() : 0;
-    }
-
-    RefPtr<AceView> GetAceView() const override
-    {
-        std::lock_guard<std::mutex> lock(viewMutex_);
-        return aceView_;
-    }
-
-    void* GetView() const override
-    {
-        std::lock_guard<std::mutex> lock(viewMutex_);
-        return static_cast<void*>(AceType::RawPtr(aceView_));
-    }
-
-    RefPtr<TaskExecutor> GetTaskExecutor() const override
-    {
-        return taskExecutor_;
-    }
-
-    void Dispatch(
-        const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override {};
-
-    void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override {};
-
-    void DispatchSync(
-        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, int64_t& position) const override
-    {}
-
-    std::string GetHostClassName() const override
-    {
-        return "";
-    }
-
-    void DumpHeapSnapshot(bool isPrivate) override;
-
-    void SetAssetManager(const RefPtr<AssetManager>& assetManager)
-    {
-        assetManager_ = assetManager;
-        if (frontend_) {
-            frontend_->SetAssetManager(assetManager);
-        }
-    }
-
-    RefPtr<AssetManager> GetAssetManager() const override
-    {
-        return assetManager_;
-    }
-
-    bool IsSubContainer() const override
-    {
-        return true;
-    }
 
     bool IsDialogContainer() const override
     {
@@ -175,62 +57,10 @@ public:
 
     static bool ShowToastDialogWindow(
         int32_t instanceId, int32_t posX, int32_t posY, int32_t width, int32_t height, bool isToast = false);
-    static bool CloseWindow(int32_t instanceId);
-    static bool HideWindow(int32_t instanceId);
 
-    static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window>& uiWindow);
-    static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
-
-    static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
-    static RefPtr<DialogContainer> GetContainer(int32_t instanceId);
-    static void SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
-        sptr<OHOS::Rosen::Window>& rsWindow);
-    static void SetViewNew(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
-        sptr<OHOS::Rosen::Window>& rsWindow);
     static bool OnBackPressed(int32_t instanceId);
 
-    void SetFontScaleAndWeightScale(int32_t instanceId);
-    void UpdateConfiguration(const ParsedConfig& parsedConfig);
-    void CheckAndSetFontFamily() override;
-    Rect GetDisplayAvailableRect() const override;
-
 private:
-    void InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density, int32_t width,
-        int32_t height, uint32_t windowId);
-    void InitializeFrontend();
-    void InitializeCallback();
-    void InitializeTouchEventCallback();
-    void InitializeMouseEventCallback();
-    void InitializeAxisEventCallback();
-    void InitializeKeyEventCallback();
-    void InitializeRotationEventCallback();
-    void InitializeViewChangeCallback();
-    void InitializeDensityChangeCallback();
-    void InitializeSystemBarHeightChangeCallback();
-    void InitializeSurfaceDestroyCallback();
-    void InitializeDragEventCallback();
-    void InitializeCrownEventCallback();
-    void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, int32_t width,
-        int32_t height, uint32_t windowId);
-    void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
-    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
-
-    uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
-    int32_t instanceId_ = -1;
-    RefPtr<AceView> aceView_;
-    RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<AssetManager> assetManager_;
-    RefPtr<PlatformResRegister> resRegister_;
-    RefPtr<PipelineBase> pipelineContext_;
-    RefPtr<Frontend> frontend_;
-    FrontendType type_ = FrontendType::DECLARATIVE_JS;
-    ResourceInfo resourceInfo_;
-    sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
-    std::string windowName_;
-    WindowModal windowModal_ { WindowModal::NORMAL };
-    ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
-    mutable std::mutex viewMutex_;
-
     ACE_DISALLOW_COPY_AND_MOVE(DialogContainer);
 };
 
