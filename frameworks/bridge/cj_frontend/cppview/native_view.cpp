@@ -86,24 +86,16 @@ RefPtr<AceType> NativeView::CreateUI()
             }
             self->pendingUpdateTasks_.clear();
         },
-        .removeFunc =
-            [weakThis]() {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                self->Destroy();
-            },
-        .reloadFunc =
-            [weakThis](bool deep) {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                ContainerScope scope(self->instanceId_);
-                self->cjView_->Reload(deep);
-            },
-        .completeReloadFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
-            auto view = weakThis.promote();
-            CHECK_NULL_RETURN(view, nullptr);
-            ContainerScope scope(view->instanceId_);
-            return view->InitialUIRender();
+        .removeFunc = [weakThis]() {
+            auto self = weakThis.promote();
+            CHECK_NULL_VOID(self);
+            self->Destroy();
+        },
+        .reloadFunc = [weakThis](bool deep) {
+            auto self = weakThis.promote();
+            CHECK_NULL_VOID(self);
+            ContainerScope scope(self->instanceId_);
+            self->cjView_->Reload(deep);
         },
         .didBuildFunc =
             [weakThis]() {
@@ -111,6 +103,19 @@ RefPtr<AceType> NativeView::CreateUI()
                 CHECK_NULL_VOID(self);
                 ContainerScope scope(self->instanceId_);
                 self->cjView_->OnDidBuild();
+            },
+        .completeReloadFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
+            auto view = weakThis.promote();
+            CHECK_NULL_RETURN(view, nullptr);
+            ContainerScope scope(view->instanceId_);
+            return view->InitialUIRender();
+        },
+        .recycleFunc =
+            [weakThis]() {
+                auto self = weakThis.promote();
+                CHECK_NULL_VOID(self);
+                ContainerScope scope(self->instanceId_);
+                self->cjView_->AboutToRecycle();
             },
         .reuseFunc =
             [weakThis](void* params) {
@@ -121,13 +126,6 @@ RefPtr<AceType> NativeView::CreateUI()
                 std::string* val = static_cast<std::string*>(params);
                 CHECK_NULL_VOID(val);
                 self->cjView_->AboutToReuse(*val);
-            },
-        .recycleFunc =
-            [weakThis]() {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                ContainerScope scope(self->instanceId_);
-                self->cjView_->AboutToRecycle();
             },
         .recycleCustomNodeFunc = [weakThis](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
             auto self = weakThis.promote();
