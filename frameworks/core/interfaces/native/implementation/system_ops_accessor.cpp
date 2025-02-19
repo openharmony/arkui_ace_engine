@@ -18,34 +18,39 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace GlobalScope_inspectorAccessor {
-void DestroyPeerImpl(Ark_GlobalScope_inspector peer)
+namespace SystemOpsAccessor {
+void DestroyPeerImpl(Ark_SystemOps peer)
 {
 }
-Ark_CustomObject GetInspectorNodesImpl()
+Ark_SystemOps CtorImpl()
 {
     return {};
 }
-Ark_CustomObject GetInspectorNodeByIdImpl(const Ark_Number* id)
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+Ark_NativePointer StartFrameImpl()
 {
     return {};
 }
-void SetAppBgColorImpl(const Ark_String* value)
+void EndFrameImpl(Ark_NativePointer root)
 {
 }
-} // GlobalScope_inspectorAccessor
-const GENERATED_ArkUIGlobalScope_inspectorAccessor* GetGlobalScope_inspectorAccessor()
+} // SystemOpsAccessor
+const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
-    static const GENERATED_ArkUIGlobalScope_inspectorAccessor GlobalScope_inspectorAccessorImpl {
-        GlobalScope_inspectorAccessor::DestroyPeerImpl,
-        GlobalScope_inspectorAccessor::GetInspectorNodesImpl,
-        GlobalScope_inspectorAccessor::GetInspectorNodeByIdImpl,
-        GlobalScope_inspectorAccessor::SetAppBgColorImpl,
+    static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
+        SystemOpsAccessor::DestroyPeerImpl,
+        SystemOpsAccessor::CtorImpl,
+        SystemOpsAccessor::GetFinalizerImpl,
+        SystemOpsAccessor::StartFrameImpl,
+        SystemOpsAccessor::EndFrameImpl,
     };
-    return &GlobalScope_inspectorAccessorImpl;
+    return &SystemOpsAccessorImpl;
 }
 
-struct GlobalScope_inspectorPeer {
-    virtual ~GlobalScope_inspectorPeer() = default;
+struct SystemOpsPeer {
+    virtual ~SystemOpsPeer() = default;
 };
 }

@@ -30,6 +30,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Array_ShadowOptions GetTextShadowImpl(Ark_TextShadowStyle peer)
+{
+    return {};
+}
 } // TextShadowStyleAccessor
 const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
 {
@@ -37,6 +41,7 @@ const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
         TextShadowStyleAccessor::DestroyPeerImpl,
         TextShadowStyleAccessor::CtorImpl,
         TextShadowStyleAccessor::GetFinalizerImpl,
+        TextShadowStyleAccessor::GetTextShadowImpl,
     };
     return &TextShadowStyleAccessorImpl;
 }

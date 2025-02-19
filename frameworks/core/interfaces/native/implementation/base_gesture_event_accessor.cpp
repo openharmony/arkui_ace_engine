@@ -31,6 +31,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Array_FingerInfo GetFingerListImpl(Ark_BaseGestureEvent peer)
+{
+    return {};
+}
 void SetFingerListImpl(Ark_BaseGestureEvent peer,
                        const Array_FingerInfo* fingerList)
 {
@@ -48,6 +52,7 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
         BaseGestureEventAccessor::DestroyPeerImpl,
         BaseGestureEventAccessor::CtorImpl,
         BaseGestureEventAccessor::GetFinalizerImpl,
+        BaseGestureEventAccessor::GetFingerListImpl,
         BaseGestureEventAccessor::SetFingerListImpl,
     };
     return &BaseGestureEventAccessorImpl;

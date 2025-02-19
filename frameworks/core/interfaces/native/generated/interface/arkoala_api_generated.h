@@ -156,7 +156,7 @@ typedef struct InteropBuffer {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 119
+#define GENERATED_ARKUI_FULL_API_VERSION 120
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -1435,6 +1435,9 @@ typedef struct Opt_ButtonTriggerClickCallback Opt_ButtonTriggerClickCallback;
 typedef struct GlobalScope_inspectorPeer GlobalScope_inspectorPeer;
 typedef struct GlobalScope_inspectorPeer* Ark_GlobalScope_inspector;
 typedef struct Opt_GlobalScope_inspector Opt_GlobalScope_inspector;
+typedef struct GlobalScope_Profiler_inspectorPeer GlobalScope_Profiler_inspectorPeer;
+typedef struct GlobalScope_Profiler_inspectorPeer* Ark_GlobalScope_Profiler_inspector;
+typedef struct Opt_GlobalScope_Profiler_inspector Opt_GlobalScope_Profiler_inspector;
 typedef struct LinearIndicatorControllerPeer LinearIndicatorControllerPeer;
 typedef struct LinearIndicatorControllerPeer* Ark_LinearIndicatorController;
 typedef struct Opt_LinearIndicatorController Opt_LinearIndicatorController;
@@ -2559,6 +2562,12 @@ typedef struct Opt_HoverEvent Opt_HoverEvent;
 typedef struct BaseEventPeer BaseEventPeer;
 typedef struct BaseEventPeer* Ark_BaseEvent;
 typedef struct Opt_BaseEvent Opt_BaseEvent;
+typedef struct GlobalScope_cursorControl_commonPeer GlobalScope_cursorControl_commonPeer;
+typedef struct GlobalScope_cursorControl_commonPeer* Ark_GlobalScope_cursorControl_common;
+typedef struct Opt_GlobalScope_cursorControl_common Opt_GlobalScope_cursorControl_common;
+typedef struct GlobalScope_focusControl_commonPeer GlobalScope_focusControl_commonPeer;
+typedef struct GlobalScope_focusControl_commonPeer* Ark_GlobalScope_focusControl_common;
+typedef struct Opt_GlobalScope_focusControl_common Opt_GlobalScope_focusControl_common;
 typedef struct Ark_TransitionEffects Ark_TransitionEffects;
 typedef struct Opt_TransitionEffects Opt_TransitionEffects;
 typedef struct Ark_PointLightStyle Ark_PointLightStyle;
@@ -2679,6 +2688,9 @@ typedef struct Ark_WebHeader Ark_WebHeader;
 typedef struct Opt_WebHeader Opt_WebHeader;
 typedef struct Array_WebHeader Array_WebHeader;
 typedef struct Opt_Array_WebHeader Opt_Array_WebHeader;
+typedef struct SystemOpsPeer SystemOpsPeer;
+typedef struct SystemOpsPeer* Ark_SystemOps;
+typedef struct Opt_SystemOps Opt_SystemOps;
 typedef struct LazyForEachOpsPeer LazyForEachOpsPeer;
 typedef struct LazyForEachOpsPeer* Ark_LazyForEachOps;
 typedef struct Opt_LazyForEachOps Opt_LazyForEachOps;
@@ -4255,56 +4267,6 @@ typedef struct Opt_ModelType {
     Ark_Tag tag;
     Ark_ModelType value;
 } Opt_ModelType;
-typedef enum Ark_PointerStyle {
-    ARK_POINTER_STYLE_DEFAULT = 0,
-    ARK_POINTER_STYLE_EAST = 1,
-    ARK_POINTER_STYLE_WEST = 2,
-    ARK_POINTER_STYLE_SOUTH = 3,
-    ARK_POINTER_STYLE_NORTH = 4,
-    ARK_POINTER_STYLE_WEST_EAST = 5,
-    ARK_POINTER_STYLE_NORTH_SOUTH = 6,
-    ARK_POINTER_STYLE_NORTH_EAST = 7,
-    ARK_POINTER_STYLE_NORTH_WEST = 8,
-    ARK_POINTER_STYLE_SOUTH_EAST = 9,
-    ARK_POINTER_STYLE_SOUTH_WEST = 10,
-    ARK_POINTER_STYLE_NORTH_EAST_SOUTH_WEST = 11,
-    ARK_POINTER_STYLE_NORTH_WEST_SOUTH_EAST = 12,
-    ARK_POINTER_STYLE_CROSS = 13,
-    ARK_POINTER_STYLE_CURSOR_COPY = 14,
-    ARK_POINTER_STYLE_CURSOR_FORBID = 15,
-    ARK_POINTER_STYLE_COLOR_SUCKER = 16,
-    ARK_POINTER_STYLE_HAND_GRABBING = 17,
-    ARK_POINTER_STYLE_HAND_OPEN = 18,
-    ARK_POINTER_STYLE_HAND_POINTING = 19,
-    ARK_POINTER_STYLE_HELP = 20,
-    ARK_POINTER_STYLE_MOVE = 21,
-    ARK_POINTER_STYLE_RESIZE_LEFT_RIGHT = 22,
-    ARK_POINTER_STYLE_RESIZE_UP_DOWN = 23,
-    ARK_POINTER_STYLE_SCREENSHOT_CHOOSE = 24,
-    ARK_POINTER_STYLE_SCREENSHOT_CURSOR = 25,
-    ARK_POINTER_STYLE_TEXT_CURSOR = 26,
-    ARK_POINTER_STYLE_ZOOM_IN = 27,
-    ARK_POINTER_STYLE_ZOOM_OUT = 28,
-    ARK_POINTER_STYLE_MIDDLE_BTN_EAST = 29,
-    ARK_POINTER_STYLE_MIDDLE_BTN_WEST = 30,
-    ARK_POINTER_STYLE_MIDDLE_BTN_SOUTH = 31,
-    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH = 32,
-    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_SOUTH = 33,
-    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_EAST = 34,
-    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_WEST = 35,
-    ARK_POINTER_STYLE_MIDDLE_BTN_SOUTH_EAST = 36,
-    ARK_POINTER_STYLE_MIDDLE_BTN_SOUTH_WEST = 37,
-    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38,
-    ARK_POINTER_STYLE_HORIZONTAL_TEXT_CURSOR = 39,
-    ARK_POINTER_STYLE_CURSOR_CROSS = 40,
-    ARK_POINTER_STYLE_CURSOR_CIRCLE = 41,
-    ARK_POINTER_STYLE_LOADING = 42,
-    ARK_POINTER_STYLE_RUNNING = 43,
-} Ark_PointerStyle;
-typedef struct Opt_PointerStyle {
-    Ark_Tag tag;
-    Ark_PointerStyle value;
-} Opt_PointerStyle;
 typedef enum Ark_ContentClipMode {
     ARK_CONTENT_CLIP_MODE_CONTENT_ONLY = 0,
     ARK_CONTENT_CLIP_MODE_BOUNDARY = 1,
@@ -4541,6 +4503,56 @@ typedef struct Opt_MouseButton {
     Ark_Tag tag;
     Ark_MouseButton value;
 } Opt_MouseButton;
+typedef enum Ark_PointerStyle {
+    ARK_POINTER_STYLE_DEFAULT = 0,
+    ARK_POINTER_STYLE_EAST = 1,
+    ARK_POINTER_STYLE_WEST = 2,
+    ARK_POINTER_STYLE_SOUTH = 3,
+    ARK_POINTER_STYLE_NORTH = 4,
+    ARK_POINTER_STYLE_WEST_EAST = 5,
+    ARK_POINTER_STYLE_NORTH_SOUTH = 6,
+    ARK_POINTER_STYLE_NORTH_EAST = 7,
+    ARK_POINTER_STYLE_NORTH_WEST = 8,
+    ARK_POINTER_STYLE_SOUTH_EAST = 9,
+    ARK_POINTER_STYLE_SOUTH_WEST = 10,
+    ARK_POINTER_STYLE_NORTH_EAST_SOUTH_WEST = 11,
+    ARK_POINTER_STYLE_NORTH_WEST_SOUTH_EAST = 12,
+    ARK_POINTER_STYLE_CROSS = 13,
+    ARK_POINTER_STYLE_CURSOR_COPY = 14,
+    ARK_POINTER_STYLE_CURSOR_FORBID = 15,
+    ARK_POINTER_STYLE_COLOR_SUCKER = 16,
+    ARK_POINTER_STYLE_HAND_GRABBING = 17,
+    ARK_POINTER_STYLE_HAND_OPEN = 18,
+    ARK_POINTER_STYLE_HAND_POINTING = 19,
+    ARK_POINTER_STYLE_HELP = 20,
+    ARK_POINTER_STYLE_MOVE = 21,
+    ARK_POINTER_STYLE_RESIZE_LEFT_RIGHT = 22,
+    ARK_POINTER_STYLE_RESIZE_UP_DOWN = 23,
+    ARK_POINTER_STYLE_SCREENSHOT_CHOOSE = 24,
+    ARK_POINTER_STYLE_SCREENSHOT_CURSOR = 25,
+    ARK_POINTER_STYLE_TEXT_CURSOR = 26,
+    ARK_POINTER_STYLE_ZOOM_IN = 27,
+    ARK_POINTER_STYLE_ZOOM_OUT = 28,
+    ARK_POINTER_STYLE_MIDDLE_BTN_EAST = 29,
+    ARK_POINTER_STYLE_MIDDLE_BTN_WEST = 30,
+    ARK_POINTER_STYLE_MIDDLE_BTN_SOUTH = 31,
+    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH = 32,
+    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_SOUTH = 33,
+    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_EAST = 34,
+    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_WEST = 35,
+    ARK_POINTER_STYLE_MIDDLE_BTN_SOUTH_EAST = 36,
+    ARK_POINTER_STYLE_MIDDLE_BTN_SOUTH_WEST = 37,
+    ARK_POINTER_STYLE_MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38,
+    ARK_POINTER_STYLE_HORIZONTAL_TEXT_CURSOR = 39,
+    ARK_POINTER_STYLE_CURSOR_CROSS = 40,
+    ARK_POINTER_STYLE_CURSOR_CIRCLE = 41,
+    ARK_POINTER_STYLE_LOADING = 42,
+    ARK_POINTER_STYLE_RUNNING = 43,
+} Ark_PointerStyle;
+typedef struct Opt_PointerStyle {
+    Ark_Tag tag;
+    Ark_PointerStyle value;
+} Opt_PointerStyle;
 typedef enum Ark_TransitionEdge {
     ARK_TRANSITION_EDGE_TOP = 0,
     ARK_TRANSITION_EDGE_BOTTOM = 1,
@@ -5539,6 +5551,10 @@ typedef struct Opt_Length {
     Ark_Tag tag;
     Ark_Length value;
 } Opt_Length;
+typedef struct Opt_Boolean {
+    Ark_Tag tag;
+    Ark_Boolean value;
+} Opt_Boolean;
 typedef struct Ark_Resource {
     Ark_String bundleName;
     Ark_String moduleName;
@@ -5586,10 +5602,6 @@ typedef struct Opt_PixelMap {
     Ark_Tag tag;
     Ark_PixelMap value;
 } Opt_PixelMap;
-typedef struct Opt_Boolean {
-    Ark_Tag tag;
-    Ark_Boolean value;
-} Opt_Boolean;
 typedef struct Ark_Union_Number_Resource {
     Ark_Int32 selector;
     union {
@@ -10701,6 +10713,10 @@ typedef struct Opt_GlobalScope_inspector {
     Ark_Tag tag;
     Ark_GlobalScope_inspector value;
 } Opt_GlobalScope_inspector;
+typedef struct Opt_GlobalScope_Profiler_inspector {
+    Ark_Tag tag;
+    Ark_GlobalScope_Profiler_inspector value;
+} Opt_GlobalScope_Profiler_inspector;
 typedef struct Opt_LinearIndicatorController {
     Ark_Tag tag;
     Ark_LinearIndicatorController value;
@@ -15311,6 +15327,14 @@ typedef struct Opt_BaseEvent {
     Ark_Tag tag;
     Ark_BaseEvent value;
 } Opt_BaseEvent;
+typedef struct Opt_GlobalScope_cursorControl_common {
+    Ark_Tag tag;
+    Ark_GlobalScope_cursorControl_common value;
+} Opt_GlobalScope_cursorControl_common;
+typedef struct Opt_GlobalScope_focusControl_common {
+    Ark_Tag tag;
+    Ark_GlobalScope_focusControl_common value;
+} Opt_GlobalScope_focusControl_common;
 typedef struct Ark_TransitionEffects {
     Ark_Undefined identity;
     Ark_Number opacity;
@@ -15765,6 +15789,10 @@ typedef struct Opt_Array_WebHeader {
     Ark_Tag tag;
     Array_WebHeader value;
 } Opt_Array_WebHeader;
+typedef struct Opt_SystemOps {
+    Ark_Tag tag;
+    Ark_SystemOps value;
+} Opt_SystemOps;
 typedef struct Opt_LazyForEachOps {
     Ark_Tag tag;
     Ark_LazyForEachOps value;
@@ -19329,6 +19357,14 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
     void (*Prepare)(Ark_NativePointer node);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
+typedef struct GENERATED_ArkUISystemOpsAccessor {
+    void (*destroyPeer)(Ark_SystemOps peer);
+    Ark_SystemOps (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_NativePointer (*StartFrame)();
+    void (*EndFrame)(Ark_NativePointer root);
+} GENERATED_ArkUISystemOpsAccessor;
+
 typedef struct GENERATED_ArkUIDrawingCanvasAccessor {
     void (*destroyPeer)(Ark_DrawingCanvas peer);
     Ark_DrawingCanvas (*ctor)(Ark_PixelMap pixelmap);
@@ -19419,12 +19455,8 @@ typedef struct GENERATED_ArkUIPixelMapAccessor {
                                    const Ark_Buffer* dst);
     void (*writeBufferToPixels)(Ark_PixelMap peer,
                                 const Ark_Buffer* src);
-    Ark_Int32 (*getIsEditable)(Ark_PixelMap peer);
-    void (*setIsEditable)(Ark_PixelMap peer,
-                          Ark_Int32 isEditable);
-    Ark_Int32 (*getIsStrideAlignment)(Ark_PixelMap peer);
-    void (*setIsStrideAlignment)(Ark_PixelMap peer,
-                                 Ark_Int32 isStrideAlignment);
+    Ark_Boolean (*getIsEditable)(Ark_PixelMap peer);
+    Ark_Boolean (*getIsStrideAlignment)(Ark_PixelMap peer);
 } GENERATED_ArkUIPixelMapAccessor;
 
 typedef struct GENERATED_ArkUINavExtenderAccessor {
@@ -19922,6 +19954,17 @@ typedef struct GENERATED_ArkUITransitionEffectAccessor {
                                     Ark_TransitionEffect transitionEffect);
 } GENERATED_ArkUITransitionEffectAccessor;
 
+typedef struct GENERATED_ArkUIGlobalScope_focusControl_commonAccessor {
+    void (*destroyPeer)(Ark_GlobalScope_focusControl_common peer);
+    Ark_Boolean (*requestFocus)(const Ark_String* value);
+} GENERATED_ArkUIGlobalScope_focusControl_commonAccessor;
+
+typedef struct GENERATED_ArkUIGlobalScope_cursorControl_commonAccessor {
+    void (*destroyPeer)(Ark_GlobalScope_cursorControl_common peer);
+    void (*setCursor)(Ark_PointerStyle value);
+    void (*restoreDefault)();
+} GENERATED_ArkUIGlobalScope_cursorControl_commonAccessor;
+
 typedef struct GENERATED_ArkUIBaseEventAccessor {
     void (*destroyPeer)(Ark_BaseEvent peer);
     Ark_BaseEvent (*ctor)();
@@ -20075,8 +20118,10 @@ typedef struct GENERATED_ArkUITouchEventAccessor {
     Ark_TouchType (*getType)(Ark_TouchEvent peer);
     void (*setType)(Ark_TouchEvent peer,
                     Ark_TouchType type);
+    Array_TouchObject (*getTouches)(Ark_TouchEvent peer);
     void (*setTouches)(Ark_TouchEvent peer,
                        const Array_TouchObject* touches);
+    Array_TouchObject (*getChangedTouches)(Ark_TouchEvent peer);
     void (*setChangedTouches)(Ark_TouchEvent peer,
                               const Array_TouchObject* changedTouches);
     Callback_Void (*getStopPropagation)(Ark_TouchEvent peer);
@@ -20283,9 +20328,6 @@ typedef struct GENERATED_ArkUIGlobalScope_commonAccessor {
     Ark_Int32 (*px2fp)(const Ark_Number* value);
     Ark_Int32 (*lpx2px)(const Ark_Number* value);
     Ark_Int32 (*px2lpx)(const Ark_Number* value);
-    Ark_Boolean (*requestFocus)(const Ark_String* value);
-    void (*setCursor)(Ark_PointerStyle value);
-    void (*restoreDefault)();
 } GENERATED_ArkUIGlobalScope_commonAccessor;
 
 typedef struct GENERATED_ArkUIContextMenuAccessor {
@@ -20320,6 +20362,7 @@ typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
     void (*destroyPeer)(Ark_BaseGestureEvent peer);
     Ark_BaseGestureEvent (*ctor)();
     Ark_NativePointer (*getFinalizer)();
+    Array_FingerInfo (*getFingerList)(Ark_BaseGestureEvent peer);
     void (*setFingerList)(Ark_BaseGestureEvent peer,
                           const Array_FingerInfo* fingerList);
 } GENERATED_ArkUIBaseGestureEventAccessor;
@@ -20403,6 +20446,7 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
     Ark_Boolean (*getRepeat)(Ark_GestureEvent peer);
     void (*setRepeat)(Ark_GestureEvent peer,
                       Ark_Boolean repeat);
+    Array_FingerInfo (*getFingerList)(Ark_GestureEvent peer);
     void (*setFingerList)(Ark_GestureEvent peer,
                           const Array_FingerInfo* fingerList);
     Ark_Int32 (*getOffsetX)(Ark_GestureEvent peer);
@@ -21520,6 +21564,7 @@ typedef struct GENERATED_ArkUITextShadowStyleAccessor {
     void (*destroyPeer)(Ark_TextShadowStyle peer);
     Ark_TextShadowStyle (*ctor)(const Ark_Union_ShadowOptions_Array_ShadowOptions* value);
     Ark_NativePointer (*getFinalizer)();
+    Array_ShadowOptions (*getTextShadow)(Ark_TextShadowStyle peer);
 } GENERATED_ArkUITextShadowStyleAccessor;
 
 typedef struct GENERATED_ArkUIBackgroundColorStyleAccessor {
@@ -21629,12 +21674,16 @@ typedef struct GENERATED_ArkUILinearIndicatorControllerAccessor {
     void (*stop)(Ark_LinearIndicatorController peer);
 } GENERATED_ArkUILinearIndicatorControllerAccessor;
 
+typedef struct GENERATED_ArkUIGlobalScope_Profiler_inspectorAccessor {
+    void (*destroyPeer)(Ark_GlobalScope_Profiler_inspector peer);
+    void (*registerVsyncCallback)(const Callback_String_Void* callback_);
+    void (*unregisterVsyncCallback)();
+} GENERATED_ArkUIGlobalScope_Profiler_inspectorAccessor;
+
 typedef struct GENERATED_ArkUIGlobalScope_inspectorAccessor {
     void (*destroyPeer)(Ark_GlobalScope_inspector peer);
     Ark_CustomObject (*getInspectorNodes)();
     Ark_CustomObject (*getInspectorNodeById)(const Ark_Number* id);
-    void (*registerVsyncCallback)(const Callback_String_Void* callback_);
-    void (*unregisterVsyncCallback)();
     void (*setAppBgColor)(const Ark_String* value);
 } GENERATED_ArkUIGlobalScope_inspectorAccessor;
 
@@ -22666,6 +22715,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
+    const GENERATED_ArkUISystemOpsAccessor* (*getSystemOpsAccessor)();
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();
     const GENERATED_ArkUILengthMetricsAccessor* (*getLengthMetricsAccessor)();
     const GENERATED_ArkUIWebviewControllerAccessor* (*getWebviewControllerAccessor)();
@@ -22698,6 +22748,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIICurveAccessor* (*getICurveAccessor)();
     const GENERATED_ArkUIDrawModifierAccessor* (*getDrawModifierAccessor)();
     const GENERATED_ArkUITransitionEffectAccessor* (*getTransitionEffectAccessor)();
+    const GENERATED_ArkUIGlobalScope_focusControl_commonAccessor* (*getGlobalScope_focusControl_commonAccessor)();
+    const GENERATED_ArkUIGlobalScope_cursorControl_commonAccessor* (*getGlobalScope_cursorControl_commonAccessor)();
     const GENERATED_ArkUIBaseEventAccessor* (*getBaseEventAccessor)();
     const GENERATED_ArkUIClickEventAccessor* (*getClickEventAccessor)();
     const GENERATED_ArkUIHoverEventAccessor* (*getHoverEventAccessor)();
@@ -22813,6 +22865,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIImageAttachmentAccessor* (*getImageAttachmentAccessor)();
     const GENERATED_ArkUICustomSpanAccessor* (*getCustomSpanAccessor)();
     const GENERATED_ArkUILinearIndicatorControllerAccessor* (*getLinearIndicatorControllerAccessor)();
+    const GENERATED_ArkUIGlobalScope_Profiler_inspectorAccessor* (*getGlobalScope_Profiler_inspectorAccessor)();
     const GENERATED_ArkUIGlobalScope_inspectorAccessor* (*getGlobalScope_inspectorAccessor)();
 } GENERATED_ArkUIAccessors;
 
