@@ -2135,6 +2135,9 @@ bool SwiperPattern::IsInFastAnimation() const
     if (!NeedFastAnimation()) {
         return false;
     }
+    if (targetIndex_) {
+        return true;
+    }
     return propertyAnimationIsRunning_;
 }
 
