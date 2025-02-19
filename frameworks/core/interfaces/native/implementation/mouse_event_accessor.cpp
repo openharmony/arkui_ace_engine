@@ -16,6 +16,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
@@ -296,7 +297,13 @@ void SetYImpl(Ark_MouseEvent peer,
 }
 Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        MouseInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetStopPropagation(true);
+    });
+    return callback;
 }
 void SetStopPropagationImpl(Ark_MouseEvent peer,
                             const Callback_Void* stopPropagation)
