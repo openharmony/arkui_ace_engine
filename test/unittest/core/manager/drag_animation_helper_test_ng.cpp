@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/manager/drag_animation_helper_test_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 
@@ -610,5 +611,53 @@ HWTEST_F(DragAnimationHelperTestNg, HideDragNodeCopy, TestSize.Level1)
     DragAnimationHelper::HideDragNodeCopy(overlayManager);
     opacity = renderContext->GetOpacity().value_or(0);
     EXPECT_EQ(opacity, 0.0f);
+}
+
+/**
+ * @tc.name: DragStartAnimation
+ * @tc.desc: Test DragStartAnimation func with Offset(10.0, 10.0). TranslateOptions value will be right after drag
+ * animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, DragStartAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlayManager and dragDropManager.
+     * @tc.expected: overlayManager and dragDropManager is not null.
+     */
+    int32_t containerId = 100;
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNode and dragPreviewInfo.
+     * @tc.expected: dragPreviewInfo's imageNode is not nullptr.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
+    auto imageNode = DragAnimationHelper::CreateImageNode(refPixelMap);
+    ASSERT_NE(imageNode, nullptr);
+    DragDropManager::DragPreviewInfo dragPreviewInfo;
+    dragPreviewInfo.imageNode = imageNode;
+    ASSERT_NE(dragPreviewInfo.imageNode, nullptr);
+    dragDropManager->SetDragPreviewInfo(dragPreviewInfo);
+
+    /**
+     * @tc.steps: step3. Call DragStartAnimation with Offset(10.0, 10.0).
+     * @tc.expected: TranslateOptions x value is 10.0f.
+     */
+    auto newOffset = Offset(10.0, 10.0);
+    auto gatherNodeCenter =
+        NG::DragDropFuncWrapper::GetPaintRectCenter(dragDropManager->GetDragPreviewInfo().imageNode);
+    Point point = { 0, 0 };
+    DragAnimationHelper::DragStartAnimation(newOffset, overlayManager, gatherNodeCenter, point, containerId);
+    auto renderContext = imageNode->GetRenderContext();
+    TranslateOptions result = renderContext->GetTransformTranslate().value();
+    TranslateOptions expectValue { 10.0f, 10.0f, 0.0f };
+    EXPECT_EQ(result.x.CalcValue(), expectValue.x.CalcValue());
 }
 } // namespace OHOS::Ace::NG
