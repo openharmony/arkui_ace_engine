@@ -107,7 +107,9 @@ void SetTimestampImpl(Ark_BaseEvent peer,
 }
 Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), static_cast<Ark_SourceType>(-1));
+    auto value = peer->GetBaseInfo()->GetSourceDevice();
+    return Converter::ArkValue<Ark_SourceType>(value);
 }
 void SetSourceImpl(Ark_BaseEvent peer,
                    Ark_SourceType source)
@@ -178,7 +180,9 @@ void SetTiltYImpl(Ark_BaseEvent peer,
 }
 Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), static_cast<Ark_SourceTool>(-1));
+    auto value = peer->GetBaseInfo()->GetSourceTool();
+    return Converter::ArkValue<Ark_SourceTool>(value);
 }
 void SetSourceToolImpl(Ark_BaseEvent peer,
                        Ark_SourceTool sourceTool)
