@@ -533,16 +533,16 @@ ArkUI_SwiperDigitIndicator* OH_ArkUI_SwiperDigitIndicator_Create()
     indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
     indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
     indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->fontColor = ArkUI_OptionalUint { 0, 0xFF000000 };         // rgb? 0xFF182431
-    indicator->selectedFontColor = ArkUI_OptionalUint { 0, 0xFF000000 }; // 0xFF182431
-    indicator->fontSize = ArkUI_OptionalFloat { 0, 14.0f };              // px fp?
+    indicator->fontColor = ArkUI_OptionalUint { 0, 0xFF000000 };
+    indicator->selectedFontColor = ArkUI_OptionalUint { 0, 0xFF000000 };
+    indicator->fontSize = ArkUI_OptionalFloat { 0, 14.0f };
     indicator->selectedFontSize = ArkUI_OptionalFloat { 0, 14.0f };
     indicator->fontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
     indicator->selectedFontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
     return indicator;
 }
 
-void OH_ArkUI_SwiperDigitIndicator_Dispose(ArkUI_SwiperDigitIndicator* indicator)
+void OH_ArkUI_SwiperDigitIndicator_Destroy(ArkUI_SwiperDigitIndicator* indicator)
 {
     delete indicator;
 }
