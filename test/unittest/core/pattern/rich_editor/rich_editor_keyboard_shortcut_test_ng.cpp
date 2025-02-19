@@ -705,6 +705,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextColorInJson001, TestSize.Level
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     std::optional<Color> value;
     auto ret = richEditorPattern->GetTextColorInJson(value);

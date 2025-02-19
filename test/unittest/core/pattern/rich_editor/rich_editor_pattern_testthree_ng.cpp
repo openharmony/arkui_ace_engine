@@ -576,6 +576,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, InitScrollablePattern001, TestSize.Level1
     ASSERT_NE(context, nullptr);
     context->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PaddingProperty padding;
     padding.top = CalcLength(10);
     padding.left = CalcLength(10);

@@ -80,6 +80,7 @@
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
 #include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
@@ -173,6 +174,7 @@ RefPtr<NG::TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>
 const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
+        { NG::RichEditorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::RichEditorThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
         { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
