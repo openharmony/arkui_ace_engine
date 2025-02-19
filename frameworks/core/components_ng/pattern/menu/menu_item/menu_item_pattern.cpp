@@ -1354,13 +1354,230 @@ void MenuItemPattern::OnHover(bool isHover)
         auto parent = AceType::DynamicCast<UINode>(host->GetParent());
         SetBgBlendColor(isHover || isSubMenuShowed_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdateHover(isHover || isSubMenuShowed_);
-        if (isHover || isSubMenuShowed_) {
-            ShowSubMenu(ShowSubMenuType::HOVER);
-        }
+        PostHoverSubMenuTask();
         menuPattern->OnItemPressed(parent, index_, isHover || isSubMenuShowed_, true);
         PlayBgColorAnimation();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void MenuItemPattern::PostHoverSubMenuTask()
+{
+    if (GetSubBuilder() == nullptr) {
+        return;
+    }
+    if (showTask_) {
+        TAG_LOGD(AceLogTag::ACE_MENU, "Submenu show task cancel");
+        showTask_.Cancel();
+    }
+    if (!isHover_ && !isSubMenuShowed_) {
+        return;
+    }
+    if (expandingMode_ != SubMenuExpandingMode::SIDE) {
+        ShowSubMenu(ShowSubMenuType::HOVER);
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto delayTime = menuTheme->GetSubMenuShowDelayDuration();
+    if (delayTime > 0) {
+        showTask_.Reset([weak = WeakClaim(this)] {
+            TAG_LOGD(AceLogTag::ACE_MENU, "Execute show submenu task");
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->IsHover() || pattern->IsSubMenuShowed()) {
+                pattern->ShowSubMenu(ShowSubMenuType::HOVER);
+            }
+        });
+        auto executor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        TAG_LOGD(AceLogTag::ACE_MENU, "Post show submenu task");
+        executor->PostDelayedTask(showTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUIShowSubMenuTask");
+    } else {
+        ShowSubMenu(ShowSubMenuType::HOVER);
+    }
+}
+
+void MenuItemPattern::CheckHideSubMenu(std::function<void()> callback, const PointF& mousePoint, const RectF& menuZone)
+{
+    if (expandingMode_ != SubMenuExpandingMode::SIDE) {
+        PerformHideSubMenu(callback);
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (!lastInnerPosition_.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "Last inner position not has value");
+        PerformHideSubMenu(callback);
+        return;
+    }
+    if (hideTask_) {
+        if (NeedPerformHideSubMenuImmediately(mousePoint, menuZone)) {
+            PerformHideSubMenu(callback);
+            return;
+        }
+    } else {
+        if (!NeedStartHideMenuTask(mousePoint, menuZone)) {
+            PerformHideSubMenu(callback);
+            return;
+        }
+        auto delayTime = menuTheme->GetSubMenuHideDelayDuration();
+        if (delayTime > 0) {
+            hideTask_.Reset([weak = WeakClaim(this), callback = std::move(callback)] {
+                TAG_LOGD(AceLogTag::ACE_MENU, "Execute hide submenu task");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->PerformHideSubMenu(callback);
+            });
+            auto executor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(executor);
+            TAG_LOGD(AceLogTag::ACE_MENU, "Post hide submenu task");
+            executor->PostDelayedTask(hideTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUIHideSubMenuTask");
+        } else {
+            PerformHideSubMenu(callback);
+            return;
+        }
+    }
+    lastOutterPosition_ = mousePoint;
+}
+
+bool MenuItemPattern::NeedPerformHideSubMenuImmediately(const PointF& mousePoint, const RectF& menuZone)
+{
+    if (!lastInnerPosition_.has_value()) {
+        return false;
+    }
+    if (!lastOutterPosition_.has_value()) {
+        return false;
+    }
+    auto lastInnerPoint = lastInnerPosition_.value();
+    auto lastOutterPoint = lastOutterPosition_.value();
+    if (LessNotEqual(lastInnerPoint.GetX(), menuZone.Left())) {
+        if (leaveFromBottom_) {
+            if (GreatNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                LessNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        } else {
+            if (GreatNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                GreatNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        }
+    } else if (GreatNotEqual(lastInnerPoint.GetX(), menuZone.Right())) {
+        if (leaveFromBottom_) {
+            if (LessNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                GreatNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        } else {
+            if (LessNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                LessNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool MenuItemPattern::NeedStartHideMenuTask(const PointF& mousePoint, const RectF& menuZone)
+{
+    if (!lastInnerPosition_.has_value()) {
+        return false;
+    }
+    auto lastInnerPoint = lastInnerPosition_.value();
+    leaveFromBottom_ = GreatNotEqual(mousePoint.GetY(), lastInnerPoint.GetY());
+    if (LessNotEqual(lastInnerPoint.GetX(), menuZone.Left())) {
+        return NeedStartHideRightSubMenuTask(lastInnerPoint, mousePoint, menuZone);
+    } else if (GreatNotEqual(lastInnerPoint.GetX(), menuZone.Right())) {
+        return NeedStartHideLeftSubMenuTask(lastInnerPoint, mousePoint, menuZone);
+    } else {
+        return false;
+    }
+}
+
+bool MenuItemPattern::NeedStartHideRightSubMenuTask(
+    const PointF& lastInnerPoint, const PointF& mousePoint, const RectF& menuZone)
+{
+    if (leaveFromBottom_) {
+        if (NearEqual(menuZone.Bottom(), lastInnerPoint.GetY()) ||
+            NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (menuZone.Left() - lastInnerPoint.GetX()) / (menuZone.Bottom() - lastInnerPoint.GetY());
+        auto currentRadio = (mousePoint.GetX() - lastInnerPoint.GetX()) / (mousePoint.GetY() - lastInnerPoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    } else {
+        if (NearEqual(menuZone.Top(), lastInnerPoint.GetY()) || NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (menuZone.Left() - lastInnerPoint.GetX()) / (lastInnerPoint.GetY() - menuZone.Top());
+        auto currentRadio = (mousePoint.GetX() - lastInnerPoint.GetX()) / (lastInnerPoint.GetY() - mousePoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool MenuItemPattern::NeedStartHideLeftSubMenuTask(
+    const PointF& lastInnerPoint, const PointF& mousePoint, const RectF& menuZone)
+{
+    if (leaveFromBottom_) {
+        if (NearEqual(menuZone.Bottom(), lastInnerPoint.GetY()) ||
+            NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (lastInnerPoint.GetX() - menuZone.Right()) / (menuZone.Bottom() - lastInnerPoint.GetY());
+        auto currentRadio = (lastInnerPoint.GetX() - mousePoint.GetX()) / (mousePoint.GetY() - lastInnerPoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    } else {
+        if (NearEqual(menuZone.Top(), lastInnerPoint.GetY()) || NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (lastInnerPoint.GetX() - menuZone.Right()) / (lastInnerPoint.GetY() - menuZone.Top());
+        auto currentRadio = (lastInnerPoint.GetX() - mousePoint.GetX()) / (lastInnerPoint.GetY() - mousePoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void MenuItemPattern::PerformHideSubMenu(std::function<void()> callback)
+{
+    if (callback) {
+        callback();
+    }
+    OnHover(false);
+    SetIsSubMenuShowed(false);
+    ClearHoverRegions();
+    ResetWrapperMouseEvent();
+    if (hideTask_) {
+        hideTask_.Cancel();
+    }
+    lastOutterPosition_.reset();
+    lastInnerPosition_.reset();
+    leaveFromBottom_ = false;
+}
+
+void MenuItemPattern::CancelHideSubMenuTask(const PointF& mousePoint)
+{
+    if (hideTask_) {
+        hideTask_.Cancel();
+    }
+    lastInnerPosition_ = mousePoint;
 }
 
 void MenuItemPattern::OnVisibleChange(bool isVisible)

@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/thread/cancelable_callback.h"
 #include "core/components/slider/render_slider.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/long_press_event.h"
@@ -232,6 +233,12 @@ public:
     void OnVisibleChange(bool isVisible) override;
     void InitLongPressEvent();
     void UpdateNeedDivider(bool need);
+    void CheckHideSubMenu(std::function<void()> callback, const PointF& mousePoint, const RectF& menuZone);
+    bool NeedPerformHideSubMenuImmediately(const PointF& mousePoint, const RectF& menuZone);
+    bool NeedStartHideMenuTask(const PointF& mousePoint, const RectF& menuZone);
+    bool NeedStartHideRightSubMenuTask(const PointF& lastInnerPoint, const PointF& mousePoint, const RectF& menuZone);
+    bool NeedStartHideLeftSubMenuTask(const PointF& lastInnerPoint, const PointF& mousePoint, const RectF& menuZone);
+    void CancelHideSubMenuTask(const PointF& mousePoint);
     void SetIndex(int32_t index)
     {
         index_ = index;
@@ -477,6 +484,8 @@ private:
     void OptionHandleBlurEvent();
     void SetFocusStyle();
     void ClearFocusStyle();
+    void PostHoverSubMenuTask();
+    void PerformHideSubMenu(std::function<void()> callback);
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;
@@ -559,6 +568,11 @@ private:
     bool isOptionFontColorSetByUser_ = false;
     bool isOptionBgColorSetByUser_ = false;
     int32_t rowSelected_ = -1;
+    CancelableCallback<void()> showTask_;
+    CancelableCallback<void()> hideTask_;
+    std::optional<PointF> lastInnerPosition_ = std::nullopt;
+    std::optional<PointF> lastOutterPosition_ = std::nullopt;
+    bool leaveFromBottom_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };
