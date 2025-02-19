@@ -78,6 +78,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/pattern/select/select_theme_wrapper.h"
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
+#include "core/components_ng/pattern/toggle/switch_theme_wrapper.h"
+#include "core/components_ng/pattern/toggle/toggle_theme_wrapper.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/checkbox/checkbox_theme_wrapper.h"
 #include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
@@ -87,6 +89,9 @@
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
+#include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -175,6 +180,8 @@ RefPtr<NG::TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>
 const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
         { CheckboxTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CheckboxThemeWrapper::WrapperBuilder> },
+        { SwitchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwitchThemeWrapper::WrapperBuilder> },
+        { ToggleTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ToggleThemeWrapper::WrapperBuilder> },
         { CounterTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CounterThemeWrapper::WrapperBuilder> },
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
@@ -182,7 +189,11 @@ const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPt
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
         { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> },
         { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> },
-        { SelectTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SelectThemeWrapper::WrapperBuilder> }
+        { SelectTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SelectThemeWrapper::WrapperBuilder> },
+        { NavigationBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::NavigationBarThemeWrapper::WrapperBuilder> },
+        { AgingAdapationDialogTheme::TypeId(),
+            &ThemeWrapperBuildFunc<NG::AgingAdapationDialogThemeWrapper::WrapperBuilder> },
+        { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;

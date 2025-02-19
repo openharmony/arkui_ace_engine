@@ -618,7 +618,7 @@ public:
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
-    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
+    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion = Rosen::API_VERSION_INVALID);
 
     uint32_t GetStatusBarHeight();
 
@@ -837,7 +837,7 @@ private:
     void RegisterUIExtDataConsumer();
     void UnRegisterUIExtDataConsumer();
     void DispatchUIExtDataConsume(
-        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void RegisterUIExtDataSendToHost();
     bool FireUIExtDataSendToHost(
         NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type);

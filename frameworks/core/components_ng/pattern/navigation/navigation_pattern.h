@@ -199,6 +199,9 @@ public:
     void OnVisibleChange(bool isVisible) override;
 
     void OnColorConfigurationUpdate() override;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void AddDragBarHotZoneRect();
 
     Dimension GetMinNavBarWidthValue() const
@@ -578,6 +581,8 @@ private:
     void RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
     void UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
     virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
+    void UpdateToobarFocusColor();
+    void UpdateDividerBackgroundColor();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

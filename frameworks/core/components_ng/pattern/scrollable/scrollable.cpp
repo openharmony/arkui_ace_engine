@@ -123,7 +123,6 @@ void Scrollable::Initialize(const RefPtr<FrameNode>& host)
     if (friction_ == -1) {
         InitFriction(scrollableTheme->GetFriction());
     }
-    InitAxisAnimator();
 }
 
 void Scrollable::InitAxisAnimator()
@@ -704,12 +703,13 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar)
         return;
     }
     lastAxisVsyncTime_ = currentVsyncTime;
-    if (axisAnimator_) {
-        ACE_SCOPED_TRACE(
-            "ProcessAxisUpdateEvent onAxis, IsAxisAnimationRunning:%u, mainDelta:%f, currentPos_:%f, id:%d, tag:%s",
-            IsAxisAnimationRunning(), mainDelta, currentPos_, nodeId_, nodeTag_.c_str());
-        axisAnimator_->OnAxis(mainDelta, currentPos_);
+    if (!axisAnimator_) {
+        InitAxisAnimator();
     }
+    ACE_SCOPED_TRACE(
+        "ProcessAxisUpdateEvent onAxis, IsAxisAnimationRunning:%u, mainDelta:%f, currentPos_:%f, id:%d, tag:%s",
+        IsAxisAnimationRunning(), mainDelta, currentPos_, nodeId_, nodeTag_.c_str());
+    axisAnimator_->OnAxis(mainDelta, currentPos_);
 }
 
 void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale, bool isScrollFromTouchPad)

@@ -1315,6 +1315,8 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->UpdateSymbolColorList(options.style.value().GetSymbolColorList());
         spanNode->UpdateSymbolRenderingStrategy(options.style.value().GetRenderStrategy());
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
+        spanNode->UpdateSymbolType(options.style.value().GetSymbolType());
+        spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = u"  ";
@@ -1858,7 +1860,7 @@ void RichEditorPattern::SetCaretPositionWithAffinity(PositionWithAffinity positi
 bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
-    AdjustSelector(correctPos, HandleType::SECOND);
+    IF_TRUE(!isModifyingContent_, AdjustSelector(correctPos, HandleType::SECOND));
     ResetLastClickOffset();
     caretAffinityPolicy_ = CaretAffinityPolicy::DEFAULT;
     CHECK_NULL_RETURN((pos == correctPos), false);

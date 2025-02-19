@@ -253,6 +253,10 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
+        return;
+    }
     auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     if (!IsSubwindowExist(subwindow)) {
         subwindow = Subwindow::CreateSubwindow(containerId);
@@ -271,6 +275,10 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
+        return;
+    }
     auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     if (!IsSubwindowExist(subwindow)) {
         subwindow = Subwindow::CreateSubwindow(containerId);

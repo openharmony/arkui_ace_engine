@@ -288,6 +288,7 @@ void SubwindowOhos::InitContainer()
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
         }
         CHECK_NULL_VOID(window_);
+        defaultDisplayId_ = displayId;
     }
     std::string url = "";
     auto subSurface = window_->GetSurfaceNode();
@@ -991,9 +992,11 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
         overlay->CleanMenuInSubWindow(targetId);
         overlay->RemoveFilter();
     }
-    overlay->EraseMenuInfo(targetId);
     HideWindow();
-    context->FlushPipelineImmediately();
+    if (overlay->GetMenuNode(targetId)) {
+        context->FlushPipelineImmediately();
+    }
+    overlay->EraseMenuInfo(targetId);
     if (inWindow) {
         HideEventColumn();
     }
@@ -2127,6 +2130,17 @@ uint64_t SubwindowOhos::GetDisplayId()
         return window_->GetDisplayId();
     }
     return 0;
+}
+
+bool SubwindowOhos::IsSameDisplayWithParentWindow(bool useInitializedId)
+{
+    CHECK_NULL_RETURN(window_, false);
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentContainer, false);
+    auto parentWindow = parentContainer->GetUIWindow(parentContainerId_);
+    CHECK_NULL_RETURN(parentWindow, false);
+    auto displayId = useInitializedId ? defaultDisplayId_ : window_->GetDisplayId();
+    return displayId == parentWindow->GetDisplayId();
 }
 
 void SubwindowOhos::InitializeSafeArea()

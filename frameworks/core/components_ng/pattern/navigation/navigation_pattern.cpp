@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -355,6 +356,8 @@ void NavigationPattern::OnModifyDone()
     // AddRecoverableNavigation function will check inside whether current navigation can be recovered
     pipeline->GetNavigationManager()->AddRecoverableNavigation(hostNode->GetCurId(), hostNode);
     RestoreJsStackIfNeeded();
+    UpdateToobarFocusColor();
+    UpdateDividerBackgroundColor();
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -2281,17 +2284,71 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
 
 void NavigationPattern::OnColorConfigurationUpdate()
 {
-    auto dividerNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    UpdateDividerBackgroundColor();
 
     auto dragBarNode = GetDragBarNode();
     CHECK_NULL_VOID(dragBarNode);
     auto dragPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
     CHECK_NULL_VOID(dragPattern);
     dragPattern->UpdateDefaultColor();
+}
+
+void NavigationPattern::UpdateDividerBackgroundColor()
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    dividerNode->MarkDirtyNode();
+}
+
+void NavigationPattern::UpdateToobarFocusColor()
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto containerNode = AceType::DynamicCast<FrameNode>(toolBarNode->GetToolbarContainerNode());
+    CHECK_NULL_VOID(containerNode);
+    auto toolBarItemNodes = containerNode->GetChildren();
+    auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    for (auto& toolBarItemNode : toolBarItemNodes) {
+        auto buttonNode = AceType::DynamicCast<FrameNode>(toolBarItemNode);
+        CHECK_NULL_VOID(buttonNode);
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        auto focusHub = buttonNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetPaintColor(theme->GetToolBarItemFocusColor());
+    }
+}
+
+bool NavigationPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_RETURN(navBarNode, false);
+
+    auto dividerNode = AceType::DynamicCast<FrameNode>(navBarNode->GetToolBarDividerNode());
+    CHECK_NULL_RETURN(dividerNode, false);
+
+    auto theme = NavigationGetTheme(themeScopeId);
+    CHECK_NULL_RETURN(theme, false);
+
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_RETURN(dividerRenderProperty, false);
+    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
+
+    navigationGroupNode->MarkModifyDone();
+    return false;
 }
 
 void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,

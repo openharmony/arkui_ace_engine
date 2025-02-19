@@ -326,7 +326,7 @@ void SecurityUIExtensionPattern::OnUeaAccessibilityEventAsync()
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    TransferAccessibilityRectInfo(); // first connect need info UEC rect info
+    TransferAccessibilityRectInfo(true); // first connect need info UEC rect info
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("security uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
@@ -422,7 +422,7 @@ public:
         CHECK_NULL_RETURN(pattern, false);
         if (state) {
             // first time turn on Accessibility, add TransferAccessibilityRectInfo
-            pattern->TransferAccessibilityRectInfo();
+            pattern->TransferAccessibilityRectInfo(true);
         }
         return true;
     }
@@ -454,6 +454,7 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
         [weak = WeakClaim(this)](int32_t, int32_t) {
             auto pattern = weak.Upgrade();
             if (pattern) {
+                pattern->TransferAccessibilityRectInfo();
                 pattern->DispatchDisplayArea(true);
             }
         });
@@ -1039,9 +1040,6 @@ void SecurityUIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag
     if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
         return;
     }
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        return;
-    }
     TransferAccessibilityRectInfo();
 }
 
@@ -1074,8 +1072,11 @@ AccessibilityParentRectInfo SecurityUIExtensionPattern::GetAccessibilityRectInfo
 }
 
 // Once enter this function, must calculate and transfer data to provider
-void SecurityUIExtensionPattern::TransferAccessibilityRectInfo()
+void SecurityUIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
 {
+    if (!(isForce || AceApplicationInfo::GetInstance().IsAccessibilityEnabled())) {
+        return;
+    }
     auto parentRectInfo = GetAccessibilityRectInfo();
     AAFwk::Want data;
     data.SetParam("left", parentRectInfo.left);

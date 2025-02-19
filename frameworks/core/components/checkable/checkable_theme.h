@@ -373,7 +373,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParseSubStylePattern(const RefPtr<ThemeConstants>& themeConstants,
             const RefPtr<SwitchTheme>& theme) const;
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwitchTheme>& theme) const;

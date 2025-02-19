@@ -106,6 +106,15 @@ public:
             json->PutExtAttr("divider", divider, filter);
         }
         json->PutExtAttr("barOverlap", propBarOverlap_.value_or(false) ? "true" : "false", filter);
+        if (propCachedMaxCount_.has_value()) {
+            auto cacheInfo = JsonUtil::Create(true);
+            cacheInfo->Put("count", propCachedMaxCount_.value());
+            cacheInfo->Put(
+                "mode", propCacheMode_.value_or(TabsCacheMode::CACHE_BOTH_SIDE) == TabsCacheMode::CACHE_BOTH_SIDE
+                            ? "TabsCacheMode.CACHE_BOTH_SIDE"
+                            : "TabsCacheMode.CACHE_LATEST_SWITCHED");
+            json->PutExtAttr("cachedMaxCount", cacheInfo, filter);
+        }
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

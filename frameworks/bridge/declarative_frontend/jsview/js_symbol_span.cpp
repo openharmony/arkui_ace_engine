@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
+constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
 std::unique_ptr<SymbolSpanModel> SymbolSpanModel::instance_ = nullptr;
 std::mutex SymbolSpanModel::mutex_;
@@ -105,6 +107,16 @@ void JSSymbolSpan::Create(const JSCallbackInfo& info)
     }
 
     SymbolSpanModel::GetInstance()->Create(symbolId);
+    std::vector<std::string> familyNames;
+    if (symbolId > SYSTEM_SYMBOL_BOUNDARY) {
+        ParseJsSymbolCustomFamilyNames(familyNames, info[0]);
+        SymbolSpanModel::GetInstance()->SetFontFamilies(familyNames);
+        SymbolSpanModel::GetInstance()->SetSymbolType(SymbolType::CUSTOM);
+    } else {
+        familyNames.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        SymbolSpanModel::GetInstance()->SetFontFamilies(familyNames);
+        SymbolSpanModel::GetInstance()->SetSymbolType(SymbolType::SYSTEM);
+    }
 }
 
 void JSSymbolSpan::JSBind(BindingTarget globalObj)

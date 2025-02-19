@@ -242,6 +242,15 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session:ui_session"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend",
+                        "header_files": [
+                            "runtime/cj_runtime_delegate.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend:cj_frontend_ohos"
                 }
             ],
             "test": [

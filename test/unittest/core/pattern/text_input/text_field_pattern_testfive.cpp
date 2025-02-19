@@ -902,7 +902,7 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize
     content = u"Hello😊";
     includeStartHalf = false;
     includeEndHalf = false;
-    TextEmojiSubStringRange expected_5 = {2, -2147483647};
+    TextEmojiSubStringRange expected_5 = {2, 2147483647};
 
     TextEmojiSubStringRange result_5 =
         TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);

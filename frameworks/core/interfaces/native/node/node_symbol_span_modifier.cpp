@@ -122,6 +122,13 @@ void ResetSymbolSpanEffectStrategy(ArkUINodeHandle node)
     SymbolSpanModelNG::SetSymbolEffect(frameNode, 0);
 }
 
+void SetCustomSymbolSpanId(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::InitialCustomSymbol(frameNode, symbolId, fontFamily);
+}
+
 void SetSymbolSpanId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -147,6 +154,7 @@ const ArkUISymbolSpanModifier* GetSymbolSpanModifier()
         .setSymbolSpanEffectStrategy = SetSymbolSpanEffectStrategy,
         .resetSymbolSpanEffectStrategy = ResetSymbolSpanEffectStrategy,
         .setSymbolSpanId = SetSymbolSpanId,
+        .setCustomSymbolSpanId = SetCustomSymbolSpanId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -169,6 +177,7 @@ const CJUISymbolSpanModifier* GetCJUISymbolSpanModifier()
         .setSymbolSpanEffectStrategy = SetSymbolSpanEffectStrategy,
         .resetSymbolSpanEffectStrategy = ResetSymbolSpanEffectStrategy,
         .setSymbolSpanId = SetSymbolSpanId,
+        .setCustomSymbolSpanId = SetCustomSymbolSpanId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

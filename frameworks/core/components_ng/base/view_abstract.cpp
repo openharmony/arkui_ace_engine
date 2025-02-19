@@ -2136,7 +2136,7 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
     }
     if (!targetNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
-        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
     auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
     if (popupInfo.popupNode) {
@@ -2335,7 +2335,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     }
     if (!targetNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
-        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
     auto overlayManager = GetCurOverlayManager(customNode);
     CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);

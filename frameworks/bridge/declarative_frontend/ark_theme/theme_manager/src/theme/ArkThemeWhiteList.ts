@@ -34,7 +34,6 @@ class ArkThemeWhiteList {
         'Scroll',
         'Swiper',
         'Text',
-        'Toggle',
     ];
 
     /**
