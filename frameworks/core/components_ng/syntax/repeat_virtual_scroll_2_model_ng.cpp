@@ -71,6 +71,15 @@ void RepeatVirtualScroll2ModelNG::RequestContainerReLayout(
     repeatNode->RequestContainerReLayout(invalidateContainerLayoutFromChildIndex);
 }
 
+void RepeatVirtualScroll2ModelNG::NotifyContainerLayoutChange(int32_t repeatElmtId, uint32_t totalCount,
+    int32_t index, int32_t count, NG::UINode::NotificationType notificationType)
+{
+    auto repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
+    CHECK_NULL_VOID(repeatNode);
+    repeatNode->UpdateTotalCount(totalCount);
+    repeatNode->NotifyContainerLayoutChange(index, count, notificationType);
+}
+
 void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount,
     uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,6 +88,10 @@ class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     public updateIndex(newIndex: number): void {
         this.index = newIndex;
     }
+
+    public hasBindingToIndex(): boolean {
+        return this[ObserveV2.SYMBOL_REFS]?.['index']?.size > 0;
+    }
 }
 
 // helper, framework internal
@@ -141,7 +145,8 @@ interface __RepeatConfig<T> {
     keyGenFuncSpecified?: boolean;
     ttypeGenFunc?: RepeatTTypeGenFunc<T>;
     totalCountSpecified?: boolean;
-    totalCount?: number;
+    totalCount?: number | (() => number);
+    onLazyLoading?: (index : number) => void,
     templateOptions?: { [type: string]: RepeatTemplateImplOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
@@ -195,17 +200,26 @@ class __Repeat<T> implements RepeatAPI<T> {
         return this;
     }
 
-    public virtualScroll(options? : { totalCount?: number, reusable?: boolean }): RepeatAPI<T> {
-        // totalCount must be integer and must be 0 or larger
-        if (Number.isInteger(options?.totalCount) && options.totalCount >= 0) {
-            this.config.totalCount = options.totalCount;
+    public virtualScroll(options? : {
+        totalCount?: number, onTotalCount?: () => number, onLazyLoading?: (index: number) => void, reusable?: boolean
+    }): RepeatAPI<T> {
+        // use array length by default
+        this.config.totalCount = this.config.arr?.length;
+        this.config.totalCountSpecified = false;
+
+        // options.totalCount must be 0 or a positive integer, or undefined
+        if (Number.isInteger(options?.totalCount) && (options?.totalCount as number) >= 0) {
+            this.config.totalCount = options?.totalCount;
             this.config.totalCountSpecified = true;
-        } else {
-            // use default totalCount value if given a non-integer or negative value
-            this.config.totalCount = this.config.arr.length;
-            this.config.totalCountSpecified = false;
         }
-        this.isVirtualScroll = true;
+        // available since API 16
+        if (options?.onTotalCount) {
+            this.config.totalCount = options.onTotalCount;
+            this.config.totalCountSpecified = true;
+        }
+        if (options?.onTotalCount && options?.totalCount != undefined) {
+            stateMgmtConsole.error(`Error: Both totalCount and onTotalCount() are defined`);
+        }
 
         if (typeof options?.reusable === 'boolean') {
             this.config.reusable = options.reusable;
@@ -216,6 +230,11 @@ class __Repeat<T> implements RepeatAPI<T> {
         } else {
             this.config.reusable = true;
         }
+        if (options?.onLazyLoading) {
+            this.config.onLazyLoading = options.onLazyLoading;
+        }
+
+        this.isVirtualScroll = true;
         return this;
     }
 

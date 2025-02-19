@@ -86,7 +86,10 @@ declare class RepeatVirtualScroll2Native {
   static setInvalid(repeatelmtId: number, rid: number): void;
 
   // invalidate owning Container layout starting from Repeat child index
-  static requestContainerReLayout(repeatElmtId: number, totalCount: number, index: number): void;
+  static requestContainerReLayout(repeatElmtId: number, totalCount: number, index?: number): void;
+
+  static notifyContainerLayoutChange(repeatElmtId: number, totalCount: number,
+    index: number, count: number, notificationType: number): void;
 
   static updateL1Rid4Index(repeatElmtId: number,
     totalCount: number,

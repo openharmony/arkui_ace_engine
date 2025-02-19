@@ -30,6 +30,7 @@ public:
     static void RemoveNode(const JSCallbackInfo& info);
     static void SetInvalid(const JSCallbackInfo& info);
     static void RequestContainerReLayout(const JSCallbackInfo& info);
+    static void NotifyContainerLayoutChange(const JSCallbackInfo& info);
     static void UpdateL1Rid4Index(const JSCallbackInfo& info);
     
     static void OnMove(const JSCallbackInfo& info);
