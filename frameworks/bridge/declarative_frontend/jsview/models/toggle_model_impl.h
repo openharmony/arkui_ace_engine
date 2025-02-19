@@ -24,7 +24,7 @@ class ToggleModelImpl : public OHOS::Ace::ToggleModel {
 public:
     void Create(NG::ToggleType toggleType, bool isOn) override;
     void SetSelectedColor(const std::optional<Color>& selectedColor) override;
-    void SetSwitchPointColor(const Color& switchPointColor) override;
+    void SetSwitchPointColor(const std::optional<Color>& switchPointColor) override;
     void OnChange(NG::ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
