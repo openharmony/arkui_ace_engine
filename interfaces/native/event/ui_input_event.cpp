@@ -2944,6 +2944,9 @@ int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI
     if (!event) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (!node) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
     if (!event->isCloned) {
         return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
     }
