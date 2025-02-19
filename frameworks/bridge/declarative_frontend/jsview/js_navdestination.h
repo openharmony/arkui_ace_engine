@@ -49,6 +49,7 @@ public:
     static void SetRecoverable(const JSCallbackInfo& info);
     static void BindToScrollable(const JSCallbackInfo& info);
     static void BindToNestedScrollable(const JSCallbackInfo& info);
+    static void SetCustomTransition(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

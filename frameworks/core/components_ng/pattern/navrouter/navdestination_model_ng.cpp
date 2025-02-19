@@ -959,4 +959,14 @@ void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo
     CHECK_NULL_VOID(navPathInfo);
     onPop(navPathInfo);
 }
+
+void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate)
+{
+    CHECK_NULL_VOID(transitionDelegate);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
 } // namespace OHOS::Ace::NG
