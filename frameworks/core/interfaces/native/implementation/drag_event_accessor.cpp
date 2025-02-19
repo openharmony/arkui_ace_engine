@@ -37,6 +37,28 @@ namespace OHOS::Ace::NG::Converter {
             default: LOGE("Unexpected enum value in DragRet: %{public}d", src);
         }
     }
+
+    void AssignArkValue(std::optional<DragRet>& dst, const Ark_DragResult& src)
+    {
+        switch (src) {
+            case DragRet::DRAG_SUCCESS: dst = ARK_DRAG_RESULT_DRAG_SUCCESSFUL; break;
+            case DragRet::DRAG_FAIL: dst = ARK_DRAG_RESULT_DRAG_FAILED; break;
+            case DragRet::DRAG_CANCEL: dst = ARK_DRAG_RESULT_DRAG_CANCELED; break;\
+            case DragRet::ENABLE_DROP: dst = ARK_DRAG_RESULT_DROP_ENABLED; break;
+            case DragRet::DISABLE_DROP: dst = ARK_DRAG_RESULT_DROP_DISABLED; break;
+            default: 
+                dst = static_cast<Ark_DragResult>(-1);
+                LOGE("Unexpected enum value in Ark_DragResult: %{public}d", src);
+        }
+    }
+
+    void AssignArkValue(Ark_Rectangle& dst, const Rect& src)
+    {
+        dst.x = ArkValue<Opt_Length>(src.Left());
+        dst.y = ArkValue<Opt_Length>(src.Top());
+        dst.width = ArkValue<Opt_Length>(src.Width());
+        dst.height = Convert(src.Height());
+    }
 } // namespace Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -137,13 +159,17 @@ void SetResultImpl(Ark_DragEvent peer,
 }
 Ark_DragResult GetResultImpl(Ark_DragEvent peer)
 {
-    LOGE("DragEventAccessor::GetResultImpl wrong return data");
-    return {};
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->dragInfo);
+    auto result = OptConvert<DragRet>(dragResult);
+    return ArkValue<Ark_DragResult(peer->dragInfo->GetResult());
 }
 Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
 {
-    LOGE("DragEventAccessor::GetPreviewRectImpl wrong return data");
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, {});
+    return ArkValue<Ark_Rectangle>(info->GetPreviewRect());
 }
 Ark_Int32 GetVelocityXImpl(Ark_DragEvent peer)
 {

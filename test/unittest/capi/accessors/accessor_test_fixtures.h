@@ -131,5 +131,24 @@ extern const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::Dr
 using DimensionTestType = std::tuple<std::string, Ark_Number, std::string>;
 extern const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues;
 extern const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable;
+
+// Fixture 'LengthAny' for type 'Ark_Length'
+extern std::vector<std::tuple<std::string, Dimension, Ark_Length>> testFixtureLengthAnyValidValues = {
+    { "123.0_vp", 123.0_vp, Converter::ArkValue<Ark_Length>(123.0_vp) },
+    { "0.0_vp", 0.0_vp, Converter::ArkValue<Ark_Length>(0.0_vp) },
+    { "1.23_vp", 1.23_vp, Converter::ArkValue<Ark-Length>(1.23_vp) },
+    { "123.0_fp", 123.0_fp, Converter::ArkValue<Ark-Length>(123.0_fp) },
+    { "0.0_fp", 0.0_fp, Converter::ArkValue<Ark-Length>(0.0_fp) },
+    { "1.23_fp", 1.23_fp, Converter::ArkValue<Ark-Length>(1.23_fp) },
+    { "123.0_px", 123.0_px, Converter::ArkValue<Ark-Length>(123.0_px) },
+    { "0.0_px", 0.0_px, Converter::ArkValue<Ark-Length>(0.0_px) },
+    { "1.23_px", 1.23_px, Converter::ArkValue<Ark-Length>(1.23_px) },
+    { "-2.3_vp", -2.3_vp, Converter::ArkValue<Ark-Length>(-2.3_vp) },
+    { "-4.5_fp", -4.5_fp, Converter::ArkValue<Ark-Length>(-4.5_fp) },
+    { "-5.6_px", -5.6_px, Converter::ArkValue<Ark-Length>(-5.6_px) },
+    { "0.5_pct", 0.5_pct, Converter::ArkValue<Ark-Length>(0.5_pct) },
+    { "0.0_pct", 0.0_pct, Converter::ArkValue<Ark-Length>(0.0_pct) },
+    { "-0.8_pct", -0.8_pct, Converter::ArkValue<Ark-Length>(-0.8_pct) },
+};
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
 #endif

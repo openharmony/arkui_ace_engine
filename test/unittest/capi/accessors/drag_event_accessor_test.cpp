@@ -160,6 +160,46 @@ HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
+{
+    for (auto& [input, expected, value] : testFixtureEnumDragResultValues) {
+        dragEvent_->SetResult(value);
+        EXPECT_EQ(accessor_->getResult(peer_, value), expected) <<
+            "Input value is: " << input << ", method: SetResult";
+    }
+}
+
+/**
+ * @tc.name: SetResultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureLengthAnyValidValues) {
+        Rect rect(value, value, value, value);
+        dragEvent_->SetPreviewRect(rect);
+        auto arkRect = accessor_->getPreviewRect(value);
+        dst.x = ArkValue<Opt_Length>(src.Left());
+        dst.y = ArkValue<Opt_Length>(src.Top());
+        dst.width = ArkValue<Opt_Length>(src.Width());
+        dst.height = Convert(src.Height());
+        EXPECT_EQ(arkRect.x, expected) <<
+            "Input value is: " << input << ", method: GetPreviewRect";
+        EXPECT_EQ(arkRect.y, expected) <<
+            "Input value is: " << input << ", method: GetPreviewRect";
+        EXPECT_EQ(arkRect.width, expected) <<
+            "Input value is: " << input << ", method: GetPreviewRect";
+        EXPECT_EQ(arkRect.height, expected) <<
+            "Input value is: " << input << ", method: GetPreviewRect";
+    }
+}
+
+/**
  * @tc.name: SetDataTest
  * @tc.desc:
  * @tc.type: FUNC
