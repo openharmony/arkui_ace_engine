@@ -350,7 +350,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(parameter.ptr);
+        auto peer = reinterpret_cast<KeyEventPeer*>(parameter);
         ASSERT_NE(peer, nullptr);
         auto info = peer->GetEventInfo();
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
@@ -379,13 +379,13 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
 
 
 /*
- * @tc.name: setOnKeyEvent0Test
+ * @tc.name: setOnKeyEventTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setOnKeyEventTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnKeyEvent0, nullptr);
+    ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
@@ -399,7 +399,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
     static const int32_t expectedResId = 123;
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(event.ptr);
+        auto peer = reinterpret_cast<KeyEventPeer*>(event);
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
         auto info = peer->GetEventInfo();
@@ -411,7 +411,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(checkCallback, expectedResId);
-    modifier_->setOnKeyEvent0(node_, &arkCallback);
+    modifier_->setOnKeyEvent(node_, &arkCallback);
 
     auto callOnKeyEvent = focusHub->GetOnKeyCallback();
     ASSERT_NE(callOnKeyEvent, nullptr);
