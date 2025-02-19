@@ -130,6 +130,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextInput>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextInput>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
+    JSClass<JSTextInput>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
+    JSClass<JSTextInput>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

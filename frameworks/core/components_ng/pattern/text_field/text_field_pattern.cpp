@@ -957,7 +957,7 @@ Offset TextFieldPattern::GetGlobalOffset() const
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto globalOffset = host->GetPaintRectOffset() - rootOffset;
+    auto globalOffset = host->GetPaintRectOffset(false, true) - rootOffset;
     offset = Offset(globalOffset.GetX(), globalOffset.GetY());
     return offset;
 }
@@ -993,7 +993,7 @@ void TextFieldPattern::HandleFocusEvent()
     ACE_LAYOUT_SCOPED_TRACE("[TextField:%d] on focus", host->GetId());
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    auto globalOffset = GetHost()->GetPaintRectOffset(false, true) - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     needToRequestKeyboardInner_ = !isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING) &&
                                     (dragStatus_ != DragStatus::DRAGGING);
@@ -1495,7 +1495,7 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    if (isUsingExternalKeyboard || IsUsingMouse()) {
+    if (isUsingExternalKeyboard || selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay(true);
     } else {
         selectOverlay_->HideMenu();
@@ -2459,7 +2459,7 @@ bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bo
     if (isFromKeyBoard) {
         return true;
     }
-    
+
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto isTriggerPassword = IsTriggerAutoFillPassword();
@@ -3968,7 +3968,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
-    double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
+    double positionY = (tmpHost->GetPaintRectOffset(false, true) - pipeline->GetRootRect().GetOffset()).GetY() +
+        windowRect.Top();
     auto offset = AVOID_OFFSET.ConvertToPx();
     auto textPaintOffset = GetPaintRectGlobalOffset();
     double height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
@@ -3994,7 +3995,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
-        .isTextPreviewSupported = hasSupportedPreviewText_ };
+        .isTextPreviewSupported = hasSupportedPreviewText_,
+        .immersiveMode = static_cast<int32_t>(keyboardAppearance_)};
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -5890,7 +5892,7 @@ bool TextFieldPattern::OnBackPressed()
         CloseSelectOverlay();
         StartTwinkling();
         if (!closeKeyboard) {
-            return true;
+            return IsStopBackPress();
         }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -5906,8 +5908,15 @@ bool TextFieldPattern::OnBackPressed()
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
-    return true;
+    return IsStopBackPress();
 #endif
+}
+
+bool TextFieldPattern::IsStopBackPress() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetStopBackPressValue(true);
 }
 
 int32_t TextFieldPattern::GetNakedCharPosition() const
@@ -6872,6 +6881,7 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
+    json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
 }
 
 void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -6910,8 +6920,8 @@ void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json
     auto menuNode = manager->GetSelectOverlayNode();
     CHECK_NULL_VOID(menuNode);
     json->PutExtAttr("MenuNode", menuNode->GetTag().c_str(), filter);
-    if (menuNode->GetAncestorNodeOfFrame()) {
-        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame()->GetTag().c_str(), filter);
+    if (menuNode->GetAncestorNodeOfFrame(true)) {
+        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame(true)->GetTag().c_str(), filter);
     }
     auto menuLayoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -7506,7 +7516,7 @@ OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     OffsetF textPaintOffset;
-    textPaintOffset = host->GetPaintRectOffset();
+    textPaintOffset = host->GetPaintRectOffset(false, true);
     return textPaintOffset - rootOffset;
 }
 
@@ -8135,7 +8145,7 @@ void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     float width = selectController_->GetCaretRect().Width();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textPaintOffset = host->GetPaintRectOffset();
+    auto textPaintOffset = host->GetPaintRectOffset(false, true);
     caretCaretMetric.offset = offset + textPaintOffset + OffsetF(width / 2.0f, 0.0f);
     caretCaretMetric.height = height;
 }

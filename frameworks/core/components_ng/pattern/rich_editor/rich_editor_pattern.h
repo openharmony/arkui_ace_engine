@@ -90,6 +90,7 @@ struct TextConfig;
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class OneStepDragController;
 
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
@@ -220,15 +221,6 @@ public:
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
-    };
-
-    struct OneStepDragParam {
-        std::function<void()> menuBuilder = nullptr;
-        std::function<void()> previewBuilder = nullptr;
-        std::function<void(int32_t, int32_t)> onAppear = nullptr;
-        MenuParam menuParam;
-        OneStepDragParam(const std::function<void()>& builder, const SelectMenuParam& selectMenuParam);
-        MenuParam GetMenuParam(const RefPtr<ImageSpanNode>& imageNode);
     };
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
@@ -960,7 +952,7 @@ public:
 
     Color GetUrlSpanColor() override;
 
-    void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
+    void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& builder, const SelectMenuParam& menuParam);
 
     void TriggerAvoidOnCaretChange();
 
@@ -1009,6 +1001,17 @@ public:
         return lastRichTextRect_;
     }
 
+    void SetKeyboardAppearance(KeyboardAppearance value)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
+        keyboardAppearance_ = value;
+    }
+
+    KeyboardAppearance GetKeyboardAppearance() const
+    {
+        return keyboardAppearance_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -1024,12 +1027,13 @@ protected:
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
 private:
+    friend class RichEditorSelectOverlay;
+    friend class OneStepDragController;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
-    friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
@@ -1327,15 +1331,11 @@ private:
     }
 
     OffsetF GetGlobalOffset() const;
-    void EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable);
+    void HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode);
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
-    void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
-    void SetImageSelfResponseEvent(bool isEnable);
-    void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void AddSpanHoverEvent(
         RefPtr<SpanItem> spanItem, const RefPtr<FrameNode>& frameNode, const SpanOptionBase& options);
-    void UpdateImagePreviewParam();
     void ClearOnFocusTextField();
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1455,12 +1455,13 @@ private:
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
-    std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
-    std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
-    bool isImageSelfResponseEvent_ = true;
+    std::unique_ptr<OneStepDragController> oneStepDragController_;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
+    std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
+    KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
 };
 } // namespace OHOS::Ace::NG
 

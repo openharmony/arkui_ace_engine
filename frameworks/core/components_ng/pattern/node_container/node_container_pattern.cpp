@@ -150,7 +150,7 @@ void NodeContainerPattern::SetExportTextureInfoIfNeeded()
     if (!viewNode->IsNeedExportTexture()) {
         return;
     }
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     if (parent) {
         auto nodeContainer = parent->GetNodeContainer();
         if (nodeContainer) {

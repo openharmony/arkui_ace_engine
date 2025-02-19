@@ -210,6 +210,11 @@ public:
         return selected_;
     }
 
+    void SetBlockClick(bool blockClick)
+    {
+        blockClick_ = blockClick;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -257,6 +262,7 @@ private:
     bool isSelectOption_ = false;
     bool selected_ = false;
     bool hasOptionWidth_ = false;
+    bool blockClick_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
 };

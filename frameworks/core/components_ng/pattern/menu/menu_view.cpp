@@ -245,7 +245,7 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
 
 OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
-    auto offsetToWindow = frameNode->GetPaintRectOffset();
+    auto offsetToWindow = frameNode->GetPaintRectOffset(false, true);
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
     return OffsetF(offsetX, offsetY);
@@ -1000,6 +1000,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         } else {
             optionNode = OptionView::CreateMenuOption(
                 optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
+            if (optionNode) {
+                auto optionPattern = optionNode->GetPattern<OptionPattern>();
+                optionPattern->SetBlockClick(params[i].disableSystemClick);
+            }
         }
         if (!optionNode) {
             continue;

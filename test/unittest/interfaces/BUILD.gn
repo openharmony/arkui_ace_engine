@@ -503,6 +503,8 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
+    "$ace_root/interfaces/native/node/node_utils.cpp",
+    "$ace_root/interfaces/native/node/progress_option.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "native_gesture_test.cpp",
     "native_node_napi_test.cpp",
@@ -693,6 +695,7 @@ ohos_unittest("node_transition_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",
@@ -857,6 +860,7 @@ ohos_unittest("node_extened_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",

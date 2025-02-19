@@ -81,6 +81,7 @@ public:
         renderProperty->propImagePaintStyle_ = CloneImagePaintStyle();
         renderProperty->propNeedBorderRadius_ = CloneNeedBorderRadius();
         renderProperty->propImageFit_ = CloneImageFit();
+        renderProperty->propImageMatrix_ = CloneImageMatrix();
         return renderProperty;
     }
 
@@ -115,6 +116,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedBorderRadius, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMatrix, Matrix4, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

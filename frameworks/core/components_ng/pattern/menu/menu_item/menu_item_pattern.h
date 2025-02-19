@@ -156,6 +156,11 @@ public:
         return label_;
     }
 
+    void SetBlockClick(bool blockClick)
+    {
+        blockClick_ = blockClick;
+    }
+
     void PlayBgColorAnimation(bool isHoverChange = true);
     void SetBgBlendColor(const Color& color)
     {
@@ -330,6 +335,8 @@ friend class ServiceCollaborationMenuAceHelper;
     bool expandingModeSet_ = false;
 
     Color bgBlendColor_ = Color::TRANSPARENT;
+
+    bool blockClick_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

@@ -344,7 +344,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
-        TouchEvent touchEvent;
+        TouchEvent touchEvent = ConvertAxisEventToTouchEvent(event);
         FalsifyCancelEventAndDispatch(touchEvent);
         responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
@@ -1585,10 +1585,13 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
-    if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
-        !event.isRotationEvent) {
-        axisTestResults_.clear();
-        return false;
+    // when api >= 15, do not block this event.
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
+            !event.isRotationEvent) {
+            axisTestResults_.clear();
+            return false;
+        }
     }
     for (const auto& axisTarget : axisTestResults_) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
@@ -2029,6 +2032,7 @@ EventManager::EventManager()
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
+    mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();
@@ -2249,6 +2253,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint)
     TouchEvent falsifyEvent = touchPoint;
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
+    falsifyEvent.sourceType = SourceType::TOUCH;
+    falsifyEvent.isInterpolated = true;
     auto downFingerIds = downFingerIds_;
     for (const auto& iter : downFingerIds) {
         falsifyEvent.id = iter.first;

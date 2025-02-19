@@ -716,4 +716,74 @@ const char* SecurityUIExtensionPattern::ToString(AbilityState state)
             return "NONE";
     }
 }
+int32_t SecurityUIExtensionPattern::GetInstanceIdFromHost() const
+{
+    auto instanceId = GetHostInstanceId();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("SecurityUIExtension pattern instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
+}
+
+bool SecurityUIExtensionPattern::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SecurityUIExtension SendBusinessDataSyncReply businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+}
+
+bool SecurityUIExtensionPattern::SendBusinessData(
+    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+}
+
+void SecurityUIExtensionPattern::OnUIExtBusinessReceiveReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    UIEXT_LOGI("SecurityUIExtension OnUIExtBusinessReceiveReply businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeReplyCallbacks_.find(code);
+    if (it == businessDataUECConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+void SecurityUIExtensionPattern::OnUIExtBusinessReceive(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    UIEXT_LOGI("SecurityUIExtension OnUIExtBusinessReceive businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeCallbacks_.find(code);
+    if (it == businessDataUECConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void SecurityUIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
+{
+    UIEXT_LOGI("SecurityUIExtension RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void SecurityUIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{
+    UIEXT_LOGI("SecurityUIExtension RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeCallbacks_.try_emplace(code, callback);
+}
+
+// Once enter this function, must calculate and transfer data to provider
+void SecurityUIExtensionPattern::TransferAccessibilityRectInfo()
+{
+}
 } // namespace OHOS::Ace::NG

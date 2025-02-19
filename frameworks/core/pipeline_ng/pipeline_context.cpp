@@ -34,6 +34,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_engine.h"
@@ -635,6 +636,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushMouseEvent();
         isNeedFlushMouseEvent_ = false;
     }
+    eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
         window_->FlushAnimationStartTime(animationTimeStamp_);
         isNeedFlushAnimationStartTime_ = false;
@@ -678,9 +680,15 @@ void PipelineContext::InspectDrew()
         auto needRenderNode = std::move(needRenderNode_);
         for (auto&& nodeWeak : needRenderNode) {
             auto node = nodeWeak.Upgrade();
-            if (node) {
+            if (!node) {
+                continue;
+            }
+            if (node->GetInspectorId().has_value()) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
+            auto eventHub = node->GetEventHub<NG::EventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireDrawCompletedNDKCallback(Claim(this));
         }
     }
 }
@@ -788,7 +796,7 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
         node->Measure(std::nullopt);
         node->Layout();
     } else {
-        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(false);
         {
             ACE_SCOPED_TRACE("FlushUITaskWithSingleDirtyNodeMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                              "[pageId:%d][depth:%d]",
@@ -1094,9 +1102,6 @@ void PipelineContext::SetupRootElement()
             }
         }
     }
-#endif
-#ifdef WINDOW_SCENE_SUPPORTED
-    uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
@@ -2141,7 +2146,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(host, newKeyboardOffset);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
-    auto paintOffset = host->GetPaintRectOffset();
+    auto paintOffset = host->GetPaintRectOffset(false, true);
     auto frameSize = geometryNode->GetFrameSize();
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
         frameSize.Height(), rootSize);
@@ -2535,6 +2540,7 @@ void PipelineContext::OnTouchEvent(
     if (scalePoint.type == TouchType::MOVE) {
         if (isEventsPassThrough) {
             scalePoint.isPassThroughMode = true;
+            eventManager_->FlushTouchEventsEnd({ scalePoint });
             eventManager_->DispatchTouchEvent(scalePoint);
             hasIdleTasks_ = true;
             RequestFrame();
@@ -3182,21 +3188,14 @@ void PipelineContext::FlushMouseEvent()
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass,
+    MouseStyleChangeReason reason)
 {
-    auto window = GetWindow();
-    if (window && window->IsUserSetCursor()) {
-        return false;
-    }
-    if (mouseStyleNodeId_ != nodeId || isByPass) {
-        return false;
-    }
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_RETURN(mouseStyle, false);
-    if (windowId) {
-        return mouseStyle->ChangePointerStyle(windowId, format);
-    }
-    return mouseStyle->ChangePointerStyle(GetFocusWindowId(), format);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_RETURN(mouseStyleManager, false);
+    mouseStyleManager->SetMouseFormat(windowId, nodeId, format, isByPass, reason);
+    RequestFrame();
+    return true;
 }
 
 bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
@@ -3403,10 +3402,17 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         eventManager_->DispatchTouchEvent(scaleEvent);
         isBeforeDragHandleAxis_ = false;
     }
-
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, node);
-        eventManager_->DispatchAxisEventNG(scaleEvent);
+    // when api >= 15, do not block end and cancel action.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.action != AxisAction::NONE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
+    } else {
+        if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
     }
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
@@ -4297,26 +4303,22 @@ void PipelineContext::DeleteNavigationNode(const std::string& id)
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
     if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
-        auto window = GetWindow();
-        CHECK_NULL_VOID(window);
-        auto mouseStyle = MouseStyle::CreateMouseStyle();
-        CHECK_NULL_VOID(mouseStyle);
-        auto cursor = static_cast<MouseFormat>(cursorValue);
-        window->SetCursor(cursor);
-        window->SetUserSetCursor(true);
-        mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
+        auto mouseFormat = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        CHECK_NULL_VOID(mouseStyleManager);
+        mouseStyleManager->SetUserSetCursor(true);
+        ChangeMouseStyle(-1, mouseFormat, GetFocusWindowId(),
+            false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     }
 }
 
 void PipelineContext::RestoreDefault(int32_t windowId)
 {
-    auto window = GetWindow();
-    CHECK_NULL_VOID(window);
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_VOID(mouseStyle);
-    window->SetCursor(MouseFormat::DEFAULT);
-    window->SetUserSetCursor(false);
-    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
+    ChangeMouseStyle(-1, MouseFormat::DEFAULT, windowId > 0 ? windowId : GetFocusWindowId(),
+        false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_VOID(mouseStyleManager);
+    mouseStyleManager->SetUserSetCursor(false);
 }
 
 std::string PipelineContext::GetCurrentExtraInfo()

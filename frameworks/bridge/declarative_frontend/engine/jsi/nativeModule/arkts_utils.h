@@ -35,6 +35,7 @@ using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
+    static bool ParseJsColorContent(const EcmaVM* vm, const Local<JSValueRef>& value);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(

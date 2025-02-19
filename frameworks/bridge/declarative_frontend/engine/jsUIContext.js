@@ -116,6 +116,20 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return pixelmap;
     }
+
+    getWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_componentSnapshot.getWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
+
+    getSyncWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSyncWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
@@ -1215,6 +1229,13 @@ class AtomicServiceBar {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_atomicServiceBar.setIconColor(color);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getBarRect() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let rect = this.ohos_atomicServiceBar.getBarRect();
+        __JSScopeUtil__.restoreInstanceId();
+        return rect;
     }
 }
 

@@ -126,7 +126,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
     if (lanes_.empty()) {
         return res;
     }
-
+    delta += delta_;
     if (startIndex_ == 0) {
         float disToTop = -StartPosWithMargin();
         if (!itemStart_) {

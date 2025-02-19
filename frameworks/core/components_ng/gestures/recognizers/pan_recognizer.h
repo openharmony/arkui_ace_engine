@@ -71,6 +71,8 @@ public:
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
 
+    void DumpVelocityInfo(int32_t fingerId);
+
     double GetDistance() const
     {
         return distance_;

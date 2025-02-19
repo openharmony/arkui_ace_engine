@@ -119,6 +119,8 @@ public:
         return panEvents_.empty();
     }
 
+    void DumpVelocityInfo(int32_t fingerId);
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;

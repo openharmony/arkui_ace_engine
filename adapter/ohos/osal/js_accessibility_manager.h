@@ -45,6 +45,7 @@ struct SearchParameter {
 };
 
 struct CommonProperty {
+    int32_t innerWindowId = -1;
     int32_t windowId = 0;
     int32_t windowLeft = 0;
     int32_t windowTop = 0;
@@ -163,7 +164,8 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void FocusMoveSearch(const int64_t elementId, const int32_t direction, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
-
+    void UpdateElementInfoInnerWindowId(Accessibility::AccessibilityElementInfo& info, const int64_t& elementId);
+    bool IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>& node, NG::WindowSceneInfo& windowSceneInfo);
     void ExecuteAction(const int64_t accessibilityId, const ActionParam& param, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     bool ClearCurrentFocus();
@@ -232,6 +234,8 @@ public:
     void RegisterInteractionOperationAsChildTree(uint32_t parentWindowId, int32_t parentTreeId,
         int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) override;
+    void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo &)> &&callback) override;
     void DeregisterInteractionOperationAsChildTree() override;
     void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) override;
@@ -251,6 +255,20 @@ public:
         std::vector<std::string>& info) override;
 
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
+
+    AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context) override;
+
+    void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
+    AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
+    void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
+    void RegisterUIExtBusinessConsumeCallback();
+    void RegisterGetParentRectHandler();
+
+    void SetFocusMoveResultWithNode(
+        const WeakPtr<NG::FrameNode>& hostNode,
+        AccessibilityElementOperatorCallback& callback,
+        const int32_t requestId);
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
@@ -457,7 +475,7 @@ private:
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
-        const RefPtr<PipelineBase>& mainContext);
+        const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,
@@ -533,7 +551,6 @@ private:
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
     void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
     int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
-
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
@@ -554,6 +571,9 @@ private:
     int32_t parentTreeId_ = 0;
     uint32_t parentWebWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
+    std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
+
+    AccessibilityParentRectInfo uecRectInfo_;
 };
 
 } // namespace OHOS::Ace::Framework

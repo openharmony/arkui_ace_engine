@@ -102,7 +102,7 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
             menuItem = FindTouchedMenuItem(child, position);
         }
         if (menuItem) {
-            auto menuItemOffset = menuItem->GetPaintRectOffset();
+            auto menuItemOffset = menuItem->GetPaintRectOffset(false, true);
             auto menuItemSize = menuItem->GetGeometryNode()->GetFrameSize();
             auto menuItemZone =
                 RectF(menuItemOffset.GetX(), menuItemOffset.GetY(), menuItemSize.Width(), menuItemSize.Height());
@@ -408,7 +408,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
 
     auto position = OffsetF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
-    position -= host->GetPaintRectOffset();
+    position -= host->GetPaintRectOffset(false, true);
     auto children = host->GetChildren();
     if (touch.GetTouchType() == TouchType::DOWN) {
         // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails

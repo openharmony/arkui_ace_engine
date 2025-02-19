@@ -83,6 +83,7 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -205,6 +206,8 @@ const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = 1.0_pct;
+
+enum class OperationType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN };
 
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
@@ -1645,6 +1648,49 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
         result = origin | COLOR_ALPHA_VALUE;
     }
     return result;
+}
+
+OperationType StringToOperationType(const std::string& id)
+{
+    if (id == "OH_DEFAULT_COPY") {
+        return OperationType::COPY;
+    } else if (id == "OH_DEFAULT_PASTE") {
+        return OperationType::PASTE;
+    } else if (id == "OH_DEFAULT_CUT") {
+        return OperationType::CUT;
+    } else if (id == "OH_DEFAULT_SELECT_ALL") {
+        return OperationType::SELECT_ALL;
+    } else {
+        return OperationType::UNKNOWN;
+    }
+}
+
+void UpdateOptionsLabelInfo(std::vector<NG::MenuItemParam>& params)
+{
+    for (auto& param : params) {
+        auto opType = StringToOperationType(param.menuOptionsParam.id);
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_VOID(theme);
+        switch (opType) {
+            case OperationType::COPY:
+                param.menuOptionsParam.labelInfo = theme->GetCopyLabelInfo();
+                break;
+            case OperationType::PASTE:
+                param.menuOptionsParam.labelInfo = theme->GetPasteLabelInfo();
+                break;
+            case OperationType::CUT:
+                param.menuOptionsParam.labelInfo = theme->GetCutLabelInfo();
+                break;
+            case OperationType::SELECT_ALL:
+                param.menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
+                break;
+            default:
+                param.menuOptionsParam.labelInfo = "";
+                break;
+        }
+    }
 }
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
@@ -8142,6 +8188,9 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.width = width;
     }
 
+    auto radiusValue = paramObj->GetProperty("radius");
+    ParseBindSheetBorderRadius(radiusValue, sheetStyle);
+
     CalcDimension sheetHeight;
     if (height->IsString()) {
         std::string heightStr = height->ToString();
@@ -8185,6 +8234,64 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
+}
+
+void JSViewAbstract::ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle)
+{
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "radius is not correct type");
+        return;
+    }
+    CalcDimension radius;
+    NG::BorderRadiusProperty borderRadius;
+    if (ParseJsLengthMetrics(args, radius)) {
+        borderRadius.SetRadius(radius);
+        sheetStyle.radius = borderRadius;
+    } else if (ParseBindSheetBorderRadiusProps(args, borderRadius)) {
+        sheetStyle.radius = borderRadius;
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SHEET, "radius is not correct.");
+        return;
+    }
+}
+
+bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+{
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (CheckLengthMetrics(object)) {
+            std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
+            std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
+            auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+            radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
+            radius.radiusTopRight = isRightToLeft ? radiusTopStart : radiusTopEnd;
+            radius.radiusBottomLeft = isRightToLeft ? radiusBottomEnd : radiusBottomStart;
+            radius.radiusBottomRight = isRightToLeft ? radiusBottomStart : radiusBottomEnd;
+            radius.multiValued = true;
+        } else {
+            ParseBorderRadiusProps(object, radius);
+        }
+        return true;
+    }
+    return false;
+}
+
+std::optional<CalcDimension> JSViewAbstract::ParseBindSheetBorderRadiusProp(
+    const JSRef<JSObject>& object, const char* prop)
+{
+    if (object->IsEmpty()) {
+        return std::nullopt;
+    }
+    if (object->HasProperty(prop) && object->GetProperty(prop)->IsObject()) {
+        JSRef<JSObject> propObj = JSRef<JSObject>::Cast(object->GetProperty(prop));
+        CalcDimension calcDimension;
+        if (ParseJsLengthMetrics(propObj, calcDimension)) {
+            return calcDimension;
+        }
+    }
+    return std::nullopt;
 }
 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
@@ -10910,6 +11017,43 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
+std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSArray>& menuItemsArray)
+{
+    std::vector<NG::MenuOptionsParam> menuParams;
+    for (size_t i = 0; i <= menuItemsArray->Length(); i++) {
+        auto menuItem = menuItemsArray->GetValueAt(i);
+        if (!menuItem->IsObject()) {
+            continue;
+        }
+        auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
+        NG::MenuOptionsParam menuOptionsParam;
+        auto jsContent = menuItemObject->GetProperty("content");
+        std::string content;
+        ParseJsString(jsContent, content);
+        menuOptionsParam.content = content;
+        auto jsStartIcon = menuItemObject->GetProperty("icon");
+        std::string icon;
+        ParseJsMedia(jsStartIcon, icon);
+        menuOptionsParam.icon = icon;
+        auto jsTextMenuId = menuItemObject->GetProperty("id");
+        std::string id;
+        if (jsTextMenuId->IsObject()) {
+            auto textMenuIdObject = JSRef<JSObject>::Cast(jsTextMenuId);
+            auto jsId = textMenuIdObject->GetProperty("id_");
+            ParseJsString(jsId, id);
+        }
+        menuOptionsParam.id = id;
+        auto jsLabelInfo = menuItemObject->GetProperty("labelInfo");
+        std::string labelInfo;
+        ParseJsString(jsLabelInfo, labelInfo);
+        if (jsLabelInfo->IsString() || jsLabelInfo->IsObject()) {
+            menuOptionsParam.labelInfo = labelInfo;
+        }
+        menuParams.emplace_back(menuOptionsParam);
+    }
+    return menuParams;
+}
+
 void JSViewAbstract::ParseOnCreateMenu(
     const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback)
 {
@@ -10929,36 +11073,14 @@ void JSViewAbstract::ParseOnCreateMenu(
         CHECK_NULL_RETURN(pipelineContext, menuParams);
 
         pipelineContext->UpdateCurrentActiveNode(node);
-        auto menuItem = func->ExecuteWithValue(systemMenuItems);
+        auto modifiedSystemMenuItems = systemMenuItems;
+        UpdateOptionsLabelInfo(modifiedSystemMenuItems);
+        auto menuItem = func->ExecuteWithValue(modifiedSystemMenuItems);
         if (!menuItem->IsArray()) {
             return menuParams;
         }
         auto menuItemsArray = JSRef<JSArray>::Cast(menuItem);
-        for (size_t i = 0; i <= menuItemsArray->Length(); i++) {
-            auto menuItem = menuItemsArray->GetValueAt(i);
-            if (!menuItem->IsObject()) {
-                continue;
-            }
-            auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
-            NG::MenuOptionsParam menuOptionsParam;
-            auto jsContent = menuItemObject->GetProperty("content");
-            std::string content;
-            ParseJsString(jsContent, content);
-            menuOptionsParam.content = content;
-            auto jsStartIcon = menuItemObject->GetProperty("icon");
-            std::string icon;
-            ParseJsMedia(jsStartIcon, icon);
-            menuOptionsParam.icon = icon;
-            auto jsTextMenuId = menuItemObject->GetProperty("id");
-            std::string id;
-            if (jsTextMenuId->IsObject()) {
-                auto textMenuIdObject = JSRef<JSObject>::Cast(jsTextMenuId);
-                auto jsId = textMenuIdObject->GetProperty("id_");
-                ParseJsString(jsId, id);
-            }
-            menuOptionsParam.id = id;
-            menuParams.emplace_back(menuOptionsParam);
-        }
+        menuParams = ParseMenuItems(menuItemsArray);
         return menuParams;
     };
     onCreateMenuCallback = jsCallback;
@@ -11070,6 +11192,7 @@ JSRef<JSVal> JSViewAbstract::CreateJsTextMenuItem(const NG::MenuItemParam& menuI
     TextMenuItem->SetProperty<std::string>("content", menuItemParam.menuOptionsParam.content.value_or(""));
     JSRef<JSObject> obj = CreateJsTextMenuId(menuItemParam.menuOptionsParam.id);
     TextMenuItem->SetPropertyObject("id", obj);
+    TextMenuItem->SetProperty<std::string>("labelInfo", menuItemParam.menuOptionsParam.labelInfo.value_or(""));
     return JSRef<JSVal>::Cast(TextMenuItem);
 }
 

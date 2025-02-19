@@ -208,7 +208,7 @@ void SelectPattern::ShowSelectMenu()
         UpdateOptionsWidth(selectWidth);
     }
 
-    auto offset = GetHost()->GetPaintRectOffset();
+    auto offset = GetHost()->GetPaintRectOffset(false, true);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
         offset.AddX(-CALIBERATE_X.ConvertToPx());

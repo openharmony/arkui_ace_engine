@@ -208,6 +208,20 @@ typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
 typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 
 /**
+ * @brief Set the linear progress indicator style.
+ *
+ * @since 15
+ */
+typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
+
+/**
+ * @brief The cross-language option.
+ *
+ * @since 15
+ */
+typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -811,6 +825,19 @@ typedef enum {
      * effect; otherwise, the Swiper triggers the edge effect. */
     ARKUI_SWIPER_NESTED_SRCOLL_SELF_FIRST,
 } ArkUI_SwiperNestedScrollMode;
+
+/**
+ * @brief Enumerates the page flipping modes using the mouse wheel for the <b>Swiper</b> component.
+ *
+ * @since 15
+ */
+typedef enum {
+    /** When the mouse wheel is scrolled continuously, multiple pages are flipped, which is determined by the number of
+     *  times that mouse events are reported. */
+    ARKUI_PAGE_FLIP_MODE_CONTINUOUS = 0,
+    /** The system does not respond to other mouse wheel events until the page flipping animation ends. */
+    ARKUI_PAGE_FLIP_MODE_SINGLE,
+} ArkUI_PageFlipMode;
 
 /**
  * @brief Enumerates the accessibility modes.
@@ -1839,6 +1866,34 @@ typedef enum {
 } ArkUI_TextInputStyle;
 
 /**
+ * @brief Defines the keyboard style of input box
+ *
+ * @since 15
+ */
+typedef enum {
+    /**
+     * Default appearance mode, won't adopt immersive styles.
+     * @since 15
+     */
+    ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE = 0,
+    /**
+     * Immersive mode.
+     * @since 15
+     */
+    ARKUI_KEYBOARD_APPEARANCE_IMMERSIVE = 1,
+    /**
+     * Light immersive style.
+     * @since 15
+     */
+    ARKUI_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE = 2,
+    /**
+     * Dark immersive style.
+     * @since 15
+     */
+    ARKUI_KEYBOARD_APPEARANCE_DARK_IMMERSIVE = 3,
+} ArkUI_KeyboardAppearance;
+
+/**
  * @brief Defines the state of the NavDestination component.
  *
  * @since 12
@@ -1997,6 +2052,12 @@ typedef enum {
     /** Invalid parameters. */
     ARKUI_ERROR_CODE_PARAM_INVALID = 401,
     /** The component does not support specific attributes or events. */
+    /**
+     * @error Internal error occurs, such as failure occurs because of the internal environment error,
+     * or operation failed because of the internal execution failed.
+     * @since 15
+     */
+    ARKUI_ERROR_CODE_INTERNAL_ERROR = 100001,
     ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
     /** The specific operation is not allowed on the node created by ArkTS. */
     ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE = 106103,
@@ -2012,6 +2073,26 @@ typedef enum {
     ARKUI_ERROR_CODE_GET_INFO_FAILED = 106201,
     /** The buffer size is not large enough. */
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
+    /**
+     * @error The node requesting focus is not focusable.
+     * @since 15
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE = 150001,
+    /**
+     * @error The node requesting focus has unfocusable ancestor.
+     * @since 15
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE_ANCESTOR = 150002,
+    /**
+     * @error The node requesting focus does not exists.
+     * @since 15
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT = 150003,
+    /**
+     * @error The snapshot taking is timeout.
+     * @since 15
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
     /** The component is not a scroll container. */
     ARKUI_ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001,
     /** The buffer is not large enough. */
@@ -2035,10 +2116,28 @@ typedef enum {
 } ArkUI_SafeAreaType;
 
 /**
+ * @brief Define an enum for the areas of the <b>ListItemGroup</b> component.
+ *
+ * @since 15
+ */
+typedef enum {
+    /** Outside the area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_GROUP_AREA_OUTSIDE = 0,
+    /** Area when the <b>ListItemGroup</b> component does not have the header, footer, or list item. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_NONE,
+    /** List item area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_ITEM,
+    /** Header area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_HEADER,
+    /** Footer area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_FOOTER,
+} ArkUI_ListItemGroupArea;
+
+/**
  * @brief defines the enumerated value of the direction of the extended security zone.
  *
  * @since 12
-*/
+ */
 typedef enum {
     /** Upper area. */
     ARKUI_SAFE_AREA_EDGE_TOP = 1,
@@ -2051,11 +2150,32 @@ typedef enum {
 } ArkUI_SafeAreaEdge;
 
 /**
+ * @brief Enumerates the expand modes.
+ *
+ * @since 15
+ */
+typedef enum {
+    /** Not expand. */
+    ARKUI_NOT_EXPAND = 0,
+    /** Expand. */
+    ARKUI_EXPAND = 1,
+    /** Lazy expand. Expand the children of node if needed. */
+    ARKUI_LAZY_EXPAND = 2,
+} ArkUI_ExpandMode;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12
  */
 typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
+
+/**
+ * @brief Defines the options for taking snapshot.
+ *
+ * @since 15
+ */
+typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
 typedef struct {
     float x;
@@ -3808,6 +3928,162 @@ ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildren
  * @since 14
  */
 int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle);
+
+/**
+ * @brief Create linear progress indicator style information.
+ *
+ * @return Returns a <b>ProgressLinearStyleOption</b> instance.
+ * <br> If the result returns nullptr, there may be out of memory.
+ * @since 15
+ */
+ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create(void);
+
+/**
+ * @brief Destroy linear progress indicator style information.
+ *
+ * @param option Linear progress indicator style information.
+ * @since 15
+ */
+void OH_ArkUI_ProgressLinearStyleOption_Destroy(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Set whether the scan effect is enabled.
+ *
+ * @param option Linear progress indicator style information.
+ * @param enabled Whether to enable the scan effect. Default value: false.
+ * @since 15
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
+
+/**
+ * @brief Set whether smoothing effect is enabled.
+ *
+ * @param option Linear progress indicator style information.
+ * @param enabled Whether to enable the smooth effect. When this effect is enabled, the progress change to
+ * the set value takes place gradually. Otherwise, it takes place immediately. Default value: true.
+ * @since 15
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
+
+/**
+ * @brief Set linear progress indicator stroke width.
+ *
+ * @param option Linear progress indicator style information.
+ * @param strokeWidth Stroke width of the progress indicator. It cannot be set in percentage.
+ * Default value: 4.0vp.
+ * @since 15
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(ArkUI_ProgressLinearStyleOption* option, float strokeWidth);
+
+/**
+ * @brief Set linear progress indicator stroke radius.
+ *
+ * @param option Linear progress indicator style information.
+ * @param strokeRadius Rounded corner radius of the progress indicator. Value range: [0, strokeWidth/2].
+ * Default value: strokeWidth/2.
+ * @since 15
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(ArkUI_ProgressLinearStyleOption* option, float strokeRadius);
+
+/**
+ * @brief Get whether scan effect is enable.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Whether to enable the scan effect.
+ * @since 15
+ */
+bool OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Get whether smoothing effect is enabled.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Whether to enable the smooth effect.
+ * @since 15
+ */
+bool OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Get linear progress indicator stroke width.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Stroke width of the progress indicator.
+ * @since 15
+ */
+float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Get linear progress indicator stroke radius.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Rounded corner radius of the progress indicator.
+ * @since 15
+ */
+float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Create a cross-language option instance.
+ *
+ * @return Returns a cross-language option instance. If the result is a null pointer, it may be out of memory.
+ * @since 15
+ */
+ArkUI_CrossLanguageOption* OH_ArkUI_CrossLanguageOption_Create(void);
+
+/**
+ * @brief Destroy the cross-language option instance.
+ *
+ * @param option The cross-language option instance.
+ * @since 15
+ */
+void OH_ArkUI_CrossLanguageOption_Destroy(ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Enable the attribute setting in the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @param enable The attribute setting in the cross-language option.
+ * Default value: false.
+ * @since 15
+ */
+void OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(ArkUI_CrossLanguageOption* option, bool enable);
+
+/**
+ * @brief Get the attribute setting enable of the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @return The attribute setting enable of the cross-language option.
+ * @since 15
+ */
+bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Creates an option for taking snapshot, the returned value must be released through
+ *        {@link OH_ArkUI_DestroySnapshotOptions} when it's not used anymore.
+ *
+ * @return Returns the pointer to the created snapshot options object.If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 15
+ */
+ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions();
+
+/**
+ * @brief Dispose a snapshot option object.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @since 15
+ */
+void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
+
+/**
+ * @brief Config the snapshot option with scale.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param scale Indicates the scale property to take the snapshot.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 15
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 #ifdef __cplusplus
 };
 #endif

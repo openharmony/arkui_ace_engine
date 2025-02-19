@@ -342,6 +342,26 @@ void ResetRichEditorEnterKeyType(ArkUINodeHandle node)
     RichEditorModelNG::SetEnterKeyType(frameNode, defaultEnterKeyType);
 }
 
+void SetRichEditorKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    if (value < KeyboardAppearance::NONE_IMMERSIVE || value > KeyboardAppearance::DARK_IMMERSIVE) {
+        RichEditorModelNG::SetKeyboardAppearance(frameNode, KeyboardAppearance::NONE_IMMERSIVE);
+        return;
+    }
+    RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -356,7 +376,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
         SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorOnPaste,
         ResetRichEditorOnPaste, SetRichEditorOnCut, ResetRichEditorOnCut, SetRichEditorOnCopy, ResetRichEditorOnCopy,
-        SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType };
+        SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType,
+        SetRichEditorKeyboardAppearance, ResetRichEditorKeyboardAppearance };
     return &modifier;
 }
 

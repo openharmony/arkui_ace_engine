@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_PATTERN_H
 
+#include "base/log/dump_log.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -64,6 +65,29 @@ public:
     bool GetIsVertical() const
     {
         return isVertical_;
+    }
+
+    void DumpInfo() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = DynamicCast<LinearLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        auto widthLayoutPolicy = layoutProperty->GetWidthLayoutPolicy();
+        auto heightLayoutPolicy = layoutProperty->GetHeightLayoutPolicy();
+        std::string layoutPolicy = "";
+        if (widthLayoutPolicy.has_value() &&
+            widthLayoutPolicy.value() != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append("WidthLayoutPolicy: ").append(std::to_string(widthLayoutPolicy.value()));
+        }
+        if (heightLayoutPolicy.has_value() &&
+            heightLayoutPolicy.value() != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append(layoutPolicy.length() == 0 ? "HeightLayoutPolicy: " : " HeightLayoutPolicy: ")
+                .append(std::to_string(heightLayoutPolicy.value()));
+        }
+        if (layoutPolicy.length() > 0) {
+            DumpLog::GetInstance().AddDesc(layoutPolicy);
+        }
     }
 
     bool IsNeedInitClickEventRecorder() const override

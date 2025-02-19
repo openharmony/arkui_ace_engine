@@ -53,6 +53,7 @@ void PatternLockPattern::OnModifyDone()
     InitFocusEvent();
     InitMouseEvent();
     InitAccessibilityHoverEvent();
+    InitSkipUnselectedPoint();
     if (isInitVirtualNode_) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -411,7 +412,7 @@ void PatternLockPattern::AddPassPointToChoosePoint(
 
 void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
 {
-    if (choosePoint_.empty()) {
+    if (choosePoint_.empty() || skipUnselectedPoint_) {
         return;
     }
     passPointCount_ = 0;
@@ -878,5 +879,16 @@ OffsetF PatternLockPattern::GetTouchOffsetToNode()
         offset = offset / windowScale;
     }
     return offset;
+}
+
+void PatternLockPattern::InitSkipUnselectedPoint()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(patternLockPaintProperty);
+    if (patternLockPaintProperty->HasSkipUnselectedPoint()) {
+        skipUnselectedPoint_ = patternLockPaintProperty->GetSkipUnselectedPointValue();
+    }
 }
 } // namespace OHOS::Ace::NG

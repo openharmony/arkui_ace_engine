@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include <algorithm>
+#include <unordered_map>
 #include <vector>
 
 #include "file_uri.h"
@@ -132,6 +133,25 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_GRABBING, MouseFormat::HAND_GRABBING },
     { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_VERTICAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH },
     { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_HORIZONTAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
+};
+
+std::unordered_map<KeyCode, KeyCode> g_numPadFunctionMap = {
+    { KeyCode::KEY_NUMPAD_0, KeyCode::KEY_INSERT },
+    { KeyCode::KEY_NUMPAD_1, KeyCode::KEY_MOVE_END },
+    { KeyCode::KEY_NUMPAD_2, KeyCode::KEY_DPAD_DOWN },
+    { KeyCode::KEY_NUMPAD_3, KeyCode::KEY_PAGE_DOWN },
+    { KeyCode::KEY_NUMPAD_4, KeyCode::KEY_DPAD_LEFT },
+    { KeyCode::KEY_NUMPAD_5, KeyCode::KEY_CLEAR },
+    { KeyCode::KEY_NUMPAD_6, KeyCode::KEY_DPAD_RIGHT },
+    { KeyCode::KEY_NUMPAD_7, KeyCode::KEY_MOVE_HOME },
+    { KeyCode::KEY_NUMPAD_8, KeyCode::KEY_DPAD_UP },
+    { KeyCode::KEY_NUMPAD_9, KeyCode::KEY_PAGE_UP },
+    { KeyCode::KEY_NUMPAD_DIVIDE, KeyCode::KEY_NUMPAD_DIVIDE },
+    { KeyCode::KEY_NUMPAD_MULTIPLY, KeyCode::KEY_NUMPAD_MULTIPLY },
+    { KeyCode::KEY_NUMPAD_SUBTRACT, KeyCode::KEY_NUMPAD_SUBTRACT },
+    { KeyCode::KEY_NUMPAD_ADD, KeyCode::KEY_NUMPAD_ADD },
+    { KeyCode::KEY_NUMPAD_DOT, KeyCode::KEY_NUMPAD_DOT },
+    { KeyCode::KEY_NUMPAD_ENTER, KeyCode::KEY_NUMPAD_ENTER }
 };
 
 constexpr Dimension OPTION_MARGIN = 8.0_vp;
@@ -2090,7 +2110,12 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
     for (auto pCode : keyEvent.pressedCodes) {
         pressedCodes.push_back(static_cast<int32_t>(pCode));
     }
-    return delegate_->WebOnKeyEvent(static_cast<int32_t>(keyEvent.code),
+    KeyCode code = keyEvent.code;
+    auto item = g_numPadFunctionMap.find(code);
+    if (!keyEvent.numLock && item != g_numPadFunctionMap.end()) {
+        code = item->second;
+    }
+    return delegate_->WebOnKeyEvent(static_cast<int32_t>(code),
         static_cast<int32_t>(keyEvent.action), pressedCodes);
 }
 
@@ -2999,6 +3024,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateBlurOnKeyboardHideMode(GetBlurOnKeyboardHideModeValue(BlurOnKeyboardHideMode::SILENT));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
+        delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -5644,22 +5670,11 @@ bool WebPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrol
 bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity)
 {
     CHECK_NULL_RETURN(parent, false);
-    if (!NestedScrollOutOfBoundary()) {
-        OnParentScrollDragEndRecursive(parent);
-    }
-    if (InstanceOf<SwiperPattern>(parent)) {
-        // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
-        // it visible before calling HandleScrollVelocity.
-        float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
-        parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-        OnParentScrollDragEndRecursive(parent);
-    }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
         OnParentScrollDragEndRecursive(parent);
         return true;
     }
-    OnParentScrollDragEndRecursive(parent);
     return false;
 }
 
@@ -5675,6 +5690,7 @@ void WebPattern::OnScrollStartRecursive(float position)
     SetIsNestedInterrupt(false);
     isFirstFlingScrollVelocity_ = true;
     isScrollStarted_ = true;
+    isDragEnd_ = false;
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_VOID(it, parentsMap_.end());
     auto parent = it->second.Upgrade();
@@ -5925,11 +5941,18 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
     return isConsumed;
 }
 
-bool WebPattern::FilterScrollEventHandleOffset(const float offset)
+bool WebPattern::FilterScrollEventHandleOffset(float offset)
 {
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
+    if (parent.Upgrade() && !NearZero(offset)) {
+        auto res = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_CHECK_OVER_SCROLL);
+        if (NearZero(res.remain)) {
+            return true;
+        }
+        offset = res.remain;
+    }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         CHECK_EQUAL_RETURN(isParentReachEdge_ && result.reachEdge, true, false);
@@ -6959,5 +6982,12 @@ bool WebPattern::GetAccessibilityVisible(int64_t accessibilityId)
         return delegate_->GetAccessibilityVisible(accessibilityId);
     }
     return true;
+}
+
+void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateOptimizeParserBudgetEnabled(value);
+    }
 }
 } // namespace OHOS::Ace::NG

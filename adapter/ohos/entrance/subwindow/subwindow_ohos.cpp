@@ -33,6 +33,9 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
+#include "bundlemgr/bundle_mgr_interface.h"
+#include "iservice_registry.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
@@ -41,7 +44,6 @@
 #include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "bundlemgr/bundle_mgr_interface.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
@@ -56,7 +58,6 @@
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-#include "iservice_registry.h"
 #ifdef OS_ACCOUNT_EXISTS
 #include "os_account_manager.h"
 #endif
@@ -397,6 +398,49 @@ void SubwindowOhos::ResizeWindow()
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 
+void SubwindowOhos::ResizeWindowForMenu()
+{
+    CHECK_NULL_VOID(window_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto containerId = Container::CurrentId();
+    if (container->IsSubContainer()) {
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = Platform::AceContainer::GetContainer(containerId);
+        CHECK_NULL_VOID(container);
+    }
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    Rosen::WMError ret;
+    if (!(theme->GetExpandDisplay()) && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        if (container->IsUIExtensionWindow()) {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            auto rect = subwindow->GetUIExtensionHostWindowRect();
+            ret = window_->Resize(rect.Width(), rect.Height());
+        } else {
+            auto rect = pipeline->GetDisplayWindowRectInfo();
+            ret = window_->Resize(rect.Width(), rect.Height());
+        }
+    } else {
+        auto displayId = window_->GetDisplayId();
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+        CHECK_NULL_VOID(defaultDisplay);
+        ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    }
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
+            static_cast<int32_t>(ret));
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "SubwindowOhos window rect is resized for menu to x: %{public}d, y: %{public}d, width: %{public}u, height: "
+        "%{public}u",
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
+}
+
 NG::RectF SubwindowOhos::GetRect()
 {
     NG::RectF rect;
@@ -729,7 +773,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     }
     ShowWindow();
-    ResizeWindow();
+    ResizeWindowForMenu();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
@@ -747,7 +791,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     ShowWindow();
-    ResizeWindow();
+    ResizeWindowForMenu();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     NG::ScopedViewStackProcessor builderViewStackProcessor;

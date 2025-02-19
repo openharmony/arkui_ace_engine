@@ -597,4 +597,11 @@ std::optional<Color> TextFieldSelectOverlay::GetHandleColor()
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
     return paintProperty->GetCursorColor();
 }
+
+bool TextFieldSelectOverlay::IsStopBackPress() const
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsStopBackPress();
+}
 } // namespace OHOS::Ace::NG

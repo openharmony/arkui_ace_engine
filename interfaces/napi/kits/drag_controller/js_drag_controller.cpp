@@ -672,6 +672,10 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::set<Media::PixelMap*> scaledPixelMaps;
     auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
+        if (!pixelMap) {
+            TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
+            continue;
+        }
         double scale = 1.0;
         if (!scaledPixelMaps.count(pixelMap.get())) {
             if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {

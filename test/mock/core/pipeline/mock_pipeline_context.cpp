@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -492,7 +493,8 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
+    bool isBypass, MouseStyleChangeReason reason)
 {
     return true;
 }
@@ -934,7 +936,7 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
         node->Measure(std::nullopt);
         node->Layout();
     } else {
-        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(true);
         node->Measure(layoutConstraint);
         node->Layout();
     }

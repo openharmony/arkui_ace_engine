@@ -560,6 +560,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
         case KEY_INPUT_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->keyEvent.subKind);
             break;
+        case TEXT_INPUT_CHANGE:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->textChangeEvent.subKind);
+            break;
         default:
             break; /* Empty */
     }
@@ -734,6 +737,83 @@ bool CheckIsCNode(ArkUI_NodeHandle node)
         return true;
     }
     return false;
+}
+
+bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node)
+{
+    if (node->cNode || node->buildNode) {
+        return true;
+    }
+    const auto* impl = GetFullImpl();
+    CHECK_NULL_RETURN(impl, false);
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(node->uiNodeHandle);
+}
+
+ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(node);
+    if (attachNode) {
+        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
+    }
+    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
+    arkUINode->type = GetNodeTypeByTag(arkUINode);
+    impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
+    return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
+}
+
+int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return -1;
+    }
+
+    static const std::unordered_map<std::string, ArkUI_NodeType> nodeTypeMap = {
+        { OHOS::Ace::V2::TEXT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT },
+        { OHOS::Ace::V2::SPAN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SPAN },
+        { OHOS::Ace::V2::IMAGE_SPAN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE_SPAN },
+        { OHOS::Ace::V2::IMAGE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE },
+        { OHOS::Ace::V2::TOGGLE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TOGGLE },
+        { OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LOADING_PROGRESS },
+        { OHOS::Ace::V2::TEXTINPUT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_INPUT },
+        { OHOS::Ace::V2::TEXTAREA_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_AREA },
+        { OHOS::Ace::V2::BUTTON_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_BUTTON },
+        { OHOS::Ace::V2::PROGRESS_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_PROGRESS },
+        { OHOS::Ace::V2::CHECK_BOX_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CHECKBOX },
+        { OHOS::Ace::V2::XCOMPONENT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_XCOMPONENT },
+        { OHOS::Ace::V2::DATE_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_DATE_PICKER },
+        { OHOS::Ace::V2::TIME_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TIME_PICKER },
+        { OHOS::Ace::V2::TEXT_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_PICKER },
+        { OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CALENDAR_PICKER },
+        { OHOS::Ace::V2::SLIDER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SLIDER },
+        { OHOS::Ace::V2::RADIO_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RADIO },
+        { OHOS::Ace::V2::IMAGE_ANIMATOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE_ANIMATOR },
+        { OHOS::Ace::V2::STACK_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_STACK },
+        { OHOS::Ace::V2::SWIPER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SWIPER },
+        { OHOS::Ace::V2::SCROLL_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SCROLL },
+        { OHOS::Ace::V2::LIST_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST },
+        { OHOS::Ace::V2::LIST_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST_ITEM },
+        { OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST_ITEM_GROUP },
+        { OHOS::Ace::V2::COLUMN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_COLUMN },
+        { OHOS::Ace::V2::ROW_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ROW },
+        { OHOS::Ace::V2::FLEX_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_FLEX },
+        { OHOS::Ace::V2::REFRESH_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_REFRESH },
+        { OHOS::Ace::V2::WATERFLOW_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_WATER_FLOW },
+        { OHOS::Ace::V2::FLOW_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_FLOW_ITEM },
+        { OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RELATIVE_CONTAINER },
+        { OHOS::Ace::V2::GRID_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID },
+        { OHOS::Ace::V2::GRID_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID_ITEM },
+        { OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN },
+    };
+
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto value = impl->getNodeModifiers()->getFrameNodeModifier()->getNodeType(node->uiNodeHandle);
+    auto iter = nodeTypeMap.find(value);
+    if (iter != nodeTypeMap.end()) {
+        return iter->second;
+    }
+    return -1;
 }
 } // namespace OHOS::Ace::NodeModel
 

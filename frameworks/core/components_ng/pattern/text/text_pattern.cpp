@@ -944,8 +944,9 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
         if (!item) {
             continue;
         }
-        auto selectedRects = GetSelectedRects(start, item->position);
-        start = item->position;
+        auto end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
+        auto selectedRects = GetSelectedRects(start, end);
+        start = end;
         for (auto&& rect : selectedRects) {
             if (!rect.IsInRegion(textOffset)) {
                 continue;
@@ -2169,7 +2170,7 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    return host->GetPaintRectOffset() - rootOffset;
+    return host->GetPaintRectOffset(false, true) - rootOffset;
 }
 
 void TextPattern::CreateHandles()
@@ -2185,7 +2186,7 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto offset = host->GetPaintRectOffset();
+    auto offset = host->GetPaintRectOffset(false, true);
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
@@ -2498,7 +2499,7 @@ std::string TextPattern::GetBindSelectionMenuInJson() const
     for (auto& [spanResponsePair, params] : selectionMenuMap_) {
         auto& [spanType, responseType] = spanResponsePair;
         auto jsonItem = JsonUtil::Create(true);
-        jsonItem->Put("spanType", static_cast<int32_t>(spanType));
+        jsonItem->Put("spanType", TextSpanTypeMapper::GetJsSpanType(spanType, params->isValid));
         jsonItem->Put("responseType", static_cast<int32_t>(responseType));
         jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::SELECTION_MENU));
         jsonArray->Put(jsonItem);
@@ -2903,7 +2904,7 @@ void TextPattern::GetGlobalOffset(Offset& offset)
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto globalOffset = host->GetPaintRectOffset() - rootOffset;
+    auto globalOffset = host->GetPaintRectOffset(false, true) - rootOffset;
     offset = Offset(globalOffset.GetX(), globalOffset.GetY());
 }
 
@@ -3562,8 +3563,7 @@ bool TextPattern::NeedShowAIDetect()
 }
 
 void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,
-    std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
-    std::function<void()>& onDisappear)
+    std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
     auto key = std::make_pair(spanType, responseType);
     auto it = selectionMenuMap_.find(key);
@@ -3573,13 +3573,19 @@ void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType resp
             return;
         }
         it->second->buildFunc = menuBuilder;
-        it->second->onAppear = onAppear;
-        it->second->onDisappear = onDisappear;
+        it->second->onAppear = menuParam.onAppear;
+        it->second->onDisappear = menuParam.onDisappear;
+        it->second->onMenuShow = menuParam.onMenuShow;
+        it->second->onMenuHide = menuParam.onMenuHide;
+        it->second->isValid = menuParam.isValid;
         return;
     }
 
-    auto selectionMenuParams =
-        std::make_shared<SelectionMenuParams>(spanType, menuBuilder, onAppear, onDisappear, responseType);
+    auto selectionMenuParams = std::make_shared<SelectionMenuParams>(
+        spanType, menuBuilder, menuParam.onAppear, menuParam.onDisappear, responseType);
+    selectionMenuParams->onMenuShow = menuParam.onMenuShow;
+    selectionMenuParams->onMenuHide = menuParam.onMenuHide;
+    selectionMenuParams->isValid = menuParam.isValid;
     selectionMenuMap_[key] = selectionMenuParams;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3594,12 +3600,22 @@ void TextPattern::CloseSelectionMenu()
 
 std::shared_ptr<SelectionMenuParams> TextPattern::GetMenuParams(TextSpanType spanType, TextResponseType responseType)
 {
-    auto key = std::make_pair(spanType, responseType);
-    auto it = selectionMenuMap_.find(key);
-    if (it != selectionMenuMap_.end()) {
-        return it->second;
+    // JS TextSpanType.DEFAULT = TextSpanType::NONE
+    // JS TextResponseType.DEFAULT = TextResponseType::NONE
+    std::vector<std::pair<TextSpanType, TextResponseType>> searchPairs = {
+        { spanType, responseType },
+        { spanType, TextResponseType::NONE },
+    };
+    if (spanType != TextSpanType::NONE) {
+        searchPairs.push_back({ TextSpanType::NONE, responseType });
+        searchPairs.push_back({ TextSpanType::NONE, TextResponseType::NONE });
     }
-
+    for (const auto& key : searchPairs) {
+        auto it = selectionMenuMap_.find(key);
+        if (it != selectionMenuMap_.end()) {
+            return it->second;
+        }
+    }
     TAG_LOGD(AceLogTag::ACE_TEXT, "The key not in selectionMenuMap_");
     return nullptr;
 }
@@ -3609,7 +3625,7 @@ void TextPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextRes
     auto currentSpanType = selectedType_.value_or(TextSpanType::NONE);
     std::shared_ptr<SelectionMenuParams> menuParams = nullptr;
     menuParams = GetMenuParams(currentSpanType, responseType);
-    if (menuParams == nullptr) {
+    if (menuParams == nullptr || !menuParams->isValid) {
         return;
     }
     CopyBindSelectionMenuParams(selectInfo, menuParams);
@@ -3619,21 +3635,46 @@ void TextPattern::CopyBindSelectionMenuParams(
     SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams)
 {
     selectInfo.menuInfo.menuBuilder = menuParams->buildFunc;
-    if (menuParams->onAppear) {
-        auto weak = AceType::WeakClaim(this);
-        auto callback = [weak, menuParams]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(menuParams->onAppear);
-
-            auto& textSelector = pattern->textSelector_;
-            auto selectStart = std::min(textSelector.baseOffset, textSelector.destinationOffset);
-            auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
-            menuParams->onAppear(selectStart, selectEnd);
-        };
-        selectInfo.menuCallback.onAppear = std::move(callback);
-    }
+    auto weak = AceType::WeakClaim(this);
+    selectInfo.menuCallback.onAppear = [weak, menuParams]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_APPEAR, menuParams);
+    };
     selectInfo.menuCallback.onDisappear = menuParams->onDisappear;
+    selectInfo.menuCallback.onMenuShow = [weak, menuParams]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_SHOW, menuParams);
+    };
+    selectInfo.menuCallback.onMenuHide = [weak, menuParams]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_HIDE, menuParams);
+    };
+}
+
+void TextPattern::OnHandleSelectionMenuCallback(
+    SelectionMenuCalblackId callbackId, std::shared_ptr<SelectionMenuParams> menuParams)
+{
+    std::function<void(int32_t, int32_t)> callback;
+    switch (callbackId) {
+        case SelectionMenuCalblackId::MENU_SHOW:
+            callback = menuParams->onMenuShow;
+            break;
+        case SelectionMenuCalblackId::MENU_HIDE:
+            callback = menuParams->onMenuHide;
+            break;
+        case SelectionMenuCalblackId::MENU_APPEAR:
+            callback = menuParams->onAppear;
+            break;
+        default:
+            callback = nullptr;
+    }
+    CHECK_NULL_VOID(callback);
+    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    callback(selectStart, selectEnd);
 }
 
 void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)
@@ -3973,15 +4014,14 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     auto options = imageItem->options;
-    auto imageInfo = CreateImageSourceInfo(options);
-    imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
-    auto index = host->GetChildren().size();
-    imageNode->MountToParent(host, index);
-    auto gesture = imageNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    gesture->SetHitTestMode(HitTestMode::HTMNONE);
+    imageLayoutProperty->UpdateImageSourceInfo(CreateImageSourceInfo(options));
+    imageNode->MountToParent(host, host->GetChildren().size());
+    SetImageNodeGesture(imageNode);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
+        auto imagePattern = imageNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetSyncLoad(imgAttr.syncLoad);
         if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
@@ -4002,12 +4042,27 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
             imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
             imageRenderCtx->SetClipToBounds(true);
         }
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
+            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+            paintProperty->ResetDrawingColorFilter();
+        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
+            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+            paintProperty->ResetColorFilter();
+        }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageItem->imageNodeId = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
     childNodes_.emplace_back(imageNode);
+}
+
+void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)
+{
+    auto gesture = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetHitTestMode(HitTestMode::HTMNONE);
 }
 
 ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
@@ -4028,14 +4083,18 @@ ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& optio
     if (options.moduleName.has_value()) {
         moduleName = options.moduleName.value();
     }
+    ImageSourceInfo info;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!options.imagePixelMap.has_value()) {
-        return { src, bundleName, moduleName };
+        info = ImageSourceInfo{ src, bundleName, moduleName };
+    } else {
+        info = ImageSourceInfo(pixMap);
     }
-    return ImageSourceInfo(pixMap);
 #else
-    return { src, bundleName, moduleName };
+    info = ImageSourceInfo{ src, bundleName, moduleName };
 #endif
+    info.SetIsUriPureNumber(options.isUriPureNumber.value_or(false));
+    return info;
 }
 
 void TextPattern::ProcessSpanString()

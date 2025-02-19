@@ -56,6 +56,7 @@ public:
 
     void InitContainer() override;
     void ResizeWindow() override;
+    void ResizeWindowForMenu() override;
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,

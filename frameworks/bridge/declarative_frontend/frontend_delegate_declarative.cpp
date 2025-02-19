@@ -3373,10 +3373,37 @@ void FrontendDelegateDeclarative::GetSnapshot(
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
+    RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSync(node, options);
+#endif
+    return { ERROR_CODE_INTERNAL_ERROR, nullptr };
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
     const std::string& componentId, const NG::SnapshotOptions& options)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     return NG::ComponentSnapshot::GetSync(componentId, options);
+#endif
+    return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarative::GetSnapshotByUniqueId(int32_t uniqueId,
+    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot::GetByUniqueId(uniqueId, std::move(callback), options);
+#endif
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshotByUniqueId(
+    int32_t uniqueId, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
 #endif
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }

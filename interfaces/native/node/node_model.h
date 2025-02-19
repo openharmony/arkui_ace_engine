@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@ struct ArkUI_Node {
     void* imageFrameInfos = nullptr;
     ArkUI_AttributeItem* areaChangeRadio = nullptr;
     void* transitionOption = nullptr;
+    void* progressLinearStyle = nullptr;
 };
 
 struct ArkUI_Context {
@@ -160,5 +161,8 @@ int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
 bool CheckIsCNode(ArkUI_NodeHandle node);
+bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
+ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
+int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

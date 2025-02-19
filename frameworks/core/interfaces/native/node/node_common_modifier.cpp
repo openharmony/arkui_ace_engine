@@ -6247,6 +6247,36 @@ ArkUI_Bool GetTabStop(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
 }
+
+void SetNodeBackdropBlur(
+    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+{
+    ArkUI_Float32 blur = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    blur = value > 0 ? value : blur;
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
+}
+
+ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
+{
+    ArkUIBackdropBlur backdropBlur;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, backdropBlur);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, backdropBlur);
+    auto blur = renderContext->GetBackBlurRadius();
+    backdropBlur.dimensionRadius = blur.has_value() ? blur.value().Value() : 0.0f;
+    auto propBackdropBlurOption = renderContext->GetBackdropBlurOption();
+    if (propBackdropBlurOption.has_value() && propBackdropBlurOption->grayscale.size() >= NUM_2) {
+        backdropBlur.brighteningBlur = propBackdropBlurOption->grayscale[NUM_0];
+        backdropBlur.darkeningBlur = propBackdropBlurOption->grayscale[NUM_1];
+    }
+    return backdropBlur;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6323,7 +6353,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
         ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop,
-        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop};
+        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, SetNodeBackdropBlur, GetNodeBackdropBlur};
 
     return &modifier;
 }
@@ -6773,6 +6803,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
             event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            event.touchEvent.changedPointerId = front.GetFingerId();
             ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint, usePx);
         }
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();

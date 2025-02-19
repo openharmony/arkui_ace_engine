@@ -286,7 +286,7 @@ void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
     const auto& geometryNode = host->GetGeometryNode();
     auto contentRect = geometryNode->GetContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset_, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
@@ -1331,7 +1331,13 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
     }
     json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
-    json->PutExtAttr("orientation", std::to_string(static_cast<int>(userOrientation_)).c_str(), filter);
+    Matrix4 defaultMatrixValue = Matrix4(
+        1.0f, 0, 0, 0,
+        0, 1.0f, 0, 0,
+        0, 0, 1.0f, 0,
+        0, 0, 0, 1.0f);
+    Matrix4 matrixValue = renderProp->HasImageMatrix() ? renderProp->GetImageMatrixValue() : defaultMatrixValue;
+    json->PutExtAttr("imageMatrix", matrixValue.ToString().c_str(), filter);
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
@@ -1401,6 +1407,8 @@ void ImagePattern::DumpRenderInfo()
     if (fillColor.has_value()) {
         auto color = fillColor.value();
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
+    } else {
+        DumpLog::GetInstance().AddDesc("fillColor: Null");
     }
 
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;

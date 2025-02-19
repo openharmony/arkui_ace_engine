@@ -181,10 +181,11 @@ var LineCapStyle;
 
 var ButtonType;
 (function (ButtonType) {
-  ButtonType[ButtonType["Normal"] = 0] = "Normal";
-  ButtonType[ButtonType["Capsule"] = 1] = "Capsule";
-  ButtonType[ButtonType["Circle"] = 2] = "Circle";
-  ButtonType[ButtonType["Arc"] = 4] = "Arc";
+  ButtonType[ButtonType['Normal'] = 0] = 'Normal';
+  ButtonType[ButtonType['Capsule'] = 1] = 'Capsule';
+  ButtonType[ButtonType['Circle'] = 2] = 'Circle';
+  ButtonType[ButtonType['Arc'] = 4] = 'Arc';
+  ButtonType[ButtonType['ROUNDED_RECTANGLE'] = 8] = 'ROUNDED_RECTANGLE';
 })(ButtonType || (ButtonType = {}));
 
 var DevicePosition;
@@ -210,6 +211,7 @@ var ImageFit;
   ImageFit[ImageFit["BOTTOM_START"] = 13] = "BOTTOM_START";
   ImageFit[ImageFit["BOTTOM"] = 14] = "BOTTOM";
   ImageFit[ImageFit["BOTTOM_END"] = 15] = "BOTTOM_END";
+  ImageFit[ImageFit["MATRIX"] = 16] = "MATRIX";
 })(ImageFit || (ImageFit = {}));
 
 var DynamicRangeMode ;
@@ -621,6 +623,18 @@ var FlexWrap;
   FlexWrap[FlexWrap["Wrap"] = 1] = "Wrap";
   FlexWrap[FlexWrap["WrapReverse"] = 2] = "WrapReverse";
 })(FlexWrap || (FlexWrap = {}));
+
+class LayoutPolicy {
+  id_ = '';
+
+  constructor(id) {
+    this.id_ = id;
+  }
+
+  static get matchParent() {
+    return new LayoutPolicy('matchParent');
+  }
+}
 
 var BlurStyle;
 (function (BlurStyle) {
@@ -1055,10 +1069,14 @@ var NavDestinationMode;
 
 var NavigationSystemTransitionType;
 (function (NavigationSystemTransitionType) {
-  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
-  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
-  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
-  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType.DEFAULT = 0] = 'DEFAULT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.NONE = 1] = 'NONE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.TITLE = 2] = 'TITLE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.CONTENT = 3] = 'CONTENT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.FADE = 4] = 'FADE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.EXPLODE = 5] = 'EXPLODE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_RIGHT = 6] = 'SLIDE_RIGHT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
@@ -1351,6 +1369,14 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
+
+let KeyboardAppearance;
+(function (KeyboardAppearance) {
+  KeyboardAppearance[KeyboardAppearance.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.IMMERSIVE = 1] = 'IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
+})(KeyboardAppearance || (KeyboardAppearance = {}));
 
 class SymbolEffect {
 }
@@ -2028,6 +2054,18 @@ class TransitionEffect {
   }
 }
 
+class ColorContent {
+  colorContent_ = '';
+
+  constructor(colorContent) {
+    this.colorContent_ = colorContent;
+  }
+
+  static get ORIGIN() {
+    return new ColorContent('ORIGIN');
+  }
+}
+
 class TextMenuItemId {
   id_ = '';
 
@@ -2299,7 +2337,7 @@ class NavPathStack {
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
-          this.popToIndex(index, undefined, animated);
+          this.innerPopToIndex(index, undefined, animated, false);
         }
         let promise = null;
         if (createPromise) {
@@ -2424,6 +2462,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return pathInfo;
   }
@@ -2452,10 +2491,11 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return index;
   }
-  popToIndex(index, result, animated) {
+  innerPopToIndex(index, result, animated, needFireOnResult) {
     if (index >= this.pathArray.length) {
       return;
     }
@@ -2476,7 +2516,13 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    if (needFireOnResult) {
+      this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
+    }
     this.nativeStack?.onStateChanged();
+  }
+  popToIndex(index, result, animated) {
+    this.innerPopToIndex(index, result, animated, true);
   }
   moveToTop(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -3150,6 +3196,12 @@ var SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
+var PageFlipMode;
+(function (PageFlipMode) {
+  PageFlipMode[PageFlipMode["CONTINUOUS"] = 0] = "CONTINUOUS";
+  PageFlipMode[PageFlipMode["SINGLE"] = 1] = "SINGLE";
+})(PageFlipMode || (PageFlipMode = {}));
+
 var CheckBoxStyle;
 (function (CheckBoxStyle) {
   CheckBoxStyle["CIRCULAR_STYLE"] = 0;
@@ -3263,6 +3315,7 @@ let TextSpanType;
   TextSpanType[TextSpanType['TEXT'] = 0] = 'TEXT';
   TextSpanType[TextSpanType['IMAGE'] = 1] = 'IMAGE';
   TextSpanType[TextSpanType['MIXED'] = 2] = 'MIXED';
+  TextSpanType[TextSpanType['DEFAULT'] = 3] = 'DEFAULT';
 })(TextSpanType || (TextSpanType = {}));
 
 let TextResponseType;
@@ -3270,6 +3323,7 @@ let TextResponseType;
   TextResponseType[TextResponseType['RIGHT_CLICK'] = 0] = 'RIGHT_CLICK';
   TextResponseType[TextResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
+  TextResponseType[TextResponseType['DEFAULT'] = 3] = 'DEFAULT';
 })(TextResponseType || (TextResponseType = {}));
 
 let NativeEmbedStatus;

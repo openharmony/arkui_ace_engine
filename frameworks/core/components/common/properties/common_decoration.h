@@ -40,11 +40,6 @@ enum class AdaptiveColor {
     AVERAGE,
 };
 
-enum class EffectType {
-    DEFAULT = 0,
-    WINDOW_EFFECT = 1
-};
-
 enum class TransitionHierarchyStrategy {
     NONE = 0,
     ADAPTIVE,
@@ -52,6 +47,11 @@ enum class TransitionHierarchyStrategy {
 
 struct BlurOption {
     std::vector<float> grayscale;
+};
+
+enum class EffectType {
+    DEFAULT = 0,
+    WINDOW_EFFECT = 1
 };
 
 enum class BlurStyleActivePolicy {

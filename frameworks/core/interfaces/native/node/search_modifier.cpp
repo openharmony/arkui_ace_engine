@@ -856,6 +856,20 @@ void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
     SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
 
+void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStopBackPress(frameNode, true);
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -881,7 +895,8 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
         SetSearchCaretPosition, ResetSearchCaretPosition, SetSearchSelectionMenuOptions,
         ResetSearchSelectionMenuOptions, SetSearchInspectorId, ResetSearchInspectorId, SetSearchEnableHapticFeedback,
-        ResetSearchEnableHapticFeedback };
+        ResetSearchEnableHapticFeedback, SetStopBackPress, ResetStopBackPress, SetSearchKeyboardAppearance,
+        ResetSearchKeyboardAppearance };
     return &modifier;
 }
 
@@ -989,6 +1004,22 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onEvent));
+}
+
+void SetSearchKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    SearchModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetSearchKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    SearchModelNG::SetKeyboardAppearance(frameNode, value);
 }
 }
 } // namespace OHOS::Ace::NG

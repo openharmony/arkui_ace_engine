@@ -37,6 +37,16 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetNeedResetMainTitleProperty(true);
+    titleBarPattern->SetNeedResetSubTitleProperty(true);
+}
+} // namespace
 bool NavDestinationModelNG::ParseCommonTitle(
     bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
 {
@@ -353,6 +363,9 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             pattern->SetNavDestinationContext(context);
             return pattern;
         });
+    if (context) {
+        context->SetUniqueId(navDestinationNode->GetId());
+    }
     if (!navDestinationNode->GetTitleBarNode()) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             CreateImageButton(navDestinationNode);
@@ -377,6 +390,20 @@ void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar);
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated);
+}
+
+void NavDestinationModelNG::SetHideBackButton(bool hideBackButton)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (!navDestinationLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navDestinationLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
+    }
+    navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
@@ -531,6 +558,19 @@ void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitle
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
+}
+
+void NavDestinationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackButton)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (!navDestinationLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navDestinationLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
+    }
+    navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(
@@ -938,5 +978,32 @@ void NavDestinationModelNG::UpdateBindingWithScrollable(
     CHECK_NULL_VOID(pattern);
     auto processor = pattern->GetScrollableProcessor();
     callback(processor);
+}
+
+void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& onPop)
+{
+    if (!onPop) {
+        return;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto navPathInfo = context->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    onPop(navPathInfo);
+}
+
+void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate)
+{
+    CHECK_NULL_VOID(transitionDelegate);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
 }
 } // namespace OHOS::Ace::NG

@@ -1739,7 +1739,7 @@ void ViewAbstract::ResetPosition()
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parentNode);
 
     // Row/Column/Flex measure and layout differently depending on whether the child nodes have position property.
@@ -2093,6 +2093,21 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
+    }
+}
+
+void ViewAbstract::SetNodeBackdropBlur(FrameNode *frameNode, const Dimension& radius, const BlurOption& blurOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateNodeBackBlur(radius, blurOption);
     }
 }
 
@@ -3003,7 +3018,7 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     CHECK_NULL_VOID(frameNode);
-    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parentNode);
     auto parentPattern = parentNode->GetPattern();
 
@@ -4029,6 +4044,57 @@ bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
+}
+
+int ViewAbstract::RequestFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_NON_EXIST);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, ERROR_CODE_NON_EXIST);
+    auto instanceId = context->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto focusManager = context->GetOrCreateFocusManager();
+    focusManager->ResetRequestFocusResult();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    // check node focusable
+    if (focusHub->IsSyncRequestFocusable()) {
+        focusHub->RequestFocusImmediately();
+    }
+    auto retCode = focusManager->GetRequestFocusResult();
+    focusManager->ResetRequestFocusResult();
+    return retCode;
+}
+
+void ViewAbstract::ClearFocus(int32_t instanceId)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    FocusHub::LostFocusToViewRoot();
+}
+
+void ViewAbstract::FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    context->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, isAutoInactive);
+}
+
+void ViewAbstract::SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
 }
 
 double ViewAbstract::GetOpacity(FrameNode* frameNode)
@@ -5101,6 +5167,24 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
+}
+
+void ViewAbstract::SetDrawCompleteEvent(
+    FrameNode* frameNode, std::function<void()>&& onDraw)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKDrawCompletedCallback(std::move(onDraw));
+}
+
+void ViewAbstract::SetLayoutEvent(
+    FrameNode* frameNode, std::function<void()>&& onLayout)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKLayoutCallback(std::move(onLayout));
 }
 
 void ViewAbstract::AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value)

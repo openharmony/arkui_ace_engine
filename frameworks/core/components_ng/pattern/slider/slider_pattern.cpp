@@ -879,7 +879,7 @@ OffsetF SliderPattern::CalculateGlobalSafeOffset()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
-    auto overlayGlobalOffset = host->GetPaintRectOffset();
+    auto overlayGlobalOffset = host->GetPaintRectOffset(false, true);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto safeAreaManger = pipelineContext->GetSafeAreaManager();

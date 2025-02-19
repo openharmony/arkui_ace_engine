@@ -73,6 +73,8 @@ public:
     virtual void SetAlignContent(int32_t value) = 0;
     virtual void SetMainSpace(const std::optional<Dimension>& space) = 0;
     virtual void SetCrossSpace(const std::optional<Dimension>& space) = 0;
+    virtual void SetWidthLayoutPolicy(uint8_t widthLayoutPolicy) = 0;
+    virtual void SetHeightLayoutPolicy(uint8_t heightLayoutPolicy) = 0;
 
 private:
     static std::unique_ptr<FlexModel> instance_;

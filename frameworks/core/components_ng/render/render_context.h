@@ -289,6 +289,7 @@ public:
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
     virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
@@ -367,6 +368,11 @@ public:
 
     virtual void GetPointWithTransform(PointF& point) {}
 
+    virtual Matrix4 GetMatrixWithTransformRotate()
+    {
+        return {};
+    }
+
     virtual void GetPointTransform(PointF& point) {}
 
     virtual void GetPointTransformRotate(PointF& point) {}
@@ -444,6 +450,10 @@ public:
     std::optional<EffectOption> GetBackgroundEffect() const
     {
         return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
+    }
+    std::optional<BlurOption> GetBackdropBlurOption() const
+    {
+        return GetBackground() ? GetBackground()->propBackdropBlurOption : std::nullopt;
     }
     std::optional<BlurStyleOption> GetFrontBlurStyle() const
     {

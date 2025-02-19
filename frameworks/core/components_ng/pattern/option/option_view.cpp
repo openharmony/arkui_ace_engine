@@ -189,7 +189,7 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
     pastePaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
-    pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
+    pasteLayoutProperty->UpdateBackgroundBorderRadius(BorderRadiusProperty(theme->GetInnerBorderRadius()));
     pasteLayoutProperty->UpdateIconSize(theme->GetIconSideLength());
     pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
     if (optionsHasIcon) {
@@ -226,6 +226,7 @@ void OptionView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& par
     row->MountToParent(option);
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
+    pattern->SetBlockClick(params[index].disableSystemClick);
 
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);

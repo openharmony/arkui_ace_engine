@@ -1452,6 +1452,7 @@ void JsRegisterFormViews(
     buttonType.Constant("Capsule", (int)ButtonType::CAPSULE);
     buttonType.Constant("Circle", (int)ButtonType::CIRCLE);
     buttonType.Constant("Arc", (int)ButtonType::ARC);
+    buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
@@ -1653,6 +1654,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     buttonType.Constant("Capsule", (int)ButtonType::CAPSULE);
     buttonType.Constant("Circle", (int)ButtonType::CIRCLE);
     buttonType.Constant("Arc", (int)ButtonType::ARC);
+    buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);

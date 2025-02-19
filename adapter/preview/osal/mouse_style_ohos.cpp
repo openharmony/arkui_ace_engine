@@ -34,10 +34,4 @@ int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle)
     return 0;
 }
 
-bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const
-{
-    LOGI("Change pointer style is not supported in previewer");
-    return true;
-}
-
 } // namespace OHOS::Ace

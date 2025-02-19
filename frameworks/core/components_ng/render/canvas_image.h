@@ -61,6 +61,7 @@ struct ImagePaintConfig {
     ImageResizableSlice resizableSlice_;
     RefPtr<DrawingLattice> resizableLattice_ = nullptr;
     ImageSourceInfo sourceInfo_;
+    Matrix4 imageMatrix_;
 };
 
 // CanvasImage is interface for drawing image.

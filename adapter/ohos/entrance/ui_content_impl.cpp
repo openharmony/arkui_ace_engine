@@ -2330,7 +2330,7 @@ void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintRect)
     auto renderContext = stageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rect = renderContext->GetPaintRectWithoutTransform();
-    auto offset = stageNode->GetPaintRectOffset(false);
+    auto offset = stageNode->GetPaintRectOffset(false, true);
     paintRect.posX_ = static_cast<int32_t>(offset.GetX());
     paintRect.posY_ = static_cast<int32_t>(offset.GetY());
     paintRect.width_ = static_cast<uint32_t>(rect.Width());
@@ -3121,6 +3121,18 @@ void UIContentImpl::RegisterAccessibilityChildTree(
 }
 
 void UIContentImpl::SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
+}
+
+void UIContentImpl::SetAccessibilityGetParentRectHandler(
+    std::function<void(AccessibilityParentRectInfo&)>&& callback)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -4098,6 +4110,22 @@ void UIContentImpl::EnableContainerModalGesture(bool isEnable)
         TaskExecutor::TaskType::UI, "ArkUIEnableContainerModalGesture");
 }
 
+void UIContentImpl::UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
+            transform.posY, transform.scaleX, transform.scaleY)]() {
+            aceContainer->SetSingleHandTransform(singleHandTransform);
+        }, TaskExecutor::TaskType::UI, "ArkUISetSingleHandTransform");
+}
+
 bool UIContentImpl::GetContainerFloatingTitleVisible()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: GetContainerFloatingTitleVisible",
@@ -4129,5 +4157,44 @@ bool UIContentImpl::GetContainerControlButtonVisible()
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     return pipelineContext->GetContainerControlButtonVisible();
+}
+
+std::shared_ptr<Rosen::RSNode> UIContentImpl::GetRSNodeByStringID(const std::string& stringId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
+    std::shared_ptr<Rosen::RSNode> rsNode;
+    taskExecutor->PostSyncTask(
+        [id = instanceId_, &rsNode, stringId]() {
+            ContainerScope scope(id);
+            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true);
+            CHECK_NULL_VOID(frameNode);
+            auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+            CHECK_NULL_VOID(renderContext);
+            rsNode = renderContext->GetRSNode();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID");
+    if (!rsNode) {
+        LOGE("Cannot find RSNode by stringId: %{public}s", stringId.c_str());
+    }
+    return rsNode;
+}
+
+void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [id = instanceId_, stringId]() {
+            ContainerScope scope(id);
+            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true);
+            CHECK_NULL_VOID(frameNode);
+            frameNode->SetTopWindowBoundary(true);
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 } // namespace OHOS::Ace

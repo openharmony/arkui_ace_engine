@@ -36,6 +36,7 @@ public:
     void SetBackBorder() override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;
+    void SetImageMatrix(const Matrix4 &value) override {};
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
@@ -44,6 +45,7 @@ public:
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;
+    void ResetImageFill() override {};
     void SetImageInterpolation(ImageInterpolation iterpolation) override;
     void SetImageRepeat(ImageRepeat imageRepeat) override;
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;

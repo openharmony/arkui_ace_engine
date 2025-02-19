@@ -580,7 +580,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset0011, TestSize.Level1)
     EXPECT_TRUE(active);
 
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
-    FRAME_NODE2->GetAncestorNodeOfFrame();
+    FRAME_NODE2->GetAncestorNodeOfFrame(false);
 
     FRAME_NODE2->SetActive(false);
 
@@ -765,24 +765,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0016, TestSize.Level1)
 
     FRAME_NODE2->CreateRenderTask(true);
     EXPECT_FALSE(FRAME_NODE2->isRenderDirtyMarked_);
-}
-
-/**
- * @tc.name: FrameNodeTestNg_GetParentGlobalOffset0017
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGetParentGlobalOffset0017, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. SetParent for FRAME_NODE2 and callback GetParentGlobalOffset.
-     * @tc.expected: expect The parent is same with 1.
-     */
-    FRAME_NODE2->GetParentGlobalOffset();
-    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
-    auto parent = FRAME_NODE2->GetAncestorNodeOfFrame();
-    FRAME_NODE2->GetParentGlobalOffset();
-    EXPECT_EQ(parent, 1);
 }
 
 /**

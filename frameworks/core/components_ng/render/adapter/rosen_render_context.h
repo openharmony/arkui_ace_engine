@@ -194,6 +194,7 @@ public:
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
     void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
@@ -306,6 +307,8 @@ public:
     void GetPointTransformRotate(PointF& point) override;
 
     void GetPointWithTransform(PointF& point) override;
+
+    Matrix4 GetMatrixWithTransformRotate() override;
 
     void ClearDrawCommands() override;
 
@@ -613,7 +616,6 @@ protected:
 
     void SetContentRectToFrame(RectF rect) override;
     Matrix4 GetMatrix();
-    Matrix4 GetMatrixWithTransformRotate();
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);

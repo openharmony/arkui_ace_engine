@@ -74,6 +74,25 @@ enum class AccessibilityVersion {
     JS_DECLARATIVE_VERSION,
 };
 
+struct AccessibilityParentRectInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    float scaleX = 1.0f;       // scale of parent interface
+    float scaleY = 1.0f;       // scale of parent interface
+    int32_t centerX = 0;       // center X of parent interface relative to real window
+    int32_t centerY = 0;       // center Y scale of parent interface relative to real window
+    int32_t rotateDegree = 0;  // final rotate degree of parent interface
+    bool isChanged = false;    // only for uiextension, true means uec transfered translate params to uiextension
+};
+
+struct AccessibilityWindowInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
+
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
@@ -225,6 +244,8 @@ public:
     virtual void RegisterInteractionOperationAsChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) {};
+    virtual void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo &)> &&callback) {};
     virtual void DeregisterInteractionOperationAsChildTree() {};
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
@@ -276,6 +297,13 @@ public:
         return uiExtensionId_;
     }
 
+    virtual AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context)
+    {
+        return AccessibilityWindowInfo();
+    }
+
+    virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
 protected:
     int32_t treeId_ = 0;
 

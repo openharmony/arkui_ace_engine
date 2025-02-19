@@ -463,20 +463,22 @@ void RichEditorModelNG::SetBarState(DisplayMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode);
 }
-void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
+
+void RichEditorModelNG::SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
+    const SelectMenuParam& menuParam)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+    richEditorPattern->SetPreviewMenuParam(spanType, buildFunc, menuParam);
 }
 
-void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
+void RichEditorModelNG::SetPreviewMenuParam(FrameNode* frameNode, TextSpanType spanType,
     std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
 {
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+    richEditorPattern->SetPreviewMenuParam(spanType, buildFunc, menuParam);
 }
 
 void RichEditorModelNG::SetEnableHapticFeedback(bool isEnabled)
@@ -484,5 +486,20 @@ void RichEditorModelNG::SetEnableHapticFeedback(bool isEnabled)
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetEnableHapticFeedback(isEnabled);
+}
+
+void RichEditorModelNG::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetKeyboardAppearance(value);
+}
+
+void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
 }
 } // namespace OHOS::Ace::NG

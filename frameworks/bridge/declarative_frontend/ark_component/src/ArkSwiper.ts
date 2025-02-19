@@ -158,6 +158,14 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, handler);
     return this;
   }
+  pageFlipMode(value: PageFlipMode): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
+    return this;
+  }
+  onContentWillScroll(handler: ContentWillScrollCallback): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentWillScrollModifier.identity, SwiperOnContentWillScrollModifier, handler);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey<SwiperController> {
   static identity: Symbol = Symbol('swiperInitialize');
@@ -810,6 +818,38 @@ class SwiperOnContentDidScrollModifier extends ModifierWithKey<(selectedIndex: n
       getUINativeModule().swiper.resetSwiperOnContentDidScroll(node);
     } else {
       getUINativeModule().swiper.setSwiperOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperPageFlipModeModifier extends ModifierWithKey<PageFlipMode> {
+  constructor(value: PageFlipMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperPageFlipMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperPageFlipMode(node);
+    } else {
+      getUINativeModule().swiper.setSwiperPageFlipMode(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnContentWillScrollModifier extends ModifierWithKey<(result: SwiperContentWillScrollResult) => boolean> {
+  constructor(value: (result: SwiperContentWillScrollResult) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnContentWillScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentWillScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentWillScroll(node, this.value);
     }
   }
   checkObjectDiff(): boolean {

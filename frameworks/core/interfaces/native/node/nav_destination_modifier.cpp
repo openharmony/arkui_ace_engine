@@ -51,6 +51,20 @@ void ResetNavDestinationHideToolBar(ArkUINodeHandle node)
     NavDestinationModelNG::SetHideToolBar(frameNode, false, false);
 }
 
+void SetNavDestinationHideBackButton(ArkUINodeHandle node, ArkUI_Bool hideBackButton)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideBackButton(frameNode, hideBackButton);
+}
+
+void ResetNavDestinationHideBackButton(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideBackButton(frameNode, false);
+}
+
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -245,6 +259,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         ResetHideTitleBar,
         SetNavDestinationHideToolBar,
         ResetNavDestinationHideToolBar,
+        SetNavDestinationHideBackButton,
+        ResetNavDestinationHideBackButton,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,
@@ -271,6 +287,8 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
         ResetHideTitleBar,
         SetNavDestinationHideToolBar,
         ResetNavDestinationHideToolBar,
+        SetNavDestinationHideBackButton,
+        ResetNavDestinationHideBackButton,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,

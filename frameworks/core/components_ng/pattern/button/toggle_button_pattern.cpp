@@ -63,6 +63,7 @@ void ToggleButtonPattern::InitParameters()
 
 void ToggleButtonPattern::OnModifyDone()
 {
+    CheckLocalizedBorderRadiuses();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
