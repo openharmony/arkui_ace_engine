@@ -6011,4 +6011,158 @@ HWTEST_F(NativeNodeTest, NativeNodeTest101, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: NativeNodeTest102
+ * @tc.desc: Test NODE_SWIPER_CACHED_COUNT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest102, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ASSERT_NE(swiper, nullptr);
+    ArkUI_NumberValue value[] = { 1, 1 };
+    ArkUI_AttributeItem item = { value, 2 };
+    value[0].i32 = 1;
+    value[1].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(swiper, NODE_SWIPER_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    value[1].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    nodeAPI->disposeNode(swiper);
+}
+
+/**
+ * @tc.name: NativeNodeTest103
+ * @tc.desc: Test NODE_SWIPER_AUTO_FILL function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest103, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ASSERT_NE(swiper, nullptr);
+    ArkUI_NumberValue value[] = { 1, 1 };
+    ArkUI_AttributeItem item = { value, 2 };
+    value[0].f32 = 1;
+    value[1].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_AUTO_FILL, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_AUTO_FILL);
+    EXPECT_EQ(ret->value[0].f32, 1);
+    EXPECT_EQ(ret->value[1].i32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(swiper, NODE_SWIPER_AUTO_FILL), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_AUTO_FILL);
+    EXPECT_EQ(ret->value[0].f32, 0);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    value[0].f32 = -1;
+    value[1].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_AUTO_FILL, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_AUTO_FILL);
+    EXPECT_EQ(ret->value[0].f32, 0);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    nodeAPI->disposeNode(swiper);
+}
+
+/**
+ * @tc.name: NativeNodeTest104
+ * @tc.desc: Test NODE_SWIPER_DISPLAY_COUNT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest104, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ASSERT_NE(swiper, nullptr);
+    ArkUI_NumberValue value[] = { {.i32 = 1}, {.i32 = 1} };
+    ArkUI_AttributeItem item = { .value = value, .string = "auto", .size = 2};
+    value[0].i32 = 1;
+    value[1].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
+    EXPECT_EQ(ret->value[0].i32, 1);
+    EXPECT_EQ(ret->value[1].i32, 1);
+    std::string str = "auto";
+    EXPECT_EQ(ret->string, str);
+    EXPECT_EQ(nodeAPI->resetAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
+    EXPECT_EQ(ret->value[0].i32, 1);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    value[0].i32 = -1;
+    value[1].i32 = -1;
+    nodeAPI->setAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT, &item);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
+    EXPECT_EQ(ret->value[0].i32, 1);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    nodeAPI->disposeNode(swiper);
+}
+
+/**
+ * @tc.name: NativeNodeTest105
+ * @tc.desc: Test NODE_SWIPER_SHOW_DISPLAY_ARROW function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest105, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 14;
+    const char* arr[size] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"};
+    
+    for (int j = 0; j < size; j++) {
+        ArkUI_NodeHandle textNode = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[j] };
+        nodeAPI->setAttribute(textNode, NODE_TEXT_CONTENT, &content);
+        
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 400;
+        nodeAPI->setAttribute(textNode, NODE_WIDTH, &item);
+        value[0].f32 = 160;
+        nodeAPI->setAttribute(textNode, NODE_HEIGHT, &item);
+        value[0].u32 = 0xFFAFEEEE;
+        nodeAPI->setAttribute(textNode, NODE_BACKGROUND_COLOR, &item);
+        value[0].i32 = 0;
+        nodeAPI->setAttribute(textNode, NODE_TEXT_ALIGN, &item);
+        value[0].f32 = 30;
+        nodeAPI->setAttribute(textNode, NODE_FONT_SIZE, &item);
+        
+        ArkUI_AttributeItem textId = {.string = "SwiperAutoPlayText"};
+        nodeAPI->setAttribute(textNode, NODE_ID, &textId);
+        nodeAPI->addChild(swiper, textNode);
+    }
+    ArkUI_SwiperArrowStyle* arrowStyle = OH_ArkUI_SwiperArrowStyle_Create();
+    OH_ArkUI_SwiperArrowStyle_SetShowBackground(arrowStyle, 1);
+    OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle(arrowStyle, 0);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(arrowStyle, 25);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(arrowStyle, 0xFF182431);
+    OH_ArkUI_SwiperArrowStyle_SetArrowSize(arrowStyle, 25);
+    OH_ArkUI_SwiperArrowStyle_SetArrowColor(arrowStyle, 0xFF182431);
+    
+    ArkUI_NumberValue valueTemp[1];
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = arrowStyle};
+    valueTemp[0].i32 = 2;
+    nodeAPI->setAttribute(swiper, NODE_SWIPER_SHOW_DISPLAY_ARROW, &itemTemp);
+    auto itemTempReturn = nodeAPI->getAttribute(swiper, NODE_SWIPER_SHOW_DISPLAY_ARROW);
+    auto returnObject = static_cast<ArkUI_SwiperArrowStyle*>(itemTempReturn->object);
+    ASSERT_NE(returnObject, nullptr);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowBackground(arrowStyle), 1);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle(arrowStyle), 0);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundSize(arrowStyle), 25);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(arrowStyle), 0xFF182431);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowSize(arrowStyle), 18.75);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowColor(arrowStyle), 0xFF182431);
+    OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
+    nodeAPI->disposeNode(swiper);
+}
 } // namespace OHOS::Ace
