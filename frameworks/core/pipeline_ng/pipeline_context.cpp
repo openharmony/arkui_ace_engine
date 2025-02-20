@@ -1670,13 +1670,10 @@ void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, W
         rsTransaction->Begin();
     }
 #endif
-    float stiffness = 300.0f;
-    float damping = 33.0f;
-    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, stiffness, damping);
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
     AnimationOption option;
     option.SetCurve(curve);
-    auto weak = WeakClaim(this);
-    Animate(option, curve, [width, height, weak]() {
+    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         pipeline->SetRootRect(width, height, 0.0);
