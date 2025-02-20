@@ -423,7 +423,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         FireSwipeActionOffsetChange(oldOffset, curOffset_);
     }
     if (!springController_) {
-        springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContextSafelyWithCheck());
     } else if (axisChanged) {
         springController_->Stop();
     }
@@ -1061,7 +1061,7 @@ void ListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);

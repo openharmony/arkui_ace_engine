@@ -422,7 +422,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_RETURN(pickerTheme, FocusPattern());

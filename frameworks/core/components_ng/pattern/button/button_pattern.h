@@ -132,7 +132,7 @@ public:
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);

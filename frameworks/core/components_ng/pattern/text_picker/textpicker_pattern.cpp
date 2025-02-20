@@ -603,7 +603,7 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     }
     auto columnNode = GetColumnNode();
     CHECK_NULL_VOID(columnNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);

@@ -404,7 +404,7 @@ void BubblePaintMethod::PaintDoubleBorderWithArrow(RSCanvas& canvas, PaintWrappe
 float BubblePaintMethod::GetInnerBorderOffset()
 {
     float borderOffset = 0;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, 0);
@@ -417,7 +417,7 @@ float BubblePaintMethod::GetInnerBorderOffset()
 float BubblePaintMethod::GetBorderOffset()
 {
     float borderOffset = 0.0f;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, 0);
@@ -473,7 +473,7 @@ void BubblePaintMethod::BuildTopLinePath(RSPath& path, float arrowOffset, float 
     float borderOffset = GetBorderOffset();
     float childOffsetY = childOffset_.GetY();
     float arrowPositionY = arrowPosition_.GetY();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
@@ -641,7 +641,7 @@ void BubblePaintMethod::BuildBottomLinePath(RSPath& path, float arrowOffset, flo
     float borderOffset = GetBorderOffset();
     float childOffsetY = childOffset_.GetY();
     float arrowPositionY = arrowPosition_.GetY();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);

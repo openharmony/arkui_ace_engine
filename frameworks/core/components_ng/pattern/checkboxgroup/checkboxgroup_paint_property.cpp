@@ -29,7 +29,7 @@ void CheckBoxGroupPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, c
         PaintProperty::ToJsonValue(json, filter);
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkboxTheme);

@@ -53,7 +53,7 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DividerTheme>();
         CHECK_NULL_VOID(theme);

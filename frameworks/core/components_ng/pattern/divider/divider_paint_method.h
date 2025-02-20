@@ -44,7 +44,7 @@ public:
         CHECK_NULL_VOID(dividerModifier_);
         auto dividerRenderProperty = DynamicCast<DividerRenderProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(dividerRenderProperty);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<DividerTheme>();
         CHECK_NULL_VOID(theme);

@@ -153,7 +153,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetRenderContext();
     CHECK_NULL_RETURN(context, false);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_RETURN(menuTheme, false);

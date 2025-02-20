@@ -43,7 +43,7 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         space = minSpace.ConvertToPx();
         rowProps->UpdateSpace(minSpace);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

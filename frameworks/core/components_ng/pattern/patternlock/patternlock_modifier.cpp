@@ -135,7 +135,7 @@ PatternLockModifier::PatternLockModifier()
 
 void PatternLockModifier::onDraw(DrawingContext& context)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         DrawForApiNine(context);

@@ -70,7 +70,7 @@ void QRCodePattern::DumpInfo()
 
 FocusPattern QRCodePattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_RETURN(qrCodeTheme, FocusPattern());

@@ -23,7 +23,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
@@ -100,7 +100,7 @@ void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void SwitchLayoutAlgorithm::CalcHeightAndWidth(float& height, float& width, float frameHeight, float frameWidth)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);

@@ -140,7 +140,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonImageChild(bool isAdd, cons
     CHECK_NULL_RETURN(imageNode, nullptr);
     imageNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetEntryArrowWidth()), CalcLength(theme->GetEntryArrowHeight())));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     std::string iconPath;
@@ -229,7 +229,7 @@ void CalendarPickerModelNG::CreateDateNode(int32_t contentId, const CalendarSett
 
 RefPtr<FrameNode> CalendarPickerModelNG::CreateDateTextNode(const std::string& textContent)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(calendarTheme, nullptr);
@@ -269,7 +269,7 @@ void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, con
 
 void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
