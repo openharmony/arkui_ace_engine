@@ -235,8 +235,8 @@ public:
     virtual void ResizeDialogSubwindow() = 0;
     virtual uint64_t GetDisplayId() = 0;
     virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
-    virtual OHOS::Ace::MenuWindowState GetAttachState() = 0;
-    virtual OHOS::Ace::MenuWindowState GetDetachState() = 0;
+    virtual OHOS::Ace::MenuWindowState GetAttachState() {return MenuWindowState::DEFAULT;};
+    virtual OHOS::Ace::MenuWindowState GetDetachState() {return MenuWindowState::DEFAULT;};
 
     virtual void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,

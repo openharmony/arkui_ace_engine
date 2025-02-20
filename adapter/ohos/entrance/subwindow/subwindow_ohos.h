@@ -288,6 +288,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterAttachToFrameNode");
         auto sub = sub_.Upgrade();
+        CHECK_NULL_VOID(sub);
         sub->SetAttachState(MenuWindowState::ATTACHED);
     }
 
@@ -295,6 +296,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterDetachToFrameNode");
         auto sub = sub_.Upgrade();
+        CHECK_NULL_VOID(sub);
         sub->SetDetachState(MenuWindowState::DETACHED);
     }
 private:
