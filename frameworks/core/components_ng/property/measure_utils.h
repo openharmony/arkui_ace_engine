@@ -28,20 +28,24 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-std::optional<float> ConvertToPx(
-    const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
+    float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
 
-std::optional<float> ConvertToPx(
-    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
+    float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
 
 std::optional<float> ConvertToPx(
     const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
-SizeF ConvertToSize(
-    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference = SizeF(-1.0f, -1.0f));
+SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty,
+    const SizeF& percentReference = SizeF(-1.0f, -1.0f),
+    const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp =
+        std::pair<std::vector<std::string>, std::vector<std::string>>());
 
-OptionalSizeF ConvertToOptionalSize(
-    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference = SizeF(-1.0f, -1.0f));
+OptionalSizeF ConvertToOptionalSize(const CalcSize& size, const ScaleProperty& scaleProperty,
+    const SizeF& percentReference = SizeF(-1.0f, -1.0f),
+    const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp =
+        std::pair<std::vector<std::string>, std::vector<std::string>>());
 
 SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
 

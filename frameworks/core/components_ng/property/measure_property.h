@@ -188,12 +188,18 @@ struct MeasureProperty {
     std::optional<CalcSize> minSize;
     std::optional<CalcSize> maxSize;
     std::optional<CalcSize> selfIdealSize;
+    std::optional<CalcSize> preMinSize;
+    std::optional<CalcSize> preMaxSize;
+    std::optional<CalcSize> preSelfIdealSize;
 
     void Reset()
     {
         minSize.reset();
         maxSize.reset();
         selfIdealSize.reset();
+        preMinSize.reset();
+        preMaxSize.reset();
+        preSelfIdealSize.reset();
     }
 
     bool operator==(const MeasureProperty& measureProperty) const

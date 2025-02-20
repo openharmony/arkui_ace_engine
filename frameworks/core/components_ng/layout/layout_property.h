@@ -205,6 +205,8 @@ public:
 
     virtual void UpdateCalcMaxSize(const CalcSize& value);
 
+    std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
+
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void UpdateParentLayoutConstraint(const LayoutConstraintF& parentConstraint)
@@ -402,7 +404,8 @@ protected:
 
 private:
     // This will call after ModifyLayoutConstraint.
-    void CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax);
+    void CheckSelfIdealSize(const SizeF& originMax);
+    void CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();
@@ -426,6 +429,9 @@ private:
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcSelfIdealSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMinSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMaxSizeRpn_;
     std::unique_ptr<PaddingProperty> safeAreaPadding_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
