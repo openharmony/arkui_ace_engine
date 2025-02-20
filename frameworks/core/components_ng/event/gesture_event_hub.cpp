@@ -1023,6 +1023,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     bool hasContextMenu = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     bool isBindMenuPreview = GetPreviewMode() != MenuPreviewMode::NONE;
+    dragDropManager->ResetContextMenuDragPosition();
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode, defaultPixelMapScale);
@@ -1039,8 +1040,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                 previewOffset = previewDragMovePosition + originPoint;
                 DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewOffset);
             }
-
-            dragDropManager->ResetContextMenuDragPosition();
         }
 
         auto frameTag = frameNode->GetTag();
