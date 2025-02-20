@@ -30,6 +30,9 @@ public:
     NGNativeTextInputController();
 
     void CaretPosition(int32_t caretPosition);
+    void SetTextSelection(
+        int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options = std::nullopt);
+    void StopEditing();
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controller_ = controller;
@@ -45,6 +48,9 @@ extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkTextInputCreate(const char* placeholder, const char* text, int64_t controllerID);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkTextInputControllerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerCaretPosition(int64_t selfID, int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerSetTextSelection(
+    int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t menuPolicy = -1);
+CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerStopEditing(int64_t selfID);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXTINPUT_FFI_H
