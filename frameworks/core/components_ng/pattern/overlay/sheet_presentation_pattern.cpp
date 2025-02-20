@@ -3387,7 +3387,6 @@ Rect SheetPresentationPattern::GetFoldScreenRect() const
 
 Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
 {
-    auto colorMode = SystemProperties::GetColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return Shadow();
     }
@@ -3395,6 +3394,7 @@ Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
     CHECK_NULL_RETURN(host, Shadow());
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, Shadow());
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, Shadow());
     auto shadow = shadowTheme->GetShadow(shadowStyle, colorMode);

@@ -1053,7 +1053,8 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
         }
         resObjParamsList.push_back(resObjParams);
     }
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -1061,7 +1062,7 @@ RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>&
 {
     auto bundleName = jsObj->GetPropertyValue<std::string>(static_cast<int32_t>(ArkUIIndex::BUNDLE_NAME), "");
     auto moduleName = jsObj->GetPropertyValue<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), "");
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -1089,7 +1090,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper()
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -7645,7 +7646,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
 
 bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }

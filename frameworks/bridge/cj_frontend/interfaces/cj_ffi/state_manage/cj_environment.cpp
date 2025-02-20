@@ -45,10 +45,7 @@ NativeOptionBool FfiOHOSAceFrameworkEnvironmentGetAccessibilityEnabled()
 
 NativeOptionInt32 FfiOHOSAceFrameworkEnvironmentGetColorMode()
 {
-    NativeOptionInt32 result {
-        .hasValue = true,
-        .value = static_cast<int32_t>(SystemProperties::GetColorMode())
-    };
+    NativeOptionInt32 result { .hasValue = true, .value = static_cast<int32_t>(Container::CurrentColorMode()) };
     return result;
 }
 

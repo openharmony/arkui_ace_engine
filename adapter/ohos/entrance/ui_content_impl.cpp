@@ -34,6 +34,7 @@
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
+#include "resource_manager.h"
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
@@ -79,6 +80,7 @@
 #include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/geometry/rect.h"
@@ -1197,6 +1199,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    ColorMode colorMode = ColorMode::LIGHT;
     if (context) {
         auto resourceManager = context->GetResourceManager();
         if (resourceManager != nullptr) {
@@ -1211,10 +1214,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                     (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
             }
             if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
-                SystemProperties::SetColorMode(ColorMode::DARK);
+                colorMode = ColorMode::DARK;
                 LOGI("Set dark mode");
             } else {
-                SystemProperties::SetColorMode(ColorMode::LIGHT);
+                colorMode = ColorMode::LIGHT;
                 LOGI("Set light mode");
             }
             SystemProperties::SetDeviceAccess(
@@ -1388,6 +1391,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     container->SetUIContentType(uIContentType_);
     container->SetRegisterComponents(registerComponents_);
     container->SetIsFRSCardContainer(isFormRender_);
+    container->SetColorMode(colorMode);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
         container->SetWindowId(window_->GetWindowId());
@@ -1425,7 +1429,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetColorMode(container->GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     aceResCfg.SetLanguage(AceApplicationInfo::GetInstance().GetLocaleTag());
     AddResConfigInfo(context, aceResCfg);
@@ -1580,7 +1584,6 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
-        SystemProperties::SetColorMode(ColorMode::LIGHT);
         return;
     }
 
@@ -1611,12 +1614,9 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
     TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
     auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    if (!colorMode.empty()) {
-        if (colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!colorMode.empty() && container) {
+        container->SetColorMode(colorMode == "dark" ? ColorMode::DARK : ColorMode::LIGHT);
     }
 
     auto string2float = [](const std::string& str) {
@@ -1788,7 +1788,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
+    ColorMode colorMode = ColorMode::LIGHT;
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = context->GetResourceManager();
@@ -1803,18 +1803,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
         }
-        if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
+        colorMode =
+            resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? ColorMode::DARK : ColorMode::LIGHT;
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
         LOGI("[%{public}s][%{public}s][%{public}d]: SetLanguage: %{public}s, colorMode: %{public}s, "
              "deviceAccess: %{public}d",
             bundleName_.c_str(), moduleName_.c_str(), instanceId_,
-            AceApplicationInfo::GetInstance().GetLanguage().c_str(),
-            SystemProperties::GetColorMode() == ColorMode::DARK ? "dark" : "light",
+            AceApplicationInfo::GetInstance().GetLanguage().c_str(), colorMode == ColorMode::DARK ? "dark" : "light",
             SystemProperties::GetDeviceAccess());
     }
 
@@ -1977,6 +1973,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
+    container->SetColorMode(colorMode);
     if (!isCJFrontend) {
         container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
     }
@@ -2005,7 +2002,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetColorMode(container->GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     aceResCfg.SetLanguage(AceApplicationInfo::GetInstance().GetLocaleTag());
     AddResConfigInfo(context, aceResCfg);
@@ -2789,7 +2786,33 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
-    UpdateConfiguration(config);
+    CHECK_NULL_VOID(config);
+
+    RefPtr<ResourceAdapter> adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager, instanceId_);
+    ResourceManager::GetInstance().UpdateResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->UpdateThemeManager(adapter);
+
+    StoreConfiguration(config);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    bool formFontUseDefault = isFormRender_ && !fontScaleFollowSystem_;
+    taskExecutor->PostTask(
+        [weakContainer = WeakPtr<Platform::AceContainer>(container), config, instanceId = instanceId_,
+            bundleName = bundleName_, moduleName = moduleName_, formFontUseDefault]() {
+            auto container = weakContainer.Upgrade();
+            CHECK_NULL_VOID(container);
+            Platform::ParsedConfig parsedConfig;
+            BuildParsedConfig(parsedConfig, config, formFontUseDefault);
+            container->UpdateConfiguration(parsedConfig, config->GetName(), true);
+            LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s", instanceId,
+                bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfigurationWithResMgr");
 }
 
 void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
@@ -3308,16 +3331,16 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
         if (resourceManager != nullptr) {
             resourceManager->GetResConfig(*resConfig);
             if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
-                SystemProperties::SetColorMode(ColorMode::DARK);
+                dialogContainer->SetColorMode(ColorMode::DARK);
             } else {
-                SystemProperties::SetColorMode(ColorMode::LIGHT);
+                dialogContainer->SetColorMode(ColorMode::LIGHT);
             }
         }
         auto aceResCfg = dialogContainer->GetResourceConfiguration();
         aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
         aceResCfg.SetDensity(SystemProperties::GetResolution());
         aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-        aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+        aceResCfg.SetColorMode(dialogContainer->GetColorMode());
         aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
         aceResCfg.SetColorModeIsSetByApp(true);
         aceResCfg.SetLanguage(AceApplicationInfo::GetInstance().GetLocaleTag());
@@ -4076,9 +4099,9 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
 Shadow UIContentImpl::GetPopupShadow()
 {
     Shadow shadow;
-    auto colorMode = SystemProperties::GetColorMode();
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, shadow);
+    auto colorMode = container->GetColorMode();
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, shadow);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();

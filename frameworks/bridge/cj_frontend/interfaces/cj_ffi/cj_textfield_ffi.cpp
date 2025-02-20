@@ -580,7 +580,7 @@ void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_
     if (src == nullptr) {
         auto theme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (Container::CurrentColorMode() == ColorMode::DARK) {
             TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
         } else {
             TextFieldModel::GetInstance()->SetCancelIconColor(Color());
@@ -599,7 +599,7 @@ void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     // set color
     Color iconColor(color);
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         auto theme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());

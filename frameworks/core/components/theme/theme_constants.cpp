@@ -571,7 +571,7 @@ RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternNa
 {
     // if LocalColorMode is different from SystemColorMode, GetPattern from SysResMgr directly by LocolColorMode
     if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
-        ColorMode systemMode = SystemProperties::GetColorMode();
+        ColorMode systemMode = pipelineContext->GetColorMode();
         ColorMode localMode = pipelineContext->GetLocalColorMode();
         if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
             // currentThemeStyle_ contains patterns for different color scheme, so need to get pattern from resAdapter_

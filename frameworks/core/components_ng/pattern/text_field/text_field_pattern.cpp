@@ -8165,8 +8165,9 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     if (magnifierController_) {
         magnifierController_->SetColorModeChange(true);
     }
-
-    auto colorMode = SystemProperties::GetColorMode();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto colorMode = context->GetColorMode();
     SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

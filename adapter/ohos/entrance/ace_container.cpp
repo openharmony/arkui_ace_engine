@@ -155,12 +155,12 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         bundleName = abilityInfo->bundleName;
         moduleName = abilityInfo->moduleName;
     }
-
+    int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
-    } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName)) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
+    } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
 
     if (resourceAdapter == nullptr) {
@@ -181,9 +181,10 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
 
     auto defaultBundleName = "";
     auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter, true);
+    ResourceManager::GetInstance().AddResourceAdapter(
+        defaultBundleName, defaultModuleName, instanceId, resourceAdapter, true);
     if (!bundleName.empty() && !moduleName.empty()) {
-        ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, resourceAdapter);
+        ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
     }
 }
 
@@ -2077,7 +2078,7 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
         DumpLog::GetInstance().Print(
             1, "RTL: " + std::string(AceApplicationInfo::GetInstance().IsRightToLeft() ? "true" : "false"));
         DumpLog::GetInstance().Print(
-            1, "ColorMode: " + std::string(SystemProperties::GetColorMode() == ColorMode::DARK ? "Dark" : "Light"));
+            1, "ColorMode: " + std::string(GetColorMode() == ColorMode::DARK ? "Dark" : "Light"));
         DumpLog::GetInstance().Print(1,
             "DeviceOrientation: " + std::string(SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
                                                     ? "Landscape"
@@ -2832,7 +2833,7 @@ void AceContainer::ReleaseResourceAdapter()
         std::string bundleName;
         std::string moduleName;
         DecodeBundleAndModule(encode, bundleName, moduleName);
-        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
     }
     resAdapterRecord_.clear();
 
@@ -2841,7 +2842,7 @@ void AceContainer::ReleaseResourceAdapter()
         if (runtimeContext) {
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
-            ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
+            ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
         }
     }
 }
@@ -2924,17 +2925,18 @@ void AceContainer::ProcessColorModeUpdate(
     // clear cache of ark theme instances when configuration updates
     NG::TokenThemeStorage::GetInstance()->CacheClear();
     if (parsedConfig.colorMode == "dark") {
-        SystemProperties::SetColorMode(ColorMode::DARK);
+        SetColorMode(ColorMode::DARK);
         SetColorScheme(ColorScheme::SCHEME_DARK);
         resConfig.SetColorMode(ColorMode::DARK);
     } else {
-        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        SetColorMode(ColorMode::LIGHT);
         SetColorScheme(ColorScheme::SCHEME_LIGHT);
         resConfig.SetColorMode(ColorMode::LIGHT);
     }
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
     if (!parsedConfig.IsValid()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
@@ -2952,9 +2954,11 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
-    themeManager->UpdateConfig(resConfig);
-    if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
+    if (!abilityLevel) {
+        themeManager->UpdateConfig(resConfig);
+        if (SystemProperties::GetResourceDecoupling()) {
+            ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
+        }
     }
     themeManager->LoadResourceThemes();
     auto front = GetFrontend();

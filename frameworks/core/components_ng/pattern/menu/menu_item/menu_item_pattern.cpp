@@ -318,7 +318,7 @@ bool MenuItemPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow
     CHECK_NULL_RETURN(context, false);
     auto shadowTheme = context->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = context->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }

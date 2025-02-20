@@ -1355,7 +1355,9 @@ void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
 void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
     int32_t duration, const RefPtr<Curve>& curve)
 {
-    auto colorMode = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto colorMode = context->GetColorMode();
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
     if (colorMode == ColorMode::DARK) {

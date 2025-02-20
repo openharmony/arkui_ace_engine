@@ -629,7 +629,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (!ParseJsColor(colorValue, result)) {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (Container::CurrentColorMode() == ColorMode::DARK) {
             result = theme->GetTextStyle().GetTextColor();
         } else {
             result = theme->GetTextStyle().GetTextDecorationColor();

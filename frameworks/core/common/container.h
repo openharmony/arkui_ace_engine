@@ -346,6 +346,7 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
+    static ColorMode CurrentColorMode();
 
     void SetUseNewPipeline()
     {
@@ -716,6 +717,16 @@ public:
         return currentDisplayId_;
     }
 
+    virtual void SetColorMode(ColorMode mode)
+    {
+        colorMode_ = mode;
+    }
+
+    virtual ColorMode GetColorMode() const
+    {
+        return colorMode_;
+    }
+
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
 
     void DestroySelectOverlaySubwindow(int32_t instanceId);
@@ -774,6 +785,7 @@ private:
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     uint64_t currentDisplayId_ = 0;
+    ColorMode colorMode_ = ColorMode::LIGHT;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

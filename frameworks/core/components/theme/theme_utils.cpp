@@ -17,6 +17,7 @@
 
 #include <regex>
 
+#include "core/common/container.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 
@@ -173,7 +174,8 @@ std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const Re
     // resource name or resource id of image in global resource manager subsystem is the same in dark or light mode.
     // image will not be reloaded if name is not changed when switching between dark and light modes.
     std::string colorMode;
-    switch (SystemProperties::GetColorMode()) {
+    ColorMode mode = Container::CurrentColorMode();
+    switch (mode) {
         case ColorMode::LIGHT:
             colorMode = "light";
             break;

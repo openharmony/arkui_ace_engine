@@ -354,6 +354,11 @@ public:
         }
     }
 
+    void UpdateResourceAdapter(const RefPtr<ResourceAdapter>& adapter)
+    {
+        resAdapter_ = adapter;
+    }
+
     uint32_t GetResourceLimitKeys() const
     {
         CHECK_NULL_RETURN(resAdapter_, 0);

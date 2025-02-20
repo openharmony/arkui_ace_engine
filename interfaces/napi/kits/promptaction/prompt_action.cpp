@@ -242,12 +242,12 @@ void GetToastBackgroundBlurStyle(napi_env env,
 
 bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, false);
+    auto colorMode = container->GetColorMode();
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();

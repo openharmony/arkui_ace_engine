@@ -218,7 +218,7 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (Container::CurrentColorMode() == ColorMode::DARK) {
             colorVal = theme->GetTextStyle().GetTextColor();
         } else {
             colorVal = Color::BLACK;

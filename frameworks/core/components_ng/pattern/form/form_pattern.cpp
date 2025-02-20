@@ -265,8 +265,8 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
         return;
     }
 
-    if (colorMode != SystemProperties::GetColorMode()) {
-        colorMode = SystemProperties::GetColorMode();
+    if (colorMode != Container::CurrentColorMode()) {
+        colorMode = Container::CurrentColorMode();
         HandleUnTrustForm();
     }
 }
@@ -972,7 +972,7 @@ void FormPattern::UpdateAppLockCfg()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
     auto currentColor = sourceInfo->GetFillColor();
-    auto newColor = SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    auto newColor = Container::CurrentColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
     if (currentColor != newColor) {
         sourceInfo->SetFillColor(newColor);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
@@ -1083,7 +1083,7 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
     CHECK_NULL_VOID(columnNode);
     double cardWidth = cardInfo_.width.Value();
     double cardHeight = cardInfo_.height.Value();
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     bool isDarkMode = colorMode == ColorMode::DARK;
     std::shared_ptr<FormSkeletonParams> params = std::make_shared<FormSkeletonParams>(cardWidth,
         cardHeight, dimension, dimensionHeight, isDarkMode);
@@ -1188,7 +1188,7 @@ RefPtr<FrameNode> FormPattern::CreateTimeLimitNode()
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
     Dimension fontSize(GetTimeLimitFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
-    textLayoutProperty->UpdateTextColor(SystemProperties::GetColorMode() == ColorMode::DARK ?
+    textLayoutProperty->UpdateTextColor(Container::CurrentColorMode() == ColorMode::DARK ?
         Color(FONT_COLOR_DARK) : Color(FONT_COLOR_LIGHT));
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(textNode->GetRenderContext());
@@ -1211,7 +1211,7 @@ RefPtr<FrameNode> FormPattern::CreateAppLockNode()
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     auto info = ImageSourceInfo("");
     info.SetResourceId(InternalResource::ResourceId::APP_LOCK_SVG);
-    info.SetFillColor(SystemProperties::GetColorMode() == ColorMode::DARK ? Color::BLACK:Color::WHITE);
+    info.SetFillColor(Container::CurrentColorMode() == ColorMode::DARK ? Color::BLACK:Color::WHITE);
     imageLayoutProperty->UpdateImageSourceInfo(info);
     CalcSize idealSize = { CalcLength(32, DimensionUnit::VP), CalcLength(32, DimensionUnit::VP) };
     imageLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
@@ -2524,7 +2524,7 @@ void FormPattern::UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &rend
 {
     Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    bool isDarkMode = SystemProperties::GetColorMode() == ColorMode::DARK;
+    bool isDarkMode = Container::CurrentColorMode() == ColorMode::DARK;
     GradientColor beginGredientColor =
         GradientColor(isDarkMode ? Color(TOP_BG_COLOR_DARK) : Color(TOP_BG_COLOR_LIGHT));
     beginGredientColor.SetDimension(CalcDimension(0, DimensionUnit::PERCENT));

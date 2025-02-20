@@ -27,6 +27,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
@@ -991,6 +992,11 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
     return true;
+}
+
+ColorMode PipelineContext::GetColorMode() const
+{
+    return MockContainer::mockColorMode_;
 }
 
 } // namespace OHOS::Ace::NG

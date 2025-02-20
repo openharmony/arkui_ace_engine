@@ -1642,7 +1642,7 @@ void JSTextField::SetCancelDefaultIcon()
 {
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
     } else {
         TextFieldModel::GetInstance()->SetCancelIconColor(Color());
@@ -1700,7 +1700,7 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
         // svg need not default color, otherwise multi color svg will render fault
         return;
     }
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
     } else {
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);

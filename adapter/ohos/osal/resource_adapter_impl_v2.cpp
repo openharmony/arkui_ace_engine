@@ -133,6 +133,22 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(std::shared_ptr<Global::Resource::R
 }
 
 ResourceAdapterImplV2::ResourceAdapterImplV2(
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager, int32_t instanceId)
+{
+    sysResourceManager_ = resourceManager;
+    std::shared_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager->GetResConfig(*resConfig);
+    resConfig_ = resConfig;
+    appHasDarkRes_ = resConfig->GetAppDarkRes();
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    if (container) {
+        std::string hapPath = container->GetHapPath();
+        std::string resPath = container->GetPackagePathStr();
+        packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
+    }
+}
+
+ResourceAdapterImplV2::ResourceAdapterImplV2(
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager, const ResourceInfo& resourceInfo)
 {
     std::string resPath = resourceInfo.GetPackagePath();

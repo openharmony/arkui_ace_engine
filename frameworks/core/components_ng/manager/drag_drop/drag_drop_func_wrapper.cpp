@@ -479,7 +479,7 @@ std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;
@@ -510,7 +510,7 @@ std::optional<EffectOption> DragDropFuncWrapper::BlurStyleToEffection(
     CHECK_NULL_RETURN(blurStyleOp, std::nullopt);
     ThemeColorMode colorMode = blurStyleOp->colorMode;
     if (blurStyleOp->colorMode == ThemeColorMode::SYSTEM) {
-        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+        colorMode = pipeline->GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     }
     auto blurParam = blurStyleTheme->GetBlurParameter(blurStyleOp->blurStyle, colorMode);
     CHECK_NULL_RETURN(blurParam, std::nullopt);

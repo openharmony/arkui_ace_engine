@@ -172,6 +172,13 @@ void Container::UpdateCurrent(int32_t id)
     ContainerScope::UpdateCurrent(id);
 }
 
+ColorMode Container::CurrentColorMode()
+{
+    auto curContainer = CurrentSafely();
+    CHECK_NULL_RETURN(curContainer, ColorMode::LIGHT);
+    return curContainer->GetColorMode();
+}
+
 bool Container::UpdateState(const Frontend::State& state)
 {
     std::lock_guard<std::mutex> lock(stateMutex_);

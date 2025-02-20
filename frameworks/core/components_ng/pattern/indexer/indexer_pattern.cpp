@@ -1028,9 +1028,9 @@ void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
 Shadow IndexerPattern::GetPopupShadow()
 {
     Shadow shadow;
-    auto colorMode = SystemProperties::GetColorMode();
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, shadow);
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
     shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultLG, colorMode);

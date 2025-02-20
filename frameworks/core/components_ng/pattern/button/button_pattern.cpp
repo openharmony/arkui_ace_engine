@@ -462,7 +462,7 @@ Shadow ButtonPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
     CHECK_NULL_RETURN(pipeline, Shadow::CreateShadow(shadowStyle));
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, Shadow::CreateShadow(shadowStyle));
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipeline->GetColorMode();
     return shadowTheme->GetShadow(shadowStyle, colorMode);
 }
 

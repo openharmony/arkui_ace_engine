@@ -197,7 +197,7 @@ static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
 
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }

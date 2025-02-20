@@ -5282,6 +5282,13 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
     return true;
 }
 
+ColorMode PipelineContext::GetColorMode() const
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, ColorMode::LIGHT);
+    return container->GetColorMode();
+}
+
 void PipelineContext::ChangeDarkModeBrightness()
 {
     auto windowManager = GetWindowManager();
@@ -5296,7 +5303,7 @@ void PipelineContext::ChangeDarkModeBrightness()
     CHECK_NULL_VOID(renderContext);
     CalcDimension dimension;
     dimension.SetValue(1);
-    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
+    if (container->GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow() &&
         !container->IsDynamicRender() && !container->IsFormRender() && !IsJsCard()) {
         if (!onFocus_ && mode == WindowMode::WINDOW_MODE_FLOATING) {
