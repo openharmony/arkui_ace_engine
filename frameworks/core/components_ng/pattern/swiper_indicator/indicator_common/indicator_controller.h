@@ -79,6 +79,10 @@ public:
         return swiperNode_;
     }
 
+    void ResetSwiperNode()
+    {
+        swiperNode_ = nullptr;
+    }
 private:
     CommonFunc showPrevImpl_;
     CommonFunc showNextImpl_;

@@ -159,7 +159,8 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton001, TestSize.Level1)
 
     auto paragraph = AceType::MakeRefPtr<MockParagraph>();
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
-    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
+    auto& paragraphs = richEditorPattern->paragraphs_.paragraphs_;
+    paragraphs.insert(paragraphs.begin(), { paragraph });
     richEditorPattern->mouseStatus_ = MouseStatus::NONE;
     richEditorPattern->blockPress_ = false;
     richEditorPattern->leftMousePress_ = true;

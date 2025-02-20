@@ -641,7 +641,9 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     if (!flag && !debugBoundaryModifier_) {
         return;
     }
-    CHECK_NULL_VOID(NeedDebugBoundary());
+    if (!NeedDebugBoundary()) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1119,9 +1121,6 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
 
 void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
@@ -2205,9 +2204,12 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
     CHECK_NULL_VOID(rsNode_);
     auto xValue = offset.GetX();
     auto yValue = offset.GetY();
+    bool changed = true;
     if (translateXY_) {
         auto propertyXY = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
         if (propertyXY) {
+            auto translate = propertyXY->Get();
+            changed = !NearEqual(translate[0], xValue) || !NearEqual(translate[1], yValue);
             propertyXY->Set({ xValue, yValue });
         }
     } else {
@@ -2216,7 +2218,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         rsNode_->AddModifier(translateXY_);
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
-    NotifyHostTransformUpdated();
+    NotifyHostTransformUpdated(changed);
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -2795,7 +2797,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         ContainerScope scope(containerId);
         std::shared_ptr<Media::PixelMap> pmap = std::move(pixmap);
         auto pixelmap = PixelMap::CreatePixelMap(&pmap);
-        auto task = [pixelmap, containerId = containerId, frameNode]() {
+        auto task = [pixelmap, frameNode]() {
             auto context = frameNode->GetRenderContext();
             if (context) {
                 context->UpdateBackgroundPixelMap(pixelmap);
@@ -2893,9 +2895,6 @@ void RosenRenderContext::PaintBorderImageGradient()
 
 void RosenRenderContext::OnModifyDone()
 {
-    auto frameNode = GetUnsafeHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
@@ -3861,15 +3860,110 @@ std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNod
     return rsNodes;
 }
 
-void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::SetDrawNode()
 {
     CHECK_NULL_VOID(rsNode_);
-    if (!isNeedRebuildRSTree_) {
+    rsNode_->SetDrawNode();
+}
+
+bool RosenRenderContext::AddNodeToRsTree()
+{
+    auto node = GetHost();
+    if (!node || !node->GetIsDelete()) {
+        return true;
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "AddNodeToRsTree node(%{public}d, %{public}s)", node->GetId(),
+            node->GetTag().c_str());
+    }
+
+    std::list<RefPtr<FrameNode>> childNodes;
+    // get not be deleted children of node
+    GetLiveChildren(node, childNodes);
+
+    auto rsNode = GetRsNodeByFrame(node);
+    CHECK_NULL_RETURN(rsNode, false);
+
+    int rsNodeIndex = rsNode->GetChildren().size();
+    for (auto& child : childNodes) {
+        auto childRsNode = GetRsNodeByFrame(child);
+        rsNode->AddChild(childRsNode, rsNodeIndex);
+        rsNodeIndex++;
+    }
+    node->SetDeleteRsNode(false);
+    // rebuild parent node
+    auto parentNode = node->GetParentFrameNode();
+    CHECK_NULL_RETURN(parentNode, false);
+    parentNode->MarkNeedSyncRenderTree();
+    parentNode->RebuildRenderContextTree();
+    return true;
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode)
+{
+    if (!frameNode) {
+        return nullptr;
+    }
+    auto rosenRenderContext = DynamicCast<RosenRenderContext>(frameNode->renderContext_);
+    if (!rosenRenderContext) {
+        return nullptr;
+    }
+    auto rsnode = rosenRenderContext->GetRSNode();
+    return rsnode;
+}
+
+void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
+{
+    CHECK_NULL_VOID(node);
+    std::list<RefPtr<FrameNode>> childrenList;
+    node->GenerateOneDepthVisibleFrameWithTransition(childrenList);
+    for (auto& child : childrenList) {
+        auto rsChild = GetRsNodeByFrame(child);
+        std::list<RefPtr<FrameNode>> childChildrenList;
+        child->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
+        if (rsChild && (rsChild->GetIsDrawn() || rsChild->GetType() != Rosen::RSUINodeType::CANVAS_NODE ||
+                           childChildrenList.empty())) {
+            childNodes.emplace_back(child);
+        } else {
+            child->SetDeleteRsNode(true);
+            GetLiveChildren(child, childNodes);
+        }
+    }
+    auto overlayNode = node->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto property = overlayNode->GetLayoutProperty();
+    if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+        auto rsoverlayNode = GetRsNodeByFrame(overlayNode);
+        std::list<RefPtr<FrameNode>> childChildrenList;
+        overlayNode->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
+        if (rsoverlayNode &&
+            (rsoverlayNode->GetIsDrawn() || rsoverlayNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE ||
+                childChildrenList.empty())) {
+            childNodes.emplace_back(overlayNode);
+        } else {
+            overlayNode->SetDeleteRsNode(true);
+            GetLiveChildren(overlayNode, childNodes);
+        }
+    }
+}
+
+void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
+{
+    if (!rsNode_ || !isNeedRebuildRSTree_) {
         return;
+    }
+    auto childNodesNew = children;
+    if (SystemProperties::GetContainerDeleteFlag()) {
+        auto frameNode = GetHost();
+        if (frameNode->GetIsDelete()) {
+            return;
+        }
+        childNodesNew.clear();
+        GetLiveChildren(frameNode, childNodesNew);
     }
     // now rsNode's children, key is id of rsNode, value means whether the node exists in previous children of rsNode.
     std::unordered_map<Rosen::NodeId, bool> childNodeMap;
-    auto nowRSNodes = GetChildrenRSNodes(children, childNodeMap);
+    auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);
     std::vector<Rosen::NodeId> childNodeIds;
     for (auto& child : nowRSNodes) {
         childNodeIds.emplace_back(child->GetId());
@@ -3881,7 +3975,6 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
         rsNode_->ClearChildren();
         return;
     }
-
     // save a copy of previous children because for loop will delete child
     auto preChildNodeIds = rsNode_->GetChildren();
     for (auto nodeId : preChildNodeIds) {
@@ -4146,8 +4239,13 @@ void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsBlendApplyType = static_cast<Rosen::RSColorBlendApplyType>(blendApplyType);
-    rsNode_->SetColorBlendApplyType(rsBlendApplyType);
+    if (blendApplyType == BlendApplyType::FAST) {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::FAST);
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER_ALPHA);
+    } else {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER);
+    }
     RequestNextFrame();
 }
 
@@ -5463,7 +5561,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
     // transition effects should be initialized without animation.
-    RSNode::ExecuteWithoutAnimation([this, isOnTheTree, &frameNode]() {
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
         // transitionIn effects should be initialized as active if currently not on the tree.
         transitionEffect_->Attach(Claim(this), !isOnTheTree);
     });

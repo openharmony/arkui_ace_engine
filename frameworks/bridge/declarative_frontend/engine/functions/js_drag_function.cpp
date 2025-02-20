@@ -224,6 +224,8 @@ void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)
     auto status = UdmfClient::GetInstance()->StartAsyncDataRetrieval(env, nativeValue, udKey);
     if (status != 0) {
         args.SetReturnValue(JSVal::Undefined());
+        napi_value result;
+        napi_get_and_clear_last_exception(env, &result);
         NapiThrow(engine, ERROR_CODE_PARAM_INVALID, "Invalid input parameter.");
         return;
     }

@@ -19,6 +19,8 @@
 
 namespace OHOS::Ace::NG {
 
+using CacheItem = RepeatVirtualScrollCaches::CacheItem;
+
 RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
     const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
     const std::function<void(uint32_t)>& onCreateNode,

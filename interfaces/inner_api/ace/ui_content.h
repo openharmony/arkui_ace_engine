@@ -82,6 +82,12 @@ struct ViewData;
 enum class AutoFillType;
 } // namespace AbilityBase
 
+namespace Global {
+namespace Resource {
+class ResourceManager;
+}
+} // namespace Global
+
 class RefBase;
 class Parcelable;
 class IRemoteObject;
@@ -149,6 +155,8 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
+    virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
@@ -314,7 +322,7 @@ public:
 
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
 
-    virtual bool GetContainerModalTitleVisible() { return false; }
+    virtual bool GetContainerModalTitleVisible(bool isImmersive) { return false; }
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
@@ -506,7 +514,7 @@ public:
 
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 
-    virtual bool SendUIExtProprty(uint32_t code, AAFwk::Want& data, uint8_t subSystemId)
+    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
     {
         return false;
     }

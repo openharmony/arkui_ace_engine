@@ -115,6 +115,7 @@ void SelectPatternTestNg::SetUpTestCase()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void SelectPatternTestNg::TearDownTestCase()
@@ -1783,6 +1784,7 @@ HWTEST_F(SelectPatternTestNg, InitFocusEventTest001, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step1. Create select.
      */
@@ -1826,6 +1828,7 @@ HWTEST_F(SelectPatternTestNg, InitFocusEventTest002, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step1. Create select.
      */
@@ -1873,6 +1876,7 @@ HWTEST_F(SelectPatternTestNg, SelectPatternTest001, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step1. Create select model and select event.
      * @tc.expected: Objects are created successfully.

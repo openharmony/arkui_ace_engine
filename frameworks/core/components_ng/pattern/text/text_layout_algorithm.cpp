@@ -27,6 +27,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
@@ -109,7 +111,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
-    ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
     auto pattern = host->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -118,6 +119,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     bool needRemain = false;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+    ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d][fontSize:%s][fontColor:%s]",
+        host->GetId(), needReCreateParagraph_, textStyle.GetFontSize().ToString().c_str(),
+        textStyle.GetTextColor().ColorToString().c_str());
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
         auto result = BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
@@ -347,7 +351,25 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
     symbolTextStyle.SetEffectStrategy(
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
-    symbolTextStyle.SetFontFamilies({ "HM Symbol" });
+    auto symbolType = textStyle.GetSymbolType();
+    symbolTextStyle.SetSymbolType(symbolType);
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = textStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        if (fontFamilies.empty()) {
+            return false;
+        }
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    }
     paragraph->PushStyle(symbolTextStyle);
     if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());

@@ -42,11 +42,12 @@ void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t tar
 
 void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag) {}
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId) {}
+void SubwindowManager::SetHotAreas(
+    const std::vector<Rect>& rects, SubwindowType type, int32_t overlayId, int32_t instanceId) {}
 
 void SubwindowManager::HideSubWindowNG() {}
 
-const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
+const RefPtr<Subwindow> SubwindowManager::GetCurrentWindow()
 {
     return g_currentWindow;
 }

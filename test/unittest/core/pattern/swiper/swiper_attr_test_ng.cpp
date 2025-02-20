@@ -923,6 +923,48 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), PRE_MARGIN);
 }
+
+/**
+ * @tc.name: AttrMargin007
+ * @tc.desc: Test property about Margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrMargin007, TestSize.Level1)
+{
+    /**
+     * @tc.cases: not support percentage
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetPreviousMargin(Dimension(10, DimensionUnit::PERCENT), false);
+    model.SetNextMargin(Dimension(10, DimensionUnit::PERCENT), false);
+    model.SetDisplayCount(1);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_FLOAT_EQ(pattern_->GetNextMargin(), 0.f);
+    EXPECT_FLOAT_EQ(pattern_->GetPrevMargin(), 0.f);
+}
+
+/**
+ * @tc.name: AttrMargin008
+ * @tc.desc: Test property about Margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrMargin008, TestSize.Level1)
+{
+    /**
+     * @tc.cases: 'auto' not support previousMargin or nextMargin
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    model.ResetDisplayCount();
+    model.SetPreviousMargin(Dimension(10), false);
+    model.SetNextMargin(Dimension(10), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_FLOAT_EQ(pattern_->GetNextMargin(), 0.f);
+    EXPECT_FLOAT_EQ(pattern_->GetPrevMargin(), 0.f);
+}
+
 /**
  * @tc.name: AttrNestedScroll001
  * @tc.desc: Test property about NestedScroll
@@ -1354,7 +1396,7 @@ HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetSelectedColor(), Color::RED);
     EXPECT_EQ(paintProperty->GetContainerColor(), Color::BLUE);
 }
-	
+
 /**
  * @tc.name: ArcDotIndicator001
  * @tc.desc: Test property about indicator

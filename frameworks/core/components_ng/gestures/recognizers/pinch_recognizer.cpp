@@ -16,6 +16,7 @@
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 
 #include "base/ressched/ressched_report.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 
@@ -123,7 +124,9 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis start, state: %{public}d", event.touchEventId,
         refereeState_);
-    if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed(event))) {
+    if (refereeState_ == RefereeState::READY &&
+        (NearEqual(event.pinchAxisScale, 1.0) ||
+            (IsCtrlBeingPressed(event) && event.sourceTool != SourceTool::TOUCHPAD))) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
         refereeState_ = RefereeState::DETECTING;
@@ -272,7 +275,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     if (event.isRotationEvent || isPinchEnd_) {
         return;
     }
-    if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed(event)) {
+    if (NearZero(event.pinchAxisScale) && (!IsCtrlBeingPressed(event) || event.sourceTool == SourceTool::TOUCHPAD)) {
         if (refereeState_ == RefereeState::DETECTING) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
@@ -409,6 +412,9 @@ void PinchRecognizer::OnResetStatus()
 
 void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
@@ -445,7 +451,8 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
 
 void PinchRecognizer::CheckCallbackState()
 {
-    if (callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) {
+    if ((callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) &&
+        currentFingers_ == 0) {
         SendCallbackMsg(onActionEnd_);
     }
 }

@@ -126,6 +126,21 @@ public:
         }
     }
 
+    void SetBarRectCollectTouchTargetCallback(const BarCollectTouchTargetCallback&& barRectCollectTouchTarget)
+    {
+        barRectCollectTouchTarget_ = std::move(barRectCollectTouchTarget);
+    }
+
+    void BarRectCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult)
+    {
+        if (barRectCollectTouchTarget_) {
+            barRectCollectTouchTarget_(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+        }
+    }
+
     void SetAnimateVelocityCallback(const GetAnimateVelocityCallback&& getAnimateVelocityCallback)
     {
         getAnimateVelocityCallback_ = std::move(getAnimateVelocityCallback);
@@ -183,6 +198,7 @@ private:
     bool enabled_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
+    BarCollectTouchTargetCallback barRectCollectTouchTarget_;
     BarCollectTouchTargetCallback barCollectLongPressTarget_;
     InBarRegionCallback inBarRegionCallback_;
     InBarRegionCallback inBarRectRegionCallback_;

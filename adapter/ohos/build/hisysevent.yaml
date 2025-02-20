@@ -216,6 +216,16 @@ NON_MANUAL_POSTCARD_ACTION:
   MODULE_NAME: {type: STRING, desc: module name}
   DIMENSION: {type: INT32, desc: dimension}
 
+RICH_EDITOR_ERROR:
+  __BASE: { type: FAULT, level: CRITICAL, desc: Failed to add or delete text because the span range or index is abnormal. }
+  BUNDLE_NAME: { type: STRING, desc: bundle name }
+  VERSION_CODE: { type: INT32, desc: version code }
+  VERSION_NAME: { type: STRING, desc: version name }
+  ERROR_TYPE: { type: INT32, desc: error type }
+  SPAN_LENGTH: { type: INT32, desc: span length }
+  TEXT_LENGTH: { type: INT32, desc: text length }
+  SPAN_INDEX: { type: INT32, desc: span index }
+
 SCROLLABLE_ERROR:
   __BASE: {type: FAULT, level: CRITICAL, desc: scrollable component error}
   NODE_TYPE: {type: STRING, desc: node type}

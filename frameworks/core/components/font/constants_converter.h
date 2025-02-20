@@ -53,6 +53,7 @@ enum class PlaceholderVerticalAlignment;
 enum class TextDecorationStyle;
 struct TextStyle;
 struct PlaceholderSpan;
+enum class SymbolType;
 
 namespace Drawing {
 class RectF;
@@ -73,6 +74,7 @@ enum class TextDecoration;
 enum class TextDecorationStyle;
 enum class WhiteSpace;
 class Color;
+enum class SymbolType;
 
 namespace Constants {
 
@@ -109,6 +111,8 @@ void ConvertPlaceholderRun(const PlaceholderRun& span, txt::PlaceholderRun& txtS
 
 #else
 OHOS::Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight);
+
+OHOS::Rosen::SymbolType ConvertTxtSymbolType(SymbolType symbolType);
 
 OHOS::Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
 

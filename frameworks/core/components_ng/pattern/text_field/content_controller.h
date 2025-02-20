@@ -79,6 +79,11 @@ public:
         content_ = value;
     }
 
+    void SetTextValueOnly(const std::u16string& value)
+    {
+        content_ = value;
+    }
+
     void Reset()
     {
         content_ = u"";

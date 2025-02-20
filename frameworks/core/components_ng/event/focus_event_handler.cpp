@@ -61,7 +61,12 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
             return FocusIntension::SPACE;
         default:;
     }
-    switch (keyEvent.keyIntention) {
+    return GetFocusIntensionFromKey(keyEvent.keyIntention);
+}
+
+FocusIntension FocusEvent::GetFocusIntensionFromKey(KeyIntention keyIntention)
+{
+    switch (keyIntention) {
         case KeyIntention::INTENTION_SELECT:
             return FocusIntension::SELECT;
         case KeyIntention::INTENTION_ESCAPE:
@@ -224,7 +229,7 @@ bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
     auto onFocusAxisCallback = GetOnFocusAxisCallback();
     CHECK_NULL_RETURN(onFocusAxisCallback, false);
     auto info = FocusAxisEventInfo(event);
-    auto eventHub = eventHub_.Upgrade();
+    auto eventHub = node->GetEventHub<EventHub>();
     if (eventHub) {
         auto targetImpl = eventHub->CreateGetEventTargetImpl();
         info.SetTarget(targetImpl().value_or(EventTarget()));
@@ -315,7 +320,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
             info.SetScreenLocation(windowOffset);
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
-        auto eventHub = eventHub_.Upgrade();
+        auto eventHub = node->GetEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
             info.SetTarget(targetImpl().value_or(EventTarget()));

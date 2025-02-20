@@ -18,9 +18,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
@@ -30,7 +28,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_select_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select/select_model.h"
@@ -99,7 +96,6 @@ void JSSelect::Create(const JSCallbackInfo& info)
             }
         }
         SelectModel::GetInstance()->Create(params);
-        JSSelectTheme::ApplyTheme();
     }
 }
 
@@ -113,6 +109,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("value", &JSSelect::Value, opt);
     JSClass<JSSelect>::StaticMethod("font", &JSSelect::Font, opt);
     JSClass<JSSelect>::StaticMethod("fontColor", &JSSelect::FontColor, opt);
+    JSClass<JSSelect>::StaticMethod("backgroundColor", &JSSelect::BackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionBgColor", &JSSelect::SelectedOptionBgColor, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionFont", &JSSelect::SelectedOptionFont, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionFontColor", &JSSelect::SelectedOptionFontColor, opt);
@@ -327,9 +324,7 @@ void JSSelect::ParseFontStyle(const JSRef<JSVal>& jsValue, SelectFontType type)
 
 void JSSelect::ResetFontSize(SelectFontType type)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     if (type == SelectFontType::OPTION) {
         SelectModel::GetInstance()->SetOptionFontSize(selectTheme->GetMenuFontSize());
@@ -359,9 +354,7 @@ void JSSelect::ResetFontWeight(SelectFontType type)
 
 void JSSelect::ResetFontFamily(SelectFontType type)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     if (type == SelectFontType::SELECT) {
         SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
@@ -374,9 +367,7 @@ void JSSelect::ResetFontFamily(SelectFontType type)
 
 void JSSelect::ResetFontStyle(SelectFontType type)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     if (type == SelectFontType::SELECT) {
         SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
@@ -404,17 +395,28 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            textColor = theme->GetFontColor();
-        } else {
+            SelectModel::GetInstance()->ResetFontColor();
             return;
         }
     }
 
     SelectModel::GetInstance()->SetFontColor(textColor);
+}
+
+void JSSelect::BackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            SelectModel::GetInstance()->ResetBackgroundColor();
+            return;
+        }
+    }
+
+    SelectModel::GetInstance()->BackgroundColor(backgroundColor);
 }
 
 void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
@@ -548,9 +550,7 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         params[0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[1] = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(2, params);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Select.onSelect");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
     };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
     info.ReturnSelf();

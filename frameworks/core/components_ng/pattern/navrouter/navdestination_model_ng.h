@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
+class ACE_FORCE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
 public:
     void Create() override;
     void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;

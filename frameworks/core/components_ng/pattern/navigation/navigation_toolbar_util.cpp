@@ -636,7 +636,7 @@ void NavigationToolbarUtil::CreateToolBarDividerNodeIfNeeded(const RefPtr<NavDes
         nodeBase->AddChild(dividerNode);
         auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
         CHECK_NULL_VOID(dividerLayoutProperty);
-        auto theme = NavigationGetTheme();
+        auto theme = NavigationGetTheme(nodeBase->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         dividerLayoutProperty->UpdateStrokeWidth(theme->GetToolBarDividerWidth());
         dividerLayoutProperty->UpdateVertical(false);

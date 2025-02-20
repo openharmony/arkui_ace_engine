@@ -56,6 +56,7 @@ public:
     void ProcessSurfaceChange(int32_t width, int32_t height) override;
     void ProcessSurfaceDestroy() override {}
     void ProcessTextureRefresh(int32_t instanceId, int64_t textureId) override;
+    void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) override;
 
 private:
     void InitListener();
@@ -63,6 +64,7 @@ private:
     RefPtr<Player> player_;
     WeakPtr<RenderSurface> renderSurface_;
     PositionUpdatedEvent positionUpdateCallback_;
+    SeekDoneEvent seekDoneCallback_;
     StateChangedEvent stateChangeCallback_;
     CommonEvent errorCallback_;
     CommonEvent resolutionChangeCallback_;

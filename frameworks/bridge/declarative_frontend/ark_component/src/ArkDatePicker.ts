@@ -42,10 +42,12 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     return this;
   }
   onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys,DatePickerOnChangeModifier.identity,DatePickerOnChangeModifier,callback);
+    return this;
   }
-  onDateChange(callback: (value: Date) => void): DatePickerAttribute {
-    throw new Error('Method not implemented.');
+  onDateChange(callback: Callback<Date>): this {
+    modifierWithKey(this._modifiersWithKeys,DatePickerOnDateChangeModifier.identity,DatePickerOnDateChangeModifier,callback);
+    return this;
   }
   backgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
@@ -168,6 +170,32 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
+  }
+}
+class DatePickerOnChangeModifier extends ModifierWithKey<(value: DatePickerResult) => void>{
+  constructor(value: (value: DatePickerResult) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('datePickerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().datePicker.resetDatePickerOnChange(node);
+    } else {
+      getUINativeModule().datePicker.setDatePickerOnChange(node, this.value);
+    }
+  }
+}
+class DatePickerOnDateChangeModifier extends ModifierWithKey<Callback<Date>>{
+  constructor(value: Callback<Date>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('datePickerOnDateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().datePicker.resetDatePickerOnDateChange(node);
+    } else {
+      getUINativeModule().datePicker.setDatePickerOnDateChange(node, this.value);
     }
   }
 }

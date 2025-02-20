@@ -274,4 +274,146 @@ void GridScrollWithOptionsLayoutAlgorithm::SkipIrregularLines(LayoutWrapper* lay
 
     info_.SkipStartIndexByOffset(options, mainGap_);
 }
+
+std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::CalculateCachedCount(
+    LayoutWrapper* layoutWrapper, int32_t cachedCount)
+{
+    if (cachedCount == 0 || info_.crossCount_ == 1) {
+        return std::make_pair(cachedCount, cachedCount);
+    }
+    int32_t cache = cachedCount * info_.crossCount_;
+
+    CHECK_NULL_RETURN(layoutWrapper, std::make_pair(cache, cache));
+    auto props = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(props, std::make_pair(cache, cache));
+
+    const auto& options = *props->GetLayoutOptions();
+    if (options.irregularIndexes.empty()) {
+        return std::make_pair(cache, cache);
+    }
+    int32_t start = CalculateStartCachedCount(options, cachedCount);
+    int32_t end = CalculateEndCachedCount(options, cachedCount);
+    return std::make_pair(start, end);
+}
+
+int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
+    const GridLayoutOptions& options, int32_t cachedCount)
+{
+    if (info_.startMainLineIndex_ - cachedCount <= 0) {
+        return info_.startIndex_;
+    }
+
+    int32_t start = cachedCount * info_.crossCount_;
+
+    auto startLine = info_.gridMatrix_.find(info_.startMainLineIndex_ - cachedCount);
+    if (startLine != info_.gridMatrix_.end()) {
+        auto line = startLine->second;
+        if (!line.empty()) {
+            auto index = line.begin()->second;
+            return info_.startIndex_ - index;
+        }
+    }
+
+    auto firstIrregularIndex = *(options.irregularIndexes.begin());
+    if (info_.startIndex_ <= firstIrregularIndex) {
+        return start;
+    }
+
+    if (!options.getSizeByIndex) {
+        auto iter = options.irregularIndexes.lower_bound(info_.startIndex_);
+        auto crossCount = static_cast<int32_t>(crossCount_);
+        if (iter == options.irregularIndexes.end()) {
+            return start;
+        }
+        if (*iter == info_.startIndex_ && iter != options.irregularIndexes.begin()) {
+            iter--;
+        }
+
+        int lineCount = 0;
+        int sum = 0;
+        int32_t diff = info_.startIndex_ - *(iter)-1;
+        while (lineCount < cachedCount) {
+            if (diff >= (cachedCount - lineCount) * crossCount) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            if (diff == 0) {
+                sum++;
+                lineCount++;
+            }
+
+            if (diff > 0 && diff <= (cachedCount - lineCount - 1) * crossCount) {
+                lineCount += std::ceil(diff / crossCount) + 1;
+                sum += diff;
+            }
+
+            if (iter == options.irregularIndexes.begin()) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            diff = (*iter) - (*(--iter)) - 1;
+        }
+        return sum;
+    }
+    return start;
+}
+
+int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
+    const GridLayoutOptions& options, int32_t cachedCount)
+{
+    if (info_.startIndex_ + cachedCount >= info_.childrenCount_ - 1) {
+        return info_.startIndex_;
+    }
+
+    int32_t end = cachedCount * info_.crossCount_;
+
+    auto endLine = info_.gridMatrix_.find(info_.endMainLineIndex_ + cachedCount);
+    if (endLine != info_.gridMatrix_.end()) {
+        auto line = endLine->second;
+        if (!line.empty()) {
+            auto index = line.rbegin()->second;
+            return index - info_.endIndex_;
+        }
+    }
+
+    auto lastIrregularIndex = *(options.irregularIndexes.rbegin());
+    if (info_.endIndex_ >= lastIrregularIndex) {
+        return end;
+    }
+
+    if (!options.getSizeByIndex) {
+        auto iter = options.irregularIndexes.upper_bound(info_.endIndex_);
+        auto crossCount = static_cast<int32_t>(crossCount_);
+        if (iter == options.irregularIndexes.end()) {
+            return end;
+        }
+
+        int lineCount = 0;
+        int sum = 0;
+        int32_t diff = *(iter)-info_.endIndex_ - 1;
+        while (lineCount < cachedCount) {
+            if (diff >= (cachedCount - lineCount) * crossCount) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            if (diff == 0) {
+                sum++;
+                lineCount++;
+            }
+
+            if (diff > 0 && diff <= (cachedCount - lineCount - 1) * crossCount) {
+                lineCount += std::ceil(diff / crossCount) + 1;
+                sum += diff;
+            }
+
+            if (iter == options.irregularIndexes.end()) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            diff = -*(iter) + *(++iter) - 1;
+        }
+        return sum;
+    }
+    return end;
+}
 } // namespace OHOS::Ace::NG

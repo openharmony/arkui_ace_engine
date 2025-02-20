@@ -48,15 +48,21 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
+            InitThemeDefaults(themeConstants, theme);
             ParsePattern(themeConstants, theme);
             return theme;
         }
 
-    private:
+    protected:
+        void InitThemeDefaults(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
+        {
+            CHECK_NULL_VOID(theme && themeConstants);
+            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
+                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
+                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
+                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
+        }
+
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
             if (!theme) {
@@ -97,9 +103,9 @@ public:
             theme->translateIsSupport_ = StringUtils::StringToInt(translateIsSupport);
             auto searchIsSupport = pattern->GetAttr<std::string>("richeditor_menu_search_is_support", "0");
             theme->searchIsSupport_ = StringUtils::StringToInt(searchIsSupport);
-            auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
+            theme->urlDisabledOpacity_ = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
             theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
-            theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
+            theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(theme->urlDisabledOpacity_);
             theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x0C182431));
             theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
             theme->cameraSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.camera");
@@ -270,6 +276,12 @@ public:
     }
 protected:
     RichEditorTheme() = default;
+    TextStyle textStyle_;
+    float urlDisabledOpacity_ = URL_DISA_OPACITY;
+    Color urlDisabledColor_ = Color(0x99000000);
+    Color urlDefaultColor_ = Color(0x99000000);
+    Color urlHoverColor_ = Color(0x99000000);
+    Color urlPressColor_ = Color(0x99000000);
 
 private:
     float disabledAlpha_ = 0.0f;
@@ -280,7 +292,6 @@ private:
 
     // UX::insert cursor offset up by 24vp
     Dimension insertCursorOffset_ = 24.0_vp;
-    TextStyle textStyle_;
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);
     Color selectedBackgroundColor_ = Color(0xff007dff);
@@ -298,10 +309,6 @@ private:
     std::string aiWriteIsSupport_;
     bool translateIsSupport_ = false;
     bool searchIsSupport_ = false;
-    Color urlDisabledColor_ = Color(0x99000000);
-    Color urlDefaultColor_ = Color(0x99000000);
-    Color urlHoverColor_ = Color(0x99000000);
-    Color urlPressColor_ = Color(0x99000000);
     uint32_t cameraSymbolId_;
     uint32_t scanSymbolId_;
     uint32_t imageSymbolId_;

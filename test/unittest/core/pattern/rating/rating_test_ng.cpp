@@ -364,6 +364,8 @@ HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest008, TestSize.Lev
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ratingPattern->isNeedFocusStyle_ = true;
+    ratingPattern->OnModifyDone();
     ASSERT_NE(ratingPattern, nullptr);
 
     /**
@@ -641,18 +643,15 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
-    ratingPattern->LoadFocusBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     ASSERT_NE(ratingPattern->foregroundImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->secondaryImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->backgroundImageLoadingCtx_, nullptr);
-    ASSERT_NE(ratingPattern->backgroundImageFocusLoadingCtx_, nullptr);
     EXPECT_TRUE(ratingPattern->secondaryConfig_.isSvg_);
     EXPECT_FALSE(ratingPattern->backgroundConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->foregroundConfig_.isSvg_);
     ratingPattern->foregroundImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
-    ratingPattern->backgroundImageFocusLoadingCtx_->SuccessCallback(nullptr);
     /**
      * @tc.steps: step4. 3 ImageLoadContexts callback successfuly, and imageSuccessStateCode_ ==
      * RATING_IMAGE_SUCCESS_CODE.
@@ -677,16 +676,14 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
     ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
-    ratingPattern->LoadFocusBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     EXPECT_FALSE(ratingPattern->secondaryConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->backgroundConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->foregroundConfig_.isSvg_);
-    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 15);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 7);
     ratingPattern->foregroundImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
-    ratingPattern->backgroundImageFocusLoadingCtx_->SuccessCallback(nullptr);
-    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 0b1111);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, RATING_IMAGE_SUCCESS_CODE);
     auto paintMethod3 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod3, nullptr);
     EXPECT_EQ(ratingPattern->ratingModifier_->foreground_.GetSrc(), RATING_SVG_URL);
@@ -724,7 +721,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
      */
     frameNode->geometryNode_->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
     frameNode->geometryNode_->SetContentSize(CONTAINER_SIZE);
-    ratingPattern->imageSuccessStateCode_ = 0b1111;
+    ratingPattern->imageSuccessStateCode_ = RATING_IMAGE_SUCCESS_CODE;
     auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod2, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
@@ -2009,6 +2006,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest016, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2084,6 +2082,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest017, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2139,6 +2138,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest018, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2194,6 +2194,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
     ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
     /**
      * @tc.steps: step2. Create image canvas.
@@ -2226,5 +2227,24 @@ HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::HOVER);
     ratingPattern->HandleHoverEvent(false);
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::NONE);
+}
+
+/**
+ * @tc.name: RatingOnChangeEventTest002
+ * @tc.desc: Test Rating onChange event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingOnChangeEventTest002, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    std::string unknownRatingScore;
+    auto onChange = [&unknownRatingScore](const std::string& ratingScore) { unknownRatingScore = ratingScore; };
+    rating.SetOnChange(frameNode, onChange);
+    EXPECT_NE(eventHub->changeEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

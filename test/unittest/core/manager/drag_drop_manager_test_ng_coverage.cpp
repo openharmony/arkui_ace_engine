@@ -15,10 +15,11 @@
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
 #include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_render_context.h"
-#define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1825,5 +1826,78 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage066, TestSi
     eventHub->SetDisableDataPrefetch(false);
     dragDropManager->HandleOnDragEnd(point, EXTRA_INFO, frameNode);
     EXPECT_EQ(DragDropBehaviorReporter::GetInstance().stopResult_, DragStopResult::GET_UDKEY_FAIL);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage067
+ * @tc.desc: Test OnDragDrop IsDragEndPending
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage067, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    ASSERT_NE(pipeline->taskExecutor_, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipeline);
+    DragPointerEvent pointerEvent;
+    dragEvent->SetResult(DragRet::DRAG_SUCCESS);
+    dragDropManager->OnDragDrop(dragEvent, frameNode, pointerEvent);
+    EXPECT_EQ(dragEvent->GetResult(), DragRet::DRAG_SUCCESS);
+
+    dragEvent->SetResult(DragRet::DRAG_SUCCESS);
+    dragEvent->SetIsDragEndPending(true);
+    dragEvent->SetRequestIdentify(1);
+    dragDropManager->OnDragDrop(dragEvent, frameNode, pointerEvent);
+    EXPECT_EQ(dragEvent->GetResult(), DragRet::DRAG_FAIL);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage068
+ * @tc.desc: Test HandleStopDrag
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage068, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipeline);
+    DragPointerEvent pointerEvent;
+    dragDropManager->dragCursorStyleCore_ = DragCursorStyleCore::MOVE;
+    dragDropManager->HandleStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_EQ(dragDropManager->dragCursorStyleCore_, DragCursorStyleCore::DEFAULT);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage069
+ * @tc.desc: Test GetStopDragCallBack
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage069, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragPointerEvent pointerEvent;
+    auto callback = dragDropManager->GetStopDragCallBack(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_NE(callback, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -500,7 +500,7 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    RectF GetTransformRectRelativeToWindow() const;
+    RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
@@ -1128,6 +1128,14 @@ public:
         return changeInfoFlag_;
     }
 
+    void SetDeleteRsNode(bool isDelete) {
+        isDeleteRsNode = isDelete;
+    }
+ 
+    bool GetIsDelete() {
+        return isDeleteRsNode;
+    }
+
     void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
 
     void ClearChangeInfoFlag()
@@ -1506,6 +1514,7 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
+    bool isDeleteRsNode = false;
 
     RefPtr<FrameNode> overlayNode_;
 

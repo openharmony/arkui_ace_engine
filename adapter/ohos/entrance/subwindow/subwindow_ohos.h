@@ -140,12 +140,18 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    Rect GetFoldExpandAvailableRect() const override;
     NG::RectF GetWindowRect() const override;
     bool CheckHostWindowStatus() const override;
     bool IsFreeMultiWindow() const override;
     void OnFreeMultiWindowSwitch(bool enable) override;
     int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
     void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) override;
+
+    bool NeedAvoidKeyboard() override
+    {
+        return needAvoidKeyboard_;
+    }
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -163,9 +169,30 @@ public:
 
     void ResizeDialogSubwindow() override;
     uint64_t GetDisplayId() override;
+    bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
+
+    MenuWindowState GetAttachState() override
+    {
+        return attachState_;
+    }
+
+    MenuWindowState GetDetachState() override
+    {
+        return detachState_;
+    }
+
+    void SetAttachState(MenuWindowState t)
+    {
+        attachState_ = t;
+    }
+
+    void SetDetachState(MenuWindowState t)
+    {
+        detachState_ = t;
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -218,6 +245,7 @@ private:
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
     int32_t childContainerId_ = -1;
+    uint64_t defaultDisplayId_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
@@ -230,11 +258,36 @@ private:
     int32_t popupTargetId_ = -1;
     bool haveDialog_ = false;
     bool isShowed_ = false;
+    bool isClosing_ = false;
+    bool needAvoidKeyboard_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
     std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
     NG::RectF windowRect_;
+    MenuWindowState attachState_ = MenuWindowState::DEFAULT;
+    MenuWindowState detachState_ = MenuWindowState::DEFAULT;
+};
+
+class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {
+public:
+    explicit MenuWindowSceneListener(WeakPtr<SubwindowOhos> sub) : sub_(sub) {}
+    ~MenuWindowSceneListener() = default;
+    void AfterAttached()
+    {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterAttachToFrameNode");
+        auto sub = sub_.Upgrade();
+        sub->SetAttachState(MenuWindowState::ATTACHED);
+    }
+
+    void AfterDetached()
+    {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterDetachToFrameNode");
+        auto sub = sub_.Upgrade();
+        sub->SetDetachState(MenuWindowState::DETACHED);
+    }
+private:
+    WeakPtr<SubwindowOhos> sub_;
 };
 
 } // namespace OHOS::Ace

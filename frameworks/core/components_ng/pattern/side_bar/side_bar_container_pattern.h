@@ -157,6 +157,8 @@ public:
         return isInDividerDrag_;
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;

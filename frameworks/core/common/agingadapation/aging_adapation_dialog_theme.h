@@ -47,18 +47,21 @@ public:
         RefPtr<AgingAdapationDialogTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<AgingAdapationDialogTheme> theme = AceType::Claim(new AgingAdapationDialogTheme());
-            if (!themeConstants) {
-                return theme;
-            }
+            InitTheme(theme, themeConstants);
+            return theme;
+        }
+
+    protected:
+        void InitTheme(
+            const RefPtr<AgingAdapationDialogTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            CHECK_NULL_VOID(theme);
+            CHECK_NULL_VOID(themeConstants);
             // init theme from global data
             auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
+            CHECK_NULL_VOID(themeStyle);
             RefPtr<ThemeStyle> dialogPattern = themeConstants->GetPatternByName(THEME_PATTERN_AGING_ADAPATION_DIALOG);
-            if (!dialogPattern) {
-                return theme;
-            }
+            CHECK_NULL_VOID(dialogPattern);
             theme->dialogIconColor_ = dialogPattern->GetAttr<Color>("aging_dialog_icon_primary", Color(0xff182431));
             theme->dialogFontColor_ = dialogPattern->GetAttr<Color>("aging_dialog_font_primary", Color(0xff182431));
             theme->bigFontSizeScale_ = dialogPattern->GetAttr<double>("big_font_size_scale", 0.0);
@@ -76,7 +79,6 @@ public:
             theme->gridCount_ = GRID_COUNT;
             theme->maxLines_ = MAX_LINES;
             theme->dialogCornerRadius_ = dialogPattern->GetAttr<Dimension>("dialog_corner_radius_level10", 0.0_vp);
-            return theme;
         }
     };
 
@@ -147,9 +149,19 @@ public:
         return dialogIconColor_;
     }
 
+    void SetDialogIconColor(const Color& color)
+    {
+        dialogIconColor_ = color;
+    }
+
     const Color& GetDialogFontColor() const
     {
         return dialogFontColor_;
+    }
+
+    void SetDialogFontColor(const Color& color)
+    {
+        dialogFontColor_ = color;
     }
 
     const int32_t& GetGridCount() const

@@ -346,7 +346,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     }
 }
 
-void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectInfo)
+void RichEditorSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
 {
     BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(selectInfo);
     selectInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
@@ -555,7 +555,7 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-    pattern->ChangeHandleHeight(event, isFirst, IsOverlayMode());
+    IF_TRUE(!IsSingleHandle(), pattern->ChangeHandleHeight(event, isFirst, IsOverlayMode()));
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
@@ -583,14 +583,34 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
     manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE);
 }
 
+void RichEditorSelectOverlay::UpdateFirstHandleOffset()
+{
+    CHECK_NULL_VOID(dragHandleIndex_ != DragHandleIndex::FIRST);
+    BaseTextSelectOverlay::UpdateFirstHandleOffset();
+}
+
+void RichEditorSelectOverlay::UpdateSecondHandleOffset()
+{
+    CHECK_NULL_VOID(dragHandleIndex_ != DragHandleIndex::SECOND);
+    BaseTextSelectOverlay::UpdateSecondHandleOffset();
+}
+
 void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->CalculateHandleOffsetAndShowOverlay();
-    UpdateHandleOffset();
-    IF_TRUE(IsMenuShow(), UpdateMenuOffset());
+    auto menuParams = pattern->GetMenuParams(pattern->GetEditorType(),
+        pattern->textResponseType_.value_or(TextResponseType::NONE));
+    bool needRecreate = (lastMenuParams_ == nullptr) ^ (menuParams == nullptr);
+    if (needRecreate) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu type changed, recreate menu");
+        ProcessOverlay({ .menuIsShow = IsCurrentMenuVisibile(), .requestCode = REQUEST_RECREATE });
+    } else {
+        UpdateHandleOffset();
+        IF_TRUE(IsMenuShow(), UpdateMenuOffset());
+    }
 }
 
 void RichEditorSelectOverlay::SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info)

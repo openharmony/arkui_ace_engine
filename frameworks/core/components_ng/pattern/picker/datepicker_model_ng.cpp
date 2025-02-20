@@ -388,6 +388,14 @@ void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void DatePickerModelNG::SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 void DatePickerModelNG::SetOnDateChange(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -749,6 +757,12 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
     if (pickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = pickerDialog.backgroundBlurStyle.value();
+    }
+    if (pickerDialog.blurStyleOption.has_value()) {
+        properties.blurStyleOption = pickerDialog.blurStyleOption.value();
+    }
+    if (pickerDialog.effectOption.has_value()) {
+        properties.effectOption = pickerDialog.effectOption.value();
     }
     if (pickerDialog.shadow.has_value()) {
         properties.shadow = pickerDialog.shadow.value();

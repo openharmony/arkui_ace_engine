@@ -58,6 +58,7 @@ public:
     static void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, PreparedInfoForDrag& data,
         PreparedAsyncCtxForAnimate& asyncCtxData);
     static bool GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager, int32_t containerId);
+    static void HideDragPreviewWindow(int32_t containerId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_DRAG_DROP_CONTROLLER_FUNC_WRAPPER_H

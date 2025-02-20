@@ -16,8 +16,8 @@
 #ifndef OHOS_ACE_FRAMEWORK_CJ_NATIVE_VIEW_FFI_H
 #define OHOS_ACE_FRAMEWORK_CJ_NATIVE_VIEW_FFI_H
 
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
@@ -34,6 +34,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkThrowNativeError(const char* msg);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeLog(const char* msg);
 CJ_EXPORT bool FfiOHOSAceFrameworkLoadNativeView(int64_t nativeViewID);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeViewCreate(int64_t nativeViewID);
+CJ_EXPORT void FfiOHOSAceFrameworkNativeViewCreateRecycle(
+    int64_t nativeViewId, bool isRecycling, const char* name, void (*callback)());
 CJ_EXPORT int64_t FfiOHOSAceFrameworkNativeViewCtor(int64_t remoteId);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeViewDestroy(int64_t id);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeViewBindRemote(int64_t nativeViewId, int64_t view);
@@ -43,6 +45,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkNativeViewMarkStatic(int64_t nativeViewId);
 CJ_EXPORT bool FfiOHOSAceFrameworkNativeViewIsStatic(int64_t nativeViewId);
 CJ_EXPORT ExternalString FfiOHOSAceFrameworkProcessViewId(int64_t nativeViewId);
 CJ_EXPORT bool FfiOHOSAceFrameworkNativeViewIsFirstRender(int64_t nativeViewId);
+CJ_EXPORT void FfiOHOSAceFrameworkNativeViewResetRecycleCustomNode(int64_t nativeViewId);
 
 CJ_EXPORT VectorToCFFIArray FfiOHOSAceFrameworkViewGetDeletedElemtIds(int64_t nativeViewId);
 CJ_EXPORT VectorCJInt64Handle FFICJCreateVectorCJInt64(int64_t size);

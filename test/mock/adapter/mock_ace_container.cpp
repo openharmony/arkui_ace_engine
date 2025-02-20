@@ -61,7 +61,7 @@ uint32_t AceContainer::GetWindowType() const
     return DEFAULT_WINDOW_TYPE;
 }
 
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }
@@ -78,6 +78,11 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 Rect AceContainer::GetDisplayAvailableRect() const
 {
     return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
 }
 
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}

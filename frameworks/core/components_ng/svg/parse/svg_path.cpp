@@ -49,7 +49,8 @@ Rect SvgPath::GetobjectBoundingBox(const SvgLengthScaleRule& lengthRule)
 
 RSRecordingPath SvgPath::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    if (path_.has_value()) {
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && !lengthRule.GetPathTransform()) {
         return path_.value();
     }
     RSRecordingPath tmp;
@@ -67,9 +68,10 @@ RSRecordingPath SvgPath::AsPath(const SvgLengthScaleRule& lengthRule)
         if (attributes_.fillState.IsEvenodd()) {
             out.SetFillStyle(RSPathFillType::EVENTODD);
         }
-        if (attributes_.clipState.IsEvenodd()) {
-            out.SetFillStyle(RSPathFillType::EVENTODD);
-        }
+    }
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(out);
     }
     return out;
 }

@@ -103,6 +103,7 @@ const double DEFAULT_DASH_DIMENSION = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -3610,8 +3611,8 @@ void ResetBackgroundBrightness(ArkUINodeHandle node)
     ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
 }
 
-void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
     const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize , ArkUI_Float32 fraction)
 {
@@ -3642,9 +3643,9 @@ void ResetBackgroundBrightnessInternal(ArkUINodeHandle node)
         saturation, posRGB, negRGB, fraction };
     ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
 }
- 
-void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+
+void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
     const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction)
 {
@@ -3885,6 +3886,20 @@ void ResetAccessibilityUseSamePage(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
+}
+
+void SetAccessibilityScrollTriggerable(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, value, false);
+}
+
+void ResetAccessibilityScrollTriggerable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, true, true);
 }
 
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
@@ -5907,7 +5922,7 @@ void ResetAccessibilityState(ArkUINodeHandle node)
         accessibilityProperty->SetUserDisabled(false);
     }
     if (accessibilityProperty->HasUserSelected()) {
-        accessibilityProperty->SetUserSelected(false); 
+        accessibilityProperty->SetUserSelected(false);
     }
     if (accessibilityProperty->HasUserCheckedType()) {
         accessibilityProperty->SetUserCheckedType(0);
@@ -6541,6 +6556,165 @@ void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
     ViewAbstract::DispatchKeyEvent(frameNode, keyEvent);
 }
 
+ArkUI_Int32 PostTouchEventToFrameNode(ArkUINodeHandle node, TouchEvent& touchEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenode is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
+    if (!frameNodePtr) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenodeptr is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto pipelineContext = frameNodePtr->GetContext();
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent pipeline context is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event manager is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    bool res = postEventManager->PostEvent(frameNodePtr, touchEvent);
+    if (!res) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event fail!");
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITouchEvent)
+{
+    if (!arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent touchevent is null!");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    TouchEvent touchEvent;
+    touchEvent.type = static_cast<TouchType>(arkUITouchEvent->action);
+    touchEvent.sourceType = static_cast<SourceType>(arkUITouchEvent->sourceType);
+    touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
+    touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
+    touchEvent.deviceId = arkUITouchEvent->deviceId;
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+    touchEvent.targetDisplayId = arkUITouchEvent->targetDisplayId;
+    ArkUITouchPoint* touchPointes = arkUITouchEvent->touchPointes;
+    auto density = PipelineBase::GetCurrentDensity();
+    for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
+        TouchPoint point;
+        point.id = touchPointes[index].id;
+        point.x = touchPointes[index].nodeX;
+        point.y = touchPointes[index].nodeY;
+        point.screenX = touchPointes[index].screenX * density;
+        point.screenY = touchPointes[index].screenY * density;
+        point.originalId = touchPointes[index].id;
+        std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
+        TimeStamp downTime(downNanoseconds);
+        point.downTime = downTime;
+        point.force = touchPointes[index].pressure;
+        touchEvent.pointers.emplace_back(point);
+    }
+    touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
+    touchEvent.x = arkUITouchEvent->actionTouchPoint.nodeX;
+    touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
+    touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
+    touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
+    touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    NG::SetPostPointerEvent(pointerEvent, touchEvent);
+    return PostTouchEventToFrameNode(node, touchEvent);
+}
+
+void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
+{
+    std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+    std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
+    if (arkUITouchEvent->historySize > 0) {
+        for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
+            allHistoryEvents[i].action = arkUITouchEvent->historyEvents[i].action;
+            allHistoryEvents[i].sourceType = arkUITouchEvent->historyEvents[i].sourceType;
+            allHistoryEvents[i].timeStamp = arkUITouchEvent->historyEvents[i].timeStamp;
+            allHistoryEvents[i].actionTouchPoint.nodeX = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeX;
+            allHistoryEvents[i].actionTouchPoint.nodeY = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeY;
+            allHistoryEvents[i].actionTouchPoint.windowX = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowX;
+            allHistoryEvents[i].actionTouchPoint.windowY = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowY;
+            allHistoryEvents[i].actionTouchPoint.screenX = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenX;
+            allHistoryEvents[i].actionTouchPoint.screenY = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenY;
+            allHistoryEvents[i].actionTouchPoint.pressure =
+                arkUITouchEvent->historyEvents[i].actionTouchPoint.pressure;
+            for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
+                allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
+                allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
+                allHistoryPoints[i][j].nodeY = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeY;
+                allHistoryPoints[i][j].windowX = arkUITouchEvent->historyEvents[i].touchPointes[j].windowX;
+                allHistoryPoints[i][j].windowY = arkUITouchEvent->historyEvents[i].touchPointes[j].windowY;
+                allHistoryPoints[i][j].screenX = arkUITouchEvent->historyEvents[i].touchPointes[j].screenX;
+                allHistoryPoints[i][j].screenY = arkUITouchEvent->historyEvents[i].touchPointes[j].screenY;
+                allHistoryPoints[i][j].contactAreaWidth =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaWidth;
+                allHistoryPoints[i][j].contactAreaHeight =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaHeight;
+                allHistoryPoints[i][j].pressure = arkUITouchEvent->historyEvents[i].touchPointes[j].pressure;
+                allHistoryPoints[i][j].tiltX = arkUITouchEvent->historyEvents[i].touchPointes[j].tiltX;
+                allHistoryPoints[i][j].tiltY = arkUITouchEvent->historyEvents[i].touchPointes[j].tiltY;
+                allHistoryPoints[i][j].pressedTime =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].pressedTime;
+                allHistoryPoints[i][j].toolType = arkUITouchEvent->historyEvents[i].touchPointes[j].toolType;
+                allHistoryPoints[i][j].operatingHand =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].operatingHand;
+            }
+            if (arkUITouchEvent->historyEvents[i].touchPointSize > 0) {
+                allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+            }
+            allHistoryEvents[i].touchPointSize = arkUITouchEvent->historyEvents[i].touchPointSize;
+        }
+        arkUITouchEventCloned->historyEvents = &allHistoryEvents[0];
+        arkUITouchEventCloned->historySize = arkUITouchEvent->historySize;
+    } else {
+        arkUITouchEventCloned->historyEvents = nullptr;
+        arkUITouchEventCloned->historySize = 0;
+    }
+}
+
+void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
+{
+    if (!arkUITouchEventCloned || !arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CreateClonedTouchEvent touchevent is null!");
+        return;
+    }
+    arkUITouchEventCloned->target.id = arkUITouchEvent->target.id;
+    arkUITouchEventCloned->target.type = arkUITouchEvent->target.type;
+    arkUITouchEventCloned->target.area = arkUITouchEvent->target.area;
+    arkUITouchEventCloned->target.origin = arkUITouchEvent->target.origin;
+    arkUITouchEventCloned->action = arkUITouchEvent->action;
+    arkUITouchEventCloned->changedPointerId = arkUITouchEvent->changedPointerId;
+    arkUITouchEventCloned->actionTouchPoint = arkUITouchEvent->actionTouchPoint;
+    arkUITouchEventCloned->timeStamp = arkUITouchEvent->timeStamp;
+    arkUITouchEventCloned->sourceType = arkUITouchEvent->sourceType;
+    arkUITouchEventCloned->targetDisplayId = arkUITouchEvent->targetDisplayId;
+    arkUITouchEventCloned->deviceId = arkUITouchEvent->deviceId;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    NG::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
+    std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
+    if (arkUITouchEvent->touchPointSize > 0) {
+        for (size_t i = 0; i < arkUITouchEvent->touchPointSize; i++) {
+            touchPoints[i] = arkUITouchEvent->touchPointes[i];
+        }
+        arkUITouchEventCloned->touchPointes = &touchPoints[0];
+        arkUITouchEventCloned->touchPointSize = arkUITouchEvent->touchPointSize;
+    } else {
+        arkUITouchEventCloned->touchPointes = nullptr;
+        arkUITouchEventCloned->touchPointSize = 0;
+    }
+    arkUITouchEventCloned->subKind = arkUITouchEvent->subKind;
+    SetHistoryTouchEvent(arkUITouchEventCloned, arkUITouchEvent);
+    arkUITouchEventCloned->stopPropagation = arkUITouchEvent->stopPropagation;
+}
+
 void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -6588,6 +6762,16 @@ void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle n
         eventReceiver(node, isHover);
     };
     ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
+}
+
+void SetOnHoverMoveExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onHoverMove = [node, eventReceiver](HoverInfo& info) {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnHoverMove(reinterpret_cast<FrameNode*>(node), std::move(onHoverMove));
 }
 
 void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
@@ -6935,6 +7119,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
         .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
         .resetAccessibilityUseSamePage = ResetAccessibilityUseSamePage,
+        .setAccessibilityScrollTriggerable = SetAccessibilityScrollTriggerable,
+        .resetAccessibilityScrollTriggerable = ResetAccessibilityScrollTriggerable,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
         .setClickEffect = SetClickEffect,
@@ -7129,10 +7315,13 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOnBlur = SetOnBlurExt,
         .setOnTouch = SetOnTouchExt,
         .setOnHover = SetOnHoverExt,
+        .setOnHoverMove = SetOnHoverMoveExt,
         .setOnChange = SetOnChangeExt,
         .setOnClick = SetOnClickExt,
         .setOnAppear = SetOnAppearExt,
         .dispatchKeyEvent = DispatchKeyEvent,
+        .postTouchEvent = PostTouchEvent,
+        .createClonedTouchEvent = CreateClonedTouchEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
@@ -8096,6 +8285,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
         event.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+        event.touchEvent.rawPointerEvent = eventInfo.GetPointerEvent().get();
 
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
@@ -8276,6 +8466,28 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
         TriggerOnHoverEvent(extraParam, nodeId, isHover, info);
     };
     ViewAbstract::SetOnHover(frameNode, onEvent);
+}
+
+void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](HoverInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = TOUCH_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.touchEvent.subKind = ON_HOVER_MOVE;
+        event.touchEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX();
+        event.touchEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY();
+        event.touchEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX();
+        event.touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
+        event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
+        event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        SendArkUISyncEvent(&event);
+    };
+    ViewAbstract::SetOnHoverMove(frameNode, onEvent);
 }
 
 void SetOnMouseInfo(ArkUINodeEvent& event, MouseInfo& info, bool usePx)
@@ -8494,6 +8706,13 @@ void ResetOnHover(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnHover(frameNode);
+}
+
+void ResetOnHoverMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnHoverMove(frameNode);
 }
 
 void ResetOnMouse(ArkUINodeHandle node)

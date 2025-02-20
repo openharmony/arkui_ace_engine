@@ -286,7 +286,7 @@ void ContainerModalViewEnhance::RemoveButtonsRectChangeListener(PipelineContext*
     pattern->RemoveButtonsRectChangeListener(id);
 }
 
-bool ContainerModalViewEnhance::GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline)
+bool ContainerModalViewEnhance::GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline, bool isImmersive)
 {
     if (pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
         return false;
@@ -297,6 +297,6 @@ bool ContainerModalViewEnhance::GetContainerModalTitleVisible(RefPtr<PipelineCon
     CHECK_NULL_RETURN(containerNode, false);
     auto containerModalPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_RETURN(containerModalPattern, false);
-    return containerModalPattern->GetContainerModalTitleVisible();
+    return containerModalPattern->GetContainerModalTitleVisible(isImmersive);
 }
 } // namespace OHOS::Ace::NG

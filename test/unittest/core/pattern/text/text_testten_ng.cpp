@@ -265,6 +265,9 @@ HWTEST_F(TextFieldTenPatternNg, TextDragOverlayModifierTestNG001, TestSize.Level
     auto textNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(V2::TEXTDRAG_ETS_TAG, nullptr);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_->AddParagraph(ParagraphManager::ParagraphInfo());
     auto dragNode = TextDragPattern::CreateDragNode(textNode);
     ASSERT_NE(dragNode, nullptr);
     auto test = dragNode->GetPattern<TextDragPattern>();

@@ -1563,7 +1563,7 @@ void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason
     CHECK_NULL_VOID(overlayManager);
     if (overlayManager->IsRightClickSubWindowMenu()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
-    } else if (overlayManager->IsSeletctOverlaySubWindowMenu()) {
+    } else if (overlayManager->IsSelectOverlaySubWindowMenu()) {
         if (overlayManager->IsMenuShow()) {
             HideMenu(true);
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");

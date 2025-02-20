@@ -874,7 +874,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -932,7 +932,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -984,7 +984,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent");
     return panda::BooleanRef::New(vm, result);
 }
 

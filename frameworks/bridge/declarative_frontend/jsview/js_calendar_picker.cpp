@@ -875,6 +875,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         properties.borderRadius = dialogRadius;
     }
     JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
+    JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
+    JSViewAbstract::SetDialogEffectOption(paramObj, properties);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

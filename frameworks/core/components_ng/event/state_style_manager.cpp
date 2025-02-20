@@ -140,6 +140,7 @@ void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState
     if (isCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
         onStateStyleChange = innerStateStyleSubscribers_.second;
         if (onStateStyleChange) {
+            ScopedViewStackProcessor processor;
             onStateStyleChange(currentState);
         }
     }
@@ -169,6 +170,7 @@ void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState
     if (isCanUpdate(userStateStyleSubscribers_.first, handlingState, currentState)) {
         onStateStyleChange = userStateStyleSubscribers_.second;
         if (onStateStyleChange) {
+            ScopedViewStackProcessor processor;
             onStateStyleChange(currentState);
         }
     }

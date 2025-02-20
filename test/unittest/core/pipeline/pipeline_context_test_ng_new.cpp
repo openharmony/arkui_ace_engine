@@ -2000,5 +2000,37 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
         EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
     }
 }
+
+HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->eventManager_, nullptr);
+
+    TouchEvent event;
+    RefPtr<HoverEventTarget> penHoverMoveEventTarget_ = AceType::MakeRefPtr<HoverEventTarget>("Button", 25);
+    penHoverMoveEventTarget_->onPenHoverMoveEventCallback_ = nullptr;
+    bool ret = penHoverMoveEventTarget_->HandlePenHoverMoveEvent(event);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->eventManager_, nullptr);
+
+    TouchEvent event;
+    RefPtr<HoverEventTarget> penHoverMoveEventTarget_ = AceType::MakeRefPtr<HoverEventTarget>("Button", 25);
+    penHoverMoveEventTarget_->onPenHoverMoveEventCallback_ = [](HoverInfo& penHoverMoveInfo) {};
+    bool ret = penHoverMoveEventTarget_->HandlePenHoverMoveEvent(event);
+    EXPECT_EQ(ret, true);
+}
 } // namespace NG
 } // namespace OHOS::Ace

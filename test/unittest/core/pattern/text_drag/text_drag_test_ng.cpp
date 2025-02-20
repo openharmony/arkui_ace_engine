@@ -158,7 +158,7 @@ void TextDragTestNg::GetInstance()
 {
     frameNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     pattern_ = frameNode_->GetPattern<TextPattern>();
-    std::list<ParagraphManager::ParagraphInfo> paragraphInfo;
+    std::vector<ParagraphManager::ParagraphInfo> paragraphInfo;
     ParagraphManager::ParagraphInfo pInfo = {
         .paragraph = paragraph_, .start = PARAGRAPHSIZE_START, .end = PARAGRAPHSIZE_END
     };

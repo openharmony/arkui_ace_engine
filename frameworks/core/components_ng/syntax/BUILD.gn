@@ -28,6 +28,13 @@ build_component_ng("syntax_ng") {
     "node_content.cpp",
     "repeat_model_ng.cpp",
     "repeat_node.cpp",
+
+    # Repeat virtual scrollAPI 16+
+    "repeat_virtual_scroll_2_caches.cpp",
+    "repeat_virtual_scroll_2_model_ng.cpp",
+    "repeat_virtual_scroll_2_node.cpp",
+
+    # Repeat virtual scroll API -15
     "repeat_virtual_scroll_caches.cpp",
     "repeat_virtual_scroll_model_ng.cpp",
     "repeat_virtual_scroll_node.cpp",

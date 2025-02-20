@@ -12,39 +12,31 @@
 :: limitations under the License.
 
 @echo off
+setlocal enabledelayedexpansion
 
-@rem Set local scope for the variables with windows NT shell
-if "%OS%"=="Windows_NT" setlocal
-
-set DIRNAME=%~dp0
-if "%DIRNAME%" == "" set DIRNAME=.
-set APP_BASE_NAME=%~n0
-set APP_HOME=%DIRNAME%
-
-goto start
-
-:start
-adb devices | findstr /i "device" > nul
-if %errorlevel%==0 (
-    goto execute
-) else (
-    echo.
-    echo Error: No device found.
-    echo.
-    goto fail
-)
-
-:execute
-@echo off
-@rem Replace here with hdc command
-adb devices
+hdc shell param set persist.ace.debug.enabled 1
 
 echo.
 echo Please enter the window ID which is to be dumped.
+hdc shell "hidumper -s WindowManagerService -a '-a'"
+
 echo.
-set /p userInput="please enter the window ID:"
+set /p "windowId=please enter the window ID: "
 
-adb shell "dumpsys window windows | grep -E %userInput%" > window_id.txt
+echo UI dump generate...
+hdc shell "hidumper -s WindowManagerService -a '-w %windowId% -event -c'" > %windowId%_event.txt
 
-:fail
+if exist .\%windowId%_event.txt (
+    echo file saved as: %cd%\%windowId%_event.txt
+    echo .\%windowId%_event.txt > generated_file_path.txt
+) else (
+    echo err: failed
+)
+goto :success
+
+echo Error
 exit /b 1
+
+:success
+echo.
+echo done!

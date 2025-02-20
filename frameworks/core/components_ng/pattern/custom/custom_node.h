@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 // CustomNode is the frame node of @Component struct.
-class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
+class ACE_FORCE_EXPORT CustomNode : public UINode, public CustomNodeBase {
     DECLARE_ACE_TYPE(CustomNode, UINode, CustomNodeBase);
 
 public:

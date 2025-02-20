@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -49,6 +47,10 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
             Maskarg.autoCancel = arg.autoCancel;
             Maskarg.onWillDismiss = arg.onWillDismiss;
             Maskarg.shadow = arg.shadow;
+            Maskarg.onWillAppear = arg.onWillAppear;
+            Maskarg.onDidAppear = arg.onDidAppear;
+            Maskarg.onWillDisappear = arg.onWillDisappear;
+            Maskarg.onDidDisappear = arg.onDidDisappear;
             auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
             CHECK_NULL_VOID(mask);
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
@@ -57,9 +59,7 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
         dialog = overlayManager->ShowDialog(arg, nullptr, false);
         CHECK_NULL_VOID(dialog);
     }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
-#endif
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show");
 #endif
 }
 

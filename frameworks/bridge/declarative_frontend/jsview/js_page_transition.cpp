@@ -14,9 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_page_transition_function.h"
@@ -168,9 +166,7 @@ void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("PageTransition.onEnter");
         func->Execute(type, progress);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "PageTransition.onEnter");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onEnter");
     };
 
     PageTransitionModel::GetInstance()->SetOnEnter(std::move(onEnterHandler));
@@ -190,9 +186,7 @@ void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("PageTransition.onExit");
         func->Execute(type, progress);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "PageTransition.onExit");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onExit");
     };
 
     PageTransitionModel::GetInstance()->SetOnExit(std::move(onExitHandler));

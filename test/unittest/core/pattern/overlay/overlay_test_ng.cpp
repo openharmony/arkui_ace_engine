@@ -1808,6 +1808,160 @@ HWTEST_F(OverlayTestNg, AddFrameNodeToOverlay002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateOverlayNodeWithOrder001
+ * @tc.desc: Test OverlayManager::CreateOverlayNodeWithOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, CreateOverlayNodeWithOrder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rootNode, overlayManager and stageNode.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = nullptr;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call CreateOverlayNodeWithOrder.
+     * @tc.expected: the size of root's children does not change.
+     */
+    int32_t childrenSize = rootNode->GetChildren().size();
+    overlayManager->CreateOverlayNodeWithOrder(std::nullopt);
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize);
+    overlayManager->CreateOverlayNodeWithOrder(std::make_optional(0.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize);
+
+    /**
+     * @tc.steps: step3. set stageManager and call CreateOverlayNodeWithOrder.
+     * @tc.expected: the size of root's children equals childrenSize + 1.
+     */
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+    overlayManager->CreateOverlayNodeWithOrder(std::make_optional(0.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 2);
+
+    /**
+     * @tc.steps: step4.call CreateOverlayNode again.
+     * @tc.expected: the size of root's children equals childrenSize + 2.
+     */
+    overlayManager->CreateOverlayNodeWithOrder(std::make_optional(0.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 3);
+}
+
+/**
+ * @tc.name: AddFrameNodeWithOrder001
+ * @tc.desc: Test OverlayManager::AddFrameNodeWithOrder when levelOrder is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, AddFrameNodeWithOrder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, rootNode, overlayManager and stageNode.
+     */
+    auto frameNode = CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. call AddFrameNodeWithOrder to add the frameNode with levelOrder.
+     * @tc.expected: both the size of rootNode's children equal childrenSize + 1
+     * and the size of dialogOrderMap and dialogLevelOrderMap equal 0.
+     */
+    int32_t childrenSize = rootNode->GetChildren().size();
+    overlayManager->AddFrameNodeWithOrder(frameNode, std::nullopt);
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+}
+
+/**
+ * @tc.name: AddFrameNodeWithOrder002
+ * @tc.desc: Test OverlayManager::AddFrameNodeWithOrder when levelOrder is not null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, AddFrameNodeWithOrder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, rootNode, overlayManager, stageNode and index.
+     */
+    auto frameNode = CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. call AddFrameNodeWithOrder to add the frameNode with levelOrder.
+     * @tc.expected: both the size of rootNode's children equal childrenSize + 1
+     * and the size of dialogOrderMap and dialogLevelOrderMap equal 1.
+     */
+    int32_t childrenSize = rootNode->GetChildren().size();
+    overlayManager->AddFrameNodeWithOrder(frameNode, std::make_optional(0.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+
+    /**
+     * @tc.steps: step3. set LevelOrder = 0.0f, create frameNode2 and call AddFrameNodeToOverlay again.
+     * @tc.expected: the frameNode2 is added to the new OrderLevelNode that end of the rootNode.
+     */
+    auto frameNode2 = CreateTargetNode();
+    ASSERT_NE(frameNode2, nullptr);
+    overlayManager->AddFrameNodeWithOrder(frameNode2, std::make_optional(0.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 2);
+    EXPECT_EQ(rootNode->GetLastChild()->GetId(), frameNode2->GetParent()->GetId());
+    EXPECT_EQ(rootNode->GetLastChild()->GetLastChild()->GetId(), frameNode2->GetId());
+
+    /**
+     * @tc.steps: step4. set LevelOrder = -1.0f, create frameNode3 and call AddFrameNodeToOverlay again.
+     * @tc.expected: the index of frameNode4's parentNode(the new OrderLevelNode) of rootNode's children equals 1.
+     */
+    auto frameNode3 = CreateTargetNode();
+    ASSERT_NE(frameNode3, nullptr);
+    overlayManager->AddFrameNodeWithOrder(frameNode3, std::make_optional(-1.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 3);
+    EXPECT_EQ(rootNode->GetChildIndexById(frameNode3->GetParent()->GetId()), 1);
+    EXPECT_EQ(rootNode->GetChildIndexById(frameNode2->GetParent()->GetId()), 3);
+
+    /**
+     * @tc.steps: step5. set LevelOrder = 1.0f, create frameNode4 and call AddFrameNodeWithOrder again.
+     * @tc.expected: the index of frameNode4's parentNode(the new OrderLevelNode) of rootNode's children equals 3.
+     */
+    auto frameNode4 = CreateTargetNode();
+    ASSERT_NE(frameNode4, nullptr);
+    overlayManager->AddFrameNodeWithOrder(frameNode4, std::make_optional(1.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 4);
+    EXPECT_EQ(rootNode->GetChildIndexById(frameNode3->GetParent()->GetId()), 1);
+    EXPECT_EQ(rootNode->GetChildIndexById(frameNode2->GetParent()->GetId()), 3);
+    EXPECT_EQ(rootNode->GetChildIndexById(frameNode4->GetParent()->GetId()), 4);
+}
+
+/**
  * @tc.name: RemoveFrameNodeOnOverlay001
  * @tc.desc: Test OverlayManager::RemoveFrameNodeOnOverlay.
  * @tc.type: FUNC

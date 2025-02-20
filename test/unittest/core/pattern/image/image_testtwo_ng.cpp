@@ -15,6 +15,8 @@
 
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -698,7 +700,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0002, TestSize.Level1)
      * @tc.steps: step12. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATION);
 }
 
 /**
@@ -833,21 +835,21 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0005, TestSize.Level1)
      * @tc.steps: step3. Test isAnimation
      * @tc.expected: false
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::BASE);
+    imagePattern->SetImageType(ImageType::BASE);
     EXPECT_EQ(imagePattern->GetIsAnimation(), false);
 
     /**
      * @tc.steps: step4. Test isAnimation
      * @tc.expected: false
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::UNDEFINED);
+    imagePattern->SetImageType(ImageType::UNDEFINED);
     EXPECT_EQ(imagePattern->GetIsAnimation(), false);
 
     /**
      * @tc.steps: step5. Test isAnimation
      * @tc.expected: true
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATION);
     EXPECT_EQ(imagePattern->GetIsAnimation(), true);
 }
 
@@ -875,28 +877,28 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0006, TestSize.Level1)
      * @tc.steps: step2. Test GetImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::ANIMATION);
 
     /**
      * @tc.steps: step3. Test GetImageType
      * @tc.expected: BASE
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::BASE);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::BASE);
+    imagePattern->SetImageType(ImageType::BASE);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
 
     /**
      * @tc.steps: step4. Test GetImageType
      * @tc.expected: UNDEFINED
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::UNDEFINED);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::UNDEFINED);
+    imagePattern->SetImageType(ImageType::UNDEFINED);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::UNDEFINED);
 
     /**
      * @tc.steps: step5. Test GetImageType
      * @tc.expected: ANIMATION
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::ANIMATION);
 }
 
 /**
@@ -1574,7 +1576,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
      * @tc.steps: step1. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATION);
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1594,7 +1596,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
      * @tc.steps: step2. Test ImageType
      * @tc.expected: BASE
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::BASE);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::BASE);
 }
 
 /**
@@ -1768,7 +1770,7 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
     EXPECT_EQ(imagePattern->GetSyncLoad(), SYNCMODE_DEFAULT);
     image.EnableAnalyzer(false);
     image.EnableAnalyzer(frameNode, true);
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATION);
     image.ResetImageSrc(frameNode);
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
@@ -1776,6 +1778,6 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::BASE);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
 }
 } // namespace OHOS::Ace::NG

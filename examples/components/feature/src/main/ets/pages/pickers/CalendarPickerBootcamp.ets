@@ -872,6 +872,10 @@ export struct CalendarPickerBootcamp {
   @State startDate: Date = new Date('2020-12-10');
   @State enableEndDate: boolean = false;
   @State endDate: Date = new Date('2028-12-30');
+  @State enableCompMarkToday: boolean = false;
+  @State compMarkToday: boolean = false;
+  @State enableCompDisabledDateRange: boolean = false;
+  @State compDisabledDateRange: DateRange[] = [{ start: new Date('2020-12-10'), end: new Date('2020-12-11') }];
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -1043,7 +1047,8 @@ export struct CalendarPickerBootcamp {
   @Builder Content() {
     Column({ space: 8 }) {
       CalendarPicker({ hintRadius: useEnabled(this.enableHintRadius, this.hintRadius), selected: this.selectedDate,
-          start: useEnabled(this.enableStartDate, this.startDate), end: useEnabled(this.enableEndDate, this.endDate) })
+          start: useEnabled(this.enableStartDate, this.startDate), end: useEnabled(this.enableEndDate, this.endDate),
+          disabledDateRange: useEnabled(this.enableCompDisabledDateRange, this.compDisabledDateRange) })
         .edgeAlign(useEnabled(this.enableEdgeAlignCalendarAlign, this.edgeAlignCalendarAlign),
           {dx:useEnabled(this.enableEdgeAlignOffsetX,this.alignOffsetX),
             dy:useEnabled(this.enableEdgeAlignOffsetY,this.alignOffsetY)})
@@ -1933,6 +1938,7 @@ export struct CalendarPickerBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .markToday(useEnabled(this.enableCompMarkToday, this.compMarkToday))
     }.width('100%').height('100%')
   }
 
@@ -2879,6 +2885,48 @@ export struct CalendarPickerBootcamp {
             { label: '2028-12-10', value: new Date('2028-12-10') },
             { label: '2029-12-10', value: new Date('2029-12-10') },
             { label: '2030-12-10', value: new Date('2030-12-10') }
+          ]
+        })
+
+        RadioBlock({
+          title: 'markToday',
+          isEnabled: $enableCompMarkToday,
+          value: $compMarkToday,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'CalendarOptions.disabledDateRange',
+          isEnabled: $enableCompDisabledDateRange,
+          value: $compDisabledDateRange,
+          dataSource: [
+            {
+              label: '2020-12-10~2020-12-11',
+              value: [{ start: new Date('2020-12-10'), end: new Date('2020-12-11') }] as DateRange[]
+            },
+            {
+              label: '2021-12-10~2021-12-11',
+              value: [{ start: new Date('2021-12-10'), end: new Date('2021-12-11') }] as DateRange[]
+            },
+            {
+              label: '2022-12-10~2022-12-11',
+              value: [{ start: new Date('2022-12-10'), end: new Date('2022-12-11') }] as DateRange[]
+            },
+            {
+              label: '2023-12-10~2023-12-11',
+              value: [{ start: new Date('2023-12-10'), end: new Date('2023-12-11') }] as DateRange[]
+            },
+            {
+              label: '2024-12-10~2024-12-11',
+              value: [{ start: new Date('2024-12-10'), end: new Date('2024-12-11') }] as DateRange[]
+            },
+            {
+              label: '2025-12-10~2025-12-11',
+              value: [{ start: new Date('2025-12-10'), end: new Date('2025-12-11') }] as DateRange[]
+            }
           ]
         })
 

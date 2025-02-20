@@ -199,6 +199,9 @@ public:
     void OnVisibleChange(bool isVisible) override;
 
     void OnColorConfigurationUpdate() override;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void AddDragBarHotZoneRect();
 
     Dimension GetMinNavBarWidthValue() const
@@ -441,6 +444,7 @@ public:
     bool FindInCurStack(const RefPtr<FrameNode>& navDestinationNode);
 
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
+    RefPtr<NavigationPattern> GetParentNavigationPattern();
     void RestoreJsStackIfNeeded();
 
     RefPtr<FrameNode> GetNavBasePageNode() const
@@ -543,7 +547,6 @@ private:
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     void RefreshNavDestination();
-    RefPtr<NavigationPattern> GetParentNavigationPattern();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar);
     void NotifyNavDestinationSwitch(const RefPtr<NavDestinationContext>& from,
         const RefPtr<NavDestinationContext>& to, NavigationOperation operation);
@@ -578,6 +581,8 @@ private:
     void RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
     void UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
     virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
+    void UpdateToobarFocusColor();
+    void UpdateDividerBackgroundColor();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

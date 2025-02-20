@@ -362,6 +362,15 @@ float CounterDecorator::GetBoundHeight() const
         GetDecoratorHeight();
 }
 
+bool CounterDecorator::HasContent() const
+{
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_RETURN(textNode, false);
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    return textLayoutProperty->GetContent().has_value() && !textLayoutProperty->GetContent().value().empty();
+}
+
 void ErrorDecorator::UpdateTextFieldMargin()
 {
     auto decoratedNode = decoratedNode_.Upgrade();

@@ -14,9 +14,8 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
@@ -619,9 +618,7 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Grid.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onItemDrop");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onItemDrop");
     };
     GridModel::GetInstance()->SetOnItemDrop(std::move(onItemDrop));
 }
@@ -718,9 +715,7 @@ void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onScrollStop");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop");
             return;
         };
         GridModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
@@ -781,9 +776,7 @@ void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachStart");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachStart");
             return;
         };
         GridModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -796,9 +789,7 @@ void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachEnd");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachEnd");
             return;
         };
         GridModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));

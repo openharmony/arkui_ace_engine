@@ -402,6 +402,10 @@ void SheetPresentationPattern::RegisterHoverModeChangeCallback()
     auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto sheetType = pattern->GetSheetType();
+        if (sheetType != SheetType::SHEET_CENTER) {
+            return;
+        }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -1646,6 +1650,15 @@ void SheetPresentationPattern::UpdateMaskBackgroundColorRender()
     maskRenderContext->UpdateBackgroundColor(sheetMaskColor_);
 }
 
+void SheetPresentationPattern::FireCommonCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FireOnTypeDidChange();
+    FireOnWidthDidChange(host);
+    FireOnHeightDidChange();
+}
+
 void SheetPresentationPattern::CheckSheetHeightChange()
 {
     auto host = GetHost();
@@ -1677,6 +1690,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 CHECK_NULL_VOID(renderContext);
                 renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
+                FireCommonCallback();
             } else {
                 overlayManager->PlaySheetTransition(host, true, false);
             }
@@ -2641,18 +2655,18 @@ void SheetPresentationPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("IsShouldDismiss: ").append(shouldDismiss_ ? "true" : "false"));
 }
 
-void SheetPresentationPattern::FireOnHeightDidChange(float height)
+void SheetPresentationPattern::FireOnHeightDidChange()
 {
+    auto height = 0.0f;
+    if (!IsSheetBottomStyle()) {
+        height = centerHeight_;
+    } else {
+        height = height_;
+    }
     if (NearEqual(preDidHeight_, height)) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!IsSheetBottomStyle()) {
-        OnHeightDidChange(centerHeight_);
-    } else {
-        OnHeightDidChange(height_);
-    }
+    OnHeightDidChange(height);
     preDidHeight_ = height;
 }
 
@@ -3180,6 +3194,9 @@ void SheetPresentationPattern::ResetClipShape()
 
 void SheetPresentationPattern::GetCurrentScrollHeight()
 {
+    if (!isScrolling_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
