@@ -212,6 +212,8 @@ public:
                                   const std::string& pageName);
     static void ReportDragInfo(const DragInfo& dragInfo);
     static void ReportReusedNodeSkipMeasureApp();
+    static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
+    static void ReportClipboardFailEvent(const std::string& errorType);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

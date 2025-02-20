@@ -200,3 +200,13 @@ INTERACTION_APP_JANK:
   MAX_FRAMETIME: {type: UINT64, desc: max single frame time during the scene}
   MAX_SEQ_MISSED_FRAMES: {type: INT32, desc: max successive missed frames during the scene}
   NOTE: {type: STRING, desc: extra infomation}
+
+TEXTFIELD_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in textfield}
+  PACKAGE_NAME: {type: STRING, desc: application package name}
+  PAGE_URL: {type: STRING, desc: page url}
+
+CLIPBOARD_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in clipboard }
+  PACKAGE_NAME: {type: STRING, desc: application package name}
+  PAGE_URL: {type: STRING, desc: page url}
