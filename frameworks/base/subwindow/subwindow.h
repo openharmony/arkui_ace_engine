@@ -51,6 +51,7 @@ enum class SubwindowType {
     TYPE_POPUP,
     TYPE_DIALOG,
     TYPE_SELECT_MENU,
+    TYPE_SHEET,
     SUB_WINDOW_TYPE_COUNT,
 };
 
@@ -236,6 +237,17 @@ public:
     virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
     virtual OHOS::Ace::MenuWindowState GetAttachState() = 0;
     virtual OHOS::Ace::MenuWindowState GetDetachState() = 0;
+
+    virtual void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) = 0;
 
 private:
     int32_t subwindowId_ = 0;

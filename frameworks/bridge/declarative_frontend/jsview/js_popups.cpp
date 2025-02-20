@@ -1602,6 +1602,26 @@ void JSViewAbstract::ParseSheetStyle(
         TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet height in unnormal condition");
     }
     sheetStyle.sheetHeight = sheetStruct;
+
+    ParseSheetSubWindowValue(paramObj, sheetStyle);
+}
+
+void JSViewAbstract::ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    // parse sheet showInSubWindow
+    sheetStyle.showInSubWindow = false;
+    if (sheetStyle.showInPage == NG::SheetLevel::EMBEDDED) {
+        return;
+    }
+    auto showInSubWindowValue = paramObj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                "emulator or a real device instead.");
+#else
+        sheetStyle.showInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
+    }
 }
 
 void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)

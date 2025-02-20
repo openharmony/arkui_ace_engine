@@ -514,7 +514,8 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
-    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    auto instanceId = sheetStyle.instanceId.has_value() && !sheetStyle.showInSubWindow.value_or(false) ?
+        sheetStyle.instanceId.value() : Container::CurrentId();
     auto buildNodeFunc = [buildFunc, instanceId]() -> RefPtr<UINode> {
         NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
         buildFunc();
@@ -537,22 +538,21 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    auto destructor = [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
-                          rootNodeType = targetNode->GetRootNodeType(),
-                          showInPage = sheetStyle.showInPage.value_or(false), instanceId]() {
-        ContainerScope scope(instanceId);
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        if (showInPage) {
-            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-            overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
+    SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
+    
+    if (sheetStyle.showInSubWindow.value_or(false)) {
+        if (isShow) {
+            SubwindowManager::GetInstance()->ShowBindSheetNG(isShow, std::move(callback), std::move(buildNodeFunc),
+                std::move(buildTitleNodeFunc), sheetStyle, std::move(onAppear), std::move(onDisappear),
+                std::move(shouldDismiss), std::move(onWillDismiss),
+                std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+                std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+                std::move(sheetSpringBack), targetNode);
+        } else {
+            SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(targetNode->GetId()));
         }
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteModal(id);
-        SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType);
-    };
-    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
+        return;
+    }
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),

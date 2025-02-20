@@ -542,6 +542,70 @@ void SubwindowManager::SetHotAreas(
     }
 }
 
+void SubwindowManager::ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show sheet ng enter");
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_SHEET);
+    if (!IsSubwindowExist(subwindow)) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_VOID(subwindow);
+        CHECK_NULL_VOID(subwindow->CheckHostWindowStatus());
+        subwindow->InitContainer();
+        CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+        AddSubwindow(containerId, SubwindowType::TYPE_SHEET, subwindow);
+    }
+    return subwindow->ShowBindSheetNG(isShow, std::move(callback), std::move(buildNodeFunc),
+        std::move(buildtitleNodeFunc), sheetStyle, std::move(onAppear), std::move(onDisappear),
+        std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), targetNode);
+}
+
+void SubwindowManager::OnWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason)
+{
+    OnUIExtensionWindowSizeChange(containerId, windowRect, reason);
+    OnHostWindowSizeChanged(containerId, windowRect, reason);
+}
+
+void SubwindowManager::OnHostWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason)
+{
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    auto subContinerId = GetSubContainerId(containerId);
+    auto subContainer = Container::GetContainer(subContinerId);
+    CHECK_NULL_VOID(subContainer);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->OnMainWindowSizeChange(subContinerId);
+}
+
+void SubwindowManager::HideSheetSubWindow(int32_t containerId)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide sheet subwindow enter %u", containerId);
+    auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_SHEET);
+    CHECK_NULL_VOID(subwindow);
+    auto overlay = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->GetSheetMap().empty()) {
+        subwindow->HideSubWindowNG();
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "fail to hide sheet subwindow, instanceId is %{public}d.", containerId);
+}
+
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
@@ -1227,7 +1291,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
     }
 }
-void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)
+void SubwindowManager::OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)
 {
     auto container = Container::GetContainer(instanceId);
     CHECK_NULL_VOID(container);
