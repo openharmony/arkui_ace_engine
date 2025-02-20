@@ -971,6 +971,7 @@ void HtmlToSpan::ToSpan(
     ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
+            
             allContent += "\n";
             childPos++;
             ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
