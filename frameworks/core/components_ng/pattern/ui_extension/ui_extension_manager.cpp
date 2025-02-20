@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -190,6 +192,7 @@ void UIExtensionManager::RecycleExtensionId(int32_t id)
 void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)
 {
     std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+    RegisterListenerIfNeeded();
     aliveUIExtensions_.try_emplace(nodeId, uiExtension);
 }
 
@@ -223,6 +226,9 @@ void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
         auto it = aliveUIExtensions_.find(nodeId);
         if (it != aliveUIExtensions_.end()) {
             aliveUIExtensions_.erase(nodeId);
+        }
+        if (aliveUIExtensions_.empty()) {
+            UnregisterListenerIfNeeded();
         }
     }
 
@@ -545,6 +551,86 @@ void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, cons
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+}
+
+void UIExtensionManager::RegisterListenerIfNeeded()
+{
+    if (hasRegisterListener_) {
+        return;
+    }
+
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    // Multi-layer nested UEC scenarios are not supported.
+    if (container->IsUIExtensionWindow()) {
+        hasRegisterListener_ = true;
+        return;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto containerModalListener =
+        [weakMgr = WeakClaim(this)](const RectF&, const RectF&) {
+            auto mgr = weakMgr.Upgrade();
+            CHECK_NULL_VOID(mgr);
+            mgr->NotifyUECProviderIfNeedded();
+        };
+    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager register listener");
+    containerModalListenerId_ = ContainerModalViewEnhance::AddButtonsRectChangeListener(
+        AceType::RawPtr(pipeline), std::move(containerModalListener));
+    hasRegisterListener_ = true;
+}
+
+void UIExtensionManager::UnregisterListenerIfNeeded()
+{
+    if (!hasRegisterListener_) {
+        return;
+    }
+
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    // Multi-layer nested UEC scenarios are not supported.
+    if (container->IsUIExtensionWindow()) {
+        hasRegisterListener_ = false;
+        return;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager unregister listener");
+    ContainerModalViewEnhance::RemoveButtonsRectChangeListener(
+        AceType::RawPtr(pipeline), containerModalListenerId_);
+    hasRegisterListener_ = false;
+}
+
+void UIExtensionManager::NotifyUECProviderIfNeedded()
+{
+    if (aliveUIExtensions_.empty()) {
+        return;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(avoidInfoMgr);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uecPattern = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uecPattern);
+        const auto& preAvoidInfo = uecPattern->GetAvoidInfo();
+        auto uecNode = AceType::DynamicCast<FrameNode>(uecPattern->GetHost());
+        CHECK_NULL_CONTINUE(uecNode);
+        ContainerModalAvoidInfo newAvoidInfo;
+        AvoidInfoManager::GetContainerModalAvoidInfoForUEC(uecNode, newAvoidInfo);
+        bool needNotify = AvoidInfoManager::CheckIfNeedNotifyAvoidInfoChange(preAvoidInfo, newAvoidInfo);
+        uecPattern->SetAvoidInfo(newAvoidInfo);
+        if (needNotify) {
+            AAFwk::Want avoidInfoWant;
+            avoidInfoMgr->BuildAvoidInfo(newAvoidInfo, avoidInfoWant);
+            TAG_LOGI(AceLogTag::ACE_LAYOUT, "UECManager send AvoidInfo: %{public}s", newAvoidInfo.ToString().c_str());
+            uecPattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
+                std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
         }
     }
 }

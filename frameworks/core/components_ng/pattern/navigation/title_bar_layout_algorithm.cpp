@@ -56,8 +56,10 @@ bool NeedAvoidMenuBar(PipelineContext* pipeline)
 bool NeedAvoidContainerModal(
     PipelineContext* pipeline, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    return NavigationTitleUtil::NeedAvoidContainerModal(pipeline) &&
-        titleBarNode && titleBarNode->NeedAvoidContainerModal();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    return avoidInfoMgr->NeedAvoidContainerModal() && titleBarNode && titleBarNode->NeedAvoidContainerModal();
 }
 } // namespace
 
@@ -277,7 +279,9 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     if (NeedAvoidContainerModal(pipeline, titleBarNode)) {
         RectF containerModal;
         RectF buttonsRect;
-        if (pipeline->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+        auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+        CHECK_NULL_RETURN(avoidInfoMgr, afterAvoidWidth);
+        if (avoidInfoMgr->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
             if (NearZero(avoidArea.Width())) {
                 avoidArea = buttonsRect;
             } else {

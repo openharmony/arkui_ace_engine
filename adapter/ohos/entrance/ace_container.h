@@ -852,6 +852,9 @@ private:
     bool FireUIExtDataSendToHostReply(
         NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
 
+    void RegisterAvoidInfoCallback();
+    void RegisterAvoidInfoDataProcessCallback();
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;

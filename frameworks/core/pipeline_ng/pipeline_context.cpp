@@ -113,6 +113,16 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (avoidInfoMgr_) {
+        avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
+        avoidInfoMgr_->SetInstanceId(instanceId);
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->SetPipelineContext(WeakClaim(this));
+        uiExtensionManager_->SetInstanceId(instanceId);
+    }
+#endif
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -123,6 +133,16 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (avoidInfoMgr_) {
+        avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
+        avoidInfoMgr_->SetInstanceId(instanceId);
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->SetPipelineContext(WeakClaim(this));
+        uiExtensionManager_->SetInstanceId(instanceId);
+    }
+#endif
 }
 
 PipelineContext::PipelineContext()
@@ -130,6 +150,14 @@ PipelineContext::PipelineContext()
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (avoidInfoMgr_) {
+        avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->SetPipelineContext(WeakClaim(this));
+    }
+#endif
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()

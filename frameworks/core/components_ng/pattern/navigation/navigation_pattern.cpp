@@ -19,6 +19,7 @@
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
@@ -411,7 +412,7 @@ void NavigationPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(host);
     InitPageNode(host);
     InitFoldState();
-    RegisterContainerModalButtonsRectChangeListener(host);
+    RegisterAvoidInfoChangeListener(host);
 }
 
 void NavigationPattern::InitFoldState()
@@ -429,7 +430,7 @@ void NavigationPattern::OnDetachFromMainTree()
     isFullPageNavigation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UnregisterContainerModalButtonsRectChangeListener(host);
+    UnregisterAvoidInfoChangeListener(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
@@ -495,6 +496,8 @@ void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host
     }
 
     isFullPageNavigation_ = isFullPage;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation[%{public}d] change to %{public}s",
+        host->GetId(), isFullPageNavigation_ ? "FullPage" : "PartialPage");
     MarkAllNavDestinationDirtyIfNeeded(host);
     UpdateSystemBarStyleOnFullPageStateChange(windowManager);
     if (isFullPageNavigation_) {
@@ -3405,42 +3408,48 @@ void NavigationPattern::SetMouseStyle(MouseFormat format)
     pipeline->FreeMouseStyleHoldNode(frameNodeId);
 }
 
-void NavigationPattern::RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode)
+void NavigationPattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
+{
+    if (!isFullPageNavigation_) {
+        return;
+    }
+    MarkAllNavDestinationDirtyIfNeeded(GetHost(), true);
+}
+
+void NavigationPattern::RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode)
 {
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto mgr = pipeline->GetNavigationManager();
+    auto mgr = pipeline->GetAvoidInfoManager();
     CHECK_NULL_VOID(mgr);
-    mgr->AddButtonsRectChangeListener(hostNode->GetId(), [weakPattern = WeakClaim(this)]() {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->isFullPageNavigation_) {
-            return;
-        }
-        pattern->MarkAllNavDestinationDirtyIfNeeded(pattern->GetHost());
-    });
+    mgr->AddAvoidInfoListener(WeakClaim(this));
 }
 
-void NavigationPattern::UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode)
+void NavigationPattern::UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode)
 {
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto mgr = pipeline->GetNavigationManager();
+    auto mgr = pipeline->GetAvoidInfoManager();
     CHECK_NULL_VOID(mgr);
-    mgr->RemoveButtonsRectChangeListener(hostNode->GetId());
+    mgr->RemoveAvoidInfoListener(WeakClaim(this));
 }
 
-void NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode)
+void NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode, bool skipCheck)
 {
     auto groupNode = AceType::DynamicCast<NavigationGroupNode>(hostNode);
     CHECK_NULL_VOID(groupNode);
-    auto pipeline = groupNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (!NavigationTitleUtil::NeedAvoidContainerModal(pipeline)) {
-        return;
+    if (!skipCheck) {
+        auto pipeline = groupNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+        CHECK_NULL_VOID(avoidInfoMgr);
+        if (!avoidInfoMgr->NeedAvoidContainerModal()) {
+            return;
+        }
     }
+
     auto contentNode = AceType::DynamicCast<FrameNode>(groupNode->GetContentNode());
     CHECK_NULL_VOID(contentNode);
     auto& childrens = contentNode->GetChildren();

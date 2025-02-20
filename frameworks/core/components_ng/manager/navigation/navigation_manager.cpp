@@ -323,41 +323,6 @@ const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRe
     return ret;
 }
 
-void NavigationManager::OnContainerModalButtonsRectChange()
-{
-    for (auto& pair : buttonsRectChangeListeners_) {
-        if (pair.second) {
-            pair.second();
-        }
-    }
-}
-
-void NavigationManager::AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener)
-{
-    if (!hasRegisterListener_) {
-        auto pipeline = pipeline_.Upgrade();
-        CHECK_NULL_VOID(pipeline);
-        auto containerModalListener =
-            [weakMgr = WeakClaim(this)](const RectF&, const RectF&) {
-                auto mgr = weakMgr.Upgrade();
-                CHECK_NULL_VOID(mgr);
-                mgr->OnContainerModalButtonsRectChange();
-            };
-        ContainerModalViewEnhance::AddButtonsRectChangeListener(
-            AceType::RawPtr(pipeline), std::move(containerModalListener));
-        hasRegisterListener_ = true;
-    }
-    buttonsRectChangeListeners_[id] = listener;
-}
-
-void NavigationManager::RemoveButtonsRectChangeListener(int32_t id)
-{
-    auto it = buttonsRectChangeListeners_.find(id);
-    if (it != buttonsRectChangeListeners_.end()) {
-        buttonsRectChangeListeners_.erase(it);
-    }
-}
-
 void NavigationManager::AddNavigation(int32_t parentId, int32_t navigationId)
 {
     auto iter = navigationMaps_.find(parentId);
