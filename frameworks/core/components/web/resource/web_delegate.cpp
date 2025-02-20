@@ -2814,7 +2814,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
     }
 }
 
-void WebDelegate::ratioStrToFloat(const std::string& str, float& ratio)
+void WebDelegate::ratioStrToFloat(const std::string& str)
 {
     // LowerFrameRateConfig format x.xx, len is 4, [0.00, 1.00]
     if (str.size() != VISIBLERATIO_LENGTH) {
@@ -2840,7 +2840,37 @@ void WebDelegate::ratioStrToFloat(const std::string& str, float& ratio)
     int i = f * VISIBLERATIO_FLOAT_TO_INT;
     if (i >= 0 && i <= VISIBLERATIO_FLOAT_TO_INT) {
         TAG_LOGI(AceLogTag::ACE_WEB, "visibleRatio check success.");
-        ratio = f;
+        lowerFrameRateVisibleRatio_ = f;
+    }
+}
+
+void WebDelegate::ratioStrToFloatV2(const std::string& str)
+{
+    // LowerFrameRateConfig format x.xx, len is 4, [0.00, 1.00]
+    if (str.size() != VISIBLERATIO_LENGTH) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio lenth is over 4.");
+        return;
+    }
+    auto dotCount = std::count(str.begin(), str.end(), '.');
+    if (dotCount != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio does not have dot.");
+        return;
+    }
+    auto pos = str.find('.', 0);
+    if (pos != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot position is wrong.");
+        return;
+    }
+    auto notDigitCount = std::count_if(str.begin(), str.end(), [](char c) { return !isdigit(c) && c != '.'; });
+    if (notDigitCount > 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot count is over 1.");
+        return;
+    }
+    float f = std::stof(str);
+    int i = f * VISIBLERATIO_FLOAT_TO_INT;
+    if (i >= 0 && i <= VISIBLERATIO_FLOAT_TO_INT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "visibleRatio check success.");
+        halfFrameRateVisibleRatio_ = f;
     }
 }
 
@@ -2858,8 +2888,8 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
         OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatio");
     std::string visibleAreaRatioV2 =
         OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatioV2");
-    ratioStrToFloat(visibleAreaRatio, lowerFrameRateVisibleRatio_);
-    ratioStrToFloat(visibleAreaRatioV2, halfFrameRateVisibleRatio_);
+    ratioStrToFloat(visibleAreaRatio);
+    ratioStrToFloatV2(visibleAreaRatioV2);
     if (lowerFrameRateVisibleRatio_ < halfFrameRateVisibleRatio_) {
         isHalfFrame_ = true;
     } else {
