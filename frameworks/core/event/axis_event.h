@@ -82,7 +82,6 @@ struct AxisEvent final : public PointerEvent {
     uint64_t modifierKeyState;
 
     int32_t scrollStep = 0;
-    bool axisSupportSourceTypeAndSourceTool = false;
 
     AxisEvent()
     {

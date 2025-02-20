@@ -142,8 +142,8 @@ int32_t HandleCHoverEventSourceType(const ArkUI_UIInputEvent* event)
 int32_t HandleAxisEventSourceType(const ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
-    if (!axisEvent || !axisEvent->axisSupportSourceTypeAndSourceTool) {
-        return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+    if (!axisEvent) {
+        return static_cast<int32_t>(UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
     }
     return static_cast<int32_t>(axisEvent->sourceType);
 }
@@ -227,7 +227,7 @@ int32_t HandleCFocusAxisEventToolType(const ArkUI_UIInputEvent* event)
 int32_t HandleAxisEventToolType(const ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
-    if (!axisEvent || !axisEvent->axisSupportSourceTypeAndSourceTool) {
+    if (!axisEvent) {
         return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
     }
     return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(static_cast<int32_t>(axisEvent->sourceTool));
