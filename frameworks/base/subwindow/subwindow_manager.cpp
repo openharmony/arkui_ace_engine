@@ -33,6 +33,9 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
     std::lock_guard<std::mutex> lock(instanceMutex_);
     if (!instance_) {
         instance_ = std::make_shared<SubwindowManager>();
+        if (instance_) {
+            instance_->isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
+        }
     }
     return instance_;
 }
@@ -253,8 +256,19 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
+        return;
+    }
     auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     if (!IsSubwindowExist(subwindow)) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+        AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
+    } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "recreate subwindow");
+        RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
@@ -271,8 +285,19 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
+        return;
+    }
     auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     if (!IsSubwindowExist(subwindow)) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+        AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
+    } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "recreate subwindow");
+        RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
@@ -464,6 +489,13 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             CHECK_NULL_VOID(menu);
             auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
             if (!manager->IsSubwindowExist(subwindow)) {
+                subwindow = Subwindow::CreateSubwindow(containerId);
+                subwindow->InitContainer();
+                CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+                manager->AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
+            } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING) {
+                TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "recreate subwindow");
+                manager->RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
                 subwindow = Subwindow::CreateSubwindow(containerId);
                 subwindow->InitContainer();
                 CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
@@ -1362,15 +1394,16 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
         windowType = SubwindowType::TYPE_DIALOG;
     }
     searchKey.windowType = windowType;
+    searchKey.foldStatus = FoldStatus::UNKNOWN;
     auto container = Container::GetContainer(instanceId);
     if (container) {
         displayId = container->GetCurrentDisplayId();
+        searchKey.foldStatus =
+            isSuperFoldDisplayDevice_ && (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID)
+                ? container->GetCurrentFoldStatus()
+                : FoldStatus::UNKNOWN;
     }
 
-    auto foldstatus = container ? container->GetCurrentFoldStatus() : FoldStatus::UNKNOWN;
-    auto isSuperFoldDisplay = SystemProperties::IsSuperFoldDisplayDevice() &&
-                              (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID);
-    searchKey.foldStatus = isSuperFoldDisplay ? foldstatus : FoldStatus::UNKNOWN;
     searchKey.displayId = displayId;
     return searchKey;
 }

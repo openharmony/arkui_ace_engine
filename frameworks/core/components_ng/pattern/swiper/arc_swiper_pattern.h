@@ -19,13 +19,14 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
-constexpr float ARC_SWIPER_PROPORTION = 5.0f / 2.0f;    //The critical point of arc_swiper is 2/5 screen
+constexpr float TO_LEFT_ARC_SWIPER_PROPORTION = 5.0f / 2.0f;    //The critical point of arc_swiper is 2/5 screen
+constexpr float TO_RIGHT_ARC_SWIPER_PROPORTION = 5.0f / 3.0f;
 class ArcSwiperPattern : public SwiperPattern {
     DECLARE_ACE_TYPE(ArcSwiperPattern, SwiperPattern);
 public:
     ArcSwiperPattern()
     {
-        swiperProportion_ = ARC_SWIPER_PROPORTION;
+        swiperProportion_ = TO_LEFT_ARC_SWIPER_PROPORTION;
     }
 
     ~ArcSwiperPattern() {}

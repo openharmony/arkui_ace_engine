@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -144,7 +145,7 @@ RichEditorPattern::RichEditorPattern() :
     styledString_->SetSpanWatcher(WeakClaim(this));
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
-    floatingCaretState_.UpdateOriginCaretColor();
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -1243,13 +1244,13 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     CHECK_NULL_VOID(options.style.has_value());
 
     TextStyle textStyle = options.style.value();
-    spanNode->UpdateTextColor(textStyle.GetTextColor());
+    spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
     spanNode->UpdateFontSize(textStyle.GetFontSize());
     spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
     spanNode->UpdateFontWeight(textStyle.GetFontWeight());
     spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
     spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
-    spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
+    spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
     spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
     spanNode->UpdateTextShadow(textStyle.GetTextShadows());
     spanNode->UpdateHalfLeading(textStyle.GetHalfLeading());
@@ -1315,6 +1316,8 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->UpdateSymbolColorList(options.style.value().GetSymbolColorList());
         spanNode->UpdateSymbolRenderingStrategy(options.style.value().GetRenderStrategy());
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
+        spanNode->UpdateSymbolType(options.style.value().GetSymbolType());
+        spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = u"  ";
@@ -1858,7 +1861,7 @@ void RichEditorPattern::SetCaretPositionWithAffinity(PositionWithAffinity positi
 bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
-    AdjustSelector(correctPos, HandleType::SECOND);
+    IF_TRUE(!isModifyingContent_, AdjustSelector(correctPos, HandleType::SECOND));
     ResetLastClickOffset();
     caretAffinityPolicy_ = CaretAffinityPolicy::DEFAULT;
     CHECK_NULL_RETURN((pos == correctPos), false);
@@ -1983,7 +1986,7 @@ void RichEditorPattern::UpdateTextStyle(
     CHECK_NULL_VOID(host);
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextColor.has_value()) {
-        spanNode->UpdateTextColor(textStyle.GetTextColor());
+        spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
         spanNode->GetSpanItem()->useThemeFontColor = false;
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
@@ -2026,7 +2029,7 @@ void RichEditorPattern::UpdateDecoration(
         spanNode->GetSpanItem()->useThemeDecorationColor = false;
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
-        spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
+        spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
@@ -3139,7 +3142,6 @@ void RichEditorPattern::HandleBlurEvent()
         lastSelectionRange_.reset();
     }
     HandleOnEditChanged(false);
-    isMoveCaretAnywhere_ = false;
 }
 
 void RichEditorPattern::HandleFocusEvent()
@@ -4744,20 +4746,38 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 
 void RichEditorPattern::OnColorConfigurationUpdate()
 {
+    auto colorMode = GetColorMode();
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        OnCommonColorChange();
+    }
+}
+
+bool RichEditorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    IF_PRESENT(magnifierController_, SetColorModeChange(true));
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
+    OnCommonColorChange();
+    return false;
+}
+
+void RichEditorPattern::OnCommonColorChange()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto displayColorMode = GetDisplayColorMode();
+    COLOR_MODE_LOCK(displayColorMode);
     const auto& themeTextStyle = theme->GetTextStyle();
     auto themeTextColor = themeTextStyle.GetTextColor();
     auto themeTextDecorationColor = themeTextStyle.GetTextDecorationColor();
     textLayoutProperty->UpdateTextColor(themeTextColor);
     textLayoutProperty->UpdateTextDecorationColor(themeTextDecorationColor);
-
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, TextColor=%{public}s, DecorationColor=%{public}s",
-        themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, ColorMode=%{public}d, TextColor=%{public}s, DecorationColor=%{public}s",
+        displayColorMode, themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
 
     const auto& spans = host->GetChildren();
     for (const auto& uiNode : spans) {
@@ -4771,8 +4791,9 @@ void RichEditorPattern::OnColorConfigurationUpdate()
         CHECK_NULL_CONTINUE(spanNode);
         auto spanItem = spanNode->GetSpanItem();
         CHECK_NULL_CONTINUE(spanItem);
-        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColor(themeTextColor));
-        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
+        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColorWithoutCheck(themeTextColor));
+        IF_TRUE(spanItem->useThemeDecorationColor, 
+            spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecorationColor));
         spanNode->UpdateColorByResourceId();
     }
     paragraphCache_.Clear();
@@ -4781,7 +4802,6 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
-    floatingCaretState_.UpdateOriginCaretColor();
     auto scrollBar = GetScrollBar();
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBar && scrollbarTheme);
@@ -5471,8 +5491,8 @@ void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
     auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
     Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
-    spanNode->UpdateTextColor(textColor);
-    spanNode->UpdateTextDecorationColor(textColor);
+    spanNode->UpdateTextColorWithoutCheck(textColor);
+    spanNode->UpdateTextDecorationColorWithoutCheck(textColor);
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::u16string& insertValue)
@@ -6913,7 +6933,6 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     ResetTouchSelectState();
-    isMoveCaretAnywhere_ = false;
     CHECK_NULL_VOID(HasFocus() && sourceTool == SourceTool::FINGER);
     auto touchDownOffset = info.GetLocalLocation();
     moveCaretState_.touchDownOffset = touchDownOffset;
@@ -6930,7 +6949,6 @@ void RichEditorPattern::HandleTouchUp()
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
-    isMoveCaretAnywhere_ = false;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -9680,10 +9698,10 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
         placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
     }
     if (layoutProperty->HasPlaceholderTextColor()) {
-        placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
+        placeholderNode->UpdateTextColorWithoutCheck(layoutProperty->GetPlaceholderTextColor().value());
     } else {
         auto theme = GetTheme<RichEditorTheme>();
-        placeholderNode->UpdateTextColor(theme ? theme->GetPlaceholderColor() : Color());
+        placeholderNode->UpdateTextColorWithoutCheck(theme ? theme->GetPlaceholderColor() : Color());
     }
 
     auto spanItem = placeholderNode->GetSpanItem();
@@ -11211,31 +11229,6 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
     TripleClickSection(info, start, end, pos);
 }
 
-void RichEditorPattern::ShowCaretNoTwinkling(const Offset& textOffset)
-{
-    auto position = paragraphs_.GetIndex(textOffset);
-    SetCaretPosition(position);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show caret no twinkling at position=%{public}d", position);
-    StopTwinkling();
-    caretVisible_ = true;
-    isMoveCaretAnywhere_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-
-    CHECK_NULL_VOID(overlayMod_);
-    auto [lastClickOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
-    auto localOffset = OffsetF(textOffset.GetX(), lastClickOffset.GetY());
-    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
-
-    // select + long press, so cancel selection.
-    if (textSelector_.IsValid()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select + long press, so cancel selection");
-        CloseSelectOverlay();
-        ResetSelection();
-    }
-}
-
 void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
 {
     // While previewing + long press and move, then shall select content.
@@ -11261,29 +11254,6 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     HandleSelectionChange(start, end);
     TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
-{
-    // While editing + long press and move, then shall move caret:caret show anywhere on the fonts.
-    CHECK_NULL_VOID(isMoveCaretAnywhere_);
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
-    auto position = paragraphs_.GetIndex(textOffset);
-    AdjustCursorPosition(position);
-    SetCaretPosition(position);
-    auto [caretOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
-    CHECK_NULL_VOID(overlayMod_);
-    auto localOffset = OffsetF(offset.GetX(), caretOffset.GetY());
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    // make sure the caret is display in the range of frame.
-    localOffset.SetX(std::clamp(localOffset.GetX(), 0.0f, frameSize.Width()));
-    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
-    MoveCaretToContentRect(localOffset, caretHeight);
 }
 
 void RichEditorPattern::HideMenu()

@@ -2764,13 +2764,6 @@ void BuildParsedConfig(Platform::ParsedConfig& parsedConfig,
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     CHECK_NULL_VOID(config);
-
-    auto dialogContainer = Platform::DialogContainer::GetContainer(instanceId_);
-    if (dialogContainer) {
-        UpdateDialogContainerConfig(config);
-        return;
-    }
-
     StoreConfiguration(config);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2788,8 +2781,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s",
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
 }
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
@@ -2918,12 +2910,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         updateDeviceOrientationTask();
         updateDisplayIdAndAreaTask();
     } else {
-        taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
-        taskExecutor->PostTask(std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI,
-            "ArkUIDeviceOrientation", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
-        taskExecutor->PostTask(std::move(updateDisplayIdAndAreaTask), TaskExecutor::TaskType::UI,
-            "ArkUIUpdateDisplayIdAndArea", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+        taskExecutor->PostTask(
+            std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
+        taskExecutor->PostTask(
+            std::move(updateDisplayIdAndAreaTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayIdAndArea");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
 
@@ -3026,14 +3017,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
-            "ArkUIPromiseViewportConfig", TaskExecutor::TaskType::PLATFORM,
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            "ArkUIPromiseViewportConfig");
     } else {
         if (container->IsUIExtensionWindow()) {
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
         }
-        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig",
-            TaskExecutor::TaskType::PLATFORM, TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
     viewportConfigMgr_->StoreConfig(aceViewportConfig);
     UIExtensionUpdateViewportConfig(config);
@@ -3151,8 +3140,8 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDecor)
         task();
     } else {
         updateDecorVisibleTask_ = SingleTaskExecutor::CancelableTask(std::move(task));
-        taskExecutor->PostTask(updateDecorVisibleTask_, TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(updateDecorVisibleTask_,
+            TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
     }
 }
 
@@ -3185,8 +3174,7 @@ void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
     if (uiTaskRunner.IsRunOnCurrentThread()) {
         task();
     } else {
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
     }
 }
 
@@ -3280,8 +3268,7 @@ void UIContentImpl::NotifyRotationAnimationEnd()
                 pipelineContext->StopWindowAnimation();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUINotifyRotationAnimationEnd",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUINotifyRotationAnimationEnd");
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -3702,8 +3689,7 @@ void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, s
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIGetResourcePaths",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIGetResourcePaths");
 }
 
 void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
@@ -3741,8 +3727,7 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
                 }
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISetResourcePaths",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUISetResourcePaths");
 }
 
 void UIContentImpl::SetIsFocusActive(bool isFocusActive)
@@ -3759,7 +3744,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->SetIsFocusActive(isFocusActive);
         },
-        TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
 }
 
 void UIContentImpl::UpdateResource()
@@ -3768,8 +3753,8 @@ void UIContentImpl::UpdateResource()
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask([container]() { container->UpdateResource(); }, TaskExecutor::TaskType::UI,
-        "ArkUIUpdateResource", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    taskExecutor->PostTask([container]() { container->UpdateResource(); },
+        TaskExecutor::TaskType::UI, "ArkUIUpdateResource");
 }
 
 int32_t UIContentImpl::CreateModalUIExtension(
@@ -4494,29 +4479,6 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
     context->SetForceSplitEnable(isForceSplit, homePage);
 }
 
-void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
-{
-    CHECK_NULL_VOID(config);
-    auto container = Platform::DialogContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weakContainer = WeakPtr<Platform::DialogContainer>(container), config, instanceId = instanceId_,
-            bundleName = bundleName_, moduleName = moduleName_]() {
-            auto container = weakContainer.Upgrade();
-            CHECK_NULL_VOID(container);
-            Platform::ParsedConfig parsedConfig;
-            parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            container->UpdateConfiguration(parsedConfig);
-            TAG_LOGI(AceLogTag::ACE_DIALOG,
-                "[%{public}d][%{public}s][%{public}s] UIContentImpl: UpdateDialogContainerConfig called End, "
-                "name:%{public}s",
-                instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
-}
-
 void UIContentImpl::ProcessDestructCallbacks()
 {
     for (auto& [_, callback] : destructCallbacks_) {
@@ -4621,9 +4583,14 @@ void UIContentImpl::UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTrans
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
+        [id = instanceId_, aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
             transform.posY, transform.scaleX, transform.scaleY)]() {
             aceContainer->SetSingleHandTransform(singleHandTransform);
+            auto context = NG::PipelineContext::GetContextByContainerId(id);
+            CHECK_NULL_VOID(context);
+            auto uiExtManager = context->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtManager);
+            uiExtManager->TransferAccessibilityRectInfo();
         }, TaskExecutor::TaskType::UI, "ArkUISetSingleHandTransform");
 }
 
@@ -4671,8 +4638,7 @@ std::shared_ptr<Rosen::RSNode> UIContentImpl::GetRSNodeByStringID(const std::str
             CHECK_NULL_VOID(renderContext);
             rsNode = renderContext->GetRSNode();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID");
     if (!rsNode) {
         LOGE("Cannot find RSNode by stringId: %{public}s", stringId.c_str());
     }
@@ -4692,8 +4658,7 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
             CHECK_NULL_VOID(frameNode);
             frameNode->SetTopWindowBoundary(true);
         },
-        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 
 void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)

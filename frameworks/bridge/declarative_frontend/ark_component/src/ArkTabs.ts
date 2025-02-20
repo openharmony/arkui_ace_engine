@@ -156,6 +156,13 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabHeightModifier.identity, TabHeightModifier, value);
     return this;
   }
+  cachedMaxCount(count: number, mode: TabsCacheMode): this {
+    let arkTabsCachedMaxCount = new ArkTabsCachedMaxCount();
+    arkTabsCachedMaxCount.count = count;
+    arkTabsCachedMaxCount.mode = mode;
+    modifierWithKey(this._modifiersWithKeys, CachedMaxCountModifier.identity, CachedMaxCountModifier, arkTabsCachedMaxCount);
+    return this;
+  }
 }
 
 class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
@@ -584,6 +591,24 @@ class TabsOnSelectedModifier extends ModifierWithKey<Callback<number>> {
     } else {
       getUINativeModule().tabs.setTabsOnSelected(node, this.value);
     }
+  }
+}
+
+class CachedMaxCountModifier extends ModifierWithKey<ArkTabsCachedMaxCount> {
+  constructor(value: ArkTabsCachedMaxCount) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('cachedMaxCount');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetCachedMaxCount(node);
+    } else {
+      getUINativeModule().tabs.setCachedMaxCount(node, this.value.count, this.value.mode);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.count === this.stageValue.count && this.value.mode === this.stageValue.mode);
   }
 }
 

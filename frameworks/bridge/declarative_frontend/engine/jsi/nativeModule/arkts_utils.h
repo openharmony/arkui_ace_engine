@@ -102,6 +102,8 @@ public:
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
+    static void ParseJsSymbolFontFamilyName(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
+        std::string& customFamilyName);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
     static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,

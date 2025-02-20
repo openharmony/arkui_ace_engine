@@ -25,34 +25,45 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 
 namespace OHOS::Ace::NG {
-namespace {}
+namespace {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == AgingAdapationDialogTheme::TypeId()) {
+        auto agingAdapationDialogTheme = AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+        agingAdapationDialogTheme->bigFontSizeScale_ = BIG_FONT_SIZE_SCALE;
+        agingAdapationDialogTheme->largeFontSizeScale_ = LARGE_FONT_SIZE_SCALE;
+        agingAdapationDialogTheme->maxFontSizeScale_ = MAX_FONT_SIZE_SCALE;
+        agingAdapationDialogTheme->bigDialogWidth_ = BIG_DIALOG_WIDTH;
+        agingAdapationDialogTheme->maxDialogWidth_ = MAX_DIALOG_WIDTH;
+        return agingAdapationDialogTheme;
+    } else if (type == TabTheme::TypeId()) {
+        auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_TAB);
+        auto tabTheme = TabTheme::Builder().Build(themeConstants);
+        tabTheme->defaultTabBarName_ = "tabBarItemName";
+        tabTheme->tabBarDefaultWidth_ = Dimension(TAB_BAR_SIZE);
+        tabTheme->tabBarDefaultHeight_ = Dimension(TAB_BAR_SIZE);
+        tabTheme->subTabBarHoverColor_ = Color::RED;
+        tabTheme->subTabBarPressedColor_ = Color::GREEN;
+        tabTheme->bottomTabSymbolOn_ = Color::BLUE;
+        tabTheme->bottomTabIconOff_ = Color::BLACK;
+        return tabTheme;
+    } else {
+        return AceType::MakeRefPtr<DialogTheme>();
+    }
+}
+} // namespace
 
 void TabsTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
-    auto agingAdapationDialogTheme = AceType::MakeRefPtr<AgingAdapationDialogTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(AgingAdapationDialogTheme::TypeId()))
-        .WillRepeatedly(Return(agingAdapationDialogTheme));
-    agingAdapationDialogTheme->bigFontSizeScale_ = BIG_FONT_SIZE_SCALE;
-    agingAdapationDialogTheme->largeFontSizeScale_ = LARGE_FONT_SIZE_SCALE;
-    agingAdapationDialogTheme->maxFontSizeScale_ = MAX_FONT_SIZE_SCALE;
-    agingAdapationDialogTheme->bigDialogWidth_ = BIG_DIALOG_WIDTH;
-    agingAdapationDialogTheme->maxDialogWidth_ = MAX_DIALOG_WIDTH;
-    auto themeConstants = CreateThemeConstants(THEME_PATTERN_TAB);
-    auto tabTheme = TabTheme::Builder().Build(themeConstants);
-    EXPECT_CALL(*themeManager, GetTheme(TabTheme::TypeId())).WillRepeatedly(Return(tabTheme));
-    tabTheme->defaultTabBarName_ = "tabBarItemName";
-    tabTheme->tabBarDefaultWidth_ = Dimension(TAB_BAR_SIZE);
-    tabTheme->tabBarDefaultHeight_ = Dimension(TAB_BAR_SIZE);
-    tabTheme->subTabBarHoverColor_ = Color::RED;
-    tabTheme->subTabBarPressedColor_ = Color::GREEN;
-    tabTheme->bottomTabSymbolOn_ = Color::BLUE;
-    tabTheme->bottomTabIconOff_ = Color::BLACK;
 }
 
 void TabsTestNg::TearDownTestSuite()

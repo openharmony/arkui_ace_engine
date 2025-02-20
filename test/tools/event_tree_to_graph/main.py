@@ -26,7 +26,7 @@ from src.content_parser import ContentParser
 from src.graph.graph_converter import generate_all_graphs
 from src.pre_process import handle_file_preprocess
 from src.utils.log_wrapper import log_info, log_error, enable_debug
-
+from src.utils.log_wrapper import log_message
 
 def usage():
     print('python main.py -i input.txt')

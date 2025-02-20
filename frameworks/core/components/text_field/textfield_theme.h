@@ -246,6 +246,13 @@ public:
                 static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
             theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                theme->padding_ = Edge(
+                    pattern->GetAttr<Dimension>("ohos_id_textfield_underline_padding_vertical", 14.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
+                    pattern->GetAttr<Dimension>("ohos_id_textfield_underline_padding_vertical", 14.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp));
+            }
         }
     };
 
@@ -399,6 +406,26 @@ public:
     const Dimension& GetIconSize() const
     {
         return iconSize_;
+    }
+
+    const Dimension& GetCancelIconSize() const
+    {
+        return cancelIconSize_;
+    }
+
+    const Dimension& GetPasswordIconSize() const
+    {
+        return passwordIconSize_;
+    }
+
+    const Dimension& GetCancelIconPadding() const
+    {
+        return cancelIconPadding_;
+    }
+
+    const Dimension& GetPasswordIconPadding() const
+    {
+        return passwordIconPadding_;
     }
 
     const Dimension& GetIconHotZoneSize() const
@@ -897,6 +924,10 @@ private:
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
+    Dimension cancelIconSize_ = 16.0_vp;
+    Dimension passwordIconSize_ = 20.0_vp;
+    Dimension cancelIconPadding_ = 14.0_vp;
+    Dimension passwordIconPadding_ = 10.0_vp;
 
     // Replace image(icon) with symbol
     Dimension symbolSize_;

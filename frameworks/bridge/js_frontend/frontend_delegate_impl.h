@@ -242,9 +242,8 @@ public:
     std::string GetParams() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
-    void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priority) override;
-    void PostUITask(
-        std::function<void()>&& task, const std::string& name, PriorityType priority = PriorityType::LOW) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
+    void PostUITask(std::function<void()>&& task, const std::string& name) override;
 
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;

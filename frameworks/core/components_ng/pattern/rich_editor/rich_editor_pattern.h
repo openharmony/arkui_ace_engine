@@ -23,6 +23,7 @@
 #include <string>
 
 #include "base/log/event_report.h"
+#include "base/utils/device_config.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -248,9 +249,8 @@ public:
             touchMoveOffset.reset();
         }
 
-        void UpdateOriginCaretColor()
+        void UpdateOriginCaretColor(ColorMode colorMode)
         {
-            auto colorMode = SystemProperties::GetColorMode();
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
@@ -828,6 +828,8 @@ public:
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnCommonColorChange();
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
@@ -1028,11 +1030,6 @@ public:
         return contentRect_;
     }
 
-    bool IsMoveCaretAnywhere() const
-    {
-        return isMoveCaretAnywhere_;
-    }
-
     void PreferredParagraph();
 
     const RefPtr<Paragraph>& GetPresetParagraph()
@@ -1178,17 +1175,31 @@ public:
         return *it;
     }
 
-protected:
-    bool CanStartAITask() override;
+    ColorMode GetColorMode()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(!host, host->GetLocalColorMode());
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, ColorMode::COLOR_MODE_UNDEFINED);
+        return context->GetLocalColorMode();
+    }
+
+    ColorMode GetDisplayColorMode()
+    {
+        auto colorMode = GetColorMode();
+        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? SystemProperties::GetColorMode() : colorMode;
+    }
 
     template<typename T>
     RefPtr<T> GetTheme()
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        return pipelineContext->GetTheme<T>();
+        return pipelineContext->GetTheme<T>(GetThemeScopeId());
     }
 
+protected:
+    bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
@@ -1467,8 +1478,6 @@ private:
     void SetAccessibilityEditAction();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
-    void MoveCaretAnywhere(const Offset& touchOffset);
-    void ShowCaretNoTwinkling(const Offset& textOffset);
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
@@ -1644,7 +1653,6 @@ private:
     bool isTextPreviewSupported_ = true;
     OffsetF movingHandleOffset_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
-    bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
     int32_t selectingFingerId_ = -1;
     bool isTouchSelecting_ = false;

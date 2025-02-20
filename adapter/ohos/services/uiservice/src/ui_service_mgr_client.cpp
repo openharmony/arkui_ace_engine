@@ -26,10 +26,12 @@ std::mutex UIServiceMgrClient::mutex_;
 
 std::shared_ptr<UIServiceMgrClient> UIServiceMgrClient::GetInstance()
 {
-    static std::once_flag onceFlag;
-    std::call_once(onceFlag, []() {
-        instance_ = std::make_shared<UIServiceMgrClient>();
-    });
+    if (instance_ == nullptr) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (instance_ == nullptr) {
+            instance_ = std::make_shared<UIServiceMgrClient>();
+        }
+    }
     return instance_;
 }
 

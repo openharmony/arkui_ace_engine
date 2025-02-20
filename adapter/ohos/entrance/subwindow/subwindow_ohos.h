@@ -169,6 +169,7 @@ public:
 
     void ResizeDialogSubwindow() override;
     uint64_t GetDisplayId() override;
+    bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
@@ -183,6 +184,26 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) override;
+
+    MenuWindowState GetAttachState() override
+    {
+        return attachState_;
+    }
+
+    MenuWindowState GetDetachState() override
+    {
+        return detachState_;
+    }
+
+    void SetAttachState(MenuWindowState t)
+    {
+        attachState_ = t;
+    }
+
+    void SetDetachState(MenuWindowState t)
+    {
+        detachState_ = t;
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -235,6 +256,7 @@ private:
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
     int32_t childContainerId_ = -1;
+    uint64_t defaultDisplayId_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
@@ -254,6 +276,29 @@ private:
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
     std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
     NG::RectF windowRect_;
+    MenuWindowState attachState_ = MenuWindowState::DEFAULT;
+    MenuWindowState detachState_ = MenuWindowState::DEFAULT;
+};
+
+class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {
+public:
+    explicit MenuWindowSceneListener(WeakPtr<SubwindowOhos> sub) : sub_(sub) {}
+    ~MenuWindowSceneListener() = default;
+    void AfterAttached()
+    {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterAttachToFrameNode");
+        auto sub = sub_.Upgrade();
+        sub->SetAttachState(MenuWindowState::ATTACHED);
+    }
+
+    void AfterDetached()
+    {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterDetachToFrameNode");
+        auto sub = sub_.Upgrade();
+        sub->SetDetachState(MenuWindowState::DETACHED);
+    }
+private:
+    WeakPtr<SubwindowOhos> sub_;
 };
 
 } // namespace OHOS::Ace

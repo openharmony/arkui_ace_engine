@@ -200,6 +200,11 @@ private:
      */
     void SyncPreload(LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize);
 
+    virtual std::pair<int32_t, int32_t> CalculateCachedCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
+    {
+        return std::make_pair(cachedCount * crossCount_, cachedCount * crossCount_);
+    }
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;

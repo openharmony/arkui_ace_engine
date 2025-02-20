@@ -1856,9 +1856,14 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         auto popupNode = popupNodeWk.Upgrade();
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
-        auto popupNodeIsInMap = overlayManager->popupMap_[targetId].popupNode == popupNode;
-        if (popupNodeIsInMap && overlayManager->popupMap_[targetId].isCurrentOnShow) {
-            return;
+        auto popupInfoIter = overlayManager->popupMap_.find(targetId);
+        auto targetIsInMap = popupInfoIter != overlayManager->popupMap_.end();
+        bool popupNodeIsInMap = false;
+        if (targetIsInMap) {
+            popupNodeIsInMap = overlayManager->popupMap_[targetId].popupNode == popupNode;
+            if (popupNodeIsInMap && overlayManager->popupMap_[targetId].isCurrentOnShow) {
+                return;
+            }
         }
         auto popupPattern = popupNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(popupPattern);
@@ -2062,7 +2067,6 @@ void OverlayManager::DismissPopup()
 PopupInfo OverlayManager::GetPopupInfoWithExistContent(const RefPtr<UINode>& node)
 {
     PopupInfo popupInfoError;
-    popupInfoError.popupNode = nullptr;
     CHECK_NULL_RETURN(node, popupInfoError);
     auto iter = popupMap_.begin();
 

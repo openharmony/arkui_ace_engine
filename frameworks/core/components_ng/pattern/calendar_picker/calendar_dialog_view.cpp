@@ -1038,8 +1038,13 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
             if (contentRenderContext->GetBackBlurStyle().has_value()) {
                 contentRenderContext->UpdateBackBlurStyle(std::nullopt);
             }
+            // Clear and re-render to avoid previous impact, when using backgroundEffect
+            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
             contentRenderContext->UpdateBackgroundEffect(dialogProperties.effectOption.value());
         }
+        // Clear and re-render to avoid previous impact
+        // Because when policy is BlurStyleActivePolicy.ALWAYS_INACTIVE, the background color shows inactiveColor
+        renderContext->ResetBackgroundColor();
         renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
     }
 }

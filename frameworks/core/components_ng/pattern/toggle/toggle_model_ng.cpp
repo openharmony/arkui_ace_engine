@@ -99,7 +99,7 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         if (!selectedColor.has_value()) {
-            auto theme = pipeline->GetTheme<CheckboxTheme>();
+            auto theme = pipeline->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
             CHECK_NULL_VOID(theme);
             color = theme->GetActiveColor();
         }
@@ -110,29 +110,31 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
     if (buttonPattern) {
         if (!selectedColor.has_value()) {
-            auto theme = pipeline->GetTheme<ToggleTheme>();
-            CHECK_NULL_VOID(theme);
-            color = theme->GetCheckedColor();
+            ToggleButtonModelNG::ResetSelectedColor();
+        } else {
+            ToggleButtonModelNG::SetSelectedColor(color);
         }
-        ToggleButtonModelNG::SetSelectedColor(color);
         return;
     }
 
     if (!selectedColor.has_value()) {
-        auto theme = pipeline->GetTheme<SwitchTheme>();
-        CHECK_NULL_VOID(theme);
-        color = theme->GetActiveColor();
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
+    } else {
+        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color);
     }
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color);
 }
 
-void ToggleModelNG::SetSwitchPointColor(const Color& switchPointColor)
+void ToggleModelNG::SetSwitchPointColor(const std::optional<Color>& switchPointColor)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        paintProperty->UpdateSwitchPointColor(switchPointColor);
+        if (switchPointColor.has_value()) {
+            paintProperty->UpdateSwitchPointColor(switchPointColor.value());
+        } else {
+            paintProperty->ResetSwitchPointColor();
+        }
     }
 }
 void ToggleModelNG::OnChange(ChangeEvent&& onChange)
@@ -492,7 +494,7 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
     auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
     if (checkboxPattern) {
         if (!selectedColor.has_value()) {
-            auto theme = pipeline->GetTheme<CheckboxTheme>();
+            auto theme = pipeline->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
             CHECK_NULL_VOID(theme);
             color = theme->GetActiveColor();
         }
@@ -504,7 +506,7 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
     if (buttonPattern) {
         if (!selectedColor.has_value()) {
-            auto theme = pipeline->GetTheme<ToggleTheme>();
+            auto theme = pipeline->GetTheme<ToggleTheme>(frameNode->GetThemeScopeId());
             CHECK_NULL_VOID(theme);
             color = theme->GetCheckedColor();
         }
@@ -513,7 +515,7 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
     }
 
     if (!selectedColor.has_value()) {
-        auto theme = pipeline->GetTheme<SwitchTheme>();
+        auto theme = pipeline->GetTheme<SwitchTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         color = theme->GetActiveColor();
     }
@@ -521,13 +523,22 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
 }
 
-void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor)
+void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optional<Color>& switchPointColor)
 {
     CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
-    if (paintProperty) {
-        paintProperty->UpdateSwitchPointColor(switchPointColor);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    Color color;
+    if (switchPointColor.has_value()) {
+        color = switchPointColor.value();
     }
+
+    if (!switchPointColor.has_value()) {
+        auto theme = pipeline->GetTheme<SwitchTheme>(frameNode->GetThemeScopeId());
+        CHECK_NULL_VOID(theme);
+        color = theme->GetPointColor();
+    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, color, frameNode);
 }
 
 void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)

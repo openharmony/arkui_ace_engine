@@ -1090,5 +1090,4 @@ ArkThemeWhiteList.whiteList = [
     'Scroll',
     'Swiper',
     'Text',
-    'Toggle',
 ];

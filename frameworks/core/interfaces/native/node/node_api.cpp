@@ -138,8 +138,9 @@ void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    std::function<bool(uint64_t)>* func = reinterpret_cast<std::function<bool(uint64_t)>*>(callback);
+    std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
     eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+    func = nullptr;
 }
 
 void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)

@@ -92,6 +92,7 @@ constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 } // namespace
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
@@ -4771,6 +4772,52 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
     return false;
 }
 
+void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& customFamilyNames,
+    const JSRef<JSVal>& jsValue)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        return;
+    }
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObject(jsObj);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return;
+    }
+    auto resourceObject = GetResourceObject(jsObj);
+    std::string bundleName = resourceObject->GetBundleName();
+    std::string moduleName = resourceObject->GetModuleName();
+    auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
+    std::replace(customSymbolFamilyName.begin(), customSymbolFamilyName.end(), '.', '_');
+    customFamilyNames.push_back(customSymbolFamilyName);
+}
+
+bool JSViewAbstract::CheckResource(RefPtr<ResourceObject> resourceObject, RefPtr<ResourceWrapper> resourceWrapper)
+{
+    if (!resourceWrapper) {
+        return false;
+    }
+    if (!resourceObject) {
+        return false;
+    }
+    return true;
+}
+
+bool JSViewAbstract::CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
+    std::uint32_t& symbolId)
+{
+    auto strValue = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
+    if (!strValue.empty()) {
+        auto customSymbolId = static_cast<uint32_t>(strtol(strValue.c_str(), nullptr, 16));
+        symbolId = customSymbolId;
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseJsSymbolId(
     const JSRef<JSVal>& jsValue, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject)
 {
@@ -4790,13 +4837,12 @@ bool JSViewAbstract::ParseJsSymbolId(
     auto resourceObject = GetResourceObject(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
-    if (!resourceWrapper) {
+    if (CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
+        return true;
+    }
+    if (!CheckResource(resourceObject, resourceWrapper)) {
         return false;
     }
-    if (!resourceObject) {
-        return false;
-    }
-
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {

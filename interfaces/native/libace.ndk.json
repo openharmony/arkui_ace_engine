@@ -2589,6 +2589,10 @@
     },
     {
         "first_introduced": "15",
+        "name": "OH_ArkUI_PointerEvent_GetChangedPointerId"
+    },
+    {
+        "first_introduced": "15",
         "name": "OH_ArkUI_KeyEvent_Dispatch"
     },
     {
@@ -2636,10 +2640,6 @@
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius"
     },
     {
-        "first_introduced": "16",
-        "name": "OH_ArkUI_PointerEvent_GetChangedPointerId"
-    },
-    {
         "first_introduced": "15",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled"
     },
@@ -2660,19 +2660,19 @@
         "name": "OH_ArkUI_PostFrameCallback"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_FocusRequest"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_FocusClear"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_FocusActivate"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_FocusSetAutoTransfer"
     },
     { 
@@ -2704,19 +2704,19 @@
         "name": "OH_ArkUI_UIInputEvent_GetTargetDisplayId"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_CreateSnapshotOptions"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_DestroySnapshotOptions"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_SnapshotOptions_SetScale"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_GetNodeSnapshot"
     },
     {

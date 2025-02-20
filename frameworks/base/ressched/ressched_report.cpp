@@ -286,11 +286,15 @@ void ResSchedReport::OnKeyEvent(const KeyEvent& event)
 void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce)
 {
     if (enforce) {
-        lastTouchEvent_ = touchEvent;
-        curTouchEvent_ = touchEvent;
-    } else if (curTouchEvent_.GetOffset() != touchEvent.GetOffset()) {
-        lastTouchEvent_ = curTouchEvent_;
-        curTouchEvent_ = touchEvent;
+        lastTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        lastTouchEvent_.offset = touchEvent.GetOffset();
+        curTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        curTouchEvent_.offset = touchEvent.GetOffset();
+    } else if (curTouchEvent_.offset != touchEvent.GetOffset()) {
+        lastTouchEvent_.timeStamp = curTouchEvent_.timeStamp;
+        lastTouchEvent_.offset = curTouchEvent_.offset;
+        curTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        curTouchEvent_.offset = touchEvent.GetOffset();
     }
 }
 
@@ -334,7 +338,7 @@ void ResSchedReport::HandleKeyUp(const KeyEvent& event)
 void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent);
-    averageDistance_ += curTouchEvent_.GetOffset() - lastTouchEvent_.GetOffset();
+    averageDistance_ += curTouchEvent_.offset - lastTouchEvent_.offset;
     if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE &&
         !isInSlide_ && isInTouch_) {
         std::unordered_map<std::string, std::string> payload;
@@ -377,12 +381,12 @@ void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
     RecordTouchEvent(touchEvent);
 }
 
-double ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
-    const TouchEvent& upEventInfo)
+double ResSchedReport::GetUpVelocity(const ResEventInfo& lastMoveInfo,
+    const ResEventInfo& upEventInfo)
 {
-    double distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
-    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(upEventInfo.GetTimeStamp() -
-        lastMoveInfo.GetTimeStamp()).count();
+    double distance = (upEventInfo.offset - lastMoveInfo.offset).GetDistance();
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(upEventInfo.timeStamp -
+        lastMoveInfo.timeStamp).count();
     if (time <= 0) {
         return 0.0f;
     }
@@ -430,20 +434,27 @@ void ResSchedReport::HandleAxisEnd(const AxisEvent& axisEvent)
 void ResSchedReport::RecordAxisEvent(const AxisEvent& axisEvent, bool enforce)
 {
     if (enforce) {
-        lastAxisEvent_ = axisEvent;
-        curAxisEvent_ = axisEvent;
+        lastAxisEvent_.timeStamp = axisEvent.time;
+        lastAxisEvent_.offset = axisEvent.ConvertToOffset();
+        lastAxisEvent_.sourceTool = axisEvent.sourceTool;
+        curAxisEvent_.timeStamp = axisEvent.time;
+        curAxisEvent_.offset = axisEvent.ConvertToOffset();
+        curAxisEvent_.sourceTool = axisEvent.sourceTool;
     } else if (axisEvent.ConvertToOffset().GetX() != 0 || axisEvent.ConvertToOffset().GetY() != 0) {
-        lastAxisEvent_ = curAxisEvent_;
-        curAxisEvent_ = axisEvent;
+        lastAxisEvent_.timeStamp = curAxisEvent_.timeStamp;
+        lastAxisEvent_.offset = curAxisEvent_.offset;
+        lastAxisEvent_.sourceTool = curAxisEvent_.sourceTool;
+        curAxisEvent_.timeStamp = axisEvent.time;
+        curAxisEvent_.offset = axisEvent.ConvertToOffset();
+        curAxisEvent_.sourceTool = axisEvent.sourceTool;
     }
 }
 
-double ResSchedReport::GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent)
+double ResSchedReport::GetAxisUpVelocity(const ResEventInfo& lastAxisEvent, const ResEventInfo& curAxisEvent)
 {
-    double distance = sqrt(pow(curAxisEvent.ConvertToOffset().GetX(), SQUARE) +
-        pow(curAxisEvent.ConvertToOffset().GetY(), SQUARE));
-    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(curAxisEvent.time -
-        lastAxisEvent.time).count();
+    double distance = curAxisEvent.offset.GetDistance();
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(curAxisEvent.timeStamp -
+        lastAxisEvent.timeStamp).count();
     if (time <= 0) {
         return 0.0;
     }

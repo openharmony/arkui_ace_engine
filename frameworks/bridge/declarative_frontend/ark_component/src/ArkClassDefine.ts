@@ -704,6 +704,15 @@ class ArkScrollableBarModeOptions {
   }
 }
 
+class ArkTabsCachedMaxCount {
+  count: number;
+  mode: TabsCacheMode;
+
+  isEqual(another: ArkTabsCachedMaxCount): boolean {
+    return (this.count === another.count && this.mode === another.mode);
+  }
+}
+
 class ArkAlignRules {
   left: string | undefined;
   middle: string | undefined;

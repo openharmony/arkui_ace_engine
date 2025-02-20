@@ -243,6 +243,7 @@ private:
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
     Rect uiExtensionWindowRect_;
+    bool isSuperFoldDisplayDevice_ = false;
 };
 
 } // namespace OHOS::Ace

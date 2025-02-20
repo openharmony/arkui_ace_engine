@@ -786,9 +786,12 @@ void JSText::Create(const JSCallbackInfo& info)
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
     if (jsController) {
         jsController->SetController(controller);
-        auto styledString = jsController->GetStyledString();
-        if (styledString) {
-            controller->SetStyledString(styledString, false);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            auto styledString = jsController->GetStyledString();
+            if (styledString) {
+                controller->SetStyledString(styledString, false);
+                jsController->ClearStyledString();
+            }
         }
     }
 }
@@ -1120,8 +1123,10 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
     }
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
-    styledString_ = spanStringController;
     auto controller = controllerWeak_.Upgrade();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) && !controller) {
+        styledString_ = spanStringController;
+    }
     CHECK_NULL_VOID(controller);
     controller->SetStyledString(spanStringController, true);
     auto thisObj = info.This();

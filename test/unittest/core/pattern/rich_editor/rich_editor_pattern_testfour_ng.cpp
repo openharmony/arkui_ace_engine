@@ -1082,7 +1082,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleTouchUp001, TestSize.Level1)
     richEditorPattern->editingLongPress_ = true;
     richEditorPattern->isEditing_ = false;
     richEditorPattern->HandleTouchUp();
-    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
+    EXPECT_EQ(richEditorPattern->editingLongPress_, false);
     richEditorPattern->editingLongPress_ = true;
     richEditorPattern->isEditing_ = true;
     richEditorPattern->HandleTouchUp();

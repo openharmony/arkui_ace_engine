@@ -32,6 +32,11 @@ void ToggleButtonModelNG::SetSelectedColor(const Color& selectedColor)
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor);
 }
 
+void ToggleButtonModelNG::ResetSelectedColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
+}
+
 void ToggleButtonModelNG::SetIsOn(bool isOn)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -64,6 +69,12 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool 
 void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor, frameNode);
+}
+
+void ToggleButtonModelNG::ResetSelectedColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void ToggleButtonModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& backgroundColor)

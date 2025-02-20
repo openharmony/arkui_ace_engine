@@ -498,11 +498,11 @@ void SessionWrapperImpl::InitNotifyGetAvoidAreaByTypeFunc()
     }
 
     sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ =
-        [instanceId = instanceId_] (Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
+        [instanceId = instanceId_] (Rosen::AvoidAreaType type, int32_t apiVersion) -> Rosen::AvoidArea {
             Rosen::AvoidArea avoidArea;
             auto container = Platform::AceContainer::GetContainer(instanceId);
             CHECK_NULL_RETURN(container, avoidArea);
-            avoidArea = container->GetAvoidAreaByType(type);
+            avoidArea = container->GetAvoidAreaByType(type, apiVersion);
             return avoidArea;
         };
 }
@@ -620,11 +620,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     auto realHostWindowId = pipeline->GetRealHostWindowId();
     customWant_ = std::make_shared<Want>(want);
     auto wantPtr = std::make_shared<Want>(want);
-    AAFwk::WantParams configParam;
-    container->GetExtensionConfig(configParam);
-    AAFwk::WantParams wantParam(wantPtr->GetParams());
-    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-    wantPtr->SetParams(wantParam);
+    UpdateWantPtr(wantPtr);
     if (sessionType_ == SessionType::UI_EXTENSION_ABILITY) {
         if (wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
             UIEXT_LOGE("The UIExtensionComponent is not allowed to start the EmbeddedUIExtensionAbility.");
@@ -718,6 +714,18 @@ void SessionWrapperImpl::DestroySession()
     }
     customWant_ = nullptr;
     session_ = nullptr;
+}
+
+void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
+{
+    CHECK_NULL_VOID(wantPtr);
+    AAFwk::WantParams configParam;
+    auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
+    CHECK_NULL_VOID(container);
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(wantPtr->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    wantPtr->SetParams(wantParam);
 }
 
 bool SessionWrapperImpl::IsSessionValid()
@@ -916,13 +924,7 @@ void SessionWrapperImpl::NotifyForeground()
         UpdateSessionViewportConfig();
     }
     auto wantPtr = session_->EditSessionInfo().want;
-    if (wantPtr) {
-        AAFwk::WantParams configParam;
-        container->GetExtensionConfig(configParam);
-        AAFwk::WantParams wantParam(wantPtr->GetParams());
-        wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-        wantPtr->SetParams(wantParam);
-    }
+    UpdateWantPtr(wantPtr);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }

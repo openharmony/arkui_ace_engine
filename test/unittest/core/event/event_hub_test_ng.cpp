@@ -1345,7 +1345,8 @@ HWTEST_F(EventHubTestNg, EventHubTest025, TestSize.Level1)
      * @tc.steps: step2. Call AddSupportedUIStateWithCallback using UI_STATE_PRESSED | UI_STATE_NORMAL.
      * @tc.expected: retFlag is true.
      */
-    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, [](UIState){}, true);
+    std::function<void(UIState)> callback = [](UIState state) {};
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, callback, true);
     bool retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED | UI_STATE_NORMAL);
     EXPECT_TRUE(retFlag);
 }
@@ -1369,7 +1370,8 @@ HWTEST_F(EventHubTestNg, EventHubTest026, TestSize.Level1)
      * @tc.expected: stateStyleMgr_ is true.
      */
     eventHub->stateStyleMgr_ = nullptr;
-    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, [](UIState){}, true);
+    std::function<void(UIState)> callback = [](UIState state) {};
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, callback, true);
     EXPECT_TRUE(eventHub->stateStyleMgr_);
 }
 
@@ -1414,7 +1416,8 @@ HWTEST_F(EventHubTestNg, EventHubTest028, TestSize.Level1)
      * @tc.steps: step2. Call AddSupportedUIStateWithCallback using UI_STATE_PRESSED | UI_STATE_NORMAL.
      * @tc.expected: retFlag is true.
      */
-    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, [](UIState){}, true);
+    std::function<void(UIState)> callback = [](UIState state) {};
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, callback, true);
 
     /**
      * @tc.steps: step3. Call RemoveSupportedState using UI_STATE_PRESSED.
