@@ -73,6 +73,9 @@ private:
 std::unique_ptr<JsonValue> GetJsonValue(
     const std::vector<std::string>& keys, const std::unique_ptr<JsonValue>& fileData)
 {
+    if (keys.empty()) {
+        return nullptr;
+    }
     auto it = keys.begin();
     CHECK_NULL_RETURN(fileData, nullptr);
     if (!fileData->IsValid() || !fileData->Contains(*it)) {
@@ -1166,6 +1169,9 @@ void JsCardParser::UpdatePageData(const std::string& dataList, const RefPtr<JsAc
     if (!data->IsValid()) {
         return;
     }
+    if (!repeatJson_) {
+        return;
+    }
     while (data && data->IsValid()) {
         auto key = data->GetKey();
         dataJson_->Replace(key.c_str(), data);
@@ -1347,6 +1353,7 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
 void JsCardParser::ParseVariable(
     std::string& value, const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& propsJson)
 {
+    baseDepth_++;
     // {{value}} --> value
     auto variable = value.substr(2, value.size() - 4);
     if (GetAndParseProps(variable, propsJson) || ParseComplexExpression(variable, dataJson) ||
@@ -1354,10 +1361,11 @@ void JsCardParser::ParseVariable(
         ParseTernaryExpression(variable, propsJson) || ParseLogicalExpression(variable, propsJson)) {
         value = variable;
 
-        if (IsVariable(value)) {
+        if (IsVariable(value) && baseDepth_) {
             ParseVariable(value, dataJson, propsJson);
         }
     }
+    baseDepth_ = 0;
 }
 
 void JsCardParser::ParseMultiVariable(
@@ -1555,6 +1563,14 @@ bool JsCardParser::ParseSpecialVariable(std::string& value)
 
 bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonValue>& dataJson)
 {
+    if (baseDepth_ >= maxDepth_) {
+        baseDepth_ = 0;
+        return true;
+    }
+
+    if (!repeatJson_) {
+        return false;
+    }
     auto key = value;
     if (!repeatJson_->Contains(key) && isRepeat_) {
         return false;
