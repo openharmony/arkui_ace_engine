@@ -49,6 +49,7 @@ private:
     void PassengerAboard(const RefPtr<SharedTransitionEffect>& effect, const RefPtr<FrameNode>& passenger);
 
     RefPtr<FrameNode> sharedManager_;
+    OffsetF pageOffset_;
     std::list<RefPtr<SharedTransitionEffect>> effects_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SharedOverlayManager);
